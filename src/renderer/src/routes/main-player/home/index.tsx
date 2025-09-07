@@ -14,7 +14,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import { lazy, useCallback, useContext, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import NoSongsImage from '../../../assets/images/svg/Empty Inbox _Monochromatic.svg';
-import DataFetchingImage from '../../../assets/images/svg/Umbrella_Monochromatic.svg';
+// import DataFetchingImage from '../../../assets/images/svg/Umbrella_Monochromatic.svg';
 import { queryOptions, useSuspenseQuery } from '@tanstack/react-query';
 import { queryClient } from '@renderer/index';
 import { songQuery } from '@renderer/queries/songs';
@@ -338,7 +338,7 @@ function HomePage() {
           </>
         )}
 
-        {latestSongs[0] === null && (
+        {latestSongs.length === 0 && (
           <div className="no-songs-container appear-from-bottom text-font-color-black dark:text-font-color-white flex h-full w-full flex-col items-center justify-center text-center text-xl">
             <Img src={NoSongsImage} className="mb-8 w-60" alt={t('homePage.noSongsAvailable')} />
             <div>{t('homePage.empty')}</div>
@@ -359,12 +359,12 @@ function HomePage() {
             </div>
           </div>
         )}
-        {recentlyPlayedSongs.length === 0 && latestSongs.length === 0 && (
+        {/* {recentlyPlayedSongs.length === 0 && latestSongs.length === 0 && (
           <div className="no-songs-container text-font-color-dimmed dark:text-dark-font-color-dimmed flex h-full w-full flex-col items-center justify-center text-center text-xl">
             <Img src={DataFetchingImage} className="mb-8 w-48" alt={t('homePage.stayCalm')} />
             <span> {t('homePage.loading')}</span>
           </div>
-        )}
+        )} */}
         {latestSongs.length > 0 && latestSongs[0] !== null && recentlyPlayedSongs.length === 0 && (
           <div className="no-songs-container flex h-full w-full flex-col items-center justify-center text-center text-lg font-normal text-black/60 dark:text-white/60">
             <span className="material-icons-round-outlined mb-1 text-4xl">headphones</span>{' '}

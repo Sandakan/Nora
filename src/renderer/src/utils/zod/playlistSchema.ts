@@ -1,10 +1,9 @@
 import { z } from 'zod';
 import { baseInfoPageSearchParamsSchema } from './baseInfoPageSearchParamsSchema';
-import { songFilterTypes, songSortTypes } from '@renderer/components/SongsPage/SongOptions';
+import { playlistSortTypes } from '@renderer/components/PlaylistsPage/PlaylistOptions';
 
 export const playlistSearchSchema = baseInfoPageSearchParamsSchema.extend({
-  sortingOrder: z.enum(songSortTypes).optional(),
-  filteringOrder: z.enum(songFilterTypes).optional()
+  sortingOrder: z.enum(playlistSortTypes).optional()
 });
 
 export type PlaylistSearchSchema = z.infer<typeof playlistSearchSchema>;

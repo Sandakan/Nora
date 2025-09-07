@@ -1,5 +1,6 @@
-import { and, asc, desc, inArray, SQL } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, SQL } from 'drizzle-orm';
 import { db } from '@db/db';
+import { playlistsSongs } from '../schema';
 
 export type GetAllPlaylistsReturnType = Awaited<ReturnType<typeof getAllPlaylists>>;
 const defaultGetAllPlaylistsOptions = {
@@ -62,4 +63,77 @@ export const getAllPlaylists = async (
     start,
     end
   };
+};
+
+export const getFavoritesPlaylist = async (trx: DB | DBTransaction = db) => {
+  const data = await trx.query.playlists.findFirst({
+    where: (s) => eq(s.name, 'Favorites'),
+    with: {
+      songs: { with: { song: { columns: { id: true } } } },
+      artworks: {
+        with: {
+          artwork: {
+            with: {
+              palette: {
+                columns: { id: true },
+                with: {
+                  swatches: {}
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  });
+
+  return data;
+};
+
+export const getHistoryPlaylist = async (trx: DB | DBTransaction = db) => {
+  const data = await trx.query.playlists.findFirst({
+    where: (s) => eq(s.name, 'History'),
+    with: {
+      songs: { with: { song: { columns: { id: true } } } },
+      artworks: {
+        with: {
+          artwork: {
+            with: {
+              palette: {
+                columns: { id: true },
+                with: {
+                  swatches: {}
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  });
+
+  return data;
+};
+
+export const linkSongsWithPlaylist = async (
+  songIds: number[],
+  playlistId: number,
+  trx: DB | DBTransaction = db
+) => {
+  const records = songIds.map((songId) => ({
+    playlistId: playlistId,
+    songId: songId
+  }));
+
+  await trx.insert(playlistsSongs).values(records);
+};
+
+export const unlinkSongsFromPlaylist = async (
+  songIds: number[],
+  playlistId: number,
+  trx: DB | DBTransaction = db
+) => {
+  await trx
+    .delete(playlistsSongs)
+    .where(and(inArray(playlistsSongs.songId, songIds), eq(playlistsSongs.playlistId, playlistId)));
 };

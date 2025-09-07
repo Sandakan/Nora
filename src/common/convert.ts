@@ -27,7 +27,7 @@ export const convertToSongData = (song: GetAllSongsReturnType[number]): SongData
   // Added date
   const addedDate = song.createdAt ? new Date(song.createdAt).getTime() : 0;
   // isAFavorite: You must join your favorites table if you have one. Here we default to false.
-  const isAFavorite = false;
+  const isAFavorite = song.playlists.some((p) => p.playlist.name === 'Favorites');
 
   const artworks = song.artworks.map((a) => a.artwork);
   return {
@@ -76,7 +76,7 @@ export const convertToAlbum = (album: GetAllAlbumsReturnType[number]) => {
   } satisfies Album;
 };
 
-export const convertToPlaylist = (playlist: GetAllPlaylistsReturnType[number]) => {
+export const convertToPlaylist = (playlist: GetAllPlaylistsReturnType['data'][number]) => {
   const artworks = playlist.artworks.map((a) => a.artwork);
   return {
     playlistId: String(playlist.id),
@@ -88,7 +88,7 @@ export const convertToPlaylist = (playlist: GetAllPlaylistsReturnType[number]) =
   } satisfies Playlist;
 };
 
-export const convertToGenre = (genre: GetAllGenresReturnType[number]) => {
+export const convertToGenre = (genre: GetAllGenresReturnType['data'][number]) => {
   const artworks = genre.artworks.map((a) => a.artwork);
   return {
     genreId: String(genre.id),

@@ -2,8 +2,8 @@
  * @type {import('electron-vite').UserConfig}
  */
 import tailwindcss from '@tailwindcss/vite';
-import { TanStackRouterVite } from '@tanstack/router-plugin/vite';
-import react from '@vitejs/plugin-react-swc';
+import { tanstackRouter } from '@tanstack/router-plugin/vite';
+import react from '@vitejs/plugin-react';
 import { defineConfig, externalizeDepsPlugin, swcPlugin } from 'electron-vite';
 import { resolve } from 'path';
 
@@ -45,7 +45,7 @@ export default defineConfig({
       }
     },
     plugins: [
-      TanStackRouterVite({
+      tanstackRouter({
         target: 'react',
         routesDirectory: 'src/renderer/src/routes',
         autoCodeSplitting: true

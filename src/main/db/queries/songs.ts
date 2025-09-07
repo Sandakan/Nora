@@ -174,6 +174,13 @@ export const getAllSongs = async (
           }
         }
       },
+      playlists: {
+        with: {
+          playlist: {
+            columns: { id: true, name: true }
+          }
+        }
+      },
       blacklist: {
         columns: { songId: true }
         // where: (songs) => {
@@ -261,6 +268,13 @@ export const getSongById = async (songId: number, trx: DB | DBTransaction = db) 
           }
         }
       },
+      playlists: {
+        with: {
+          playlist: {
+            columns: { id: true, name: true }
+          }
+        }
+      },
       blacklist: {
         columns: { songId: true }
       }
@@ -298,6 +312,13 @@ export const getSongByPath = async (path: string, trx: DB | DBTransaction = db) 
                 }
               }
             }
+          }
+        }
+      },
+      playlists: {
+        with: {
+          playlist: {
+            columns: { id: true, name: true }
           }
         }
       },
@@ -347,6 +368,13 @@ export const searchSongs = async (keyword: string, trx: DB | DBTransaction = db)
                 }
               }
             }
+          }
+        }
+      },
+      playlists: {
+        with: {
+          playlist: {
+            columns: { id: true, name: true }
           }
         }
       },

@@ -377,7 +377,7 @@ const playlistsData = {
     start?: number,
     end?: number,
     onlyMutablePlaylists?: boolean
-  ): Promise<Playlist[]> =>
+  ): Promise<PaginatedResult<Playlist, PlaylistSortTypes>> =>
     ipcRenderer.invoke(
       'app/getPlaylistData',
       playlistIds,
