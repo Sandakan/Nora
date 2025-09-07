@@ -35,7 +35,9 @@ export const artists = pgTable(
   {
     id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
     name: varchar('name', { length: 1024 }).notNull(),
-    isFavorite: boolean('is_favorite').notNull().default(false)
+    isFavorite: boolean('is_favorite').notNull().default(false),
+    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
   (t) => [
     // Index for name-based lookups and sorting (aToZ, zToA)
@@ -125,7 +127,8 @@ export const artworks = pgTable(
     source: artworkSourceEnum('source').notNull().default('LOCAL'),
     width: integer('width').notNull(),
     height: integer('height').notNull(),
-    createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow()
+    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
   (t) => [
     // Index for path-based lookups
@@ -144,7 +147,8 @@ export const palettes = pgTable(
     artworkId: integer('artwork_id')
       .notNull()
       .references(() => artworks.id),
-    createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow()
+    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
   (t) => [
     // Index for artwork-based palette lookups
@@ -163,7 +167,8 @@ export const paletteSwatches = pgTable(
     paletteId: integer('palette_id')
       .notNull()
       .references(() => palettes.id),
-    createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow()
+    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
   (t) => [
     // Index for palette-based swatch lookups
@@ -183,7 +188,8 @@ export const albums = pgTable(
     id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
     title: varchar('title', { length: 255 }).notNull(),
     year: integer('year'),
-    createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow()
+    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
   (t) => [
     // Index for title-based lookups and sorting
@@ -200,7 +206,8 @@ export const genres = pgTable(
   {
     id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
     name: varchar('name', { length: 255 }).notNull(),
-    createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow()
+    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
   (t) => [
     // Index for name-based lookups and sorting
@@ -213,7 +220,8 @@ export const playlists = pgTable(
   {
     id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
     name: varchar('name', { length: 255 }).notNull(),
-    createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow()
+    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
   (t) => [
     // Index for name-based lookups and sorting
@@ -231,7 +239,8 @@ export const playEvents = pgTable(
     songId: integer('song_id')
       .notNull()
       .references(() => songs.id),
-    createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow()
+    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
   (t) => [
     // Index for song-based event lookups
@@ -253,7 +262,8 @@ export const seekEvents = pgTable(
     songId: integer('song_id')
       .notNull()
       .references(() => songs.id),
-    createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow()
+    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
   (t) => [
     // Index for song-based event lookups
@@ -273,7 +283,8 @@ export const skipEvents = pgTable(
     songId: integer('song_id')
       .notNull()
       .references(() => songs.id),
-    createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow()
+    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
   (t) => [
     // Index for song-based event lookups
@@ -291,7 +302,8 @@ export const songBlacklist = pgTable(
     songId: integer('song_id')
       .primaryKey()
       .references(() => songs.id),
-    createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow()
+    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
   (t) => [
     // Index for blacklist lookups (though primary key already covers this)
@@ -306,7 +318,8 @@ export const folderBlacklist = pgTable(
     folderId: integer('folder_id')
       .primaryKey()
       .references(() => musicFolders.id),
-    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull()
+    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
   (t) => [
     // Index for blacklist creation time queries
@@ -325,7 +338,9 @@ export const artworksSongs = pgTable(
       .references(() => songs.id),
     artworkId: integer('artwork_id')
       .notNull()
-      .references(() => artworks.id)
+      .references(() => artworks.id),
+    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
   (table) => [
     primaryKey({ columns: [table.songId, table.artworkId] }),
@@ -343,7 +358,9 @@ export const artistsArtworks = pgTable(
       .references(() => artists.id),
     artworkId: integer('artwork_id')
       .notNull()
-      .references(() => artworks.id)
+      .references(() => artworks.id),
+    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
   (table) => [
     primaryKey({ columns: [table.artistId, table.artworkId] }),
@@ -361,7 +378,9 @@ export const albumsArtworks = pgTable(
       .references(() => albums.id),
     artworkId: integer('artwork_id')
       .notNull()
-      .references(() => artworks.id)
+      .references(() => artworks.id),
+    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
   (table) => [
     primaryKey({ columns: [table.albumId, table.artworkId] }),
@@ -379,7 +398,9 @@ export const artistsSongs = pgTable(
       .references(() => songs.id),
     artistId: integer('artist_id')
       .notNull()
-      .references(() => artists.id)
+      .references(() => artists.id),
+    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
   (table) => [
     primaryKey({ columns: [table.songId, table.artistId] }),
@@ -397,7 +418,9 @@ export const albumsSongs = pgTable(
       .references(() => albums.id),
     songId: integer('song_id')
       .notNull()
-      .references(() => songs.id)
+      .references(() => songs.id),
+    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
   (table) => [
     primaryKey({ columns: [table.albumId, table.songId] }),
@@ -415,7 +438,9 @@ export const genresSongs = pgTable(
       .references(() => genres.id),
     songId: integer('song_id')
       .notNull()
-      .references(() => songs.id)
+      .references(() => songs.id),
+    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
   (table) => [
     primaryKey({ columns: [table.genreId, table.songId] }),
@@ -433,7 +458,9 @@ export const artworksGenres = pgTable(
       .references(() => genres.id),
     artworkId: integer('artwork_id')
       .notNull()
-      .references(() => artworks.id)
+      .references(() => artworks.id),
+    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
   (table) => [
     primaryKey({ columns: [table.genreId, table.artworkId] }),
@@ -451,7 +478,9 @@ export const playlistsSongs = pgTable(
       .references(() => playlists.id),
     songId: integer('song_id')
       .notNull()
-      .references(() => songs.id)
+      .references(() => songs.id),
+    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
   (table) => [
     primaryKey({ columns: [table.playlistId, table.songId] }),
@@ -469,7 +498,9 @@ export const artworksPlaylists = pgTable(
       .references(() => playlists.id),
     artworkId: integer('artwork_id')
       .notNull()
-      .references(() => artworks.id)
+      .references(() => artworks.id),
+    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
   (table) => [
     primaryKey({ columns: [table.playlistId, table.artworkId] }),
@@ -487,7 +518,9 @@ export const albumsArtists = pgTable(
       .references(() => albums.id),
     artistId: integer('artist_id')
       .notNull()
-      .references(() => artists.id)
+      .references(() => artists.id),
+    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
   (table) => [
     primaryKey({ columns: [table.albumId, table.artistId] }),

@@ -1,6 +1,7 @@
 import { and, asc, desc, eq, inArray, SQL } from 'drizzle-orm';
 import { db } from '@db/db';
 import { playlistsSongs } from '../schema';
+import { timeEnd, timeStart } from '@main/utils/measureTimeUsage';
 
 export type GetAllPlaylistsReturnType = Awaited<ReturnType<typeof getAllPlaylists>>;
 const defaultGetAllPlaylistsOptions = {
@@ -66,6 +67,7 @@ export const getAllPlaylists = async (
 };
 
 export const getFavoritesPlaylist = async (trx: DB | DBTransaction = db) => {
+  const timer = timeStart();
   const data = await trx.query.playlists.findFirst({
     where: (s) => eq(s.name, 'Favorites'),
     with: {
@@ -86,11 +88,13 @@ export const getFavoritesPlaylist = async (trx: DB | DBTransaction = db) => {
       }
     }
   });
+  timeEnd(timer, 'Time taken to fetch favorites playlist');
 
   return data;
 };
 
 export const getHistoryPlaylist = async (trx: DB | DBTransaction = db) => {
+  const timer = timeStart();
   const data = await trx.query.playlists.findFirst({
     where: (s) => eq(s.name, 'History'),
     with: {
@@ -111,6 +115,7 @@ export const getHistoryPlaylist = async (trx: DB | DBTransaction = db) => {
       }
     }
   });
+  timeEnd(timer, 'Time taken to fetch history playlist');
 
   return data;
 };

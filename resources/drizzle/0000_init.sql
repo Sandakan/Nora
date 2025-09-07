@@ -4,42 +4,55 @@ CREATE TABLE "albums" (
 	"id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "albums_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
 	"title" varchar(255) NOT NULL,
 	"year" integer,
-	"created_at" timestamp DEFAULT now() NOT NULL
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "albums_artists" (
 	"album_id" integer NOT NULL,
 	"artist_id" integer NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "albums_artists_album_id_artist_id_pk" PRIMARY KEY("album_id","artist_id")
 );
 --> statement-breakpoint
 CREATE TABLE "albums_artworks" (
 	"album_id" integer NOT NULL,
 	"artwork_id" integer NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "albums_artworks_album_id_artwork_id_pk" PRIMARY KEY("album_id","artwork_id")
 );
 --> statement-breakpoint
 CREATE TABLE "album_songs" (
 	"album_id" integer NOT NULL,
 	"song_id" integer NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "album_songs_album_id_song_id_pk" PRIMARY KEY("album_id","song_id")
 );
 --> statement-breakpoint
 CREATE TABLE "artists" (
 	"id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "artists_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
 	"name" varchar(1024) NOT NULL,
-	"is_favorite" boolean DEFAULT false NOT NULL
+	"is_favorite" boolean DEFAULT false NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "artists_artworks" (
 	"artist_id" integer NOT NULL,
 	"artwork_id" integer NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "artists_artworks_artist_id_artwork_id_pk" PRIMARY KEY("artist_id","artwork_id")
 );
 --> statement-breakpoint
 CREATE TABLE "artists_songs" (
 	"song_id" integer NOT NULL,
 	"artist_id" integer NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "artists_songs_song_id_artist_id_pk" PRIMARY KEY("song_id","artist_id")
 );
 --> statement-breakpoint
@@ -49,41 +62,52 @@ CREATE TABLE "artworks" (
 	"source" "artwork_source" DEFAULT 'LOCAL' NOT NULL,
 	"width" integer NOT NULL,
 	"height" integer NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "artworks_genres" (
 	"genre_id" integer NOT NULL,
 	"artwork_id" integer NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "artworks_genres_genre_id_artwork_id_pk" PRIMARY KEY("genre_id","artwork_id")
 );
 --> statement-breakpoint
 CREATE TABLE "artworks_playlists" (
 	"playlist_id" integer NOT NULL,
 	"artwork_id" integer NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "artworks_playlists_playlist_id_artwork_id_pk" PRIMARY KEY("playlist_id","artwork_id")
 );
 --> statement-breakpoint
 CREATE TABLE "artworks_songs" (
 	"song_id" integer NOT NULL,
 	"artwork_id" integer NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "artworks_songs_song_id_artwork_id_pk" PRIMARY KEY("song_id","artwork_id")
 );
 --> statement-breakpoint
 CREATE TABLE "folder_blacklist" (
 	"folder_id" integer PRIMARY KEY NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "genres" (
 	"id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "genres_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
 	"name" varchar(255) NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "genres_songs" (
 	"genre_id" integer NOT NULL,
 	"song_id" integer NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "genres_songs_genre_id_song_id_pk" PRIMARY KEY("genre_id","song_id")
 );
 --> statement-breakpoint
@@ -108,31 +132,37 @@ CREATE TABLE "palette_swatches" (
 	"hsl" json NOT NULL,
 	"swatch_type" "swatch_type" DEFAULT 'VIBRANT' NOT NULL,
 	"palette_id" integer NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "palettes" (
 	"id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "palettes_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
 	"artwork_id" integer NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "play_events" (
 	"id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "play_events_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
 	"playback_percentage" numeric(5, 1) NOT NULL,
 	"song_id" integer NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "playlists" (
 	"id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "playlists_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
 	"name" varchar(255) NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "playlists_songs" (
 	"playlist_id" integer NOT NULL,
 	"song_id" integer NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "playlists_songs_playlist_id_song_id_pk" PRIMARY KEY("playlist_id","song_id")
 );
 --> statement-breakpoint
@@ -140,19 +170,22 @@ CREATE TABLE "seek_events" (
 	"id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "seek_events_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
 	"position" numeric(8, 3) NOT NULL,
 	"song_id" integer NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "skip_events" (
 	"id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "skip_events_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
 	"position" numeric(8, 3) NOT NULL,
 	"song_id" integer NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "song_blacklist" (
 	"song_id" integer PRIMARY KEY NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "songs" (

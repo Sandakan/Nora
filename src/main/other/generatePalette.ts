@@ -109,18 +109,8 @@ const generatePalettesForSongs = async () => {
           const artwork = artworks[i];
 
           if (!artwork.paletteId) {
-            // const metadata = await musicMetaData.parseFile(song.path);
-
             const buffer = await generateCoverBuffer(artwork.path, false, false);
             const palette = await generatePalette(buffer);
-
-            // const swatch =
-            //   palette && palette.DarkVibrant && palette.LightVibrant
-            //     ? {
-            //         DarkVibrant: palette.DarkVibrant,
-            //         LightVibrant: palette.LightVibrant
-            //       }
-            //     : undefined;
 
             await savePalette(artwork.id, palette, trx);
             x += 1;
@@ -133,7 +123,7 @@ const generatePalettesForSongs = async () => {
         }
       });
 
-      timeEnd(start, 'Time to finish generating palettes for songs');
+      timeEnd(start, 'Time to finish generating palettes');
 
       dataUpdateEvent('songs/palette');
     } else sendMessageToRenderer({ messageCode: 'NO_MORE_SONG_PALETTES' });
@@ -192,66 +182,12 @@ export const getSelectedPaletteData = (paletteId?: string) => {
   return undefined;
 };
 
-// const generatePalettesForGenres = async () => {
-//   const genres = getGenresData();
-//   const songs = getSongsData();
-
-//   if (Array.isArray(songs) && Array.isArray(genres) && songs.length > 0 && genres.length > 0) {
-//     let x = 0;
-//     const noOfNoPaletteGenres = genres.reduce(
-//       (acc, genre) => (!genre?.paletteId ? acc + 1 : acc),
-//       0
-//     );
-
-//     if (noOfNoPaletteGenres > 0) {
-//       const start = timeStart();
-
-//       for (let i = 0; i < genres.length; i += 1) {
-//         const genreArtworkName = genres[i].artworkName;
-//         if (!genres[i]?.paletteId) {
-//           if (genreArtworkName) {
-//             const artNameWithoutExt = genreArtworkName.split('.')[0];
-
-//             for (const song of songs) {
-//               if (song.songId === artNameWithoutExt) {
-//                 genres[i].paletteId = song.paletteId;
-//                 x += 1;
-//                 break;
-//               }
-//             }
-//           } else {
-//             const coverBuffer = await generateCoverBuffer(
-//               genreArtworkName?.replace('.webp', '-optimized.webp'),
-//               true
-//             );
-
-//             const palette = await generatePalette(coverBuffer);
-
-//             genres[i].paletteId = palette?.paletteId;
-//             x += 1;
-//           }
-
-//           sendMessageToRenderer({
-//             messageCode: 'SONG_PALETTE_GENERATING_PROCESS_UPDATE',
-//             data: { total: noOfNoPaletteGenres, value: x }
-//           });
-//         }
-//       }
-//       timeEnd(start, 'Time to finish generating palettes for genres');
-
-//       setGenresData(genres);
-//       dataUpdateEvent('genres/backgroundColor');
-//     } else sendMessageToRenderer({ messageCode: 'NO_MORE_SONG_PALETTES' });
-//   }
-// };
-
 export const generatePalettes = async () => {
-  generatePalettesForSongs()
-    .then(() => {
-      // setTimeout(generatePalettesForGenres, 1000);
-      return undefined;
-    })
-    .catch((error) => logger.error('Failed to generating palettes.', { error }));
+  try {
+    await generatePalettesForSongs();
+  } catch (error) {
+    logger.error('Failed to generate palettes for songs.', { error });
+  }
 };
 
 export default generatePalette;

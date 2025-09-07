@@ -1980,7 +1980,7 @@ export default function App() {
           <Outlet />
         </div>
       </AppUpdateContext.Provider>
-      <TanStackRouterDevtools position="bottom-left" />
+      <TanStackRouterDevtools position="bottom-right" />
     </ErrorBoundary>
   );
 }
