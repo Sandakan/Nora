@@ -24,5 +24,12 @@ export const songQuery = createQueryKeys('songs', {
           end: end
         })
     };
+  },
+  allSongInfo: (data: { songIds: string[] }) => {
+    const { songIds } = data;
+    return {
+      queryKey: [`songIds=${songIds.sort().join(',')}`],
+      queryFn: () => window.api.audioLibraryControls.getSongInfo(songIds)
+    };
   }
 });

@@ -59,21 +59,19 @@ const ListeningActivityBarGraph = (props: Props) => {
 
   const lastSixMonthsListeningActivity = useMemo(() => {
     if (listeningData) {
-      const listensData = listeningData.listens.map((listen) => listen.listens).flat();
+      const listensData = listeningData.playEvents;
+      const monthGroupedPlayEvents = Object.groupBy(listensData, (le) => {
+        const date = new Date(le.createdAt);
+        return date.getMonth();
+      });
+
       const monthsWithNames: { listens: number; month: string }[] = [];
 
       for (let i = 0; i < monthNames.length; i += 1) {
-        const listens = listensData
-          .map((x) => {
-            const [date, noOfListens] = x;
-            const month = new Date(date).getMonth();
-
-            if (i === month) return noOfListens;
-            return 0;
-          })
-          .reduce((prevValue, currValue) => prevValue + currValue, 0);
-
-        monthsWithNames.push({ listens, month: monthNames[i] });
+        monthsWithNames.push({
+          month: monthNames[i],
+          listens: monthGroupedPlayEvents[i]?.length ?? 0
+        });
       }
 
       const lastMonths = getLastNoOfMonths(

@@ -85,13 +85,10 @@ const audioLibraryControls = {
     ipcRenderer.invoke('app/getSongInfo', songIds, sortType, filterType, limit, preserveIdOrder),
   getSongListeningData: (songIds: string[]): Promise<SongListeningData[]> =>
     ipcRenderer.invoke('app/getSongListeningData', songIds),
-  updateSongListeningData: <
-    DataType extends keyof ListeningDataTypes,
-    Value extends ListeningDataTypes[DataType]
-  >(
+  updateSongListeningData: (
     songId: string,
-    dataType: DataType,
-    dataUpdateType: Value
+    dataType: ListeningDataEvents,
+    dataUpdateType: number
   ): Promise<void> =>
     ipcRenderer.invoke('app/updateSongListeningData', songId, dataType, dataUpdateType),
   resyncSongsLibrary: (): Promise<true> => ipcRenderer.invoke('app/resyncSongsLibrary'),

@@ -1,18 +1,40 @@
+import { inArray, sql } from 'drizzle-orm';
 import { db } from '../db';
 import { playEvents, seekEvents, skipEvents } from '../schema';
 
-export const getSongListeningData = (songId: number, trx: DB | DBTransaction = db) => {
-  return trx.query.songs.findFirst({
-    where: (songs, { eq }) => eq(songs.id, songId),
+export type GetAllSongListeningDataReturnType = Awaited<ReturnType<typeof getAllSongListeningData>>;
+export const getAllSongListeningData = async (songIds?: number[], trx: DB | DBTransaction = db) => {
+  const data = await trx.query.songs.findMany({
+    where: (songs) => {
+      if (Array.isArray(songIds) && songIds.length > 0) {
+        return inArray(songs.id, songIds);
+      }
+
+      return undefined;
+    },
     columns: {
       id: true
     },
+    extras: {
+      songId: sql<number>`id`.as('songId')
+    },
     with: {
-      playEvents: { orderBy: (playEvents, { desc }) => [desc(playEvents.createdAt)] },
-      seekEvents: { orderBy: (seekEvents, { desc }) => [desc(seekEvents.createdAt)] },
-      skipEvents: { orderBy: (skipEvents, { desc }) => [desc(skipEvents.createdAt)] }
+      playEvents: {
+        columns: { songId: false },
+        orderBy: (playEvents, { desc }) => [desc(playEvents.createdAt)]
+      },
+      seekEvents: {
+        columns: { songId: false },
+        orderBy: (seekEvents, { desc }) => [desc(seekEvents.createdAt)]
+      },
+      skipEvents: {
+        columns: { songId: false },
+        orderBy: (skipEvents, { desc }) => [desc(skipEvents.createdAt)]
+      }
     }
   });
+
+  return data;
 };
 
 export const addSongPlayEvent = (
@@ -25,10 +47,10 @@ export const addSongPlayEvent = (
 
 export const addSongSeekEvent = (
   songId: number,
-  positions: string[],
+  position: string,
   trx: DB | DBTransaction = db
 ) => {
-  return trx.insert(seekEvents).values(positions.map((position) => ({ position, songId })));
+  return trx.insert(seekEvents).values({ position, songId });
 };
 
 export const addSongSkipEvent = (

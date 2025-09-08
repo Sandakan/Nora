@@ -8,6 +8,7 @@ import { LastFMSessionData } from './last_fm_api';
 import { SimilarArtist, Tag } from './last_fm_artist_info_api';
 import { resources } from 'src/renderer/src/i18n';
 import type { db } from '@main/db/db';
+import type { GetAllSongListeningDataReturnType } from '@main/db/queries/listens';
 
 declare global {
   interface Window {
@@ -187,37 +188,13 @@ declare global {
   // ? Song listening data related types
 
   interface SongListeningData {
-    /** song id of the relevant song */
     songId: string;
-    /** no of song skips.
-     * Incremented if the song is skipped less than 5 seconds */
-    skips?: number;
-    /** no of full listens.
-     * Incremented if the user has listened to more than 80% of the song. */
-    fullListens?: number;
-    /** no of playlists the song was added.
-     * Incremented if the user added the song to any playlist. */
-    inNoOfPlaylists?: number;
-    /** an array of listening records for each year. */
-    listens: YearlyListeningRate[];
-    /** an array of listening records for each year. */
-    seeks?: SongSeek[];
+    playEvents: { playbackPercentage: string; createdAt: Date }[];
+    skipEvents: { position: string; createdAt: Date }[];
+    seekEvents: { position: string; createdAt: Date }[];
   }
 
-  interface SongSeek {
-    position: number;
-    seeks: number;
-  }
-  interface YearlyListeningRate {
-    year: number;
-    /** [Date in milliseconds, No of listens in that day] [] */
-    listens: [number, number][];
-  }
-
-  interface ListeningDataTypes extends Omit<SongListeningData, 'listens'> {
-    listens: number;
-  }
-
+  type ListeningDataEvents = 'SKIP' | 'SEEK' | 'LISTEN';
   // ? Audio player and lyrics related types
 
   type RepeatTypes = 'false' | 'repeat' | 'repeat-1';

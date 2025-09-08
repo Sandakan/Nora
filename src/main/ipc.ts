@@ -76,12 +76,7 @@ import getArtistInfoFromNet from './core/getArtistInfoFromNet';
 import getSongLyrics from './core/getSongLyrics';
 import sendAudioDataFromPath from './core/sendAudioDataFromPath';
 import saveLyricsToSong from './saveLyricsToSong';
-import {
-  getUserData,
-  setUserData as saveUserData,
-  getListeningData,
-  getBlacklistData
-} from './filesystem';
+import { getUserData, setUserData as saveUserData, getBlacklistData } from './filesystem';
 import changeAppTheme from './core/changeAppTheme';
 import checkForStartUpSongs from './core/checkForStartUpSongs';
 import checkForNewSongs from './core/checkForNewSongs';
@@ -92,6 +87,7 @@ import convertLyricsToPinyin from './utils/convertToPinyin';
 import convertLyricsToRomaja from './utils/convertToRomaja';
 import resetLyrics from './utils/resetLyrics';
 import logger, { logFilePath } from './logger';
+import { getListeningData } from './core/getListeningData';
 
 export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSignal) {
   if (mainWindow) {
@@ -241,12 +237,8 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
 
     ipcMain.handle(
       'app/updateSongListeningData',
-      <DataType extends keyof ListeningDataTypes, Value extends ListeningDataTypes[DataType]>(
-        _: unknown,
-        songId: string,
-        dataType: DataType,
-        value: Value
-      ) => updateSongListeningData(songId, dataType, value)
+      (_: unknown, songId: string, dataType: ListeningDataEvents, value: number) =>
+        updateSongListeningData(songId, dataType, value)
     );
 
     ipcMain.handle('app/generatePalettes', generatePalettes);

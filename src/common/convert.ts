@@ -30,10 +30,20 @@ export const convertToSongData = (song: GetAllSongsReturnType[number]): SongData
   const isAFavorite = song.playlists.some((p) => p.playlist.name === 'Favorites');
 
   const artworks = song.artworks.map((a) => a.artwork);
+
+  const albumArtists = albumObj
+    ? (albumObj.artists?.map((a) => ({ artistId: String(a.artist.id), name: a.artist.name })) ?? [])
+    : [];
+
+  const genres =
+    song.genres?.map((g) => ({ genreId: String(g.genre.id), name: g.genre.name })) ?? [];
+
   return {
     title: song.title,
     artists,
     album,
+    albumArtists,
+    genres,
     duration: Number(song.duration),
     artworkPaths: parseSongArtworks(artworks),
     path: song.path,
@@ -44,7 +54,13 @@ export const convertToSongData = (song: GetAllSongsReturnType[number]): SongData
     paletteData: parsePaletteFromArtworks(artworks),
     isBlacklisted,
     trackNo,
-    isArtworkAvailable: artworks.length > 0
+    isArtworkAvailable: artworks.length > 0,
+    bitrate: song.bitRate ?? undefined,
+    sampleRate: song.sampleRate ?? undefined,
+    createdDate: song.createdAt ? new Date(song.createdAt).getTime() : 0,
+    modifiedDate: song.updatedAt ? new Date(song.updatedAt).getTime() : undefined,
+    discNo: song.diskNumber ?? undefined,
+    noOfChannels: song.noOfChannels ?? undefined
   } satisfies SongData;
 };
 
@@ -100,3 +116,13 @@ export const convertToGenre = (genre: GetAllGenresReturnType['data'][number]) =>
     }))
   } satisfies Genre;
 };
+
+// export const convertToSongListeningData = (
+//   listeningData: GetAllSongListeningDataReturnType[number]
+// ): SongListeningData => {
+//   return {
+//     songId: String(listeningData.id),
+//     skips: listeningData.skipEvents.length,
+//     listens:
+//   };
+// };
