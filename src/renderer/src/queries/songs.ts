@@ -31,5 +31,9 @@ export const songQuery = createQueryKeys('songs', {
       queryKey: [`songIds=${songIds.sort().join(',')}`],
       queryFn: () => window.api.audioLibraryControls.getSongInfo(songIds)
     };
-  }
+  },
+  similarTracks: (data: { songId: string }) => ({
+    queryKey: [data.songId],
+    queryFn: () => window.api.audioLibraryControls.getSimilarTracksForASong(data.songId)
+  })
 });

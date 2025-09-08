@@ -8,7 +8,7 @@ import type {
   LastFMAlbumInfo,
   Tag
 } from '../../../types/last_fm_album_info_api';
-import { getAudioInfoFromSavableSongData } from './getSimilarTracks';
+import { getAudioInfoFromSongData } from './getSimilarTracks';
 
 const getSelectedAlbum = (albums: SavableAlbum[], albumId: string) => {
   for (const album of albums) {
@@ -50,7 +50,7 @@ const parseAlbumInfoFromLastFM = (
             availableTracksLinkedToAlbum.push({
               title: song.title,
               artists: song.artists?.map((artist) => artist.name),
-              songData: getAudioInfoFromSavableSongData(song),
+              songData: getAudioInfoFromSongData(song),
               url: track.url,
               rank: track['@attr'].rank
             });
@@ -58,7 +58,7 @@ const parseAlbumInfoFromLastFM = (
             availableTracksUnlinkedToAlbum.push({
               title: song.title,
               artists: song.artists?.map((artist) => artist.name),
-              songData: getAudioInfoFromSavableSongData(song),
+              songData: getAudioInfoFromSongData(song),
               url: track.url,
               rank: track['@attr'].rank
             });

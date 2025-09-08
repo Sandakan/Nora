@@ -1,5 +1,4 @@
 import logger from '../../logger';
-import { getSongsData } from '../../filesystem';
 import type {
   LastFMSimilarTracksAPI,
   ParsedSimilarTrack,
@@ -7,9 +6,8 @@ import type {
   SimilarTracksOutput
 } from '../../../types/last_fm_similar_tracks_api';
 import { checkIfConnectedToInternet } from '../../main';
-import { getSongArtworkPath } from '../../fs/resolveFilePaths';
-import { isSongBlacklisted } from '../../utils/isBlacklisted';
-import { getSelectedPaletteData } from '../generatePalette';
+import { getSongById, getSongsByNames } from '@main/db/queries/songs';
+import { convertToSongData } from '../../../common/convert';
 
 const sortSimilarTracks = (a: ParsedSimilarTrack, b: ParsedSimilarTrack) => {
   if (a.match > b.match) return -1;
@@ -17,48 +15,36 @@ const sortSimilarTracks = (a: ParsedSimilarTrack, b: ParsedSimilarTrack) => {
   return 0;
 };
 
-export const getAudioInfoFromSavableSongData = (song: SavableSongData): AudioInfo => {
-  const isBlacklisted = isSongBlacklisted(song.songId, song.path);
-
-  return {
-    title: song.title,
-    artists: song.artists,
-    album: song.album,
-    duration: song.duration,
-    artworkPaths: getSongArtworkPath(song.songId, song.isArtworkAvailable),
-    path: song.path,
-    year: song.year,
-    songId: song.songId,
-    paletteData: getSelectedPaletteData(song.paletteId),
-    addedDate: song.addedDate,
-    isAFavorite: song.isAFavorite,
-    isBlacklisted
-  };
-};
-
-const parseSimilarTracks = (similarTracks: SimilarTrack[], songs: SavableSongData[]) => {
+const parseSimilarTracks = async (similarTracks: SimilarTrack[]) => {
   const availableTracks: ParsedSimilarTrack[] = [];
   const unAvailableTracks: ParsedSimilarTrack[] = [];
 
-  similarTrackLoop: for (const track of similarTracks) {
-    for (const song of songs) {
-      if (song.title === track.name) {
-        availableTracks.push({
-          title: song.title,
-          artists: song.artists?.map((artist) => artist.name),
-          songData: getAudioInfoFromSavableSongData(song),
-          match: track.match,
-          url: track.url
-        });
-        continue similarTrackLoop;
-      }
+  const availableSongs = await getSongsByNames(similarTracks.map((track) => track.name));
+
+  for (const track of similarTracks) {
+    const artists = track.artist?.name ? [track.artist.name] : [];
+    const matchedSong = availableSongs.find(
+      (song) => song.title.toLowerCase() === track.name.toLowerCase()
+    );
+
+    if (matchedSong) {
+      const song = convertToSongData(matchedSong);
+
+      availableTracks.push({
+        title: song.title,
+        artists: song.artists?.map((artist) => artist.name),
+        songData: song,
+        match: track.match,
+        url: track.url
+      });
+    } else {
+      unAvailableTracks.push({
+        title: track.name,
+        artists,
+        match: track.match,
+        url: track.url
+      });
     }
-    unAvailableTracks.push({
-      title: track.name,
-      artists: [track.artist.name],
-      match: track.match,
-      url: track.url
-    });
   }
 
   const sortedAvailTracks = availableTracks.sort(sortSimilarTracks);
@@ -67,24 +53,18 @@ const parseSimilarTracks = (similarTracks: SimilarTrack[], songs: SavableSongDat
   return { sortedAvailTracks, sortedUnAvailTracks };
 };
 
-const getSelectedSong = (songs: SavableSongData[], songId: string) => {
-  for (const song of songs) {
-    if (song.songId === songId) return song;
-  }
-  throw new Error(`Song with ${songId} does not exist in the library.`);
-};
-
 const getSimilarTracks = async (songId: string): Promise<SimilarTracksOutput> => {
   try {
-    const songs = getSongsData();
-
     const LAST_FM_API_KEY = import.meta.env.MAIN_VITE_LAST_FM_API_KEY;
     if (!LAST_FM_API_KEY) throw new Error('LastFM api key not found.');
 
     const isOnline = checkIfConnectedToInternet();
     if (!isOnline) throw new Error('App not connected to internet.');
 
-    const { title, artists } = getSelectedSong(songs, songId);
+    const song = await getSongById(Number(songId));
+    if (!song) throw new Error(`Song with id of ${songId} not found in the database.`);
+
+    const { title, artists } = convertToSongData(song);
     const artistsStr = artists?.map((artist) => artist.name).join(', ') || '';
 
     const url = new URL('http://ws.audioscrobbler.com/2.0/');
@@ -103,7 +83,7 @@ const getSimilarTracks = async (songId: string): Promise<SimilarTracksOutput> =>
       if ('error' in data) throw new Error(`${data.error} - ${data.message}`);
 
       const similarTracks = data.similartracks.track;
-      const parsedAndSortedSimilarTracks = parseSimilarTracks(similarTracks, songs);
+      const parsedAndSortedSimilarTracks = parseSimilarTracks(similarTracks);
 
       return parsedAndSortedSimilarTracks;
     }

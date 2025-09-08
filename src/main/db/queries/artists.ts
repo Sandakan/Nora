@@ -1,5 +1,5 @@
 import { db } from '@db/db';
-import { and, asc, desc, eq, inArray, SQL } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, SQL, sql } from 'drizzle-orm';
 import { albumsArtists, artists, artistsSongs } from '@db/schema';
 
 export const isArtistWithNameAvailable = async (name: string, trx: DB | DBTransaction = db) => {
@@ -154,4 +154,15 @@ export const updateArtistFavoriteStatus = async (
   trx: DB | DBTransaction = db
 ) => {
   return trx.update(artists).set({ isFavorite }).where(inArray(artists.id, artistIds));
+};
+
+export const getArtistsOfASong = async (songId: number, trx: DB | DBTransaction = db) => {
+  const data = await trx
+    .select()
+    .from(artists)
+    .where(
+      inArray(artists.id, sql`(SELECT "artistId" FROM "artistsSongs" WHERE "songId" = ${songId})`)
+    );
+
+  return data;
 };

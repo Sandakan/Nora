@@ -449,3 +449,68 @@ export const searchSongs = async (keyword: string, trx: DB | DBTransaction = db)
   });
   return data;
 };
+
+export const getSongsByNames = async (songNames: string[], trx: DB | DBTransaction = db) => {
+  if (songNames.length === 0) return [];
+
+  const data = await trx.query.songs.findMany({
+    where: inArray(songs.title, songNames),
+    with: {
+      artists: {
+        with: {
+          artist: {
+            columns: { id: true, name: true }
+          }
+        }
+      },
+      albums: {
+        with: {
+          album: {
+            columns: { id: true, title: true },
+            with: {
+              artists: {
+                with: {
+                  artist: {
+                    columns: { id: true, name: true }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      genres: {
+        with: {
+          genre: {
+            columns: { id: true, name: true }
+          }
+        }
+      },
+      artworks: {
+        with: {
+          artwork: {
+            with: {
+              palette: {
+                columns: { id: true },
+                with: {
+                  swatches: {}
+                }
+              }
+            }
+          }
+        }
+      },
+      playlists: {
+        with: {
+          playlist: {
+            columns: { id: true, name: true }
+          }
+        }
+      },
+      blacklist: {
+        columns: { songId: true }
+      }
+    }
+  });
+  return data;
+};
