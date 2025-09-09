@@ -5,7 +5,7 @@
       "name": "Main - attach",
       "port": 5858,
       "request": "attach",
-      "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+      "skipFiles": [ "<node_internals>/**", "**/node_modules/**" ],
       "type": "node",
       "timeout": 15000,
       "restart": {
@@ -13,9 +13,9 @@
         "maxAttempts": 10
       },
       "showAsyncStacks": true,
-      "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"],
-      "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/out/**/*.js", "!**/node_modules/**"]
+      "resolveSourceMapLocations": [ "${workspaceFolder}/**", "!**/node_modules/**" ],
+      "sourceMaps": true, "smartStep": true, "pauseForSourceMap": true,
+      "outFiles": [ "${workspaceFolder}/out/**/*.js", "!**/node_modules/**" ]
     },
     {
       "name": "Renderer - Attach",
@@ -30,7 +30,7 @@
   "compounds": [
     {
       "name": "Debug All",
-      "configurations": ["Renderer - Attach", "Main - attach"],
+      "configurations": [ "Renderer - Attach", "Main - attach" ],
       "presentation": {
         "order": 1
       }

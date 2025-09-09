@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/no-noninteractive-tabindex */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import { lazy, useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -21,6 +20,7 @@ import DefaultSongCover from '../../assets/images/webp/song_cover_default.webp';
 import { useStore } from '@tanstack/react-store';
 import { store } from '../../store/store';
 import { useNavigate } from '@tanstack/react-router';
+import NavLink from '../NavLink';
 
 interface SongCardProp {
   index: number;
@@ -138,11 +138,6 @@ const SongCard = (props: SongCardProp) => {
           subTitle: artists?.map((artist) => artist.name).join(', ') ?? t('common.unknownArtist'),
           artworkPath
         };
-
-  const showSongInfoPage = () =>
-    changeCurrentActivePage('SongInfo', {
-      songId
-    });
 
   const handleLikeButtonClick = useCallback(() => {
     window.api.playerControls
@@ -611,18 +606,15 @@ const SongCard = (props: SongCardProp) => {
         </div>
         <div className="song-info-and-play-btn-container flex w-full items-center justify-between">
           <div className="song-info-container text-font-color-white dark:text-font-color-white max-w-[75%]">
-            <div
-              className="song-title cursor-pointer overflow-hidden text-xl font-normal text-ellipsis whitespace-nowrap outline-offset-1 transition-none hover:underline focus-visible:outline!"
+            <NavLink
+              to="/main-player/songs/$songId"
+              params={{ songId }}
+              className={`song-title cursor-pointer overflow-hidden text-xl font-normal text-ellipsis whitespace-nowrap outline-offset-1 transition-none hover:underline focus-visible:outline!`}
               title={title}
-              onClick={(e) => {
-                e.stopPropagation();
-                showSongInfoPage();
-              }}
-              onKeyDown={(e) => e.key === 'Enter' && showSongInfoPage()}
               tabIndex={0}
             >
               {title}
-            </div>
+            </NavLink>
             <div
               className="song-artists w-full max-w-full truncate text-sm transition-none"
               title={artists ? artists.map((x) => x.name).join(', ') : t('common.unknownArtist')}

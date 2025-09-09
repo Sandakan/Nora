@@ -81,10 +81,14 @@ export const convertToArtist = (artist: GetAllArtistsReturnType[number]) => {
 
 export const convertToAlbum = (album: GetAllAlbumsReturnType[number]) => {
   const artworks = album.artworks.map((a) => a.artwork);
+  const artists =
+    album.artists?.map((a) => ({ artistId: String(a.artist.id), name: a.artist.name })) ?? [];
+
   return {
     albumId: String(album.id),
     title: album.title,
     artworkPaths: parseAlbumArtworks(artworks),
+    artists,
     songs: album.songs.map((s) => ({
       title: s.song.title,
       songId: String(s.song.id)

@@ -77,6 +77,32 @@ export const getAllAlbums = async (
   };
 };
 
+export const getAlbumById = async (albumId: number, trx: DB | DBTransaction = db) => {
+  const data = await trx.query.albums.findFirst({
+    where: (albums) => eq(albums.id, albumId),
+    with: {
+      artists: {
+        with: {
+          artist: {
+            columns: {
+              name: true,
+              id: true
+            }
+          }
+        }
+      },
+      songs: { with: { song: { columns: { id: true, title: true } } } },
+      artworks: {
+        with: {
+          artwork: {}
+        }
+      }
+    }
+  });
+
+  return data;
+};
+
 export const getAlbumWithTitle = async (title: string, trx: DB | DBTransaction = db) => {
   const data = await trx.select().from(albums).where(eq(albums.title, title));
 
