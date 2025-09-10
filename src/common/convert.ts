@@ -26,8 +26,6 @@ export const convertToSongData = (song: GetAllSongsReturnType[number]): SongData
   const trackNo = song.trackNumber ?? undefined;
   // Added date
   const addedDate = song.createdAt ? new Date(song.createdAt).getTime() : 0;
-  // isAFavorite: You must join your favorites table if you have one. Here we default to false.
-  const isAFavorite = song.playlists.some((p) => p.playlist.name === 'Favorites');
 
   const artworks = song.artworks.map((a) => a.artwork);
 
@@ -49,7 +47,7 @@ export const convertToSongData = (song: GetAllSongsReturnType[number]): SongData
     path: song.path,
     songId: String(song.id),
     addedDate,
-    isAFavorite,
+    isAFavorite: song.isFavorite,
     year: song.year ?? undefined,
     paletteData: parsePaletteFromArtworks(artworks),
     isBlacklisted,

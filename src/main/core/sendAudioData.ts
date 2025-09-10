@@ -8,7 +8,7 @@ import { setCurrentSongPath } from '../main';
 import { getSongById } from '@main/db/queries/songs';
 import { parsePaletteFromArtworks } from './getAllSongs';
 import { setDiscordRpcActivity } from '@main/other/discordRPC';
-import { getHistoryPlaylist, linkSongsWithPlaylist } from '@main/db/queries/playlists';
+import { addSongToPlayHistory } from '@main/db/queries/history';
 
 const IS_DEVELOPMENT = !app.isPackaged || process.env.NODE_ENV === 'development';
 
@@ -58,14 +58,6 @@ const getArtworkData = (artworkData?: Buffer | Uint8Array) => {
 //   return relevantArtists;
 // };
 
-const addSongToHistory = async (songId: string) => {
-  const historyPlaylist = await getHistoryPlaylist();
-
-  if (historyPlaylist) {
-    await linkSongsWithPlaylist([Number(songId)], historyPlaylist.id);
-  }
-};
-
 const sendAudioData = async (songId: string): Promise<AudioPlayerData> => {
   logger.debug(`Fetching song data for song id -${songId}-`);
   try {
@@ -101,7 +93,7 @@ const sendAudioData = async (songId: string): Promise<AudioPlayerData> => {
           isBlacklisted
         };
 
-        addSongToHistory(songId);
+        addSongToPlayHistory(Number(songId));
 
         const now = Date.now();
         setDiscordRpcActivity({

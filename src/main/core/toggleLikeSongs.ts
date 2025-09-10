@@ -1,21 +1,10 @@
 import logger from '../logger';
 import { dataUpdateEvent } from '../main';
-import {
-  getFavoritesPlaylist,
-  linkSongsWithPlaylist,
-  unlinkSongsFromPlaylist
-} from '@main/db/queries/playlists';
 import { db } from '@main/db/db';
+import { getSongFavoriteStatuses, updateSongFavoriteStatuses } from '@main/db/queries/songs';
 
 const toggleLikeSongs = async (songIds: string[], isLikeSong?: boolean) => {
-  const favoritesPlaylist = await getFavoritesPlaylist();
-
-  if (!favoritesPlaylist) {
-    logger.error('Favorites playlist not found while toggling like songs.');
-    return;
-  }
-
-  const likedSongIds = favoritesPlaylist.songs.map((s) => s.songId) || [];
+  const songStatuses = await getSongFavoriteStatuses(songIds.map((id) => Number(id)));
 
   const result: ToggleLikeSongReturnValue = {
     likes: [],
@@ -24,25 +13,33 @@ const toggleLikeSongs = async (songIds: string[], isLikeSong?: boolean) => {
 
   logger.info(`Requested to like/dislike song(s).`, { songIds, isLikeSong });
 
-  const likeGroupedSongIds = Object.groupBy(songIds, (id) =>
-    likedSongIds.includes(Number(id)) ? 'liked' : 'notLiked'
+  const likeGroupedSongData = Object.groupBy(songStatuses, (status) =>
+    status.isFavorite ? 'liked' : 'notLiked'
   );
 
   await db.transaction(async (trx) => {
-    if (likeGroupedSongIds.liked) {
-      const dislikedSongIds = likeGroupedSongIds.liked.map((id) => Number(id));
+    if (isLikeSong !== undefined) {
+      if (likeGroupedSongData.liked) {
+        const dislikedSongIds = likeGroupedSongData.liked.map((status) => status.id);
 
-      await unlinkSongsFromPlaylist(dislikedSongIds, favoritesPlaylist.id, trx);
+        await updateSongFavoriteStatuses(dislikedSongIds, false, trx);
 
-      result.dislikes.push(...dislikedSongIds.map((id) => id.toString()));
-    }
+        result.dislikes.push(...dislikedSongIds.map((id) => id.toString()));
+      }
 
-    if (likeGroupedSongIds.notLiked) {
-      const likedSongIds = likeGroupedSongIds.notLiked.map((id) => Number(id));
+      if (likeGroupedSongData.notLiked) {
+        const likedSongIds = likeGroupedSongData.notLiked.map((status) => status.id);
 
-      await linkSongsWithPlaylist(likedSongIds, favoritesPlaylist.id, trx);
+        await updateSongFavoriteStatuses(likedSongIds, true, trx);
 
-      result.likes.push(...likedSongIds.map((id) => id.toString()));
+        result.likes.push(...likedSongIds.map((id) => id.toString()));
+      }
+    } else {
+      await updateSongFavoriteStatuses(
+        songIds.map((id) => Number(id)),
+        isLikeSong!,
+        trx
+      );
     }
   });
 

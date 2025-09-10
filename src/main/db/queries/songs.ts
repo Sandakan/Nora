@@ -514,3 +514,20 @@ export const getSongsByNames = async (songNames: string[], trx: DB | DBTransacti
   });
   return data;
 };
+
+export const getSongFavoriteStatuses = async (songIds: number[], trx: DB | DBTransaction = db) => {
+  const data = await trx
+    .select({ id: songs.id, isFavorite: songs.isFavorite })
+    .from(songs)
+    .where(inArray(songs.id, songIds));
+  return data;
+};
+
+export const updateSongFavoriteStatuses = async (
+  songIds: number[],
+  isFavorite: boolean,
+  trx: DB | DBTransaction = db
+) => {
+  const data = await trx.update(songs).set({ isFavorite }).where(inArray(songs.id, songIds));
+  return data;
+};

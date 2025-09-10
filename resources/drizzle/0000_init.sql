@@ -151,6 +151,13 @@ CREATE TABLE "play_events" (
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "play_history" (
+	"id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "play_history_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
+	"song_id" integer NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "playlists" (
 	"id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "playlists_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
 	"name" varchar(255) NOT NULL,
@@ -193,6 +200,7 @@ CREATE TABLE "songs" (
 	"title" varchar(4096) NOT NULL,
 	"duration" numeric(10, 3) NOT NULL,
 	"path" text NOT NULL,
+	"is_favorite" boolean DEFAULT false NOT NULL,
 	"sample_rate" integer,
 	"bit_rate" integer,
 	"no_of_channels" integer,
@@ -230,6 +238,7 @@ ALTER TABLE "music_folders" ADD CONSTRAINT "music_folders_parent_id_music_folder
 ALTER TABLE "palette_swatches" ADD CONSTRAINT "palette_swatches_palette_id_palettes_id_fk" FOREIGN KEY ("palette_id") REFERENCES "public"."palettes"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "palettes" ADD CONSTRAINT "palettes_artwork_id_artworks_id_fk" FOREIGN KEY ("artwork_id") REFERENCES "public"."artworks"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "play_events" ADD CONSTRAINT "play_events_song_id_songs_id_fk" FOREIGN KEY ("song_id") REFERENCES "public"."songs"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "play_history" ADD CONSTRAINT "play_history_song_id_songs_id_fk" FOREIGN KEY ("song_id") REFERENCES "public"."songs"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "playlists_songs" ADD CONSTRAINT "playlists_songs_playlist_id_playlists_id_fk" FOREIGN KEY ("playlist_id") REFERENCES "public"."playlists"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "playlists_songs" ADD CONSTRAINT "playlists_songs_song_id_songs_id_fk" FOREIGN KEY ("song_id") REFERENCES "public"."songs"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "seek_events" ADD CONSTRAINT "seek_events_song_id_songs_id_fk" FOREIGN KEY ("song_id") REFERENCES "public"."songs"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
@@ -276,6 +285,8 @@ CREATE INDEX "idx_play_events_song_id" ON "play_events" USING btree ("song_id");
 CREATE INDEX "idx_play_events_created_at" ON "play_events" USING btree ("created_at");--> statement-breakpoint
 CREATE INDEX "idx_play_events_song_created" ON "play_events" USING btree ("song_id","created_at");--> statement-breakpoint
 CREATE INDEX "idx_play_events_percentage" ON "play_events" USING btree ("playback_percentage");--> statement-breakpoint
+CREATE INDEX "idx_play_history_song_id" ON "play_history" USING btree ("song_id");--> statement-breakpoint
+CREATE INDEX "idx_play_history_created_at" ON "play_history" USING btree ("created_at");--> statement-breakpoint
 CREATE INDEX "idx_playlists_name" ON "playlists" USING btree ("name");--> statement-breakpoint
 CREATE INDEX "idx_playlists_created_at" ON "playlists" USING btree ("created_at");--> statement-breakpoint
 CREATE INDEX "idx_playlists_songs_playlist_id" ON "playlists_songs" USING btree ("playlist_id");--> statement-breakpoint

@@ -81,6 +81,7 @@ export const songs = pgTable(
     title: varchar('title', { length: 4096 }).notNull(),
     duration: decimal('duration', { precision: 10, scale: 3 }).notNull(),
     path: text('path').notNull().unique(),
+    isFavorite: boolean('is_favorite').notNull().default(false),
     sampleRate: integer('sample_rate'),
     bitRate: integer('bit_rate'),
     noOfChannels: integer('no_of_channels'),
@@ -324,6 +325,24 @@ export const folderBlacklist = pgTable(
   (t) => [
     // Index for blacklist creation time queries
     index('idx_folder_blacklist_created_at').on(t.createdAt)
+  ]
+);
+
+export const playHistory = pgTable(
+  'play_history',
+  {
+    id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+    songId: integer('song_id')
+      .notNull()
+      .references(() => songs.id),
+    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
+  },
+  (t) => [
+    // Index for song-based lookups
+    index('idx_play_history_song_id').on(t.songId),
+    // Index for time-based queries
+    index('idx_play_history_created_at').on(t.createdAt)
   ]
 );
 
