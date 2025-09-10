@@ -27,5 +27,24 @@ export const artistQuery = createQueryKeys('artists', {
           end
         )
     };
-  }
+  },
+  single: (data: { artistId: string }) => {
+    const { artistId } = data;
+
+    return {
+      queryKey: [`artistId=${artistId}`],
+      queryFn: () => window.api.artistsData.getArtistData([artistId])
+    };
+  },
+  fetchOnlineInfo: (data: { artistId: string }) => ({
+    queryKey: [`artistId=${data.artistId}`],
+    queryFn: () => window.api.artistsData.getArtistArtworks(data.artistId)
+  })
 });
+
+export const artistMutations = {
+  toggleLike: (data: { artistIds: string[]; isLikeArtist?: boolean }) => ({
+    invalidatingQueryKeys: [['artists']],
+    mutationFn: () => window.api.artistsData.toggleLikeArtists(data.artistIds, data.isLikeArtist)
+  })
+};

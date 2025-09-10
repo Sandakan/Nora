@@ -163,6 +163,31 @@ export const parseArtistArtworks = (
   };
 };
 
+export const parseArtistOnlineArtworks = (
+  artworks: (typeof artworksSchema.$inferSelect)[] | undefined
+): OnlineArtistArtworks | undefined => {
+  if (!artworks) return undefined;
+
+  const highResImage = artworks.find(
+    (artwork) => artwork.width >= 500 && artwork.height >= 500 && artwork.source === 'REMOTE'
+  );
+  const mediumResImage = artworks.find(
+    (artwork) => artwork.width >= 300 && artwork.height >= 300 && artwork.source === 'REMOTE'
+  );
+  const lowResImage = artworks.find(
+    (artwork) => artwork.width >= 100 && artwork.height >= 100 && artwork.source === 'REMOTE'
+  );
+
+  if (mediumResImage && lowResImage) {
+    return {
+      picture_xl: highResImage?.path,
+      picture_medium: mediumResImage?.path,
+      picture_small: lowResImage?.path || mediumResImage?.path
+    };
+  }
+  return undefined;
+};
+
 export const getAlbumArtworkPath = (artworkName?: string, resetCache = false): ArtworkPaths => {
   if (resetCache) resetArtworkCache('albumArtworks');
 

@@ -9,10 +9,48 @@ export const isArtistWithNameAvailable = async (name: string, trx: DB | DBTransa
 };
 
 export const getArtistWithName = async (name: string, trx: DB | DBTransaction = db) => {
-  const data = await trx.select().from(artists).where(eq(artists.name, name)).limit(1);
+  const data = await trx.query.artists.findFirst({
+    where: (a) => eq(a.name, name)
+  });
 
-  return data.at(0);
+  return data;
 };
+
+export const getArtistById = async (id: number, trx: DB | DBTransaction = db) => {
+  const data = await trx.query.artists.findFirst({
+    where: (a) => eq(a.id, id),
+    with: {
+      songs: { with: { song: { columns: { id: true, title: true } } } },
+      artworks: {
+        with: {
+          artwork: {
+            with: {
+              palette: {
+                columns: { id: true },
+                with: {
+                  swatches: {}
+                }
+              }
+            }
+          }
+        }
+      },
+      albums: {
+        with: {
+          album: {
+            columns: {
+              title: true,
+              id: true
+            }
+          }
+        }
+      }
+    }
+  });
+
+  return data;
+};
+
 export const linkSongToArtist = async (
   artistId: number,
   songId: number,
@@ -163,6 +201,41 @@ export const getArtistsOfASong = async (songId: number, trx: DB | DBTransaction 
     .where(
       inArray(artists.id, sql`(SELECT "artistId" FROM "artistsSongs" WHERE "songId" = ${songId})`)
     );
+
+  return data;
+};
+
+export const getArtistsByName = async (names: string[], trx: DB | DBTransaction = db) => {
+  const data = await trx.query.artists.findMany({
+    where: (a) => inArray(a.name, names),
+    with: {
+      songs: { with: { song: { columns: { id: true, title: true } } } },
+      artworks: {
+        with: {
+          artwork: {
+            with: {
+              palette: {
+                columns: { id: true },
+                with: {
+                  swatches: {}
+                }
+              }
+            }
+          }
+        }
+      },
+      albums: {
+        with: {
+          album: {
+            columns: {
+              title: true,
+              id: true
+            }
+          }
+        }
+      }
+    }
+  });
 
   return data;
 };

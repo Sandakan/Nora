@@ -1,4 +1,4 @@
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray, sql } from 'drizzle-orm';
 import { db } from '../db';
 import {
   albumsArtworks,
@@ -78,4 +78,17 @@ export const linkArtworksToArtist = async (
   trx: DB | DBTransaction = db
 ) => {
   return trx.insert(artistsArtworks).values(data).returning();
+};
+
+export const getArtistOnlineArtworksCount = async (
+  artistId: number,
+  trx: DB | DBTransaction = db
+) => {
+  const data = await trx
+    .select({ count: sql`COUNT(*)` })
+    .from(artworks)
+    .innerJoin(artistsArtworks, eq(artistsArtworks.artworkId, artworks.id))
+    .where(eq(artistsArtworks.artistId, artistId));
+
+  return data.at(0)?.count ?? 0;
 };

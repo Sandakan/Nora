@@ -7,6 +7,7 @@ import type { GetAllSongsReturnType } from '@main/db/queries/songs';
 import {
   parseAlbumArtworks,
   parseArtistArtworks,
+  parseArtistOnlineArtworks,
   parseGenreArtworks,
   parsePlaylistArtworks,
   parseSongArtworks
@@ -73,6 +74,7 @@ export const convertToArtist = (artist: GetAllArtistsReturnType[number]) => {
       title: s.song.title,
       songId: String(s.song.id)
     })),
+    onlineArtworkPaths: parseArtistOnlineArtworks(artworks),
     isAFavorite: artist.isFavorite
   } satisfies Artist;
 };
