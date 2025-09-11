@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer } from 'electron';
+import { contextBridge, ipcRenderer, webUtils } from 'electron';
 // const { contextBridge, ipcRenderer } = require('electron');
 import type { LastFMTrackInfoApi } from '../types/last_fm_api';
 import type { SimilarTracksOutput } from '../types/last_fm_similar_tracks_api';
@@ -468,6 +468,10 @@ const appControls = {
 
 // $ OTHER
 const utils = {
+  showFilePath: (file: File) => {
+    const path = webUtils.getPathForFile(file);
+    return path;
+  },
   path: {
     join: (...args: string[]) => args.join('/')
   },

@@ -1014,12 +1014,6 @@ export default function App() {
           store.state.currentSongData.duration,
           true
         );
-
-        window.api.audioLibraryControls.updateSongListeningData(
-          store.state.currentSongData.songId,
-          'listens',
-          1
-        );
       } else if (typeof currentSongIndex === 'number') {
         if (queue.queue.length > 0) {
           if (queue.queue.length - 1 === currentSongIndex) {
@@ -1827,18 +1821,21 @@ export default function App() {
     (e: DragEvent<HTMLDivElement>) => {
       console.log(e.dataTransfer.files);
       if (e.dataTransfer.files.length > 0) {
-        const isASupportedAudioFormat = appPreferences.supportedMusicExtensions.some((type) =>
-          e.dataTransfer.files[0].path.endsWith(type)
-        );
-
-        if (isASupportedAudioFormat) fetchSongFromUnknownSource(e.dataTransfer.files[0].path);
-        else
-          changePromptMenuData(
-            true,
-            <UnsupportedFileMessagePrompt
-              filePath={e.dataTransfer.files[0].path || e.dataTransfer.files[0].name}
-            />
+        const file = e.dataTransfer.files.item(0);
+        if (file) {
+          const filePath = window.api.utils.showFilePath(file);
+          console.log('Dropped file path:', filePath);
+          const isASupportedAudioFormat = appPreferences.supportedMusicExtensions.some((type) =>
+            file?.webkitRelativePath.endsWith(type)
           );
+
+          if (isASupportedAudioFormat) fetchSongFromUnknownSource(filePath);
+          else
+            changePromptMenuData(
+              true,
+              <UnsupportedFileMessagePrompt filePath={filePath || file.name} />
+            );
+        }
       }
       if (AppRef.current) AppRef.current.classList.remove('song-drop');
     },

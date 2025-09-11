@@ -56,7 +56,7 @@ const getLogFilePath = () => {
 
 export const logFilePath = getLogFilePath();
 
-const DEFAULT_LOGGER_LEVEL = IS_DEVELOPMENT ? 'silly' : 'debug';
+const DEFAULT_LOGGER_LEVEL = IS_DEVELOPMENT ? 'silly' : 'info';
 
 const transports = {
   console: new winston.transports.Console({
