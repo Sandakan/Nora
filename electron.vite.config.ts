@@ -1,6 +1,3 @@
-/**
- * @type {import('electron-vite').UserConfig}
- */
 import tailwindcss from '@tailwindcss/vite';
 import { tanstackRouter } from '@tanstack/router-plugin/vite';
 import react from '@vitejs/plugin-react';
@@ -50,7 +47,11 @@ export default defineConfig({
         routesDirectory: 'src/renderer/src/routes',
         autoCodeSplitting: true
       }),
-      react(),
+      react({
+        babel: {
+          plugins: ['babel-plugin-react-compiler']
+        }
+      }),
       tailwindcss()
     ]
   }
