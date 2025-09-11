@@ -7,7 +7,9 @@ import { pathToFileURL } from 'url';
 export const handleFileProtocol = async (req: GlobalRequest) => {
   try {
     const { pathname } = new URL(req.url);
-    const filePath = decodeURI(pathname).replace(/^[/\\]{1,2}/gm, '');
+    const decodedPath = decodeURI(pathname);
+    const filePath =
+      process.platform === 'darwin' ? decodedPath : decodedPath.replace(/^[/\\]{1,2}/gm, '');
 
     if (!existsSync(filePath)) {
       return new Response('File not found', { status: 404 });
@@ -96,3 +98,4 @@ export const handleFileProtocol = async (req: GlobalRequest) => {
     return new Response('Internal Server Error', { status: 500 });
   }
 };
+
