@@ -54,6 +54,12 @@ import i18n from './i18n';
 import { normalizedKeys } from './other/appShortcuts';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { Outlet } from '@tanstack/react-router';
+import { queryClient } from '.';
+import { songQuery } from '@renderer/queries/songs';
+import { artistQuery } from '@renderer/queries/aritsts';
+import { albumQuery } from '@renderer/queries/albums';
+import { playlistQuery } from '@renderer/queries/playlists';
+import { genreQuery } from '@renderer/queries/genres';
 
 // ? CONSTANTS
 const LOW_RESPONSE_DURATION = 100;
@@ -523,8 +529,60 @@ export default function App() {
 
   useEffect(() => {
     const noticeDataUpdateEvents = (_: unknown, dataEvents: DataUpdateEvent[]) => {
-      const event = new CustomEvent('app/dataUpdates', { detail: dataEvents });
-      document.dispatchEvent(event);
+      // const event = new CustomEvent('app/dataUpdates', { detail: dataEvents });
+      // document.dispatchEvent(event);
+
+      for (const dataEvent of dataEvents) {
+        const songEvents: DataUpdateEventTypes[] = [
+          'songs',
+          'artists',
+          'albums',
+          'playlists',
+          'genres'
+        ];
+        if (songEvents.includes(dataEvent.dataType))
+          queryClient.invalidateQueries({ queryKey: songQuery._def });
+
+        const artistEvents: DataUpdateEventTypes[] = [
+          'artists',
+          'artists/artworks',
+          'artists/likes',
+          'artists/updatedArtist',
+          'artists/deletedArtist',
+          'artists/newArtist'
+        ];
+        if (artistEvents.includes(dataEvent.dataType))
+          queryClient.invalidateQueries({ queryKey: artistQuery._def });
+
+        const albumEvents: DataUpdateEventTypes[] = [
+          'albums',
+          'albums/updatedAlbum',
+          'albums/deletedAlbum',
+          'albums/newAlbum'
+        ];
+        if (albumEvents.includes(dataEvent.dataType))
+          queryClient.invalidateQueries({ queryKey: albumQuery._def });
+
+        const playlistEvents: DataUpdateEventTypes[] = [
+          'playlists',
+          'playlists/updatedPlaylist',
+          'playlists/deletedPlaylist',
+          'playlists/newPlaylist',
+          'playlists/newSong',
+          'playlists/deletedSong'
+        ];
+        if (playlistEvents.includes(dataEvent.dataType))
+          queryClient.invalidateQueries({ queryKey: playlistQuery._def });
+
+        const genreEvents: DataUpdateEventTypes[] = [
+          'genres',
+          'genres/newGenre',
+          'genres/updatedGenre',
+          'genres/deletedGenre'
+        ];
+        if (genreEvents.includes(dataEvent.dataType))
+          queryClient.invalidateQueries({ queryKey: genreQuery._def });
+      }
     };
 
     window.api.dataUpdates.dataUpdateEvent(noticeDataUpdateEvents);
