@@ -8,6 +8,7 @@ import * as schema from '@db/schema';
 import logger from '@main/logger';
 // import type { Logger } from 'drizzle-orm';
 import { PGlite } from '@electric-sql/pglite';
+import { seedDatabase } from './seed';
 // import { seedDatabase } from './seed';
 
 const DB_PATH = app.getPath('userData') + '/database.db';
@@ -32,4 +33,4 @@ export const closeDatabaseInstance = async () => {
 };
 
 await migrate(db, { migrationsFolder });
-// await seedDatabase();
+await seedDatabase();

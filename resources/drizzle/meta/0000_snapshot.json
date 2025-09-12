@@ -1,5 +1,5 @@
 {
-  "id": "ffe77d7d-687f-4504-a547-80d2d4e9d866",
+  "id": "214adbd7-c87b-4e49-bff7-0ff76c17207d",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -2886,6 +2886,272 @@
           ]
         }
       },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.user_settings": {
+      "name": "user_settings",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "user_settings_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "language": {
+          "name": "language",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'en'"
+        },
+        "is_dark_mode": {
+          "name": "is_dark_mode",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "use_system_theme": {
+          "name": "use_system_theme",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "auto_launch_app": {
+          "name": "auto_launch_app",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "open_window_maximized_on_start": {
+          "name": "open_window_maximized_on_start",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "open_window_as_hidden_on_system_start": {
+          "name": "open_window_as_hidden_on_system_start",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "is_mini_player_always_on_top": {
+          "name": "is_mini_player_always_on_top",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "is_musixmatch_lyrics_enabled": {
+          "name": "is_musixmatch_lyrics_enabled",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "hide_window_on_close": {
+          "name": "hide_window_on_close",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "send_song_scrobbling_data_to_lastfm": {
+          "name": "send_song_scrobbling_data_to_lastfm",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "send_song_favorites_data_to_lastfm": {
+          "name": "send_song_favorites_data_to_lastfm",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "send_now_playing_song_data_to_lastfm": {
+          "name": "send_now_playing_song_data_to_lastfm",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "save_lyrics_in_lrc_files_for_supported_songs": {
+          "name": "save_lyrics_in_lrc_files_for_supported_songs",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "enable_discord_rpc": {
+          "name": "enable_discord_rpc",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "save_verbose_logs": {
+          "name": "save_verbose_logs",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "main_window_x": {
+          "name": "main_window_x",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "main_window_y": {
+          "name": "main_window_y",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "mini_player_x": {
+          "name": "mini_player_x",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "mini_player_y": {
+          "name": "mini_player_y",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "main_window_width": {
+          "name": "main_window_width",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "main_window_height": {
+          "name": "main_window_height",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "mini_player_width": {
+          "name": "mini_player_width",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "mini_player_height": {
+          "name": "mini_player_height",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "window_state": {
+          "name": "window_state",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'normal'"
+        },
+        "recent_searches": {
+          "name": "recent_searches",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::json"
+        },
+        "musixmatch_user_token": {
+          "name": "musixmatch_user_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "custom_lrc_files_save_location": {
+          "name": "custom_lrc_files_save_location",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "lastfm_session_name": {
+          "name": "lastfm_session_name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "lastfm_session_key": {
+          "name": "lastfm_session_key",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "idx_user_settings_language": {
+          "name": "idx_user_settings_language",
+          "columns": [
+            {
+              "expression": "language",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_user_settings_window_state": {
+          "name": "idx_user_settings_window_state",
+          "columns": [
+            {
+              "expression": "window_state",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false

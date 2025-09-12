@@ -215,6 +215,41 @@ CREATE TABLE "songs" (
 	CONSTRAINT "songs_path_unique" UNIQUE("path")
 );
 --> statement-breakpoint
+CREATE TABLE "user_settings" (
+	"id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "user_settings_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
+	"language" varchar(10) DEFAULT 'en' NOT NULL,
+	"is_dark_mode" boolean DEFAULT true NOT NULL,
+	"use_system_theme" boolean DEFAULT true NOT NULL,
+	"auto_launch_app" boolean DEFAULT false NOT NULL,
+	"open_window_maximized_on_start" boolean DEFAULT false NOT NULL,
+	"open_window_as_hidden_on_system_start" boolean DEFAULT false NOT NULL,
+	"is_mini_player_always_on_top" boolean DEFAULT false NOT NULL,
+	"is_musixmatch_lyrics_enabled" boolean DEFAULT true NOT NULL,
+	"hide_window_on_close" boolean DEFAULT false NOT NULL,
+	"send_song_scrobbling_data_to_lastfm" boolean DEFAULT false NOT NULL,
+	"send_song_favorites_data_to_lastfm" boolean DEFAULT false NOT NULL,
+	"send_now_playing_song_data_to_lastfm" boolean DEFAULT false NOT NULL,
+	"save_lyrics_in_lrc_files_for_supported_songs" boolean DEFAULT true NOT NULL,
+	"enable_discord_rpc" boolean DEFAULT true NOT NULL,
+	"save_verbose_logs" boolean DEFAULT false NOT NULL,
+	"main_window_x" integer,
+	"main_window_y" integer,
+	"mini_player_x" integer,
+	"mini_player_y" integer,
+	"main_window_width" integer,
+	"main_window_height" integer,
+	"mini_player_width" integer,
+	"mini_player_height" integer,
+	"window_state" varchar(20) DEFAULT 'normal' NOT NULL,
+	"recent_searches" json DEFAULT '[]'::json NOT NULL,
+	"musixmatch_user_token" text,
+	"custom_lrc_files_save_location" text,
+	"lastfm_session_name" varchar(255),
+	"lastfm_session_key" varchar(255),
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 ALTER TABLE "albums_artists" ADD CONSTRAINT "albums_artists_album_id_albums_id_fk" FOREIGN KEY ("album_id") REFERENCES "public"."albums"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "albums_artists" ADD CONSTRAINT "albums_artists_artist_id_artists_id_fk" FOREIGN KEY ("artist_id") REFERENCES "public"."artists"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "albums_artworks" ADD CONSTRAINT "albums_artworks_album_id_albums_id_fk" FOREIGN KEY ("album_id") REFERENCES "public"."albums"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
@@ -310,4 +345,6 @@ CREATE INDEX "idx_songs_track_title" ON "songs" USING btree ("track_number","tit
 CREATE INDEX "idx_songs_created_title" ON "songs" USING btree ("created_at","title");--> statement-breakpoint
 CREATE INDEX "idx_songs_modified_title" ON "songs" USING btree ("file_modified_at","title");--> statement-breakpoint
 CREATE INDEX "idx_songs_folder_title" ON "songs" USING btree ("folder_id","title");--> statement-breakpoint
-CREATE INDEX "idx_songs_title_text" ON "songs" USING btree ("title") WHERE "songs"."title" IS NOT NULL;
+CREATE INDEX "idx_songs_title_text" ON "songs" USING btree ("title") WHERE "songs"."title" IS NOT NULL;--> statement-breakpoint
+CREATE INDEX "idx_user_settings_language" ON "user_settings" USING btree ("language");--> statement-breakpoint
+CREATE INDEX "idx_user_settings_window_state" ON "user_settings" USING btree ("window_state");

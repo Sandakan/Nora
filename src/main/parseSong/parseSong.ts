@@ -144,7 +144,7 @@ export const parseSong = async (
       const songInfo: typeof songs.$inferInsert = {
         title: songTitle,
         duration: getSongDurationFromSong(metadata.format.duration).toFixed(2),
-        year: metadata.common?.year,
+        year: metadata.common?.year || undefined,
         path: absoluteFilePath,
         sampleRate: metadata.format.sampleRate,
         bitRate: metadata?.format?.bitrate ? Math.ceil(metadata.format.bitrate) : undefined,

@@ -346,6 +346,79 @@ export const playHistory = pgTable(
   ]
 );
 
+export const userSettings = pgTable(
+  'user_settings',
+  {
+    id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+
+    // Language settings
+    language: varchar('language', { length: 10 }).notNull().default('en'),
+
+    // Theme settings (from AppThemeData)
+    isDarkMode: boolean('is_dark_mode').notNull().default(true),
+    useSystemTheme: boolean('use_system_theme').notNull().default(true),
+
+    // Preferences
+    autoLaunchApp: boolean('auto_launch_app').notNull().default(false),
+    openWindowMaximizedOnStart: boolean('open_window_maximized_on_start').notNull().default(false),
+    openWindowAsHiddenOnSystemStart: boolean('open_window_as_hidden_on_system_start')
+      .notNull()
+      .default(false),
+    isMiniPlayerAlwaysOnTop: boolean('is_mini_player_always_on_top').notNull().default(false),
+    isMusixmatchLyricsEnabled: boolean('is_musixmatch_lyrics_enabled').notNull().default(true),
+    hideWindowOnClose: boolean('hide_window_on_close').notNull().default(false),
+    sendSongScrobblingDataToLastFM: boolean('send_song_scrobbling_data_to_lastfm')
+      .notNull()
+      .default(false),
+    sendSongFavoritesDataToLastFM: boolean('send_song_favorites_data_to_lastfm')
+      .notNull()
+      .default(false),
+    sendNowPlayingSongDataToLastFM: boolean('send_now_playing_song_data_to_lastfm')
+      .notNull()
+      .default(false),
+    saveLyricsInLrcFilesForSupportedSongs: boolean('save_lyrics_in_lrc_files_for_supported_songs')
+      .notNull()
+      .default(true),
+    enableDiscordRPC: boolean('enable_discord_rpc').notNull().default(true),
+    saveVerboseLogs: boolean('save_verbose_logs').notNull().default(false),
+
+    // Window positions (stored as JSON objects)
+    mainWindowX: integer('main_window_x'),
+    mainWindowY: integer('main_window_y'),
+    miniPlayerX: integer('mini_player_x'),
+    miniPlayerY: integer('mini_player_y'),
+
+    // Window dimensions (stored as JSON objects)
+    mainWindowWidth: integer('main_window_width'),
+    mainWindowHeight: integer('main_window_height'),
+    miniPlayerWidth: integer('mini_player_width'),
+    miniPlayerHeight: integer('mini_player_height'),
+
+    // Window state
+    windowState: varchar('window_state', { length: 20 }).notNull().default('normal'),
+
+    // Recent searches (stored as JSON array)
+    recentSearches: json('recent_searches').$type<string[]>().notNull().default([]),
+
+    // Optional settings
+    musixmatchUserToken: text('musixmatch_user_token'),
+    customLrcFilesSaveLocation: text('custom_lrc_files_save_location'),
+
+    // LastFM session data
+    lastFmSessionName: varchar('lastfm_session_name', { length: 255 }),
+    lastFmSessionKey: varchar('lastfm_session_key', { length: 255 }),
+
+    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
+  },
+  (t) => [
+    // Index for language-based queries
+    index('idx_user_settings_language').on(t.language),
+    // Index for window state queries
+    index('idx_user_settings_window_state').on(t.windowState)
+  ]
+);
+
 // ============================================================================
 // Many-to-Many Junction Tables
 // ============================================================================
@@ -668,6 +741,15 @@ export const folderBlacklistRelations = relations(folderBlacklist, ({ one }) => 
     references: [musicFolders.id]
   })
 }));
+
+export const playHistoryRelations = relations(playHistory, ({ one }) => ({
+  song: one(songs, {
+    fields: [playHistory.songId],
+    references: [songs.id]
+  })
+}));
+
+// User settings has no relations as it's a single-row configuration table
 
 // Junction Table Relations
 export const artistsSongsRelations = relations(artistsSongs, ({ one }) => ({

@@ -8,7 +8,7 @@ const checkForNewSongs = async () => {
   if (folders.length > 0) {
     for (const folder of folders) {
       try {
-        await checkFolderForUnknownModifications(folder.path);
+        return await checkFolderForUnknownModifications(folder.path);
       } catch (error) {
         logger.error(`Failed to check for unknown modifications of a path.`, {
           error,
