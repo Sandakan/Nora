@@ -1,6 +1,6 @@
 import { and, asc, desc, eq, inArray, SQL } from 'drizzle-orm';
 import { db } from '@db/db';
-import { playlistsSongs } from '../schema';
+import { playlistsSongs, playlists } from '../schema';
 import { timeEnd, timeStart } from '@main/utils/measureTimeUsage';
 
 export type GetAllPlaylistsReturnType = Awaited<ReturnType<typeof getAllPlaylists>>;
@@ -141,4 +141,18 @@ export const unlinkSongsFromPlaylist = async (
   await trx
     .delete(playlistsSongs)
     .where(and(inArray(playlistsSongs.songId, songIds), eq(playlistsSongs.playlistId, playlistId)));
+};
+
+export const getPlaylistWithSongPaths = async (
+  playlistId: number,
+  trx: DB | DBTransaction = db
+) => {
+  const playlist = await trx.query.playlists.findFirst({
+    where: eq(playlists.id, playlistId),
+    with: {
+      songs: { with: { song: { columns: { path: true } } } }
+    }
+  });
+
+  return playlist;
 };

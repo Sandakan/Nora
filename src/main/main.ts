@@ -22,13 +22,7 @@ import {
   type Display
 } from 'electron';
 
-import {
-  getSongsData,
-  getUserData,
-  setUserData as saveUserData,
-  resetAppCache,
-  setUserData
-} from './filesystem';
+import { getUserData, setUserData as saveUserData, resetAppCache, setUserData } from './filesystem';
 import { version, appPreferences } from '../../package.json';
 import { savePendingMetadataUpdates } from './updateSongId3Tags';
 import addWatchersToFolders from './fs/addWatchersToFolders';
@@ -55,6 +49,7 @@ import roundTo from '../common/roundTo';
 // import { fileURLToPath, pathToFileURL } from 'url';
 import { closeDatabaseInstance } from './db/db';
 import { handleFileProtocol } from './handleFileProtocol';
+import { getSongById } from '@main/db/queries/songs';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -589,11 +584,9 @@ export function restartApp(reason: string, noQuitEvents = false) {
 }
 
 export async function revealSongInFileExplorer(songId: string) {
-  const songs = getSongsData();
+  const song = await getSongById(Number(songId));
 
-  for (let x = 0; x < songs.length; x += 1) {
-    if (songs[x].songId === songId) return shell.showItemInFolder(songs[x].path);
-  }
+  if (song) return shell.showItemInFolder(song.path);
 
   logger.warn(
     `Revealing song file in explorer failed because song couldn't be found in the library.`,

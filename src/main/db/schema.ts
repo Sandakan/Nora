@@ -575,7 +575,8 @@ export const musicFoldersRelations = relations(musicFolders, ({ one, many }) => 
     references: [musicFolders.id],
     relationName: 'music_folder_children'
   }),
-  songs: many(songs)
+  songs: many(songs),
+  blacklist: one(folderBlacklist)
 }));
 
 export const songsRelations = relations(songs, ({ one, many }) => ({
@@ -589,6 +590,11 @@ export const songsRelations = relations(songs, ({ one, many }) => ({
   artworks: many(artworksSongs),
   playlists: many(playlistsSongs),
   blacklist: one(songBlacklist),
+  folderBlacklist: one(folderBlacklist, {
+    fields: [songs.folderId],
+    references: [folderBlacklist.folderId]
+  }),
+  playHistory: many(playHistory),
   playEvents: many(playEvents),
   seekEvents: many(seekEvents),
   skipEvents: many(skipEvents)

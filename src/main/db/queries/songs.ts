@@ -27,38 +27,29 @@ export const getSongsRelativeToFolder = async (
       typeof folderPathOrId === 'string'
         ? eq(musicFolders.path, folderPathOrId)
         : eq(musicFolders.id, folderPathOrId),
-    columns: { id: true }
+    columns: { id: true },
+    with: {
+      songs: {
+        columns: { id: true, path: true },
+        with: {
+          blacklist: { columns: { songId: true } }
+        }
+      },
+      blacklist: { columns: { folderId: true } }
+    }
   });
 
   if (!folder) return [];
 
   // Check if folder is blacklisted
-  if (options?.skipBlacklistedFolders) {
-    const blacklistedFolder = await trx.query.folderBlacklist.findFirst({
-      where: eq(folderBlacklist.folderId, folder.id),
-      columns: { folderId: true }
-    });
+  if (options?.skipBlacklistedFolders && folder.blacklist != null) return [];
 
-    if (blacklistedFolder) return [];
-  }
-
-  // If we want to skip blacklisted songs, fetch their IDs
-  let blacklistedSongIds: number[] = [];
+  // Filter out blacklisted songs if needed
   if (options?.skipBlacklistedSongs) {
-    const blacklist = await trx.query.songBlacklist.findMany({
-      columns: { songId: true }
-    });
-    blacklistedSongIds = blacklist.map((b) => b.songId);
+    return folder.songs.filter((song) => song.blacklist == null);
   }
 
-  // Final songs query
-  const folderSongs = await trx.query.songs.findMany({
-    where: (s) =>
-      eq(s.folderId, folder.id) &&
-      (options?.skipBlacklistedSongs ? notInArray(s.id, blacklistedSongIds) : undefined)
-  });
-
-  return folderSongs;
+  return folder.songs;
 };
 
 export async function getSongsInFolders(
