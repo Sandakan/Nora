@@ -1,14 +1,19 @@
 import { app } from 'electron';
-import { parseFile } from 'music-metadata';
 
-import { parseSongArtworks, resolveSongFilePath } from '../fs/resolveFilePaths';
+import {
+  parseArtistOnlineArtworks,
+  parseSongArtworks,
+  removeDefaultAppProtocolFromFilePath,
+  resolveSongFilePath
+} from '../fs/resolveFilePaths';
 import logger from '../logger';
 // import { setDiscordRpcActivity } from '../other/discordRPC';
 import { setCurrentSongPath } from '../main';
-import { getSongById } from '@main/db/queries/songs';
+import { getPlayableSongById } from '@main/db/queries/songs';
 import { parsePaletteFromArtworks } from './getAllSongs';
 import { setDiscordRpcActivity } from '@main/other/discordRPC';
 import { addSongToPlayHistory } from '@main/db/queries/history';
+import sharp from 'sharp';
 
 const IS_DEVELOPMENT = !app.isPackaged || process.env.NODE_ENV === 'development';
 
@@ -61,60 +66,57 @@ const getArtworkData = (artworkData?: Buffer | Uint8Array) => {
 const sendAudioData = async (songId: string): Promise<AudioPlayerData> => {
   logger.debug(`Fetching song data for song id -${songId}-`);
   try {
-    const song = await getSongById(Number(songId));
+    const song = await getPlayableSongById(Number(songId));
 
     if (song) {
-      const metadata = await parseFile(song.path);
+      const artists: AudioPlayerData['artists'] =
+        song.artists?.map((a) => ({
+          artistId: String(a.artist.id),
+          name: a.artist.name,
+          onlineArtworkPaths: parseArtistOnlineArtworks(a.artist.artworks.map((aw) => aw.artwork))
+        })) ?? [];
 
-      if (metadata) {
-        const artworkData = metadata.common.picture ? metadata.common.picture[0].data : undefined;
+      const artworks = song.artworks.map((a) => a.artwork);
+      const songArtwork = parseSongArtworks(artworks).artworkPath;
+      const artworkData = await sharp(removeDefaultAppProtocolFromFilePath(songArtwork)).toBuffer();
 
-        // addToSongsHistory(song.songId);
-        const artists =
-          song.artists?.map((a) => ({ artistId: String(a.artist.id), name: a.artist.name })) ?? [];
-        const artworks = song.artworks.map((a) => a.artwork);
-        const albumObj = song.albums?.[0]?.album;
-        const album = albumObj ? { albumId: String(albumObj.id), name: albumObj.title } : undefined;
-        const isBlacklisted = !!song.blacklist;
-        const isAFavorite = song.playlists.some((p) => p.playlist.name === 'Favorites');
+      const albumObj = song.albums?.[0]?.album;
+      const album = albumObj ? { albumId: String(albumObj.id), name: albumObj.title } : undefined;
+      const isBlacklisted = !!song.blacklist;
+      const isAFavorite = song.isFavorite;
 
-        const data: AudioPlayerData = {
-          title: song.title,
-          artists,
-          duration: Number(song.duration),
-          artwork: getArtworkData(artworkData),
-          artworkPath: parseSongArtworks(artworks).artworkPath,
-          path: resolveSongFilePath(song.path),
-          songId: String(song.id),
-          isAFavorite,
-          album,
-          paletteData: parsePaletteFromArtworks(artworks),
-          isKnownSource: true, // TODO: Add logic to determine if the source is known
-          isBlacklisted
-        };
+      const data: AudioPlayerData = {
+        title: song.title,
+        artists,
+        duration: Number(song.duration),
+        artwork: getArtworkData(artworkData),
+        artworkPath: songArtwork,
+        path: resolveSongFilePath(song.path),
+        songId: String(song.id),
+        isAFavorite,
+        album,
+        paletteData: parsePaletteFromArtworks(artworks),
+        isKnownSource: true, // TODO: Add logic to determine if the source is known
+        isBlacklisted
+      };
 
-        addSongToPlayHistory(Number(songId));
+      addSongToPlayHistory(Number(songId));
 
-        const now = Date.now();
-        setDiscordRpcActivity({
-          details: `Listening to '${data.title}'`,
-          state: `By ${data.artists?.map((artist) => artist.name).join(', ')}`,
-          largeImageKey: 'nora_logo',
-          smallImageKey: 'song_artwork',
-          startTimestamp: now,
-          endTimestamp: now + data.duration * 1000
-        });
-        setCurrentSongPath(song.path);
-        return data;
-        // returnlogger.debug(`total : ${console.timeEnd('total')}`);
-      }
-      logger.error(`No matching song to send audio data`, { audioId: songId });
-      throw new Error('SONG_NOT_FOUND' as ErrorCodes);
+      const now = Date.now();
+      setDiscordRpcActivity({
+        details: `Listening to '${data.title}'`,
+        state: `By ${data.artists?.map((artist) => artist.name).join(', ')}`,
+        largeImageKey: 'nora_logo',
+        smallImageKey: 'song_artwork',
+        startTimestamp: now,
+        endTimestamp: now + data.duration * 1000
+      });
+      setCurrentSongPath(song.path);
+
+      return data;
     }
-    logger.error(`Failed to read data.json because it doesn't exist or is empty.`, {
-      audioId: songId
-    });
-    throw new Error('EMPTY_SONG_ARRAY' as ErrorCodes);
+    logger.error(`No matching song to send audio data`, { audioId: songId });
+    throw new Error('SONG_NOT_FOUND' as ErrorCodes);
   } catch (error) {
     logger.error(`Failed to send songs data.`, { err: error });
     throw new Error('SONG_DATA_SEND_FAILED' as ErrorCodes);

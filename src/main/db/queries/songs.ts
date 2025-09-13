@@ -522,3 +522,50 @@ export const updateSongFavoriteStatuses = async (
   const data = await trx.update(songs).set({ isFavorite }).where(inArray(songs.id, songIds));
   return data;
 };
+
+export const getPlayableSongById = async (songId: number, trx: DB | DBTransaction = db) => {
+  const song = await trx.query.songs.findFirst({
+    where: eq(songs.id, songId),
+    with: {
+      artists: {
+        with: {
+          artist: {
+            columns: { id: true, name: true },
+            with: {
+              artworks: {
+                with: {
+                  artwork: true
+                }
+              }
+            }
+          }
+        }
+      },
+      albums: {
+        with: {
+          album: {
+            columns: { id: true, title: true }
+          }
+        }
+      },
+      artworks: {
+        with: {
+          artwork: {
+            with: {
+              palette: {
+                columns: { id: true },
+                with: {
+                  swatches: {}
+                }
+              }
+            }
+          }
+        }
+      },
+      blacklist: {
+        columns: { songId: true }
+      }
+    }
+  });
+  return song;
+};
