@@ -1,4 +1,4 @@
-import { getUserData } from '../filesystem';
+import { getUserSettings } from '@main/db/queries/settings';
 import logger from '../logger';
 import { Initialize, setDiscordRPC } from './discord';
 
@@ -6,10 +6,9 @@ import { Initialize, setDiscordRPC } from './discord';
 let dataQueue: any[] = [];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const setDiscordRpcActivity = (data: any) => {
+export const setDiscordRpcActivity = async (data: any) => {
   try {
-    const userData = getUserData();
-    const { enableDiscordRPC } = userData.preferences;
+    const { enableDiscordRPC } = await getUserSettings();
 
     if (!enableDiscordRPC)
       return logger.debug('Discord Rich Presence skipped.', {

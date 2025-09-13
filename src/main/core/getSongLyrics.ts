@@ -3,16 +3,16 @@ import { readFile } from 'fs/promises';
 import NodeID3 from 'node-id3';
 import songlyrics from 'songlyrics';
 
-import { getUserData } from '../filesystem';
 import { removeDefaultAppProtocolFromFilePath } from '../fs/resolveFilePaths';
 import logger from '../logger';
 import { checkIfConnectedToInternet, sendMessageToRenderer } from '../main';
-import fetchLyricsFromMusixmatch from '../utils/fetchLyricsFromMusixmatch';
+// import fetchLyricsFromMusixmatch from '../utils/fetchLyricsFromMusixmatch';
 import { appPreferences } from '../../../package.json';
 import parseLyrics, { parseSyncedLyricsFromAudioDataSource } from '../../common/parseLyrics';
 import saveLyricsToSong from '../saveLyricsToSong';
-import { decrypt } from '../utils/safeStorage';
+// import { decrypt } from '../utils/safeStorage';
 import fetchLyricsFromLrclib from '../utils/fetchLyricsFromLrclib';
+import { getUserSettings } from '@main/db/queries/settings';
 
 const { metadataEditingSupportedExtensions } = appPreferences;
 
@@ -87,7 +87,8 @@ const readFileData = async (path?: string) => {
 };
 
 const fetchLyricsFromLRCFile = async (songPath: string) => {
-  const userData = getUserData();
+  const userData = await getUserSettings();
+
   const defaultLrcFilePath = `${songPath}.lrc`;
   const defaultLrcFilePathWithoutExtension = `${songPath.replaceAll(path.extname(songPath), '')}.lrc`;
   const customLrcFilePath = userData.customLrcFilesSaveLocation
@@ -172,64 +173,64 @@ const getLyricsFromLrclib = async (
   return undefined;
 };
 
-const getLyricsFromMusixmatch = async (
-  trackInfo: LyricsRequestTrackInfo,
-  lyricsType?: LyricsTypes,
-  abortControllerSignal?: AbortSignal
-) => {
-  const { songTitle, songArtists = [], duration } = trackInfo;
+// const getLyricsFromMusixmatch = async (
+//   trackInfo: LyricsRequestTrackInfo,
+//   lyricsType?: LyricsTypes,
+//   abortControllerSignal?: AbortSignal
+// ) => {
+//   const { songTitle, songArtists = [], duration } = trackInfo;
 
-  const userData = getUserData();
+//   const userData = await getAllSettings();
 
-  let mxmUserToken = import.meta.env.MAIN_VITE_MUSIXMATCH_DEFAULT_USER_TOKEN;
-  const encryptedCustomMxmToken = userData?.customMusixmatchUserToken?.trim();
+//   let mxmUserToken = import.meta.env.MAIN_VITE_MUSIXMATCH_DEFAULT_USER_TOKEN;
+//   const encryptedCustomMxmToken = userData?.customMusixmatchUserToken?.trim();
 
-  if (encryptedCustomMxmToken) {
-    const decryptedCustomMxmToken = decrypt(encryptedCustomMxmToken);
-    mxmUserToken = decryptedCustomMxmToken;
-  }
+//   if (encryptedCustomMxmToken) {
+//     const decryptedCustomMxmToken = decrypt(encryptedCustomMxmToken);
+//     mxmUserToken = decryptedCustomMxmToken;
+//   }
 
-  if (mxmUserToken && userData?.preferences?.isMusixmatchLyricsEnabled) {
-    // Searching internet for lyrics because none present on audio source.
-    try {
-      const musixmatchLyrics = await fetchLyricsFromMusixmatch(
-        {
-          q_track: songTitle,
-          q_artist: songArtists[0] || '',
-          q_artists: songArtists.join(' '),
-          q_duration: duration.toString()
-        },
-        mxmUserToken,
-        lyricsType,
-        abortControllerSignal
-      );
+//   if (mxmUserToken && userData?.preferences?.isMusixmatchLyricsEnabled) {
+//     // Searching internet for lyrics because none present on audio source.
+//     try {
+//       const musixmatchLyrics = await fetchLyricsFromMusixmatch(
+//         {
+//           q_track: songTitle,
+//           q_artist: songArtists[0] || '',
+//           q_artists: songArtists.join(' '),
+//           q_duration: duration.toString()
+//         },
+//         mxmUserToken,
+//         lyricsType,
+//         abortControllerSignal
+//       );
 
-      if (musixmatchLyrics) {
-        const { lyrics, metadata, lyricsType: lyricsSyncState } = musixmatchLyrics;
-        logger.info(`Found musixmatch lyrics for '${metadata.title}' song.`);
+//       if (musixmatchLyrics) {
+//         const { lyrics, metadata, lyricsType: lyricsSyncState } = musixmatchLyrics;
+//         logger.info(`Found musixmatch lyrics for '${metadata.title}' song.`);
 
-        const parsedLyrics = parseLyrics(lyrics);
+//         const parsedLyrics = parseLyrics(lyrics);
 
-        return {
-          lyrics: parsedLyrics,
-          title: songTitle,
-          source: 'MUSIXMATCH',
-          lang: metadata.lang,
-          link: metadata.link,
-          lyricsType: lyricsSyncState,
-          copyright: metadata.copyright
-        };
-      }
-    } catch (error) {
-      logger.error(`Failed to fetch lyrics from musixmatch.`, {
-        trackInfo,
-        lyricsType,
-        error
-      });
-    }
-  }
-  return undefined;
-};
+//         return {
+//           lyrics: parsedLyrics,
+//           title: songTitle,
+//           source: 'MUSIXMATCH',
+//           lang: metadata.lang,
+//           link: metadata.link,
+//           lyricsType: lyricsSyncState,
+//           copyright: metadata.copyright
+//         };
+//       }
+//     } catch (error) {
+//       logger.error(`Failed to fetch lyrics from musixmatch.`, {
+//         trackInfo,
+//         lyricsType,
+//         error
+//       });
+//     }
+//   }
+//   return undefined;
+// };
 
 const fetchUnsyncedLyrics = async (songTitle: string, songArtists: string[]) => {
   const str = songArtists ? `${songTitle} ${songArtists.join(' ')}` : songTitle;
@@ -335,9 +336,8 @@ const getSongLyrics = async (
 
   if (isConnectedToInternet && lyricsRequestType !== 'OFFLINE_ONLY') {
     try {
-      const onlineLyrics =
-        (await getLyricsFromLrclib(trackInfo, lyricsType)) ||
-        (await getLyricsFromMusixmatch(trackInfo, lyricsType, abortControllerSignal));
+      const onlineLyrics = await getLyricsFromLrclib(trackInfo, lyricsType, abortControllerSignal);
+      // || (await getLyricsFromMusixmatch(trackInfo, lyricsType, abortControllerSignal));
 
       if (onlineLyrics) {
         cachedLyrics = {

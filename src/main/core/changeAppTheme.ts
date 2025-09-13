@@ -1,10 +1,10 @@
 import { nativeTheme } from 'electron';
 import { dataUpdateEvent, getBackgroundColor, mainWindow } from '../main';
 import logger from '../logger';
-import { getAllSettings, saveUserThemeSettings } from '@main/db/queries/settings';
+import { getUserSettings, saveUserSettings } from '@main/db/queries/settings';
 
 const changeAppTheme = async (theme?: AppTheme) => {
-  const { isDarkMode } = await getAllSettings();
+  const { isDarkMode } = await getUserSettings();
   logger.debug(`Theme update requested`, { theme });
 
   const updatedIsDarkMode =
@@ -20,9 +20,9 @@ const changeAppTheme = async (theme?: AppTheme) => {
   if (mainWindow?.webContents)
     mainWindow.webContents.send('app/systemThemeChange', updatedIsDarkMode, updatedUseSystemTheme);
 
-  await saveUserThemeSettings(updatedIsDarkMode, updatedUseSystemTheme);
+  await saveUserSettings({ isDarkMode: updatedIsDarkMode, useSystemTheme: updatedUseSystemTheme });
 
-  mainWindow?.setBackgroundColor(getBackgroundColor());
+  mainWindow?.setBackgroundColor(await getBackgroundColor());
   dataUpdateEvent('userData/theme', [theme ?? 'system']);
 };
 

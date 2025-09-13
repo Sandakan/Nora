@@ -1,8 +1,6 @@
 import path from 'path';
 import { app } from 'electron';
 
-import { getUserData, setUserData } from '../filesystem';
-
 import getRootSize from '../utils/getRootSize';
 import getDirSize from '../utils/getDirSize';
 import getFileSize from '../utils/getFileSize';
@@ -58,12 +56,7 @@ const getAppDataStorageMetrics = async () => {
   };
 };
 
-const getStorageUsage = async (forceRefresh = false) => {
-  const userData = getUserData();
-  let { storageMetrics } = userData;
-
-  if (!forceRefresh) return storageMetrics;
-
+const getStorageUsage = async () => {
   try {
     const appPath = app.getAppPath();
     const { dir: appFolderPath } = path.parse(appPath);
@@ -93,7 +86,7 @@ const getStorageUsage = async (forceRefresh = false) => {
 
     const totalSize = appDataSizes.appDataSize + appFolderSize;
 
-    storageMetrics = {
+    const storageMetrics = {
       rootSizes,
       remainingSize,
       appFolderSize,
@@ -101,8 +94,6 @@ const getStorageUsage = async (forceRefresh = false) => {
       totalSize,
       generatedDate: new Date().toISOString()
     };
-
-    setUserData('storageMetrics', storageMetrics);
 
     return storageMetrics;
   } catch (error) {

@@ -22,7 +22,7 @@ import {
   type Display
 } from 'electron';
 
-import { getUserData, setUserData as saveUserData, resetAppCache, setUserData } from './filesystem';
+import { resetAppCache } from './filesystem';
 import { version, appPreferences } from '../../package.json';
 import { savePendingMetadataUpdates } from './updateSongId3Tags';
 import addWatchersToFolders from './fs/addWatchersToFolders';
@@ -50,6 +50,7 @@ import roundTo from '../common/roundTo';
 import { closeDatabaseInstance } from './db/db';
 import { handleFileProtocol } from './handleFileProtocol';
 import { getSongById } from '@main/db/queries/songs';
+import { getUserSettings, saveUserSettings } from './db/queries/settings';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -161,9 +162,10 @@ const installExtensions = async () => {
   }
 };
 
-export const getBackgroundColor = () => {
-  const userData = getUserData();
-  if (userData.theme.isDarkMode) return '#212226';
+export const getBackgroundColor = async () => {
+  const { isDarkMode } = await getUserSettings();
+
+  if (isDarkMode) return '#212226';
   return '#FFFFFF';
 };
 
@@ -183,7 +185,7 @@ const createWindow = async () => {
     visualEffectState: 'followWindow',
     roundedCorners: true,
     frame: false,
-    backgroundColor: getBackgroundColor(),
+    backgroundColor: await getBackgroundColor(),
     icon: appIcon,
     titleBarStyle: 'hidden',
     show: false
@@ -228,11 +230,11 @@ protocol.registerSchemesAsPrivileged([
 app
   .whenReady()
   .then(async () => {
-    const userData = getUserData();
+    const { windowState } = await getUserSettings();
 
     if (BrowserWindow.getAllWindows().length === 0) await createWindow();
 
-    if (userData.windowState === 'maximized') mainWindow.maximize();
+    if (windowState === 'maximized') mainWindow.maximize();
 
     if (!app.isDefaultProtocolClient(DEFAULT_APP_PROTOCOL)) {
       logger.info(
@@ -329,20 +331,23 @@ app.on('window-all-closed', () => {
 });
 
 // / / / / / / / / / / / / / / / / / / / / / / / / / / / /
-function manageWindowFinishLoad() {
-  const { windowDiamensions, windowPositions } = getUserData();
-  if (windowPositions.mainWindow) {
-    const { x, y } = windowPositions.mainWindow;
-    mainWindow.setPosition(x, y, true);
+async function manageWindowFinishLoad() {
+  const { mainWindowHeight, mainWindowWidth, mainWindowX, mainWindowY } = await getUserSettings();
+
+  if (mainWindowX !== null && mainWindowY !== null) {
+    mainWindow.setPosition(mainWindowX, mainWindowY, true);
   } else {
     mainWindow.center();
     const [x, y] = mainWindow.getPosition();
-    saveUserData('windowPositions.mainWindow', { x, y });
+    await saveUserSettings({ mainWindowX: x, mainWindowY: y });
   }
 
-  if (windowDiamensions.mainWindow) {
-    const { x, y } = windowDiamensions.mainWindow;
-    mainWindow.setSize(x || MAIN_WINDOW_DEFAULT_SIZE_X, y || MAIN_WINDOW_DEFAULT_SIZE_Y, true);
+  if (mainWindowWidth !== null && mainWindowHeight !== null) {
+    mainWindow.setSize(
+      mainWindowWidth || MAIN_WINDOW_DEFAULT_SIZE_X,
+      mainWindowHeight || MAIN_WINDOW_DEFAULT_SIZE_Y,
+      true
+    );
   }
 
   mainWindow.show();
@@ -540,15 +545,17 @@ export async function showSaveDialog(saveDialogOptions = DEFAULT_SAVE_DIALOG_OPT
 function manageAppMoveEvent() {
   const [x, y] = mainWindow.getPosition();
   logger.debug(`User moved the player`, { playerType, coordinates: { x, y } });
-  if (playerType === 'mini') saveUserData('windowPositions.miniPlayer', { x, y });
-  else if (playerType === 'normal') saveUserData('windowPositions.mainWindow', { x, y });
+
+  if (playerType === 'mini') saveUserSettings({ miniPlayerX: x, miniPlayerY: y });
+  else if (playerType === 'normal') saveUserSettings({ mainWindowX: x, mainWindowY: y });
 }
 
 function manageAppResizeEvent() {
   const [x, y] = mainWindow.getSize();
   logger.debug(`User resized the player`, { playerType, coordinates: { x, y } });
-  if (playerType === 'mini') saveUserData('windowDiamensions.miniPlayer', { x, y });
-  else if (playerType === 'normal') saveUserData('windowDiamensions.mainWindow', { x, y });
+
+  if (playerType === 'mini') saveUserSettings({ miniPlayerWidth: x, miniPlayerHeight: y });
+  else if (playerType === 'normal') saveUserSettings({ mainWindowWidth: x, mainWindowHeight: y });
 }
 
 async function handleSecondInstances(_: unknown, argv: string[]) {
@@ -661,7 +668,8 @@ export async function resetApp(isRestartApp = true) {
 export function toggleMiniPlayerAlwaysOnTop(isMiniPlayerAlwaysOnTop: boolean) {
   if (mainWindow) {
     if (playerType === 'mini') mainWindow.setAlwaysOnTop(isMiniPlayerAlwaysOnTop);
-    saveUserData('preferences.isMiniPlayerAlwaysOnTop', isMiniPlayerAlwaysOnTop);
+
+    saveUserSettings({ isMiniPlayerAlwaysOnTop });
   }
 }
 
@@ -687,7 +695,8 @@ export async function getRendererLogs(
 
 function recordWindowState(state: WindowState) {
   logger.debug(`Window state changed`, { state });
-  setUserData('windowState', state);
+
+  saveUserSettings({ windowState: state });
 }
 
 export function restartRenderer() {
@@ -699,41 +708,52 @@ export function restartRenderer() {
   }
 }
 
-function watchForSystemThemeChanges() {
+async function watchForSystemThemeChanges() {
   // This event only occurs when system theme changes
-  const userData = getUserData();
-  const { useSystemTheme } = userData.theme;
+  const { useSystemTheme } = await getUserSettings();
 
   const theme = nativeTheme.shouldUseDarkColors ? 'dark' : 'light';
   if (IS_DEVELOPMENT && useSystemTheme)
     sendMessageToRenderer({ messageCode: 'APP_THEME_CHANGE', data: { theme } });
 
-  if (useSystemTheme) changeAppTheme('system');
+  if (useSystemTheme) await changeAppTheme('system');
   else logger.debug(`System theme changed`, { theme });
 }
 
-export function changePlayerType(type: PlayerTypes) {
+export async function changePlayerType(type: PlayerTypes) {
   if (mainWindow) {
     logger.debug(`Changed player type.`, { type });
     playerType = type;
-    const { windowPositions, windowDiamensions, preferences } = getUserData();
+
+    const {
+      mainWindowHeight,
+      mainWindowWidth,
+      miniPlayerHeight,
+      miniPlayerWidth,
+      mainWindowX,
+      mainWindowY,
+      miniPlayerX,
+      miniPlayerY,
+      isMiniPlayerAlwaysOnTop
+    } = await getUserSettings();
+
     if (type === 'mini') {
       if (mainWindow.fullScreen) mainWindow.setFullScreen(false);
 
       mainWindow.setMaximumSize(MINI_PLAYER_MAX_SIZE_X, MINI_PLAYER_MAX_SIZE_Y);
       mainWindow.setMinimumSize(MINI_PLAYER_MIN_SIZE_X, MINI_PLAYER_MIN_SIZE_Y);
-      mainWindow.setAlwaysOnTop(preferences.isMiniPlayerAlwaysOnTop ?? false);
-      if (windowDiamensions.miniPlayer) {
-        const { x, y } = windowDiamensions.miniPlayer;
-        mainWindow.setSize(x, y, true);
+      mainWindow.setAlwaysOnTop(isMiniPlayerAlwaysOnTop);
+
+      if (miniPlayerWidth !== null && miniPlayerHeight !== null) {
+        mainWindow.setSize(miniPlayerWidth, miniPlayerHeight, true);
       } else mainWindow.setSize(MINI_PLAYER_MIN_SIZE_X, MINI_PLAYER_MIN_SIZE_Y, true);
-      if (windowPositions.miniPlayer) {
-        const { x, y } = windowPositions.miniPlayer;
-        mainWindow.setPosition(x, y, true);
+
+      if (miniPlayerX !== null && miniPlayerY !== null) {
+        mainWindow.setPosition(miniPlayerX, miniPlayerY, true);
       } else {
         mainWindow.center();
         const [x, y] = mainWindow.getPosition();
-        saveUserData('windowPositions.miniPlayer', { x, y });
+        await saveUserSettings({ miniPlayerX: x, miniPlayerY: y });
       }
       mainWindow.setAspectRatio(MINI_PLAYER_ASPECT_RATIO);
     } else if (type === 'normal') {
@@ -742,17 +762,16 @@ export function changePlayerType(type: PlayerTypes) {
       mainWindow.setAlwaysOnTop(false);
       mainWindow.setFullScreen(false);
 
-      if (windowDiamensions.mainWindow) {
-        const { x, y } = windowDiamensions.mainWindow;
-        mainWindow.setSize(x, y, true);
+      if (mainWindowWidth !== null && mainWindowHeight !== null) {
+        mainWindow.setSize(mainWindowWidth, mainWindowHeight, true);
       } else mainWindow.setSize(MAIN_WINDOW_DEFAULT_SIZE_X, MAIN_WINDOW_DEFAULT_SIZE_Y, true);
-      if (windowPositions.mainWindow) {
-        const { x, y } = windowPositions.mainWindow;
-        mainWindow.setPosition(x, y, true);
+
+      if (mainWindowX !== null && mainWindowY !== null) {
+        mainWindow.setPosition(mainWindowX, mainWindowY, true);
       } else {
         mainWindow.center();
         const [x, y] = mainWindow.getPosition();
-        saveUserData('windowPositions.mainWindow', { x, y });
+        await saveUserSettings({ mainWindowX: x, mainWindowY: y });
       }
       mainWindow.setAspectRatio(MAIN_WINDOW_ASPECT_RATIO);
     } else {
@@ -765,6 +784,7 @@ export function changePlayerType(type: PlayerTypes) {
 
 function manageWindowOnDisplayMetricsChange(primaryDisplay: Display) {
   const currentDisplay = screen.getDisplayMatching(mainWindow.getBounds());
+
   if (!currentDisplay || currentDisplay.id !== primaryDisplay.id) {
     mainWindow.setPosition(primaryDisplay.workArea.x, primaryDisplay.workArea.y);
   }
@@ -780,18 +800,17 @@ function manageWindowPositionInMonitor() {
 
 export async function toggleAutoLaunch(autoLaunchState: boolean) {
   const options = app.getLoginItemSettings();
-  const userData = getUserData();
-  const openAsHidden = userData?.preferences?.openWindowAsHiddenOnSystemStart ?? false;
+  const { openWindowAsHiddenOnSystemStart } = await getUserSettings();
 
   logger.debug(`Auto launch state changed`, { openAtLogin: options.openAtLogin });
 
   app.setLoginItemSettings({
     openAtLogin: autoLaunchState,
     name: 'Nora',
-    openAsHidden
+    openAsHidden: openWindowAsHiddenOnSystemStart
   });
 
-  saveUserData('preferences.autoLaunchApp', autoLaunchState);
+  await saveUserSettings({ openWindowAsHiddenOnSystemStart });
 }
 
 export const checkIfConnectedToInternet = () => net.isOnline();

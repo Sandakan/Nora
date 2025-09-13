@@ -10,7 +10,6 @@ import {
   getPlaylistData,
   getSongsData,
   getBlacklistData,
-  getUserData,
   getPaletteData
 } from '../filesystem';
 import { sendMessageToRenderer, showOpenDialog } from '../main';
@@ -78,11 +77,6 @@ const exportAppData = async (localStorageData: string) => {
     {
       filename: 'genres.json',
       dataString: JSON.stringify({ genres: getGenresData() })
-    },
-    // USER DATA
-    {
-      filename: 'userData.json',
-      dataString: JSON.stringify({ userData: getUserData() })
     },
     // LISTENING DATA
     {

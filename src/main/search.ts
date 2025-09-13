@@ -1,4 +1,3 @@
-import { getUserData, setUserData } from './filesystem';
 import logger from './logger';
 import {
   searchAlbumsByName,
@@ -16,6 +15,7 @@ import {
   convertToPlaylist,
   convertToSongData
 } from '../common/convert';
+import { getUserSettings, saveUserSettings } from './db/queries/settings';
 
 let recentSearchesTimeoutId: NodeJS.Timeout;
 const search = async (
@@ -50,18 +50,16 @@ const search = async (
 
   if (updateSearchHistory) {
     if (recentSearchesTimeoutId) clearTimeout(recentSearchesTimeoutId);
-    recentSearchesTimeoutId = setTimeout(() => {
-      const userData = getUserData();
-      if (userData) {
-        const { recentSearches } = userData;
-        if (Array.isArray(userData.recentSearches)) {
-          if (recentSearches.length > 10) recentSearches.pop();
-          if (recentSearches.includes(value))
-            recentSearches.splice(recentSearches.indexOf(value), 1);
-          recentSearches.unshift(value);
-        }
-        setUserData('recentSearches', recentSearches);
+    recentSearchesTimeoutId = setTimeout(async () => {
+      const { recentSearches } = await getUserSettings();
+
+      if (Array.isArray(recentSearches)) {
+        if (recentSearches.length > 10) recentSearches.pop();
+        if (recentSearches.includes(value)) recentSearches.splice(recentSearches.indexOf(value), 1);
+        recentSearches.unshift(value);
       }
+
+      await saveUserSettings({ recentSearches });
     }, 2000);
   }
 

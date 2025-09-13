@@ -20,7 +20,23 @@ export const searchSongsByName = async (keyword: string, trx: DB | DBTransaction
       albums: {
         with: {
           album: {
-            columns: { id: true, title: true }
+            columns: { id: true, title: true },
+            with: {
+              artists: {
+                with: {
+                  artist: {
+                    columns: { id: true, name: true }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      genres: {
+        with: {
+          genre: {
+            columns: { id: true, name: true }
           }
         }
       },
@@ -35,6 +51,13 @@ export const searchSongsByName = async (keyword: string, trx: DB | DBTransaction
                 }
               }
             }
+          }
+        }
+      },
+      playlists: {
+        with: {
+          playlist: {
+            columns: { id: true, name: true }
           }
         }
       },

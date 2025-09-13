@@ -1,4 +1,3 @@
-import { getUserData } from '../../filesystem';
 import logger from '../../logger';
 import type { LastFMScrobblePostResponse, ScrobbleParams } from '../../../types/last_fm_api';
 import { checkIfConnectedToInternet } from '../../main';
@@ -6,20 +5,19 @@ import generateApiRequestBodyForLastFMPostRequests from './generateApiRequestBod
 import getLastFmAuthData from './getLastFMAuthData';
 import { getSongById } from '@main/db/queries/songs';
 import { convertToSongData } from '../../../common/convert';
+import { getUserSettings } from '@main/db/queries/settings';
 
 const scrobbleSong = async (songId: string, startTimeInSecs: number) => {
   try {
-    const userData = getUserData();
+    const { sendSongScrobblingDataToLastFM: isScrobblingEnabled } = await getUserSettings();
     const isConnectedToInternet = checkIfConnectedToInternet();
-
-    const isScrobblingEnabled = userData.preferences.sendSongScrobblingDataToLastFM;
 
     if (isScrobblingEnabled && isConnectedToInternet) {
       const songData = await getSongById(Number(songId));
 
       if (songData) {
         const song = convertToSongData(songData);
-        const authData = getLastFmAuthData();
+        const authData = await getLastFmAuthData();
 
         const url = new URL('http://ws.audioscrobbler.com/2.0/');
         url.searchParams.set('format', 'json');
