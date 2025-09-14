@@ -12,7 +12,7 @@ const WindowControlsContainer = () => {
   const { t } = useTranslation();
 
   const close = useCallback(() => {
-    if (userData && userData.preferences.hideWindowOnClose) window.api.windowControls.hideApp();
+    if (userData && userData.hideWindowOnClose) window.api.windowControls.hideApp();
     else window.api.windowControls.closeApp();
   }, [userData]);
 

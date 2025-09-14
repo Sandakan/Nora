@@ -13,7 +13,7 @@ import { searchQuery } from '@renderer/queries/search';
 
 type Props = {
   searchInput: string;
-  searchResults: SearchResult;
+  searchResults?: SearchResult;
 
   updateSearchInput: (input: string) => void;
 };
@@ -72,11 +72,11 @@ const SearchStartPlaceholder = (props: Props) => {
           <Img
             src={SearchSomethingImage}
             className={
-              searchResults.songs.length === 0 &&
-              searchResults.artists.length === 0 &&
-              searchResults.albums.length === 0 &&
-              searchResults.playlists.length === 0 &&
-              searchResults.genres.length === 0 &&
+              searchResults?.songs.length === 0 &&
+              searchResults?.artists.length === 0 &&
+              searchResults?.albums.length === 0 &&
+              searchResults?.playlists.length === 0 &&
+              searchResults?.genres.length === 0 &&
               searchInput.trim() === ''
                 ? 'mb-4 w-60 max-w-full'
                 : ''

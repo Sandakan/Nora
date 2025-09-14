@@ -138,3 +138,74 @@ const createOrUpdateFolderStructure = async (
 
   return { addedFolders, updatedFolders };
 };
+
+const getMusicFolder = async (
+  parentId: number | null = null,
+  trx: DB | DBTransaction = db
+): Promise<MusicFolder[]> => {
+  // Fetch folders with the given parentId
+  const folders = await trx.query.musicFolders.findMany({
+    where: parentId === null ? isNull(musicFolders.parentId) : eq(musicFolders.parentId, parentId),
+    with: {
+      songs: {
+        columns: { id: true }
+      },
+      blacklist: true
+    }
+  });
+  // .from(musicFolders)
+  // .where(parentId === null ? isNull(musicFolders.parentId) : eq(musicFolders.parentId, parentId));
+
+  const result: MusicFolder[] = [];
+
+  for (const folder of folders) {
+    const subFolders = await getMusicFolder(folder.id);
+
+    result.push({
+      path: folder.path,
+      stats: {
+        lastModifiedDate: folder.lastModifiedAt!,
+        lastChangedDate: folder.lastChangedAt!,
+        fileCreatedDate: folder.folderCreatedAt!,
+        lastParsedDate: folder.lastParsedAt!
+      },
+      songIds: folder.songs.map((song) => song.id.toString()),
+      isBlacklisted: folder.blacklist !== null,
+      subFolders
+    });
+  }
+
+  return result;
+};
+
+export const getAllMusicFolders = async (trx: DB | DBTransaction = db): Promise<MusicFolder[]> => {
+  const rootFolders = await trx.query.musicFolders.findMany({
+    where: isNull(musicFolders.parentId),
+    with: {
+      songs: {
+        columns: { id: true }
+      },
+      blacklist: true
+    }
+  });
+
+  const structures = await Promise.all(
+    rootFolders.map(
+      async (folder) =>
+        ({
+          path: folder.path,
+          stats: {
+            lastModifiedDate: folder.lastModifiedAt!,
+            lastChangedDate: folder.lastChangedAt!,
+            fileCreatedDate: folder.folderCreatedAt!,
+            lastParsedDate: folder.lastParsedAt!
+          },
+          songIds: folder.songs.map((song) => song.id.toString()),
+          isBlacklisted: folder.blacklist !== null,
+          subFolders: await getMusicFolder(folder.id, trx)
+        }) satisfies MusicFolder
+    )
+  );
+
+  return structures;
+};

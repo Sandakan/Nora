@@ -1,9 +1,9 @@
-import { setUserData } from '../filesystem';
 import type { LastFMSessionGetResponse } from '../../types/last_fm_api';
 import hashText from '../utils/hashText';
 import { encrypt } from '../utils/safeStorage';
 import { sendMessageToRenderer } from '../main';
 import logger from '../logger';
+import { saveUserSettings } from '@main/db/queries/settings';
 
 const createLastFmAuthSignature = (token: string, apiKey: string) => {
   const LAST_FM_SHARED_SECRET = import.meta.env.MAIN_VITE_LAST_FM_SHARED_SECRET;
@@ -39,7 +39,9 @@ const manageLastFmAuth = async (token: string) => {
       const { key, name } = json.session;
       const encryptedKey = encrypt(key);
       logger.info('Successfully retrieved user authentication for LastFM', { name });
-      setUserData('lastFmSessionData', { name, key: encryptedKey });
+
+      await saveUserSettings({ lastFmSessionName: name, lastFmSessionKey: encryptedKey });
+
       return sendMessageToRenderer({ messageCode: 'LASTFM_LOGIN_SUCCESS' });
     }
 

@@ -8,10 +8,10 @@ import { searchPageSchema } from '@renderer/utils/zod/searchPageSchema';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 import { zodValidator } from '@tanstack/zod-adapter';
-import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import storage from '@renderer/utils/localStorage';
-import { useDebouncedValue } from '@tanstack/react-pacer';
+import { useThrottledCallback } from '@tanstack/react-pacer';
 
 import GenreSearchResultsContainer from '@renderer/components/SearchPage/Result_Containers/GenreSearchResultsContainer';
 import PlaylistSearchResultsContainer from '@renderer/components/SearchPage/Result_Containers/PlaylistSearchResultsContainer';
@@ -21,10 +21,26 @@ import MostRelevantSearchResultsContainer from '@renderer/components/SearchPage/
 import ArtistsSearchResultsContainer from '@renderer/components/SearchPage/Result_Containers/ArtistsSearchResultsContainer';
 import NoSearchResultsContainer from '@renderer/components/SearchPage/NoSearchResultsContainer';
 import SearchStartPlaceholder from '@renderer/components/SearchPage/SearchStartPlaceholder';
+import { searchQuery } from '@renderer/queries/search';
+import { useQuery } from '@tanstack/react-query';
 
 export const Route = createFileRoute('/main-player/search/')({
   validateSearch: zodValidator(searchPageSchema),
   component: SearchPage
+  // loaderDeps: ({ search }) => ({ search }),
+  // loader: ({ deps }) => {
+  //   const { search } = deps;
+
+  // if ((search.keyword ?? '').trim().length === 0) return;
+  // return queryClient.ensureQueryData(
+  //   searchQuery.query({
+  //     keyword: search.keyword ?? '',
+  //     filter: search.filterBy ?? 'all',
+  //     isPredictiveSearchEnabled: search.isPredictiveSearchEnabled ?? false,
+  //     updateSearchHistory: true
+  //   })
+  // );
+  // }
 });
 
 const ARTIST_WIDTH = 175;
@@ -48,17 +64,23 @@ function SearchPage() {
 
   const searchContainerRef = useRef(null);
   const { width } = useResizeObserver(searchContainerRef);
-  const [, startTransition] = useTransition();
-  const [debouncedKeyword] = useDebouncedValue(keyword, { wait: 500 });
+  const [searchText, setSearchText] = useState(keyword);
 
-  const [searchResults, setSearchResults] = useState({
-    albums: [],
-    artists: [],
-    songs: [],
-    playlists: [],
-    genres: [],
-    availableResults: []
-  } as SearchResult);
+  const throttledSetSearch = useThrottledCallback(
+    (value) => {
+      navigate({ search: (prev) => ({ ...prev, keyword: value }), replace: true });
+    },
+    {
+      wait: 1000
+    }
+  );
+
+  const updateSearchInput = (input: string) => {
+    const value = input ?? '';
+    setSearchText(value);
+
+    throttledSetSearch(value);
+  };
 
   const { noOfArtists, noOfPlaylists, noOfAlbums, noOfGenres } = useMemo(() => {
     return {
@@ -88,66 +110,13 @@ function SearchPage() {
     [filterBy, navigate]
   );
 
-  const timeOutIdRef = useRef(undefined as NodeJS.Timeout | undefined);
-  const fetchSearchResults = useCallback(() => {
-    if (keyword.trim() !== '') {
-      if (timeOutIdRef.current) clearTimeout(timeOutIdRef.current);
-      timeOutIdRef.current = setTimeout(async () => {
-        const results = await window.api.search.search(
-          filterBy,
-          debouncedKeyword,
-          true,
-          isPredictiveSearchEnabled
-        );
-
-        startTransition(() => {
-          setSearchResults(results);
-        });
-      }, 250);
-    } else
-      setSearchResults({
-        albums: [],
-        artists: [],
-        songs: [],
-        playlists: [],
-        genres: [],
-        availableResults: []
-      });
-  }, [keyword, filterBy, debouncedKeyword, isPredictiveSearchEnabled]);
-
-  useEffect(() => {
-    fetchSearchResults();
-    const manageSearchResultsUpdatesInSearchPage = (e: Event) => {
-      if ('detail' in e) {
-        const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
-        for (let i = 0; i < dataEvents.length; i += 1) {
-          const event = dataEvents[i];
-          if (
-            event.dataType === 'songs' ||
-            event.dataType === 'artists' ||
-            event.dataType === 'albums' ||
-            event.dataType === 'playlists/newPlaylist' ||
-            event.dataType === 'playlists/deletedPlaylist' ||
-            event.dataType === 'genres/newGenre' ||
-            event.dataType === 'genres/deletedGenre' ||
-            event.dataType === 'blacklist/songBlacklist'
-          )
-            fetchSearchResults();
-        }
-      }
-    };
-    document.addEventListener('app/dataUpdates', manageSearchResultsUpdatesInSearchPage);
-    return () => {
-      document.removeEventListener('app/dataUpdates', manageSearchResultsUpdatesInSearchPage);
-    };
-  }, [fetchSearchResults]);
-
-  const updateSearchInput = useCallback(
-    (input: string) => {
-      navigate({ search: (prev) => ({ ...prev, keyword: input }), replace: true });
-    },
-    [navigate]
-  );
+  const { data: searchResults } = useQuery({
+    ...searchQuery.query({
+      keyword: keyword ?? '',
+      filter: filterBy ?? 'all'
+    }),
+    enabled: (keyword ?? '').trim().length > 0
+  });
 
   return (
     <MainContainer className="h-full! pb-0! [scrollbar-gutter:stable]" ref={searchContainerRef}>
@@ -188,7 +157,7 @@ function SearchPage() {
               className="text-font-color-black placeholder:text-font-color-highlight dark:text-font-color-white dark:placeholder:text-dark-font-color-highlight h-full w-full border-2 border-[transparent] bg-[transparent] outline-hidden"
               aria-label="Search"
               placeholder={t('searchPage.searchForAnything')}
-              value={keyword}
+              value={searchText}
               onChange={(e) => updateSearchInput(e.currentTarget.value)}
               onKeyDown={(e) => e.stopPropagation()}
               // eslint-disable-next-line jsx-a11y/no-autofocus
@@ -208,48 +177,52 @@ function SearchPage() {
         </div>
       </div>
       <div className="search-results-container relative h-full!">
-        {/* MOST RELEVANT SEARCH RESULTS */}
-        <MostRelevantSearchResultsContainer searchResults={searchResults} />
-        {/* SONG SEARCH RESULTS */}
-        <SongSearchResultsContainer
-          songs={searchResults.songs}
-          searchInput={keyword}
-          isPredictiveSearchEnabled={isPredictiveSearchEnabled}
-        />
-        {/* ARTIST SEARCH RESULTS */}
-        <ArtistsSearchResultsContainer
-          artists={searchResults.artists}
-          searchInput={keyword}
-          noOfVisibleArtists={noOfArtists}
-          isPredictiveSearchEnabled={isPredictiveSearchEnabled}
-        />
-        {/* ALBUM SEARCH RESULTS */}
-        <AlbumSearchResultsContainer
-          albums={searchResults.albums}
-          searchInput={keyword}
-          noOfVisibleAlbums={noOfAlbums}
-          isPredictiveSearchEnabled={isPredictiveSearchEnabled}
-        />
-        {/* PLAYLIST SEARCH RESULTS */}
-        <PlaylistSearchResultsContainer
-          playlists={searchResults.playlists}
-          searchInput={keyword}
-          noOfVisiblePlaylists={noOfPlaylists}
-          isPredictiveSearchEnabled={isPredictiveSearchEnabled}
-        />
-        {/* GENRE SEARCH RESULTS */}
-        <GenreSearchResultsContainer
-          genres={searchResults.genres}
-          searchInput={keyword}
-          noOfVisibleGenres={noOfGenres}
-          isPredictiveSearchEnabled={isPredictiveSearchEnabled}
-        />
-        {/* NO SEARCH RESULTS PLACEHOLDER */}
-        <NoSearchResultsContainer
-          searchInput={keyword}
-          searchResults={searchResults}
-          updateSearchInput={updateSearchInput}
-        />
+        {searchResults && (
+          <>
+            {/* MOST RELEVANT SEARCH RESULTS */}
+            <MostRelevantSearchResultsContainer searchResults={searchResults} />
+            {/* SONG SEARCH RESULTS */}
+            <SongSearchResultsContainer
+              songs={searchResults.songs}
+              searchInput={keyword}
+              isPredictiveSearchEnabled={isPredictiveSearchEnabled}
+            />
+            {/* ARTIST SEARCH RESULTS */}
+            <ArtistsSearchResultsContainer
+              artists={searchResults.artists}
+              searchInput={keyword}
+              noOfVisibleArtists={noOfArtists}
+              isPredictiveSearchEnabled={isPredictiveSearchEnabled}
+            />
+            {/* ALBUM SEARCH RESULTS */}
+            <AlbumSearchResultsContainer
+              albums={searchResults.albums}
+              searchInput={keyword}
+              noOfVisibleAlbums={noOfAlbums}
+              isPredictiveSearchEnabled={isPredictiveSearchEnabled}
+            />
+            {/* PLAYLIST SEARCH RESULTS */}
+            <PlaylistSearchResultsContainer
+              playlists={searchResults.playlists}
+              searchInput={keyword}
+              noOfVisiblePlaylists={noOfPlaylists}
+              isPredictiveSearchEnabled={isPredictiveSearchEnabled}
+            />
+            {/* GENRE SEARCH RESULTS */}
+            <GenreSearchResultsContainer
+              genres={searchResults.genres}
+              searchInput={keyword}
+              noOfVisibleGenres={noOfGenres}
+              isPredictiveSearchEnabled={isPredictiveSearchEnabled}
+            />
+            {/* NO SEARCH RESULTS PLACEHOLDER */}
+            <NoSearchResultsContainer
+              searchInput={keyword}
+              searchResults={searchResults}
+              updateSearchInput={updateSearchInput}
+            />
+          </>
+        )}
         {/* SEARCH START PLACEHOLDER */}
         <SearchStartPlaceholder
           searchResults={searchResults}

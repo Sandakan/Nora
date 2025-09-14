@@ -1,9 +1,7 @@
 import path from 'path';
-import { getUserData } from '../filesystem';
 import removeMusicFolder from '../core/removeMusicFolder';
 import { dirExistsSync } from '../utils/dirExists';
 import logger from '../logger';
-import { getAllFoldersFromFolderStructures } from './parseFolderStructuresForSongPaths';
 import { getAllFolders } from '@main/db/queries/folders';
 
 const checkForFolderModifications = async (folderName: string) => {

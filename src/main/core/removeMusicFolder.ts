@@ -1,6 +1,5 @@
 import path from 'path';
-import { closeAbortController, saveAbortController } from '../fs/controlAbortControllers';
-import { getUserData, setUserData } from '../filesystem';
+import { saveAbortController } from '../fs/controlAbortControllers';
 import logger from '../logger';
 import { sendMessageToRenderer } from '../main';
 import removeSongsFromLibrary from '../removeSongsFromLibrary';
@@ -45,16 +44,16 @@ const removeFolderFromStructure = (
   return updatedMusicFolders;
 };
 
-const removeFoldersFromStructure = (folderPaths: string[]) => {
-  let musicFolders = [...getUserData().musicFolders];
+// const removeFoldersFromStructure = (folderPaths: string[]) => {
+//   let musicFolders = [...getUserData().musicFolders];
 
-  for (const folderPath of folderPaths) {
-    musicFolders = removeFolderFromStructure(folderPath, undefined, musicFolders);
-    logger.info(`Folder removed successfully.`, { folderPath });
-  }
+//   for (const folderPath of folderPaths) {
+//     musicFolders = removeFolderFromStructure(folderPath, undefined, musicFolders);
+//     logger.info(`Folder removed successfully.`, { folderPath });
+//   }
 
-  return musicFolders;
-};
+//   return musicFolders;
+// };
 
 const removeMusicFolder = async (folderPath: string): Promise<boolean> => {
   logger.debug(`Started the process of removing a folder from the library.`, { folderPath });

@@ -404,37 +404,35 @@ declare global {
   }
 
   interface UserData {
-    language: LanguageCodes;
-    theme: AppThemeData;
-    musicFolders: FolderStructure[];
-    preferences: {
-      autoLaunchApp: boolean;
-      openWindowMaximizedOnStart: boolean;
-      openWindowAsHiddenOnSystemStart: boolean;
-      isMiniPlayerAlwaysOnTop: boolean;
-      isMusixmatchLyricsEnabled: boolean;
-      hideWindowOnClose: boolean;
-      sendSongScrobblingDataToLastFM: boolean;
-      sendSongFavoritesDataToLastFM: boolean;
-      sendNowPlayingSongDataToLastFM: boolean;
-      saveLyricsInLrcFilesForSupportedSongs: boolean;
-      enableDiscordRPC: boolean;
-      saveVerboseLogs: boolean;
-    };
-    windowPositions: {
-      mainWindow?: WindowCordinates;
-      miniPlayer?: WindowCordinates;
-    };
-    windowDiamensions: {
-      mainWindow?: WindowCordinates;
-      miniPlayer?: WindowCordinates;
-    };
-    windowState: WindowState;
+    language: string;
+    isDarkMode: boolean;
+    useSystemTheme: boolean;
+    autoLaunchApp: boolean;
+    openWindowMaximizedOnStart: boolean;
+    openWindowAsHiddenOnSystemStart: boolean;
+    isMiniPlayerAlwaysOnTop: boolean;
+    isMusixmatchLyricsEnabled: boolean;
+    hideWindowOnClose: boolean;
+    sendSongScrobblingDataToLastFM: boolean;
+    sendSongFavoritesDataToLastFM: boolean;
+    sendNowPlayingSongDataToLastFM: boolean;
+    saveLyricsInLrcFilesForSupportedSongs: boolean;
+    enableDiscordRPC: boolean;
+    saveVerboseLogs: boolean;
+    mainWindowX: number | null;
+    mainWindowY: number | null;
+    miniPlayerX: number | null;
+    miniPlayerY: number | null;
+    mainWindowWidth: number | null;
+    mainWindowHeight: number | null;
+    miniPlayerWidth: number | null;
+    miniPlayerHeight: number | null;
+    windowState: string;
     recentSearches: string[];
-    customMusixmatchUserToken?: string;
-    lastFmSessionData?: LastFMSessionData;
-    storageMetrics?: StorageMetrics;
-    customLrcFilesSaveLocation?: string;
+    musixmatchUserToken: string | null;
+    customLrcFilesSaveLocation: string | null;
+    lastFmSessionName: string | null;
+    lastFmSessionKey: string | null;
   }
 
   type LanguageCodes = NoInfer<keyof typeof resources>;

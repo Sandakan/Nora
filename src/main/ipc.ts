@@ -76,7 +76,7 @@ import getArtistInfoFromNet from './core/getArtistInfoFromNet';
 import getSongLyrics from './core/getSongLyrics';
 import sendAudioDataFromPath from './core/sendAudioDataFromPath';
 import saveLyricsToSong from './saveLyricsToSong';
-import { getUserData, setUserData as saveUserData, getBlacklistData } from './filesystem';
+import { getBlacklistData } from './filesystem';
 import changeAppTheme from './core/changeAppTheme';
 import checkForStartUpSongs from './core/checkForStartUpSongs';
 import checkForNewSongs from './core/checkForNewSongs';
@@ -88,6 +88,7 @@ import convertLyricsToRomaja from './utils/convertToRomaja';
 import resetLyrics from './utils/resetLyrics';
 import logger, { logFilePath } from './logger';
 import { getListeningData } from './core/getListeningData';
+import { getUserSettings } from './db/queries/settings';
 
 export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSignal) {
   if (mainWindow) {
@@ -135,9 +136,9 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     powerMonitor.addListener('on-ac', toggleOnBatteryPower);
     powerMonitor.addListener('on-battery', toggleOnBatteryPower);
 
-    ipcMain.on('app/getSongPosition', (_, position: number) =>
-      saveUserData('currentSong.stoppedPosition', position)
-    );
+    // ipcMain.on('app/getSongPosition', (_, position: number) =>
+    //   saveUserData('currentSong.stoppedPosition', position)
+    // );
 
     ipcMain.handle('app/addSongsFromFolderStructures', (_, structures: FolderStructure[]) =>
       addSongsFromFolderStructures(structures)
@@ -167,15 +168,14 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       ) => getAllSongs(sortType, filterType, paginatingData)
     );
 
-    ipcMain.handle('app/saveUserData', (_, dataType: UserDataTypes, data: string) =>
-      saveUserData(dataType, data)
-    );
+    // ipcMain.handle('app/saveUserData', (_, dataType: UserDataTypes, data: string) =>
+    //   saveUserData(dataType, data)
+    // );
 
-    ipcMain.handle('app/getStorageUsage', (_, forceRefresh?: boolean) =>
-      getStorageUsage(forceRefresh)
-    );
+    ipcMain.handle('app/getStorageUsage', () => getStorageUsage());
 
-    ipcMain.handle('app/getUserData', () => getUserData());
+    ipcMain.handle('app/getUserData', async () => await getUserSettings());
+    ipcMain.handle('app/getUserSettings', async () => await getUserSettings());
 
     ipcMain.handle(
       'app/search',

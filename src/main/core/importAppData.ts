@@ -14,7 +14,6 @@ import {
   setGenresData,
   setBlacklist,
   saveListeningData,
-  saveUserData,
   setPaletteData
 } from '../filesystem';
 
@@ -74,12 +73,6 @@ const importRequiredData = async (importDir: string) => {
     });
     const genreData: SavableGenre[] = JSON.parse(genreDataString).genres;
 
-    // USER DATA
-    const userDataString = await fs.readFile(path.join(importDir, 'userData.json'), {
-      encoding: 'utf-8'
-    });
-    const { userData } = JSON.parse(userDataString);
-
     // SONG COVERS
     await copyDir(path.join(importDir, 'song_covers'), songCoversFolderPath);
 
@@ -90,7 +83,6 @@ const importRequiredData = async (importDir: string) => {
     setPlaylistData(playlistData);
     setAlbumsData(albumData);
     setGenresData(genreData);
-    saveUserData(userData as UserData);
   } catch (error) {
     logger.error('Failed to copy required data from import destination', { error, importDir });
   }
