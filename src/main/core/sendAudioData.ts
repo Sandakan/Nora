@@ -63,6 +63,18 @@ const getArtworkData = (artworkData?: Buffer | Uint8Array) => {
 //   return relevantArtists;
 // };
 
+const getArtworkBuffer = async (artworkPath: string) => {
+  try {
+    const realPath = removeDefaultAppProtocolFromFilePath(artworkPath);
+    const buffer = await sharp(realPath).toBuffer();
+
+    return buffer;
+  } catch (error) {
+    // Failed to get artwork buffer most probably becuase the artwork path is a packaged path
+    return undefined;
+  }
+};
+
 const sendAudioData = async (songId: string): Promise<AudioPlayerData> => {
   logger.debug(`Fetching song data for song id -${songId}-`);
   try {
@@ -79,9 +91,7 @@ const sendAudioData = async (songId: string): Promise<AudioPlayerData> => {
       const artworks = song.artworks.map((a) => a.artwork);
       const artworkPaths = parseSongArtworks(artworks);
       const songArtwork = artworkPaths.artworkPath;
-      const artworkData = artworkPaths.isDefaultArtwork
-        ? undefined
-        : await sharp(removeDefaultAppProtocolFromFilePath(songArtwork)).toBuffer();
+      const artworkData = await getArtworkBuffer(songArtwork);
 
       const albumObj = song.albums?.[0]?.album;
       const album = albumObj ? { albumId: String(albumObj.id), name: albumObj.title } : undefined;

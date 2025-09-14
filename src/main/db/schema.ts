@@ -401,7 +401,6 @@ export const userSettings = pgTable(
     recentSearches: json('recent_searches').$type<string[]>().notNull().default([]),
 
     // Optional settings
-    musixmatchUserToken: text('musixmatch_user_token'),
     customLrcFilesSaveLocation: text('custom_lrc_files_save_location'),
 
     // LastFM session data

@@ -14,7 +14,7 @@ export const resources = {
 
 // export type LanguageCodes = keyof typeof resources;
 
-export const supportedLanguagesDropdownOptions: DropdownOption<LanguageCodes>[] = [
+export const supportedLanguagesDropdownOptions: DropdownOption<keyof typeof resources>[] = [
   { label: `English`, value: 'en' },
   { label: `Turkish`, value: 'tr' },
   { label: `Vietnamese`, value: 'vi' }

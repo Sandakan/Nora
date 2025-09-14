@@ -60,6 +60,7 @@ import { artistQuery } from '@renderer/queries/aritsts';
 import { albumQuery } from '@renderer/queries/albums';
 import { playlistQuery } from '@renderer/queries/playlists';
 import { genreQuery } from '@renderer/queries/genres';
+import { settingsQuery } from '@renderer/queries/settings';
 
 // ? CONSTANTS
 const LOW_RESPONSE_DURATION = 100;
@@ -85,7 +86,10 @@ const syncUserData = () =>
       if (!res) return undefined;
 
       dispatch({ type: 'USER_DATA_CHANGE', data: res });
-      dispatch({ type: 'APP_THEME_CHANGE', data: res.theme });
+      dispatch({
+        type: 'APP_THEME_CHANGE',
+        data: { isDarkMode: res.isDarkMode, useSystemTheme: res.useSystemTheme }
+      });
       return res;
     })
     .catch((err) => console.error(err));
@@ -582,6 +586,18 @@ export default function App() {
         ];
         if (genreEvents.includes(dataEvent.dataType))
           queryClient.invalidateQueries({ queryKey: genreQuery._def });
+
+        const settingEvents: DataUpdateEventTypes[] = [
+          'userData',
+          'userData/theme',
+          'userData/windowPosition',
+          'userData/windowDiamension',
+          'userData/recentSearches',
+          'userData/sortingStates',
+          'settings/preferences'
+        ];
+        if (settingEvents.includes(dataEvent.dataType))
+          queryClient.invalidateQueries({ queryKey: settingsQuery._def });
       }
     };
 

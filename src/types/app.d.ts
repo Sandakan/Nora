@@ -429,7 +429,6 @@ declare global {
     miniPlayerHeight: number | null;
     windowState: string;
     recentSearches: string[];
-    musixmatchUserToken: string | null;
     customLrcFilesSaveLocation: string | null;
     lastFmSessionName: string | null;
     lastFmSessionKey: string | null;
