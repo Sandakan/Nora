@@ -77,8 +77,11 @@ const sendAudioData = async (songId: string): Promise<AudioPlayerData> => {
         })) ?? [];
 
       const artworks = song.artworks.map((a) => a.artwork);
-      const songArtwork = parseSongArtworks(artworks).artworkPath;
-      const artworkData = await sharp(removeDefaultAppProtocolFromFilePath(songArtwork)).toBuffer();
+      const artworkPaths = parseSongArtworks(artworks);
+      const songArtwork = artworkPaths.artworkPath;
+      const artworkData = artworkPaths.isDefaultArtwork
+        ? undefined
+        : await sharp(removeDefaultAppProtocolFromFilePath(songArtwork)).toBuffer();
 
       const albumObj = song.albums?.[0]?.album;
       const album = albumObj ? { albumId: String(albumObj.id), name: albumObj.title } : undefined;

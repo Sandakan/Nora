@@ -13,9 +13,12 @@ import Checkbox from '../../Checkbox';
 import DynamicThemeSettings from './DynamicThemeSettings';
 import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store/store';
+import { useQuery } from '@tanstack/react-query';
+import { settingsQuery } from '@renderer/queries/settings';
 
 const ThemeSettings = () => {
-  const theme = useStore(store, (state) => state.userData.theme);
+  const { data: userSettings } = useQuery(settingsQuery.all);
+
   const currentSongPaletteData = useStore(store, (state) => state.currentSongData?.paletteData);
   const enableImageBasedDynamicThemes = useStore(
     store,
@@ -32,7 +35,7 @@ const ThemeSettings = () => {
     }
   }, []);
 
-  return theme ? (
+  return userSettings ? (
     <li className="main-container appearance-settings-container mb-16">
       <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center text-2xl font-medium">
         <span className="material-icons-round-outlined mr-2">dark_mode</span>
@@ -46,8 +49,8 @@ const ThemeSettings = () => {
               htmlFor="lightThemeRadioBtn"
               tabIndex={0}
               className={`theme-change-radio-btn bg-background-color-2/75 hover:bg-background-color-2 dark:bg-dark-background-color-2/75 dark:hover:bg-dark-background-color-2 mb-2 flex cursor-pointer flex-col items-center rounded-md p-6 outline-offset-1 focus-within:outline-2 ${
-                !theme.useSystemTheme &&
-                !theme.isDarkMode &&
+                userSettings.useSystemTheme &&
+                userSettings.isDarkMode &&
                 'bg-background-color-3! dark:bg-dark-background-color-3!'
               }`}
               onKeyDown={focusInput}
@@ -58,7 +61,7 @@ const ThemeSettings = () => {
                 className="peer invisible absolute -left-[9999px] mr-4"
                 value="lightTheme"
                 id="lightThemeRadioBtn"
-                defaultChecked={!theme.useSystemTheme && !theme.isDarkMode}
+                defaultChecked={userSettings.useSystemTheme && userSettings.isDarkMode}
                 onClick={() => window.api.theme.changeAppTheme('light')}
               />
               <Img loading="eager" src={HomeImgLight} className="h-24 w-40 shadow-md" />
@@ -71,8 +74,8 @@ const ThemeSettings = () => {
               htmlFor="darkThemeRadioBtn"
               tabIndex={0}
               className={`theme-change-radio-btn bg-background-color-2/75 hover:bg-background-color-2 dark:bg-dark-background-color-2/75 dark:hover:bg-dark-background-color-2 mb-2 flex cursor-pointer flex-col items-center rounded-md p-6 outline-offset-1 focus-within:outline-2 ${
-                !theme.useSystemTheme &&
-                theme.isDarkMode &&
+                userSettings.useSystemTheme &&
+                userSettings.isDarkMode &&
                 'bg-background-color-3! dark:bg-dark-background-color-3!'
               }`}
               onKeyDown={focusInput}
@@ -83,7 +86,7 @@ const ThemeSettings = () => {
                 className="peer invisible absolute -left-[9999px] mr-4"
                 value="darkTheme"
                 id="darkThemeRadioBtn"
-                defaultChecked={!theme.useSystemTheme && theme.isDarkMode}
+                defaultChecked={userSettings.useSystemTheme && userSettings.isDarkMode}
                 onClick={() => window.api.theme.changeAppTheme('dark')}
               />
               <Img loading="eager" src={HomeImgDark} className="h-24 w-40 shadow-md" />
@@ -96,7 +99,8 @@ const ThemeSettings = () => {
               htmlFor="systemThemeRadioBtn"
               tabIndex={0}
               className={`theme-change-radio-btn hover:bg-background-color bg-background-color-2/75 dark:bg-dark-background-color-2/75 dark:hover:bg-dark-background-color-2 mb-2 flex cursor-pointer flex-col items-center rounded-md p-6 outline-offset-1 focus-within:outline-2 ${
-                theme.useSystemTheme && 'bg-background-color-3! dark:bg-dark-background-color-3!'
+                userSettings.useSystemTheme &&
+                'bg-background-color-3! dark:bg-dark-background-color-3!'
               } `}
               onKeyDown={focusInput}
             >
@@ -106,7 +110,7 @@ const ThemeSettings = () => {
                 className="peer invisible absolute -left-[9999px] mr-4"
                 value="systemTheme"
                 id="systemThemeRadioBtn"
-                defaultChecked={theme.useSystemTheme}
+                defaultChecked={userSettings.useSystemTheme}
                 onClick={() => window.api.theme.changeAppTheme('system')}
               />
               <Img loading="eager" src={HomeImgLightDark} className="h-24 w-40 shadow-md" />

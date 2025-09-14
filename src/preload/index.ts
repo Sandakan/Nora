@@ -296,6 +296,40 @@ const storageData = {
     ipcRenderer.invoke('app/getStorageUsage', forceRefresh)
 };
 
+//  $ USER SETTINGS
+const settings = {
+  getUserSettings: (): Promise<UserSettings> => ipcRenderer.invoke('app/getUserSettings'),
+  saveUserSettings: (settings: Partial<UserSettings>): Promise<void> =>
+    ipcRenderer.invoke('app/saveUserSettings', settings),
+
+  updateDiscordRpcState: (enableDiscordRpc: boolean): Promise<void> =>
+    ipcRenderer.invoke('app/saveUserSettings', { enableDiscordRPC: enableDiscordRpc }),
+  updateSongScrobblingToLastFMState: (enableScrobbling: boolean): Promise<void> =>
+    ipcRenderer.invoke('app/saveUserSettings', {
+      sendSongScrobblingDataToLastFM: enableScrobbling
+    }),
+  updateSongFavoritesToLastFMState: (enableFavorites: boolean): Promise<void> =>
+    ipcRenderer.invoke('app/saveUserSettings', {
+      sendSongFavoritesDataToLastFM: enableFavorites
+    }),
+  updateNowPlayingSongDataToLastFMState: (enableNowPlaying: boolean): Promise<void> =>
+    ipcRenderer.invoke('app/saveUserSettings', {
+      sendNowPlayingSongDataToLastFM: enableNowPlaying
+    }),
+  updateSaveLyricsInLrcFilesForSupportedSongs: (enableSave: boolean): Promise<void> =>
+    ipcRenderer.invoke('app/saveUserSettings', {
+      saveLyricsInLrcFilesForSupportedSongs: enableSave
+    }),
+  updateCustomLrcFilesSaveLocation: (location: string): Promise<void> =>
+    ipcRenderer.invoke('app/saveUserSettings', { customLrcFilesSaveLocation: location }),
+  updateOpenWindowAsHiddenOnSystemStart: (enable: boolean): Promise<void> =>
+    ipcRenderer.invoke('app/saveUserSettings', { openWindowAsHiddenOnSystemStart: enable }),
+  updateHideWindowOnCloseState: (enable: boolean): Promise<void> =>
+    ipcRenderer.invoke('app/saveUserSettings', { hideWindowOnClose: enable }),
+  updateSaveVerboseLogs: (enable: boolean): Promise<void> =>
+    ipcRenderer.invoke('app/saveUserSettings', { saveVerboseLogs: enable })
+};
+
 // $ FOLDER DATA
 const folderData = {
   getFolderData: (folderPaths: string[], sortType?: FolderSortTypes): Promise<MusicFolder[]> =>
@@ -520,6 +554,7 @@ export const api = {
   playlistsData,
   log,
   miniPlayer,
+  settings,
   settingsHelpers,
   appControls,
   utils

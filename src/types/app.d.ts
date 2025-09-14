@@ -403,7 +403,7 @@ declare global {
     folderBlacklist: string[];
   }
 
-  interface UserData {
+  interface UserSettings {
     language: string;
     isDarkMode: boolean;
     useSystemTheme: boolean;
@@ -434,6 +434,8 @@ declare global {
     lastFmSessionName: string | null;
     lastFmSessionKey: string | null;
   }
+
+  interface UserData extends UserSettings {}
 
   type LanguageCodes = NoInfer<keyof typeof resources>;
 

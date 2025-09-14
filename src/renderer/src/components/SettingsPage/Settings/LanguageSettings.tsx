@@ -3,15 +3,15 @@ import { useTranslation } from 'react-i18next';
 import Dropdown from '../../Dropdown';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import i18n, { supportedLanguagesDropdownOptions } from '../../../i18n';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store/store';
+import { useQuery } from '@tanstack/react-query';
+import { settingsQuery } from '@renderer/queries/settings';
 
 const LanguageSettings = () => {
   const { t } = useTranslation();
-  const userData = useStore(store, (state) => state.userData);
+  const { data: userSettings } = useQuery(settingsQuery.all);
 
   const { addNewNotifications } = useContext(AppUpdateContext);
-  const appLang = userData?.language || 'en';
+  const appLang = userSettings?.language || 'en';
 
   return (
     <li className="main-container performance-settings-container mb-16">

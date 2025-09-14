@@ -1,15 +1,20 @@
 import { useTranslation } from 'react-i18next';
 import Checkbox from '../../Checkbox';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store/store';
-import { useContext } from 'react';
-import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { settingsQuery } from '@renderer/queries/settings';
+import { queryClient } from '@renderer/index';
 
 const AdvancedSettings = () => {
-  const userData = useStore(store, (state) => state.userData);
+  const { data: userSettings } = useQuery(settingsQuery.all);
 
-  const { updateUserData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
+
+  const { mutate: updateSaveVerboseLogs } = useMutation({
+    mutationFn: (enable: boolean) => window.api.settings.updateSaveVerboseLogs(enable),
+    onSuccess: () => {
+      queryClient.invalidateQueries(settingsQuery.all);
+    }
+  });
 
   return (
     <li className="main-container performance-settings-container mb-16">
@@ -23,22 +28,8 @@ const AdvancedSettings = () => {
           <Checkbox
             id="toggleSaveVerboseLogs"
             labelContent={t('settingsPage.saveVerboseLogs')}
-            isChecked={
-              userData && userData.preferences ? userData.preferences.saveVerboseLogs : false
-            }
-            checkedStateUpdateFunction={(state) =>
-              window.api.userData.saveUserData('preferences.saveVerboseLogs', state).then(() =>
-                updateUserData((prevUserData) => {
-                  return {
-                    ...prevUserData,
-                    preferences: {
-                      ...prevUserData.preferences,
-                      saveVerboseLogs: state
-                    }
-                  };
-                })
-              )
-            }
+            isChecked={userSettings ? userSettings.saveVerboseLogs : false}
+            checkedStateUpdateFunction={(state) => updateSaveVerboseLogs(state)}
           />
         </li>
       </ul>
