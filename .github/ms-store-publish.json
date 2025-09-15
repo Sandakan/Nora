@@ -1,0 +1,39 @@
+{
+    "name": "Nora",
+    "iconUrl": "/blob/v3.1.0-stable/resources/logo_light_mode.png?raw=true",
+    "category": "Music",
+    "privacyPolicyUrl": "https://noramusic.netlify.app",
+    "developerEmail": "sandakannipunajith@gmail.com",
+    "windowsExecutablePackage": {
+        "gitHubReleasesX64FileName": "Nora.v{{version:3}}-stable-win-x64.exe",
+        "gitHubReleasesArm64FileName": "Nora.v{{version:3}}-stable-win-arm64.exe"
+    },
+    "storeListings": [
+        {
+            "language": "en",
+            "name": "Nora",
+            "description": "Nora is an elegant music player built using Electron and React. Inspired from Oto Music (Android) by Piyush Mamidwar.",
+            "shortDescription": "Nora is an elegant music player built using Electron and React.",
+            "screenshots": [
+                {
+                    "url": "https://github.com/Sandakan/Nora/raw/v3.1.0-stable/resources/other/artwork%201.webp?raw=true",
+                    "caption": "Support for Online and Offline lyrics"
+                },
+                {
+                    "url": "https://github.com/Sandakan/Nora/raw/v3.1.0-stable/resources/other/artwork%202.webp?raw=true",
+                    "caption": "Switdch between Dark Mode and Light Mode"
+                },
+                {
+                    "url": "https://github.com/Sandakan/Nora/raw/v3.1.0-stable/resources/other/artwork%209.webp?raw=true",
+                    "caption": "Support for Last.FM Scrobbling"
+                },
+                {
+                    "url": "https://github.com/Sandakan/Nora/raw/v3.1.0-stable/resources/other/artwork%203.webp?raw=true",
+                    "caption": "Organize your Music Library with ease"
+                }
+            ],
+            "keywords": [],
+            "developedBy": "Sandakan Nipunajith"
+        }
+    ]
+}
