@@ -15,7 +15,14 @@ export const getLowResArtworksWithoutPalettes = async (trx: DB | DBTransaction =
     })
     .from(artworks)
     .leftJoin(palettes, eq(artworks.id, palettes.artworkId))
-    .where(and(lte(artworks.width, 100), lte(artworks.height, 100), isNull(palettes.id)));
+    .where(
+      and(
+        lte(artworks.width, 100),
+        lte(artworks.height, 100),
+        eq(artworks.source, 'LOCAL'),
+        isNull(palettes.id)
+      )
+    );
 
   return res;
 };

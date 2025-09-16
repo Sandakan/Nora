@@ -7,6 +7,7 @@ import Button from '../Button';
 import VolumeSlider from '../VolumeSlider';
 import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store/store';
+import NavLink from '../NavLink';
 
 const AppShortcutsPrompt = lazy(() => import('../SettingsPage/AppShortcutsPrompt'));
 
@@ -84,23 +85,23 @@ const OtherSongControlsContainer = () => {
 
   return (
     <div className="other-controls-container flex items-center justify-end">
-      <Button
+      <NavLink
+        to="/main-player/queue"
         className={`queue-btn text-font-color-black text-opacity-60 after:bg-font-color-highlight dark:text-font-color-white dark:after:bg-dark-font-color-highlight !mr-6 !rounded-none !border-0 bg-transparent !p-0 outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:opacity-0 after:transition-opacity hover:bg-transparent focus-visible:!outline lg:hidden dark:bg-transparent dark:hover:bg-transparent ${
           currentlyActivePage.pageTitle === 'CurrentQueue' && 'after:opacity-100'
         }`}
-        tooltipLabel={t('player.currentQueue')}
-        iconName="table_rows"
-        iconClassName={`text-xl text-font-color-black opacity-60 transition-opacity hover:opacity-80 dark:text-font-color-white ${
-          currentlyActivePage.pageTitle === 'CurrentQueue'
-            ? 'text-font-color-highlight! font-medium opacity-90! dark:text-dark-font-color-highlight! material-icons-round'
-            : 'material-icons-round-outlined'
-        } `}
-        clickHandler={() =>
-          currentlyActivePage.pageTitle === 'CurrentQueue'
-            ? changeCurrentActivePage('Home')
-            : changeCurrentActivePage('CurrentQueue')
-        }
-      />
+        title={t('player.currentQueue')}
+      >
+        {({ isActive }) => {
+          return (
+            <span
+              className={`${isActive ? 'material-icons-round' : 'material-icons-round-outlined'} group-[.active]:text-font-color-highlight! dark:group-[.active]:text-dark-font-color-highlight! !text-2xl opacity-60 transition-[color,_opacity] group-[.active]:opacity-100! hover:opacity-80`}
+            >
+              table_rows
+            </span>
+          );
+        }}
+      </NavLink>
 
       <Button
         className="mini-player-btn text-font-color-black text-opacity-60 dark:text-font-color-white mr-6! rounded-none! border-0! bg-transparent p-0! outline-offset-1 hover:bg-transparent focus-visible:outline! lg:hidden dark:bg-transparent dark:hover:bg-transparent"

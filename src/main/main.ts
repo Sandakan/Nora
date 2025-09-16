@@ -375,10 +375,13 @@ async function handleBeforeQuit() {
         logger.error('Optional cleanup functions failed when quiting the app.', { error });
       }
 
-      savePendingSongLyrics(currentSongPath, true);
-      savePendingMetadataUpdates(currentSongPath, true);
-      closeAllAbortControllers();
-      clearTempArtworkFolder();
+      const promise1 = savePendingSongLyrics(currentSongPath, true);
+      const promise2 = savePendingMetadataUpdates(currentSongPath, true);
+      const promise3 = closeAllAbortControllers();
+      const promise4 = clearTempArtworkFolder();
+
+      await Promise.all([promise1, promise2, promise3, promise4]);
+
       mainWindow.webContents.send('app/beforeQuitEvent');
       await closeDatabaseInstance();
 

@@ -45,6 +45,7 @@ export default defineConfig({
       tanstackRouter({
         target: 'react',
         routesDirectory: 'src/renderer/src/routes',
+        generatedRouteTree: 'src/renderer/src/routeTree.gen.ts',
         autoCodeSplitting: true
       }),
       react({
