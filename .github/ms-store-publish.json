@@ -2,7 +2,7 @@
     "name": "Nora",
     "iconUrl": "/blob/v3.1.0-stable/resources/logo_light_mode.png?raw=true",
     "category": "Music",
-    "privacyPolicyUrl": "https://noramusic.netlify.app",
+    "privacyPolicyUrl": "https://github.com/Sandakan/Nora/blob/master/PRIVACY-POLICY.md",
     "developerEmail": "sandakannipunajith@gmail.com",
     "windowsExecutablePackage": {
         "gitHubReleasesX64FileName": "Nora.v{{version:3}}-stable-win-x64.exe",
