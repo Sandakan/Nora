@@ -23,20 +23,20 @@ const createArtworks = async (
   artworkType: QueueTypes,
   artwork?: Buffer | Uint8Array | string
 ) => {
-  const defaultPath = path.join(
-    DEFAULT_FILE_URL,
+  const realDefaultPath =
     artworkType === 'playlist'
       ? playlistCoverImage
       : artworkType === 'album'
         ? albumCoverImage
-        : songCoverImage
-  );
+        : songCoverImage;
+  const defaultPath = path.join(DEFAULT_FILE_URL, realDefaultPath);
+
   const defaultArtworkPaths = {
     isDefaultArtwork: true,
     artworkPath: defaultPath,
     optimizedArtworkPath: defaultPath,
-    realArtworkPath: defaultPath,
-    realOptimizedArtworkPath: defaultPath
+    realArtworkPath: realDefaultPath,
+    realOptimizedArtworkPath: realDefaultPath
   };
   // const start = timeStart();
   if (artwork) {
