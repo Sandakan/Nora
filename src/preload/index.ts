@@ -443,6 +443,11 @@ const playlistsData = {
   importPlaylist: (): Promise<void> => ipcRenderer.invoke('app/importPlaylist')
 };
 
+const queue = {
+  getQueueInfo: (queueType: QueueTypes, id: string): Promise<QueueInfo | undefined> =>
+    ipcRenderer.invoke('app/getQueueInfo', queueType, id)
+};
+
 // $ APP LOGS
 const log = {
   sendLogs: (
@@ -557,7 +562,8 @@ export const api = {
   settings,
   settingsHelpers,
   appControls,
-  utils
+  utils,
+  queue
 };
 
 contextBridge.exposeInMainWorld('api', api);

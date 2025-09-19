@@ -89,6 +89,7 @@ import resetLyrics from './utils/resetLyrics';
 import logger, { logFilePath } from './logger';
 import { getListeningData } from './core/getListeningData';
 import { getUserSettings } from './db/queries/settings';
+import { getQueueInfo } from './utils/getQueueInfo';
 
 export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSignal) {
   if (mainWindow) {
@@ -328,6 +329,10 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       'app/resolveFeaturingArtists',
       (_, songId: string, featArtistNames: string[], removeFeatInfoInTitle?: boolean) =>
         resolveFeaturingArtists(songId, featArtistNames, removeFeatInfoInTitle)
+    );
+
+    ipcMain.handle('app/getQueueInfo', (_, queueType: QueueTypes, id: string) =>
+      getQueueInfo(queueType, id)
     );
 
     ipcMain.handle(

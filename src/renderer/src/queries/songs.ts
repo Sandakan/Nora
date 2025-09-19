@@ -35,5 +35,10 @@ export const songQuery = createQueryKeys('songs', {
   similarTracks: (data: { songId: string }) => ({
     queryKey: [data.songId],
     queryFn: () => window.api.audioLibraryControls.getSimilarTracksForASong(data.songId)
+  }),
+  queue: (songIds: string[]) => ({
+    queryKey: [`songIds=${songIds.sort().join(',')}`],
+    queryFn: () =>
+      window.api.audioLibraryControls.getSongInfo(songIds, 'addedOrder', undefined, undefined, true)
   })
 });

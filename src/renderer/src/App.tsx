@@ -61,6 +61,7 @@ import { albumQuery } from '@renderer/queries/albums';
 import { playlistQuery } from '@renderer/queries/playlists';
 import { genreQuery } from '@renderer/queries/genres';
 import { settingsQuery } from '@renderer/queries/settings';
+import { searchQuery } from './queries/search';
 
 // ? CONSTANTS
 const LOW_RESPONSE_DURATION = 100;
@@ -542,10 +543,19 @@ export default function App() {
           'artists',
           'albums',
           'playlists',
-          'genres'
+          'genres',
+          'songs',
+          'songs/newSong',
+          'songs/updatedSong',
+          'songs/deletedSong',
+          'songs/artworks',
+          'songs/palette',
+          'songs/likes'
         ];
-        if (songEvents.includes(dataEvent.dataType))
+        if (songEvents.includes(dataEvent.dataType)) {
           queryClient.invalidateQueries({ queryKey: songQuery._def });
+          queryClient.invalidateQueries({ queryKey: searchQuery._def });
+        }
 
         const artistEvents: DataUpdateEventTypes[] = [
           'artists',
@@ -555,8 +565,10 @@ export default function App() {
           'artists/deletedArtist',
           'artists/newArtist'
         ];
-        if (artistEvents.includes(dataEvent.dataType))
+        if (artistEvents.includes(dataEvent.dataType)) {
           queryClient.invalidateQueries({ queryKey: artistQuery._def });
+          queryClient.invalidateQueries({ queryKey: searchQuery._def });
+        }
 
         const albumEvents: DataUpdateEventTypes[] = [
           'albums',
@@ -564,8 +576,10 @@ export default function App() {
           'albums/deletedAlbum',
           'albums/newAlbum'
         ];
-        if (albumEvents.includes(dataEvent.dataType))
+        if (albumEvents.includes(dataEvent.dataType)) {
           queryClient.invalidateQueries({ queryKey: albumQuery._def });
+          queryClient.invalidateQueries({ queryKey: searchQuery._def });
+        }
 
         const playlistEvents: DataUpdateEventTypes[] = [
           'playlists',
@@ -575,8 +589,10 @@ export default function App() {
           'playlists/newSong',
           'playlists/deletedSong'
         ];
-        if (playlistEvents.includes(dataEvent.dataType))
+        if (playlistEvents.includes(dataEvent.dataType)) {
           queryClient.invalidateQueries({ queryKey: playlistQuery._def });
+          queryClient.invalidateQueries({ queryKey: searchQuery._def });
+        }
 
         const genreEvents: DataUpdateEventTypes[] = [
           'genres',
@@ -584,8 +600,10 @@ export default function App() {
           'genres/updatedGenre',
           'genres/deletedGenre'
         ];
-        if (genreEvents.includes(dataEvent.dataType))
+        if (genreEvents.includes(dataEvent.dataType)) {
           queryClient.invalidateQueries({ queryKey: genreQuery._def });
+          queryClient.invalidateQueries({ queryKey: searchQuery._def });
+        }
 
         const settingEvents: DataUpdateEventTypes[] = [
           'userData',
@@ -596,8 +614,10 @@ export default function App() {
           'userData/sortingStates',
           'settings/preferences'
         ];
-        if (settingEvents.includes(dataEvent.dataType))
+        if (settingEvents.includes(dataEvent.dataType)) {
           queryClient.invalidateQueries({ queryKey: settingsQuery._def });
+          queryClient.invalidateQueries({ queryKey: searchQuery._def });
+        }
       }
     };
 

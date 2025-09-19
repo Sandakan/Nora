@@ -347,6 +347,12 @@ declare global {
 
   type QueueTypes = 'album' | 'playlist' | 'artist' | 'songs' | 'genre' | 'folder';
 
+  interface QueueInfo {
+    artworkPath: string;
+    onlineArtworkPath?: string;
+    title: string;
+  }
+
   // ? User data related types
 
   type AppThemeWithoutSystem = 'dark' | 'light';
