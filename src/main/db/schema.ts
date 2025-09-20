@@ -52,7 +52,10 @@ export const musicFolders = pgTable(
     id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
     path: text('path').notNull().unique(),
     name: varchar('name', { length: 512 }).notNull(),
-    parentId: integer('parent_id').references((): AnyPgColumn => musicFolders.id),
+    parentId: integer('parent_id').references((): AnyPgColumn => musicFolders.id, {
+      onDelete: 'set null',
+      onUpdate: 'cascade'
+    }),
     /*   When the folder itself was created on the file system */
     folderCreatedAt: timestamp('folder_created_at', { withTimezone: false }),
     /*   When the folder metadata (like permissions or timestamps) last changed */
@@ -88,7 +91,10 @@ export const songs = pgTable(
     year: integer('year'),
     diskNumber: integer('disk_number'),
     trackNumber: integer('track_number'),
-    folderId: integer('folder_id').references(() => musicFolders.id),
+    folderId: integer('folder_id').references(() => musicFolders.id, {
+      onDelete: 'set null',
+      onUpdate: 'cascade'
+    }),
     fileCreatedAt: timestamp('file_created_at', { withTimezone: false }).notNull(),
     fileModifiedAt: timestamp('file_modified_at', { withTimezone: false }).notNull(),
     createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow(),
@@ -147,7 +153,7 @@ export const palettes = pgTable(
     id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
     artworkId: integer('artwork_id')
       .notNull()
-      .references(() => artworks.id),
+      .references(() => artworks.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
     createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
@@ -167,7 +173,7 @@ export const paletteSwatches = pgTable(
     swatchType: swatchTypeEnum('swatch_type').notNull().default('VIBRANT'),
     paletteId: integer('palette_id')
       .notNull()
-      .references(() => palettes.id),
+      .references(() => palettes.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
     createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
@@ -239,7 +245,7 @@ export const playEvents = pgTable(
     playbackPercentage: decimal('playback_percentage', { precision: 5, scale: 1 }).notNull(),
     songId: integer('song_id')
       .notNull()
-      .references(() => songs.id),
+      .references(() => songs.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
     createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
@@ -262,7 +268,7 @@ export const seekEvents = pgTable(
     position: decimal('position', { precision: 8, scale: 3 }).notNull(),
     songId: integer('song_id')
       .notNull()
-      .references(() => songs.id),
+      .references(() => songs.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
     createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
@@ -283,7 +289,7 @@ export const skipEvents = pgTable(
     position: decimal('position', { precision: 8, scale: 3 }).notNull(),
     songId: integer('song_id')
       .notNull()
-      .references(() => songs.id),
+      .references(() => songs.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
     createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
@@ -302,7 +308,7 @@ export const songBlacklist = pgTable(
   {
     songId: integer('song_id')
       .primaryKey()
-      .references(() => songs.id),
+      .references(() => songs.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
     createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
@@ -318,7 +324,7 @@ export const folderBlacklist = pgTable(
   {
     folderId: integer('folder_id')
       .primaryKey()
-      .references(() => musicFolders.id),
+      .references(() => musicFolders.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
     createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
@@ -334,7 +340,7 @@ export const playHistory = pgTable(
     id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
     songId: integer('song_id')
       .notNull()
-      .references(() => songs.id),
+      .references(() => songs.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
     createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
@@ -426,10 +432,10 @@ export const artworksSongs = pgTable(
   {
     songId: integer('song_id')
       .notNull()
-      .references(() => songs.id),
+      .references(() => songs.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
     artworkId: integer('artwork_id')
       .notNull()
-      .references(() => artworks.id),
+      .references(() => artworks.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
     createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
@@ -446,10 +452,10 @@ export const artistsArtworks = pgTable(
   {
     artistId: integer('artist_id')
       .notNull()
-      .references(() => artists.id),
+      .references(() => artists.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
     artworkId: integer('artwork_id')
       .notNull()
-      .references(() => artworks.id),
+      .references(() => artworks.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
     createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
@@ -466,10 +472,10 @@ export const albumsArtworks = pgTable(
   {
     albumId: integer('album_id')
       .notNull()
-      .references(() => albums.id),
+      .references(() => albums.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
     artworkId: integer('artwork_id')
       .notNull()
-      .references(() => artworks.id),
+      .references(() => artworks.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
     createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
@@ -486,10 +492,10 @@ export const artistsSongs = pgTable(
   {
     songId: integer('song_id')
       .notNull()
-      .references(() => songs.id),
+      .references(() => songs.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
     artistId: integer('artist_id')
       .notNull()
-      .references(() => artists.id),
+      .references(() => artists.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
     createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
@@ -506,10 +512,10 @@ export const albumsSongs = pgTable(
   {
     albumId: integer('album_id')
       .notNull()
-      .references(() => albums.id),
+      .references(() => albums.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
     songId: integer('song_id')
       .notNull()
-      .references(() => songs.id),
+      .references(() => songs.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
     createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
@@ -526,10 +532,10 @@ export const genresSongs = pgTable(
   {
     genreId: integer('genre_id')
       .notNull()
-      .references(() => genres.id),
+      .references(() => genres.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
     songId: integer('song_id')
       .notNull()
-      .references(() => songs.id),
+      .references(() => songs.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
     createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
@@ -546,10 +552,10 @@ export const artworksGenres = pgTable(
   {
     genreId: integer('genre_id')
       .notNull()
-      .references(() => genres.id),
+      .references(() => genres.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
     artworkId: integer('artwork_id')
       .notNull()
-      .references(() => artworks.id),
+      .references(() => artworks.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
     createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
@@ -566,10 +572,10 @@ export const playlistsSongs = pgTable(
   {
     playlistId: integer('playlist_id')
       .notNull()
-      .references(() => playlists.id),
+      .references(() => playlists.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
     songId: integer('song_id')
       .notNull()
-      .references(() => songs.id),
+      .references(() => songs.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
     createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
@@ -586,10 +592,10 @@ export const artworksPlaylists = pgTable(
   {
     playlistId: integer('playlist_id')
       .notNull()
-      .references(() => playlists.id),
+      .references(() => playlists.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
     artworkId: integer('artwork_id')
       .notNull()
-      .references(() => artworks.id),
+      .references(() => artworks.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
     createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
@@ -606,10 +612,10 @@ export const albumsArtists = pgTable(
   {
     albumId: integer('album_id')
       .notNull()
-      .references(() => albums.id),
+      .references(() => albums.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
     artistId: integer('artist_id')
       .notNull()
-      .references(() => artists.id),
+      .references(() => artists.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
     createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },

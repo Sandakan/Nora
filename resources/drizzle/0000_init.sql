@@ -242,7 +242,6 @@ CREATE TABLE "user_settings" (
 	"mini_player_height" integer,
 	"window_state" varchar(20) DEFAULT 'normal' NOT NULL,
 	"recent_searches" json DEFAULT '[]'::json NOT NULL,
-	"musixmatch_user_token" text,
 	"custom_lrc_files_save_location" text,
 	"lastfm_session_name" varchar(255),
 	"lastfm_session_key" varchar(255),
@@ -250,36 +249,36 @@ CREATE TABLE "user_settings" (
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-ALTER TABLE "albums_artists" ADD CONSTRAINT "albums_artists_album_id_albums_id_fk" FOREIGN KEY ("album_id") REFERENCES "public"."albums"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "albums_artists" ADD CONSTRAINT "albums_artists_artist_id_artists_id_fk" FOREIGN KEY ("artist_id") REFERENCES "public"."artists"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "albums_artworks" ADD CONSTRAINT "albums_artworks_album_id_albums_id_fk" FOREIGN KEY ("album_id") REFERENCES "public"."albums"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "albums_artworks" ADD CONSTRAINT "albums_artworks_artwork_id_artworks_id_fk" FOREIGN KEY ("artwork_id") REFERENCES "public"."artworks"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "album_songs" ADD CONSTRAINT "album_songs_album_id_albums_id_fk" FOREIGN KEY ("album_id") REFERENCES "public"."albums"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "album_songs" ADD CONSTRAINT "album_songs_song_id_songs_id_fk" FOREIGN KEY ("song_id") REFERENCES "public"."songs"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "artists_artworks" ADD CONSTRAINT "artists_artworks_artist_id_artists_id_fk" FOREIGN KEY ("artist_id") REFERENCES "public"."artists"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "artists_artworks" ADD CONSTRAINT "artists_artworks_artwork_id_artworks_id_fk" FOREIGN KEY ("artwork_id") REFERENCES "public"."artworks"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "artists_songs" ADD CONSTRAINT "artists_songs_song_id_songs_id_fk" FOREIGN KEY ("song_id") REFERENCES "public"."songs"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "artists_songs" ADD CONSTRAINT "artists_songs_artist_id_artists_id_fk" FOREIGN KEY ("artist_id") REFERENCES "public"."artists"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "artworks_genres" ADD CONSTRAINT "artworks_genres_genre_id_genres_id_fk" FOREIGN KEY ("genre_id") REFERENCES "public"."genres"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "artworks_genres" ADD CONSTRAINT "artworks_genres_artwork_id_artworks_id_fk" FOREIGN KEY ("artwork_id") REFERENCES "public"."artworks"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "artworks_playlists" ADD CONSTRAINT "artworks_playlists_playlist_id_playlists_id_fk" FOREIGN KEY ("playlist_id") REFERENCES "public"."playlists"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "artworks_playlists" ADD CONSTRAINT "artworks_playlists_artwork_id_artworks_id_fk" FOREIGN KEY ("artwork_id") REFERENCES "public"."artworks"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "artworks_songs" ADD CONSTRAINT "artworks_songs_song_id_songs_id_fk" FOREIGN KEY ("song_id") REFERENCES "public"."songs"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "artworks_songs" ADD CONSTRAINT "artworks_songs_artwork_id_artworks_id_fk" FOREIGN KEY ("artwork_id") REFERENCES "public"."artworks"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "folder_blacklist" ADD CONSTRAINT "folder_blacklist_folder_id_music_folders_id_fk" FOREIGN KEY ("folder_id") REFERENCES "public"."music_folders"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "genres_songs" ADD CONSTRAINT "genres_songs_genre_id_genres_id_fk" FOREIGN KEY ("genre_id") REFERENCES "public"."genres"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "genres_songs" ADD CONSTRAINT "genres_songs_song_id_songs_id_fk" FOREIGN KEY ("song_id") REFERENCES "public"."songs"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "music_folders" ADD CONSTRAINT "music_folders_parent_id_music_folders_id_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."music_folders"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "palette_swatches" ADD CONSTRAINT "palette_swatches_palette_id_palettes_id_fk" FOREIGN KEY ("palette_id") REFERENCES "public"."palettes"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "palettes" ADD CONSTRAINT "palettes_artwork_id_artworks_id_fk" FOREIGN KEY ("artwork_id") REFERENCES "public"."artworks"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "play_events" ADD CONSTRAINT "play_events_song_id_songs_id_fk" FOREIGN KEY ("song_id") REFERENCES "public"."songs"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "play_history" ADD CONSTRAINT "play_history_song_id_songs_id_fk" FOREIGN KEY ("song_id") REFERENCES "public"."songs"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "playlists_songs" ADD CONSTRAINT "playlists_songs_playlist_id_playlists_id_fk" FOREIGN KEY ("playlist_id") REFERENCES "public"."playlists"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "playlists_songs" ADD CONSTRAINT "playlists_songs_song_id_songs_id_fk" FOREIGN KEY ("song_id") REFERENCES "public"."songs"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "seek_events" ADD CONSTRAINT "seek_events_song_id_songs_id_fk" FOREIGN KEY ("song_id") REFERENCES "public"."songs"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "skip_events" ADD CONSTRAINT "skip_events_song_id_songs_id_fk" FOREIGN KEY ("song_id") REFERENCES "public"."songs"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "song_blacklist" ADD CONSTRAINT "song_blacklist_song_id_songs_id_fk" FOREIGN KEY ("song_id") REFERENCES "public"."songs"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "songs" ADD CONSTRAINT "songs_folder_id_music_folders_id_fk" FOREIGN KEY ("folder_id") REFERENCES "public"."music_folders"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "albums_artists" ADD CONSTRAINT "albums_artists_album_id_albums_id_fk" FOREIGN KEY ("album_id") REFERENCES "public"."albums"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE "albums_artists" ADD CONSTRAINT "albums_artists_artist_id_artists_id_fk" FOREIGN KEY ("artist_id") REFERENCES "public"."artists"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE "albums_artworks" ADD CONSTRAINT "albums_artworks_album_id_albums_id_fk" FOREIGN KEY ("album_id") REFERENCES "public"."albums"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE "albums_artworks" ADD CONSTRAINT "albums_artworks_artwork_id_artworks_id_fk" FOREIGN KEY ("artwork_id") REFERENCES "public"."artworks"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE "album_songs" ADD CONSTRAINT "album_songs_album_id_albums_id_fk" FOREIGN KEY ("album_id") REFERENCES "public"."albums"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE "album_songs" ADD CONSTRAINT "album_songs_song_id_songs_id_fk" FOREIGN KEY ("song_id") REFERENCES "public"."songs"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE "artists_artworks" ADD CONSTRAINT "artists_artworks_artist_id_artists_id_fk" FOREIGN KEY ("artist_id") REFERENCES "public"."artists"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE "artists_artworks" ADD CONSTRAINT "artists_artworks_artwork_id_artworks_id_fk" FOREIGN KEY ("artwork_id") REFERENCES "public"."artworks"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE "artists_songs" ADD CONSTRAINT "artists_songs_song_id_songs_id_fk" FOREIGN KEY ("song_id") REFERENCES "public"."songs"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE "artists_songs" ADD CONSTRAINT "artists_songs_artist_id_artists_id_fk" FOREIGN KEY ("artist_id") REFERENCES "public"."artists"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE "artworks_genres" ADD CONSTRAINT "artworks_genres_genre_id_genres_id_fk" FOREIGN KEY ("genre_id") REFERENCES "public"."genres"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE "artworks_genres" ADD CONSTRAINT "artworks_genres_artwork_id_artworks_id_fk" FOREIGN KEY ("artwork_id") REFERENCES "public"."artworks"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE "artworks_playlists" ADD CONSTRAINT "artworks_playlists_playlist_id_playlists_id_fk" FOREIGN KEY ("playlist_id") REFERENCES "public"."playlists"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE "artworks_playlists" ADD CONSTRAINT "artworks_playlists_artwork_id_artworks_id_fk" FOREIGN KEY ("artwork_id") REFERENCES "public"."artworks"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE "artworks_songs" ADD CONSTRAINT "artworks_songs_song_id_songs_id_fk" FOREIGN KEY ("song_id") REFERENCES "public"."songs"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE "artworks_songs" ADD CONSTRAINT "artworks_songs_artwork_id_artworks_id_fk" FOREIGN KEY ("artwork_id") REFERENCES "public"."artworks"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE "folder_blacklist" ADD CONSTRAINT "folder_blacklist_folder_id_music_folders_id_fk" FOREIGN KEY ("folder_id") REFERENCES "public"."music_folders"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE "genres_songs" ADD CONSTRAINT "genres_songs_genre_id_genres_id_fk" FOREIGN KEY ("genre_id") REFERENCES "public"."genres"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE "genres_songs" ADD CONSTRAINT "genres_songs_song_id_songs_id_fk" FOREIGN KEY ("song_id") REFERENCES "public"."songs"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE "music_folders" ADD CONSTRAINT "music_folders_parent_id_music_folders_id_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."music_folders"("id") ON DELETE set null ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE "palette_swatches" ADD CONSTRAINT "palette_swatches_palette_id_palettes_id_fk" FOREIGN KEY ("palette_id") REFERENCES "public"."palettes"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE "palettes" ADD CONSTRAINT "palettes_artwork_id_artworks_id_fk" FOREIGN KEY ("artwork_id") REFERENCES "public"."artworks"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE "play_events" ADD CONSTRAINT "play_events_song_id_songs_id_fk" FOREIGN KEY ("song_id") REFERENCES "public"."songs"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE "play_history" ADD CONSTRAINT "play_history_song_id_songs_id_fk" FOREIGN KEY ("song_id") REFERENCES "public"."songs"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE "playlists_songs" ADD CONSTRAINT "playlists_songs_playlist_id_playlists_id_fk" FOREIGN KEY ("playlist_id") REFERENCES "public"."playlists"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE "playlists_songs" ADD CONSTRAINT "playlists_songs_song_id_songs_id_fk" FOREIGN KEY ("song_id") REFERENCES "public"."songs"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE "seek_events" ADD CONSTRAINT "seek_events_song_id_songs_id_fk" FOREIGN KEY ("song_id") REFERENCES "public"."songs"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE "skip_events" ADD CONSTRAINT "skip_events_song_id_songs_id_fk" FOREIGN KEY ("song_id") REFERENCES "public"."songs"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE "song_blacklist" ADD CONSTRAINT "song_blacklist_song_id_songs_id_fk" FOREIGN KEY ("song_id") REFERENCES "public"."songs"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
+ALTER TABLE "songs" ADD CONSTRAINT "songs_folder_id_music_folders_id_fk" FOREIGN KEY ("folder_id") REFERENCES "public"."music_folders"("id") ON DELETE set null ON UPDATE cascade;--> statement-breakpoint
 CREATE INDEX "idx_albums_title" ON "albums" USING btree ("title");--> statement-breakpoint
 CREATE INDEX "idx_albums_year" ON "albums" USING btree ("year");--> statement-breakpoint
 CREATE INDEX "idx_albums_year_title" ON "albums" USING btree ("year","title");--> statement-breakpoint
