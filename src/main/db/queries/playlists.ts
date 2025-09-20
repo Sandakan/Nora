@@ -1,6 +1,6 @@
 import { and, asc, desc, eq, inArray, SQL } from 'drizzle-orm';
 import { db } from '@db/db';
-import { playlistsSongs, playlists } from '../schema';
+import { playlistsSongs, playlists, artworksPlaylists } from '../schema';
 import { timeEnd, timeStart } from '@main/utils/measureTimeUsage';
 
 export type GetAllPlaylistsReturnType = Awaited<ReturnType<typeof getAllPlaylists>>;
@@ -64,6 +64,56 @@ export const getAllPlaylists = async (
     start,
     end
   };
+};
+
+export const getPlaylistById = async (id: number, trx: DB | DBTransaction = db) => {
+  const data = await trx.query.playlists.findFirst({
+    where: eq(playlists.id, id),
+    with: {
+      songs: { with: { song: { columns: { id: true } } } },
+      artworks: {
+        with: {
+          artwork: {
+            with: {
+              palette: {
+                columns: { id: true },
+                with: {
+                  swatches: {}
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  });
+
+  return data;
+};
+
+export const getPlaylistByName = async (name: string, trx: DB | DBTransaction = db) => {
+  const data = await trx.query.playlists.findFirst({
+    where: eq(playlists.name, name),
+    with: {
+      songs: { with: { song: { columns: { id: true } } } },
+      artworks: {
+        with: {
+          artwork: {
+            with: {
+              palette: {
+                columns: { id: true },
+                with: {
+                  swatches: {}
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  });
+
+  return data;
 };
 
 export const getFavoritesPlaylist = async (trx: DB | DBTransaction = db) => {
@@ -155,4 +205,31 @@ export const getPlaylistWithSongPaths = async (
   });
 
   return playlist;
+};
+
+export const createPlaylist = async (name: string, trx: DB | DBTransaction = db) => {
+  const [newPlaylist] = await trx.insert(playlists).values({ name }).returning();
+
+  return newPlaylist;
+};
+
+export const linkArtworkToPlaylist = async (
+  playlistId: number,
+  artworkId: number,
+  trx: DB | DBTransaction = db
+) => {
+  return await trx.insert(artworksPlaylists).values({ playlistId, artworkId });
+};
+
+export const updatePlaylistName = async (
+  playlistId: number,
+  newName: string,
+  trx: DB | DBTransaction = db
+) => {
+  return await trx.update(playlists).set({ name: newName }).where(eq(playlists.id, playlistId));
+};
+
+export const deletePlaylists = async (playlistIds: number[], trx: DB | DBTransaction = db) => {
+  const data = await trx.delete(playlists).where(inArray(playlists.id, playlistIds));
+  return data.affectedRows || 0;
 };

@@ -1,22 +1,43 @@
-import { getPlaylistData, setPlaylistData } from '../filesystem';
+import { generateLocalArtworkBuffer } from '@main/updateSongId3Tags';
 import logger from '../logger';
 import { dataUpdateEvent } from '../main';
 import { storeArtworks } from '../other/artworks';
-import { generateRandomId } from '../utils/randomId';
+import { db } from '@main/db/db';
+import {
+  createPlaylist,
+  getPlaylistById,
+  getPlaylistByName,
+  linkArtworkToPlaylist,
+  linkSongsWithPlaylist
+} from '@main/db/queries/playlists';
+import { convertToPlaylist } from '../../common/convert';
 
 const createNewPlaylist = async (name: string, songIds?: string[], artworkPath?: string) => {
   try {
-    const playlistId = generateRandomId();
-    const artworkPaths = await storeArtworks(playlistId, 'playlist', artworkPath);
-    const newPlaylist: SavablePlaylist = {
-      name,
-      playlistId,
-      createdDate: new Date(),
-      songs: Array.isArray(songIds) ? songIds : [],
-      isArtworkAvailable: !artworkPaths.isDefaultArtwork
-    };
+    const buffer = await generateLocalArtworkBuffer(artworkPath || '');
 
-    return { newPlaylist, newPlaylistArtworkPaths: artworkPaths };
+    const { playlist: newPlaylist, artworks: newArtworks } = await db.transaction(async (trx) => {
+      const artworks = await storeArtworks('playlist', buffer, trx);
+
+      const playlist = await createPlaylist(name, trx);
+
+      if (artworks && artworks.length > 0) {
+        await linkArtworkToPlaylist(playlist.id, artworks[0].id, trx);
+      }
+
+      if (songIds && songIds.length > 0) {
+        await linkSongsWithPlaylist(
+          songIds.map((id) => Number(id)),
+          playlist.id,
+          trx
+        );
+      }
+
+      return { playlist, artworks };
+    });
+
+    dataUpdateEvent('playlists/newPlaylist');
+    return { newPlaylist, artworks: newArtworks };
   } catch (error) {
     logger.error('Failed to create a new playlist.', { error });
     return;
@@ -29,39 +50,28 @@ const addNewPlaylist = async (
   artworkPath?: string
 ): Promise<{ success: boolean; message?: string; playlist?: Playlist }> => {
   logger.debug(`Requested a creation of new playlist with a name ${name}`);
-  const playlists = getPlaylistData();
+  const playlist = await getPlaylistByName(name);
 
-  if (playlists && Array.isArray(playlists)) {
-    const duplicatePlaylist = playlists.find((playlist) => playlist.name === name);
-
-    if (duplicatePlaylist) {
-      logger.warn(`Request failed because there is already a playlist named '${name}'.`, {
-        duplicatePlaylist
-      });
-      return {
-        success: false,
-        message: `Playlist with name '${name}' already exists.`
-      };
-    }
-
-    const newPlaylistData = await createNewPlaylist(name, songIds, artworkPath);
-    if (!newPlaylistData) return { success: false };
-
-    const { newPlaylist, newPlaylistArtworkPaths } = newPlaylistData;
-
-    playlists.push(newPlaylist);
-    setPlaylistData(playlists);
-    dataUpdateEvent('playlists/newPlaylist');
-
+  if (playlist) {
+    logger.warn(`Request failed because there is already a playlist named '${name}'.`, {
+      duplicatePlaylist: playlist
+    });
     return {
-      success: true,
-      playlist: { ...newPlaylist, artworkPaths: newPlaylistArtworkPaths }
+      success: false,
+      message: `Playlist with name '${name}' already exists.`
     };
   }
-  logger.error(`Failed to add a song to the favorites. Playlist is not an array.`, {
-    playlistsType: typeof playlists
-  });
-  return { success: false };
+
+  const newPlaylistData = await createNewPlaylist(name, songIds, artworkPath);
+  if (!newPlaylistData) return { success: false };
+
+  const newPlaylist = await getPlaylistById(newPlaylistData.newPlaylist.id);
+  if (!newPlaylist) return { success: false };
+
+  return {
+    success: true,
+    playlist: convertToPlaylist(newPlaylist)
+  };
 };
 
 export default addNewPlaylist;

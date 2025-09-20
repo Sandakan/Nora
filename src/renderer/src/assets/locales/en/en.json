@@ -337,7 +337,8 @@
     "createdOn": "Created on {{val, datetime}}",
     "clearSongHistoryConfirm": "Clear song history",
     "clearSongHistoryConfirmNotice": "Are you sure you want to clear your song history? This action cannot be undone.",
-    "clearSongHistorySuccess": "Your song history has been cleared successfully."
+    "clearSongHistorySuccess": "Your song history has been cleared successfully.",
+    "empty": "No playlists created yet."
   },
 
   "albumsPage": {

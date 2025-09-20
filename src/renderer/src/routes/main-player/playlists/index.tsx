@@ -17,6 +17,8 @@ import { zodValidator } from '@tanstack/zod-adapter';
 import { playlistSearchSchema } from '@renderer/utils/zod/playlistSchema';
 import { playlistSortOptions } from '@renderer/components/PlaylistsPage/PlaylistOptions';
 import { useSuspenseQuery } from '@tanstack/react-query';
+import Img from '@renderer/components/Img';
+import NoPlaylistsImage from '@assets/images/svg/Empty Inbox _Monochromatic.svg';
 
 export const Route = createFileRoute('/main-player/playlists/')({
   validateSearch: zodValidator(playlistSearchSchema),
@@ -153,71 +155,66 @@ function PlaylistsPage() {
                   })}
                 </div>
               ) : (
-                playlists.length > 0 && (
-                  <span className="no-of-artists">
-                    {t('common.playlistWithCount', { count: playlists.length })}
-                  </span>
-                )
+                <span className="no-of-artists">
+                  {t('common.playlistWithCount', { count: playlists.length })}
+                </span>
               )}
             </div>
           </div>
-          {playlists.length > 0 && (
-            <div className="other-control-container flex">
-              <Button
-                className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
-                iconName={isMultipleSelectionEnabled ? 'remove_done' : 'checklist'}
-                clickHandler={() =>
-                  toggleMultipleSelections(!isMultipleSelectionEnabled, 'playlist')
-                }
-                tooltipLabel={t(`common.${isMultipleSelectionEnabled ? 'unselectAll' : 'select'}`)}
-              />
-              <Button
-                label={t(`playlistsPage.importPlaylist`)}
-                className="import-playlist-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
-                iconName="publish"
-                clickHandler={(_, setIsDisabled, setIsPending) => {
-                  setIsDisabled(true);
-                  setIsPending(true);
+          <div className="other-control-container flex">
+            <Button
+              className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+              iconName={isMultipleSelectionEnabled ? 'remove_done' : 'checklist'}
+              clickHandler={() => toggleMultipleSelections(!isMultipleSelectionEnabled, 'playlist')}
+              tooltipLabel={t(`common.${isMultipleSelectionEnabled ? 'unselectAll' : 'select'}`)}
+              isDisabled={playlists.length === 0}
+            />
+            <Button
+              label={t(`playlistsPage.importPlaylist`)}
+              className="import-playlist-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+              iconName="publish"
+              clickHandler={(_, setIsDisabled, setIsPending) => {
+                setIsDisabled(true);
+                setIsPending(true);
 
-                  return window.api.playlistsData
-                    .importPlaylist()
-                    .finally(() => {
-                      setIsDisabled(false);
-                      setIsPending(false);
-                    })
-                    .catch((err) => console.error(err));
-                }}
-              />
-              <Button
-                label={t(`playlistsPage.addPlaylist`)}
-                className="add-new-playlist-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
-                iconName="add"
-                clickHandler={createNewPlaylist}
-              />
-              <Dropdown
-                name="playlistsSortDropdown"
-                value={sortingOrder}
-                options={playlistSortOptions}
-                onChange={(e) => {
-                  const playlistSortType = e.currentTarget.value as PlaylistSortTypes;
-                  updateCurrentlyActivePageData((currentData) => ({
-                    ...currentData,
-                    sortingOrder: playlistSortType
-                  }));
-                  navigate({
-                    search: (prev) => ({
-                      ...prev,
-                      sortingOrder: e.currentTarget.value as PlaylistSortTypes
-                    })
-                  });
-                }}
-              />
-            </div>
-          )}
+                return window.api.playlistsData
+                  .importPlaylist()
+                  .finally(() => {
+                    setIsDisabled(false);
+                    setIsPending(false);
+                  })
+                  .catch((err) => console.error(err));
+              }}
+            />
+            <Button
+              label={t(`playlistsPage.addPlaylist`)}
+              className="add-new-playlist-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+              iconName="add"
+              clickHandler={createNewPlaylist}
+            />
+            <Dropdown
+              name="playlistsSortDropdown"
+              value={sortingOrder}
+              options={playlistSortOptions}
+              onChange={(e) => {
+                const playlistSortType = e.currentTarget.value as PlaylistSortTypes;
+                updateCurrentlyActivePageData((currentData) => ({
+                  ...currentData,
+                  sortingOrder: playlistSortType
+                }));
+                navigate({
+                  search: (prev) => ({
+                    ...prev,
+                    sortingOrder: e.currentTarget.value as PlaylistSortTypes
+                  })
+                });
+              }}
+            />
+          </div>
         </div>
 
-        <div className="playlists-container appear-from-bottom flex h-full flex-wrap delay-100">
-          {playlists && playlists.length > 0 && (
+        {playlists.length > 0 && (
+          <div className="playlists-container appear-from-bottom flex h-full flex-wrap delay-100">
             <VirtualizedGrid
               data={playlists}
               fixedItemWidth={MIN_ITEM_WIDTH}
@@ -227,8 +224,14 @@ function PlaylistsPage() {
                 return <Playlist index={index} selectAllHandler={selectAllHandler} {...playlist} />;
               }}
             />
-          )}
-        </div>
+          </div>
+        )}
+        {playlists.length === 0 && (
+          <div className="no-playlists-container text-font-color-black dark:text-font-color-white my-[10%] flex h-full w-full flex-col items-center justify-center text-center text-xl">
+            <Img src={NoPlaylistsImage} alt="" className="mb-8 w-60" />
+            <span>{t('playlistsPage.empty')}</span>
+          </div>
+        )}
       </>
     </MainContainer>
   );

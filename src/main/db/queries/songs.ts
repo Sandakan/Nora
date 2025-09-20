@@ -569,3 +569,13 @@ export const getPlayableSongById = async (songId: number, trx: DB | DBTransactio
   });
   return song;
 };
+
+export const getSongsInPathList = async (songPaths: string[], trx: DB | DBTransaction = db) => {
+  if (songPaths.length === 0) return [];
+
+  const data = await trx.query.songs.findMany({
+    where: inArray(songs.path, songPaths),
+    columns: { id: true, path: true }
+  });
+  return data;
+};

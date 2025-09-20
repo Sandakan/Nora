@@ -18,7 +18,7 @@ import Song from '@renderer/components/SongsPage/Song';
 import DataFetchingImage from '@assets/images/svg/Road trip_Monochromatic.svg';
 import NoSongsImage from '@assets/images/svg/Empty Inbox _Monochromatic.svg';
 import Img from '@renderer/components/Img';
-import { queryOptions, useSuspenseQuery } from '@tanstack/react-query';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { queryClient } from '@renderer/index';
 import { songQuery } from '@renderer/queries/songs';
 
