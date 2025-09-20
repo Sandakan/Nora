@@ -27,5 +27,9 @@ export const playlistQuery = createQueryKeys('playlists', {
           onlyMutablePlaylists
         )
     };
-  }
+  },
+  single: (data: { playlistId: string }) => ({
+    queryKey: [data.playlistId],
+    queryFn: () => window.api.playlistsData.getPlaylistData([data.playlistId])
+  })
 });
