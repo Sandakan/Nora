@@ -15,5 +15,13 @@ export const albumQuery = createQueryKeys('albums', {
       queryFn: () =>
         window.api.albumsData.getAlbumData(albumIds, sortType as AlbumSortTypes, start, end)
     };
-  }
+  },
+  single: (data: { albumId: string }) => ({
+    queryKey: [data.albumId],
+    queryFn: () => window.api.albumsData.getAlbumData([data.albumId], 'aToZ', 0, 1)
+  }),
+  fetchOnlineInfo: (data: { albumId: string }) => ({
+    queryKey: [data.albumId],
+    queryFn: () => window.api.albumsData.getAlbumInfoFromLastFM(data.albumId)
+  })
 });

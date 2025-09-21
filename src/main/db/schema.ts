@@ -12,7 +12,7 @@ import {
   json,
   boolean
 } from 'drizzle-orm/pg-core';
-import { relations, sql } from 'drizzle-orm';
+import { relations } from 'drizzle-orm';
 
 // ============================================================================
 // Enums
@@ -109,20 +109,17 @@ export const songs = pgTable(
     index('idx_songs_file_modified_at').on(t.fileModifiedAt),
     index('idx_songs_folder_id').on(t.folderId),
     index('idx_songs_path').on(t.path),
+    index('idx_songs_is_favorite').on(t.isFavorite),
 
     // Composite indexes for common sorting patterns
     index('idx_songs_year_title').on(t.year, t.title),
     index('idx_songs_track_title').on(t.trackNumber, t.title),
     index('idx_songs_created_title').on(t.createdAt, t.title),
     index('idx_songs_modified_title').on(t.fileModifiedAt, t.title),
+    index('idx_songs_favorite_title').on(t.isFavorite, t.title),
 
     // Index for folder-based queries
-    index('idx_songs_folder_title').on(t.folderId, t.title),
-
-    // Index for text search on title (case-insensitive)
-    index('idx_songs_title_text')
-      .on(t.title)
-      .where(sql`${t.title} IS NOT NULL`)
+    index('idx_songs_folder_title').on(t.folderId, t.title)
   ]
 );
 
@@ -143,7 +140,9 @@ export const artworks = pgTable(
     // Index for source filtering
     index('idx_artworks_source').on(t.source),
     // Index for dimension-based queries
-    index('idx_artworks_dimensions').on(t.width, t.height)
+    index('idx_artworks_dimensions').on(t.width, t.height),
+    // Composite index for palette queries filtering by source and dimensions
+    index('idx_artworks_source_dimensions').on(t.source, t.width, t.height)
   ]
 );
 

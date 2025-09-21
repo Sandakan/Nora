@@ -1,3 +1,5 @@
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 import Button from '@renderer/components/Button';
 import Img from '@renderer/components/Img';
 import MainContainer from '@renderer/components/MainContainer';
@@ -36,8 +38,12 @@ function SongInfoPage() {
 
   const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
 
-  const { changeCurrentActivePage, updateBodyBackgroundImage, updateContextMenuData } =
-    useContext(AppUpdateContext);
+  const {
+    changeCurrentActivePage,
+    updateBodyBackgroundImage,
+    updateContextMenuData,
+    updateSongPosition
+  } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { data: songInfo } = useSuspenseQuery({
@@ -378,7 +384,10 @@ function SongInfoPage() {
                     key={6}
                     title={t('songInfoPage.mostSoughtPosition')}
                     value={
-                      <span className="flex flex-col">
+                      <span
+                        className="flex flex-col"
+                        onClick={() => updateSongPosition(maxSongSeekPosition)}
+                      >
                         <span className="text-2xl">{maxSongSeekPosition.toFixed(1)}</span>
                         <span className="text-xs">
                           {t('time.second', {

@@ -32,12 +32,12 @@ export const artistQuery = createQueryKeys('artists', {
     const { artistId } = data;
 
     return {
-      queryKey: [`artistId=${artistId}`],
+      queryKey: [artistId],
       queryFn: () => window.api.artistsData.getArtistData([artistId])
     };
   },
   fetchOnlineInfo: (data: { artistId: string }) => ({
-    queryKey: [`artistId=${data.artistId}`],
+    queryKey: [data.artistId],
     queryFn: () => window.api.artistsData.getArtistArtworks(data.artistId)
   })
 });
