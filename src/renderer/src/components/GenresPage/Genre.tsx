@@ -22,7 +22,7 @@ interface GenreProp {
 }
 
 const Genre = (props: GenreProp) => {
-  const { genreId, songIds, title, artworkPaths, className, selectAllHandler } = props;
+  const { genreId, songIds, title, artworkPaths, paletteData, className, selectAllHandler } = props;
   const isMultipleSelectionEnabled = useStore(
     store,
     (state) => state.multipleSelectionsData.isEnabled
@@ -50,15 +50,15 @@ const Genre = (props: GenreProp) => {
     [genreId, navigate]
   );
 
-  // const backgroundColor = useMemo(() => {
-  //   const swatch = paletteData?.DarkVibrant;
-  //   if (swatch?.hsl) {
-  //     const { hsl } = swatch;
+  const backgroundColor = useMemo(() => {
+    const swatch = paletteData?.DarkVibrant;
+    if (swatch?.hsl) {
+      const { hsl } = swatch;
 
-  //     return `hsl(${hsl[0] * 360} ${hsl[1] * 100}% ${hsl[2] * 100}%)`;
-  //   }
-  //   return 'hsl(0 0% 0%)';
-  // }, [paletteData?.DarkVibrant]);
+      return `hsl(${hsl[0] * 360} ${hsl[1] * 100}% ${hsl[2] * 100}%)`;
+    }
+    return undefined;
+  }, [paletteData?.DarkVibrant]);
 
   const playGenreSongs = useCallback(
     (isShuffle = false) => {
@@ -301,6 +301,9 @@ const Genre = (props: GenreProp) => {
         multipleSelectionsData.selectionType === 'genre' &&
         'border-4 border-transparent'
       } ${isAMultipleSelection && 'border-font-color-highlight! dark:border-dark-font-color-highlight!'}`}
+      style={{
+        backgroundColor
+      }}
       onClick={(e) => {
         e.preventDefault();
         if (e.getModifierState('Shift') === true && selectAllHandler) selectAllHandler(genreId);

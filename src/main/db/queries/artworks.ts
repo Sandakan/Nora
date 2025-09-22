@@ -4,6 +4,7 @@ import {
   albumsArtworks,
   artistsArtworks,
   artworks,
+  artworksGenres,
   artworkSourceEnum,
   artworksSongs
 } from '../schema';
@@ -71,6 +72,13 @@ export const linkArtworksToAlbum = async (
   trx: DB | DBTransaction = db
 ) => {
   return trx.insert(albumsArtworks).values(data).returning();
+};
+
+export const linkArtworksToGenre = async (
+  data: (typeof artworksGenres.$inferInsert)[],
+  trx: DB | DBTransaction = db
+) => {
+  return trx.insert(artworksGenres).values(data).returning();
 };
 
 export const linkArtworksToArtist = async (

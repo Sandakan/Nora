@@ -1,3 +1,4 @@
+import { linkArtworksToGenre } from '@main/db/queries/artworks';
 import { createGenre, getGenreWithTitle, linkSongToGenre } from '@main/db/queries/genres';
 import type { genres } from '@main/db/schema';
 
@@ -7,7 +8,7 @@ const manageGenresOfParsedSong = async (
 ) => {
   const newGenres: (typeof genres.$inferSelect)[] = [];
   const relevantGenres: (typeof genres.$inferSelect)[] = [];
-  const { songId, songGenres } = data;
+  const { songId, songGenres, artworkId } = data;
 
   for (const songGenre of songGenres) {
     const songGenreName = songGenre.trim();
@@ -18,6 +19,8 @@ const manageGenresOfParsedSong = async (
       relevantGenres.push(availableGenre);
     } else {
       const genre = await createGenre({ name: songGenreName }, trx);
+
+      await linkArtworksToGenre([{ artworkId, genreId: genre.id }], trx);
       await linkSongToGenre(genre.id, songId, trx);
 
       relevantGenres.push(genre);
