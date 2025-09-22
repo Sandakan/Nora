@@ -17,6 +17,7 @@ import { linkArtworksToSong } from '@main/db/queries/artworks';
 // import { timeEnd, timeStart } from './utils/measureTimeUsage';
 
 const pathsQueue = new Set<string>();
+export const ARTIST_SEPARATOR_REGEX = /[,&]/gm;
 
 export const tryToParseSong = (
   songPath: string,
@@ -308,7 +309,7 @@ export const parseSong = async (
 
 export const getArtistNamesFromSong = (artists?: string) => {
   if (artists) {
-    const splittedArtists = artists.split(',');
+    const splittedArtists = artists.split(ARTIST_SEPARATOR_REGEX).map((artist) => artist.trim());
 
     return splittedArtists;
   }
