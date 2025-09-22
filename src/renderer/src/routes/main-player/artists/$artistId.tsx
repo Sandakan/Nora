@@ -75,7 +75,11 @@ function ArtistInfoPage() {
   const { data: onlineArtistInfo } = useQuery(artistQuery.fetchOnlineInfo({ artistId }));
 
   const { data: songs = [] } = useQuery({
-    ...songQuery.allSongInfo({ songIds: artistData.songs.map((song) => song.songId) || [] }),
+    ...songQuery.allSongInfo({
+      songIds: artistData.songs.map((song) => song.songId) || [],
+      sortType: sortingOrder,
+      filterType: 'notSelected'
+    }),
     enabled: !!artistData?.songs && artistData.songs.length > 0
   });
 

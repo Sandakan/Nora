@@ -1,6 +1,3 @@
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-
 import { lazy, useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -14,6 +11,7 @@ import MultipleArtworksCover from './MultipleArtworksCover';
 import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store/store';
 import { useNavigate } from '@tanstack/react-router';
+import NavLink from '../NavLink';
 
 const ConfirmDeletePlaylistsPrompt = lazy(() => import('./ConfirmDeletePlaylistsPrompt'));
 const RenamePlaylistPrompt = lazy(() => import('./RenamePlaylistPrompt'));
@@ -92,7 +90,7 @@ export const Playlist = (props: PlaylistProp) => {
       window.api.playlistsData
         .getPlaylistData(playlistIds)
         .then((playlists) => {
-          const ids = playlists.map((playlist) => playlist.songs).flat();
+          const ids = playlists.data.map((playlist) => playlist.songs).flat();
 
           return window.api.audioLibraryControls.getSongInfo(
             ids,
@@ -364,7 +362,9 @@ export const Playlist = (props: PlaylistProp) => {
   );
 
   return (
-    <div
+    <NavLink
+      to={'/main-player/playlists/$playlistId'}
+      params={{ playlistId: props.playlistId }}
       className={`playlist group hover:bg-background-color-2/50 dark:hover:bg-dark-background-color-2/50 ${
         props.playlistId
       } text-font-color-black dark:text-font-color-white mr-12 mb-8 flex h-fit max-h-52 min-h-[12rem] w-36 flex-col justify-between rounded-md p-4 ${
@@ -379,6 +379,7 @@ export const Playlist = (props: PlaylistProp) => {
         updateContextMenuData(true, contextMenus, e.pageX, e.pageY, contextMenuItemData);
       }}
       onClick={(e) => {
+        e.preventDefault();
         if (e.getModifierState('Shift') === true && props.selectAllHandler)
           props.selectAllHandler(props.playlistId);
         else if (e.getModifierState('Control') === true && !isMultipleSelectionEnabled)
@@ -455,6 +456,6 @@ export const Playlist = (props: PlaylistProp) => {
           {t('common.songWithCount', { count: props.songs.length })}
         </div>
       </div>
-    </div>
+    </NavLink>
   );
 };

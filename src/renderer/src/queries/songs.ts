@@ -25,13 +25,25 @@ export const songQuery = createQueryKeys('songs', {
         })
     };
   },
-  allSongInfo: (data: { songIds: string[] }) => {
-    const { songIds } = data;
+  allSongInfo: (data: {
+    songIds: string[];
+    sortType: SongSortTypes;
+    filterType?: SongFilterTypes;
+  }) => {
+    const { songIds, sortType, filterType } = data;
     return {
-      queryKey: [`songIds=${songIds.sort().join(',')}`],
-      queryFn: () => window.api.audioLibraryControls.getSongInfo(songIds)
+      queryKey: [
+        `songIds=${songIds.sort().join(',')}`,
+        `sortType=${sortType}`,
+        `filterType=${filterType}`
+      ],
+      queryFn: () => window.api.audioLibraryControls.getSongInfo(songIds, sortType, filterType)
     };
   },
+  singleSongInfo: (data: { songId: string }) => ({
+    queryKey: [data.songId],
+    queryFn: () => window.api.audioLibraryControls.getSongInfo([data.songId])
+  }),
   similarTracks: (data: { songId: string }) => ({
     queryKey: [data.songId],
     queryFn: () => window.api.audioLibraryControls.getSimilarTracksForASong(data.songId)

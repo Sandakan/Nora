@@ -51,7 +51,11 @@ function PlaylistInfoPage() {
     select: (data) => data.data[0]
   });
   const { data: playlistSongs = [] } = useQuery({
-    ...songQuery.allSongInfo({ songIds: playlistData.songs }),
+    ...songQuery.allSongInfo({
+      songIds: playlistData.songs,
+      sortType: sortingOrder,
+      filterType: filteringOrder
+    }),
     enabled: Array.isArray(playlistData.songs)
   });
 

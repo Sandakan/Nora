@@ -1,6 +1,3 @@
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-
 import { store } from '@renderer/store/store';
 import { useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
@@ -11,6 +8,7 @@ import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Button from '../Button';
 import Img from '../Img';
 import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
+import NavLink from '../NavLink';
 
 interface ArtistProp {
   index: number;
@@ -294,7 +292,9 @@ export const Artist = (props: ArtistProp) => {
   );
 
   return (
-    <div
+    <NavLink
+      to="/main-player/artists/$artistId"
+      params={{ artistId: props.artistId }}
       // style={{ animationDelay: `${50 * (props.index + 1)}ms` }}
       className={`artist ${appearFromBottom && 'appear-from-bottom'} hover:bg-background-color-2/50 dark:hover:bg-dark-background-color-2/50 mr-2 flex h-44 w-40 cursor-pointer flex-col justify-between overflow-hidden rounded-lg p-4 ${
         props.className
@@ -304,6 +304,7 @@ export const Artist = (props: ArtistProp) => {
         updateContextMenuData(true, artistContextMenus, e.pageX, e.pageY, contextMenuItemData);
       }}
       onClick={(e) => {
+        e.preventDefault();
         if (e.getModifierState('Shift') === true && props.selectAllHandler)
           props.selectAllHandler(props.artistId);
         else if (e.getModifierState('Control') === true && !isMultipleSelectionEnabled)
@@ -352,6 +353,6 @@ export const Artist = (props: ArtistProp) => {
           clickHandler={goToArtistInfoPage}
         />
       </div>
-    </div>
+    </NavLink>
   );
 };

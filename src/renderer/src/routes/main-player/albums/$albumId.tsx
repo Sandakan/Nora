@@ -48,7 +48,11 @@ function AlbumInfoPage() {
   const { data: onlineAlbumInfo } = useQuery(albumQuery.fetchOnlineInfo({ albumId }));
 
   const { data: songsData = [] } = useQuery({
-    ...songQuery.allSongInfo({ songIds: albumData.songs.map((song) => song.songId) || [] }),
+    ...songQuery.allSongInfo({
+      songIds: albumData.songs.map((song) => song.songId) || [],
+      sortType: sortingOrder,
+      filterType: 'notSelected'
+    }),
     enabled: !!albumData?.songs && albumData.songs.length > 0
   });
 

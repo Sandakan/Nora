@@ -8,5 +8,9 @@ export const genreQuery = createQueryKeys('genres', {
       queryKey: [`sortType=${sortType}`, `start=${start}`, `end=${end}`, `limit=${end - start}`],
       queryFn: () => window.api.genresData.getGenresData([], sortType as GenreSortTypes, start, end)
     };
-  }
+  },
+  single: (data: { genreId: string }) => ({
+    queryKey: [data.genreId],
+    queryFn: () => window.api.genresData.getGenresData([data.genreId])
+  })
 });

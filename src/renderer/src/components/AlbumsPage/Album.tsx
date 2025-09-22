@@ -9,6 +9,7 @@ import Button from '../Button';
 import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store/store';
 import { useNavigate } from '@tanstack/react-router';
+import NavLink from '../NavLink';
 
 interface AlbumProp extends Album {
   index: number;
@@ -315,8 +316,9 @@ export const Album = (props: AlbumProp) => {
   );
 
   return (
-    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
-    <div
+    <NavLink
+      to="/main-player/albums/$albumId"
+      params={{ albumId: props.albumId }}
       // style={{ animationDelay: `${50 * (props.index + 1)}ms` }}
       className={`album group mr-6 mb-2 flex h-68 w-48 flex-col justify-between overflow-hidden rounded-md p-4 ${
         props.className ?? ''
@@ -329,6 +331,7 @@ export const Album = (props: AlbumProp) => {
         updateContextMenuData(true, contextMenuItems, e.pageX, e.pageY, contextMenuItemData)
       }
       onClick={(e) => {
+        e.preventDefault();
         if (e.getModifierState('Shift') === true && props.selectAllHandler)
           props.selectAllHandler(props.albumId);
         else if (e.getModifierState('Control') === true && !isMultipleSelectionEnabled)
@@ -391,6 +394,6 @@ export const Album = (props: AlbumProp) => {
           {t('common.songWithCount', { count: props.songs.length })}
         </div>
       </div>
-    </div>
+    </NavLink>
   );
 };

@@ -29,7 +29,7 @@ export const Route = createFileRoute('/main-player/songs/$songId')({
     const songId = route.params.songId;
 
     await queryClient.ensureQueryData(listenQuery.single({ songId }));
-    await queryClient.ensureQueryData(songQuery.allSongInfo({ songIds: [songId] }));
+    await queryClient.ensureQueryData(songQuery.singleSongInfo({ songId }));
   }
 });
 
@@ -47,7 +47,7 @@ function SongInfoPage() {
   const { t } = useTranslation();
 
   const { data: songInfo } = useSuspenseQuery({
-    ...songQuery.allSongInfo({ songIds: [songId] }),
+    ...songQuery.singleSongInfo({ songId }),
     select: (data) => (Array.isArray(data) && data.length > 0 ? data[0] : undefined)
   });
   const { data: listeningData } = useSuspenseQuery({

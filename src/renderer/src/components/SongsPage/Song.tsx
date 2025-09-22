@@ -565,13 +565,12 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
         updateContextMenuData(true, contextMenuItems, e.pageX, e.pageY, contextMenuItemData);
       }}
       onClick={(e) => {
-        clickTimeoutRef.current = setTimeout(() => {
-          if (e.getModifierState('Shift') === true && selectAllHandler) selectAllHandler(songId);
-          else if (e.getModifierState('Control') === true && !isMultipleSelectionEnabled)
-            toggleMultipleSelections(!isAMultipleSelection, 'songs', [songId]);
-          else if (isMultipleSelectionEnabled && multipleSelectionsData.selectionType === 'songs')
-            updateMultipleSelections(songId, 'songs', isAMultipleSelection ? 'remove' : 'add');
-        }, 100);
+        e.preventDefault();
+        if (e.getModifierState('Shift') === true && selectAllHandler) selectAllHandler(songId);
+        else if (e.getModifierState('Control') === true && !isMultipleSelectionEnabled)
+          toggleMultipleSelections(!isAMultipleSelection, 'songs', [songId]);
+        else if (isMultipleSelectionEnabled && multipleSelectionsData.selectionType === 'songs')
+          updateMultipleSelections(songId, 'songs', isAMultipleSelection ? 'remove' : 'add');
       }}
       onDoubleClick={() => {
         if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
@@ -668,6 +667,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
           params={{ songId }}
           title={title}
           className="song-title truncate text-base font-normal outline-offset-1 transition-none focus-visible:outline!"
+          disabled={isMultipleSelectionEnabled}
         >
           {title}
         </NavLink>
@@ -679,7 +679,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
             <NavLink
               to="/main-player/albums/$albumId"
               params={{ albumId: album?.albumId }}
-              disabled={album?.albumId === undefined}
+              disabled={album?.albumId === undefined || isMultipleSelectionEnabled}
               className="cursor-pointer -outline-offset-1 hover:underline focus-visible:outline!"
               title={album.name}
             >

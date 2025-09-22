@@ -537,6 +537,7 @@ const SongCard = (props: SongCardProp) => {
         updateContextMenuData(true, contextMenuItems, e.pageX, e.pageY, contextMenuItemData);
       }}
       onClick={(e) => {
+        e.preventDefault();
         if (e.getModifierState('Shift') === true && selectAllHandler) selectAllHandler(songId);
         else if (e.getModifierState('Control') === true && !isMultipleSelectionEnabled)
           toggleMultipleSelections(!isAMultipleSelection, 'songs', [songId]);
@@ -612,6 +613,7 @@ const SongCard = (props: SongCardProp) => {
               className={`song-title cursor-pointer overflow-hidden text-xl font-normal text-ellipsis whitespace-nowrap outline-offset-1 transition-none hover:underline focus-visible:outline!`}
               title={title}
               tabIndex={0}
+              disabled={isMultipleSelectionEnabled}
             >
               {title}
             </NavLink>

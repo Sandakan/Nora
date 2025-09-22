@@ -27,6 +27,7 @@ export const router = createRouter({
   scrollRestoration: true,
   context: { queryClient },
   defaultPreload: 'intent',
+  defaultPreloadDelay: 100,
   defaultPreloadStaleTime: 0,
   defaultViewTransition: true,
   defaultPendingMs: 1000, // Show pending component if loader exceeds 1 second

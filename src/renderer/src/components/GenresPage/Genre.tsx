@@ -1,5 +1,3 @@
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
 import { useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
@@ -10,6 +8,7 @@ import Button from '../Button';
 import { store } from '@renderer/store/store';
 import { useStore } from '@tanstack/react-store';
 import { useNavigate } from '@tanstack/react-router';
+import NavLink from '../NavLink';
 
 interface GenreProp {
   index: number;
@@ -23,7 +22,7 @@ interface GenreProp {
 }
 
 const Genre = (props: GenreProp) => {
-  const { genreId, songIds, title, artworkPaths, paletteData, className, selectAllHandler } = props;
+  const { genreId, songIds, title, artworkPaths, className, selectAllHandler } = props;
   const isMultipleSelectionEnabled = useStore(
     store,
     (state) => state.multipleSelectionsData.isEnabled
@@ -51,15 +50,15 @@ const Genre = (props: GenreProp) => {
     [genreId, navigate]
   );
 
-  const backgroundColor = useMemo(() => {
-    const swatch = paletteData?.DarkVibrant;
-    if (swatch?.hsl) {
-      const { hsl } = swatch;
+  // const backgroundColor = useMemo(() => {
+  //   const swatch = paletteData?.DarkVibrant;
+  //   if (swatch?.hsl) {
+  //     const { hsl } = swatch;
 
-      return `hsl(${hsl[0] * 360} ${hsl[1] * 100}% ${hsl[2] * 100}%)`;
-    }
-    return 'hsl(0 0% 0%)';
-  }, [paletteData?.DarkVibrant]);
+  //     return `hsl(${hsl[0] * 360} ${hsl[1] * 100}% ${hsl[2] * 100}%)`;
+  //   }
+  //   return 'hsl(0 0% 0%)';
+  // }, [paletteData?.DarkVibrant]);
 
   const playGenreSongs = useCallback(
     (isShuffle = false) => {
@@ -294,16 +293,16 @@ const Genre = (props: GenreProp) => {
   );
 
   return (
-    <div
-      className={`genre group text-background-color-2 dark:text-dark-background-color-2 relative mr-10 mb-6 flex h-36 w-72 cursor-pointer items-center gap-4 overflow-hidden rounded-2xl p-4 transition-[border,border-color] ${className} ${
+    <NavLink
+      to="/main-player/genres/$genreId"
+      params={{ genreId }}
+      className={`genre group bg-background-color-2/70 hover:bg-background-color-2! dark:bg-dark-background-color-2/70 dark:hover:bg-dark-background-color-2! text-background-color-2 dark:text-dark-background-color-2 relative mr-10 mb-6 flex h-36 w-72 cursor-pointer items-center gap-4 overflow-hidden rounded-2xl p-4 backdrop-blur-md transition-[border,border-color] ${className} ${
         isMultipleSelectionEnabled &&
         multipleSelectionsData.selectionType === 'genre' &&
         'border-4 border-transparent'
       } ${isAMultipleSelection && 'border-font-color-highlight! dark:border-dark-font-color-highlight!'}`}
-      style={{
-        backgroundColor
-      }}
       onClick={(e) => {
+        e.preventDefault();
         if (e.getModifierState('Shift') === true && selectAllHandler) selectAllHandler(genreId);
         else if (e.getModifierState('Control') === true && !isMultipleSelectionEnabled)
           toggleMultipleSelections(!isAMultipleSelection, 'genre', [genreId]);
@@ -338,7 +337,7 @@ const Genre = (props: GenreProp) => {
           <MultipleSelectionCheckbox id={genreId} selectionType="genre" className="z-10 mt-2!" />
         )}
       </div>
-    </div>
+    </NavLink>
   );
 };
 
