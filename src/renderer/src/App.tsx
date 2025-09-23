@@ -52,8 +52,8 @@ import AudioPlayer from './other/player';
 import { dispatch, store } from './store/store';
 import i18n from './i18n';
 import { normalizedKeys } from './other/appShortcuts';
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
-import { Outlet } from '@tanstack/react-router';
+// import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
+import { Outlet, useNavigate } from '@tanstack/react-router';
 import { queryClient } from '.';
 import { songQuery } from '@renderer/queries/songs';
 import { artistQuery } from '@renderer/queries/aritsts';
@@ -104,6 +104,7 @@ window.addEventListener('offline', updateNetworkStatus);
 
 export default function App() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   // const [content, dispatch] = useReducer(reducer, DEFAULT_REDUCER_DATA);
   // // Had to use a Ref in parallel with the Reducer to avoid an issue that happens when using content.* not giving the intended data in useCallback functions even though it was added as a dependency of that function.
@@ -1125,7 +1126,9 @@ export default function App() {
     const updateMediaSessionMetaData = () => {
       if (store.state.currentSongData.artwork !== undefined) {
         if (typeof store.state.currentSongData.artwork === 'object') {
-          const blob = new Blob([store.state.currentSongData.artwork]);
+          const artwork = store.state.currentSongData.artwork as Uint8Array<ArrayBuffer>;
+
+          const blob = new Blob([artwork]);
           artworkPath = URL.createObjectURL(blob);
         } else {
           artworkPath = `data:;base64,${store.state.currentSongData.artwork}`;
@@ -1767,30 +1770,16 @@ export default function App() {
             ]);
             break;
           case i18n.t('appShortcutsPrompt.goToSearch'):
-            changeCurrentActivePage('Search');
+            navigate({ to: '/main-player/search' });
             break;
           case i18n.t('appShortcutsPrompt.goToLyrics'):
-            {
-              const current =
-                store.state.navigationHistory.history[
-                  store.state.navigationHistory.pageHistoryIndex
-                ];
-              changeCurrentActivePage(current.pageTitle === 'Lyrics' ? 'Home' : 'Lyrics');
-            }
+            navigate({ to: '/main-player/lyrics' });
             break;
           case i18n.t('appShortcutsPrompt.goToQueue'):
-            {
-              const current =
-                store.state.navigationHistory.history[
-                  store.state.navigationHistory.pageHistoryIndex
-                ];
-              changeCurrentActivePage(
-                current.pageTitle === 'CurrentQueue' ? 'Home' : 'CurrentQueue'
-              );
-            }
+            navigate({ to: '/main-player/queue' });
             break;
           case i18n.t('appShortcutsPrompt.goHome'):
-            updatePageHistoryIndex('home');
+            navigate({ to: '/main-player/home' });
             break;
           case i18n.t('appShortcutsPrompt.goBack'):
             updatePageHistoryIndex('decrement');
@@ -1805,25 +1794,25 @@ export default function App() {
             toggleMultipleSelections(true);
             break;
           case i18n.t('appShortcutsPrompt.selectNextLyricsLine'):
-            // MISSING IMPLEMENTATION.
+            // TODO: Implement logic to select next lyrics line.
             break;
           case i18n.t('appShortcutsPrompt.selectPrevLyricsLine'):
-            // MISSING IMPLEMENTATION.
+            // TODO: Implement logic to select previous lyrics line.
             break;
           case i18n.t('appShortcutsPrompt.selectCustomLyricsLine'):
-            // MISSING IMPLEMENTATION.
+            // TODO: Implement logic to select custom lyrics line.
             break;
           case i18n.t('appShortcutsPrompt.playNextLyricsLine'):
-            // Implement logic to jump to next lyrics line. MISSING IMPLEMENTATION.
+            // TODO: Implement logic to jump to next lyrics line.
             break;
           case i18n.t('appShortcutsPrompt.playPrevLyricsLine'):
-            // Implement logic to jump to previous lyrics line. MISSING IMPLEMENTATION.
+            // TODO: Implement logic to jump to previous lyrics line.
             break;
           case i18n.t('appShortcutsPrompt.toggleTheme'):
             window.api.theme.changeAppTheme();
             break;
           case i18n.t('appShortcutsPrompt.toggleMiniPlayerAlwaysOnTop'):
-            // Implement logic to jump to to trigger mini player always on top. MISSING IMPLEMENTATION.
+            // TODO: Implement logic to jump to to trigger mini player always on top.
             break;
           case i18n.t('appShortcutsPrompt.reload'):
             window.api.appControls.restartRenderer?.('Shortcut: Ctrl+R');
@@ -1842,21 +1831,21 @@ export default function App() {
       }
     },
     [
-      updateVolume,
+      toggleSongPlayback,
       toggleMutedState,
       handleSkipForwardClick,
       handleSkipBackwardClick,
+      updateVolume,
       toggleShuffling,
       toggleRepeat,
       toggleIsFavorite,
-      updatePlayerType,
-      changeCurrentActivePage,
-      changePromptMenuData,
-      toggleMultipleSelections,
-      toggleSongPlayback,
-      updatePageHistoryIndex,
       addNewNotifications,
-      t
+      t,
+      navigate,
+      updatePageHistoryIndex,
+      updatePlayerType,
+      toggleMultipleSelections,
+      changePromptMenuData
     ]
   );
 
@@ -2071,7 +2060,7 @@ export default function App() {
           <Outlet />
         </div>
       </AppUpdateContext.Provider>
-      <TanStackRouterDevtools position="bottom-right" />
+      {/* <TanStackRouterDevtools position="bottom-right" /> */}
     </ErrorBoundary>
   );
 }
