@@ -41,7 +41,6 @@ import manageLastFmAuth from './auth/manageLastFmAuth';
 import { initializeIPC } from './ipc';
 import checkForUpdates from './update';
 import { clearDiscordRpcActivity } from './other/discordRPC';
-import { is } from '@electron-toolkit/utils';
 
 import noraAppIcon from '../../resources/logo_light_mode.png?asset';
 import logger from './logger';
@@ -191,7 +190,7 @@ const createWindow = async () => {
     show: false
   });
 
-  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+  if (IS_DEVELOPMENT && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL']);
   } else {
     mainWindow.loadFile(join(import.meta.dirname, '../renderer/index.html'));

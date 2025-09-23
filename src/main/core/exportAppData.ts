@@ -2,20 +2,11 @@ import fs from 'fs/promises';
 import path from 'path';
 import { type OpenDialogOptions, app } from 'electron';
 
-import {
-  getAlbumsData,
-  getArtistsData,
-  getGenresData,
-  getListeningData,
-  getPlaylistData,
-  getSongsData,
-  getBlacklistData,
-  getPaletteData
-} from '../filesystem';
 import { sendMessageToRenderer, showOpenDialog } from '../main';
 import logger from '../logger';
 import copyDir from '../utils/copyDir';
 import makeDir from '../utils/makeDir';
+import { exportDatabase } from '@main/db/db';
 
 const DEFAULT_EXPORT_DIALOG_OPTIONS: OpenDialogOptions = {
   title: 'Select a Destination to Export App Data',
@@ -41,51 +32,17 @@ in these config files.
 
 const exportAppData = async (localStorageData: string) => {
   const destinations = await showOpenDialog(DEFAULT_EXPORT_DIALOG_OPTIONS);
+  const dbDump = await exportDatabase();
 
   const operations = [
     // SONG DATA
     {
-      filename: 'songs.json',
-      dataString: JSON.stringify({ songs: getSongsData() })
-    },
-    // PALETTE DATA
-    {
-      filename: 'palettes.json',
-      dataString: JSON.stringify({ palettes: getPaletteData() })
-    },
-    // BLACKLIST DATA
-    {
-      filename: 'blacklist.json',
-      dataString: JSON.stringify({ blacklists: getBlacklistData() })
-    },
-    // ARTIST DATA
-    {
-      filename: 'artists.json',
-      dataString: JSON.stringify({ artists: getArtistsData() })
-    },
-    // PLAYLIST DATA
-    {
-      filename: 'playlists.json',
-      dataString: JSON.stringify({ playlists: getPlaylistData() })
-    },
-    // ALBUM DATA
-    {
-      filename: 'albums.json',
-      dataString: JSON.stringify({ albums: getAlbumsData() })
-    },
-    // GENRE DATA
-    {
-      filename: 'genres.json',
-      dataString: JSON.stringify({ genres: getGenresData() })
-    },
-    // LISTENING DATA
-    {
-      filename: 'listening_data.json',
-      dataString: JSON.stringify({ listeningData: getListeningData() })
+      filename: 'nora.pglite.db.sql',
+      dataString: dbDump
     },
     // LOCAL STORAGE DATA
     {
-      filename: 'localStorageData.json',
+      filename: 'local_storage.json',
       dataString: localStorageData
     },
     // WARNING MESSAGE

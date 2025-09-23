@@ -7,6 +7,7 @@ import { mkdirSync } from 'fs';
 import * as schema from '@db/schema';
 import logger from '@main/logger';
 // import type { Logger } from 'drizzle-orm';
+import { pgDump } from '@electric-sql/pglite-tools/pg_dump';
 import { PGlite } from '@electric-sql/pglite';
 import { seedDatabase } from './seed';
 // import { seedDatabase } from './seed';
@@ -17,21 +18,32 @@ const migrationsFolder = path.resolve(import.meta.dirname, '../../resources/driz
 logger.debug(`Migrations folder: ${migrationsFolder}`);
 
 mkdirSync(DB_PATH, { recursive: true });
-const instance = await PGlite.create(DB_PATH, { debug: 5 });
-instance.onNotification((notification) => {
+
+const pgliteInstance = await PGlite.create(DB_PATH, { debug: 5 });
+pgliteInstance.onNotification((notification) => {
   logger.info('Database notification:', { notification });
 });
 
-export const db = drizzle(instance, {
+export const db = drizzle(pgliteInstance, {
   schema
 });
 
 export const closeDatabaseInstance = async () => {
-  if (instance.closed) return logger.debug('Database instance already closed.');
+  if (pgliteInstance.closed) return logger.debug('Database instance already closed.');
 
-  await instance.close();
+  await pgliteInstance.close();
   logger.debug('Database instance closed.');
 };
 
 await migrate(db, { migrationsFolder });
 await seedDatabase();
+
+export const exportDatabase = async () => {
+  // TODO: Temporary solution until https://github.com/electric-sql/pglite/issues/606 is resolved
+  const newPgliteInstance = await pgliteInstance.clone();
+
+  const dump = await pgDump({ pg: newPgliteInstance as PGlite });
+  const dumpText = await dump.text();
+
+  return dumpText;
+};

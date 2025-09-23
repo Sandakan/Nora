@@ -107,6 +107,7 @@
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.3.7",
+    "@electric-sql/pglite-tools": "^0.2.14",
     "@electron-toolkit/preload": "^3.0.0",
     "@headlessui/react": "^2.2.0",
     "@hello-pangea/dnd": "^18.0.1",
