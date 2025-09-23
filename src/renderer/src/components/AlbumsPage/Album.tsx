@@ -319,6 +319,7 @@ export const Album = (props: AlbumProp) => {
     <NavLink
       to="/main-player/albums/$albumId"
       params={{ albumId: props.albumId }}
+      preload={isMultipleSelectionEnabled ? false : undefined}
       // style={{ animationDelay: `${50 * (props.index + 1)}ms` }}
       className={`album group mr-6 mb-2 flex h-68 w-48 flex-col justify-between overflow-hidden rounded-md p-4 ${
         props.className ?? ''

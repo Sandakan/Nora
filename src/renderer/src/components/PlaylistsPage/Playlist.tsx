@@ -365,6 +365,7 @@ export const Playlist = (props: PlaylistProp) => {
     <NavLink
       to={'/main-player/playlists/$playlistId'}
       params={{ playlistId: props.playlistId }}
+      preload={isMultipleSelectionEnabled ? false : undefined}
       className={`playlist group hover:bg-background-color-2/50 dark:hover:bg-dark-background-color-2/50 ${
         props.playlistId
       } text-font-color-black dark:text-font-color-white mr-12 mb-8 flex h-fit max-h-52 min-h-[12rem] w-36 flex-col justify-between rounded-md p-4 ${

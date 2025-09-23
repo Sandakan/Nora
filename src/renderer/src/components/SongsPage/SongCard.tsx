@@ -610,6 +610,7 @@ const SongCard = (props: SongCardProp) => {
             <NavLink
               to="/main-player/songs/$songId"
               params={{ songId }}
+              preload={isMultipleSelectionEnabled ? false : undefined}
               className={`song-title cursor-pointer overflow-hidden text-xl font-normal text-ellipsis whitespace-nowrap outline-offset-1 transition-none hover:underline focus-visible:outline!`}
               title={title}
               tabIndex={0}

@@ -6,7 +6,13 @@ import {
   getPlaylistRelatedQueueInfo,
   getSongRelatedQueueInfo
 } from '@main/db/queries/queue';
-import { parseSongArtworks } from '@main/fs/resolveFilePaths';
+import { addDefaultAppProtocolToFilePath, parseSongArtworks } from '@main/fs/resolveFilePaths';
+
+const addFileUrlToPath = (path?: string) => {
+  if (!path) return '';
+  return addDefaultAppProtocolToFilePath(path);
+};
+
 export const getQueueInfo = async (
   queueType: QueueTypes,
   id: string
@@ -19,7 +25,7 @@ export const getQueueInfo = async (
         const artworkData = parseSongArtworks(artworks);
 
         return {
-          artworkPath: artworkData.artworkPath,
+          artworkPath: addFileUrlToPath(artworkData.artworkPath),
           title: data?.title || ''
         };
       }
@@ -28,28 +34,28 @@ export const getQueueInfo = async (
     case 'artist': {
       const data = await getArtistRelatedQueueInfo(Number(id));
       return {
-        artworkPath: data?.artworks.at(0)?.artwork?.path || '',
+        artworkPath: addFileUrlToPath(data?.artworks.at(0)?.artwork?.path),
         title: data?.name || ''
       };
     }
     case 'album': {
       const data = await getAlbumRelatedQueueInfo(Number(id));
       return {
-        artworkPath: data?.artworks.at(0)?.artwork?.path || '',
+        artworkPath: addFileUrlToPath(data?.artworks.at(0)?.artwork?.path),
         title: data?.title || ''
       };
     }
     case 'playlist': {
       const data = await getPlaylistRelatedQueueInfo(Number(id));
       return {
-        artworkPath: data?.artworks.at(0)?.artwork?.path || '',
+        artworkPath: addFileUrlToPath(data?.artworks.at(0)?.artwork?.path),
         title: data?.name || ''
       };
     }
     case 'genre': {
       const data = await getGenreRelatedQueueInfo(Number(id));
       return {
-        artworkPath: data?.artworks.at(0)?.artwork?.path || '',
+        artworkPath: addFileUrlToPath(data?.artworks.at(0)?.artwork?.path),
         title: data?.name || ''
       };
     }

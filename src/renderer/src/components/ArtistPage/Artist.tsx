@@ -295,6 +295,7 @@ export const Artist = (props: ArtistProp) => {
     <NavLink
       to="/main-player/artists/$artistId"
       params={{ artistId: props.artistId }}
+      preload={isMultipleSelectionEnabled ? false : undefined}
       // style={{ animationDelay: `${50 * (props.index + 1)}ms` }}
       className={`artist ${appearFromBottom && 'appear-from-bottom'} hover:bg-background-color-2/50 dark:hover:bg-dark-background-color-2/50 mr-2 flex h-44 w-40 cursor-pointer flex-col justify-between overflow-hidden rounded-lg p-4 ${
         props.className

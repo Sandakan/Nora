@@ -12,6 +12,7 @@ import artistCoverImage from '../../renderer/src/assets/images/webp/artist_cover
 import playlistCoverImage from '../../renderer/src/assets/images/webp/playlist_cover_default.webp?asset';
 import favoritesPlaylistCoverImage from '../../renderer/src/assets/images/webp/favorites-playlist-icon.webp?asset';
 import historyPlaylistCoverImage from '../../renderer/src/assets/images/webp/history-playlist-icon.webp?asset';
+import path from 'node:path';
 
 let timestamps = {
   songs: Date.now(),
@@ -366,4 +367,8 @@ export const removeDefaultAppProtocolFromFilePath = (filePath: string) => {
 
   if (platform === 'linux') return `/${strippedPath}`;
   return strippedPath;
+};
+
+export const addDefaultAppProtocolToFilePath = (filePath: string) => {
+  return path.join('nora://localfiles/', filePath);
 };

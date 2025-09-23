@@ -296,6 +296,7 @@ const Genre = (props: GenreProp) => {
     <NavLink
       to="/main-player/genres/$genreId"
       params={{ genreId }}
+      preload={isMultipleSelectionEnabled ? false : undefined}
       className={`genre group bg-background-color-2/70 hover:bg-background-color-2! dark:bg-dark-background-color-2/70 dark:hover:bg-dark-background-color-2! text-background-color-2 dark:text-dark-background-color-2 relative mr-10 mb-6 flex h-36 w-72 cursor-pointer items-center gap-4 overflow-hidden rounded-2xl p-4 backdrop-blur-md transition-[border,border-color] ${className} ${
         isMultipleSelectionEnabled &&
         multipleSelectionsData.selectionType === 'genre' &&
