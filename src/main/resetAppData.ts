@@ -23,7 +23,10 @@ const resetAppData = async () => {
       if (isResourcePathADirectory)
         await fs
           .rm(path.join(userDataPath, resourcePath), {
-            recursive: true
+            recursive: true,
+            maxRetries: 5,
+            retryDelay: 150,
+            force: true
           })
           .catch(manageErrors);
       else await fs.unlink(path.join(userDataPath, resourcePath)).catch(manageErrors);
