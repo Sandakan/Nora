@@ -88,7 +88,7 @@ import convertLyricsToRomaja from './utils/convertToRomaja';
 import resetLyrics from './utils/resetLyrics';
 import logger, { logFilePath } from './logger';
 import { getListeningData } from './core/getListeningData';
-import { getUserSettings } from './db/queries/settings';
+import { getUserSettings, saveUserSettings } from './db/queries/settings';
 import { getQueueInfo } from './utils/getQueueInfo';
 
 export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSignal) {
@@ -172,6 +172,9 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     // ipcMain.handle('app/saveUserData', (_, dataType: UserDataTypes, data: string) =>
     //   saveUserData(dataType, data)
     // );
+    ipcMain.handle('app/saveUserSettings', (_, settings: Partial<UserSettings>) =>
+      saveUserSettings(settings)
+    );
 
     ipcMain.handle('app/getStorageUsage', () => getStorageUsage());
 
@@ -519,3 +522,4 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     ipcMain.on('app/restartApp', (_: unknown, reason: string) => restartApp(reason));
   }
 }
+

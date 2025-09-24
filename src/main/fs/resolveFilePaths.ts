@@ -364,10 +364,11 @@ export const removeDefaultAppProtocolFromFilePath = (filePath: string) => {
     ''
   );
 
-  if (platform === 'linux') return `/${strippedPath}`;
+  if (platform === 'linux' || platform === 'darwin') return `/${strippedPath}`;
   return strippedPath;
 };
 
 export const addDefaultAppProtocolToFilePath = (filePath: string) => {
   return joinPath('nora://localfiles/', filePath);
 };
+

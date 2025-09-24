@@ -45,5 +45,8 @@ export const exportDatabase = async () => {
   const dump = await pgDump({ pg: newPgliteInstance as PGlite });
   const dumpText = await dump.text();
 
+  await newPgliteInstance.close();
+
   return dumpText;
 };
+

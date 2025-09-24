@@ -107,7 +107,9 @@ if (!hasSingleInstanceLock) {
 
 export const IS_DEVELOPMENT = !app.isPackaged || process.env.NODE_ENV === 'development';
 
-const appIcon = nativeImage.createFromPath(noraAppIcon);
+const appIcon = nativeImage
+  .createFromPath(noraAppIcon)
+  .resize(process.platform === 'darwin' ? { width: 15, height: 15 } : { width: 50, height: 50 });
 
 // dotenv.config({ debug: true });
 saveAbortController('main', abortController);
@@ -830,3 +832,4 @@ export function stopScreenSleeping() {
   powerSaveBlockerId = powerSaveBlocker.start('prevent-display-sleep');
   logger.debug('Screen sleeping prevented.', { powerSaveBlockerId });
 }
+
