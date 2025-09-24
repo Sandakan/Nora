@@ -754,14 +754,7 @@ declare global {
     tempArtworkCacheSize: number;
     totalArtworkCacheSize: number;
     logSize: number;
-    songDataSize: number;
-    artistDataSize: number;
-    albumDataSize: number;
-    genreDataSize: number;
-    playlistDataSize: number;
-    paletteDataSize: number;
-    userDataSize: number;
-    librarySize: number;
+    databaseSize: number;
     totalKnownItemsSize: number;
     otherSize: number;
   }
@@ -773,6 +766,14 @@ declare global {
     appDataSizes: AppDataStorageMetrics;
     totalSize: number;
     generatedDate: string;
+  }
+
+  interface DatabaseMetrics {
+    songCount: number;
+    artistCount: number;
+    albumCount: number;
+    genreCount: number;
+    playlistCount: number;
   }
 
   // ? Search related types

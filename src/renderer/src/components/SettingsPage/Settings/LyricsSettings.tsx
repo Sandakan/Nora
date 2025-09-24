@@ -34,7 +34,7 @@ const LyricsSettings = () => {
   const { mutate: updateSaveLyricsInLrcFilesForSupportedSongs } = useMutation({
     mutationFn: (enableSave: boolean) =>
       window.api.settings.updateSaveLyricsInLrcFilesForSupportedSongs(enableSave),
-    onSuccess: () => {
+    onSettled: () => {
       queryClient.invalidateQueries(settingsQuery.all);
     }
   });
@@ -42,7 +42,7 @@ const LyricsSettings = () => {
   const { mutate: updateCustomLrcFilesSaveLocation } = useMutation({
     mutationFn: (location: string) =>
       window.api.settings.updateCustomLrcFilesSaveLocation(location),
-    onSuccess: () => {
+    onSettled: () => {
       queryClient.invalidateQueries(settingsQuery.all);
     }
   });

@@ -21,7 +21,7 @@ const AccountsSettings = () => {
   const { mutate: updateDiscordRpcState } = useMutation({
     mutationFn: (enableDiscordRpc: boolean) =>
       window.api.settings.updateDiscordRpcState(enableDiscordRpc),
-    onSuccess: () => {
+    onSettled: () => {
       queryClient.invalidateQueries(settingsQuery.all);
     }
   });
@@ -29,7 +29,7 @@ const AccountsSettings = () => {
   const { mutate: updateSongScrobblingToLastFMState } = useMutation({
     mutationFn: (enableScrobbling: boolean) =>
       window.api.settings.updateSongScrobblingToLastFMState(enableScrobbling),
-    onSuccess: () => {
+    onSettled: () => {
       queryClient.invalidateQueries(settingsQuery.all);
     }
   });
@@ -37,7 +37,7 @@ const AccountsSettings = () => {
   const { mutate: updateSongFavoritesToLastFMState } = useMutation({
     mutationFn: (enableFavorites: boolean) =>
       window.api.settings.updateSongFavoritesToLastFMState(enableFavorites),
-    onSuccess: () => {
+    onSettled: () => {
       queryClient.invalidateQueries(settingsQuery.all);
     }
   });
@@ -45,7 +45,7 @@ const AccountsSettings = () => {
   const { mutate: updateSendNowPlayingSongDataToLastFMState } = useMutation({
     mutationFn: (enableNowPlaying: boolean) =>
       window.api.settings.updateNowPlayingSongDataToLastFMState(enableNowPlaying),
-    onSuccess: () => {
+    onSettled: () => {
       queryClient.invalidateQueries(settingsQuery.all);
     }
   });

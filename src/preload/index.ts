@@ -293,7 +293,8 @@ const userData = {
 // $ STORAGE DATA
 const storageData = {
   getStorageUsage: (forceRefresh?: boolean): Promise<StorageMetrics> =>
-    ipcRenderer.invoke('app/getStorageUsage', forceRefresh)
+    ipcRenderer.invoke('app/getStorageUsage', forceRefresh),
+  getDatabaseMetrics: (): Promise<DatabaseMetrics> => ipcRenderer.invoke('app/getDatabaseMetrics')
 };
 
 //  $ USER SETTINGS

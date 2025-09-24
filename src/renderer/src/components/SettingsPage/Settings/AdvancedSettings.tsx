@@ -11,7 +11,7 @@ const AdvancedSettings = () => {
 
   const { mutate: updateSaveVerboseLogs } = useMutation({
     mutationFn: (enable: boolean) => window.api.settings.updateSaveVerboseLogs(enable),
-    onSuccess: () => {
+    onSettled: () => {
       queryClient.invalidateQueries(settingsQuery.all);
     }
   });

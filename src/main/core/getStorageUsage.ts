@@ -3,10 +3,10 @@ import { app } from 'electron';
 
 import getRootSize from '../utils/getRootSize';
 import getDirSize from '../utils/getDirSize';
-import getFileSize from '../utils/getFileSize';
 import logger from '../logger';
+import { DB_PATH } from '@main/db/db';
 
-const getAppDataStorageMetrics = async () => {
+const getAppDataStorageMetrics = async (): Promise<AppDataStorageMetrics> => {
   const appDataPath = app.getPath('userData');
 
   const appDataSize = await getDirSize(appDataPath);
@@ -18,22 +18,9 @@ const getAppDataStorageMetrics = async () => {
 
   const logSize = await getDirSize(path.join(appDataPath, 'logs'));
 
-  const songDataSize = await getFileSize(path.join(appDataPath, 'songs.json'));
-  const artistDataSize = await getFileSize(path.join(appDataPath, 'artists.json'));
-  const albumDataSize = await getFileSize(path.join(appDataPath, 'albums.json'));
-  const genreDataSize = await getFileSize(path.join(appDataPath, 'genres.json'));
-  const playlistDataSize = await getFileSize(path.join(appDataPath, 'playlists.json'));
-  const paletteDataSize = await getFileSize(path.join(appDataPath, 'palettes.json'));
-  const userDataSize = await getFileSize(path.join(appDataPath, 'userData.json'));
+  const databaseSize = await getDirSize(DB_PATH);
 
-  const librarySize =
-    songDataSize +
-    artistDataSize +
-    albumDataSize +
-    genreDataSize +
-    playlistDataSize +
-    paletteDataSize;
-  const totalKnownItemsSize = librarySize + totalArtworkCacheSize + userDataSize + logSize;
+  const totalKnownItemsSize = databaseSize + totalArtworkCacheSize + logSize;
 
   const otherSize = appDataSize - totalKnownItemsSize;
 
@@ -43,14 +30,7 @@ const getAppDataStorageMetrics = async () => {
     tempArtworkCacheSize,
     totalArtworkCacheSize,
     logSize,
-    songDataSize,
-    artistDataSize,
-    albumDataSize,
-    genreDataSize,
-    playlistDataSize,
-    paletteDataSize,
-    userDataSize,
-    librarySize,
+    databaseSize,
     totalKnownItemsSize,
     otherSize
   };
@@ -86,7 +66,7 @@ const getStorageUsage = async () => {
 
     const totalSize = appDataSizes.appDataSize + appFolderSize;
 
-    const storageMetrics = {
+    const storageMetrics: StorageMetrics = {
       rootSizes,
       remainingSize,
       appFolderSize,

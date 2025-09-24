@@ -13,11 +13,19 @@ import Checkbox from '../../Checkbox';
 import DynamicThemeSettings from './DynamicThemeSettings';
 import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store/store';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { settingsQuery } from '@renderer/queries/settings';
+import { queryClient } from '@renderer/index';
 
 const ThemeSettings = () => {
   const { data: userSettings } = useQuery(settingsQuery.all);
+
+  const { mutate: changeAppTheme } = useMutation({
+    mutationFn: async (theme: AppTheme) => window.api.theme.changeAppTheme(theme),
+    onSettled: () => {
+      queryClient.invalidateQueries(settingsQuery.all);
+    }
+  });
 
   const currentSongPaletteData = useStore(store, (state) => state.currentSongData?.paletteData);
   const enableImageBasedDynamicThemes = useStore(
@@ -49,8 +57,8 @@ const ThemeSettings = () => {
               htmlFor="lightThemeRadioBtn"
               tabIndex={0}
               className={`theme-change-radio-btn bg-background-color-2/75 hover:bg-background-color-2 dark:bg-dark-background-color-2/75 dark:hover:bg-dark-background-color-2 mb-2 flex cursor-pointer flex-col items-center rounded-md p-6 outline-offset-1 focus-within:outline-2 ${
-                userSettings.useSystemTheme &&
-                userSettings.isDarkMode &&
+                !userSettings.useSystemTheme &&
+                !userSettings.isDarkMode &&
                 'bg-background-color-3! dark:bg-dark-background-color-3!'
               }`}
               onKeyDown={focusInput}
@@ -61,8 +69,8 @@ const ThemeSettings = () => {
                 className="peer invisible absolute -left-[9999px] mr-4"
                 value="lightTheme"
                 id="lightThemeRadioBtn"
-                defaultChecked={userSettings.useSystemTheme && userSettings.isDarkMode}
-                onClick={() => window.api.theme.changeAppTheme('light')}
+                defaultChecked={!userSettings.useSystemTheme && !userSettings.isDarkMode}
+                onClick={() => changeAppTheme('light')}
               />
               <Img loading="eager" src={HomeImgLight} className="h-24 w-40 shadow-md" />
               <span className="peer-checked:text-font-color-black! dark:peer-checked:text-font-color-black! mt-4">
@@ -74,7 +82,7 @@ const ThemeSettings = () => {
               htmlFor="darkThemeRadioBtn"
               tabIndex={0}
               className={`theme-change-radio-btn bg-background-color-2/75 hover:bg-background-color-2 dark:bg-dark-background-color-2/75 dark:hover:bg-dark-background-color-2 mb-2 flex cursor-pointer flex-col items-center rounded-md p-6 outline-offset-1 focus-within:outline-2 ${
-                userSettings.useSystemTheme &&
+                !userSettings.useSystemTheme &&
                 userSettings.isDarkMode &&
                 'bg-background-color-3! dark:bg-dark-background-color-3!'
               }`}
@@ -86,8 +94,8 @@ const ThemeSettings = () => {
                 className="peer invisible absolute -left-[9999px] mr-4"
                 value="darkTheme"
                 id="darkThemeRadioBtn"
-                defaultChecked={userSettings.useSystemTheme && userSettings.isDarkMode}
-                onClick={() => window.api.theme.changeAppTheme('dark')}
+                defaultChecked={!userSettings.useSystemTheme && userSettings.isDarkMode}
+                onClick={() => changeAppTheme('dark')}
               />
               <Img loading="eager" src={HomeImgDark} className="h-24 w-40 shadow-md" />
               <span className="peer-checked:text-font-color-black! dark:peer-checked:text-font-color-black! mt-4">
@@ -111,7 +119,7 @@ const ThemeSettings = () => {
                 value="systemTheme"
                 id="systemThemeRadioBtn"
                 defaultChecked={userSettings.useSystemTheme}
-                onClick={() => window.api.theme.changeAppTheme('system')}
+                onClick={() => changeAppTheme('system')}
               />
               <Img loading="eager" src={HomeImgLightDark} className="h-24 w-40 shadow-md" />
               <span className="peer-checked:text-font-color-black! dark:peer-checked:text-font-color-black! mt-4">

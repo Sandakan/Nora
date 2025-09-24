@@ -462,6 +462,7 @@
     "otherApplications": "Other applications",
     "artworkCache": "Artwork cache",
     "tempArtworkCache": "Temp artwork cache",
+    "databaseData": "Database",
     "songsData": "Song data",
     "artistsData": "Artist data",
     "albumsData": "Album data",

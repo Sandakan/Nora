@@ -12,7 +12,7 @@ const StartupSettings = () => {
   const { mutate: updateOpenWindowAsHiddenOnSystemStart } = useMutation({
     mutationFn: (enableHidden: boolean) =>
       window.api.settings.updateOpenWindowAsHiddenOnSystemStart(enableHidden),
-    onSuccess: () => {
+    onSettled: () => {
       queryClient.invalidateQueries(settingsQuery.all);
     }
   });
@@ -20,7 +20,7 @@ const StartupSettings = () => {
   const { mutate: updateHideWindowOnCloseState } = useMutation({
     mutationFn: (hideOnClose: boolean) =>
       window.api.settings.updateHideWindowOnCloseState(hideOnClose),
-    onSuccess: () => {
+    onSettled: () => {
       queryClient.invalidateQueries(settingsQuery.all);
     }
   });

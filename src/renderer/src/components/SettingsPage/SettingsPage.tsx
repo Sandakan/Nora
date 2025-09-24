@@ -15,6 +15,7 @@ import PerformanceSettings from './Settings/PerformanceSettings';
 import AdvancedSettings from './Settings/AdvancedSettings';
 import AccountsSettings from './Settings/AccountsSettings';
 import LanguageSettings from './Settings/LanguageSettings';
+import StorageSettings from './Settings/StorageSettings';
 
 const SettingsPage = () => {
   const { t } = useTranslation();
@@ -60,7 +61,7 @@ const SettingsPage = () => {
           <StartupSettings />
 
           {/* STORAGE SETTINGS */}
-          {/* <StorageSettings /> */}
+          <StorageSettings />
 
           {/* ADVANCED SETTINGS */}
           <AdvancedSettings />

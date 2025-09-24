@@ -90,6 +90,7 @@ import logger, { logFilePath } from './logger';
 import { getListeningData } from './core/getListeningData';
 import { getUserSettings, saveUserSettings } from './db/queries/settings';
 import { getQueueInfo } from './utils/getQueueInfo';
+import { getDatabaseMetrics } from './db/queries/other';
 
 export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSignal) {
   if (mainWindow) {
@@ -177,6 +178,7 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     );
 
     ipcMain.handle('app/getStorageUsage', () => getStorageUsage());
+    ipcMain.handle('app/getDatabaseMetrics', () => getDatabaseMetrics());
 
     ipcMain.handle('app/getUserData', async () => await getUserSettings());
     ipcMain.handle('app/getUserSettings', async () => await getUserSettings());
@@ -522,4 +524,3 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     ipcMain.on('app/restartApp', (_: unknown, reason: string) => restartApp(reason));
   }
 }
-

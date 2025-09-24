@@ -196,7 +196,7 @@ function ArtistInfoPage() {
   const { mutate: toggleLike } = useMutation({
     mutationFn: () =>
       window.api.artistsData.toggleLikeArtists([artistData.artistId], !artistData.isAFavorite),
-    onSuccess: () => {
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: artistQuery._def });
     }
   });
