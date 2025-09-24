@@ -2,7 +2,7 @@ import { drizzle } from 'drizzle-orm/pglite';
 import { migrate } from 'drizzle-orm/pglite/migrator';
 import { app } from 'electron';
 import path from 'path';
-import { mkdirSync, unlinkSync } from 'fs';
+import { mkdirSync, rmSync } from 'fs';
 
 import * as schema from '@db/schema';
 import logger from '@main/logger';
@@ -62,13 +62,13 @@ export const importDatabase = async (query: string) => {
   await closeDatabaseInstance();
 
   // Delete the existing database file
-  unlinkSync(DB_PATH);
+  rmSync(DB_PATH);
 
-  logger.info('Database file deleted. Reinitializing database...');
+  logger.info('Database folder deleted. Reinitializing database...');
 
   // Recreate the database instance
   const newPgliteInstance = await PGlite.create(DB_PATH, { debug: 5 });
-  newPgliteInstance.exec(query);
+  await newPgliteInstance.exec(query);
 
   await newPgliteInstance.close();
 

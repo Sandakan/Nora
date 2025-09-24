@@ -8,6 +8,8 @@ import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Checkbox from '../Checkbox';
 import Button from '../Button';
 import Img from '../Img';
+import { useSuspenseQuery } from '@tanstack/react-query';
+import { playlistQuery } from '@renderer/queries/playlists';
 
 interface AddSongsToPlaylistProp {
   songIds: string[];
@@ -77,27 +79,10 @@ const AddSongsToPlaylistsPrompt = (props: AddSongsToPlaylistProp) => {
   const { t } = useTranslation();
 
   const { songIds } = props;
-  const [playlists, setPlaylists] = useState([] as SelectPlaylist[]);
-
-  useEffect(() => {
-    window.api.playlistsData
-      .getPlaylistData([], undefined, true)
-      .then((res) => {
-        if (res.length > 0) {
-          setPlaylists(() =>
-            res.map((playlist) => {
-              return {
-                ...playlist,
-                isSelected:
-                  songIds.length === 1 && playlist.songs.some((id) => songIds.includes(id))
-              };
-            })
-          );
-        }
-        return undefined;
-      })
-      .catch((err) => console.error(err));
-  }, [songIds]);
+  const { data: playlists } = useSuspenseQuery({
+    ...playlistQuery.all({ sortType: 'aToZ' }),
+    select: (data) => data.data
+  });
 
   const addSongsToPlaylists = useCallback(() => {
     const selectedPlaylists = playlists.filter((playlist) => playlist.isSelected);

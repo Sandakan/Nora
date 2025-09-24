@@ -664,8 +664,9 @@ export async function resetApp(isRestartApp = true) {
     logger.error(`Error occurred when resetting the app. Reloading the app now.`, { error });
   } finally {
     logger.debug(`Reloading the ${isRestartApp ? 'app' : 'renderer'}`);
-    if (isRestartApp) restartApp('App reset.');
-    else mainWindow.webContents.reload();
+
+    restartApp('App reset.');
+    // else mainWindow.webContents.reload();
   }
 }
 
@@ -832,4 +833,3 @@ export function stopScreenSleeping() {
   powerSaveBlockerId = powerSaveBlocker.start('prevent-display-sleep');
   logger.debug('Screen sleeping prevented.', { powerSaveBlockerId });
 }
-
