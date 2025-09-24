@@ -3,17 +3,7 @@ import path from 'path';
 import { app } from 'electron';
 import logger from './logger';
 
-const resourcePaths = [
-  'songs.json',
-  'artists.json',
-  'albums.json',
-  'genres.json',
-  'playlists.json',
-  'userData.json',
-  'listening_data.json',
-  'blacklist.json',
-  'song_covers'
-];
+const resourcePaths = ['nora.pglite.db.sql', 'listening_data.json', 'song_covers'];
 const userDataPath = app.getPath('userData');
 
 const manageErrors = (error: Error) => {
@@ -44,3 +34,4 @@ const resetAppData = async () => {
 };
 
 export default resetAppData;
+

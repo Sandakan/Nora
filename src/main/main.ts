@@ -22,7 +22,6 @@ import {
   type Display
 } from 'electron';
 
-import { resetAppCache } from './filesystem';
 import { version, appPreferences } from '../../package.json';
 import { savePendingMetadataUpdates } from './updateSongId3Tags';
 import addWatchersToFolders from './fs/addWatchersToFolders';
@@ -655,8 +654,9 @@ export async function resetApp(isRestartApp = true) {
   logger.debug('Started the resetting process of the app.');
   try {
     await mainWindow.webContents.session.clearStorageData();
-    resetAppCache();
+    await closeDatabaseInstance();
     await resetAppData();
+
     logger.debug(`Successfully reset the app. Restarting the app now.`);
     sendMessageToRenderer({ messageCode: 'RESET_SUCCESSFUL' });
   } catch (error) {

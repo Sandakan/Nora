@@ -20,9 +20,11 @@ import { queryClient } from '@renderer/index';
 import { songQuery } from '@renderer/queries/songs';
 import { artistQuery } from '@renderer/queries/aritsts';
 
+// TODO: Implement logic to fetch recently played songs from the backend or local storage.
 const fetchRecentlyPlayedSongs = async (
   noOfRecentlyAddedSongCards: number
 ): Promise<SongData[]> => [];
+// TODO: Implement logic to fetch recent song artists from the backend or local storage.
 const fetchRecentSongArtists = async (
   noOfRecentlyAddedArtistCards: number
 ): Promise<Artist[]> => [];
@@ -375,3 +377,4 @@ function HomePage() {
     </MainContainer>
   );
 }
+

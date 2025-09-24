@@ -47,7 +47,7 @@ function GenresPage() {
   );
   const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
 
-  const { updateCurrentlyActivePageData, toggleMultipleSelections } = useContext(AppUpdateContext);
+  const { toggleMultipleSelections } = useContext(AppUpdateContext);
   const { t } = useTranslation();
   const genresPageSortingState = useStore(
     store,
@@ -129,14 +129,10 @@ function GenresPage() {
                 value={sortingOrder}
                 options={genreSortOptions}
                 onChange={(e) => {
-                  updateCurrentlyActivePageData((currentData) => ({
-                    ...currentData,
-                    sortingOrder: e.currentTarget.value as ArtistSortTypes
-                  }));
                   navigate({
                     search: (prev) => ({
                       ...prev,
-                      sortingOrder: e.currentTarget.value as AlbumSortTypes
+                      sortingOrder: e.currentTarget.value as GenreSortTypes
                     })
                   });
                 }}
@@ -177,3 +173,4 @@ function GenresPage() {
     </MainContainer>
   );
 }
+

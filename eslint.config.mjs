@@ -14,6 +14,7 @@ import importPlugin from 'eslint-plugin-import';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
 import promiseConfigs from 'eslint-plugin-promise';
 import drizzleConfig from 'eslint-plugin-drizzle';
+import simpleImportSort from 'eslint-plugin-simple-import-sort';
 
 // mimic CommonJS variables -- not needed if using CommonJS
 const __filename = fileURLToPath(import.meta.url);
@@ -36,7 +37,8 @@ export default tsLint.config(
     files: ['**/**/*.{js,ts,jsx,tsx}'],
     plugins: {
       react: react,
-      drizzle: drizzleConfig
+      drizzle: drizzleConfig,
+      'simple-import-sort': simpleImportSort
     },
     extends: [importPlugin.flatConfigs.recommended, importPlugin.flatConfigs.typescript],
     settings: {
@@ -73,3 +75,4 @@ export default tsLint.config(
     }
   }
 );
+

@@ -502,17 +502,3 @@ export async function getDirectoriesRecursive(srcpath: string): Promise<string[]
   }
 }
 
-export const resetAppCache = () => {
-  cachedSongsData = [];
-  cachedArtistsData = [];
-  cachedAlbumsData = [];
-  cachedGenresData = [];
-  cachedPlaylistsData = [...PLAYLIST_DATA_TEMPLATE];
-  songStore.store = { version, songs: [] };
-  artistStore.store = { version, artists: [] };
-  albumStore.store = { version, albums: [] };
-  genreStore.store = { version, genres: [] };
-  userDataStore.store = { version, userData: USER_DATA_TEMPLATE };
-  playlistDataStore.store = { version, playlists: PLAYLIST_DATA_TEMPLATE };
-  logger.info(`In-app cache reset successfully.`);
-};

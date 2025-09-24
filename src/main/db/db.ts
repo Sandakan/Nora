@@ -2,15 +2,13 @@ import { drizzle } from 'drizzle-orm/pglite';
 import { migrate } from 'drizzle-orm/pglite/migrator';
 import { app } from 'electron';
 import path from 'path';
-import { mkdirSync } from 'fs';
+import { mkdirSync, unlinkSync } from 'fs';
 
 import * as schema from '@db/schema';
 import logger from '@main/logger';
-// import type { Logger } from 'drizzle-orm';
 import { pgDump } from '@electric-sql/pglite-tools/pg_dump';
 import { PGlite } from '@electric-sql/pglite';
 import { seedDatabase } from './seed';
-// import { seedDatabase } from './seed';
 
 const DB_NAME = 'nora.pglite.db';
 const DB_PATH = app.getPath('userData') + '/' + DB_NAME;
@@ -48,5 +46,33 @@ export const exportDatabase = async () => {
   await newPgliteInstance.close();
 
   return dumpText;
+};
+
+/**
+ * Imports a database by executing the provided SQL query after resetting the database file.
+ *
+ * This function closes the current database instance, deletes the database file,
+ * reinitializes the database, and executes the given SQL query.
+ * Useful for restoring or reinitializing the database from a dump or migration.
+ *
+ * @param query - The SQL query or migration to execute after reset.
+ * @returns A promise that resolves to true when the import is successful.
+ */
+export const importDatabase = async (query: string) => {
+  await closeDatabaseInstance();
+
+  // Delete the existing database file
+  unlinkSync(DB_PATH);
+
+  logger.info('Database file deleted. Reinitializing database...');
+
+  // Recreate the database instance
+  const newPgliteInstance = await PGlite.create(DB_PATH, { debug: 5 });
+  newPgliteInstance.exec(query);
+
+  await newPgliteInstance.close();
+
+  logger.info('Database imported successfully.');
+  return true;
 };
 
