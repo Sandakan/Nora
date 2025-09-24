@@ -16,13 +16,7 @@ const PromptMenu = () => {
   const { changePromptMenuData, updatePromptMenuHistoryIndex } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const promptMenuRef = useRef<HTMLDialogElement>(null);
-
-  useEffect(() => {
-    const dialog = promptMenuRef.current;
-
-    if (promptMenuData.isVisible && dialog && !dialog.open) dialog.showModal();
-  }, [promptMenuData.isVisible]);
+  const promptMenuRef = useRef<HTMLDivElement>(null);
 
   const manageKeyboardShortcuts = useCallback(
     (e: KeyboardEvent) => {
@@ -48,7 +42,6 @@ const PromptMenu = () => {
     <>
       <Dialog
         open={promptMenuData.isVisible}
-        ref={promptMenuRef}
         onClose={() => changePromptMenuData(false)}
         className="relative z-100"
       >
@@ -60,6 +53,7 @@ const PromptMenu = () => {
         <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
           <div className="flex h-screen items-center justify-center p-4 text-center sm:items-center sm:p-0">
             <DialogPanel
+              ref={promptMenuRef}
               transition
               className="bg-background-color-1 dark:bg-dark-background-color-1 relative h-fit max-h-[80%] min-h-[300px] w-[80%] max-w-[90%] min-w-[800px] transform overflow-hidden overflow-y-auto rounded-2xl text-left shadow-xl transition-all data-closed:scale-95 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8 sm:w-full sm:max-w-lg"
             >
@@ -125,3 +119,4 @@ const PromptMenu = () => {
 };
 
 export default PromptMenu;
+
