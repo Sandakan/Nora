@@ -2,8 +2,9 @@ import fs from 'fs/promises';
 import path from 'path';
 import { app } from 'electron';
 import logger from './logger';
+import { nukeDatabase } from '@main/db/db';
 
-const resourcePaths = ['nora.pglite.db', 'listening_data.json', 'song_covers'];
+const resourcePaths = ['listening_data.json', 'song_covers'];
 const userDataPath = app.getPath('userData');
 
 const manageErrors = (error: Error) => {
@@ -17,6 +18,8 @@ const manageErrors = (error: Error) => {
 
 const resetAppData = async () => {
   try {
+    await nukeDatabase();
+
     for (const resourcePath of resourcePaths) {
       const isResourcePathADirectory = path.extname(resourcePath) === '';
 

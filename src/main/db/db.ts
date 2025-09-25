@@ -2,7 +2,7 @@ import { drizzle } from 'drizzle-orm/pglite';
 import { migrate } from 'drizzle-orm/pglite/migrator';
 import { app } from 'electron';
 import path from 'path';
-import { mkdirSync, rmSync } from 'fs';
+import { mkdirSync } from 'fs';
 
 import * as schema from '@db/schema';
 import logger from '@main/logger';
@@ -36,6 +36,25 @@ export const closeDatabaseInstance = async () => {
 await migrate(db, { migrationsFolder });
 await seedDatabase();
 
+export const nukeDatabase = async () => {
+  try {
+    logger.debug('Performing complete database reset...');
+
+    // Drop everything - public schema AND drizzle schema
+    await db.execute('DROP SCHEMA IF EXISTS public CASCADE;');
+    await db.execute('DROP SCHEMA IF EXISTS drizzle CASCADE;');
+
+    // Recreate public schema
+    await db.execute('CREATE SCHEMA public;');
+    await db.execute('GRANT ALL ON SCHEMA public TO public;');
+
+    logger.debug('Database completely reset');
+  } catch (error) {
+    logger.error('Failed to reset database:', { error });
+    throw error;
+  }
+};
+
 export const exportDatabase = async () => {
   // TODO: Temporary solution until https://github.com/electric-sql/pglite/issues/606 is resolved
   const newPgliteInstance = await pgliteInstance.clone();
@@ -59,18 +78,7 @@ export const exportDatabase = async () => {
  * @returns A promise that resolves to true when the import is successful.
  */
 export const importDatabase = async (query: string) => {
-  await closeDatabaseInstance();
-
-  // Delete the existing database file
-  rmSync(DB_PATH);
-
-  logger.info('Database folder deleted. Reinitializing database...');
-
-  // Recreate the database instance
-  const newPgliteInstance = await PGlite.create(DB_PATH, { debug: 5 });
-  await newPgliteInstance.exec(query);
-
-  await newPgliteInstance.close();
+  await pgliteInstance.exec(query);
 
   logger.info('Database imported successfully.');
   return true;

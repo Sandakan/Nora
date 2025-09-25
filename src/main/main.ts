@@ -654,7 +654,6 @@ export async function resetApp(isRestartApp = true) {
   logger.debug('Started the resetting process of the app.');
   try {
     await mainWindow.webContents.session.clearStorageData();
-    await closeDatabaseInstance();
     await resetAppData();
 
     logger.debug(`Successfully reset the app. Restarting the app now.`);
