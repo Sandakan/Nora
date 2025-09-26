@@ -309,7 +309,10 @@ export const parseSong = async (
 
 export const getArtistNamesFromSong = (artists?: string) => {
   if (artists) {
-    const splittedArtists = artists.split(ARTIST_SEPARATOR_REGEX).map((artist) => artist.trim());
+    const splittedArtists = artists
+      .split(ARTIST_SEPARATOR_REGEX)
+      .map((artist) => artist.trim())
+      .filter((a) => a.length > 0);
 
     return splittedArtists;
   }

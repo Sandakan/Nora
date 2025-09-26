@@ -220,7 +220,7 @@ const lyrics = {
 
   resetLyrics: (): Promise<SongLyrics> => ipcRenderer.invoke('app/resetLyrics'),
 
-  saveLyricsToSong: (songPath: string, text: SongLyrics) =>
+  saveLyricsToSong: (songPath: string, text: SongLyrics): Promise<void> =>
     ipcRenderer.invoke('app/saveLyricsToSong', songPath, text)
 };
 

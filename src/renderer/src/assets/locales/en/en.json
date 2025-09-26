@@ -276,6 +276,7 @@
 
   "homePage": {
     "empty": "There's nothing here..",
+    "emptyDescription": "It seems like you haven't added any music folders to your library yet.",
     "loading": "Hold on. We are getting everything ready for you...",
     "listenMoreToShowMetrics": "Listen to more songs to show additional metrics.",
 

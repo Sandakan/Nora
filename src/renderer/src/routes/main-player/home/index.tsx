@@ -5,7 +5,6 @@ import MostLovedSongs from '@renderer/components/HomePage/MostLovedSongs';
 import RecentlyAddedSongs from '@renderer/components/HomePage/RecentlyAddedSongs';
 import RecentlyPlayedArtists from '@renderer/components/HomePage/RecentlyPlayedArtists';
 import RecentlyPlayedSongs from '@renderer/components/HomePage/RecentlyPlayedSongs';
-import Img from '@renderer/components/Img';
 import MainContainer from '@renderer/components/MainContainer';
 import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
 import useResizeObserver from '@renderer/hooks/useResizeObserver';
@@ -13,7 +12,6 @@ import storage from '@renderer/utils/localStorage';
 import { createFileRoute } from '@tanstack/react-router';
 import { lazy, useCallback, useContext, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import NoSongsImage from '../../../assets/images/svg/Empty Inbox _Monochromatic.svg';
 // import DataFetchingImage from '../../../assets/images/svg/Umbrella_Monochromatic.svg';
 import { queryOptions, useSuspenseQuery } from '@tanstack/react-query';
 import { queryClient } from '@renderer/index';
@@ -342,20 +340,25 @@ function HomePage() {
 
         {latestSongs.length === 0 && (
           <div className="no-songs-container appear-from-bottom text-font-color-black dark:text-font-color-white flex h-full w-full flex-col items-center justify-center text-center text-xl">
-            <Img src={NoSongsImage} className="mb-8 w-60" alt={t('homePage.noSongsAvailable')} />
-            <div>{t('homePage.empty')}</div>
-            <div className="flex items-center justify-between">
+            <span className="material-icons-round-outlined text-font-color-highlight dark:text-dark-font-color-highlight mb-4 text-6xl">
+              brightness_empty
+            </span>{' '}
+            <div className="text-font-color-highlight dark:text-dark-font-color-highlight mb-2 text-2xl font-medium">
+              {t('homePage.empty')}
+            </div>
+            <p className="text-sm">{t('homePage.emptyDescription')}</p>
+            <div className="mt-4 flex items-center justify-between gap-4">
               <Button
+                className="mr-0!"
                 label={t('foldersPage.addFolder')}
                 iconName="create_new_folder"
                 iconClassName="material-icons-round-outlined"
-                className="bg-background-color-3! text-font-color-black! hover:border-background-color-3 dark:bg-dark-background-color-3! dark:text-font-color-black! dark:hover:border-background-color-3 mt-4 px-8 text-lg"
                 clickHandler={addNewSongs}
               />
               <Button
+                className="mr-0!"
                 label={t('settingsPage.importAppData')}
                 iconName="publish"
-                className="bg-background-color-3! text-font-color-black! hover:border-background-color-3 dark:bg-dark-background-color-3! dark:text-font-color-black! dark:hover:border-background-color-3 mt-4 px-8 text-lg"
                 clickHandler={importAppData}
               />
             </div>
@@ -377,4 +380,3 @@ function HomePage() {
     </MainContainer>
   );
 }
-

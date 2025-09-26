@@ -1,7 +1,8 @@
-import { type CSSProperties, type ReactNode, forwardRef, useContext } from 'react';
+import { type CSSProperties, type ReactNode, forwardRef, useContext, useRef } from 'react';
 import { Virtuoso, type Components, type VirtuosoHandle } from 'react-virtuoso';
 import debounce from '../utils/debounce';
 import { AppUpdateContext } from '../contexts/AppUpdateContext';
+import { useVirtualizer } from '@tanstack/react-virtual';
 
 type Props<T extends object> = {
   data: T[];
@@ -18,6 +19,7 @@ type Props<T extends object> = {
 
 const List = <T extends object>(props: Props<T>, ref) => {
   const { updateCurrentlyActivePageData } = useContext(AppUpdateContext);
+  const parentRef = useRef(null);
 
   const {
     data,
@@ -30,6 +32,13 @@ const List = <T extends object>(props: Props<T>, ref) => {
     style,
     noRangeUpdates = false
   } = props;
+
+  const rowVirtualizer = useVirtualizer({
+    count: data.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => fixedItemHeight,
+    overscan: (fixedItemHeight || 0) * 5
+  });
 
   return (
     <Virtuoso

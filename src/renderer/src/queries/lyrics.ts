@@ -7,8 +7,20 @@ export const lyricsQuery = createQueryKeys('lyrics', {
     album?: string;
     path: string;
     duration: number;
+    lyricsType?: LyricsTypes;
+    lyricsRequestType?: LyricsRequestTypes;
+    saveLyricsAutomatically?: AutomaticallySaveLyricsTypes;
   }) => {
-    const { title, artists, album, path, duration } = data;
+    const {
+      title,
+      artists,
+      album,
+      path,
+      duration,
+      lyricsType,
+      lyricsRequestType,
+      saveLyricsAutomatically
+    } = data;
 
     return {
       queryKey: [
@@ -16,16 +28,24 @@ export const lyricsQuery = createQueryKeys('lyrics', {
         `artists=${artists.join(',')}`,
         `album=${album}`,
         `path=${path}`,
-        `duration=${duration}`
+        `duration=${duration}`,
+        `lyricsType=${lyricsType}`,
+        `lyricsRequestType=${lyricsRequestType}`,
+        `saveLyricsAutomatically=${saveLyricsAutomatically}`
       ],
       queryFn: () =>
-        window.api.lyrics.getSongLyrics({
-          songTitle: title,
-          songArtists: artists,
-          album: album,
-          songPath: path,
-          duration: duration
-        })
+        window.api.lyrics.getSongLyrics(
+          {
+            songTitle: title,
+            songArtists: artists,
+            album: album,
+            songPath: path,
+            duration: duration
+          },
+          lyricsType,
+          lyricsRequestType,
+          saveLyricsAutomatically
+        )
     };
   }
 });
