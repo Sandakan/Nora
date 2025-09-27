@@ -16,6 +16,7 @@ import {
   convertToSongData
 } from '../common/convert';
 import { getUserSettings, saveUserSettings } from './db/queries/settings';
+import { dataUpdateEvent } from './main';
 
 let recentSearchesTimeoutId: NodeJS.Timeout;
 const search = async (
@@ -60,6 +61,7 @@ const search = async (
       }
 
       await saveUserSettings({ recentSearches });
+      dataUpdateEvent('userData/recentSearches');
     }, 2000);
   }
 

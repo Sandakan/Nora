@@ -66,6 +66,14 @@ function SearchPage() {
   const { width } = useResizeObserver(searchContainerRef);
   const [searchText, setSearchText] = useState(keyword);
 
+  const { data: searchResults } = useQuery({
+    ...searchQuery.query({
+      keyword: keyword ?? '',
+      filter: filterBy ?? 'all'
+    }),
+    enabled: (keyword ?? '').trim().length > 0
+  });
+
   const throttledSetSearch = useThrottledCallback(
     (value) => {
       navigate({ search: (prev) => ({ ...prev, keyword: value }), replace: true });
@@ -109,14 +117,6 @@ function SearchPage() {
       }),
     [filterBy, navigate]
   );
-
-  const { data: searchResults } = useQuery({
-    ...searchQuery.query({
-      keyword: keyword ?? '',
-      filter: filterBy ?? 'all'
-    }),
-    enabled: (keyword ?? '').trim().length > 0
-  });
 
   return (
     <MainContainer className="h-full! pb-0! [scrollbar-gutter:stable]" ref={searchContainerRef}>

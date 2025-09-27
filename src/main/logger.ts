@@ -56,11 +56,11 @@ const getLogFilePath = () => {
 
 export const logFilePath = getLogFilePath();
 
-const DEFAULT_LOGGER_LEVEL = IS_DEVELOPMENT ? 'silly' : 'info';
+const DEFAULT_LOGGER_LEVEL = IS_DEVELOPMENT ? 'debug' : 'info';
 
 const transports = {
   console: new winston.transports.Console({
-    level: 'silly',
+    level: 'debug',
     format: winston.format.combine(
       winston.format.timestamp({
         format: 'YYYY-MM-DD hh:mm:ss.SSS A'
@@ -114,13 +114,22 @@ export const toggleVerboseLogs = (isEnabled: boolean) => {
   //   }
   // });
   if (isEnabled) {
-    transports.console.level = 'debug';
-    transports.file.level = 'debug';
+    transports.console.level = 'silly';
+    transports.file.level = 'silly';
   } else {
     transports.console.level = DEFAULT_LOGGER_LEVEL;
     transports.file.level = DEFAULT_LOGGER_LEVEL;
   }
 };
+
+// # NPM LOG LEVELS
+//   error: 0,
+//   warn: 1,
+//   info: 2,
+//   http: 3,
+//   verbose: 4,
+//   debug: 5,
+//   silly: 6
 
 const logger = {
   info: (message: string, data = {} as object) => {
@@ -136,6 +145,9 @@ const logger = {
   },
   debug: (message: string, data = {} as object) => {
     log.debug(message, { process: 'MAIN', data });
+  },
+  silly: (message: string, data = {} as object) => {
+    log.silly(message, { process: 'MAIN', data });
   },
   verbose: (message: string, data = {} as object) => {
     log.verbose(message, { process: 'MAIN', data });

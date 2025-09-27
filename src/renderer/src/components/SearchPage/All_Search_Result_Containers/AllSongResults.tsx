@@ -4,14 +4,13 @@ import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
 
 import Song from '../../SongsPage/Song';
 import SecondaryContainer from '../../SecondaryContainer';
-import VirtualizedList from '../../VirtualizedList';
+import { VirtualList } from '../../VirtualizedList';
 import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store/store';
 
-type Props = { songData: SongData[] };
+type Props = { songData: SongData[]; scrollTopOffset?: number };
 
 const AllSongResults = (prop: Props) => {
-  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
   const isSongIndexingEnabled = useStore(
     store,
     (state) => state.localStorage.preferences.isSongIndexingEnabled
@@ -19,7 +18,7 @@ const AllSongResults = (prop: Props) => {
 
   const { createQueue, playSong } = useContext(AppUpdateContext);
 
-  const { songData } = prop;
+  const { songData, scrollTopOffset = 0 } = prop;
 
   const selectAllHandler = useSelectAllHandler(songData, 'songs', 'songId');
 
@@ -45,27 +44,32 @@ const AllSongResults = (prop: Props) => {
         }
       }}
     >
-      {songData && songData.length > 0 && (
-        <VirtualizedList
-          data={songData}
-          fixedItemHeight={60}
-          scrollTopOffset={currentlyActivePage.data?.scrollTopOffset}
-          itemContent={(index, song) => {
-            if (song)
-              return (
-                <Song
-                  key={index}
-                  index={index}
-                  isIndexingSongs={isSongIndexingEnabled}
-                  onPlayClick={handleSongPlayBtnClick}
-                  selectAllHandler={selectAllHandler}
-                  {...song}
-                />
-              );
-            return <div>Bad Index</div>;
-          }}
-        />
-      )}
+      <VirtualList
+        data={songData}
+        fixedItemHeight={60}
+        scrollTopOffset={scrollTopOffset}
+        // onDebouncedScroll={(instance) => {
+        //   const offset = Math.floor(instance.scrollOffset || 0);
+
+        //   navigate({
+        //     replace: true,
+        //     search: (prev) => ({
+        //       ...prev,
+        //       scrollTopOffset: offset
+        //     })
+        //   });
+        // }}
+        itemContent={(item, dataItem) => (
+          <Song
+            key={item.key}
+            index={item.index}
+            isIndexingSongs={isSongIndexingEnabled}
+            onPlayClick={handleSongPlayBtnClick}
+            selectAllHandler={selectAllHandler}
+            {...dataItem}
+          />
+        )}
+      />
     </SecondaryContainer>
   );
 };

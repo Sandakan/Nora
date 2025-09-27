@@ -7,7 +7,7 @@ import Img from '../Img';
 import RecentSearchResult from './RecentSearchResult';
 
 import SearchSomethingImage from '../../assets/images/svg/Flying kite_Monochromatic.svg';
-import { useSuspenseQuery, queryOptions } from '@tanstack/react-query';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { queryClient } from '@renderer/index';
 import { searchQuery } from '@renderer/queries/search';
 
@@ -18,15 +18,13 @@ type Props = {
   updateSearchInput: (input: string) => void;
 };
 
-const recentSearchResultsQueryOptions = queryOptions(searchQuery.recentResults);
-
 const SearchStartPlaceholder = (props: Props) => {
   const { updateCurrentlyActivePageData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { searchResults, searchInput, updateSearchInput } = props;
 
-  const { data: recentSearchResults } = useSuspenseQuery(recentSearchResultsQueryOptions);
+  const { data: recentSearchResults } = useSuspenseQuery(searchQuery.recentResults);
 
   useEffect(() => {
     const manageSearchResultsUpdatesInSearchPage = (e: Event) => {
@@ -35,7 +33,7 @@ const SearchStartPlaceholder = (props: Props) => {
         for (let i = 0; i < dataEvents.length; i += 1) {
           const event = dataEvents[i];
           if (event.dataType === 'userData/recentSearches')
-            queryClient.invalidateQueries(recentSearchResultsQueryOptions);
+            queryClient.invalidateQueries(searchQuery.recentResults);
         }
       }
     };

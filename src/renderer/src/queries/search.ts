@@ -16,7 +16,7 @@ export const searchQuery = createQueryKeys('search', {
     return {
       queryKey: [{ keyword }, { filter }, { isPredictiveSearchEnabled }, { updateSearchHistory }],
       queryFn: () =>
-        window.api.search.search(filter, keyword, isPredictiveSearchEnabled, updateSearchHistory)
+        window.api.search.search(filter, keyword, updateSearchHistory, isPredictiveSearchEnabled)
     };
   }
 });

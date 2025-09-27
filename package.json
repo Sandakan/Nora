@@ -103,7 +103,9 @@
     "db:push": "drizzle-kit push",
     "db:pull": "drizzle-kit pull",
     "db:studio": "drizzle-kit studio --verbose",
-    "db:seed": "drizzle-kit seed"
+    "db:seed": "drizzle-kit seed",
+    "renderer:generate-routes": "tsr generate",
+    "renderer:watch-routes": "tsr watch"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.3.7",
@@ -154,6 +156,7 @@
     "@eslint/eslintrc": "^3.2.0",
     "@tailwindcss/vite": "^4.0.15",
     "@tanstack/react-router-devtools": "^1.114.34",
+    "@tanstack/router-cli": "^1.132.7",
     "@tanstack/router-plugin": "^1.114.34",
     "@types/discord-rpc": "^4.0.1",
     "@types/electron-store": "^1.3.1",

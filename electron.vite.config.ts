@@ -49,9 +49,10 @@ export default defineConfig({
         autoCodeSplitting: true
       }),
       react({
-        babel: {
-          plugins: ['babel-plugin-react-compiler']
-        }
+        // TODO: Using babel plugin breaks the tanstack-virtual package. Need to investigate further.
+        // babel: {
+        //   plugins: ['babel-plugin-react-compiler']
+        // }
       }),
       tailwindcss()
     ]

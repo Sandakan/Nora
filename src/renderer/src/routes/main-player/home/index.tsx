@@ -17,6 +17,12 @@ import { queryOptions, useSuspenseQuery } from '@tanstack/react-query';
 import { queryClient } from '@renderer/index';
 import { songQuery } from '@renderer/queries/songs';
 import { artistQuery } from '@renderer/queries/aritsts';
+import NavLink from '@renderer/components/NavLink';
+import SecondaryContainer from '@renderer/components/SecondaryContainer';
+import Img from '@renderer/components/Img';
+
+import favoritesPlaylistCoverImage from '../../../assets/images/webp/favorites-playlist-icon.webp';
+import historyPlaylistCoverImage from '../../../assets/images/webp/history-playlist-icon.webp';
 
 // TODO: Implement logic to fetch recently played songs from the backend or local storage.
 const fetchRecentlyPlayedSongs = async (
@@ -311,6 +317,28 @@ function HomePage() {
       ref={recentlyAddedSongsContainerRef}
     >
       <>
+        <SecondaryContainer className="appear-from-bottom mt-4 flex h-fit max-h-full w-full gap-4 pb-4 pl-8">
+          <NavLink
+            to="/main-player/playlists/favorites"
+            className="bg-background-color-2/70 hover:bg-background-color-2! dark:bg-dark-background-color-2/70 dark:hover:bg-dark-background-color-2! text-font-color dark:text-dark-font-color flex h-24 min-w-60 items-center gap-4 rounded-xl px-4 py-4"
+          >
+            <Img
+              src={favoritesPlaylistCoverImage}
+              className="aspect-square h-full w-auto rounded-lg"
+            />
+            <span className="text-xl">Favorites</span>
+          </NavLink>
+          <NavLink
+            to="/main-player/playlists/history"
+            className="bg-background-color-2/70 hover:bg-background-color-2! dark:bg-dark-background-color-2/70 dark:hover:bg-dark-background-color-2! text-font-color dark:text-dark-font-color flex h-24 min-w-60 items-center gap-4 rounded-xl px-4 py-4"
+          >
+            <Img
+              src={historyPlaylistCoverImage}
+              className="aspect-square h-full w-auto rounded-lg"
+            />
+            <span className="text-xl">History</span>
+          </NavLink>
+        </SecondaryContainer>
         {recentlyAddedSongsContainerRef.current && (
           <>
             {latestSongs[0] !== null && (
