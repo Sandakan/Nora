@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, inArray, SQL } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, type SQL } from 'drizzle-orm';
 import { db } from '@db/db';
 import { playlistsSongs, playlists, artworksPlaylists } from '../schema';
 import { timeEnd, timeStart } from '@main/utils/measureTimeUsage';

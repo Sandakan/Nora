@@ -24,7 +24,13 @@ export const songSortTypes = [
   'whitelistedSongs'
 ] as const;
 
-export const songFilterTypes = ['notSelected', 'blacklistedSongs', 'whitelistedSongs'] as const;
+export const songFilterTypes = [
+  'notSelected',
+  'blacklistedSongs',
+  'whitelistedSongs',
+  'favorites',
+  'nonFavorites'
+] as const;
 
 export const songSortOptions: DropdownOption<SongSortTypes>[] = [
   { label: i18n.t('sortTypes.addedOrder'), value: 'addedOrder' },
@@ -86,5 +92,13 @@ export const songFilterOptions: DropdownOption<SongFilterTypes>[] = [
   {
     label: i18n.t('filterTypes.whitelistedSongs'),
     value: 'whitelistedSongs'
+  },
+  {
+    label: i18n.t('filterTypes.favorites'),
+    value: 'favorites'
+  },
+  {
+    label: i18n.t('filterTypes.nonFavorites'),
+    value: 'nonFavorites'
   }
 ];

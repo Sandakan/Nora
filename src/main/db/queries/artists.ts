@@ -1,5 +1,5 @@
 import { db } from '@db/db';
-import { and, asc, desc, eq, inArray, SQL, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, type SQL, sql } from 'drizzle-orm';
 import { albumsArtists, artists, artistsSongs } from '@db/schema';
 
 export const isArtistWithNameAvailable = async (name: string, trx: DB | DBTransaction = db) => {

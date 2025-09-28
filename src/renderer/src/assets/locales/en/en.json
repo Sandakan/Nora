@@ -174,7 +174,8 @@
     "notSelected": "Not Selected",
     "blacklistedSongs": "Blacklisted songs",
     "whitelistedSongs": "Whitelisted songs",
-    "favorites": "Favorites"
+    "favorites": "Favorites",
+    "nonFavorites": "Non-favorites"
   },
 
   "equalizerPresets": {
@@ -291,7 +292,8 @@
     "openFavoritesWithAllTimeMostListenedSortOption": "Opens 'Favorites' playlist with 'AllTimeMostListened' sort option",
 
     "noSongsAvailable": "No songs available",
-    "stayCalm": "Stay calm"
+    "stayCalm": "Stay calm",
+    "favoritesAndRecaps": "Favorites and Recaps"
   },
 
   "searchPage": {
@@ -339,7 +341,10 @@
     "clearSongHistoryConfirm": "Clear song history",
     "clearSongHistoryConfirmNotice": "Are you sure you want to clear your song history? This action cannot be undone.",
     "clearSongHistorySuccess": "Your song history has been cleared successfully.",
-    "empty": "No playlists created yet."
+    "empty": "No playlists created yet.",
+
+    "favorites": "Favorites",
+    "history": "History"
   },
 
   "albumsPage": {

@@ -52,5 +52,25 @@ export const songQuery = createQueryKeys('songs', {
     queryKey: [`songIds=${songIds.sort().join(',')}`],
     queryFn: () =>
       window.api.audioLibraryControls.getSongInfo(songIds, 'addedOrder', undefined, undefined, true)
-  })
+  }),
+  favorites: (data: { sortType: SongSortTypes; start?: number; end?: number; limit?: number }) => {
+    const { sortType = 'addedOrder', start = 0, end = 0, limit } = data;
+
+    return {
+      queryKey: [`sortType=${sortType}`, `start=${start}`, `end=${end}`, `limit=${limit}`],
+      queryFn: () =>
+        window.api.audioLibraryControls.getAllSongs(sortType, 'favorites', {
+          start,
+          end
+        })
+    };
+  },
+  history: (data: { sortType: SongSortTypes; start?: number; end?: number; limit?: number }) => {
+    const { sortType = 'addedOrder', start = 0, end = 0, limit } = data;
+
+    return {
+      queryKey: [`sortType=${sortType}`, `start=${start}`, `end=${end}`, `limit=${limit}`],
+      queryFn: () => window.api.audioLibraryControls.getAllHistorySongs(sortType, { start, end })
+    };
+  }
 });

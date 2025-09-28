@@ -998,7 +998,12 @@ declare global {
     | 'sortingStates.artistsPage'
     | 'sortingStates.genresPage';
 
-  type SongFilterTypes = 'notSelected' | 'blacklistedSongs' | 'whitelistedSongs';
+  type SongFilterTypes =
+    | 'notSelected'
+    | 'blacklistedSongs'
+    | 'whitelistedSongs'
+    | 'favorites'
+    | 'nonFavorites';
 
   type SongSortTypes = (typeof songSortTypes)[number];
 

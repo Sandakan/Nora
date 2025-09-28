@@ -1,5 +1,5 @@
 import { db } from '@db/db';
-import { and, asc, desc, eq, inArray, SQL } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, type SQL } from 'drizzle-orm';
 import { genres, genresSongs } from '@db/schema';
 
 export const isGenreWithIdAvailable = async (genreId: number, trx: DB | DBTransaction = db) => {

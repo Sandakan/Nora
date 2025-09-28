@@ -317,27 +317,32 @@ function HomePage() {
       ref={recentlyAddedSongsContainerRef}
     >
       <>
-        <SecondaryContainer className="appear-from-bottom mt-4 flex h-fit max-h-full w-full gap-4 pb-4 pl-8">
-          <NavLink
-            to="/main-player/playlists/favorites"
-            className="bg-background-color-2/70 hover:bg-background-color-2! dark:bg-dark-background-color-2/70 dark:hover:bg-dark-background-color-2! text-font-color dark:text-dark-font-color flex h-24 min-w-60 items-center gap-4 rounded-xl px-4 py-4"
-          >
-            <Img
-              src={favoritesPlaylistCoverImage}
-              className="aspect-square h-full w-auto rounded-lg"
-            />
-            <span className="text-xl">Favorites</span>
-          </NavLink>
-          <NavLink
-            to="/main-player/playlists/history"
-            className="bg-background-color-2/70 hover:bg-background-color-2! dark:bg-dark-background-color-2/70 dark:hover:bg-dark-background-color-2! text-font-color dark:text-dark-font-color flex h-24 min-w-60 items-center gap-4 rounded-xl px-4 py-4"
-          >
-            <Img
-              src={historyPlaylistCoverImage}
-              className="aspect-square h-full w-auto rounded-lg"
-            />
-            <span className="text-xl">History</span>
-          </NavLink>
+        <SecondaryContainer className="appear-from-bottom mt-4 h-fit max-h-full w-full pb-4 pl-8">
+          <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center justify-between text-2xl font-medium">
+            {t('homePage.favoritesAndRecaps')}
+          </div>
+          <div className="flex gap-4">
+            <NavLink
+              to="/main-player/playlists/favorites"
+              className="bg-background-color-2/70 hover:bg-background-color-2! dark:bg-dark-background-color-2/70 dark:hover:bg-dark-background-color-2! text-font-color dark:text-dark-font-color flex h-24 min-w-60 items-center gap-4 rounded-xl px-4 py-4"
+            >
+              <Img
+                src={favoritesPlaylistCoverImage}
+                className="aspect-square h-full w-auto rounded-lg"
+              />
+              <span className="text-xl">Favorites</span>
+            </NavLink>
+            <NavLink
+              to="/main-player/playlists/history"
+              className="bg-background-color-2/70 hover:bg-background-color-2! dark:bg-dark-background-color-2/70 dark:hover:bg-dark-background-color-2! text-font-color dark:text-dark-font-color flex h-24 min-w-60 items-center gap-4 rounded-xl px-4 py-4"
+            >
+              <Img
+                src={historyPlaylistCoverImage}
+                className="aspect-square h-full w-auto rounded-lg"
+              />
+              <span className="text-xl">History</span>
+            </NavLink>
+          </div>
         </SecondaryContainer>
         {recentlyAddedSongsContainerRef.current && (
           <>

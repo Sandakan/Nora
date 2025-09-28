@@ -1,7 +1,7 @@
 import { db } from '@db/db';
 import { folderBlacklist, musicFolders, songs } from '@db/schema';
 import { timeEnd, timeStart } from '@main/utils/measureTimeUsage';
-import { and, asc, desc, eq, ilike, inArray, notInArray, or, SQL } from 'drizzle-orm';
+import { and, asc, desc, eq, ilike, inArray, notInArray, or, type SQL } from 'drizzle-orm';
 
 export const isSongWithPathAvailable = async (path: string, trx: DB | DBTransaction = db) => {
   const count = await trx.$count(songs, eq(songs.path, path));
@@ -132,6 +132,10 @@ export const getAllSongs = async (
 
       if (songIds && songIds.length > 0) {
         filters.push(inArray(s.id, songIds));
+      }
+
+      if (filterType === 'favorites' || filterType === 'nonFavorites') {
+        filters.push(eq(s.isFavorite, filterType === 'favorites'));
       }
 
       return filters.length > 0 ? and(...filters) : undefined;
