@@ -10,7 +10,10 @@ const PreferencesSettings = () => {
   const { t } = useTranslation();
 
   return (
-    <li className="main-container preferences-settings-container mb-16">
+    <li
+      className="main-container preferences-settings-container mb-16"
+      id="preferences-settings-container"
+    >
       <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center text-2xl font-medium">
         <span className="material-icons-round-outlined mr-2">tune</span>
         {t('settingsPage.preferences')}

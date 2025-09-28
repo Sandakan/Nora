@@ -8,6 +8,7 @@ import VolumeSlider from '../VolumeSlider';
 import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store/store';
 import NavLink from '../NavLink';
+import { useNavigate } from '@tanstack/react-router';
 
 const AppShortcutsPrompt = lazy(() => import('../SettingsPage/AppShortcutsPrompt'));
 
@@ -16,14 +17,10 @@ const OtherSongControlsContainer = () => {
   const isMuted = useStore(store, (state) => state.player.volume.isMuted);
   const volume = useStore(store, (state) => state.player.volume.value);
 
-  const {
-    changeCurrentActivePage,
-    updatePlayerType,
-    toggleMutedState,
-    updateContextMenuData,
-    changePromptMenuData
-  } = useContext(AppUpdateContext);
+  const { updatePlayerType, toggleMutedState, updateContextMenuData, changePromptMenuData } =
+    useContext(AppUpdateContext);
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const openOtherSettingsContextMenu = useCallback(
     (pageX: number, pageY: number) => {
@@ -42,25 +39,21 @@ const OtherSongControlsContainer = () => {
             iconName: 'graphic_eq',
             iconClassName: 'material-icons-round-outlined mr-2',
             handlerFunction: () =>
-              changeCurrentActivePage('Settings', {
-                scrollToId: '#equalizer'
-              })
+              navigate({ to: '/main-player/settings', hash: 'equalizer-settings-container' })
           },
           {
             label: t('player.adjustPlaybackSpeed'),
             iconName: 'avg_pace',
             iconClassName: 'material-icons-round-outlined mr-2',
             handlerFunction: () =>
-              changeCurrentActivePage('Settings', {
-                scrollToId: '#playbackRateInterval'
-              })
+              navigate({ to: '/main-player/settings', hash: 'audio-playback-settings-container' })
           },
           { label: '', isContextMenuItemSeperator: true, handlerFunction: () => true },
           {
             label: t('player.showCurrentQueue'),
             iconName: 'table_rows',
             iconClassName: 'material-icons-round-outlined mr-2',
-            handlerFunction: () => changeCurrentActivePage('CurrentQueue')
+            handlerFunction: () => navigate({ to: '/main-player/queue' })
           },
           { label: '', isContextMenuItemSeperator: true, handlerFunction: () => true },
           {
@@ -80,7 +73,7 @@ const OtherSongControlsContainer = () => {
         pageY
       );
     },
-    [changeCurrentActivePage, changePromptMenuData, t, updateContextMenuData, updatePlayerType]
+    [changePromptMenuData, navigate, t, updateContextMenuData, updatePlayerType]
   );
 
   return (

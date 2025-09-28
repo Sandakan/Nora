@@ -100,7 +100,10 @@ const EqualizerSettings = () => {
   }, [content]);
 
   return (
-    <li className="main-container equalizer-settings-container mb-12">
+    <li
+      className="main-container equalizer-settings-container mb-12"
+      id="equalizer-settings-container"
+    >
       <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center text-2xl font-medium">
         <span className="material-icons-round-outlined mr-2">graphic_eq</span>
         {t('settingsPage.equalizer')}

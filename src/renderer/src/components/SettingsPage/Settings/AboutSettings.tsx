@@ -56,7 +56,7 @@ const AboutSettings = () => {
   }, [currentVersionReleasedDate]);
 
   return (
-    <li className="main-container about-container">
+    <li className="main-container about-container" id="about-settings-container">
       <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center text-2xl font-medium">
         <span className="material-icons-round-outlined mr-2">info</span>
         About

@@ -70,7 +70,10 @@ const LyricsSettings = () => {
   }, []);
 
   return (
-    <li className="main-container audio-playback-settings-container mb-16">
+    <li
+      className="main-container audio-playback-settings-container mb-16"
+      id="audio-playback-settings-container"
+    >
       <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center text-2xl font-medium">
         <span className="material-icons-round-outlined mr-2">notes</span>
         {t('settingsPage.lyrics')}
