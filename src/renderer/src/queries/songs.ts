@@ -59,7 +59,7 @@ export const songQuery = createQueryKeys('songs', {
     return {
       queryKey: [`sortType=${sortType}`, `start=${start}`, `end=${end}`, `limit=${limit}`],
       queryFn: () =>
-        window.api.audioLibraryControls.getAllSongs(sortType, 'favorites', {
+        window.api.audioLibraryControls.getAllFavoriteSongs(sortType, {
           start,
           end
         })

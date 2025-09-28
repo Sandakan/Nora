@@ -523,7 +523,10 @@ export const updateSongFavoriteStatuses = async (
   isFavorite: boolean,
   trx: DB | DBTransaction = db
 ) => {
-  const data = await trx.update(songs).set({ isFavorite }).where(inArray(songs.id, songIds));
+  const data = await trx
+    .update(songs)
+    .set({ isFavorite, isFavoriteUpdatedAt: new Date() })
+    .where(inArray(songs.id, songIds));
   return data;
 };
 
@@ -582,4 +585,105 @@ export const getSongsInPathList = async (songPaths: string[], trx: DB | DBTransa
     columns: { id: true, path: true }
   });
   return data;
+};
+
+export const getAllSongsInFavorite = async (
+  sortType?: SongSortTypes,
+  paginatingData?: PaginatingData,
+  trx: DB | DBTransaction = db
+) => {
+  const { start = 0, end = 0 } = paginatingData || {};
+
+  const limit = end - start === 0 ? undefined : end - start;
+
+  const data = await trx.query.songs.findMany({
+    where: (songs) => eq(songs.isFavorite, true),
+    with: {
+      artists: {
+        with: {
+          artist: {
+            columns: { id: true, name: true }
+          }
+        }
+      },
+      albums: {
+        with: {
+          album: {
+            columns: { id: true, title: true },
+            with: {
+              artists: {
+                with: {
+                  artist: {
+                    columns: { id: true, name: true }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      genres: {
+        with: {
+          genre: {
+            columns: { id: true, name: true }
+          }
+        }
+      },
+      artworks: {
+        with: {
+          artwork: {
+            with: {
+              palette: {
+                columns: { id: true },
+                with: {
+                  swatches: {}
+                }
+              }
+            }
+          }
+        }
+      },
+      playlists: {
+        with: {
+          playlist: {
+            columns: { id: true, name: true }
+          }
+        }
+      },
+      blacklist: {
+        columns: { songId: true }
+      }
+    },
+    orderBy: (songs) => {
+      const orders: SQL[] = [desc(songs.isFavoriteUpdatedAt)];
+      // Apply sorting based on sortType parameter
+      if (sortType === 'aToZ') return [asc(songs.title), ...orders];
+      if (sortType === 'zToA') return [desc(songs.title), ...orders];
+      if (sortType === 'releasedYearAscending')
+        return [asc(songs.year), asc(songs.title), ...orders];
+      if (sortType === 'releasedYearDescending')
+        return [desc(songs.year), asc(songs.title), ...orders];
+      if (sortType === 'trackNoAscending')
+        return [asc(songs.trackNumber), asc(songs.title), ...orders];
+      if (sortType === 'trackNoDescending')
+        return [desc(songs.trackNumber), asc(songs.title), ...orders];
+      if (sortType === 'dateAddedAscending')
+        return [asc(songs.fileModifiedAt), asc(songs.title), ...orders];
+      if (sortType === 'dateAddedDescending')
+        return [desc(songs.fileModifiedAt), asc(songs.title), ...orders];
+      if (sortType === 'addedOrder') return orders;
+      // Add other sort types as needed
+      return orders; // Default sorting
+    },
+    limit: limit,
+    offset: start
+  });
+
+  return {
+    data,
+    sortType,
+    filterType: 'notSelected',
+    start,
+    end
+  };
 };

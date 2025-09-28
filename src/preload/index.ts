@@ -88,6 +88,11 @@ const audioLibraryControls = {
     paginatingData?: PaginatingData
   ): Promise<PaginatedResult<SongData, SongSortTypes>> =>
     ipcRenderer.invoke('app/getAllHistorySongs', sortType, paginatingData),
+  getAllFavoriteSongs: (
+    sortType?: SongSortTypes,
+    paginatingData?: PaginatingData
+  ): Promise<PaginatedResult<SongData, SongSortTypes>> =>
+    ipcRenderer.invoke('app/getAllFavoriteSongs', sortType, paginatingData),
   getSongListeningData: (songIds: string[]): Promise<SongListeningData[]> =>
     ipcRenderer.invoke('app/getSongListeningData', songIds),
   updateSongListeningData: (

@@ -95,6 +95,9 @@ export const songs = pgTable(
       onDelete: 'set null',
       onUpdate: 'cascade'
     }),
+    isFavoriteUpdatedAt: timestamp('is_favorite_updated_at', { withTimezone: false })
+      .notNull()
+      .defaultNow(),
     fileCreatedAt: timestamp('file_created_at', { withTimezone: false }).notNull(),
     fileModifiedAt: timestamp('file_modified_at', { withTimezone: false }).notNull(),
     createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow(),

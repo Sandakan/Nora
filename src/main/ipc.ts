@@ -92,6 +92,7 @@ import { getUserSettings, saveUserSettings } from './db/queries/settings';
 import { getQueueInfo } from './utils/getQueueInfo';
 import { getDatabaseMetrics } from './db/queries/other';
 import { getAllHistorySongs } from './core/getAllHistorySongs';
+import { getAllFavoriteSongs } from './core/getAllFavoriteSongs';
 
 export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSignal) {
   if (mainWindow) {
@@ -175,6 +176,12 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       'app/getAllHistorySongs',
       (_, sortType?: SongSortTypes, paginatingData?: PaginatingData) =>
         getAllHistorySongs(sortType, paginatingData)
+    );
+
+    ipcMain.handle(
+      'app/getAllFavoriteSongs',
+      (_, sortType?: SongSortTypes, paginatingData?: PaginatingData) =>
+        getAllFavoriteSongs(sortType, paginatingData)
     );
 
     // ipcMain.handle('app/saveUserData', (_, dataType: UserDataTypes, data: string) =>
