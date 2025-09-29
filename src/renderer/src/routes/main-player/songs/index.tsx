@@ -12,7 +12,7 @@ import MainContainer from '@renderer/components/MainContainer';
 import Button from '@renderer/components/Button';
 import Dropdown from '@renderer/components/Dropdown';
 import { songFilterOptions, songSortOptions } from '@renderer/components/SongsPage/SongOptions';
-import { VirtualList } from '@renderer/components/VirtualizedList';
+import VirtualizedList from '@renderer/components/VirtualizedList';
 import Song from '@renderer/components/SongsPage/Song';
 
 import NoSongsImage from '@assets/images/svg/Empty Inbox _Monochromatic.svg';
@@ -308,32 +308,75 @@ function SongsPage() {
           />
         </div>
       </div>
-      <VirtualList
-        data={songData}
-        fixedItemHeight={60}
-        scrollTopOffset={scrollTopOffset}
-        onDebouncedScroll={(instance) => {
-          const offset = Math.floor(instance.scrollOffset || 0);
-
-          navigate({
-            replace: true,
-            search: (prev) => ({
-              ...prev,
-              scrollTopOffset: offset
-            })
-          });
-        }}
-        itemContent={(item, dataItem) => (
-          <Song
-            key={item.key}
-            index={item.index}
-            isIndexingSongs={isSongIndexingEnabled}
-            onPlayClick={handleSongPlayBtnClick}
-            selectAllHandler={selectAllHandler}
-            {...dataItem}
+      <div
+        className="songs-container appear-from-bottom h-full flex-1 delay-100"
+        // ref={songsContainerRef}
+      >
+        {/* <InfiniteLoader
+            // isItemLoaded={isItemLoaded}
+            itemCount={60}
+            // loadMoreItems={loadMoreItems}
+          >
+            {({ onItemsRendered, ref }) => (
+              <List
+                ref={ref}
+                onItemsRendered={onItemsRendered}
+                itemCount={songsData.length}
+                itemSize={60}
+                width={width || '100%'}
+                height={height || 450}
+                overscanCount={10}
+                className="appear-from-bottom delay-100"
+                initialScrollOffset={
+                  currentlyActivePage.data?.scrollTopOffset ?? 0
+                }
+                onScroll={(data) => {
+                  if (!data.scrollUpdateWasRequested && data.scrollOffset !== 0)
+                    debounce(
+                      () =>
+                        updateCurrentlyActivePageData((currentPageData) => ({
+                          ...currentPageData,
+                          scrollTopOffset: data.scrollOffset,
+                        })),
+                      500,
+                    );
+                }}
+              >
+                {songs}
+              </List>
+            )}
+          </InfiniteLoader> */}
+        {songData && songData.length > 0 && (
+          <VirtualizedList
+            data={songData}
+            fixedItemHeight={60}
+            scrollTopOffset={scrollTopOffset}
+            onDebouncedScroll={(range) => {
+              navigate({
+                replace: true,
+                search: (prev) => ({
+                  ...prev,
+                  scrollTopOffset: range.startIndex
+                })
+              });
+            }}
+            itemContent={(index, song) => {
+              if (song)
+                return (
+                  <Song
+                    key={index}
+                    index={index}
+                    isIndexingSongs={isSongIndexingEnabled}
+                    onPlayClick={handleSongPlayBtnClick}
+                    selectAllHandler={selectAllHandler}
+                    {...song}
+                  />
+                );
+              return <div>Bad Index</div>;
+            }}
           />
         )}
-      />
+      </div>
       {songData === null && (
         <div className="no-songs-container text-font-color-black dark:text-font-color-white my-[8%] flex h-full w-full flex-col items-center justify-center text-center text-xl">
           <Img src={NoSongsImage} alt="" className="mb-8 w-60" />

@@ -4,7 +4,7 @@ import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
 
 import Song from '../../SongsPage/Song';
 import SecondaryContainer from '../../SecondaryContainer';
-import { VirtualList } from '../../VirtualizedList';
+import VirtualizedList from '../../VirtualizedList';
 import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store/store';
 
@@ -44,7 +44,7 @@ const AllSongResults = (prop: Props) => {
         }
       }}
     >
-      <VirtualList
+      <VirtualizedList
         data={songData}
         fixedItemHeight={60}
         scrollTopOffset={scrollTopOffset}
@@ -59,10 +59,10 @@ const AllSongResults = (prop: Props) => {
         //     })
         //   });
         // }}
-        itemContent={(item, dataItem) => (
+        itemContent={(index, dataItem) => (
           <Song
-            key={item.key}
-            index={item.index}
+            key={dataItem.songId}
+            index={index}
             isIndexingSongs={isSongIndexingEnabled}
             onPlayClick={handleSongPlayBtnClick}
             selectAllHandler={selectAllHandler}

@@ -189,7 +189,7 @@ function HistoryPlaylistInfoPage() {
             options: songSortOptions,
             onChange: (e) => {
               const order = e.currentTarget.value as SongSortTypes;
-              navigate({ search: (prev) => ({ ...prev, sortingOrder: order }) });
+              navigate({ search: (prev) => ({ ...prev, sortingOrder: order }), replace: true });
             },
             isDisabled: !(historySongs.length > 0)
           }
