@@ -1,4 +1,4 @@
-jest.mock('../src/main/logger', () => ({
+jest.mock('../../../src/main/logger', () => ({
   __esModule: true, // this property makes it work
   default: {
     info: jest.fn((...data) => console.log(...data)),
@@ -13,7 +13,7 @@ import { TagConstants } from 'node-id3';
 import parseLyrics, {
   SyncedLyricsInput,
   parseSyncedLyricsFromAudioDataSource
-} from '../src/common/parseLyrics';
+} from '../../../src/common/parseLyrics';
 
 // const songMetadata = `[ti:Stay]
 // [length:03:30.13]

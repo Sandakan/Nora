@@ -8,7 +8,15 @@
     "allowJs": true,
     "types": [ "node", "jest" ],
     "verbatimModuleSyntax": false,
-    "erasableSyntaxOnly": false
+    "erasableSyntaxOnly": false,
+    "paths": {
+      "@renderer/*": [
+        "src/renderer/src/*"
+      ],
+      "@common/*": [
+        "src/common/*"
+      ],
+    }
   },
   "include": [ "src/types/" ]
 }

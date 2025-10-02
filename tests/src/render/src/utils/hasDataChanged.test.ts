@@ -1,4 +1,6 @@
-import hasDataChanged, { isDataChanged } from '../src/renderer/src/utils/hasDataChanged';
+import hasDataChanged, {
+  isDataChanged
+} from '../../../../../src/renderer/src/utils/hasDataChanged';
 
 describe('hasDataChanged function check', () => {
   test('Basic comparisons with boolean returns', () => {
