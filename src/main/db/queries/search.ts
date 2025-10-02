@@ -60,9 +60,6 @@ export const searchSongsByName = async (keyword: string, trx: DB | DBTransaction
             columns: { id: true, name: true }
           }
         }
-      },
-      blacklist: {
-        columns: { songId: true }
       }
     }
   });

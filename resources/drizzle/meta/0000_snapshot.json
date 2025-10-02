@@ -1,5 +1,5 @@
 {
-  "id": "e9a05b11-1b2e-432d-a98b-a8ccb278731c",
+  "id": "4902e6a5-3ee7-4fa1-8a90-579a4d467d67",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -838,6 +838,33 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
+        },
+        "idx_artworks_source_dimensions": {
+          "name": "idx_artworks_source_dimensions",
+          "columns": [
+            {
+              "expression": "source",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "width",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "height",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {},
@@ -1162,69 +1189,6 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.folder_blacklist": {
-      "name": "folder_blacklist",
-      "schema": "",
-      "columns": {
-        "folder_id": {
-          "name": "folder_id",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "idx_folder_blacklist_created_at": {
-          "name": "idx_folder_blacklist_created_at",
-          "columns": [
-            {
-              "expression": "created_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "folder_blacklist_folder_id_music_folders_id_fk": {
-          "name": "folder_blacklist_folder_id_music_folders_id_fk",
-          "tableFrom": "folder_blacklist",
-          "tableTo": "music_folders",
-          "columnsFrom": [
-            "folder_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.genres": {
       "name": "genres",
       "schema": "",
@@ -1429,11 +1393,25 @@
           "primaryKey": false,
           "notNull": true
         },
+        "is_blacklisted": {
+          "name": "is_blacklisted",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
         "parent_id": {
           "name": "parent_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
+        },
+        "is_blacklisted_updated_at": {
+          "name": "is_blacklisted_updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
         },
         "folder_created_at": {
           "name": "folder_created_at",
@@ -1495,6 +1473,21 @@
           "columns": [
             {
               "expression": "path",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_music_folders_is_blacklisted": {
+          "name": "idx_music_folders_is_blacklisted",
+          "columns": [
+            {
+              "expression": "is_blacklisted",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -2455,69 +2448,6 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.song_blacklist": {
-      "name": "song_blacklist",
-      "schema": "",
-      "columns": {
-        "song_id": {
-          "name": "song_id",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "idx_song_blacklist_created_at": {
-          "name": "idx_song_blacklist_created_at",
-          "columns": [
-            {
-              "expression": "created_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "song_blacklist_song_id_songs_id_fk": {
-          "name": "song_blacklist_song_id_songs_id_fk",
-          "tableFrom": "song_blacklist",
-          "tableTo": "songs",
-          "columnsFrom": [
-            "song_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.songs": {
       "name": "songs",
       "schema": "",
@@ -2605,6 +2535,27 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": false
+        },
+        "is_blacklisted": {
+          "name": "is_blacklisted",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "is_blacklisted_updated_at": {
+          "name": "is_blacklisted_updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "is_favorite_updated_at": {
+          "name": "is_favorite_updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
         },
         "file_created_at": {
           "name": "file_created_at",
@@ -2739,6 +2690,36 @@
           "method": "btree",
           "with": {}
         },
+        "idx_songs_is_favorite": {
+          "name": "idx_songs_is_favorite",
+          "columns": [
+            {
+              "expression": "is_favorite",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_songs_is_blacklisted": {
+          "name": "idx_songs_is_blacklisted",
+          "columns": [
+            {
+              "expression": "is_blacklisted",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
         "idx_songs_year_title": {
           "name": "idx_songs_year_title",
           "columns": [
@@ -2823,6 +2804,27 @@
           "method": "btree",
           "with": {}
         },
+        "idx_songs_favorite_title": {
+          "name": "idx_songs_favorite_title",
+          "columns": [
+            {
+              "expression": "is_favorite",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "title",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
         "idx_songs_folder_title": {
           "name": "idx_songs_folder_title",
           "columns": [
@@ -2840,22 +2842,6 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "idx_songs_title_text": {
-          "name": "idx_songs_title_text",
-          "columns": [
-            {
-              "expression": "title",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "where": "\"songs\".\"title\" IS NOT NULL",
           "concurrently": false,
           "method": "btree",
           "with": {}

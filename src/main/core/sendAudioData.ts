@@ -95,7 +95,7 @@ const sendAudioData = async (songId: string): Promise<AudioPlayerData> => {
 
       const albumObj = song.albums?.[0]?.album;
       const album = albumObj ? { albumId: String(albumObj.id), name: albumObj.title } : undefined;
-      const isBlacklisted = !!song.blacklist;
+      const isBlacklisted = song.isBlacklisted;
       const isAFavorite = song.isFavorite;
 
       const data: AudioPlayerData = {

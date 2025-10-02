@@ -11,10 +11,8 @@ import {
   blacklistMigrations,
   generateMigrationMessage,
   genreMigrations,
-  listeningDataMigrations,
   playlistMigrations,
-  songMigrations,
-  userDataMigrations
+  songMigrations
 } from './migrations';
 import { DEFAULT_SONG_PALETTE } from './other/generatePalette';
 import isPathADir from './utils/isPathADir';
@@ -32,30 +30,6 @@ export const DEFAULT_FILE_URL = 'nora://localfiles/';
 // console.log('New user created!');
 // const users = await db.select().from(usersTable);
 // console.log('Getting all users from the database: ', users);
-
-export const USER_DATA_TEMPLATE: UserData = {
-  language: 'en',
-  theme: { isDarkMode: false, useSystemTheme: true },
-  musicFolders: [],
-  preferences: {
-    autoLaunchApp: false,
-    isMiniPlayerAlwaysOnTop: false,
-    isMusixmatchLyricsEnabled: false,
-    hideWindowOnClose: false,
-    openWindowAsHiddenOnSystemStart: false,
-    openWindowMaximizedOnStart: false,
-    sendSongScrobblingDataToLastFM: false,
-    sendSongFavoritesDataToLastFM: false,
-    sendNowPlayingSongDataToLastFM: false,
-    saveLyricsInLrcFilesForSupportedSongs: false,
-    enableDiscordRPC: false,
-    saveVerboseLogs: false
-  },
-  windowPositions: {},
-  windowDiamensions: {},
-  windowState: 'normal',
-  recentSearches: []
-};
 
 export const HISTORY_PLAYLIST_TEMPLATE: SavablePlaylist = {
   name: 'History',
@@ -163,39 +137,6 @@ const playlistDataStore = new Store({
   migrations: playlistMigrations
 });
 
-const userDataStore = new Store({
-  name: 'userData',
-  defaults: {
-    version,
-    userData: USER_DATA_TEMPLATE
-  },
-  schema: {
-    version: { type: ['string', 'null'] },
-    userData: {
-      type: 'object'
-    }
-  },
-  beforeEachMigration: (_, context) => generateMigrationMessage('userData.json', context),
-  migrations: userDataMigrations
-});
-
-const listeningDataStore = new Store({
-  name: 'listening_data',
-  clearInvalidConfig: true,
-  defaults: {
-    version,
-    listeningData: []
-  },
-  schema: {
-    version: { type: ['string', 'null'] },
-    listeningData: {
-      type: 'array'
-    }
-  },
-  beforeEachMigration: (_, context) => generateMigrationMessage('listening_data.json', context),
-  migrations: listeningDataMigrations
-});
-
 const blacklistStore = new Store({
   name: 'blacklist',
   clearInvalidConfig: true,
@@ -250,7 +191,6 @@ let cachedPlaylistsData = playlistDataStore.get(
   'playlists',
   PLAYLIST_DATA_TEMPLATE
 ) as SavablePlaylist[];
-let cachedListeningData = listeningDataStore.get('listeningData', []) as SongListeningData[];
 let cachedBlacklist = blacklistStore.get('blacklist', BLACKLIST_TEMPLATE) as Blacklist;
 let cachedPaletteData = paletteStore.get('palettes', PALETTE_DATA_TEMPLATE) as PaletteData[];
 
@@ -324,84 +264,6 @@ export const setGenresData = (updatedGenres: SavableGenre[]) => {
   genreStore.set('genres', updatedGenres);
 };
 
-// ? SONG LISTENING DATA GETTERS AND SETTERS
-
-export const createNewListeningDataInstance = (songId: string) => {
-  const date = new Date();
-  const currentYear = date.getFullYear();
-
-  const newListeningData: SongListeningData = {
-    songId,
-    skips: 0,
-    fullListens: 0,
-    inNoOfPlaylists: 0,
-    listens: [{ year: currentYear, listens: [] }],
-    seeks: []
-  };
-  return newListeningData;
-};
-
-export const getListeningData = (songIds = [] as string[]): SongListeningData[] => {
-  const data =
-    cachedListeningData && cachedListeningData.length > 0
-      ? cachedListeningData
-      : (listeningDataStore.get('listeningData', []) as SongListeningData[]);
-
-  const results =
-    songIds.length === 0 ? data : data.filter((x) => songIds.some((songId) => x.songId === songId));
-
-  if (results.length === 0) {
-    if (songIds.length === 0) return [];
-    const defaultOutputs: SongListeningData[] = songIds.map((id) =>
-      createNewListeningDataInstance(id)
-    );
-    return defaultOutputs;
-  }
-
-  const listeningData: SongListeningData[] = results.map((x) => {
-    const { songId, skips = 0, fullListens = 0, inNoOfPlaylists = 0, listens, seeks = [] } = x;
-
-    return {
-      songId,
-      skips,
-      fullListens,
-      inNoOfPlaylists,
-      listens,
-      seeks
-    };
-  });
-
-  return listeningData;
-};
-
-export const saveListeningData = (listeningData: SongListeningData[]) => {
-  cachedListeningData = listeningData;
-  return listeningDataStore.set('listeningData', listeningData);
-};
-
-export const setListeningData = (data: SongListeningData) => {
-  const results =
-    cachedListeningData && cachedListeningData.length > 0
-      ? cachedListeningData
-      : (listeningDataStore.get('listeningData', []) as SongListeningData[]);
-
-  for (let i = 0; i < results.length; i += 1) {
-    if (results[i].songId === data.songId) {
-      results[i].skips = data.skips;
-      results[i].fullListens = data.fullListens;
-      results[i].inNoOfPlaylists = data.inNoOfPlaylists;
-      results[i].listens = data.listens;
-      results[i].seeks = data.seeks;
-
-      break;
-    }
-  }
-
-  results.push(data);
-  saveListeningData(results);
-  return dataUpdateEvent('songs/listeningData');
-};
-
 // ? PLAYLIST DATA GETTERS AND SETTERS
 
 export const getPlaylistData = (playlistIds = [] as string[]) => {
@@ -439,33 +301,6 @@ export const getBlacklistData = (): Blacklist => {
   return blacklistStore.get('blacklist') as Blacklist;
 };
 
-export const addToBlacklist = (
-  str: string,
-  blacklistType: 'SONG_BLACKLIST' | 'FOLDER_BLACKLIST'
-) => {
-  switch (blacklistType) {
-    case 'SONG_BLACKLIST':
-      cachedBlacklist.songBlacklist.push(str);
-      dataUpdateEvent('blacklist/songBlacklist');
-      break;
-
-    case 'FOLDER_BLACKLIST':
-      cachedBlacklist.folderBlacklist.push(str);
-      dataUpdateEvent('blacklist/folderBlacklist');
-      break;
-
-    default:
-      throw new Error('unknown blacklist type');
-  }
-  blacklistStore.set('blacklist', cachedBlacklist);
-};
-
-export const updateBlacklist = (callback: (_prevBlacklist: Blacklist) => Blacklist) => {
-  const updatedBlacklist = callback(cachedBlacklist);
-  cachedBlacklist = updatedBlacklist;
-  blacklistStore.set('blacklist', updatedBlacklist);
-};
-
 export const setBlacklist = (updatedBlacklist: Blacklist) => {
   cachedBlacklist = updatedBlacklist;
   blacklistStore.set('blacklist', updatedBlacklist);
@@ -501,4 +336,3 @@ export async function getDirectoriesRecursive(srcpath: string): Promise<string[]
     return [];
   }
 }
-

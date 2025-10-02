@@ -1,7 +1,7 @@
 import { db } from '@db/db';
-import { folderBlacklist, musicFolders, songs } from '@db/schema';
+import { musicFolders, songs } from '@db/schema';
 import { timeEnd, timeStart } from '@main/utils/measureTimeUsage';
-import { and, asc, desc, eq, ilike, inArray, notInArray, or, type SQL } from 'drizzle-orm';
+import { and, asc, desc, eq, ilike, inArray, or, type SQL } from 'drizzle-orm';
 
 export const isSongWithPathAvailable = async (path: string, trx: DB | DBTransaction = db) => {
   const count = await trx.$count(songs, eq(songs.path, path));
@@ -27,26 +27,22 @@ export const getSongsRelativeToFolder = async (
       typeof folderPathOrId === 'string'
         ? eq(musicFolders.path, folderPathOrId)
         : eq(musicFolders.id, folderPathOrId),
-    columns: { id: true },
+    columns: { id: true, isBlacklisted: true },
     with: {
       songs: {
-        columns: { id: true, path: true },
-        with: {
-          blacklist: { columns: { songId: true } }
-        }
-      },
-      blacklist: { columns: { folderId: true } }
+        columns: { id: true, path: true, isBlacklisted: true }
+      }
     }
   });
 
   if (!folder) return [];
 
   // Check if folder is blacklisted
-  if (options?.skipBlacklistedFolders && folder.blacklist != null) return [];
+  if (options?.skipBlacklistedFolders && folder.isBlacklisted) return [];
 
   // Filter out blacklisted songs if needed
   if (options?.skipBlacklistedSongs) {
-    return folder.songs.filter((song) => song.blacklist == null);
+    return folder.songs.filter((song) => !song.isBlacklisted);
   }
 
   return folder.songs;
@@ -66,24 +62,14 @@ export async function getSongsInFolders(
 
   // Filter out blacklisted folders if needed
   if (options?.skipBlacklistedFolders) {
-    const blacklistedFolders = await trx.query.folderBlacklist.findMany({
-      where: inArray(folderBlacklist.folderId, folderIds),
-      columns: { folderId: true }
+    const blacklistedFolders = await trx.query.musicFolders.findMany({
+      where: and(inArray(musicFolders.id, folderIds), eq(musicFolders.isBlacklisted, true)),
+      columns: { id: true }
     });
 
-    const blacklistedSet = new Set(blacklistedFolders.map((entry) => entry.folderId));
-    validFolderIds = folderIds.filter((id) => !blacklistedSet.has(id));
+    validFolderIds = folderIds.filter((id) => !blacklistedFolders.some((bf) => bf.id === id));
 
     if (validFolderIds.length === 0) return [];
-  }
-
-  // Prepare to filter out blacklisted songs if needed
-  let blacklistedSongIds: number[] = [];
-  if (options?.skipBlacklistedSongs) {
-    const blacklistedSongs = await trx.query.songBlacklist.findMany({
-      columns: { songId: true }
-    });
-    blacklistedSongIds = blacklistedSongs.map((entry) => entry.songId);
   }
 
   // Query the songs
@@ -91,7 +77,7 @@ export async function getSongsInFolders(
     where: (s) =>
       and(
         inArray(s.folderId, validFolderIds),
-        options?.skipBlacklistedSongs ? notInArray(s.id, blacklistedSongIds) : undefined
+        eq(s.isBlacklisted, options?.skipBlacklistedSongs ?? false)
       )
   });
 
@@ -136,6 +122,10 @@ export const getAllSongs = async (
 
       if (filterType === 'favorites' || filterType === 'nonFavorites') {
         filters.push(eq(s.isFavorite, filterType === 'favorites'));
+      }
+
+      if (filterType === 'blacklistedSongs' || filterType === 'whitelistedSongs') {
+        filters.push(eq(s.isBlacklisted, filterType === 'blacklistedSongs'));
       }
 
       return filters.length > 0 ? and(...filters) : undefined;
@@ -191,21 +181,6 @@ export const getAllSongs = async (
             columns: { id: true, name: true }
           }
         }
-      },
-      blacklist: {
-        columns: { songId: true }
-        // where: (songs) => {
-        //   // Apply filter for blacklisted songs if needed
-        //   const filters: SQL[] = [];
-
-        //   // if (filterType === 'blacklistedSongs') {
-        //   //   filters.push(eq(songs.blacklist.length, 1));
-        //   // } else if (filterType === 'notBlacklisted') {
-        //   //   filters.push(eq(songs.blacklist.length, 0));
-        //   // }
-
-        //   return or(...filters);
-        // }
       }
     },
     orderBy: (songs) => {
@@ -301,9 +276,6 @@ export const getSongById = async (songId: number, trx: DB | DBTransaction = db) 
             columns: { id: true, name: true }
           }
         }
-      },
-      blacklist: {
-        columns: { songId: true }
       }
     }
   });
@@ -364,9 +336,6 @@ export const getSongByPath = async (path: string, trx: DB | DBTransaction = db) 
             columns: { id: true, name: true }
           }
         }
-      },
-      blacklist: {
-        columns: { songId: true }
       }
     }
   });
@@ -436,9 +405,6 @@ export const searchSongs = async (keyword: string, trx: DB | DBTransaction = db)
             columns: { id: true, name: true }
           }
         }
-      },
-      blacklist: {
-        columns: { songId: true }
       }
     }
   });
@@ -501,9 +467,6 @@ export const getSongsByNames = async (songNames: string[], trx: DB | DBTransacti
             columns: { id: true, name: true }
           }
         }
-      },
-      blacklist: {
-        columns: { songId: true }
       }
     }
   });
@@ -568,9 +531,6 @@ export const getPlayableSongById = async (songId: number, trx: DB | DBTransactio
             }
           }
         }
-      },
-      blacklist: {
-        columns: { songId: true }
       }
     }
   });
@@ -649,9 +609,6 @@ export const getAllSongsInFavorite = async (
             columns: { id: true, name: true }
           }
         }
-      },
-      blacklist: {
-        columns: { songId: true }
       }
     },
     orderBy: (songs) => {

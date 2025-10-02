@@ -1,4 +1,4 @@
-import { and, eq, isNull } from 'drizzle-orm';
+import { and, eq, inArray, isNull } from 'drizzle-orm';
 import { db } from '../db';
 import { musicFolders } from '../schema';
 import { basename } from 'path';
@@ -149,8 +149,7 @@ const getMusicFolder = async (
     with: {
       songs: {
         columns: { id: true }
-      },
-      blacklist: true
+      }
     }
   });
   // .from(musicFolders)
@@ -170,7 +169,7 @@ const getMusicFolder = async (
         lastParsedDate: folder.lastParsedAt!
       },
       songIds: folder.songs.map((song) => song.id.toString()),
-      isBlacklisted: folder.blacklist !== null,
+      isBlacklisted: folder.isBlacklisted,
       subFolders
     });
   }
@@ -184,8 +183,7 @@ export const getAllMusicFolders = async (trx: DB | DBTransaction = db): Promise<
     with: {
       songs: {
         columns: { id: true }
-      },
-      blacklist: true
+      }
     }
   });
 
@@ -201,11 +199,49 @@ export const getAllMusicFolders = async (trx: DB | DBTransaction = db): Promise<
             lastParsedDate: folder.lastParsedAt!
           },
           songIds: folder.songs.map((song) => song.id.toString()),
-          isBlacklisted: folder.blacklist !== null,
+          isBlacklisted: folder.isBlacklisted,
           subFolders: await getMusicFolder(folder.id, trx)
         }) satisfies MusicFolder
     )
   );
 
   return structures;
+};
+
+export const getFoldersByIds = async (ids: number[], trx: DB | DBTransaction = db) => {
+  const folders = await trx.query.musicFolders.findMany({
+    where: (f) => inArray(f.id, ids)
+  });
+
+  return folders;
+};
+
+export const getFoldersByPaths = async (paths: string[], trx: DB | DBTransaction = db) => {
+  const folders = await trx.query.musicFolders.findMany({
+    where: (f) => inArray(f.path, paths)
+  });
+
+  return folders;
+};
+
+export const getBlacklistedFolders = async () => {
+  const data = await db.query.musicFolders.findMany({
+    where: (f) => eq(f.isBlacklisted, true)
+  });
+
+  return data;
+};
+
+export const isFolderBlacklisted = async (folderId: number) => {
+  const data = await db.query.musicFolders.findFirst({
+    where: eq(musicFolders.id, folderId)
+  });
+  return !!data;
+};
+
+export const addFoldersToBlacklist = async (folderIds: number[]) => {
+  await db
+    .update(musicFolders)
+    .set({ isBlacklisted: true, isBlacklistedUpdatedAt: new Date() })
+    .where(inArray(musicFolders.id, folderIds));
 };

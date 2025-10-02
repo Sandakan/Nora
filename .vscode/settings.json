@@ -58,7 +58,7 @@
     "*.{css,sass,scss}.d.ts": true,
     "**/routeTree.gen.ts": true
   },
-  "cSpell.ignoreWords": ["asar", "edata", "prettierrc"],
+  "cSpell.ignoreWords": [ "asar", "edata", "prettierrc" ],
   "rpc.enabled": true,
   "docwriter.hotkey.windows": "Alt + .",
   "tailwindCSS.emmetCompletions": true,
@@ -71,7 +71,7 @@
   ],
   "json.schemas": [
     {
-      "fileMatch": ["../release-notes.json"],
+      "fileMatch": [ "../release-notes.json" ],
       "url": "../release-notes-schema.json"
     }
   ],
@@ -81,7 +81,7 @@
   },
   "editor.tokenColorCustomizations": {
     "comments": "#657bae",
-    "textMateRules": []
+    "textMateRules": [ ]
   },
   "editor.wordWrap": "off",
   "window.zoomLevel": -1,

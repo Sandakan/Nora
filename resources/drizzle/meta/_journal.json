@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1758391523575,
+      "when": 1759419054690,
       "tag": "0000_init",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1758466373263,
-      "tag": "0001_lyrical_beast",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1759041975494,
-      "tag": "0002_cheerful_thena",
       "breakpoints": true
     }
   ]

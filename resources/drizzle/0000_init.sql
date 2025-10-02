@@ -90,12 +90,6 @@ CREATE TABLE "artworks_songs" (
 	CONSTRAINT "artworks_songs_song_id_artwork_id_pk" PRIMARY KEY("song_id","artwork_id")
 );
 --> statement-breakpoint
-CREATE TABLE "folder_blacklist" (
-	"folder_id" integer PRIMARY KEY NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL
-);
---> statement-breakpoint
 CREATE TABLE "genres" (
 	"id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "genres_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
 	"name" varchar(255) NOT NULL,
@@ -115,7 +109,9 @@ CREATE TABLE "music_folders" (
 	"id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "music_folders_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
 	"path" text NOT NULL,
 	"name" varchar(512) NOT NULL,
+	"is_blacklisted" boolean DEFAULT false NOT NULL,
 	"parent_id" integer,
+	"is_blacklisted_updated_at" timestamp DEFAULT now() NOT NULL,
 	"folder_created_at" timestamp,
 	"last_modified_at" timestamp,
 	"last_changed_at" timestamp,
@@ -189,12 +185,6 @@ CREATE TABLE "skip_events" (
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "song_blacklist" (
-	"song_id" integer PRIMARY KEY NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL
-);
---> statement-breakpoint
 CREATE TABLE "songs" (
 	"id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "songs_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
 	"title" varchar(4096) NOT NULL,
@@ -208,6 +198,9 @@ CREATE TABLE "songs" (
 	"disk_number" integer,
 	"track_number" integer,
 	"folder_id" integer,
+	"is_blacklisted" boolean DEFAULT false NOT NULL,
+	"is_blacklisted_updated_at" timestamp DEFAULT now() NOT NULL,
+	"is_favorite_updated_at" timestamp DEFAULT now() NOT NULL,
 	"file_created_at" timestamp NOT NULL,
 	"file_modified_at" timestamp NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
@@ -265,7 +258,6 @@ ALTER TABLE "artworks_playlists" ADD CONSTRAINT "artworks_playlists_playlist_id_
 ALTER TABLE "artworks_playlists" ADD CONSTRAINT "artworks_playlists_artwork_id_artworks_id_fk" FOREIGN KEY ("artwork_id") REFERENCES "public"."artworks"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "artworks_songs" ADD CONSTRAINT "artworks_songs_song_id_songs_id_fk" FOREIGN KEY ("song_id") REFERENCES "public"."songs"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "artworks_songs" ADD CONSTRAINT "artworks_songs_artwork_id_artworks_id_fk" FOREIGN KEY ("artwork_id") REFERENCES "public"."artworks"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
-ALTER TABLE "folder_blacklist" ADD CONSTRAINT "folder_blacklist_folder_id_music_folders_id_fk" FOREIGN KEY ("folder_id") REFERENCES "public"."music_folders"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "genres_songs" ADD CONSTRAINT "genres_songs_genre_id_genres_id_fk" FOREIGN KEY ("genre_id") REFERENCES "public"."genres"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "genres_songs" ADD CONSTRAINT "genres_songs_song_id_songs_id_fk" FOREIGN KEY ("song_id") REFERENCES "public"."songs"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "music_folders" ADD CONSTRAINT "music_folders_parent_id_music_folders_id_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."music_folders"("id") ON DELETE set null ON UPDATE cascade;--> statement-breakpoint
@@ -277,7 +269,6 @@ ALTER TABLE "playlists_songs" ADD CONSTRAINT "playlists_songs_playlist_id_playli
 ALTER TABLE "playlists_songs" ADD CONSTRAINT "playlists_songs_song_id_songs_id_fk" FOREIGN KEY ("song_id") REFERENCES "public"."songs"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "seek_events" ADD CONSTRAINT "seek_events_song_id_songs_id_fk" FOREIGN KEY ("song_id") REFERENCES "public"."songs"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "skip_events" ADD CONSTRAINT "skip_events_song_id_songs_id_fk" FOREIGN KEY ("song_id") REFERENCES "public"."songs"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
-ALTER TABLE "song_blacklist" ADD CONSTRAINT "song_blacklist_song_id_songs_id_fk" FOREIGN KEY ("song_id") REFERENCES "public"."songs"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "songs" ADD CONSTRAINT "songs_folder_id_music_folders_id_fk" FOREIGN KEY ("folder_id") REFERENCES "public"."music_folders"("id") ON DELETE set null ON UPDATE cascade;--> statement-breakpoint
 CREATE INDEX "idx_albums_title" ON "albums" USING btree ("title");--> statement-breakpoint
 CREATE INDEX "idx_albums_year" ON "albums" USING btree ("year");--> statement-breakpoint
@@ -297,18 +288,19 @@ CREATE INDEX "idx_artists_songs_song_id" ON "artists_songs" USING btree ("song_i
 CREATE INDEX "idx_artworks_path" ON "artworks" USING btree ("path");--> statement-breakpoint
 CREATE INDEX "idx_artworks_source" ON "artworks" USING btree ("source");--> statement-breakpoint
 CREATE INDEX "idx_artworks_dimensions" ON "artworks" USING btree ("width","height");--> statement-breakpoint
+CREATE INDEX "idx_artworks_source_dimensions" ON "artworks" USING btree ("source","width","height");--> statement-breakpoint
 CREATE INDEX "idx_artworks_genres_genre_id" ON "artworks_genres" USING btree ("genre_id");--> statement-breakpoint
 CREATE INDEX "idx_artworks_genres_artwork_id" ON "artworks_genres" USING btree ("artwork_id");--> statement-breakpoint
 CREATE INDEX "idx_artworks_playlists_playlist_id" ON "artworks_playlists" USING btree ("playlist_id");--> statement-breakpoint
 CREATE INDEX "idx_artworks_playlists_artwork_id" ON "artworks_playlists" USING btree ("artwork_id");--> statement-breakpoint
 CREATE INDEX "idx_artworks_songs_artwork_id" ON "artworks_songs" USING btree ("artwork_id");--> statement-breakpoint
 CREATE INDEX "idx_artworks_songs_song_id" ON "artworks_songs" USING btree ("song_id");--> statement-breakpoint
-CREATE INDEX "idx_folder_blacklist_created_at" ON "folder_blacklist" USING btree ("created_at");--> statement-breakpoint
 CREATE INDEX "idx_genres_name" ON "genres" USING btree ("name");--> statement-breakpoint
 CREATE INDEX "idx_genres_songs_genre_id" ON "genres_songs" USING btree ("genre_id");--> statement-breakpoint
 CREATE INDEX "idx_genres_songs_song_id" ON "genres_songs" USING btree ("song_id");--> statement-breakpoint
 CREATE INDEX "idx_parent_id" ON "music_folders" USING btree ("parent_id");--> statement-breakpoint
 CREATE INDEX "idx_music_folders_path" ON "music_folders" USING btree ("path");--> statement-breakpoint
+CREATE INDEX "idx_music_folders_is_blacklisted" ON "music_folders" USING btree ("is_blacklisted");--> statement-breakpoint
 CREATE INDEX "idx_music_folders_parent_path" ON "music_folders" USING btree ("parent_id","path");--> statement-breakpoint
 CREATE INDEX "idx_palette_swatches_palette_id" ON "palette_swatches" USING btree ("palette_id");--> statement-breakpoint
 CREATE INDEX "idx_palette_swatches_type" ON "palette_swatches" USING btree ("swatch_type");--> statement-breakpoint
@@ -331,7 +323,6 @@ CREATE INDEX "idx_seek_events_song_created" ON "seek_events" USING btree ("song_
 CREATE INDEX "idx_skip_events_song_id" ON "skip_events" USING btree ("song_id");--> statement-breakpoint
 CREATE INDEX "idx_skip_events_created_at" ON "skip_events" USING btree ("created_at");--> statement-breakpoint
 CREATE INDEX "idx_skip_events_song_created" ON "skip_events" USING btree ("song_id","created_at");--> statement-breakpoint
-CREATE INDEX "idx_song_blacklist_created_at" ON "song_blacklist" USING btree ("created_at");--> statement-breakpoint
 CREATE INDEX "idx_songs_title" ON "songs" USING btree ("title");--> statement-breakpoint
 CREATE INDEX "idx_songs_year" ON "songs" USING btree ("year");--> statement-breakpoint
 CREATE INDEX "idx_songs_track_number" ON "songs" USING btree ("track_number");--> statement-breakpoint
@@ -339,11 +330,13 @@ CREATE INDEX "idx_songs_created_at" ON "songs" USING btree ("created_at");--> st
 CREATE INDEX "idx_songs_file_modified_at" ON "songs" USING btree ("file_modified_at");--> statement-breakpoint
 CREATE INDEX "idx_songs_folder_id" ON "songs" USING btree ("folder_id");--> statement-breakpoint
 CREATE INDEX "idx_songs_path" ON "songs" USING btree ("path");--> statement-breakpoint
+CREATE INDEX "idx_songs_is_favorite" ON "songs" USING btree ("is_favorite");--> statement-breakpoint
+CREATE INDEX "idx_songs_is_blacklisted" ON "songs" USING btree ("is_blacklisted");--> statement-breakpoint
 CREATE INDEX "idx_songs_year_title" ON "songs" USING btree ("year","title");--> statement-breakpoint
 CREATE INDEX "idx_songs_track_title" ON "songs" USING btree ("track_number","title");--> statement-breakpoint
 CREATE INDEX "idx_songs_created_title" ON "songs" USING btree ("created_at","title");--> statement-breakpoint
 CREATE INDEX "idx_songs_modified_title" ON "songs" USING btree ("file_modified_at","title");--> statement-breakpoint
+CREATE INDEX "idx_songs_favorite_title" ON "songs" USING btree ("is_favorite","title");--> statement-breakpoint
 CREATE INDEX "idx_songs_folder_title" ON "songs" USING btree ("folder_id","title");--> statement-breakpoint
-CREATE INDEX "idx_songs_title_text" ON "songs" USING btree ("title") WHERE "songs"."title" IS NOT NULL;--> statement-breakpoint
 CREATE INDEX "idx_user_settings_language" ON "user_settings" USING btree ("language");--> statement-breakpoint
 CREATE INDEX "idx_user_settings_window_state" ON "user_settings" USING btree ("window_state");

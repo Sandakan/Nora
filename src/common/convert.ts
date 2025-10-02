@@ -22,7 +22,7 @@ export const convertToSongData = (song: GetAllSongsReturnType[number]): SongData
   const album = albumObj ? { albumId: String(albumObj.id), name: albumObj.title } : undefined;
 
   // Blacklist
-  const isBlacklisted = !!song.blacklist;
+  const isBlacklisted = song.isBlacklisted;
   // Track number
   const trackNo = song.trackNumber ?? undefined;
   // Added date

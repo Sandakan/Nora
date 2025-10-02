@@ -80,9 +80,6 @@ export const getAllSongsInHistory = async (
             columns: { id: true, name: true }
           }
         }
-      },
-      blacklist: {
-        columns: { songId: true }
       }
     },
     orderBy: (songs) => {

@@ -52,10 +52,14 @@ export const musicFolders = pgTable(
     id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
     path: text('path').notNull().unique(),
     name: varchar('name', { length: 512 }).notNull(),
+    isBlacklisted: boolean('is_blacklisted').notNull().default(false),
     parentId: integer('parent_id').references((): AnyPgColumn => musicFolders.id, {
       onDelete: 'set null',
       onUpdate: 'cascade'
     }),
+    isBlacklistedUpdatedAt: timestamp('is_blacklisted_updated_at', { withTimezone: false })
+      .notNull()
+      .defaultNow(),
     /*   When the folder itself was created on the file system */
     folderCreatedAt: timestamp('folder_created_at', { withTimezone: false }),
     /*   When the folder metadata (like permissions or timestamps) last changed */
@@ -72,6 +76,7 @@ export const musicFolders = pgTable(
     index('idx_parent_id').on(t.parentId),
     // Index for path-based lookups
     index('idx_music_folders_path').on(t.path),
+    index('idx_music_folders_is_blacklisted').on(t.isBlacklisted),
     // Composite index for hierarchical queries with path
     index('idx_music_folders_parent_path').on(t.parentId, t.path)
   ]
@@ -95,6 +100,10 @@ export const songs = pgTable(
       onDelete: 'set null',
       onUpdate: 'cascade'
     }),
+    isBlacklisted: boolean('is_blacklisted').notNull().default(false),
+    isBlacklistedUpdatedAt: timestamp('is_blacklisted_updated_at', { withTimezone: false })
+      .notNull()
+      .defaultNow(),
     isFavoriteUpdatedAt: timestamp('is_favorite_updated_at', { withTimezone: false })
       .notNull()
       .defaultNow(),
@@ -113,6 +122,7 @@ export const songs = pgTable(
     index('idx_songs_folder_id').on(t.folderId),
     index('idx_songs_path').on(t.path),
     index('idx_songs_is_favorite').on(t.isFavorite),
+    index('idx_songs_is_blacklisted').on(t.isBlacklisted),
 
     // Composite indexes for common sorting patterns
     index('idx_songs_year_title').on(t.year, t.title),
@@ -302,37 +312,6 @@ export const skipEvents = pgTable(
     index('idx_skip_events_created_at').on(t.createdAt),
     // Composite index for song + time queries
     index('idx_skip_events_song_created').on(t.songId, t.createdAt)
-  ]
-);
-
-export const songBlacklist = pgTable(
-  'song_blacklist',
-  {
-    songId: integer('song_id')
-      .primaryKey()
-      .references(() => songs.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
-    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
-    updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
-  },
-  (t) => [
-    // Index for blacklist lookups (though primary key already covers this)
-    // Adding for consistency and potential composite queries
-    index('idx_song_blacklist_created_at').on(t.createdAt)
-  ]
-);
-
-export const folderBlacklist = pgTable(
-  'folder_blacklist',
-  {
-    folderId: integer('folder_id')
-      .primaryKey()
-      .references(() => musicFolders.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
-    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
-    updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
-  },
-  (t) => [
-    // Index for blacklist creation time queries
-    index('idx_folder_blacklist_created_at').on(t.createdAt)
   ]
 );
 
@@ -655,8 +634,7 @@ export const musicFoldersRelations = relations(musicFolders, ({ one, many }) => 
     references: [musicFolders.id],
     relationName: 'music_folder_children'
   }),
-  songs: many(songs),
-  blacklist: one(folderBlacklist)
+  songs: many(songs)
 }));
 
 export const songsRelations = relations(songs, ({ one, many }) => ({
@@ -669,11 +647,6 @@ export const songsRelations = relations(songs, ({ one, many }) => ({
   genres: many(genresSongs),
   artworks: many(artworksSongs),
   playlists: many(playlistsSongs),
-  blacklist: one(songBlacklist),
-  folderBlacklist: one(folderBlacklist, {
-    fields: [songs.folderId],
-    references: [folderBlacklist.folderId]
-  }),
   playHistory: many(playHistory),
   playEvents: many(playEvents),
   seekEvents: many(seekEvents),
@@ -732,20 +705,6 @@ export const skipEventsRelations = relations(skipEvents, ({ one }) => ({
   song: one(songs, {
     fields: [skipEvents.songId],
     references: [songs.id]
-  })
-}));
-
-export const songBlacklistRelations = relations(songBlacklist, ({ one }) => ({
-  song: one(songs, {
-    fields: [songBlacklist.songId],
-    references: [songs.id]
-  })
-}));
-
-export const folderBlacklistRelations = relations(folderBlacklist, ({ one }) => ({
-  folder: one(musicFolders, {
-    fields: [folderBlacklist.folderId],
-    references: [musicFolders.id]
   })
 }));
 

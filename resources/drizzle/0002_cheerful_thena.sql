@@ -1,1 +1,0 @@
-ALTER TABLE "songs" ADD COLUMN "is_favorite_updated_at" timestamp DEFAULT now() NOT NULL;
