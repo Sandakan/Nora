@@ -14,6 +14,7 @@ type Props = {
     labelTitle?: string;
   };
   tags?: Tag[];
+  className?: string;
 };
 
 const Biography = (props: Props) => {
@@ -54,7 +55,7 @@ const Biography = (props: Props) => {
         bodyBackgroundImage
           ? `bg-background-color-2/70 dark:bg-dark-background-color-2/70 backdrop-blur-md`
           : `bg-background-color-2 dark:bg-dark-background-color-2`
-      }`}
+      } ${props.className}`}
     >
       <h3 className="text-font-color-highlight dark:text-dark-font-color-highlight mb-2 text-xl font-medium">
         <Trans

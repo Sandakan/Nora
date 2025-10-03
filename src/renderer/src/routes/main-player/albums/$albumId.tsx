@@ -16,9 +16,8 @@ import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 import { zodValidator } from '@tanstack/zod-adapter';
-import { useCallback, useContext, useMemo } from 'react';
+import { useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { LastFMAlbumInfo } from 'src/types/last_fm_album_info_api';
 
 export const Route = createFileRoute('/main-player/albums/$albumId')({
   validateSearch: zodValidator(songSearchSchema),
@@ -47,7 +46,7 @@ function AlbumInfoPage() {
 
   const { data: onlineAlbumInfo } = useQuery(albumQuery.fetchOnlineInfo({ albumId }));
 
-  const { data: songsData = [] } = useQuery({
+  const { data: albumSongs = [] } = useQuery({
     ...songQuery.allSongInfo({
       songIds: albumData.songs.map((song) => song.songId) || [],
       sortType: sortingOrder,
@@ -56,26 +55,18 @@ function AlbumInfoPage() {
     enabled: !!albumData?.songs && albumData.songs.length > 0
   });
 
-  const selectAllHandler = useSelectAllHandler(songsData, 'songs', 'songId');
+  const selectAllHandler = useSelectAllHandler(albumSongs, 'songs', 'songId');
 
   const handleSongPlayBtnClick = useCallback(
     (currSongId: string) => {
-      const queueSongIds = songsData
+      const queueSongIds = albumSongs
         .filter((song) => !song.isBlacklisted)
         .map((song) => song.songId);
       createQueue(queueSongIds, 'album', false, albumData.albumId, false);
       playSong(currSongId, true);
     },
-    [albumData.albumId, createQueue, playSong, songsData]
+    [albumData.albumId, createQueue, playSong, albumSongs]
   );
-
-  const listItems = useMemo(() => {
-    const items: (Album | SongData | LastFMAlbumInfo)[] = [albumData, ...songsData];
-
-    if (onlineAlbumInfo) items.push(onlineAlbumInfo);
-
-    return items;
-  }, [albumData, onlineAlbumInfo, songsData]);
 
   return (
     <MainContainer
@@ -97,13 +88,13 @@ function AlbumInfoPage() {
             iconName: 'shuffle',
             clickHandler: () =>
               createQueue(
-                songsData.filter((song) => !song.isBlacklisted).map((song) => song.songId),
+                albumSongs.filter((song) => !song.isBlacklisted).map((song) => song.songId),
                 'songs',
                 true,
                 albumData.albumId,
                 true
               ),
-            isDisabled: !(songsData.length > 0)
+            isDisabled: !(albumSongs.length > 0)
           },
           {
             tooltipLabel: t('common.addToQueue'),
@@ -111,7 +102,7 @@ function AlbumInfoPage() {
             clickHandler: () => {
               updateQueueData(
                 undefined,
-                [...queue.queue, ...songsData.map((song) => song.songId)],
+                [...queue.queue, ...albumSongs.map((song) => song.songId)],
                 false,
                 false
               );
@@ -120,25 +111,25 @@ function AlbumInfoPage() {
                   id: albumData.albumId,
                   duration: 5000,
                   content: t('notifications.addedToQueue', {
-                    count: songsData.length
+                    count: albumSongs.length
                   })
                 }
               ]);
             },
-            isDisabled: !(songsData.length > 0)
+            isDisabled: !(albumSongs.length > 0)
           },
           {
             label: t('common.playAll'),
             iconName: 'play_arrow',
             clickHandler: () =>
               createQueue(
-                songsData.filter((song) => !song.isBlacklisted).map((song) => song.songId),
+                albumSongs.filter((song) => !song.isBlacklisted).map((song) => song.songId),
                 'songs',
                 false,
                 albumData.albumId,
                 true
               ),
-            isDisabled: !(songsData.length > 0)
+            isDisabled: !(albumSongs.length > 0)
           }
         ]}
         dropdowns={[
@@ -155,35 +146,39 @@ function AlbumInfoPage() {
                 })
               });
             },
-            isDisabled: !(songsData.length > 0)
+            isDisabled: !(albumSongs.length > 0)
           }
         ]}
       />
 
       <VirtualizedList
-        data={listItems}
+        data={albumSongs}
         fixedItemHeight={60}
         scrollTopOffset={scrollTopOffset}
+        components={{
+          Header: () => <AlbumImgAndInfoContainer albumData={albumData} songsData={albumSongs} />,
+          Footer: onlineAlbumInfo
+            ? () => (
+                <OnlineAlbumInfoContainer
+                  biographyClassName="ml-0!"
+                  albumTitle={albumData.title}
+                  otherAlbumData={onlineAlbumInfo}
+                />
+              )
+            : undefined
+        }}
         itemContent={(index, item) => {
-          if ('songId' in item)
-            return (
-              <Song
-                key={index}
-                index={index}
-                isIndexingSongs={preferences?.isSongIndexingEnabled}
-                onPlayClick={handleSongPlayBtnClick}
-                selectAllHandler={selectAllHandler}
-                {...item}
-                trackNo={
-                  preferences?.showTrackNumberAsSongIndex ? (item.trackNo ?? '--') : undefined
-                }
-              />
-            );
-
-          if ('sortedAllTracks' in item)
-            return <OnlineAlbumInfoContainer albumTitle={albumData.title} otherAlbumData={item} />;
-
-          return <AlbumImgAndInfoContainer albumData={item} songsData={songsData} />;
+          return (
+            <Song
+              key={index}
+              index={index}
+              isIndexingSongs={preferences?.isSongIndexingEnabled}
+              onPlayClick={handleSongPlayBtnClick}
+              selectAllHandler={selectAllHandler}
+              {...item}
+              trackNo={preferences?.showTrackNumberAsSongIndex ? (item.trackNo ?? '--') : undefined}
+            />
+          );
         }}
       />
     </MainContainer>
