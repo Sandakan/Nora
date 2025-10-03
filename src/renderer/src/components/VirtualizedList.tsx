@@ -103,6 +103,23 @@ type Props<T extends object> = {
 //   );
 // };
 
+// const ScrollSeekPlaceholder = ({ height, index }) => (
+//   <div
+//     style={{
+//       height,
+//       padding: '8px',
+//       boxSizing: 'border-box',
+//       overflow: 'hidden'
+//     }}
+//   >
+//     <div
+//       style={{
+//         background: index % 2 ? '#ccc' : '#eee'
+//       }}
+//     ></div>
+//   </div>
+// );
+
 const PRELOADED_ITEM_THROUGH_VIEWPORT_COUNT = 5;
 const List = <T extends object>(props: Props<T>, ref) => {
   const {
@@ -138,13 +155,14 @@ const List = <T extends object>(props: Props<T>, ref) => {
               ...style
             }
       }
-      // className="pb-4"
       data={data}
       overscan={25}
       useWindowScroll={useWindowScroll}
-      atBottomThreshold={20}
       fixedItemHeight={fixedItemHeight}
-      components={components}
+      components={{
+        // ScrollSeekPlaceholder,
+        ...components
+      }}
       ref={ref}
       initialTopMostItemIndex={scrollTopOffset}
       scrollerRef={scrollerRef}
@@ -160,6 +178,14 @@ const List = <T extends object>(props: Props<T>, ref) => {
         handleDebouncedScroll(range);
       }}
       itemContent={itemContent}
+      skipAnimationFrameInResizeObserver={true}
+      // scrollSeekConfiguration={{
+      //   enter: (velocity) => Math.abs(velocity) > 1000,
+      //   exit: (velocity) => {
+      //     const shouldExit = Math.abs(velocity) < 200;
+      //     return shouldExit;
+      //   }
+      // }}
     />
   );
 };

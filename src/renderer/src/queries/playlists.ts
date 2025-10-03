@@ -31,5 +31,9 @@ export const playlistQuery = createQueryKeys('playlists', {
   single: (data: { playlistId: string }) => ({
     queryKey: [data.playlistId],
     queryFn: () => window.api.playlistsData.getPlaylistData([data.playlistId])
+  }),
+  songArtworks: (data: { songIds: string[] }) => ({
+    queryKey: ['songArtworks', `songIds=${data.songIds.join(',')}`],
+    queryFn: () => window.api.playlistsData.getArtworksForMultipleArtworksCover(data.songIds)
   })
 });

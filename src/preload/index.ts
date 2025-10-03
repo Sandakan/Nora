@@ -447,7 +447,9 @@ const playlistsData = {
     ipcRenderer.invoke('app/removeSongFromPlaylist', playlistId, songId),
   removePlaylists: (playlistIds: string[]) =>
     ipcRenderer.invoke('app/removePlaylists', playlistIds),
-  getArtworksForMultipleArtworksCover: (songIds: string[]): Promise<string[]> =>
+  getArtworksForMultipleArtworksCover: (
+    songIds: string[]
+  ): Promise<{ songId: string; artworkPaths: ArtworkPaths }[]> =>
     ipcRenderer.invoke('app/getArtworksForMultipleArtworksCover', songIds),
   exportPlaylist: (playlistId: string): Promise<void> =>
     ipcRenderer.invoke('app/exportPlaylist', playlistId),

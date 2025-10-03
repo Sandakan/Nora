@@ -15,7 +15,7 @@ import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 import { zodValidator } from '@tanstack/zod-adapter';
-import { useCallback, useContext, useMemo } from 'react';
+import { useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
 export const Route = createFileRoute('/main-player/genres/$genreId')({
@@ -65,11 +65,6 @@ function GenreInfoPage() {
       playSong(currSongId, true);
     },
     [createQueue, genreData?.genreId, genreSongs, playSong]
-  );
-
-  const listItems = useMemo(
-    () => [genreData, ...genreSongs].filter((x) => x !== undefined) as (Genre | AudioInfo)[],
-    [genreData, genreSongs]
   );
 
   return (
@@ -164,23 +159,24 @@ function GenreInfoPage() {
       />
 
       <VirtualizedList
-        data={listItems}
+        data={genreSongs}
         fixedItemHeight={60}
         scrollTopOffset={scrollTopOffset}
+        components={{
+          Header: () => <GenreImgAndInfoContainer genreData={genreData} genreSongs={genreSongs} />
+        }}
         itemContent={(index, item) => {
-          if ('songId' in item)
-            return (
-              <Song
-                key={index}
-                index={index}
-                isIndexingSongs={preferences?.isSongIndexingEnabled}
-                onPlayClick={handleSongPlayBtnClick}
-                selectAllHandler={selectAllHandler}
-                {...item}
-                trackNo={undefined}
-              />
-            );
-          return <GenreImgAndInfoContainer genreData={item} genreSongs={genreSongs} />;
+          return (
+            <Song
+              key={index}
+              index={index}
+              isIndexingSongs={preferences?.isSongIndexingEnabled}
+              onPlayClick={handleSongPlayBtnClick}
+              selectAllHandler={selectAllHandler}
+              {...item}
+              trackNo={undefined}
+            />
+          );
         }}
       />
     </MainContainer>

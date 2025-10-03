@@ -13,7 +13,7 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 import { zodValidator } from '@tanstack/zod-adapter';
-import { useCallback, useContext, useMemo } from 'react';
+import { useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import historyPlaylistCoverImage from '../../../assets/images/webp/history-playlist-icon.webp';
 export const Route = createFileRoute('/main-player/playlists/history')({
@@ -65,11 +65,6 @@ function HistoryPlaylistInfoPage() {
       playSong(currSongId, true);
     },
     [createQueue, playSong, historySongs]
-  );
-
-  const listItems = useMemo(
-    () => [{ ...playlistData, songs: historySongs.map((song) => song.songId) }, ...historySongs],
-    [historySongs]
   );
 
   // const clearSongHistory = useCallback(() => {
@@ -196,48 +191,48 @@ function HistoryPlaylistInfoPage() {
         ]}
       />
       <VirtualizedList
-        data={listItems}
+        data={historySongs}
         fixedItemHeight={60}
         scrollTopOffset={scrollTopOffset}
+        components={{
+          Header: () => <PlaylistInfoAndImgContainer playlist={playlistData} songs={historySongs} />
+        }}
         itemContent={(index, item) => {
-          if ('songId' in item)
-            return (
-              <Song
-                key={index}
-                // # Since the first element is the PlaylistInfoAndImgContainer, we need to subtract 1
-                index={index - 1}
-                isIndexingSongs={preferences.isSongIndexingEnabled}
-                onPlayClick={handleSongPlayBtnClick}
-                selectAllHandler={selectAllHandler}
-                {...item}
-                trackNo={undefined}
-                // additionalContextMenuItems={[
-                //   {
-                //     label: t('playlistsPage.removeFromThisPlaylist'),
-                //     iconName: 'playlist_remove',
-                //     handlerFunction: () =>
-                //       window.api.playlistsData
-                //         .removeSongFromPlaylist(playlistData.playlistId, item.songId)
-                //         .then(
-                //           (res) =>
-                //             res.success &&
-                //             addNewNotifications([
-                //               {
-                //                 id: `${item.songId}Removed`,
-                //                 duration: 5000,
-                //                 content: t('playlistsPage.removeSongFromPlaylistSuccess', {
-                //                   title: item.title,
-                //                   playlistName: playlistData.name
-                //                 })
-                //               }
-                //             ])
-                //         )
-                //         .catch((err) => console.error(err))
-                //   }
-                // ]}
-              />
-            );
-          return <PlaylistInfoAndImgContainer playlist={item} songs={historySongs as SongData[]} />;
+          return (
+            <Song
+              key={index}
+              index={index}
+              isIndexingSongs={preferences.isSongIndexingEnabled}
+              onPlayClick={handleSongPlayBtnClick}
+              selectAllHandler={selectAllHandler}
+              {...item}
+              trackNo={undefined}
+              // additionalContextMenuItems={[
+              //   {
+              //     label: t('playlistsPage.removeFromThisPlaylist'),
+              //     iconName: 'playlist_remove',
+              //     handlerFunction: () =>
+              //       window.api.playlistsData
+              //         .removeSongFromPlaylist(playlistData.playlistId, item.songId)
+              //         .then(
+              //           (res) =>
+              //             res.success &&
+              //             addNewNotifications([
+              //               {
+              //                 id: `${item.songId}Removed`,
+              //                 duration: 5000,
+              //                 content: t('playlistsPage.removeSongFromPlaylistSuccess', {
+              //                   title: item.title,
+              //                   playlistName: playlistData.name
+              //                 })
+              //               }
+              //             ])
+              //         )
+              //         .catch((err) => console.error(err))
+              //   }
+              // ]}
+            />
+          );
         }}
       />
       {historySongs.length === 0 && (

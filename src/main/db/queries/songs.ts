@@ -644,3 +644,22 @@ export const getAllSongsInFavorite = async (
     end
   };
 };
+
+export const getSongArtworksBySongIds = async (songIds: number[], trx: DB | DBTransaction = db) => {
+  if (songIds.length === 0) return [];
+
+  const data = await trx.query.songs.findMany({
+    where: inArray(songs.id, songIds),
+    columns: {
+      id: true
+    },
+    with: {
+      artworks: {
+        with: {
+          artwork: true
+        }
+      }
+    }
+  });
+  return data;
+};
