@@ -173,6 +173,12 @@ function ArtistPage() {
               fixedItemWidth={MIN_ITEM_WIDTH}
               fixedItemHeight={MIN_ITEM_HEIGHT}
               scrollTopOffset={scrollTopOffset}
+              onDebouncedScroll={(range) => {
+                navigate({
+                  replace: true,
+                  search: (prev) => ({ ...prev, scrollTopOffset: range.startIndex })
+                });
+              }}
               itemContent={(index, artist) => {
                 return (
                   <Artist

@@ -2,7 +2,7 @@ import { createQueryKeys } from '@lukemorales/query-key-factory';
 
 export const albumQuery = createQueryKeys('albums', {
   all: (data: {
-    albumIds: string[];
+    albumIds?: string[];
     sortType?: AlbumSortTypes;
     start?: number;
     end?: number;

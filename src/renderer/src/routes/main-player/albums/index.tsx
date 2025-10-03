@@ -31,7 +31,7 @@ export const Route = createFileRoute('/main-player/albums/')({
       albumQuery.all({
         sortType: deps.sortingOrder || 'aToZ',
         start: 0,
-        end: 30
+        end: 0
       })
     );
   }
@@ -150,7 +150,12 @@ function AlbumsPage() {
               data={albumsData}
               fixedItemWidth={MIN_ITEM_WIDTH}
               fixedItemHeight={MIN_ITEM_HEIGHT}
-              // scrollTopOffset={currentlyActivePage.data?.scrollTopOffset}
+              onDebouncedScroll={(range) => {
+                navigate({
+                  replace: true,
+                  search: (prev) => ({ ...prev, scrollTopOffset: range.startIndex })
+                });
+              }}
               itemContent={(index, item) => {
                 return (
                   <Album

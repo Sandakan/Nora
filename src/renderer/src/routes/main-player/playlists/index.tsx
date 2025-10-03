@@ -219,7 +219,12 @@ function PlaylistsPage() {
               data={playlists}
               fixedItemWidth={MIN_ITEM_WIDTH}
               fixedItemHeight={MIN_ITEM_HEIGHT}
-              // scrollTopOffset={currentlyActivePage.data?.scrollTopOffset}
+              onDebouncedScroll={(range) => {
+                navigate({
+                  replace: true,
+                  search: (prev) => ({ ...prev, scrollTopOffset: range.startIndex })
+                });
+              }}
               itemContent={(index, playlist) => {
                 return <Playlist index={index} selectAllHandler={selectAllHandler} {...playlist} />;
               }}

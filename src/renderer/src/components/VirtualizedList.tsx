@@ -178,7 +178,7 @@ const List = <T extends object>(props: Props<T>, ref) => {
         handleDebouncedScroll(range);
       }}
       itemContent={itemContent}
-      skipAnimationFrameInResizeObserver={true}
+      // skipAnimationFrameInResizeObserver={true}
       // scrollSeekConfiguration={{
       //   enter: (velocity) => Math.abs(velocity) > 1000,
       //   exit: (velocity) => {
