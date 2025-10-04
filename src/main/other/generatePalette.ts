@@ -1,7 +1,6 @@
 import { Vibrant } from 'node-vibrant/node';
 import { timeEnd, timeStart } from '../utils/measureTimeUsage';
 import logger from '../logger';
-import { getPaletteData } from '../filesystem';
 import { dataUpdateEvent, sendMessageToRenderer } from '../main';
 import roundTo from '../../common/roundTo';
 import { generateRandomId } from '../utils/randomId';
@@ -169,17 +168,6 @@ const savePalette = async (
 
     await createArtworkPalette({ artworkId, swatches }, trx);
   }
-};
-
-export const getSelectedPaletteData = (paletteId?: string) => {
-  const palettes = getPaletteData();
-
-  if (paletteId) {
-    for (const palette of palettes) {
-      if (palette.paletteId === paletteId) return palette;
-    }
-  }
-  return undefined;
 };
 
 export const generatePalettes = async () => {

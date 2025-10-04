@@ -663,3 +663,90 @@ export const getSongArtworksBySongIds = async (songIds: number[], trx: DB | DBTr
   });
   return data;
 };
+
+export const getSongIdFromSongPath = async (path: string, trx: DB | DBTransaction = db) => {
+  const song = await trx.query.songs.findFirst({
+    where: eq(songs.path, path),
+    columns: { id: true }
+  });
+  return song?.id ?? null;
+};
+
+export const getSongByIdForSongID3Tags = async (songId: number, trx: DB | DBTransaction = db) => {
+  const song = await trx.query.songs.findFirst({
+    where: eq(songs.id, songId),
+    with: {
+      artists: {
+        with: {
+          artist: {
+            columns: { id: true, name: true },
+            with: {
+              artworks: {
+                with: {
+                  artwork: true
+                }
+              }
+            }
+          }
+        }
+      },
+      albums: {
+        with: {
+          album: {
+            columns: { id: true, title: true },
+            with: {
+              artists: {
+                with: {
+                  artist: {
+                    columns: { id: true, name: true },
+                    with: {
+                      artworks: {
+                        with: {
+                          artwork: true
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              artworks: {
+                with: {
+                  artwork: true
+                }
+              }
+            }
+          }
+        }
+      },
+      genres: {
+        with: {
+          genre: {
+            columns: { id: true, name: true },
+            with: {
+              artworks: {
+                with: {
+                  artwork: true
+                }
+              }
+            }
+          }
+        }
+      },
+      artworks: {
+        with: {
+          artwork: {
+            with: {
+              palette: {
+                columns: { id: true },
+                with: {
+                  swatches: {}
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  });
+  return song;
+};

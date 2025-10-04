@@ -7,10 +7,10 @@ import {
   createPlaylist,
   getPlaylistById,
   getPlaylistByName,
-  linkArtworkToPlaylist,
   linkSongsWithPlaylist
 } from '@main/db/queries/playlists';
 import { convertToPlaylist } from '../../common/convert';
+import { linkArtworkToPlaylist } from '@main/db/queries/artworks';
 
 const createNewPlaylist = async (name: string, songIds?: string[], artworkPath?: string) => {
   try {

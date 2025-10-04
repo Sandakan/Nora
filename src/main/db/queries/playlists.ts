@@ -1,6 +1,6 @@
 import { and, asc, desc, eq, inArray, type SQL } from 'drizzle-orm';
 import { db } from '@db/db';
-import { playlistsSongs, playlists, artworksPlaylists } from '../schema';
+import { playlistsSongs, playlists } from '../schema';
 import { timeEnd, timeStart } from '@main/utils/measureTimeUsage';
 
 export type GetAllPlaylistsReturnType = Awaited<ReturnType<typeof getAllPlaylists>>;
@@ -211,14 +211,6 @@ export const createPlaylist = async (name: string, trx: DB | DBTransaction = db)
   const [newPlaylist] = await trx.insert(playlists).values({ name }).returning();
 
   return newPlaylist;
-};
-
-export const linkArtworkToPlaylist = async (
-  playlistId: number,
-  artworkId: number,
-  trx: DB | DBTransaction = db
-) => {
-  return await trx.insert(artworksPlaylists).values({ playlistId, artworkId });
 };
 
 export const updatePlaylistName = async (

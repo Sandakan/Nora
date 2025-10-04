@@ -101,3 +101,8 @@ export const getAllSongsInHistory = async (
     end
   };
 };
+
+export const clearFullSongHistory = async (trx: DB | DBTransaction = db) => {
+  const data = await trx.delete(playHistory);
+  return data;
+};

@@ -6,6 +6,7 @@ import {
   artworks,
   artworksGenres,
   artworkSourceEnum,
+  artworksPlaylists,
   artworksSongs
 } from '../schema';
 
@@ -49,10 +50,9 @@ export const syncSongArtworks = async (
 
   // Remove unlinked
   if (toRemove.length > 0) {
-    await trx.delete(artworksSongs).where(
-      and(eq(artworksSongs.songId, songId), inArray(artworksSongs.artworkId, toRemove))
-      // @ts-ignore: Drizzle ORM may require a custom 'in' helper for array filtering
-    );
+    await trx
+      .delete(artworksSongs)
+      .where(and(eq(artworksSongs.songId, songId), inArray(artworksSongs.artworkId, toRemove)));
   }
 
   // Add new links
@@ -86,6 +86,14 @@ export const linkArtworksToArtist = async (
   trx: DB | DBTransaction = db
 ) => {
   return trx.insert(artistsArtworks).values(data).returning();
+};
+
+export const linkArtworkToPlaylist = async (
+  playlistId: number,
+  artworkId: number,
+  trx: DB | DBTransaction = db
+) => {
+  return await trx.insert(artworksPlaylists).values({ playlistId, artworkId });
 };
 
 export const getArtistOnlineArtworksCount = async (

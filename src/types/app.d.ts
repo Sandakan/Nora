@@ -1166,14 +1166,20 @@ declare global {
     onlineArtworkPaths?: OnlineArtistArtworks;
   };
 
+  type SongTagsGenreData = {
+    genreId?: string;
+    name: string;
+    artworkPath?: string;
+  };
+
   interface SongTags {
     title: string;
     artists?: SongTagsArtistData[];
     albumArtists?: SongTagsArtistData[];
-    album?: SongTagsAlbumData;
+    albums?: SongTagsAlbumData[];
     trackNumber?: number;
     releasedYear?: number;
-    genres?: { genreId?: string; name: string; artworkPath?: string }[];
+    genres?: SongTagsGenreData[];
     composer?: string;
     synchronizedLyrics?: string;
     unsynchronizedLyrics?: string;

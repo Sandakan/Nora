@@ -1,5 +1,3 @@
-import { app } from 'electron';
-
 import {
   parseArtistOnlineArtworks,
   parseSongArtworks,
@@ -7,17 +5,14 @@ import {
   resolveSongFilePath
 } from '../fs/resolveFilePaths';
 import logger from '../logger';
-// import { setDiscordRpcActivity } from '../other/discordRPC';
-import { setCurrentSongPath } from '../main';
+import { IS_DEVELOPMENT, setCurrentSongPath } from '../main';
 import { getPlayableSongById } from '@main/db/queries/songs';
 import { parsePaletteFromArtworks } from './getAllSongs';
 import { setDiscordRpcActivity } from '@main/other/discordRPC';
 import { addSongToPlayHistory } from '@main/db/queries/history';
 import sharp from 'sharp';
 
-const IS_DEVELOPMENT = !app.isPackaged || process.env.NODE_ENV === 'development';
-
-const getArtworkData = (artworkData?: Buffer | Uint8Array) => {
+export const parseArtworkDataForAudioPlayerData = (artworkData?: Buffer | Uint8Array) => {
   if (artworkData === undefined) return undefined;
 
   if (IS_DEVELOPMENT) return Buffer.from(artworkData).toString('base64');
@@ -102,14 +97,14 @@ const sendAudioData = async (songId: string): Promise<AudioPlayerData> => {
         title: song.title,
         artists,
         duration: Number(song.duration),
-        artwork: getArtworkData(artworkData),
+        artwork: parseArtworkDataForAudioPlayerData(artworkData),
         artworkPath: songArtwork,
         path: resolveSongFilePath(song.path),
         songId: String(song.id),
         isAFavorite,
         album,
         paletteData: parsePaletteFromArtworks(artworks),
-        isKnownSource: true, // TODO: Add logic to determine if the source is known
+        isKnownSource: true, // this is always true here because the song is from the library
         isBlacklisted
       };
 
