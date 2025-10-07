@@ -108,3 +108,18 @@ export const getArtistOnlineArtworksCount = async (
 
   return data.at(0)?.count ?? 0;
 };
+
+export const deleteArtworks = async (artworkIds: number[], trx: DB | DBTransaction = db) => {
+  const data = await trx.delete(artworks).where(inArray(artworks.id, artworkIds)).returning();
+  return data;
+};
+
+export const updateArtwork = async (
+  artworkId: number,
+  data: Partial<typeof artworks.$inferInsert>,
+  trx: DB | DBTransaction = db
+) => {
+  const updated = await trx.update(artworks).set(data).where(eq(artworks.id, artworkId));
+
+  return updated;
+};

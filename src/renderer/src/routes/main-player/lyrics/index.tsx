@@ -197,7 +197,7 @@ function LyricsPage() {
       }
     }
     return [];
-  }, [currentSongData?.duration, isAutoScrolling, lyrics]);
+  }, [currentSongData.duration, isAutoScrolling, lyrics]);
 
   // const showOnlineLyrics = useCallback(
   //   (

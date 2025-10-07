@@ -14,7 +14,7 @@ import { isAnErrorWithCode } from '../utils/isAnErrorWithCode';
 import albumCoverImage from '../../renderer/src/assets/images/webp/album_cover_default.webp?asset';
 import songCoverImage from '../../renderer/src/assets/images/webp/song_cover_default.webp?asset';
 import playlistCoverImage from '../../renderer/src/assets/images/webp/playlist_cover_default.webp?asset';
-import { saveArtworks } from '@main/db/queries/artworks';
+import { deleteArtworks, saveArtworks } from '@main/db/queries/artworks';
 import { db } from '@main/db/db';
 import type { artworks } from '@main/db/schema';
 
@@ -125,6 +125,37 @@ export const storeArtworks = async (
   }
 };
 
+export const updateArtworkData = async (
+  artworkType: QueueTypes,
+  artwork?: Buffer | Uint8Array | string,
+  trx: DB | DBTransaction = db
+): Promise<(typeof artworks.$inferSelect)[]> => {
+  try {
+    // const start = timeStart();
+
+    const id = generateRandomId();
+    await checkForDefaultArtworkSaveLocation();
+
+    // const start1 = timeEnd(start, 'Time to check for default artwork location');
+
+    const result = await createArtworks(id, artworkType, artwork);
+    const data = await saveArtworks(
+      [
+        { path: result.realArtworkPath, width: 1000, height: 1000, source: 'LOCAL' }, // Full resolution song artwork
+        { path: result.realOptimizedArtworkPath, width: 50, height: 50, source: 'LOCAL' } // Optimized song artwork
+      ],
+      trx
+    );
+
+    // timeEnd(start, 'Time to create artwork');
+    // timeEnd(start1, 'Total time to finish artwork storing process');
+    return data;
+  } catch (error) {
+    logger.error(`Failed to store song artwork.`, { error });
+    throw error;
+  }
+};
+
 const manageArtworkRemovalErrors = (error: Error) => {
   if (isAnErrorWithCode(error) && error.code === 'ENOENT')
     return logger.error('Failed to remove artwork.', { error });
@@ -142,6 +173,32 @@ export const removeArtwork = async (artworkPaths: ArtworkPaths, type: QueueTypes
   } catch (error) {
     logger.error(`Failed to remove a ${type} artwork.`, { error, artworkPaths });
     throw new Error(`Error occurred when removing a ${type} artwork.`);
+  }
+};
+
+/**
+ * Removes artworks from the database and deletes their corresponding files from the filesystem.
+ * Make sure to unlink any associations (e.g., songs, albums) before calling this function due to foreign key constraints having `ON DELETE CASCADE`, which may lead to unintended deletions.
+ *
+ * @param artworkIds - Array of artwork IDs to be removed.
+ * @param trx - Optional database transaction or connection to use. Defaults to the main database connection.
+ * @returns A promise that resolves when all specified artworks have been removed.
+ * @throws Throws an error if the removal process fails.
+ */
+export const removeArtworks = async (artworkIds: number[], trx: DB | DBTransaction = db) => {
+  try {
+    const artworks = await deleteArtworks(artworkIds, trx);
+
+    await Promise.allSettled(
+      artworks.map((artwork) => {
+        fs.unlink(removeDefaultAppProtocolFromFilePath(artwork.path)).catch(
+          manageArtworkRemovalErrors
+        );
+      })
+    );
+  } catch (error) {
+    logger.error('Failed to remove artwork.', { error });
+    throw new Error('Error occurred when removing artwork.');
   }
 };
 
