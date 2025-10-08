@@ -105,7 +105,9 @@
     "db:studio": "drizzle-kit studio --verbose",
     "db:seed": "drizzle-kit seed",
     "renderer:generate-routes": "tsr generate",
-    "renderer:watch-routes": "tsr watch"
+    "renderer:watch-routes": "tsr watch",
+    "preversion": "npm test",
+    "version": "npm run build"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.3.7",
@@ -150,6 +152,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.2.5",
     "@electron-toolkit/eslint-config-ts": "^3.0.0",
     "@electron-toolkit/tsconfig": "^2.0.0",
     "@eslint/compat": "^1.2.4",

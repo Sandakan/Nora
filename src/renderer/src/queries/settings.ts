@@ -10,3 +10,7 @@ export const settingsQuery = createQueryKeys('settings', {
     queryFn: async () => window.api.storageData.getStorageUsage()
   }
 });
+
+export const settingsMutation = createQueryKeys('settings', {
+  changeAppTheme: null
+});
