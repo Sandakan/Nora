@@ -3,7 +3,7 @@
 	"vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true, "defaultBranch": "master" },
 	"files": { "ignoreUnknown": false },
 	"formatter": {
-		"enabled": true,
+		"enabled": false,
 		"formatWithErrors": false,
 		"indentStyle": "tab",
 		"indentWidth": 2,
@@ -25,7 +25,7 @@
 		]
 	},
 	"linter": {
-		"enabled": true,
+		"enabled": false,
 		"rules": {
 			"recommended": false,
 			"a11y": {
@@ -303,7 +303,7 @@
 	"html": { "formatter": { "selfCloseVoidElements": "always" } },
 	"overrides": [
 		{
-			"includes": ["**/*.ts", "**/*.tsx", "**/*.mts", "**/*.cts"],
+			"includes": [ "**/*.ts", "**/*.tsx", "**/*.mts", "**/*.cts" ],
 			"linter": {
 				"rules": {
 					"complexity": { "noArguments": "error" },
@@ -334,9 +334,9 @@
 				}
 			}
 		},
-		{ "includes": ["*.js", "*.mjs"], "linter": { "rules": {} } },
-		{ "javascript": { "globals": [] }, "linter": { "rules": {} } },
-		{ "linter": { "rules": {} } },
+		{ "includes": [ "*.js", "*.mjs" ], "linter": { "rules": { } } },
+		{ "javascript": { "globals": [ ] }, "linter": { "rules": { } } },
+		{ "linter": { "rules": { } } },
 		{
 			"javascript": {
 				"globals": [
@@ -470,7 +470,7 @@
 			}
 		},
 		{
-			"includes": ["**/*.ts", "**/*.tsx", "**/*.mts", "**/*.cts"],
+			"includes": [ "**/*.ts", "**/*.tsx", "**/*.mts", "**/*.cts" ],
 			"linter": {
 				"rules": {
 					"complexity": { "noArguments": "error" },
@@ -502,5 +502,5 @@
 			}
 		}
 	],
-	"assist": { "enabled": true, "actions": { "source": { "organizeImports": "on" } } }
+	"assist": { "enabled": false, "actions": { "source": { "organizeImports": "on" } } }
 }

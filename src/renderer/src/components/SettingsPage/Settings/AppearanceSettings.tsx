@@ -26,17 +26,25 @@ const ThemeSettings = () => {
 			window.api.theme.changeAppTheme(theme);
 		},
 		// When mutate is called:
-		onMutate: async (newSettings) => {
+		onMutate: async (theme) => {
 			// Cancel any outgoing refetches
 			// (so they don't overwrite our optimistic update)
 			console.log('before change theme', new Date().toISOString());
-			await queryClient.cancelQueries({ queryKey: settingsQuery._def });
+			await queryClient.cancelQueries({ queryKey: settingsQuery.all.queryKey });
 
 			// Snapshot the previous value
-			const prevSettings = queryClient.getQueryData(settingsQuery._def);
+			const prevSettings = queryClient.getQueryData<typeof userSettings>(
+				settingsQuery.all.queryKey
+			);
 
 			// Optimistically update to the new value
-			queryClient.setQueryData(settingsQuery._def, newSettings);
+			const newSettings = {
+				...prevSettings!,
+				isDarkMode:
+					theme === 'dark' ? true : theme === 'light' ? false : (prevSettings?.isDarkMode ?? false),
+				useSystemTheme: theme === 'system'
+			};
+			queryClient.setQueryData<typeof userSettings>(settingsQuery.all.queryKey, newSettings);
 
 			console.log({ newSettings, prevSettings });
 			// Return a result with the previous and new settings
@@ -44,7 +52,10 @@ const ThemeSettings = () => {
 		},
 		// If the mutation fails, use the result we returned above
 		onError: (_, __, onMutateResult) => {
-			queryClient.setQueryData(settingsQuery._def, onMutateResult?.prevSettings);
+			queryClient.setQueryData<typeof userSettings>(
+				settingsQuery.all.queryKey,
+				onMutateResult?.prevSettings
+			);
 		},
 		// Always refetch after error or success:
 		onSettled: () => {
