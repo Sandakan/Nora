@@ -1,38 +1,54 @@
-import { useCallback, useContext } from 'react';
+import { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import Button from '../../Button';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import { store } from '@renderer/store/store';
 import { useStore } from '@tanstack/react-store';
+import { useMutation, useSuspenseQuery } from '@tanstack/react-query';
+import { settingsMutation, settingsQuery } from '@renderer/queries/settings';
+import { queryClient } from '@renderer/index';
 
 type Props = { isLyricsVisible: boolean };
 
 const TitleBarContainer = (props: Props) => {
   const isCurrentSongPlaying = useStore(store, (state) => state.player.isCurrentSongPlaying);
-  const isMiniPlayerAlwaysOnTop = useStore(
-    store,
-    (state) => state.userData.preferences.isMiniPlayerAlwaysOnTop
-  );
-  const hideWindowOnClose = useStore(
-    store,
-    (state) => state.userData.preferences.hideWindowOnClose
-  );
+  const {
+    data: { isMiniPlayerAlwaysOnTop, hideWindowOnClose }
+  } = useSuspenseQuery({
+    ...settingsQuery.all,
+    select: (data) => ({
+      isMiniPlayerAlwaysOnTop: data.isMiniPlayerAlwaysOnTop,
+      hideWindowOnClose: data.hideWindowOnClose
+    })
+  });
 
-  const { updatePlayerType, updateUserData } = useContext(AppUpdateContext);
+  const { mutate: toggleAlwaysOnTop } = useMutation({
+    mutationKey: settingsMutation.toggleMiniPlayerAlwaysOnTop.mutationKey,
+    mutationFn: async (state: boolean) => {
+      await window.api.miniPlayer.toggleMiniPlayerAlwaysOnTop(state);
+    },
+    onMutate: async (state) => {
+      await queryClient.cancelQueries({ queryKey: settingsQuery.all.queryKey });
+
+      const prevSettings = queryClient.getQueryData(settingsQuery.all.queryKey);
+
+      const newSettings = {
+        ...prevSettings!,
+        isMiniPlayerAlwaysOnTop: state
+      };
+      queryClient.setQueryData(settingsQuery.all.queryKey, newSettings);
+
+      return { prevSettings, newSettings };
+    },
+    onError: (_, __, onMutateResult) =>
+      queryClient.setQueryData(settingsQuery.all.queryKey, onMutateResult?.prevSettings),
+    onSettled: () => queryClient.invalidateQueries(settingsQuery.all)
+  });
+
+  const { updatePlayerType } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { isLyricsVisible } = props;
-
-  const toggleAlwaysOnTop = useCallback(() => {
-    const state = !isMiniPlayerAlwaysOnTop;
-
-    return window.api.miniPlayer.toggleMiniPlayerAlwaysOnTop(state).then(() =>
-      updateUserData((prevUserData) => {
-        if (prevUserData?.preferences) prevUserData.preferences.isMiniPlayerAlwaysOnTop = state;
-        return prevUserData;
-      })
-    );
-  }, [isMiniPlayerAlwaysOnTop, updateUserData]);
 
   return (
     <div
@@ -67,7 +83,7 @@ const TitleBarContainer = (props: Props) => {
             `miniPlayer.${isMiniPlayerAlwaysOnTop ? 'alwaysOnTopEnabled' : 'alwaysOnTopDisabled'}`
           )}
           removeFocusOnClick
-          clickHandler={toggleAlwaysOnTop}
+          clickHandler={() => toggleAlwaysOnTop(!isMiniPlayerAlwaysOnTop)}
         />
       </div>
       <div className="window-controls-container flex">

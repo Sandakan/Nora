@@ -62,6 +62,7 @@ import { playlistQuery } from '@renderer/queries/playlists';
 import { genreQuery } from '@renderer/queries/genres';
 import { settingsQuery } from '@renderer/queries/settings';
 import { searchQuery } from './queries/search';
+import { useSuspenseQuery } from '@tanstack/react-query';
 
 // ? CONSTANTS
 const LOW_RESPONSE_DURATION = 100;
@@ -80,23 +81,8 @@ let repetitivePlaybackErrorsCount = 0;
 // / / / / / / / /
 
 const updateNetworkStatus = () => window.api.settingsHelpers.networkStatusChange(navigator.onLine);
-const syncUserData = () =>
-  window.api.userData
-    .getUserData()
-    .then((res) => {
-      if (!res) return undefined;
-
-      dispatch({ type: 'USER_DATA_CHANGE', data: res });
-      dispatch({
-        type: 'APP_THEME_CHANGE',
-        data: { isDarkMode: res.isDarkMode, useSystemTheme: res.useSystemTheme }
-      });
-      return res;
-    })
-    .catch((err) => console.error(err));
 
 updateNetworkStatus();
-syncUserData();
 window.addEventListener('online', updateNetworkStatus);
 window.addEventListener('offline', updateNetworkStatus);
 
@@ -117,6 +103,7 @@ export default function App() {
   const refStartPlay = useRef(false);
 
   const { isOnline } = useNetworkConnectivity();
+  const { data: userSettings } = useSuspenseQuery(settingsQuery.all);
 
   const addSongDropPlaceholder = useCallback((e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -279,35 +266,6 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [isOnline]
   );
-
-  useEffect(() => {
-    const watchForSystemThemeChanges = (
-      _: unknown,
-      isDarkMode: boolean,
-      usingSystemTheme: boolean
-    ) => {
-      console.log('theme changed : isDarkMode', isDarkMode, 'usingSystemTheme', usingSystemTheme);
-      const theme = {
-        isDarkMode,
-        useSystemTheme: usingSystemTheme
-      };
-      dispatch({
-        type: 'APP_THEME_CHANGE',
-        data: theme
-      });
-    };
-
-    const watchPowerChanges = (_: unknown, isOnBatteryPower: boolean) => {
-      dispatch({ type: 'UPDATE_BATTERY_POWER_STATE', data: isOnBatteryPower });
-    };
-
-    window.api.theme.listenForSystemThemeChanges(watchForSystemThemeChanges);
-    window.api.battery.listenForBatteryPowerStateChanges(watchPowerChanges);
-    return () => {
-      window.api.theme.stoplisteningForSystemThemeChanges(watchForSystemThemeChanges);
-      window.api.battery.stopListeningForBatteryPowerStateChanges(watchPowerChanges);
-    };
-  }, []);
 
   const manageWindowBlurOrFocus = useCallback((state: 'blur-sm' | 'focus') => {
     if (AppRef.current) {
@@ -511,8 +469,6 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    syncUserData();
-
     const handleToggleSongPlayback = () => toggleSongPlayback();
     const handleSkipForwardClickListener = () => handleSkipForwardClick('PLAYER_SKIP');
     const handlePlaySongFromUnknownSource = (_: unknown, data: AudioPlayerData) =>
@@ -1858,48 +1814,6 @@ export default function App() {
     };
   }, [handleContextMenuVisibilityUpdate, manageKeyboardShortcuts]);
 
-  const updateUserData = useCallback(
-    async (callback: (prevState: UserData) => UserData | Promise<UserData> | void) => {
-      try {
-        const updatedUserData = await callback(store.state.userData);
-
-        if (typeof updatedUserData === 'object') {
-          dispatch({ type: 'USER_DATA_CHANGE', data: updatedUserData });
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    },
-    []
-  );
-
-  const fetchUserData = useCallback(
-    () =>
-      window.api.userData
-        .getUserData()
-        .then((res) => updateUserData(() => res))
-        .catch((err) => console.error(err)),
-    [updateUserData]
-  );
-
-  useEffect(() => {
-    fetchUserData();
-    const manageUserDataUpdates = (e: Event) => {
-      if ('detail' in e) {
-        const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
-        for (let i = 0; i < dataEvents.length; i += 1) {
-          const event = dataEvents[i];
-          if (event.dataType.includes('userData') || event.dataType === 'settings/preferences')
-            fetchUserData();
-        }
-      }
-    };
-    document.addEventListener('app/dataUpdates', manageUserDataUpdates);
-    return () => {
-      document.removeEventListener('app/dataUpdates', manageUserDataUpdates);
-    };
-  }, [fetchUserData]);
-
   const onSongDrop = useCallback(
     (e: DragEvent<HTMLDivElement>) => {
       console.log(e.dataTransfer.files);
@@ -1967,7 +1881,6 @@ export default function App() {
 
   const appUpdateContextValues: AppUpdateContextType = useMemo(
     () => ({
-      updateUserData,
       updateCurrentSongData,
       updateContextMenuData,
       changePromptMenuData,
@@ -2001,7 +1914,6 @@ export default function App() {
       updateEqualizerOptions
     }),
     [
-      updateUserData,
       updateCurrentSongData,
       updateContextMenuData,
       changePromptMenuData,
@@ -2036,7 +1948,7 @@ export default function App() {
     ]
   );
 
-  const isDarkMode = useStore(store, (state) => state.isDarkMode);
+  const isDarkMode = userSettings.isDarkMode;
 
   useEffect(() => {
     if (isDarkMode) document.body.classList.add('dark');

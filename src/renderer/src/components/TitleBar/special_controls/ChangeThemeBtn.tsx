@@ -3,9 +3,16 @@ import { useTranslation } from 'react-i18next';
 import Button from '../../Button';
 import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store/store';
+import { useSuspenseQuery } from '@tanstack/react-query';
+import { settingsQuery } from '@renderer/queries/settings';
 
 const ChangeThemeBtn = () => {
-  const isDarkMode = useStore(store, (state) => state.isDarkMode);
+  const {
+    data: { isDarkMode }
+  } = useSuspenseQuery({
+    ...settingsQuery.all,
+    select: (data) => ({ isDarkMode: data.isDarkMode })
+  });
   const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
 
   const { t } = useTranslation();

@@ -1,7 +1,6 @@
 import { createContext, type ReactNode } from 'react';
 
 export interface AppUpdateContextType {
-  updateUserData: (callback: (prevState: UserData) => UserData | Promise<UserData> | void) => void;
   updateCurrentSongData: (callback: (prevState: AudioPlayerData) => AudioPlayerData) => void;
   updateContextMenuData: (
     isVisible: boolean,

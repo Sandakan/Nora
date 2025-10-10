@@ -1,4 +1,4 @@
-import { createQueryKeys } from '@lukemorales/query-key-factory';
+import { createMutationKeys, createQueryKeys } from '@lukemorales/query-key-factory';
 
 export const settingsQuery = createQueryKeys('settings', {
   all: {
@@ -11,6 +11,7 @@ export const settingsQuery = createQueryKeys('settings', {
   }
 });
 
-export const settingsMutation = createQueryKeys('settings', {
-  changeAppTheme: null
+export const settingsMutation = createMutationKeys('settings', {
+  changeAppTheme: null,
+  toggleMiniPlayerAlwaysOnTop: null
 });
