@@ -9,6 +9,7 @@
     "types": [ "node", "jest" ],
     "verbatimModuleSyntax": false,
     "erasableSyntaxOnly": false,
+    "sourceMap": true,
     "paths": {
       "@renderer/*": [
         "src/renderer/src/*"
