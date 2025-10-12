@@ -40,7 +40,7 @@
     "unknownLyricsProvider": "Fournisseur de paroles inconnu",
 
     "songTitle": "Titre de la musique",
-    "duration": "Duration",
+    "duration": "Durée",
     "albumArtists": "Artistes de l'album de la musique",
     "albumTrackNo": "Numéro de piste de l'album",
     "releasedYear": "Année de sortie",
@@ -107,14 +107,14 @@
   },
 
   "titleBar": {
-    "changeTheme": "Change theme",
-    "goBack": "Go Back (Alt + Left-Arrow)",
-    "goHome": "Go to Home (Alt + Home)",
-    "goForward": "Go Forward (Alt + Right-Arrow)",
+    "changeTheme": "Changer le thème",
+    "goBack": "Aller en arrière (Alt + Flèche-Gauche)",
+    "goHome": "Aller à l'accueil (Alt + Accueil)",
+    "goForward": "Aller en avant (Alt + Flèche-Droite)",
 
-    "minimize": "Minimize",
-    "maximize": "Maximize",
-    "close": "Close"
+    "minimize": "Réduire",
+    "maximize": "Maximiser",
+    "close": "Fermer"
   },
 
   "player": {
