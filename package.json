@@ -189,7 +189,7 @@
     "globals": "^16.0.0",
     "husky": "^9.0.11",
     "jest": "^30.0.4",
-    "material-symbols": "^0.36.0",
+    "material-symbols": "^0.38.0",
     "prettier": "^3.2.4",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "react": "^19.0.0",

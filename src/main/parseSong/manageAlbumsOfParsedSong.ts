@@ -53,12 +53,14 @@ const manageAlbumsOfParsedSong = async (
     }
     return {
       relevantAlbum,
-      newAlbum
+      newAlbum,
+      relevantAlbumArtists
     };
   }
   return {
     relevantAlbum,
-    newAlbum
+    newAlbum,
+    relevantAlbumArtists
   };
 };
 
