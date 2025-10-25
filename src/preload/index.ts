@@ -194,9 +194,9 @@ const search = {
     filter: SearchFilters,
     value: string,
     updateSearchHistory?: boolean,
-    isPredictiveSearchEnabled?: boolean
+    isSimilaritySearchEnabled?: boolean
   ): Promise<SearchResult> =>
-    ipcRenderer.invoke('app/search', filter, value, updateSearchHistory, isPredictiveSearchEnabled),
+    ipcRenderer.invoke('app/search', filter, value, updateSearchHistory, isSimilaritySearchEnabled),
   clearSearchHistory: (searchText?: string[]): Promise<boolean> =>
     ipcRenderer.invoke('app/clearSearchHistory', searchText)
 };

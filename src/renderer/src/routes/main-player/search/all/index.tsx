@@ -26,7 +26,7 @@ export const Route = createFileRoute('/main-player/search/all/')({
       searchQuery.query({
         keyword: deps.search.keyword,
         filter: deps.search.filterBy,
-        isPredictiveSearchEnabled: deps.search.isPredictiveSearchEnabled,
+        isSimilaritySearchEnabled: deps.search.isSimilaritySearchEnabled,
         updateSearchHistory: true
       })
     );
@@ -41,13 +41,13 @@ function RouteComponent() {
 
   const { toggleMultipleSelections } = useContext(AppUpdateContext);
   const { t } = useTranslation();
-  const { keyword, isPredictiveSearchEnabled, filterBy } = Route.useSearch();
+  const { keyword, isSimilaritySearchEnabled, filterBy } = Route.useSearch();
 
   const { data: searchResults } = useSuspenseQuery(
     searchQuery.query({
       keyword: keyword,
       filter: filterBy,
-      isPredictiveSearchEnabled: isPredictiveSearchEnabled,
+      isSimilaritySearchEnabled: isSimilaritySearchEnabled,
       updateSearchHistory: true
     })
   );

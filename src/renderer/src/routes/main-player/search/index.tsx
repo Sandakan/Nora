@@ -36,7 +36,7 @@ export const Route = createFileRoute('/main-player/search/')({
   //   searchQuery.query({
   //     keyword: search.keyword ?? '',
   //     filter: search.filterBy ?? 'all',
-  //     isPredictiveSearchEnabled: search.isPredictiveSearchEnabled ?? false,
+  //     isSimilaritySearchEnabled: search.isSimilaritySearchEnabled ?? false,
   //     updateSearchHistory: true
   //   })
   // );
@@ -49,16 +49,16 @@ const PLAYLIST_WIDTH = 160;
 const GENRE_WIDTH = 300;
 
 function SearchPage() {
-  const isPredictiveSearchEnabledInLocalStorage = useStore(
+  const isSimilaritySearchEnabledInLocalStorage = useStore(
     store,
-    (state) => state.localStorage.preferences.isPredictiveSearchEnabled
+    (state) => state.localStorage.preferences.isSimilaritySearchEnabled
   );
 
   const { t } = useTranslation();
   const navigate = useNavigate({ from: Route.fullPath });
   const {
     keyword,
-    isPredictiveSearchEnabled = isPredictiveSearchEnabledInLocalStorage,
+    isSimilaritySearchEnabled = isSimilaritySearchEnabledInLocalStorage,
     filterBy
   } = Route.useSearch();
 
@@ -125,26 +125,26 @@ function SearchPage() {
           <div className="search-bar-container bg-background-color-2 dark:bg-dark-background-color-2 flex w-1/2 max-w-xl min-w-[25rem] items-center rounded-3xl px-2 py-1">
             <Button
               className={`!my-1 !mr-2 !ml-1 !rounded-3xl border-none !px-4 !py-2 shadow-sm outline-offset-1 focus-visible:!outline ${
-                isPredictiveSearchEnabled
+                isSimilaritySearchEnabled
                   ? 'bg-background-color-3 dark:bg-dark-background-color-3 text-black!'
                   : 'bg-background-color-1/50 text-font-color-highlight! hover:bg-background-color-1 focus-visible:bg-background-color-1 dark:bg-dark-background-color-1/50 dark:text-dark-font-color-highlight! dark:hover:bg-dark-background-color-1 dark:focus-visible:bg-dark-background-color-1'
               }`}
-              iconName={isPredictiveSearchEnabled ? 'auto_fix' : 'auto_fix_off'}
+              iconName={isSimilaritySearchEnabled ? 'auto_fix' : 'auto_fix_off'}
               tooltipLabel={t(
                 `searchPage.${
-                  isPredictiveSearchEnabled ? 'disablePredictiveSearch' : 'enablePredictiveSearch'
+                  isSimilaritySearchEnabled ? 'disablePredictiveSearch' : 'enablePredictiveSearch'
                 }`
               )}
               iconClassName="material-icons-round-outlined"
               clickHandler={() => {
                 storage.preferences.setPreferences(
-                  'isPredictiveSearchEnabled',
-                  !isPredictiveSearchEnabled
+                  'isSimilaritySearchEnabled',
+                  !isSimilaritySearchEnabled
                 );
                 navigate({
                   search: (prev) => ({
                     ...prev,
-                    isPredictiveSearchEnabled: !isPredictiveSearchEnabled
+                    isSimilaritySearchEnabled: !isSimilaritySearchEnabled
                   })
                 });
               }}
@@ -185,35 +185,35 @@ function SearchPage() {
             <SongSearchResultsContainer
               songs={searchResults.songs}
               searchInput={keyword}
-              isPredictiveSearchEnabled={isPredictiveSearchEnabled}
+              isSimilaritySearchEnabled={isSimilaritySearchEnabled}
             />
             {/* ARTIST SEARCH RESULTS */}
             <ArtistsSearchResultsContainer
               artists={searchResults.artists}
               searchInput={keyword}
               noOfVisibleArtists={noOfArtists}
-              isPredictiveSearchEnabled={isPredictiveSearchEnabled}
+              isSimilaritySearchEnabled={isSimilaritySearchEnabled}
             />
             {/* ALBUM SEARCH RESULTS */}
             <AlbumSearchResultsContainer
               albums={searchResults.albums}
               searchInput={keyword}
               noOfVisibleAlbums={noOfAlbums}
-              isPredictiveSearchEnabled={isPredictiveSearchEnabled}
+              isSimilaritySearchEnabled={isSimilaritySearchEnabled}
             />
             {/* PLAYLIST SEARCH RESULTS */}
             <PlaylistSearchResultsContainer
               playlists={searchResults.playlists}
               searchInput={keyword}
               noOfVisiblePlaylists={noOfPlaylists}
-              isPredictiveSearchEnabled={isPredictiveSearchEnabled}
+              isSimilaritySearchEnabled={isSimilaritySearchEnabled}
             />
             {/* GENRE SEARCH RESULTS */}
             <GenreSearchResultsContainer
               genres={searchResults.genres}
               searchInput={keyword}
               noOfVisibleGenres={noOfGenres}
-              isPredictiveSearchEnabled={isPredictiveSearchEnabled}
+              isSimilaritySearchEnabled={isSimilaritySearchEnabled}
             />
             {/* NO SEARCH RESULTS PLACEHOLDER */}
             <NoSearchResultsContainer

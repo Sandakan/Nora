@@ -9,14 +9,14 @@ export const searchQuery = createQueryKeys('search', {
     keyword: string;
     filter: SearchFilters;
     updateSearchHistory?: boolean;
-    isPredictiveSearchEnabled?: boolean;
+    isSimilaritySearchEnabled?: boolean;
   }) => {
-    const { keyword, filter, isPredictiveSearchEnabled = false, updateSearchHistory = true } = data;
+    const { keyword, filter, isSimilaritySearchEnabled = false, updateSearchHistory = true } = data;
 
     return {
-      queryKey: [{ keyword }, { filter }, { isPredictiveSearchEnabled }, { updateSearchHistory }],
+      queryKey: [{ keyword }, { filter }, { isSimilaritySearchEnabled }, { updateSearchHistory }],
       queryFn: () =>
-        window.api.search.search(filter, keyword, updateSearchHistory, isPredictiveSearchEnabled)
+        window.api.search.search(filter, keyword, updateSearchHistory, isSimilaritySearchEnabled)
     };
   }
 });

@@ -3,12 +3,18 @@ import { albums, artists, genres, playlists, songs } from '@db/schema';
 import { timeEnd, timeStart } from '@main/utils/measureTimeUsage';
 import { asc, ilike, sql } from 'drizzle-orm';
 
-export const searchSongsByName = async (keyword: string, trx: DB | DBTransaction = db) => {
+type SearchOptions = { keyword: string; isSimilaritySearchEnabled: boolean };
+
+export const searchSongsByName = async (options: SearchOptions, trx: DB | DBTransaction = db) => {
+  const { keyword, isSimilaritySearchEnabled } = options;
   const timer = timeStart();
 
   const results = await trx.query.songs.findMany({
-    where: ilike(songs.title, `%${keyword}%`),
-    orderBy: [asc(songs.title)],
+    where: () => sql`${songs.titleCI} % ${keyword}`, // % operator with citext
+    orderBy: () =>
+      isSimilaritySearchEnabled
+        ? sql`similarity(${songs.titleCI}, ${keyword}) DESC`
+        : [asc(songs.title)],
     with: {
       artists: {
         with: {
@@ -68,12 +74,16 @@ export const searchSongsByName = async (keyword: string, trx: DB | DBTransaction
   return results;
 };
 
-export const searchArtistsByName = async (keyword: string, trx: DB | DBTransaction = db) => {
+export const searchArtistsByName = async (options: SearchOptions, trx: DB | DBTransaction = db) => {
+  const { keyword, isSimilaritySearchEnabled } = options;
   const timer = timeStart();
 
   const results = await trx.query.artists.findMany({
-    where: ilike(artists.name, `%${keyword}%`),
-    orderBy: [asc(artists.name)],
+    where: () => sql`${artists.nameCI} % ${keyword}`, // % operator with citext
+    orderBy: () =>
+      isSimilaritySearchEnabled
+        ? sql`similarity(${artists.nameCI}, ${keyword}) DESC`
+        : [asc(artists.name)],
     with: {
       songs: { with: { song: { columns: { id: true, title: true } } } },
       artworks: {
@@ -107,12 +117,16 @@ export const searchArtistsByName = async (keyword: string, trx: DB | DBTransacti
   return results;
 };
 
-export const searchAlbumsByName = async (keyword: string, trx: DB | DBTransaction = db) => {
+export const searchAlbumsByName = async (options: SearchOptions, trx: DB | DBTransaction = db) => {
+  const { keyword, isSimilaritySearchEnabled } = options;
   const timer = timeStart();
 
   const results = await trx.query.albums.findMany({
-    where: ilike(albums.title, `%${keyword}%`),
-    orderBy: [asc(albums.title)],
+    where: () => sql`${albums.titleCI} % ${keyword}`, // % operator with citext
+    orderBy: () =>
+      isSimilaritySearchEnabled
+        ? sql`similarity(${albums.titleCI}, ${keyword}) DESC`
+        : [asc(albums.title)],
     with: {
       artists: {
         with: {
@@ -137,12 +151,19 @@ export const searchAlbumsByName = async (keyword: string, trx: DB | DBTransactio
   return results;
 };
 
-export const searchPlaylistsByName = async (keyword: string, trx: DB | DBTransaction = db) => {
+export const searchPlaylistsByName = async (
+  options: SearchOptions,
+  trx: DB | DBTransaction = db
+) => {
+  const { keyword, isSimilaritySearchEnabled } = options;
   const timer = timeStart();
 
   const results = await trx.query.playlists.findMany({
-    where: ilike(playlists.name, `%${keyword}%`),
-    orderBy: [asc(playlists.name)],
+    where: () => sql`${playlists.nameCI} % ${keyword}`, // % operator with citext
+    orderBy: () =>
+      isSimilaritySearchEnabled
+        ? sql`similarity(${playlists.nameCI}, ${keyword}) DESC`
+        : [asc(playlists.name)],
     with: {
       songs: { with: { song: { columns: { id: true } } } },
       artworks: {
@@ -166,12 +187,16 @@ export const searchPlaylistsByName = async (keyword: string, trx: DB | DBTransac
   return results;
 };
 
-export const searchGenresByName = async (keyword: string, trx: DB | DBTransaction = db) => {
+export const searchGenresByName = async (options: SearchOptions, trx: DB | DBTransaction = db) => {
+  const { keyword, isSimilaritySearchEnabled } = options;
   const timer = timeStart();
 
   const results = await trx.query.genres.findMany({
-    where: ilike(genres.name, `%${keyword}%`),
-    orderBy: [asc(genres.name)],
+    where: () => sql`${genres.nameCI} % ${keyword}`, // % operator with citext
+    orderBy: () =>
+      isSimilaritySearchEnabled
+        ? sql`similarity(${genres.nameCI}, ${keyword}) DESC`
+        : [asc(genres.name)],
     with: {
       songs: { with: { song: { columns: { id: true, title: true } } } },
       artworks: {

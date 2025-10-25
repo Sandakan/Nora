@@ -3,6 +3,7 @@ CREATE TYPE "public"."swatch_type" AS ENUM('VIBRANT', 'LIGHT_VIBRANT', 'DARK_VIB
 CREATE TABLE "albums" (
 	"id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "albums_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
 	"title" varchar(255) NOT NULL,
+	"title_ci" "citext" GENERATED ALWAYS AS ("albums"."title"::citext) STORED,
 	"year" integer,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
@@ -35,6 +36,7 @@ CREATE TABLE "album_songs" (
 CREATE TABLE "artists" (
 	"id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "artists_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
 	"name" varchar(1024) NOT NULL,
+	"name_ci" "citext" GENERATED ALWAYS AS ("artists"."name"::citext) STORED,
 	"is_favorite" boolean DEFAULT false NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
@@ -93,6 +95,7 @@ CREATE TABLE "artworks_songs" (
 CREATE TABLE "genres" (
 	"id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "genres_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
 	"name" varchar(255) NOT NULL,
+	"name_ci" "citext" GENERATED ALWAYS AS ("genres"."name"::citext) STORED,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
@@ -157,6 +160,7 @@ CREATE TABLE "play_history" (
 CREATE TABLE "playlists" (
 	"id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "playlists_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
 	"name" varchar(255) NOT NULL,
+	"name_ci" "citext" GENERATED ALWAYS AS ("playlists"."name"::citext) STORED,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
@@ -188,6 +192,7 @@ CREATE TABLE "skip_events" (
 CREATE TABLE "songs" (
 	"id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "songs_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
 	"title" varchar(4096) NOT NULL,
+	"title_ci" "citext" GENERATED ALWAYS AS ("songs"."title"::citext) STORED,
 	"duration" numeric(10, 3) NOT NULL,
 	"path" text NOT NULL,
 	"is_favorite" boolean DEFAULT false NOT NULL,
@@ -271,8 +276,10 @@ ALTER TABLE "seek_events" ADD CONSTRAINT "seek_events_song_id_songs_id_fk" FOREI
 ALTER TABLE "skip_events" ADD CONSTRAINT "skip_events_song_id_songs_id_fk" FOREIGN KEY ("song_id") REFERENCES "public"."songs"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "songs" ADD CONSTRAINT "songs_folder_id_music_folders_id_fk" FOREIGN KEY ("folder_id") REFERENCES "public"."music_folders"("id") ON DELETE set null ON UPDATE cascade;--> statement-breakpoint
 CREATE INDEX "idx_albums_title" ON "albums" USING btree ("title");--> statement-breakpoint
-CREATE INDEX "idx_albums_year" ON "albums" USING btree ("year");--> statement-breakpoint
-CREATE INDEX "idx_albums_year_title" ON "albums" USING btree ("year","title");--> statement-breakpoint
+CREATE INDEX "idx_albums_title_ci" ON "albums" USING btree ("title_ci");--> statement-breakpoint
+CREATE INDEX "idx_albums_title_ci_trgm" ON "albums" USING gin ("title_ci" gin_trgm_ops);--> statement-breakpoint
+CREATE INDEX "idx_albums_year" ON "albums" USING btree ("year" DESC NULLS LAST);--> statement-breakpoint
+CREATE INDEX "idx_albums_year_title" ON "albums" USING btree ("year" DESC NULLS LAST,"title");--> statement-breakpoint
 CREATE INDEX "idx_albums_artists_album_id" ON "albums_artists" USING btree ("album_id");--> statement-breakpoint
 CREATE INDEX "idx_albums_artists_artist_id" ON "albums_artists" USING btree ("artist_id");--> statement-breakpoint
 CREATE INDEX "idx_albums_artworks_artwork_id" ON "albums_artworks" USING btree ("artwork_id");--> statement-breakpoint
@@ -280,6 +287,8 @@ CREATE INDEX "idx_albums_artworks_album_id" ON "albums_artworks" USING btree ("a
 CREATE INDEX "idx_album_songs_album_id" ON "album_songs" USING btree ("album_id");--> statement-breakpoint
 CREATE INDEX "idx_album_songs_song_id" ON "album_songs" USING btree ("song_id");--> statement-breakpoint
 CREATE INDEX "idx_artists_name" ON "artists" USING btree ("name");--> statement-breakpoint
+CREATE INDEX "idx_artists_name_ci" ON "artists" USING btree ("name_ci");--> statement-breakpoint
+CREATE INDEX "idx_artists_name_ci_trgm" ON "artists" USING gin ("name_ci" gin_trgm_ops);--> statement-breakpoint
 CREATE INDEX "idx_artists_is_favorite" ON "artists" USING btree ("is_favorite");--> statement-breakpoint
 CREATE INDEX "idx_artists_artworks_artwork_id" ON "artists_artworks" USING btree ("artwork_id");--> statement-breakpoint
 CREATE INDEX "idx_artists_artworks_artist_id" ON "artists_artworks" USING btree ("artist_id");--> statement-breakpoint
@@ -296,6 +305,8 @@ CREATE INDEX "idx_artworks_playlists_artwork_id" ON "artworks_playlists" USING b
 CREATE INDEX "idx_artworks_songs_artwork_id" ON "artworks_songs" USING btree ("artwork_id");--> statement-breakpoint
 CREATE INDEX "idx_artworks_songs_song_id" ON "artworks_songs" USING btree ("song_id");--> statement-breakpoint
 CREATE INDEX "idx_genres_name" ON "genres" USING btree ("name");--> statement-breakpoint
+CREATE INDEX "idx_genres_name_ci" ON "genres" USING btree ("name_ci");--> statement-breakpoint
+CREATE INDEX "idx_genres_name_ci_trgm" ON "genres" USING gin ("name_ci" gin_trgm_ops);--> statement-breakpoint
 CREATE INDEX "idx_genres_songs_genre_id" ON "genres_songs" USING btree ("genre_id");--> statement-breakpoint
 CREATE INDEX "idx_genres_songs_song_id" ON "genres_songs" USING btree ("song_id");--> statement-breakpoint
 CREATE INDEX "idx_parent_id" ON "music_folders" USING btree ("parent_id");--> statement-breakpoint
@@ -308,34 +319,38 @@ CREATE INDEX "idx_palette_swatches_palette_type" ON "palette_swatches" USING btr
 CREATE INDEX "idx_palette_swatches_hex" ON "palette_swatches" USING btree ("hex");--> statement-breakpoint
 CREATE INDEX "idx_palettes_artwork_id" ON "palettes" USING btree ("artwork_id");--> statement-breakpoint
 CREATE INDEX "idx_play_events_song_id" ON "play_events" USING btree ("song_id");--> statement-breakpoint
-CREATE INDEX "idx_play_events_created_at" ON "play_events" USING btree ("created_at");--> statement-breakpoint
-CREATE INDEX "idx_play_events_song_created" ON "play_events" USING btree ("song_id","created_at");--> statement-breakpoint
+CREATE INDEX "idx_play_events_created_at" ON "play_events" USING btree ("created_at" DESC NULLS LAST);--> statement-breakpoint
+CREATE INDEX "idx_play_events_song_created" ON "play_events" USING btree ("song_id","created_at" DESC NULLS LAST);--> statement-breakpoint
 CREATE INDEX "idx_play_events_percentage" ON "play_events" USING btree ("playback_percentage");--> statement-breakpoint
 CREATE INDEX "idx_play_history_song_id" ON "play_history" USING btree ("song_id");--> statement-breakpoint
-CREATE INDEX "idx_play_history_created_at" ON "play_history" USING btree ("created_at");--> statement-breakpoint
+CREATE INDEX "idx_play_history_created_at" ON "play_history" USING btree ("created_at" DESC NULLS LAST);--> statement-breakpoint
 CREATE INDEX "idx_playlists_name" ON "playlists" USING btree ("name");--> statement-breakpoint
-CREATE INDEX "idx_playlists_created_at" ON "playlists" USING btree ("created_at");--> statement-breakpoint
+CREATE INDEX "idx_playlists_name_ci" ON "playlists" USING btree ("name_ci");--> statement-breakpoint
+CREATE INDEX "idx_playlists_name_ci_trgm" ON "playlists" USING gin ("name_ci" gin_trgm_ops);--> statement-breakpoint
+CREATE INDEX "idx_playlists_created_at" ON "playlists" USING btree ("created_at" DESC NULLS LAST);--> statement-breakpoint
 CREATE INDEX "idx_playlists_songs_playlist_id" ON "playlists_songs" USING btree ("playlist_id");--> statement-breakpoint
 CREATE INDEX "idx_playlists_songs_song_id" ON "playlists_songs" USING btree ("song_id");--> statement-breakpoint
 CREATE INDEX "idx_seek_events_song_id" ON "seek_events" USING btree ("song_id");--> statement-breakpoint
-CREATE INDEX "idx_seek_events_created_at" ON "seek_events" USING btree ("created_at");--> statement-breakpoint
-CREATE INDEX "idx_seek_events_song_created" ON "seek_events" USING btree ("song_id","created_at");--> statement-breakpoint
+CREATE INDEX "idx_seek_events_created_at" ON "seek_events" USING btree ("created_at" DESC NULLS LAST);--> statement-breakpoint
+CREATE INDEX "idx_seek_events_song_created" ON "seek_events" USING btree ("song_id","created_at" DESC NULLS LAST);--> statement-breakpoint
 CREATE INDEX "idx_skip_events_song_id" ON "skip_events" USING btree ("song_id");--> statement-breakpoint
-CREATE INDEX "idx_skip_events_created_at" ON "skip_events" USING btree ("created_at");--> statement-breakpoint
-CREATE INDEX "idx_skip_events_song_created" ON "skip_events" USING btree ("song_id","created_at");--> statement-breakpoint
+CREATE INDEX "idx_skip_events_created_at" ON "skip_events" USING btree ("created_at" DESC NULLS LAST);--> statement-breakpoint
+CREATE INDEX "idx_skip_events_song_created" ON "skip_events" USING btree ("song_id","created_at" DESC NULLS LAST);--> statement-breakpoint
 CREATE INDEX "idx_songs_title" ON "songs" USING btree ("title");--> statement-breakpoint
+CREATE INDEX "idx_songs_title_ci" ON "songs" USING btree ("title_ci");--> statement-breakpoint
+CREATE INDEX "idx_songs_title_ci_trgm" ON "songs" USING gin ("title_ci" gin_trgm_ops);--> statement-breakpoint
 CREATE INDEX "idx_songs_year" ON "songs" USING btree ("year");--> statement-breakpoint
 CREATE INDEX "idx_songs_track_number" ON "songs" USING btree ("track_number");--> statement-breakpoint
-CREATE INDEX "idx_songs_created_at" ON "songs" USING btree ("created_at");--> statement-breakpoint
-CREATE INDEX "idx_songs_file_modified_at" ON "songs" USING btree ("file_modified_at");--> statement-breakpoint
+CREATE INDEX "idx_songs_created_at" ON "songs" USING btree ("created_at" DESC NULLS LAST);--> statement-breakpoint
+CREATE INDEX "idx_songs_file_modified_at" ON "songs" USING btree ("file_modified_at" DESC NULLS LAST);--> statement-breakpoint
 CREATE INDEX "idx_songs_folder_id" ON "songs" USING btree ("folder_id");--> statement-breakpoint
 CREATE INDEX "idx_songs_path" ON "songs" USING btree ("path");--> statement-breakpoint
 CREATE INDEX "idx_songs_is_favorite" ON "songs" USING btree ("is_favorite");--> statement-breakpoint
 CREATE INDEX "idx_songs_is_blacklisted" ON "songs" USING btree ("is_blacklisted");--> statement-breakpoint
 CREATE INDEX "idx_songs_year_title" ON "songs" USING btree ("year","title");--> statement-breakpoint
 CREATE INDEX "idx_songs_track_title" ON "songs" USING btree ("track_number","title");--> statement-breakpoint
-CREATE INDEX "idx_songs_created_title" ON "songs" USING btree ("created_at","title");--> statement-breakpoint
-CREATE INDEX "idx_songs_modified_title" ON "songs" USING btree ("file_modified_at","title");--> statement-breakpoint
+CREATE INDEX "idx_songs_created_title" ON "songs" USING btree ("created_at" DESC NULLS LAST,"title");--> statement-breakpoint
+CREATE INDEX "idx_songs_modified_title" ON "songs" USING btree ("file_modified_at" DESC NULLS LAST,"title");--> statement-breakpoint
 CREATE INDEX "idx_songs_favorite_title" ON "songs" USING btree ("is_favorite","title");--> statement-breakpoint
 CREATE INDEX "idx_songs_folder_title" ON "songs" USING btree ("folder_id","title");--> statement-breakpoint
 CREATE INDEX "idx_user_settings_language" ON "user_settings" USING btree ("language");--> statement-breakpoint

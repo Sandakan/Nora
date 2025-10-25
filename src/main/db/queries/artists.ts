@@ -10,7 +10,7 @@ export const isArtistWithNameAvailable = async (name: string, trx: DB | DBTransa
 
 export const getArtistWithName = async (name: string, trx: DB | DBTransaction = db) => {
   const data = await trx.query.artists.findFirst({
-    where: (a) => eq(a.name, name)
+    where: (a) => eq(a.nameCI, name) // citext column for case-insensitive match
   });
 
   return data;

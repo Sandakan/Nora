@@ -10,9 +10,31 @@ import {
   index,
   type AnyPgColumn,
   json,
-  boolean
+  boolean,
+  customType
 } from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
+import { relations, sql, SQL } from 'drizzle-orm';
+
+// ============================================================================
+// Data types
+// ============================================================================
+
+export const tsvector = customType<{
+  data: string;
+}>({
+  dataType() {
+    return `tsvector`;
+  }
+});
+
+// Case-insensitive text type for fuzzy search support
+export const citext = customType<{
+  data: string;
+}>({
+  dataType() {
+    return `citext`;
+  }
+});
 
 // ============================================================================
 // Enums
@@ -35,13 +57,19 @@ export const artists = pgTable(
   {
     id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
     name: varchar('name', { length: 1024 }).notNull(),
+    // Generated column: case-insensitive text for searches (using citext type)
+    nameCI: citext('name_ci').generatedAlwaysAs((): SQL => sql`${artists.name}::citext`),
     isFavorite: boolean('is_favorite').notNull().default(false),
     createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
   (t) => [
     // Index for name-based lookups and sorting (aToZ, zToA)
-    index('idx_artists_name').on(t.name),
+    index('idx_artists_name').on(t.name.asc()),
+    // Index for case-insensitive exact matches
+    index('idx_artists_name_ci').on(t.nameCI.asc()),
+    // GIN index for fuzzy matching with pg_trgm trigram operator
+    index('idx_artists_name_ci_trgm').using('gin', t.nameCI.op('gin_trgm_ops')),
     index('idx_artists_is_favorite').on(t.isFavorite)
   ]
 );
@@ -75,10 +103,10 @@ export const musicFolders = pgTable(
     // Existing index for hierarchical queries
     index('idx_parent_id').on(t.parentId),
     // Index for path-based lookups
-    index('idx_music_folders_path').on(t.path),
+    index('idx_music_folders_path').on(t.path.asc()),
     index('idx_music_folders_is_blacklisted').on(t.isBlacklisted),
     // Composite index for hierarchical queries with path
-    index('idx_music_folders_parent_path').on(t.parentId, t.path)
+    index('idx_music_folders_parent_path').on(t.parentId, t.path.asc())
   ]
 );
 
@@ -87,6 +115,8 @@ export const songs = pgTable(
   {
     id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
     title: varchar('title', { length: 4096 }).notNull(),
+    // Generated column: case-insensitive text for searches (using citext type)
+    titleCI: citext('title_ci').generatedAlwaysAs((): SQL => sql`${songs.title}::citext`),
     duration: decimal('duration', { precision: 10, scale: 3 }).notNull(),
     path: text('path').notNull().unique(),
     isFavorite: boolean('is_favorite').notNull().default(false),
@@ -114,25 +144,29 @@ export const songs = pgTable(
   },
   (t) => [
     // Single column indexes for common sort operations
-    index('idx_songs_title').on(t.title),
-    index('idx_songs_year').on(t.year),
-    index('idx_songs_track_number').on(t.trackNumber),
-    index('idx_songs_created_at').on(t.createdAt),
-    index('idx_songs_file_modified_at').on(t.fileModifiedAt),
+    index('idx_songs_title').on(t.title.asc()),
+    // Index for case-insensitive exact matches
+    index('idx_songs_title_ci').on(t.titleCI.asc()),
+    // GIN index for fuzzy matching with pg_trgm trigram operator
+    index('idx_songs_title_ci_trgm').using('gin', t.titleCI.op('gin_trgm_ops')),
+    index('idx_songs_year').on(t.year.asc()),
+    index('idx_songs_track_number').on(t.trackNumber.asc()),
+    index('idx_songs_created_at').on(t.createdAt.desc()),
+    index('idx_songs_file_modified_at').on(t.fileModifiedAt.desc()),
     index('idx_songs_folder_id').on(t.folderId),
     index('idx_songs_path').on(t.path),
     index('idx_songs_is_favorite').on(t.isFavorite),
     index('idx_songs_is_blacklisted').on(t.isBlacklisted),
 
     // Composite indexes for common sorting patterns
-    index('idx_songs_year_title').on(t.year, t.title),
-    index('idx_songs_track_title').on(t.trackNumber, t.title),
-    index('idx_songs_created_title').on(t.createdAt, t.title),
-    index('idx_songs_modified_title').on(t.fileModifiedAt, t.title),
-    index('idx_songs_favorite_title').on(t.isFavorite, t.title),
+    index('idx_songs_year_title').on(t.year.asc(), t.title.asc()),
+    index('idx_songs_track_title').on(t.trackNumber.asc(), t.title.asc()),
+    index('idx_songs_created_title').on(t.createdAt.desc(), t.title.asc()),
+    index('idx_songs_modified_title').on(t.fileModifiedAt.desc(), t.title.asc()),
+    index('idx_songs_favorite_title').on(t.isFavorite, t.title.asc()),
 
     // Index for folder-based queries
-    index('idx_songs_folder_title').on(t.folderId, t.title)
+    index('idx_songs_folder_title').on(t.folderId, t.title.asc())
   ]
 );
 
@@ -206,17 +240,23 @@ export const albums = pgTable(
   {
     id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
     title: varchar('title', { length: 255 }).notNull(),
+    // Generated column: case-insensitive text for searches (using citext type)
+    titleCI: citext('title_ci').generatedAlwaysAs((): SQL => sql`${albums.title}::citext`),
     year: integer('year'),
     createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
   (t) => [
     // Index for title-based lookups and sorting
-    index('idx_albums_title').on(t.title),
+    index('idx_albums_title').on(t.title.asc()),
+    // Index for case-insensitive exact matches
+    index('idx_albums_title_ci').on(t.titleCI.asc()),
+    // GIN index for fuzzy matching with pg_trgm trigram operator
+    index('idx_albums_title_ci_trgm').using('gin', t.titleCI.op('gin_trgm_ops')),
     // Index for year-based filtering and sorting
-    index('idx_albums_year').on(t.year),
+    index('idx_albums_year').on(t.year.desc()),
     // Composite index for year + title sorting
-    index('idx_albums_year_title').on(t.year, t.title)
+    index('idx_albums_year_title').on(t.year.desc(), t.title.asc())
   ]
 );
 
@@ -225,12 +265,18 @@ export const genres = pgTable(
   {
     id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
     name: varchar('name', { length: 255 }).notNull(),
+    // Generated column: case-insensitive text for searches (using citext type)
+    nameCI: citext('name_ci').generatedAlwaysAs((): SQL => sql`${genres.name}::citext`),
     createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
   (t) => [
     // Index for name-based lookups and sorting
-    index('idx_genres_name').on(t.name)
+    index('idx_genres_name').on(t.name.asc()),
+    // Index for case-insensitive exact matches
+    index('idx_genres_name_ci').on(t.nameCI.asc()),
+    // GIN index for fuzzy matching with pg_trgm trigram operator
+    index('idx_genres_name_ci_trgm').using('gin', t.nameCI.op('gin_trgm_ops'))
   ]
 );
 
@@ -239,14 +285,20 @@ export const playlists = pgTable(
   {
     id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
     name: varchar('name', { length: 255 }).notNull(),
+    // Generated column: case-insensitive text for searches (using citext type)
+    nameCI: citext('name_ci').generatedAlwaysAs((): SQL => sql`${playlists.name}::citext`),
     createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
   (t) => [
     // Index for name-based lookups and sorting
-    index('idx_playlists_name').on(t.name),
+    index('idx_playlists_name').on(t.name.asc()),
+    // Index for case-insensitive exact matches
+    index('idx_playlists_name_ci').on(t.nameCI.asc()),
+    // GIN index for fuzzy matching with pg_trgm trigram operator
+    index('idx_playlists_name_ci_trgm').using('gin', t.nameCI.op('gin_trgm_ops')),
     // Index for creation date sorting
-    index('idx_playlists_created_at').on(t.createdAt)
+    index('idx_playlists_created_at').on(t.createdAt.desc())
   ]
 );
 
@@ -265,9 +317,9 @@ export const playEvents = pgTable(
     // Index for song-based event lookups
     index('idx_play_events_song_id').on(t.songId),
     // Index for time-based queries
-    index('idx_play_events_created_at').on(t.createdAt),
+    index('idx_play_events_created_at').on(t.createdAt.desc()),
     // Composite index for song + time queries (for play statistics)
-    index('idx_play_events_song_created').on(t.songId, t.createdAt),
+    index('idx_play_events_song_created').on(t.songId, t.createdAt.desc()),
     // Index for playback percentage analysis
     index('idx_play_events_percentage').on(t.playbackPercentage)
   ]
@@ -288,9 +340,9 @@ export const seekEvents = pgTable(
     // Index for song-based event lookups
     index('idx_seek_events_song_id').on(t.songId),
     // Index for time-based queries
-    index('idx_seek_events_created_at').on(t.createdAt),
+    index('idx_seek_events_created_at').on(t.createdAt.desc()),
     // Composite index for song + time queries
-    index('idx_seek_events_song_created').on(t.songId, t.createdAt)
+    index('idx_seek_events_song_created').on(t.songId, t.createdAt.desc())
   ]
 );
 
@@ -309,9 +361,9 @@ export const skipEvents = pgTable(
     // Index for song-based event lookups
     index('idx_skip_events_song_id').on(t.songId),
     // Index for time-based queries
-    index('idx_skip_events_created_at').on(t.createdAt),
+    index('idx_skip_events_created_at').on(t.createdAt.desc()),
     // Composite index for song + time queries
-    index('idx_skip_events_song_created').on(t.songId, t.createdAt)
+    index('idx_skip_events_song_created').on(t.songId, t.createdAt.desc())
   ]
 );
 
@@ -329,7 +381,7 @@ export const playHistory = pgTable(
     // Index for song-based lookups
     index('idx_play_history_song_id').on(t.songId),
     // Index for time-based queries
-    index('idx_play_history_created_at').on(t.createdAt)
+    index('idx_play_history_created_at').on(t.createdAt.desc())
   ]
 );
 

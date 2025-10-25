@@ -104,9 +104,11 @@ export const getAlbumById = async (albumId: number, trx: DB | DBTransaction = db
 };
 
 export const getAlbumWithTitle = async (title: string, trx: DB | DBTransaction = db) => {
-  const data = await trx.select().from(albums).where(eq(albums.title, title));
+  const data = await trx.query.albums.findFirst({
+    where: (a) => eq(a.titleCI, title) // citext column for case-insensitive match
+  });
 
-  return data[0];
+  return data;
 };
 
 export const linkSongToAlbum = async (

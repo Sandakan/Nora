@@ -204,8 +204,8 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
         searchFilters: SearchFilters,
         value: string,
         updateSearchHistory?: boolean,
-        isPredictiveSearchEnabled?: boolean
-      ) => search(searchFilters, value, updateSearchHistory, isPredictiveSearchEnabled)
+        isSimilaritySearchEnabled?: boolean
+      ) => search(searchFilters, value, updateSearchHistory, isSimilaritySearchEnabled)
     );
 
     ipcMain.handle(

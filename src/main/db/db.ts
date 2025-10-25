@@ -10,6 +10,10 @@ import { pgDump } from '@electric-sql/pglite-tools/pg_dump';
 import { PGlite } from '@electric-sql/pglite';
 import { seedDatabase } from './seed';
 
+// PostgreSQL Database extensions
+import { pg_trgm } from '@electric-sql/pglite/contrib/pg_trgm';
+import { citext } from '@electric-sql/pglite/contrib/citext';
+
 const DB_NAME = 'nora.pglite.db';
 export const DB_PATH = app.getPath('userData') + '/' + DB_NAME;
 const migrationsFolder = path.resolve(import.meta.dirname, '../../resources/drizzle/');
@@ -17,11 +21,16 @@ logger.debug(`Migrations folder: ${migrationsFolder}`);
 
 mkdirSync(DB_PATH, { recursive: true });
 
-const pgliteInstance = await PGlite.create(DB_PATH, { debug: 5 });
+const pgliteInstance = await PGlite.create(DB_PATH, { debug: 5, extensions: { pg_trgm, citext } });
 pgliteInstance.onNotification((notification) => {
   logger.info('Database notification:', { notification });
 });
 
+// Initialize extension types
+await pgliteInstance.exec('CREATE EXTENSION IF NOT EXISTS citext;');
+await pgliteInstance.exec('CREATE EXTENSION IF NOT EXISTS pg_trgm;');
+
+// Initialize Drizzle ORM
 export const db = drizzle(pgliteInstance, {
   schema
 });

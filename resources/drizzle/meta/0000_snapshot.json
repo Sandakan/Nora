@@ -1,5 +1,5 @@
 {
-  "id": "4902e6a5-3ee7-4fa1-8a90-579a4d467d67",
+  "id": "9ca7f748-3bf2-4e68-bb53-c5f7c06fa7d4",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -30,6 +30,16 @@
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true
+        },
+        "title_ci": {
+          "name": "title_ci",
+          "type": "citext",
+          "primaryKey": false,
+          "notNull": false,
+          "generated": {
+            "as": "\"albums\".\"title\"::citext",
+            "type": "stored"
+          }
         },
         "year": {
           "name": "year",
@@ -68,13 +78,44 @@
           "method": "btree",
           "with": {}
         },
+        "idx_albums_title_ci": {
+          "name": "idx_albums_title_ci",
+          "columns": [
+            {
+              "expression": "title_ci",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_albums_title_ci_trgm": {
+          "name": "idx_albums_title_ci_trgm",
+          "columns": [
+            {
+              "expression": "title_ci",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last",
+              "opclass": "gin_trgm_ops"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gin",
+          "with": {}
+        },
         "idx_albums_year": {
           "name": "idx_albums_year",
           "columns": [
             {
               "expression": "year",
               "isExpression": false,
-              "asc": true,
+              "asc": false,
               "nulls": "last"
             }
           ],
@@ -89,7 +130,7 @@
             {
               "expression": "year",
               "isExpression": false,
-              "asc": true,
+              "asc": false,
               "nulls": "last"
             },
             {
@@ -454,6 +495,16 @@
           "primaryKey": false,
           "notNull": true
         },
+        "name_ci": {
+          "name": "name_ci",
+          "type": "citext",
+          "primaryKey": false,
+          "notNull": false,
+          "generated": {
+            "as": "\"artists\".\"name\"::citext",
+            "type": "stored"
+          }
+        },
         "is_favorite": {
           "name": "is_favorite",
           "type": "boolean",
@@ -490,6 +541,37 @@
           "isUnique": false,
           "concurrently": false,
           "method": "btree",
+          "with": {}
+        },
+        "idx_artists_name_ci": {
+          "name": "idx_artists_name_ci",
+          "columns": [
+            {
+              "expression": "name_ci",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_artists_name_ci_trgm": {
+          "name": "idx_artists_name_ci_trgm",
+          "columns": [
+            {
+              "expression": "name_ci",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last",
+              "opclass": "gin_trgm_ops"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gin",
           "with": {}
         },
         "idx_artists_is_favorite": {
@@ -1216,6 +1298,16 @@
           "primaryKey": false,
           "notNull": true
         },
+        "name_ci": {
+          "name": "name_ci",
+          "type": "citext",
+          "primaryKey": false,
+          "notNull": false,
+          "generated": {
+            "as": "\"genres\".\"name\"::citext",
+            "type": "stored"
+          }
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -1245,6 +1337,37 @@
           "isUnique": false,
           "concurrently": false,
           "method": "btree",
+          "with": {}
+        },
+        "idx_genres_name_ci": {
+          "name": "idx_genres_name_ci",
+          "columns": [
+            {
+              "expression": "name_ci",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_genres_name_ci_trgm": {
+          "name": "idx_genres_name_ci_trgm",
+          "columns": [
+            {
+              "expression": "name_ci",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last",
+              "opclass": "gin_trgm_ops"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gin",
           "with": {}
         }
       },
@@ -1856,7 +1979,7 @@
             {
               "expression": "created_at",
               "isExpression": false,
-              "asc": true,
+              "asc": false,
               "nulls": "last"
             }
           ],
@@ -1877,7 +2000,7 @@
             {
               "expression": "created_at",
               "isExpression": false,
-              "asc": true,
+              "asc": false,
               "nulls": "last"
             }
           ],
@@ -1987,7 +2110,7 @@
             {
               "expression": "created_at",
               "isExpression": false,
-              "asc": true,
+              "asc": false,
               "nulls": "last"
             }
           ],
@@ -2045,6 +2168,16 @@
           "primaryKey": false,
           "notNull": true
         },
+        "name_ci": {
+          "name": "name_ci",
+          "type": "citext",
+          "primaryKey": false,
+          "notNull": false,
+          "generated": {
+            "as": "\"playlists\".\"name\"::citext",
+            "type": "stored"
+          }
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -2076,13 +2209,44 @@
           "method": "btree",
           "with": {}
         },
+        "idx_playlists_name_ci": {
+          "name": "idx_playlists_name_ci",
+          "columns": [
+            {
+              "expression": "name_ci",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_playlists_name_ci_trgm": {
+          "name": "idx_playlists_name_ci_trgm",
+          "columns": [
+            {
+              "expression": "name_ci",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last",
+              "opclass": "gin_trgm_ops"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gin",
+          "with": {}
+        },
         "idx_playlists_created_at": {
           "name": "idx_playlists_created_at",
           "columns": [
             {
               "expression": "created_at",
               "isExpression": false,
-              "asc": true,
+              "asc": false,
               "nulls": "last"
             }
           ],
@@ -2274,7 +2438,7 @@
             {
               "expression": "created_at",
               "isExpression": false,
-              "asc": true,
+              "asc": false,
               "nulls": "last"
             }
           ],
@@ -2295,7 +2459,7 @@
             {
               "expression": "created_at",
               "isExpression": false,
-              "asc": true,
+              "asc": false,
               "nulls": "last"
             }
           ],
@@ -2396,7 +2560,7 @@
             {
               "expression": "created_at",
               "isExpression": false,
-              "asc": true,
+              "asc": false,
               "nulls": "last"
             }
           ],
@@ -2417,7 +2581,7 @@
             {
               "expression": "created_at",
               "isExpression": false,
-              "asc": true,
+              "asc": false,
               "nulls": "last"
             }
           ],
@@ -2474,6 +2638,16 @@
           "type": "varchar(4096)",
           "primaryKey": false,
           "notNull": true
+        },
+        "title_ci": {
+          "name": "title_ci",
+          "type": "citext",
+          "primaryKey": false,
+          "notNull": false,
+          "generated": {
+            "as": "\"songs\".\"title\"::citext",
+            "type": "stored"
+          }
         },
         "duration": {
           "name": "duration",
@@ -2600,6 +2774,37 @@
           "method": "btree",
           "with": {}
         },
+        "idx_songs_title_ci": {
+          "name": "idx_songs_title_ci",
+          "columns": [
+            {
+              "expression": "title_ci",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_songs_title_ci_trgm": {
+          "name": "idx_songs_title_ci_trgm",
+          "columns": [
+            {
+              "expression": "title_ci",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last",
+              "opclass": "gin_trgm_ops"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gin",
+          "with": {}
+        },
         "idx_songs_year": {
           "name": "idx_songs_year",
           "columns": [
@@ -2636,7 +2841,7 @@
             {
               "expression": "created_at",
               "isExpression": false,
-              "asc": true,
+              "asc": false,
               "nulls": "last"
             }
           ],
@@ -2651,7 +2856,7 @@
             {
               "expression": "file_modified_at",
               "isExpression": false,
-              "asc": true,
+              "asc": false,
               "nulls": "last"
             }
           ],
@@ -2768,7 +2973,7 @@
             {
               "expression": "created_at",
               "isExpression": false,
-              "asc": true,
+              "asc": false,
               "nulls": "last"
             },
             {
@@ -2789,7 +2994,7 @@
             {
               "expression": "file_modified_at",
               "isExpression": false,
-              "asc": true,
+              "asc": false,
               "nulls": "last"
             },
             {

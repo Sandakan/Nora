@@ -75,9 +75,11 @@ export const getAllGenres = async (options: GetAllGenresOptions, trx: DB | DBTra
 };
 
 export const getGenreWithTitle = async (name: string, trx: DB | DBTransaction = db) => {
-  const data = await trx.select().from(genres).where(eq(genres.name, name));
+  const data = await trx.query.genres.findFirst({
+    where: (a) => eq(a.nameCI, name)
+  });
 
-  return data[0];
+  return data;
 };
 
 export const linkSongToGenre = async (

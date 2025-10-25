@@ -13,11 +13,11 @@ type Props = {
   albums: Album[];
   searchInput: string;
   noOfVisibleAlbums?: number;
-  isPredictiveSearchEnabled: boolean;
+  isSimilaritySearchEnabled: boolean;
 };
 
 const AlbumSearchResultsContainer = (props: Props) => {
-  const { albums, searchInput, noOfVisibleAlbums = 4, isPredictiveSearchEnabled } = props;
+  const { albums, searchInput, noOfVisibleAlbums = 4, isSimilaritySearchEnabled } = props;
   const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
   const isMultipleSelectionEnabled = useStore(
     store,
@@ -114,7 +114,7 @@ const AlbumSearchResultsContainer = (props: Props) => {
                 clickHandler={() =>
                   navigate({
                     to: '/main-player/search/all',
-                    search: { keyword: searchInput, isPredictiveSearchEnabled, filterBy: 'Albums' }
+                    search: { keyword: searchInput, isSimilaritySearchEnabled, filterBy: 'Albums' }
                   })
                 }
               />
