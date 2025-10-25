@@ -69,7 +69,8 @@ function SearchPage() {
   const { data: searchResults } = useQuery({
     ...searchQuery.query({
       keyword: keyword ?? '',
-      filter: filterBy ?? 'all'
+      filter: filterBy ?? 'all',
+      isSimilaritySearchEnabled
     }),
     enabled: (keyword ?? '').trim().length > 0
   });

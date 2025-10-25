@@ -511,7 +511,7 @@ export default function App() {
         ];
         if (songEvents.includes(dataEvent.dataType)) {
           queryClient.invalidateQueries({ queryKey: songQuery._def });
-          queryClient.invalidateQueries({ queryKey: searchQuery._def });
+          queryClient.invalidateQueries({ queryKey: searchQuery.query._def });
         }
 
         const artistEvents: DataUpdateEventTypes[] = [
@@ -524,7 +524,7 @@ export default function App() {
         ];
         if (artistEvents.includes(dataEvent.dataType)) {
           queryClient.invalidateQueries({ queryKey: artistQuery._def });
-          queryClient.invalidateQueries({ queryKey: searchQuery._def });
+          queryClient.invalidateQueries({ queryKey: searchQuery.query._def });
         }
 
         const albumEvents: DataUpdateEventTypes[] = [
@@ -535,7 +535,7 @@ export default function App() {
         ];
         if (albumEvents.includes(dataEvent.dataType)) {
           queryClient.invalidateQueries({ queryKey: albumQuery._def });
-          queryClient.invalidateQueries({ queryKey: searchQuery._def });
+          queryClient.invalidateQueries({ queryKey: searchQuery.query._def });
         }
 
         const playlistEvents: DataUpdateEventTypes[] = [
@@ -548,7 +548,7 @@ export default function App() {
         ];
         if (playlistEvents.includes(dataEvent.dataType)) {
           queryClient.invalidateQueries({ queryKey: playlistQuery._def });
-          queryClient.invalidateQueries({ queryKey: searchQuery._def });
+          queryClient.invalidateQueries({ queryKey: searchQuery.query._def });
         }
 
         const genreEvents: DataUpdateEventTypes[] = [
@@ -559,7 +559,7 @@ export default function App() {
         ];
         if (genreEvents.includes(dataEvent.dataType)) {
           queryClient.invalidateQueries({ queryKey: genreQuery._def });
-          queryClient.invalidateQueries({ queryKey: searchQuery._def });
+          queryClient.invalidateQueries({ queryKey: searchQuery.query._def });
         }
 
         const settingEvents: DataUpdateEventTypes[] = [
@@ -573,7 +573,9 @@ export default function App() {
         ];
         if (settingEvents.includes(dataEvent.dataType)) {
           queryClient.invalidateQueries({ queryKey: settingsQuery._def });
-          queryClient.invalidateQueries({ queryKey: searchQuery._def });
+
+          if (settingEvents.includes('userData/recentSearches'))
+            queryClient.invalidateQueries({ queryKey: searchQuery.recentResults.queryKey });
         }
       }
     };
