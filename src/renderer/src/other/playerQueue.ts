@@ -1,4 +1,8 @@
 type QueueTypes = 'album' | 'playlist' | 'artist' | 'songs' | 'genre' | 'folder';
+interface PlayerQueueMetadata {
+  queueId?: string;
+  queueType?: QueueTypes;
+}
 
 /* 
     Represents a queue of songs to be played in the music player.
@@ -6,21 +10,18 @@ type QueueTypes = 'album' | 'playlist' | 'artist' | 'songs' | 'genre' | 'folder'
 class PlayerQueue {
   songIds: string[];
   position: number;
-  queueId?: string;
-  queueType?: QueueTypes;
   queueBeforeShuffle?: number[];
+  metadata?: PlayerQueueMetadata;
 
   constructor(
     songIds: string[] = [],
     position = 0,
-    queueId?: string,
-    queueType?: QueueTypes,
-    queueBeforeShuffle?: number[]
+    queueBeforeShuffle?: number[],
+    metadata?: PlayerQueueMetadata
   ) {
     this.songIds = songIds;
     this.position = position;
-    this.queueId = queueId;
-    this.queueType = queueType;
+    this.metadata = metadata;
     this.queueBeforeShuffle = queueBeforeShuffle;
   }
 
@@ -317,19 +318,15 @@ class PlayerQueue {
    * @param queueType - Optional queue type
    */
   setMetadata(queueId?: string, queueType?: QueueTypes): void {
-    this.queueId = queueId;
-    this.queueType = queueType;
+    this.metadata = { queueId, queueType };
   }
 
   /**
    * Gets the queue metadata
    * @returns object containing queueId and queueType
    */
-  getMetadata(): { queueId?: string; queueType?: QueueTypes } {
-    return {
-      queueId: this.queueId,
-      queueType: this.queueType
-    };
+  getMetadata(): PlayerQueueMetadata {
+    return this.metadata || {};
   }
 
   /**
@@ -391,9 +388,8 @@ class PlayerQueue {
     return new PlayerQueue(
       [...this.songIds],
       this.position,
-      this.queueId,
-      this.queueType,
-      this.queueBeforeShuffle ? [...this.queueBeforeShuffle] : undefined
+      this.queueBeforeShuffle ? [...this.queueBeforeShuffle] : undefined,
+      this.metadata ? { ...this.metadata } : undefined
     );
   }
 }

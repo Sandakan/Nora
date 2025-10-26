@@ -6,8 +6,7 @@ describe('PlayerQueue', () => {
       const queue = new PlayerQueue();
       expect(queue.songIds).toEqual([]);
       expect(queue.position).toBe(0);
-      expect(queue.queueId).toBeUndefined();
-      expect(queue.queueType).toBeUndefined();
+      expect(queue.metadata).toBeUndefined();
       expect(queue.queueBeforeShuffle).toBeUndefined();
     });
 
@@ -26,15 +25,21 @@ describe('PlayerQueue', () => {
 
     test('should create a queue with metadata', () => {
       const songIds = ['song1', 'song2'];
-      const queue = new PlayerQueue(songIds, 0, 'playlist-123', 'playlist');
-      expect(queue.queueId).toBe('playlist-123');
-      expect(queue.queueType).toBe('playlist');
+      const queue = new PlayerQueue(songIds, 0, undefined, {
+        queueId: 'playlist-123',
+        queueType: 'playlist'
+      });
+      expect(queue.metadata?.queueId).toBe('playlist-123');
+      expect(queue.metadata?.queueType).toBe('playlist');
     });
 
     test('should create a queue with shuffle history', () => {
       const songIds = ['song1', 'song2', 'song3'];
       const shuffleHistory = [2, 0, 1];
-      const queue = new PlayerQueue(songIds, 0, 'album-456', 'album', shuffleHistory);
+      const queue = new PlayerQueue(songIds, 0, shuffleHistory, {
+        queueId: 'album-456',
+        queueType: 'album'
+      });
       expect(queue.queueBeforeShuffle).toEqual(shuffleHistory);
     });
   });
@@ -406,7 +411,7 @@ describe('PlayerQueue', () => {
       });
 
       test('should clear shuffle history', () => {
-        const queue = new PlayerQueue(['song1', 'song2'], 0, undefined, undefined, [1, 0]);
+        const queue = new PlayerQueue(['song1', 'song2'], 0, [1, 0]);
         queue.clear();
         expect(queue.queueBeforeShuffle).toBeUndefined();
       });
@@ -434,13 +439,13 @@ describe('PlayerQueue', () => {
       });
 
       test('should clear shuffle history by default', () => {
-        const queue = new PlayerQueue(['song1', 'song2'], 0, undefined, undefined, [1, 0]);
+        const queue = new PlayerQueue(['song1', 'song2'], 0, [1, 0]);
         queue.replaceQueue(['songA', 'songB']);
         expect(queue.queueBeforeShuffle).toBeUndefined();
       });
 
       test('should preserve shuffle history when specified', () => {
-        const queue = new PlayerQueue(['song1', 'song2'], 0, undefined, undefined, [1, 0]);
+        const queue = new PlayerQueue(['song1', 'song2'], 0, [1, 0]);
         queue.replaceQueue(['songA', 'songB'], 0, false);
         expect(queue.queueBeforeShuffle).toEqual([1, 0]);
       });
@@ -513,7 +518,7 @@ describe('PlayerQueue', () => {
       });
 
       test('should clear shuffle history', () => {
-        const queue = new PlayerQueue(['song1', 'song2'], 0, undefined, undefined, [1, 0]);
+        const queue = new PlayerQueue(['song1', 'song2'], 0, [1, 0]);
         queue.restoreFromPositions([1, 0]);
         expect(queue.queueBeforeShuffle).toBeUndefined();
       });
@@ -573,25 +578,25 @@ describe('PlayerQueue', () => {
       });
 
       test('should return false when shuffle history is empty', () => {
-        const queue = new PlayerQueue(['song1', 'song2'], 0, undefined, undefined, []);
+        const queue = new PlayerQueue(['song1', 'song2'], 0, []);
         expect(queue.canRestoreFromShuffle()).toBe(false);
       });
 
       test('should return false when shuffle history length mismatch', () => {
-        const queue = new PlayerQueue(['song1', 'song2', 'song3'], 0, undefined, undefined, [0, 1]);
+        const queue = new PlayerQueue(['song1', 'song2', 'song3'], 0, [0, 1]);
         expect(queue.canRestoreFromShuffle()).toBe(false);
       });
     });
 
     describe('clearShuffleHistory', () => {
       test('should clear shuffle history', () => {
-        const queue = new PlayerQueue(['song1', 'song2'], 0, undefined, undefined, [1, 0]);
+        const queue = new PlayerQueue(['song1', 'song2'], 0, [1, 0]);
         queue.clearShuffleHistory();
         expect(queue.queueBeforeShuffle).toBeUndefined();
       });
 
       test('should not affect queue or position', () => {
-        const queue = new PlayerQueue(['song1', 'song2'], 1, undefined, undefined, [1, 0]);
+        const queue = new PlayerQueue(['song1', 'song2'], 1, [1, 0]);
         queue.clearShuffleHistory();
         expect(queue.songIds).toEqual(['song1', 'song2']);
         expect(queue.position).toBe(1);
@@ -604,28 +609,37 @@ describe('PlayerQueue', () => {
       test('should set queue ID and type', () => {
         const queue = new PlayerQueue(['song1', 'song2']);
         queue.setMetadata('album-123', 'album');
-        expect(queue.queueId).toBe('album-123');
-        expect(queue.queueType).toBe('album');
+        expect(queue.metadata?.queueId).toBe('album-123');
+        expect(queue.metadata?.queueType).toBe('album');
       });
 
       test('should update existing metadata', () => {
-        const queue = new PlayerQueue(['song1'], 0, 'old-id', 'songs');
+        const queue = new PlayerQueue(['song1'], 0, undefined, {
+          queueId: 'old-id',
+          queueType: 'songs'
+        });
         queue.setMetadata('new-id', 'playlist');
-        expect(queue.queueId).toBe('new-id');
-        expect(queue.queueType).toBe('playlist');
+        expect(queue.metadata?.queueId).toBe('new-id');
+        expect(queue.metadata?.queueType).toBe('playlist');
       });
 
       test('should handle undefined values', () => {
-        const queue = new PlayerQueue(['song1'], 0, 'id', 'album');
+        const queue = new PlayerQueue(['song1'], 0, undefined, {
+          queueId: 'id',
+          queueType: 'album'
+        });
         queue.setMetadata();
-        expect(queue.queueId).toBeUndefined();
-        expect(queue.queueType).toBeUndefined();
+        expect(queue.metadata?.queueId).toBeUndefined();
+        expect(queue.metadata?.queueType).toBeUndefined();
       });
     });
 
     describe('getMetadata', () => {
       test('should return queue metadata', () => {
-        const queue = new PlayerQueue(['song1'], 0, 'playlist-456', 'playlist');
+        const queue = new PlayerQueue(['song1'], 0, undefined, {
+          queueId: 'playlist-456',
+          queueType: 'playlist'
+        });
         const metadata = queue.getMetadata();
         expect(metadata).toEqual({
           queueId: 'playlist-456',
@@ -636,10 +650,7 @@ describe('PlayerQueue', () => {
       test('should return undefined values when not set', () => {
         const queue = new PlayerQueue(['song1']);
         const metadata = queue.getMetadata();
-        expect(metadata).toEqual({
-          queueId: undefined,
-          queueType: undefined
-        });
+        expect(metadata).toEqual({});
       });
     });
   });
@@ -754,19 +765,16 @@ describe('PlayerQueue', () => {
   describe('Utility Methods', () => {
     describe('clone', () => {
       test('should create deep copy of queue', () => {
-        const queue = new PlayerQueue(
-          ['song1', 'song2', 'song3'],
-          1,
-          'playlist-789',
-          'playlist',
-          [2, 0, 1]
-        );
+        const queue = new PlayerQueue(['song1', 'song2', 'song3'], 1, [2, 0, 1], {
+          queueId: 'playlist-789',
+          queueType: 'playlist'
+        });
         const cloned = queue.clone();
 
         expect(cloned.songIds).toEqual(queue.songIds);
         expect(cloned.position).toBe(queue.position);
-        expect(cloned.queueId).toBe(queue.queueId);
-        expect(cloned.queueType).toBe(queue.queueType);
+        expect(cloned.metadata?.queueId).toBe(queue.metadata?.queueId);
+        expect(cloned.metadata?.queueType).toBe(queue.metadata?.queueType);
         expect(cloned.queueBeforeShuffle).toEqual(queue.queueBeforeShuffle);
       });
 
@@ -783,13 +791,16 @@ describe('PlayerQueue', () => {
       });
 
       test('should handle cloning queue with no shuffle history', () => {
-        const queue = new PlayerQueue(['song1', 'song2'], 0, 'id', 'songs');
+        const queue = new PlayerQueue(['song1', 'song2'], 0, undefined, {
+          queueId: 'id',
+          queueType: 'songs'
+        });
         const cloned = queue.clone();
         expect(cloned.queueBeforeShuffle).toBeUndefined();
       });
 
       test('should deep copy shuffle history', () => {
-        const queue = new PlayerQueue(['song1', 'song2'], 0, undefined, undefined, [1, 0]);
+        const queue = new PlayerQueue(['song1', 'song2'], 0, [1, 0]);
         const cloned = queue.clone();
 
         cloned.queueBeforeShuffle![0] = 99;
@@ -835,15 +846,18 @@ describe('PlayerQueue', () => {
     });
 
     test('should handle metadata changes during operations', () => {
-      const queue = new PlayerQueue(['song1', 'song2'], 0, 'album-1', 'album');
+      const queue = new PlayerQueue(['song1', 'song2'], 0, undefined, {
+        queueId: 'album-1',
+        queueType: 'album'
+      });
 
       queue.shuffle();
-      expect(queue.queueId).toBe('album-1');
-      expect(queue.queueType).toBe('album');
+      expect(queue.metadata?.queueId).toBe('album-1');
+      expect(queue.metadata?.queueType).toBe('album');
 
       queue.setMetadata('playlist-1', 'playlist');
-      expect(queue.queueId).toBe('playlist-1');
-      expect(queue.queueType).toBe('playlist');
+      expect(queue.metadata?.queueId).toBe('playlist-1');
+      expect(queue.metadata?.queueType).toBe('playlist');
     });
 
     test('should maintain integrity through multiple operations', () => {
