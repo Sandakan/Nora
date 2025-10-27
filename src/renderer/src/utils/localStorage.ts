@@ -275,14 +275,14 @@ const setVolumeOptions = <Type extends keyof Volume, Data extends Volume[Type]>(
 
 // QUEUE
 
-const setQueue = (queue: Queue) => {
+const setQueue = (queue: PlayerQueueJson) => {
   const allItems = getAllItems();
   setAllItems({ ...allItems, queue });
 };
 
 const getQueue = () => getAllItems().queue;
 
-const setCurrentSongIndex = (index: number | null) => setItem('queue', 'currentSongIndex', index);
+const setCurrentSongIndex = (index: number | null) => setItem('queue', 'position', index ?? 0);
 
 // IGNORED SEPARATE ARTISTS
 

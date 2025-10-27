@@ -150,7 +150,7 @@
     "tailwind-merge": "^3.0.2",
     "wanakana": "^5.3.1",
     "winston": "^3.17.0",
-    "zod": "^4.1.12"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.2.7",

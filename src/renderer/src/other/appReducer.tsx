@@ -50,7 +50,7 @@ export type AppReducerStateActions =
   | { type: 'TOGGLE_IS_FAVORITE_STATE'; data?: boolean }
   | { type: 'TOGGLE_SHUFFLE_STATE'; data?: boolean }
   | { type: 'UPDATE_VOLUME_VALUE'; data: number }
-  | { type: 'UPDATE_QUEUE'; data: Queue }
+  | { type: 'UPDATE_QUEUE'; data: PlayerQueueJson }
   | { type: 'UPDATE_QUEUE_CURRENT_SONG_INDEX'; data: number }
   | { type: 'TOGGLE_REDUCED_MOTION'; data?: boolean }
   | { type: 'TOGGLE_SONG_INDEXING'; data?: boolean }
@@ -411,7 +411,7 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
     },
     playbackRate: 1.0
   },
-  queue: { currentSongIndex: null, queue: [], queueType: 'songs' },
+  queue: { position: 0, songIds: [] },
   ignoredSeparateArtists: [],
   ignoredSongsWithFeatArtists: [],
   ignoredDuplicates: {
@@ -603,7 +603,7 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
       ]
     }
   ]
-};
+} satisfies LocalStorage;
 
 export const USER_DATA_TEMPLATE: UserData = {
   language: 'en',

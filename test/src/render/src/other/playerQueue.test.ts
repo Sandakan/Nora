@@ -1,5 +1,7 @@
 import PlayerQueue from '../../../../../src/renderer/src/other/playerQueue';
 
+type QueueTypes = 'album' | 'playlist' | 'artist' | 'songs' | 'genre' | 'folder';
+
 describe('PlayerQueue', () => {
   describe('Constructor and Initial State', () => {
     test('should create an empty queue with default values', () => {
@@ -805,6 +807,566 @@ describe('PlayerQueue', () => {
 
         cloned.queueBeforeShuffle![0] = 99;
         expect(queue.queueBeforeShuffle![0]).toBe(1);
+      });
+    });
+
+    describe('toJSON', () => {
+      test('should convert queue to JSON object', () => {
+        const queue = new PlayerQueue(['song1', 'song2', 'song3'], 1);
+        const json = queue.toJSON();
+
+        expect(json).toEqual({
+          songIds: ['song1', 'song2', 'song3'],
+          position: 1,
+          queueBeforeShuffle: undefined,
+          metadata: undefined
+        });
+      });
+
+      test('should include metadata in JSON', () => {
+        const queue = new PlayerQueue(['song1', 'song2'], 0, undefined, {
+          queueId: 'playlist-123',
+          queueType: 'playlist'
+        });
+        const json = queue.toJSON();
+
+        expect(json.metadata).toEqual({
+          queueId: 'playlist-123',
+          queueType: 'playlist'
+        });
+      });
+
+      test('should include shuffle history in JSON', () => {
+        const queue = new PlayerQueue(['song1', 'song2', 'song3'], 0, [2, 0, 1]);
+        const json = queue.toJSON();
+
+        expect(json.queueBeforeShuffle).toEqual([2, 0, 1]);
+      });
+
+      test('should create independent copy of data', () => {
+        const queue = new PlayerQueue(['song1', 'song2'], 1, [1, 0], {
+          queueId: 'album-456',
+          queueType: 'album'
+        });
+        const json = queue.toJSON();
+
+        // Modify the JSON
+        json.songIds.push('song3');
+        json.position = 2;
+        json.queueBeforeShuffle![0] = 99;
+        json.metadata!.queueId = 'modified';
+
+        // Original queue should be unchanged
+        expect(queue.songIds).toEqual(['song1', 'song2']);
+        expect(queue.position).toBe(1);
+        expect(queue.queueBeforeShuffle![0]).toBe(1);
+        expect(queue.metadata?.queueId).toBe('album-456');
+      });
+
+      test('should handle empty queue', () => {
+        const queue = new PlayerQueue();
+        const json = queue.toJSON();
+
+        expect(json).toEqual({
+          songIds: [],
+          position: 0,
+          queueBeforeShuffle: undefined,
+          metadata: undefined
+        });
+      });
+
+      test('should be JSON.stringify compatible', () => {
+        const queue = new PlayerQueue(['song1', 'song2'], 1, undefined, {
+          queueId: 'test-id',
+          queueType: 'songs'
+        });
+
+        const jsonString = JSON.stringify(queue);
+        const parsed = JSON.parse(jsonString);
+
+        expect(parsed.songIds).toEqual(['song1', 'song2']);
+        expect(parsed.position).toBe(1);
+        expect(parsed.metadata.queueId).toBe('test-id');
+      });
+    });
+
+    describe('fromJSON', () => {
+      test('should create queue from JSON object', () => {
+        const json = {
+          songIds: ['song1', 'song2', 'song3'],
+          position: 1,
+          queueBeforeShuffle: undefined,
+          metadata: undefined
+        };
+        const queue = PlayerQueue.fromJSON(json);
+
+        expect(queue.songIds).toEqual(['song1', 'song2', 'song3']);
+        expect(queue.position).toBe(1);
+        expect(queue.queueBeforeShuffle).toBeUndefined();
+        expect(queue.metadata).toBeUndefined();
+      });
+
+      test('should restore metadata from JSON', () => {
+        const json = {
+          songIds: ['song1', 'song2'],
+          position: 0,
+          queueBeforeShuffle: undefined,
+          metadata: {
+            queueId: 'playlist-123',
+            queueType: 'playlist' as QueueTypes
+          }
+        };
+        const queue = PlayerQueue.fromJSON(json);
+
+        expect(queue.metadata?.queueId).toBe('playlist-123');
+        expect(queue.metadata?.queueType).toBe('playlist');
+      });
+
+      test('should restore shuffle history from JSON', () => {
+        const json = {
+          songIds: ['song1', 'song2', 'song3'],
+          position: 0,
+          queueBeforeShuffle: [2, 0, 1],
+          metadata: undefined
+        };
+        const queue = PlayerQueue.fromJSON(json);
+
+        expect(queue.queueBeforeShuffle).toEqual([2, 0, 1]);
+        expect(queue.canRestoreFromShuffle()).toBe(true);
+      });
+
+      test('should handle empty JSON object with defaults', () => {
+        const json = {
+          songIds: [],
+          position: 0
+        };
+        const queue = PlayerQueue.fromJSON(json);
+
+        expect(queue.songIds).toEqual([]);
+        expect(queue.position).toBe(0);
+        expect(queue.isEmpty).toBe(true);
+      });
+
+      test('should handle missing songIds with empty array', () => {
+        const json = {
+          songIds: undefined as any,
+          position: 5
+        };
+        const queue = PlayerQueue.fromJSON(json);
+
+        expect(queue.songIds).toEqual([]);
+        expect(queue.position).toBe(5);
+      });
+
+      test('should handle missing position with 0', () => {
+        const json = {
+          songIds: ['song1', 'song2'],
+          position: undefined as any
+        };
+        const queue = PlayerQueue.fromJSON(json);
+
+        expect(queue.songIds).toEqual(['song1', 'song2']);
+        expect(queue.position).toBe(0);
+      });
+
+      test('should restore complete queue state', () => {
+        const json = {
+          songIds: ['song1', 'song2', 'song3', 'song4'],
+          position: 2,
+          queueBeforeShuffle: [3, 1, 0, 2],
+          metadata: {
+            queueId: 'album-789',
+            queueType: 'album' as QueueTypes
+          }
+        };
+        const queue = PlayerQueue.fromJSON(json);
+
+        expect(queue.currentSongId).toBe('song3');
+        expect(queue.hasNext).toBe(true);
+        expect(queue.hasPrevious).toBe(true);
+        expect(queue.canRestoreFromShuffle()).toBe(true);
+        expect(queue.getMetadata()).toEqual({
+          queueId: 'album-789',
+          queueType: 'album'
+        });
+      });
+    });
+
+    describe('toJSON and fromJSON round-trip', () => {
+      test('should preserve queue state through serialization', () => {
+        const originalQueue = new PlayerQueue(
+          ['song1', 'song2', 'song3', 'song4'],
+          2,
+          [3, 1, 0, 2],
+          { queueId: 'test-123', queueType: 'playlist' }
+        );
+
+        const json = originalQueue.toJSON();
+        const restoredQueue = PlayerQueue.fromJSON(json);
+
+        expect(restoredQueue.songIds).toEqual(originalQueue.songIds);
+        expect(restoredQueue.position).toBe(originalQueue.position);
+        expect(restoredQueue.queueBeforeShuffle).toEqual(originalQueue.queueBeforeShuffle);
+        expect(restoredQueue.metadata).toEqual(originalQueue.metadata);
+      });
+
+      test('should work with JSON.stringify and JSON.parse', () => {
+        const originalQueue = new PlayerQueue(['song1', 'song2'], 1, undefined, {
+          queueId: 'genre-rock',
+          queueType: 'genre'
+        });
+
+        const jsonString = JSON.stringify(originalQueue.toJSON());
+        const parsed = JSON.parse(jsonString);
+        const restoredQueue = PlayerQueue.fromJSON(parsed);
+
+        expect(restoredQueue.songIds).toEqual(originalQueue.songIds);
+        expect(restoredQueue.position).toBe(originalQueue.position);
+        expect(restoredQueue.metadata?.queueId).toBe('genre-rock');
+        expect(restoredQueue.metadata?.queueType).toBe('genre');
+      });
+
+      test('should preserve queue functionality after round-trip', () => {
+        const originalQueue = new PlayerQueue(['song1', 'song2', 'song3'], 1);
+        originalQueue.shuffle();
+
+        const json = originalQueue.toJSON();
+        const restoredQueue = PlayerQueue.fromJSON(json);
+
+        expect(restoredQueue.canRestoreFromShuffle()).toBe(true);
+        expect(restoredQueue.moveToNext()).toBe(true);
+        expect(restoredQueue.hasPrevious).toBe(true);
+      });
+
+      test('should handle empty queue round-trip', () => {
+        const originalQueue = new PlayerQueue();
+        const json = originalQueue.toJSON();
+        const restoredQueue = PlayerQueue.fromJSON(json);
+
+        expect(restoredQueue.isEmpty).toBe(true);
+        expect(restoredQueue.position).toBe(0);
+        expect(restoredQueue.currentSongId).toBeNull();
+      });
+
+      test('should create independent instances after fromJSON', () => {
+        const originalQueue = new PlayerQueue(['song1', 'song2'], 0);
+        const json = originalQueue.toJSON();
+        const restoredQueue = PlayerQueue.fromJSON(json);
+
+        restoredQueue.addSongIdToEnd('song3');
+        restoredQueue.moveToNext();
+
+        expect(originalQueue.songIds).toEqual(['song1', 'song2']);
+        expect(originalQueue.position).toBe(0);
+        expect(restoredQueue.songIds).toEqual(['song1', 'song2', 'song3']);
+        expect(restoredQueue.position).toBe(1);
+      });
+    });
+
+    describe('Event Listeners', () => {
+      describe('on and off', () => {
+        test('should register and trigger positionChange event', () => {
+          const queue = new PlayerQueue(['song1', 'song2', 'song3'], 0);
+          const callback = jest.fn();
+
+          queue.on('positionChange', callback);
+          queue.moveToNext();
+
+          expect(callback).toHaveBeenCalledTimes(1);
+          expect(callback).toHaveBeenCalledWith({
+            oldPosition: 0,
+            newPosition: 1,
+            currentSongId: 'song2'
+          });
+        });
+
+        test('should register and trigger queueChange event', () => {
+          const queue = new PlayerQueue(['song1', 'song2'], 0);
+          const callback = jest.fn();
+
+          queue.on('queueChange', callback);
+          queue.addSongIdToEnd('song3');
+
+          expect(callback).toHaveBeenCalledTimes(1);
+          expect(callback).toHaveBeenCalledWith({
+            queue: ['song1', 'song2', 'song3'],
+            length: 3
+          });
+        });
+
+        test('should register and trigger songAdded event', () => {
+          const queue = new PlayerQueue(['song1', 'song2'], 0);
+          const callback = jest.fn();
+
+          queue.on('songAdded', callback);
+          queue.addSongIdToNext('newSong');
+
+          expect(callback).toHaveBeenCalledTimes(1);
+          expect(callback).toHaveBeenCalledWith({
+            songId: 'newSong',
+            position: 1
+          });
+        });
+
+        test('should register and trigger songRemoved event', () => {
+          const queue = new PlayerQueue(['song1', 'song2', 'song3'], 1);
+          const callback = jest.fn();
+
+          queue.on('songRemoved', callback);
+          queue.removeSongId('song2');
+
+          expect(callback).toHaveBeenCalledTimes(1);
+          expect(callback).toHaveBeenCalledWith({
+            songId: 'song2',
+            position: 1
+          });
+        });
+
+        test('should register and trigger queueCleared event', () => {
+          const queue = new PlayerQueue(['song1', 'song2'], 0);
+          const callback = jest.fn();
+
+          queue.on('queueCleared', callback);
+          queue.clear();
+
+          expect(callback).toHaveBeenCalledTimes(1);
+          expect(callback).toHaveBeenCalledWith({});
+        });
+
+        test('should register and trigger queueReplaced event', () => {
+          const queue = new PlayerQueue(['song1', 'song2'], 0);
+          const callback = jest.fn();
+
+          queue.on('queueReplaced', callback);
+          queue.replaceQueue(['songA', 'songB', 'songC'], 1);
+
+          expect(callback).toHaveBeenCalledTimes(1);
+          expect(callback).toHaveBeenCalledWith({
+            oldQueue: ['song1', 'song2'],
+            newQueue: ['songA', 'songB', 'songC'],
+            newPosition: 1
+          });
+        });
+
+        test('should register and trigger shuffled event', () => {
+          const queue = new PlayerQueue(['song1', 'song2', 'song3', 'song4'], 1);
+          const callback = jest.fn();
+
+          queue.on('shuffled', callback);
+          queue.shuffle();
+
+          expect(callback).toHaveBeenCalledTimes(1);
+          expect(callback.mock.calls[0][0]).toHaveProperty('originalQueue');
+          expect(callback.mock.calls[0][0]).toHaveProperty('shuffledQueue');
+          expect(callback.mock.calls[0][0]).toHaveProperty('positions');
+        });
+
+        test('should register and trigger restored event', () => {
+          const queue = new PlayerQueue(['song1', 'song2', 'song3'], 0);
+          queue.shuffle();
+          const callback = jest.fn();
+
+          queue.on('restored', callback);
+          queue.restoreFromShuffle();
+
+          expect(callback).toHaveBeenCalledTimes(1);
+          expect(callback.mock.calls[0][0]).toHaveProperty('restoredQueue');
+        });
+
+        test('should register and trigger metadataChange event', () => {
+          const queue = new PlayerQueue(['song1', 'song2'], 0);
+          const callback = jest.fn();
+
+          queue.on('metadataChange', callback);
+          queue.setMetadata('playlist-123', 'playlist');
+
+          expect(callback).toHaveBeenCalledTimes(1);
+          expect(callback).toHaveBeenCalledWith({
+            queueId: 'playlist-123',
+            queueType: 'playlist'
+          });
+        });
+
+        test('should remove specific listener with off', () => {
+          const queue = new PlayerQueue(['song1', 'song2'], 0);
+          const callback = jest.fn();
+
+          queue.on('positionChange', callback);
+          queue.moveToNext();
+          expect(callback).toHaveBeenCalledTimes(1);
+
+          queue.off('positionChange', callback);
+          queue.moveToNext();
+          expect(callback).toHaveBeenCalledTimes(1); // Should not be called again
+        });
+
+        test('should return unsubscribe function from on', () => {
+          const queue = new PlayerQueue(['song1', 'song2'], 0);
+          const callback = jest.fn();
+
+          const unsubscribe = queue.on('positionChange', callback);
+          queue.moveToNext();
+          expect(callback).toHaveBeenCalledTimes(1);
+
+          unsubscribe();
+          queue.moveToNext();
+          expect(callback).toHaveBeenCalledTimes(1); // Should not be called again
+        });
+
+        test('should support multiple listeners for same event', () => {
+          const queue = new PlayerQueue(['song1', 'song2'], 0);
+          const callback1 = jest.fn();
+          const callback2 = jest.fn();
+
+          queue.on('positionChange', callback1);
+          queue.on('positionChange', callback2);
+          queue.moveToNext();
+
+          expect(callback1).toHaveBeenCalledTimes(1);
+          expect(callback2).toHaveBeenCalledTimes(1);
+        });
+
+        test('should handle errors in listeners gracefully', () => {
+          const queue = new PlayerQueue(['song1', 'song2'], 0);
+          const errorCallback = jest.fn(() => {
+            throw new Error('Test error');
+          });
+          const normalCallback = jest.fn();
+          const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+
+          queue.on('positionChange', errorCallback);
+          queue.on('positionChange', normalCallback);
+          queue.moveToNext();
+
+          expect(errorCallback).toHaveBeenCalledTimes(1);
+          expect(normalCallback).toHaveBeenCalledTimes(1);
+          expect(consoleErrorSpy).toHaveBeenCalled();
+
+          consoleErrorSpy.mockRestore();
+        });
+      });
+
+      describe('removeAllListeners', () => {
+        test('should remove all listeners for specific event type', () => {
+          const queue = new PlayerQueue(['song1', 'song2'], 0);
+          const positionCallback = jest.fn();
+          const queueCallback = jest.fn();
+
+          queue.on('positionChange', positionCallback);
+          queue.on('queueChange', queueCallback);
+
+          queue.removeAllListeners('positionChange');
+
+          queue.moveToNext();
+          queue.addSongIdToEnd('song3');
+
+          expect(positionCallback).not.toHaveBeenCalled();
+          expect(queueCallback).toHaveBeenCalledTimes(1);
+        });
+
+        test('should remove all listeners for all events when no type specified', () => {
+          const queue = new PlayerQueue(['song1', 'song2'], 0);
+          const positionCallback = jest.fn();
+          const queueCallback = jest.fn();
+
+          queue.on('positionChange', positionCallback);
+          queue.on('queueChange', queueCallback);
+
+          queue.removeAllListeners();
+
+          queue.moveToNext();
+          queue.addSongIdToEnd('song3');
+
+          expect(positionCallback).not.toHaveBeenCalled();
+          expect(queueCallback).not.toHaveBeenCalled();
+        });
+      });
+
+      describe('Event emission scenarios', () => {
+        test('should emit events in correct order for multiple operations', () => {
+          const queue = new PlayerQueue(['song1', 'song2'], 0);
+          const events: string[] = [];
+
+          queue.on('songAdded', () => events.push('songAdded'));
+          queue.on('queueChange', () => events.push('queueChange'));
+          queue.on('positionChange', () => events.push('positionChange'));
+
+          queue.addSongIdToNext('song3');
+          queue.moveToNext();
+
+          expect(events).toEqual(['songAdded', 'queueChange', 'positionChange']);
+        });
+
+        test('should not emit positionChange when position does not change', () => {
+          const queue = new PlayerQueue(['song1', 'song2'], 0);
+          const callback = jest.fn();
+
+          queue.on('positionChange', callback);
+          queue.moveToStart(); // Already at start
+
+          expect(callback).not.toHaveBeenCalled();
+        });
+
+        test('should emit both songAdded and queueChange for batch add', () => {
+          const queue = new PlayerQueue(['song1'], 0);
+          const songAddedCallback = jest.fn();
+          const queueChangeCallback = jest.fn();
+
+          queue.on('songAdded', songAddedCallback);
+          queue.on('queueChange', queueChangeCallback);
+
+          queue.addSongIdsToEnd(['song2', 'song3', 'song4']);
+
+          expect(songAddedCallback).toHaveBeenCalledTimes(3);
+          expect(queueChangeCallback).toHaveBeenCalledTimes(1);
+        });
+
+        test('should emit positionChange when removing current song', () => {
+          const queue = new PlayerQueue(['song1', 'song2', 'song3'], 2);
+          const callback = jest.fn();
+
+          queue.on('positionChange', callback);
+          queue.removeSongId('song3');
+
+          expect(callback).toHaveBeenCalledTimes(1);
+          expect(callback).toHaveBeenCalledWith({
+            oldPosition: 2,
+            newPosition: 1,
+            currentSongId: 'song2'
+          });
+        });
+
+        test('should emit multiple events for clear operation', () => {
+          const queue = new PlayerQueue(['song1', 'song2'], 1);
+          const clearedCallback = jest.fn();
+          const queueChangeCallback = jest.fn();
+          const positionChangeCallback = jest.fn();
+
+          queue.on('queueCleared', clearedCallback);
+          queue.on('queueChange', queueChangeCallback);
+          queue.on('positionChange', positionChangeCallback);
+
+          queue.clear();
+
+          expect(clearedCallback).toHaveBeenCalledTimes(1);
+          expect(queueChangeCallback).toHaveBeenCalledTimes(1);
+          expect(positionChangeCallback).toHaveBeenCalledTimes(1);
+        });
+
+        test('should emit events for shuffle and restore cycle', () => {
+          const queue = new PlayerQueue(['song1', 'song2', 'song3'], 1);
+          const shuffledCallback = jest.fn();
+          const restoredCallback = jest.fn();
+
+          queue.on('shuffled', shuffledCallback);
+          queue.on('restored', restoredCallback);
+
+          queue.shuffle();
+          expect(shuffledCallback).toHaveBeenCalledTimes(1);
+
+          queue.restoreFromShuffle();
+          expect(restoredCallback).toHaveBeenCalledTimes(1);
+        });
       });
     });
   });

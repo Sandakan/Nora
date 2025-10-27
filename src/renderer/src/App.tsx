@@ -63,6 +63,7 @@ import { genreQuery } from '@renderer/queries/genres';
 import { settingsQuery } from '@renderer/queries/settings';
 import { searchQuery } from './queries/search';
 import { useSuspenseQuery } from '@tanstack/react-query';
+import PlayerQueue from '@renderer/other/playerQueue';
 
 // ? CONSTANTS
 const LOW_RESPONSE_DURATION = 100;
@@ -91,6 +92,7 @@ window.addEventListener('offline', updateNetworkStatus);
 export default function App() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  let playerQueue = new PlayerQueue();
 
   // const [content, dispatch] = useReducer(reducer, DEFAULT_REDUCER_DATA);
   // // Had to use a Ref in parallel with the Reducer to avoid an issue that happens when using content.* not giving the intended data in useCallback functions even though it was added as a dependency of that function.
@@ -439,15 +441,10 @@ export default function App() {
       .catch((err) => console.error(err));
 
     if (queue) {
-      const updatedQueue = {
-        ...store.state.localStorage.queue,
-        queue: queue.queue || [],
-        queueType: queue.queueType,
-        queueId: queue.queueId
-      };
+      playerQueue = PlayerQueue.fromJSON(queue);
 
       // dispatch({ type: 'UPDATE_QUEUE', data: updatedQueue });
-      storage.queue.setQueue(updatedQueue);
+      // storage.queue.setQueue(playerQueue);
     } else {
       window.api.audioLibraryControls
         .getAllSongs()
@@ -953,6 +950,7 @@ export default function App() {
               //     playAsCurrentSongIndex
               //   )
               // });
+              playerQueue.replaceQueue();
               storage.queue.setQueue(
                 updateQueueOnSongPlay(
                   store.state.localStorage.queue,
@@ -1237,23 +1235,17 @@ export default function App() {
       queueId?: string,
       startPlaying = false
     ) => {
-      const queue = {
-        currentSongIndex: 0,
-        queue: newQueue,
-        queueId,
-        queueType
-      } as Queue;
+      playerQueue.replaceQueue(newQueue, 0, true, { queueId, queueType });
+
+      toggleShuffling(isShuffleQueue);
 
       if (isShuffleQueue) {
-        const { shuffledQueue, positions } = shuffleQueue(queue.queue);
-        queue.queue = shuffledQueue;
+        playerQueue.shuffle();
+      }
 
-        if (positions.length > 0) queue.queueBeforeShuffle = positions;
-        queue.currentSongIndex = 0;
-      } else toggleShuffling(false);
+      storage.queue.setQueue(playerQueue);
 
-      storage.queue.setQueue(queue);
-      if (startPlaying) changeQueueCurrentSongIndex(0);
+      if (startPlaying) playSong(playerQueue.currentSongId!);
     },
     [changeQueueCurrentSongIndex, shuffleQueue, toggleShuffling]
   );
@@ -1266,49 +1258,25 @@ export default function App() {
       playCurrentSongIndex = true,
       restoreAndClearPreviousQueue = false
     ) => {
-      const currentQueue = store.state.localStorage.queue;
-      const queue: Queue = {
-        ...currentQueue,
-        currentSongIndex:
-          typeof currentSongIndex === 'number' || currentSongIndex === null
-            ? currentSongIndex
-            : currentQueue.currentSongIndex,
-        queue: newQueue ?? currentQueue.queue
-      };
-
-      if (
-        restoreAndClearPreviousQueue &&
-        Array.isArray(queue.queueBeforeShuffle) &&
-        queue.queueBeforeShuffle.length > 0
-      ) {
-        const currentQueuePlayingSong = queue.queue.at(currentQueue.currentSongIndex ?? 0);
-        const restoredQueue: string[] = [];
-
-        for (let i = 0; i < queue.queueBeforeShuffle.length; i += 1) {
-          restoredQueue.push(queue.queue[queue.queueBeforeShuffle[i]]);
-        }
-
-        queue.queue = restoredQueue;
-        queue.queueBeforeShuffle = [];
-        if (currentQueuePlayingSong)
-          queue.currentSongIndex = queue.queue.indexOf(currentQueuePlayingSong);
+      if (newQueue) {
+        playerQueue.replaceQueue(newQueue, currentSongIndex ?? 0, true);
       }
 
-      if (queue.queue.length > 1 && isShuffleQueue) {
-        // toggleShuffling will be called in the shuffleQueue function
-        const { shuffledQueue, positions } = shuffleQueue(
-          // Clone the songIds array because tanstack store thinks its values aren't changed if we don't do this
-          [...queue.queue],
-          queue.currentSongIndex ?? currentQueue.currentSongIndex ?? undefined
+      if (restoreAndClearPreviousQueue && playerQueue.canRestoreFromShuffle()) {
+        playerQueue.restoreFromShuffle(
+          playerQueue.getSongIdAtPosition(currentSongIndex ?? 0) ?? ''
         );
-        queue.queue = shuffledQueue;
-        if (positions.length > 0) queue.queueBeforeShuffle = positions;
-        queue.currentSongIndex = 0;
-      } else toggleShuffling(false);
+      }
 
-      storage.queue.setQueue(queue);
+      if (!playerQueue.isEmpty && isShuffleQueue) {
+        playerQueue.shuffle();
+      }
+      toggleShuffling(isShuffleQueue);
+
+      storage.queue.setQueue(playerQueue);
+
       if (playCurrentSongIndex && typeof currentSongIndex === 'number')
-        playSong(currentQueue.queue[currentSongIndex]);
+        playSong(playerQueue.currentSongId!);
     },
     [playSong, shuffleQueue, toggleShuffling]
   );
@@ -1857,7 +1825,7 @@ export default function App() {
     player.currentTime = 0;
     player.pause();
 
-    const updatedQueue = store.state.localStorage.queue.queue.filter(
+    const updatedQueue = store.state.localStorage.queue.songIds.filter(
       (songId) => songId !== store.state.currentSongData.songId
     );
     updateQueueData(null, updatedQueue);

@@ -631,10 +631,47 @@ declare global {
 
   type ShortcutCategoryList = ShortcutCategory[];
 
+  interface PlayerQueueMetadata {
+    queueId?: string;
+    queueType?: QueueTypes;
+  }
+
+  type QueueEventType =
+    | 'positionChange'
+    | 'queueChange'
+    | 'songAdded'
+    | 'songRemoved'
+    | 'queueCleared'
+    | 'queueReplaced'
+    | 'shuffled'
+    | 'restored'
+    | 'metadataChange';
+
+  type QueueEventCallback<T = unknown> = (data: T) => void;
+
+  interface QueueEventData {
+    positionChange: { oldPosition: number; newPosition: number; currentSongId: string | null };
+    queueChange: { queue: string[]; length: number };
+    songAdded: { songId: string; position: number };
+    songRemoved: { songId: string; position: number };
+    queueCleared: Record<string, never>;
+    queueReplaced: { oldQueue: string[]; newQueue: string[]; newPosition: number };
+    shuffled: { originalQueue: string[]; shuffledQueue: string[]; positions: number[] };
+    restored: { restoredQueue: string[] };
+    metadataChange: { queueId?: string; queueType?: QueueTypes };
+  }
+
+  interface PlayerQueueJson {
+    songIds: string[];
+    position: number;
+    queueBeforeShuffle?: number[];
+    metadata?: PlayerQueueMetadata;
+  }
+
   interface LocalStorage {
     preferences: Preferences;
     playback: Playback;
-    queue: Queue;
+    queue: PlayerQueueJson;
     ignoredSeparateArtists: string[];
     ignoredSongsWithFeatArtists: string[];
     ignoredDuplicates: IgnoredDuplicates;

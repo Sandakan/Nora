@@ -1,9 +1,3 @@
-type QueueTypes = 'album' | 'playlist' | 'artist' | 'songs' | 'genre' | 'folder';
-interface PlayerQueueMetadata {
-  queueId?: string;
-  queueType?: QueueTypes;
-}
-
 /* 
     Represents a queue of songs to be played in the music player.
 */
@@ -12,6 +6,7 @@ class PlayerQueue {
   position: number;
   queueBeforeShuffle?: number[];
   metadata?: PlayerQueueMetadata;
+  private listeners: Map<QueueEventType, Set<QueueEventCallback<unknown>>>;
 
   constructor(
     songIds: string[] = [],
@@ -23,6 +18,7 @@ class PlayerQueue {
     this.position = position;
     this.metadata = metadata;
     this.queueBeforeShuffle = queueBeforeShuffle;
+    this.listeners = new Map();
   }
 
   get currentSongId(): string | null {
@@ -72,12 +68,92 @@ class PlayerQueue {
   }
 
   /**
+   * Emits an event to all registered listeners
+   * @param eventType - The type of event to emit
+   * @param data - The data to pass to the listeners
+   */
+  private emit<K extends QueueEventType>(eventType: K, data: QueueEventData[K]): void {
+    const eventListeners = this.listeners.get(eventType);
+    if (eventListeners) {
+      eventListeners.forEach((callback) => {
+        try {
+          callback(data);
+        } catch (error) {
+          console.error(`Error in queue event listener for ${eventType}:`, error);
+        }
+      });
+    }
+  }
+
+  /**
+   * Registers a callback for a specific queue event
+   * @param eventType - The type of event to listen for
+   * @param callback - The callback function to execute when the event occurs
+   * @returns A function to unregister the listener
+   */
+  on<K extends QueueEventType>(
+    eventType: K,
+    callback: QueueEventCallback<QueueEventData[K]>
+  ): () => void {
+    if (!this.listeners.has(eventType)) {
+      this.listeners.set(eventType, new Set());
+    }
+
+    const eventListeners = this.listeners.get(eventType)!;
+    eventListeners.add(callback as QueueEventCallback<unknown>);
+
+    // Return unsubscribe function
+    return () => {
+      eventListeners.delete(callback as QueueEventCallback<unknown>);
+      if (eventListeners.size === 0) {
+        this.listeners.delete(eventType);
+      }
+    };
+  }
+
+  /**
+   * Removes a specific callback for an event type
+   * @param eventType - The type of event
+   * @param callback - The callback to remove
+   */
+  off<K extends QueueEventType>(
+    eventType: K,
+    callback: QueueEventCallback<QueueEventData[K]>
+  ): void {
+    const eventListeners = this.listeners.get(eventType);
+    if (eventListeners) {
+      eventListeners.delete(callback as QueueEventCallback<unknown>);
+      if (eventListeners.size === 0) {
+        this.listeners.delete(eventType);
+      }
+    }
+  }
+
+  /**
+   * Removes all listeners for a specific event type or all events
+   * @param eventType - Optional event type to clear. If not provided, clears all listeners
+   */
+  removeAllListeners(eventType?: QueueEventType): void {
+    if (eventType) {
+      this.listeners.delete(eventType);
+    } else {
+      this.listeners.clear();
+    }
+  }
+
+  /**
    * Moves to the next song in the queue
    * @returns true if moved successfully, false if at the end
    */
   moveToNext(): boolean {
     if (this.hasNext) {
+      const oldPosition = this.position;
       this.position += 1;
+      this.emit('positionChange', {
+        oldPosition,
+        newPosition: this.position,
+        currentSongId: this.currentSongId
+      });
       return true;
     }
     return false;
@@ -89,7 +165,13 @@ class PlayerQueue {
    */
   moveToPrevious(): boolean {
     if (this.hasPrevious) {
+      const oldPosition = this.position;
       this.position -= 1;
+      this.emit('positionChange', {
+        oldPosition,
+        newPosition: this.position,
+        currentSongId: this.currentSongId
+      });
       return true;
     }
     return false;
@@ -99,15 +181,31 @@ class PlayerQueue {
    * Moves to the first song in the queue
    */
   moveToStart(): void {
+    const oldPosition = this.position;
     this.position = 0;
+    if (oldPosition !== this.position) {
+      this.emit('positionChange', {
+        oldPosition,
+        newPosition: this.position,
+        currentSongId: this.currentSongId
+      });
+    }
   }
 
   /**
    * Moves to the last song in the queue
    */
   moveToEnd(): void {
+    const oldPosition = this.position;
     if (this.songIds.length > 0) {
       this.position = this.songIds.length - 1;
+    }
+    if (oldPosition !== this.position) {
+      this.emit('positionChange', {
+        oldPosition,
+        newPosition: this.position,
+        currentSongId: this.currentSongId
+      });
     }
   }
 
@@ -118,7 +216,13 @@ class PlayerQueue {
    */
   moveToPosition(position: number): boolean {
     if (position >= 0 && position < this.songIds.length) {
+      const oldPosition = this.position;
       this.position = position;
+      this.emit('positionChange', {
+        oldPosition,
+        newPosition: this.position,
+        currentSongId: this.currentSongId
+      });
       return true;
     }
     return false;
@@ -130,6 +234,10 @@ class PlayerQueue {
    */
   addSongIdsToNext(songIds: string[]): void {
     this.songIds.splice(this.position + 1, 0, ...songIds);
+    songIds.forEach((songId, index) => {
+      this.emit('songAdded', { songId, position: this.position + 1 + index });
+    });
+    this.emit('queueChange', { queue: [...this.songIds], length: this.songIds.length });
   }
 
   /**
@@ -137,7 +245,12 @@ class PlayerQueue {
    * @param songIds - Array of song IDs to add
    */
   addSongIdsToEnd(songIds: string[]): void {
+    const startPosition = this.songIds.length;
     this.songIds.push(...songIds);
+    songIds.forEach((songId, index) => {
+      this.emit('songAdded', { songId, position: startPosition + index });
+    });
+    this.emit('queueChange', { queue: [...this.songIds], length: this.songIds.length });
   }
 
   /**
@@ -146,6 +259,8 @@ class PlayerQueue {
    */
   addSongIdToNext(songId: string): void {
     this.songIds.splice(this.position + 1, 0, songId);
+    this.emit('songAdded', { songId, position: this.position + 1 });
+    this.emit('queueChange', { queue: [...this.songIds], length: this.songIds.length });
   }
 
   /**
@@ -153,7 +268,10 @@ class PlayerQueue {
    * @param songId - Song ID to add
    */
   addSongIdToEnd(songId: string): void {
+    const position = this.songIds.length;
     this.songIds.push(songId);
+    this.emit('songAdded', { songId, position });
+    this.emit('queueChange', { queue: [...this.songIds], length: this.songIds.length });
   }
 
   /**
@@ -165,12 +283,26 @@ class PlayerQueue {
     const index = this.songIds.indexOf(songId);
     if (index !== -1) {
       this.songIds.splice(index, 1);
+      this.emit('songRemoved', { songId, position: index });
       // Adjust position if necessary
       if (index < this.position) {
+        const oldPosition = this.position;
         this.position -= 1;
+        this.emit('positionChange', {
+          oldPosition,
+          newPosition: this.position,
+          currentSongId: this.currentSongId
+        });
       } else if (index === this.position && this.position >= this.songIds.length) {
+        const oldPosition = this.position;
         this.position = Math.max(0, this.songIds.length - 1);
+        this.emit('positionChange', {
+          oldPosition,
+          newPosition: this.position,
+          currentSongId: this.currentSongId
+        });
       }
+      this.emit('queueChange', { queue: [...this.songIds], length: this.songIds.length });
       return true;
     }
     return false;
@@ -184,12 +316,26 @@ class PlayerQueue {
   removeSongAtPosition(position: number): string | null {
     if (position >= 0 && position < this.songIds.length) {
       const [removed] = this.songIds.splice(position, 1);
+      this.emit('songRemoved', { songId: removed, position });
       // Adjust current position if necessary
       if (position < this.position) {
+        const oldPosition = this.position;
         this.position -= 1;
+        this.emit('positionChange', {
+          oldPosition,
+          newPosition: this.position,
+          currentSongId: this.currentSongId
+        });
       } else if (position === this.position && this.position >= this.songIds.length) {
+        const oldPosition = this.position;
         this.position = Math.max(0, this.songIds.length - 1);
+        this.emit('positionChange', {
+          oldPosition,
+          newPosition: this.position,
+          currentSongId: this.currentSongId
+        });
       }
+      this.emit('queueChange', { queue: [...this.songIds], length: this.songIds.length });
       return removed;
     }
     return null;
@@ -200,8 +346,18 @@ class PlayerQueue {
    */
   clear(): void {
     this.songIds = [];
+    const oldPosition = this.position;
     this.position = 0;
     this.queueBeforeShuffle = undefined;
+    this.emit('queueCleared', {});
+    this.emit('queueChange', { queue: [], length: 0 });
+    if (oldPosition !== 0) {
+      this.emit('positionChange', {
+        oldPosition,
+        newPosition: 0,
+        currentSongId: null
+      });
+    }
   }
 
   /**
@@ -209,12 +365,40 @@ class PlayerQueue {
    * @param songIds - New array of song IDs
    * @param newPosition - Optional new position (defaults to 0)
    * @param clearShuffleHistory - Whether to clear shuffle history (defaults to true)
+   * @param metadata - Optional queue metadata to set
    */
-  replaceQueue(songIds: string[], newPosition = 0, clearShuffleHistory = true): void {
+  replaceQueue(
+    songIds: string[],
+    newPosition = 0,
+    clearShuffleHistory = true,
+    metadata?: PlayerQueueMetadata
+  ): void {
+    const oldQueue = [...this.songIds];
+    const oldPosition = this.position;
+    const oldMetadata = this.metadata;
     this.songIds = [...songIds];
     this.position = newPosition >= 0 && newPosition < songIds.length ? newPosition : 0;
     if (clearShuffleHistory) {
       this.queueBeforeShuffle = undefined;
+    }
+    if (metadata !== undefined) {
+      this.metadata = metadata;
+    }
+    this.emit('queueReplaced', {
+      oldQueue,
+      newQueue: [...this.songIds],
+      newPosition: this.position
+    });
+    this.emit('queueChange', { queue: [...this.songIds], length: this.songIds.length });
+    if (oldPosition !== this.position) {
+      this.emit('positionChange', {
+        oldPosition,
+        newPosition: this.position,
+        currentSongId: this.currentSongId
+      });
+    }
+    if (metadata !== undefined && JSON.stringify(oldMetadata) !== JSON.stringify(metadata)) {
+      this.emit('metadataChange', { queueId: metadata?.queueId, queueType: metadata?.queueType });
     }
   }
 
@@ -243,8 +427,23 @@ class PlayerQueue {
       positions.push(this.songIds.indexOf(initialQueue[i]));
     }
 
+    const oldPosition = this.position;
     this.position = 0;
     this.queueBeforeShuffle = positions;
+
+    this.emit('shuffled', {
+      originalQueue: initialQueue,
+      shuffledQueue: [...this.songIds],
+      positions
+    });
+    this.emit('queueChange', { queue: [...this.songIds], length: this.songIds.length });
+    if (oldPosition !== 0) {
+      this.emit('positionChange', {
+        oldPosition,
+        newPosition: 0,
+        currentSongId: this.currentSongId
+      });
+    }
 
     return { shuffledQueue: this.songIds, positions };
   }
@@ -266,6 +465,7 @@ class PlayerQueue {
       restoredQueue.push(currentQueue[positionMapping[i]]);
     }
 
+    const oldPosition = this.position;
     this.songIds = restoredQueue;
 
     if (currentSongId) {
@@ -277,6 +477,16 @@ class PlayerQueue {
 
     // Clear the shuffle history since we've restored
     this.queueBeforeShuffle = undefined;
+
+    this.emit('restored', { restoredQueue: [...this.songIds] });
+    this.emit('queueChange', { queue: [...this.songIds], length: this.songIds.length });
+    if (oldPosition !== this.position) {
+      this.emit('positionChange', {
+        oldPosition,
+        newPosition: this.position,
+        currentSongId: this.currentSongId
+      });
+    }
   }
 
   /**
@@ -319,6 +529,7 @@ class PlayerQueue {
    */
   setMetadata(queueId?: string, queueType?: QueueTypes): void {
     this.metadata = { queueId, queueType };
+    this.emit('metadataChange', { queueId, queueType });
   }
 
   /**
@@ -390,6 +601,38 @@ class PlayerQueue {
       this.position,
       this.queueBeforeShuffle ? [...this.queueBeforeShuffle] : undefined,
       this.metadata ? { ...this.metadata } : undefined
+    );
+  }
+
+  /**
+   * Converts the queue to a JSON-serializable object
+   * @returns object representation of the queue
+   */
+  toJSON(): PlayerQueueJson {
+    return {
+      songIds: [...this.songIds],
+      position: this.position,
+      queueBeforeShuffle: this.queueBeforeShuffle ? [...this.queueBeforeShuffle] : undefined,
+      metadata: this.metadata ? { ...this.metadata } : undefined
+    };
+  }
+
+  /**
+   * Creates a PlayerQueue instance from a JSON object
+   * @param json - JSON object representation of a queue
+   * @returns a new PlayerQueue instance
+   */
+  static fromJSON(json: {
+    songIds: string[];
+    position: number;
+    queueBeforeShuffle?: number[];
+    metadata?: PlayerQueueMetadata;
+  }): PlayerQueue {
+    return new PlayerQueue(
+      json.songIds || [],
+      json.position || 0,
+      json.queueBeforeShuffle,
+      json.metadata
     );
   }
 }
