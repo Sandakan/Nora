@@ -104,6 +104,7 @@
     "db:pull": "drizzle-kit pull",
     "db:studio": "drizzle-kit studio --verbose",
     "db:seed": "drizzle-kit seed",
+    "db:drop": "node ./scripts/dropDatabase.ts",
     "renderer:generate-routes": "tsr generate",
     "renderer:watch-routes": "tsr watch",
     "preversion": "npm test",
@@ -149,7 +150,7 @@
     "tailwind-merge": "^3.0.2",
     "wanakana": "^5.3.1",
     "winston": "^3.17.0",
-    "zod": "^3.25.76"
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.2.7",
