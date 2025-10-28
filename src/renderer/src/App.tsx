@@ -950,14 +950,14 @@ export default function App() {
               //     playAsCurrentSongIndex
               //   )
               // });
-              playerQueue.replaceQueue();
-              storage.queue.setQueue(
-                updateQueueOnSongPlay(
-                  store.state.localStorage.queue,
-                  songData.songId,
-                  playAsCurrentSongIndex
-                )
-              );
+              // playerQueue.replaceQueue();
+              // storage.queue.setQueue(
+              //   updateQueueOnSongPlay(
+              //     store.state.localStorage.queue,
+              //     songData.songId,
+              //     playAsCurrentSongIndex
+              //   )
+              // );
             } else console.log(songData);
             return undefined;
           })
@@ -1034,20 +1034,24 @@ export default function App() {
       // dispatch({ type: 'UPDATE_QUEUE_CURRENT_SONG_INDEX', data: currentSongIndex });
 
       storage.queue.setCurrentSongIndex(currentSongIndex);
+      const songId = playerQueue.getSongIdAtPosition(currentSongIndex);
 
-      if (isPlaySong) playSong(store.state.localStorage.queue.queue[currentSongIndex]);
+      if (songId == null) return console.error('Selected song id not found.');
+
+      if (isPlaySong) playSong(songId);
     },
     [playSong]
   );
 
   const handleSkipBackwardClick = useCallback(() => {
-    const queue = store.state.localStorage.queue;
-    const { currentSongIndex } = queue;
     if (player.currentTime > 5) {
       player.currentTime = 0;
-    } else if (typeof currentSongIndex === 'number') {
-      if (currentSongIndex === 0) {
-        if (queue.queue.length > 0) changeQueueCurrentSongIndex(queue.queue.length - 1);
+    } else if (typeof playerQueue.currentSongId === 'string') {
+      if (playerQueue.position === 0) {
+        if (playerQueue.length > 0) {
+          playerQueue.moveToNext();
+          playSong(playerQueue.currentSongId!);
+        }
       } else changeQueueCurrentSongIndex(currentSongIndex - 1);
     } else changeQueueCurrentSongIndex(0);
   }, [changeQueueCurrentSongIndex]);
@@ -1946,3 +1950,4 @@ export default function App() {
     </ErrorBoundary>
   );
 }
+

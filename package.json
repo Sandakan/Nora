@@ -173,7 +173,7 @@
     "@typescript-eslint/parser": "^8.33.0",
     "babel-plugin-react-compiler": "^1.0.0",
     "drizzle-kit": "^0.31.1",
-    "electron": "^38.1.0",
+    "electron": "^39.0.0",
     "electron-builder": "^26.0.12",
     "electron-devtools-installer": "^4.0.0",
     "electron-vite": "^4.0.0",
