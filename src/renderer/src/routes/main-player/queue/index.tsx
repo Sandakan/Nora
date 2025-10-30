@@ -45,7 +45,7 @@ function RouteComponent() {
   const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
   const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
   const queue = useStore(store, (state) => state.localStorage.queue);
-  const currentQueue = useStore(store, (state) => state.localStorage.queue.queue);
+  const currentQueue = useStore(store, (state) => state.localStorage.queue.songIds);
   const preferences = useStore(store, (state) => state.localStorage.preferences);
 
   const { updateQueueData, addNewNotifications, updateContextMenuData, toggleMultipleSelections } =
@@ -59,12 +59,15 @@ function RouteComponent() {
 
   // const previousQueueRef = useRef<string[]>([]);
   const { data: queueInfo } = useQuery({
-    ...queueQuery.info({ queueType: queue.queueType, id: queue.queueId ?? '' }),
-    select: (data) => {
+    ...queueQuery.info({
+      queueType: queue.metadata?.queueType ?? 'songs',
+      id: queue.metadata?.queueId ?? ''
+    }),
+    select: (data): QueueInfo | undefined => {
       if (data) {
-        if (queue.queueType === 'songs')
-          return { artworkPath: currentSongData.artworkPath, title: 'All Songs' };
-        if (queue.queueType === 'folder')
+        if (queue.metadata?.queueType === 'songs')
+          return { artworkPath: currentSongData.artworkPath!, title: 'All Songs' };
+        if (queue.metadata?.queueType === 'folder')
           return {
             ...data,
             title: t(data.title ? 'currentQueuePage.folderWithName' : 'common.unknownFolder', {
@@ -125,13 +128,15 @@ function RouteComponent() {
 
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return undefined;
+
+    // Directly manipulate PlayerQueue instead of creating a new array
     const updatedQueue = Array.from(currentQueue);
     const [item] = updatedQueue.splice(result.source.index, 1);
     updatedQueue.splice(result.destination.index, 0, item);
 
-    updateQueueData(undefined, updatedQueue, undefined, undefined, true);
-
-    return updateQueueData();
+    // Single call to updateQueueData
+    updateQueueData(undefined, updatedQueue, undefined, false, true);
+    return undefined;
   };
 
   const centerCurrentlyPlayingSong = useCallback(() => {
@@ -169,10 +174,10 @@ function RouteComponent() {
     () =>
       calculateTimeFromSeconds(
         queuedSongs
-          ?.slice(queue.currentSongIndex ?? 0)
+          ?.slice(queue.position ?? 0)
           .reduce((prev, current) => prev + current.duration, 0)
       ).timeString,
-    [queue.currentSongIndex, queuedSongs]
+    [queue.position, queuedSongs]
   );
 
   return (
@@ -271,9 +276,9 @@ function RouteComponent() {
               <div className="cover-img-container mr-8">
                 <Img
                   className={`h-20 w-20 rounded-md shadow-lg ${
-                    queue.queueType === 'artist'
+                    queue.metadata?.queueType === 'artist'
                       ? 'artist-img rounded-full!'
-                      : `${queue.queueType}-img`
+                      : `${queue.metadata?.queueType}-img`
                   }`}
                   src={queueInfo?.onlineArtworkPath}
                   fallbackSrc={queueInfo?.artworkPath}
@@ -283,7 +288,7 @@ function RouteComponent() {
               </div>
               <div className="queue-info">
                 <div className="queue-type text-sm font-semibold uppercase opacity-50 dark:font-medium">
-                  {queue.queueType}
+                  {queue.metadata?.queueType}
                 </div>
                 <div className="queue-title text-3xl">{queueInfo?.title}</div>
                 <div className="other-info flex text-sm font-light">

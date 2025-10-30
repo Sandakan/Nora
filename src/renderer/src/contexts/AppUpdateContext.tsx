@@ -27,6 +27,7 @@ export interface AppUpdateContextType {
   handleSkipBackwardClick: () => void;
   handleSkipForwardClick: (reason: SongSkipReason) => void;
   toggleShuffling: (isShuffling?: boolean) => void;
+  toggleQueueShuffle: () => void;
   toggleSongPlayback: () => void;
   toggleRepeat: (newState?: RepeatTypes) => void;
   toggleIsFavorite: (isFavorite: boolean, onlyChangeCurrentSongData?: boolean) => void;

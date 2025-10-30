@@ -88,7 +88,7 @@
     "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",
     "typecheck": "npm run typecheck:node && npm run typecheck:web",
     "start": "electron-vite preview",
-    "dev": "electron-vite dev --inspect --sourcemap --watch",
+    "dev": "electron-vite dev --watch",
     "build": "electron-vite build",
     "prebuild:wasm": "node -e \"const fs = require('fs'); const path = require('path'); const dir = path.join(__dirname, 'node_modules', '@img', 'sharp-darwin-arm64'); if (!fs.existsSync(dir)) { fs.mkdirSync(dir, { recursive: true }); console.log('Created placeholder for Sharp platform compatibility (using WASM build)'); }\"",
     "postinstall": "electron-builder install-app-deps",
@@ -153,7 +153,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.2.7",
+    "@biomejs/biome": "2.3.2",
     "@electron-toolkit/eslint-config-ts": "^3.0.0",
     "@electron-toolkit/tsconfig": "^2.0.0",
     "@eslint/compat": "^1.2.4",

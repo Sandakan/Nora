@@ -21,6 +21,8 @@ import { AppUpdateContext, type AppUpdateContextType } from './contexts/AppUpdat
 
 // ? HOOKS
 import useNetworkConnectivity from './hooks/useNetworkConnectivity';
+import { useAudioPlayer } from './hooks/useAudioPlayer';
+import { usePlayerQueue } from './hooks/usePlayerQueue';
 
 // ? MAIN APP COMPONENTS
 import ErrorPrompt from './components/ErrorPrompt';
@@ -46,9 +48,6 @@ import log from './utils/log';
 import throttle from './utils/throttle';
 import parseNotificationFromMain from './other/parseNotificationFromMain';
 import ListeningDataSession from './other/listeningDataSession';
-import updateQueueOnSongPlay from './other/updateQueueOnSongPlay';
-import shuffleQueueRandomly from './other/shuffleQueueRandomly';
-import AudioPlayer from './other/player';
 import { dispatch, store } from './store/store';
 import i18n from './i18n';
 import { normalizedKeys } from './other/appShortcuts';
@@ -69,10 +68,6 @@ import PlayerQueue from '@renderer/other/playerQueue';
 const LOW_RESPONSE_DURATION = 100;
 const DURATION = 1000;
 
-// ? INITIALIZE PLAYER
-const player = new AudioPlayer();
-let repetitivePlaybackErrorsCount = 0;
-
 // ? / / / / / / /  PLAYER DEFAULT OPTIONS / / / / / / / / / / / / / /
 // player.addEventListener('player/trackchange', (e) => {
 //   if ('detail' in e) {
@@ -92,7 +87,10 @@ window.addEventListener('offline', updateNetworkStatus);
 export default function App() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  let playerQueue = new PlayerQueue();
+
+  // ? INITIALIZE PLAYER AND QUEUE (singleton instances via custom hooks)
+  const player = useAudioPlayer();
+  const playerQueue = usePlayerQueue();
 
   // const [content, dispatch] = useReducer(reducer, DEFAULT_REDUCER_DATA);
   // // Had to use a Ref in parallel with the Reducer to avoid an issue that happens when using content.* not giving the intended data in useCallback functions even though it was added as a dependency of that function.
@@ -103,6 +101,7 @@ export default function App() {
 
   const [, startTransition] = useTransition();
   const refStartPlay = useRef(false);
+  const repetitivePlaybackErrorsCountRef = useRef(0);
 
   const { isOnline } = useNetworkConnectivity();
   const { data: userSettings } = useSuspenseQuery(settingsQuery.all);
@@ -171,7 +170,7 @@ export default function App() {
         />
       );
 
-      if (repetitivePlaybackErrorsCount > 5) {
+      if (repetitivePlaybackErrorsCountRef.current > 5) {
         changePromptMenuData(true, prompt);
         return log(
           'Playback errors exceeded the 5 errors limit.',
@@ -180,7 +179,7 @@ export default function App() {
         );
       }
 
-      repetitivePlaybackErrorsCount += 1;
+      repetitivePlaybackErrorsCountRef.current += 1;
       const prevSongPosition = player.currentTime;
       log(`Error occurred in the player.`, { appError, playerErrorData }, 'ERROR');
 
@@ -441,10 +440,13 @@ export default function App() {
       .catch((err) => console.error(err));
 
     if (queue) {
-      playerQueue = PlayerQueue.fromJSON(queue);
-
-      // dispatch({ type: 'UPDATE_QUEUE', data: updatedQueue });
-      // storage.queue.setQueue(playerQueue);
+      // PlayerQueue already initialized from localStorage via usePlayerQueue hook
+      // No need to reassign, just verify it matches
+      const storedQueue = PlayerQueue.fromJSON(queue);
+      if (storedQueue.length !== playerQueue.length) {
+        console.warn('Queue mismatch detected, reinitializing from localStorage');
+        playerQueue.replaceQueue(storedQueue.songIds, storedQueue.position, false);
+      }
     } else {
       window.api.audioLibraryControls
         .getAllSongs()
@@ -461,6 +463,42 @@ export default function App() {
 
     return () => {
       document.removeEventListener('localStorage', syncLocalStorage);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ? SETUP PLAYER QUEUE EVENT LISTENERS
+  useEffect(() => {
+    // Sync to localStorage on any queue change
+    const unsubscribeQueueChange = playerQueue.on('queueChange', () => {
+      storage.queue.setQueue(playerQueue);
+    });
+
+    // Sync to localStorage on position change
+    const unsubscribePositionChange = playerQueue.on('positionChange', () => {
+      storage.queue.setQueue(playerQueue);
+    });
+
+    // Update up next song when position changes
+    const unsubscribeUpNext = playerQueue.on('positionChange', async () => {
+      const nextSongId = playerQueue.nextSongId;
+      if (nextSongId) {
+        try {
+          const songData = await window.api.audioLibraryControls.getSong(nextSongId);
+          if (songData) changeUpNextSongData(songData);
+        } catch (err) {
+          console.error('Failed to fetch up next song:', err);
+        }
+      } else {
+        changeUpNextSongData(undefined);
+      }
+    });
+
+    // Cleanup
+    return () => {
+      unsubscribeQueueChange();
+      unsubscribePositionChange();
+      unsubscribeUpNext();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -910,7 +948,8 @@ export default function App() {
 
   const playSong = useCallback(
     (songId: string, isStartPlay = true, playAsCurrentSongIndex = false) => {
-      repetitivePlaybackErrorsCount = 0;
+      console.log(playAsCurrentSongIndex);
+      repetitivePlaybackErrorsCountRef.current = 0;
       if (typeof songId === 'string') {
         if (store.state.currentSongData.songId === songId) return toggleSongPlayback();
         console.time('timeForSongFetch');
@@ -1030,13 +1069,19 @@ export default function App() {
 
   const changeQueueCurrentSongIndex = useCallback(
     (currentSongIndex: number, isPlaySong = true) => {
-      console.log('currentSongIndex', currentSongIndex);
-      // dispatch({ type: 'UPDATE_QUEUE_CURRENT_SONG_INDEX', data: currentSongIndex });
+      console.log('changeQueueCurrentSongIndex', currentSongIndex);
 
-      storage.queue.setCurrentSongIndex(currentSongIndex);
-      const songId = playerQueue.getSongIdAtPosition(currentSongIndex);
+      // Use PlayerQueue's moveToPosition method
+      const moved = playerQueue.moveToPosition(currentSongIndex);
 
-      if (songId == null) return console.error('Selected song id not found.');
+      if (!moved) {
+        return console.error('Failed to move to position:', currentSongIndex);
+      }
+
+      const songId = playerQueue.currentSongId;
+      if (songId == null) {
+        return console.error('Selected song id not found.');
+      }
 
       if (isPlaySong) playSong(songId);
     },
@@ -1047,21 +1092,25 @@ export default function App() {
     if (player.currentTime > 5) {
       player.currentTime = 0;
     } else if (typeof playerQueue.currentSongId === 'string') {
-      if (playerQueue.position === 0) {
-        if (playerQueue.length > 0) {
-          playerQueue.moveToNext();
-          playSong(playerQueue.currentSongId!);
-        }
-      } else changeQueueCurrentSongIndex(currentSongIndex - 1);
-    } else changeQueueCurrentSongIndex(0);
-  }, [changeQueueCurrentSongIndex]);
+      if (playerQueue.hasPrevious) {
+        playerQueue.moveToPrevious();
+        playSong(playerQueue.currentSongId!);
+      } else {
+        // At first song, restart it
+        playerQueue.moveToStart();
+        playSong(playerQueue.currentSongId!);
+      }
+    } else if (playerQueue.length > 0) {
+      // No current song but queue has songs, play first
+      playerQueue.moveToStart();
+      playSong(playerQueue.currentSongId!);
+    }
+  }, [playSong]);
 
   const handleSkipForwardClick = useCallback(
     (reason: SongSkipReason = 'USER_SKIP') => {
-      const queue = store.state.localStorage.queue;
-
-      const { currentSongIndex } = queue;
       if (store.state.player.isRepeating === 'repeat-1' && reason !== 'USER_SKIP') {
+        // Repeat current song
         player.currentTime = 0;
         toggleSongPlayback(true);
         recordListeningData(
@@ -1069,15 +1118,24 @@ export default function App() {
           store.state.currentSongData.duration,
           true
         );
-      } else if (typeof currentSongIndex === 'number') {
-        if (queue.queue.length > 0) {
-          if (queue.queue.length - 1 === currentSongIndex) {
-            if (store.state.player.isRepeating === 'repeat') changeQueueCurrentSongIndex(0);
-          } else changeQueueCurrentSongIndex(currentSongIndex + 1);
-        } else console.log('Queue is empty.');
-      } else if (queue.queue.length > 0) changeQueueCurrentSongIndex(0);
+      } else if (playerQueue.hasNext) {
+        // Move to next song
+        playerQueue.moveToNext();
+        if (playerQueue.currentSongId) {
+          playSong(playerQueue.currentSongId);
+        }
+      } else if (store.state.player.isRepeating === 'repeat') {
+        // At end of queue with repeat-all, go to start
+        playerQueue.moveToStart();
+        if (playerQueue.currentSongId) {
+          playSong(playerQueue.currentSongId);
+        }
+      } else if (playerQueue.isEmpty) {
+        console.log('Queue is empty.');
+      }
+      // else: at end without repeat, do nothing (song ends)
     },
-    [changeQueueCurrentSongIndex, recordListeningData, toggleSongPlayback]
+    [playSong, recordListeningData, toggleSongPlayback]
   );
 
   useEffect(() => {
@@ -1223,14 +1281,6 @@ export default function App() {
     dispatch({ type: 'TOGGLE_SHUFFLE_STATE', data: isShuffling });
   }, []);
 
-  const shuffleQueue = useCallback(
-    (songIds: string[], currentSongIndex?: number) => {
-      toggleShuffling(true);
-      return shuffleQueueRandomly(songIds, currentSongIndex);
-    },
-    [toggleShuffling]
-  );
-
   const createQueue = useCallback(
     (
       newQueue: string[],
@@ -1243,16 +1293,39 @@ export default function App() {
 
       toggleShuffling(isShuffleQueue);
 
-      if (isShuffleQueue) {
+      if (isShuffleQueue && !playerQueue.isEmpty) {
         playerQueue.shuffle();
       }
 
       storage.queue.setQueue(playerQueue);
 
-      if (startPlaying) playSong(playerQueue.currentSongId!);
+      if (startPlaying && playerQueue.currentSongId) {
+        playSong(playerQueue.currentSongId);
+      }
     },
-    [changeQueueCurrentSongIndex, shuffleQueue, toggleShuffling]
+    [playSong, toggleShuffling]
   );
+
+  // Optimized queue manipulation - event listeners handle localStorage sync
+  const toggleQueueShuffle = useCallback(() => {
+    const wasShuffling = store.state.player.isShuffling;
+
+    if (wasShuffling) {
+      // Restore from shuffle
+      if (playerQueue.canRestoreFromShuffle()) {
+        const targetSongId = playerQueue.currentSongId ?? '';
+        playerQueue.restoreFromShuffle(targetSongId);
+      }
+      toggleShuffling(false);
+    } else {
+      // Shuffle the queue
+      if (!playerQueue.isEmpty) {
+        playerQueue.shuffle();
+      }
+      toggleShuffling(true);
+    }
+    // Event listeners will handle localStorage sync automatically
+  }, [toggleShuffling]);
 
   const updateQueueData = useCallback(
     (
@@ -1264,12 +1337,14 @@ export default function App() {
     ) => {
       if (newQueue) {
         playerQueue.replaceQueue(newQueue, currentSongIndex ?? 0, true);
+      } else if (typeof currentSongIndex === 'number') {
+        // Update position without replacing queue
+        playerQueue.moveToPosition(currentSongIndex);
       }
 
       if (restoreAndClearPreviousQueue && playerQueue.canRestoreFromShuffle()) {
-        playerQueue.restoreFromShuffle(
-          playerQueue.getSongIdAtPosition(currentSongIndex ?? 0) ?? ''
-        );
+        const targetSongId = playerQueue.currentSongId ?? '';
+        playerQueue.restoreFromShuffle(targetSongId);
       }
 
       if (!playerQueue.isEmpty && isShuffleQueue) {
@@ -1277,12 +1352,15 @@ export default function App() {
       }
       toggleShuffling(isShuffleQueue);
 
+      // Event listeners already handle localStorage sync, but keep for now
+      // to ensure compatibility during migration
       storage.queue.setQueue(playerQueue);
 
-      if (playCurrentSongIndex && typeof currentSongIndex === 'number')
-        playSong(playerQueue.currentSongId!);
+      if (playCurrentSongIndex && playerQueue.currentSongId) {
+        playSong(playerQueue.currentSongId);
+      }
     },
-    [playSong, shuffleQueue, toggleShuffling]
+    [playSong, toggleShuffling]
   );
 
   const updateCurrentSongPlaybackState = useCallback((isPlaying: boolean) => {
@@ -1829,10 +1907,12 @@ export default function App() {
     player.currentTime = 0;
     player.pause();
 
-    const updatedQueue = store.state.localStorage.queue.songIds.filter(
-      (songId) => songId !== store.state.currentSongData.songId
-    );
-    updateQueueData(null, updatedQueue);
+    // Remove current song from queue using PlayerQueue method
+    const currentSongId = store.state.currentSongData.songId;
+    if (currentSongId) {
+      playerQueue.removeSongId(currentSongId);
+      storage.queue.setQueue(playerQueue);
+    }
 
     dispatch({ type: 'CURRENT_SONG_DATA_CHANGE', data: {} as AudioPlayerData });
 
@@ -1843,7 +1923,7 @@ export default function App() {
         content: t('notifications.playbackPausedDueToSongDeletion')
       }
     ]);
-  }, [addNewNotifications, t, toggleSongPlayback, updateQueueData]);
+  }, [addNewNotifications, t, toggleSongPlayback]);
 
   const updateEqualizerOptions = useCallback((options: Equalizer) => {
     storage.equalizerPreset.setEqualizerPreset(options);
@@ -1877,6 +1957,7 @@ export default function App() {
       toggleMutedState,
       toggleRepeat,
       toggleShuffling,
+      toggleQueueShuffle,
       toggleIsFavorite,
       toggleSongPlayback,
       updateQueueData,
@@ -1910,6 +1991,7 @@ export default function App() {
       toggleMutedState,
       toggleRepeat,
       toggleShuffling,
+      toggleQueueShuffle,
       toggleIsFavorite,
       toggleSongPlayback,
       updateQueueData,
@@ -1933,7 +2015,7 @@ export default function App() {
     <ErrorBoundary>
       <AppUpdateContext.Provider value={appUpdateContextValues}>
         <div
-          className="main-app bg-background-color-1 dark:bg-dark-background-color-1 relative !h-screen min-h-screen w-full overflow-hidden"
+          className="main-app bg-background-color-1 dark:bg-dark-background-color-1 relative h-screen! min-h-screen w-full overflow-hidden"
           ref={AppRef}
           onDragEnter={addSongDropPlaceholder}
           onDragLeave={removeSongDropPlaceholder}
@@ -1950,4 +2032,3 @@ export default function App() {
     </ErrorBoundary>
   );
 }
-

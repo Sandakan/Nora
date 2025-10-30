@@ -1,6 +1,6 @@
 import { store } from '@renderer/store/store';
 import { useStore } from '@tanstack/react-store';
-import { useCallback, useContext } from 'react';
+import { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Button from '../Button';
@@ -16,7 +16,7 @@ const SongControlsAndSeekbarContainer = () => {
   const isPlayerStalled = useStore(store, (state) => state.player.isPlayerStalled);
 
   const {
-    updateQueueData,
+    toggleQueueShuffle,
     toggleIsFavorite,
     toggleRepeat,
     toggleSongPlayback,
@@ -24,11 +24,6 @@ const SongControlsAndSeekbarContainer = () => {
     handleSkipBackwardClick
   } = useContext(AppUpdateContext);
   const { t } = useTranslation();
-
-  const handleQueueShuffle = useCallback(() => {
-    if (isShuffling) updateQueueData(undefined, undefined, false, false, true);
-    else updateQueueData(undefined, undefined, true, undefined, false);
-  }, [isShuffling, updateQueueData]);
 
   return (
     <div className="song-controls-and-seekbar-container flex flex-col items-center justify-center py-2">
@@ -57,7 +52,7 @@ const SongControlsAndSeekbarContainer = () => {
             isShuffling &&
             'text-font-color-highlight! dark:text-dark-font-color-highlight! opacity-100!'
           }`}
-          clickHandler={handleQueueShuffle}
+          clickHandler={toggleQueueShuffle}
         />
 
         <Button

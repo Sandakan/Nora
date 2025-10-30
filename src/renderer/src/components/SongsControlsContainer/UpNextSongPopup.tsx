@@ -27,7 +27,7 @@ const UpNextSongPopup = (props: Props) => {
   const { onPopupAppears, isSemiTransparent = false, className } = props;
 
   const [upNextSongData, setUpNextSongData] = useState<SongData>();
-  const upNextSongDataCache = useRef<SongData>();
+  const upNextSongDataCache = useRef<SongData>(null as unknown as SongData);
 
   useEffect(() => {
     onPopupAppears(!!upNextSongData);
@@ -87,9 +87,9 @@ const UpNextSongPopup = (props: Props) => {
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
     let timeIntervalId: NodeJS.Timeout;
-    if (queue.queue.length > 1 && queue.currentSongIndex !== null) {
+    if (queue.songIds.length > 1 && queue.position !== null) {
       setUpNextSongData(undefined);
-      const nextSongIndex = queue.queue[queue.currentSongIndex + 1];
+      const nextSongIndex = queue.songIds[queue.position + 1];
 
       if (nextSongIndex) {
         timeoutId = setTimeout(
@@ -117,7 +117,7 @@ const UpNextSongPopup = (props: Props) => {
       if (timeoutId) clearTimeout(timeoutId);
       if (timeIntervalId) clearInterval(timeIntervalId);
     };
-  }, [queue.currentSongIndex, queue.queue, showPopup]);
+  }, [queue.position, queue.songIds, showPopup]);
 
   const showSongInfoPage = useCallback(
     (songId: string) =>
