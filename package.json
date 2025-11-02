@@ -73,7 +73,8 @@
     "prebuild:wasm": "Creates placeholder directory for Sharp platform compatibility due to package-lock.json references"
   },
   "scripts": {
-    "test": "jest --collect-coverage",
+    "test": "vitest",
+    "coverage": "vitest run --coverage",
     "check-types": "tsc --noEmit",
     "husky-test": "npm run prettier-check && npm run test",
     "prepare": "husky install",
@@ -164,13 +165,13 @@
     "@tanstack/router-plugin": "^1.114.34",
     "@types/discord-rpc": "^4.0.1",
     "@types/electron-store": "^1.3.1",
-    "@types/jest": "^30.0.0",
     "@types/node": "^24.0.10",
     "@types/pinyin": "^2.10.2",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@typescript-eslint/eslint-plugin": "^8.33.0",
     "@typescript-eslint/parser": "^8.33.0",
+    "@vitest/coverage-v8": "^4.0.6",
     "babel-plugin-react-compiler": "^1.0.0",
     "drizzle-kit": "^0.31.1",
     "electron": "^39.0.0",
@@ -189,16 +190,15 @@
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "globals": "^16.0.0",
     "husky": "^9.0.11",
-    "jest": "^30.0.4",
     "material-symbols": "^0.38.0",
     "prettier": "^3.2.4",
     "prettier-plugin-tailwindcss": "^0.7.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwindcss": "^4.0.15",
-    "ts-jest": "^29.1.2",
     "typescript": "^5.8.0",
     "typescript-eslint": "^8.18.2",
-    "vite": "^7.0.2"
+    "vite": "^7.0.2",
+    "vitest": "^4.0.6"
   }
 }

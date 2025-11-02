@@ -6,7 +6,7 @@
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "allowJs": true,
-    "types": [ "node", "jest" ],
+    "types": [ "node", "vitest/globals" ],
     "verbatimModuleSyntax": false,
     "erasableSyntaxOnly": false,
     "sourceMap": true,

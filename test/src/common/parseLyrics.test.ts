@@ -1,15 +1,16 @@
-jest.mock('../../../src/main/logger', () => ({
-  __esModule: true, // this property makes it work
+import { describe, test, expect, vi } from 'vitest';
+import { TagConstants } from 'node-id3';
+
+vi.mock('../../../src/main/logger', () => ({
   default: {
-    info: jest.fn((...data) => console.log(...data)),
-    error: jest.fn((...data) => console.error(...data)),
-    warn: jest.fn((...data) => console.warn(...data)),
-    debug: jest.fn((...data) => console.debug(...data)),
-    verbose: jest.fn((...data) => console.debug(...data))
+    info: vi.fn((...data) => console.log(...data)),
+    error: vi.fn((...data) => console.error(...data)),
+    warn: vi.fn((...data) => console.warn(...data)),
+    debug: vi.fn((...data) => console.debug(...data)),
+    verbose: vi.fn((...data) => console.debug(...data))
   }
 }));
 
-import { TagConstants } from 'node-id3';
 import parseLyrics, {
   SyncedLyricsInput,
   parseSyncedLyricsFromAudioDataSource

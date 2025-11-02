@@ -5,6 +5,58 @@ import { dispatch, store } from '../store/store';
 import storage from '../utils/localStorage';
 import { settingsQuery } from '../queries/settings';
 
+const manageBrightness = (
+  values: [number, number, number],
+  range?: { min?: number; max?: number }
+): [number, number, number] => {
+  const max = range?.max || 1;
+  const min = range?.min || 0.9;
+
+  const [h, s, l] = values;
+
+  const updatedL = l >= min ? (l <= max ? l : max) : min;
+  return [h, s, updatedL];
+};
+
+const manageSaturation = (
+  values: [number, number, number],
+  range?: { min?: number; max?: number }
+): [number, number, number] => {
+  const max = range?.max || 1;
+  const min = range?.min || 0.9;
+
+  const [h, s, l] = values;
+
+  const updatedS = s >= min ? (s <= max ? s : max) : min;
+  return [h, updatedS, l];
+};
+
+const resetStyles = () => {
+  const root = document.getElementById('root');
+
+  if (root) {
+    root.style.removeProperty('--side-bar-background');
+    root.style.removeProperty('--background-color-2');
+    root.style.removeProperty('--dark-background-color-2');
+    root.style.removeProperty('--background-color-3');
+    root.style.removeProperty('--dark-background-color-3');
+    root.style.removeProperty('--text-color-highlight');
+    root.style.removeProperty('--dark-text-color-highlight');
+    root.style.removeProperty('--seekbar-background-color');
+    root.style.removeProperty('--dark-seekbar-background-color');
+    root.style.removeProperty('--scrollbar-thumb-background-color');
+    root.style.removeProperty('--dark-scrollbar-thumb-background-color');
+    root.style.removeProperty('--seekbar-track-background-color');
+    root.style.removeProperty('--dark-seekbar-track-background-color');
+    root.style.removeProperty('--text-color-highlight-2');
+    root.style.removeProperty('--dark-text-color-highlight-2');
+    root.style.removeProperty('--slider-opacity');
+    root.style.removeProperty('--dark-slider-opacity');
+    root.style.removeProperty('--context-menu-list-hover');
+    root.style.removeProperty('--dark-context-menu-list-hover');
+  }
+};
+
 export interface UseDynamicThemeReturn {
   setDynamicThemesFromSongPalette: (palette?: NodeVibrantPalette) => () => void;
   updateBodyBackgroundImage: (isVisible: boolean, src?: string) => void;
@@ -34,62 +86,10 @@ export interface UseDynamicThemeReturn {
  */
 export function useDynamicTheme(): UseDynamicThemeReturn {
   const setDynamicThemesFromSongPalette = useCallback((palette?: NodeVibrantPalette) => {
-    const manageBrightness = (
-      values: [number, number, number],
-      range?: { min?: number; max?: number }
-    ): [number, number, number] => {
-      const max = range?.max || 1;
-      const min = range?.min || 0.9;
-
-      const [h, s, l] = values;
-
-      const updatedL = l >= min ? (l <= max ? l : max) : min;
-      return [h, s, updatedL];
-    };
-
-    const manageSaturation = (
-      values: [number, number, number],
-      range?: { min?: number; max?: number }
-    ): [number, number, number] => {
-      const max = range?.max || 1;
-      const min = range?.min || 0.9;
-
-      const [h, s, l] = values;
-
-      const updatedS = s >= min ? (s <= max ? s : max) : min;
-      return [h, updatedS, l];
-    };
-
     const generateColor = (values: [number, number, number]) => {
       const [lh, ls, ll] = values;
       const color = `${lh * 360} ${ls * 100}% ${ll * 100}%`;
       return color;
-    };
-
-    const resetStyles = () => {
-      const root = document.getElementById('root');
-
-      if (root) {
-        root.style.removeProperty('--side-bar-background');
-        root.style.removeProperty('--background-color-2');
-        root.style.removeProperty('--dark-background-color-2');
-        root.style.removeProperty('--background-color-3');
-        root.style.removeProperty('--dark-background-color-3');
-        root.style.removeProperty('--text-color-highlight');
-        root.style.removeProperty('--dark-text-color-highlight');
-        root.style.removeProperty('--seekbar-background-color');
-        root.style.removeProperty('--dark-seekbar-background-color');
-        root.style.removeProperty('--scrollbar-thumb-background-color');
-        root.style.removeProperty('--dark-scrollbar-thumb-background-color');
-        root.style.removeProperty('--seekbar-track-background-color');
-        root.style.removeProperty('--dark-seekbar-track-background-color');
-        root.style.removeProperty('--text-color-highlight-2');
-        root.style.removeProperty('--dark-text-color-highlight-2');
-        root.style.removeProperty('--slider-opacity');
-        root.style.removeProperty('--dark-slider-opacity');
-        root.style.removeProperty('--context-menu-list-hover');
-        root.style.removeProperty('--dark-context-menu-list-hover');
-      }
     };
 
     const root = document.getElementById('root');

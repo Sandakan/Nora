@@ -1,3 +1,4 @@
+import { describe, test, expect, vi } from 'vitest';
 import PlayerQueue from '../../../../../src/renderer/src/other/playerQueue';
 
 type QueueTypes = 'album' | 'playlist' | 'artist' | 'songs' | 'genre' | 'folder';
@@ -1067,7 +1068,7 @@ describe('PlayerQueue', () => {
       describe('on and off', () => {
         test('should register and trigger positionChange event', () => {
           const queue = new PlayerQueue(['song1', 'song2', 'song3'], 0);
-          const callback = jest.fn();
+          const callback = vi.fn();
 
           queue.on('positionChange', callback);
           queue.moveToNext();
@@ -1082,7 +1083,7 @@ describe('PlayerQueue', () => {
 
         test('should register and trigger queueChange event', () => {
           const queue = new PlayerQueue(['song1', 'song2'], 0);
-          const callback = jest.fn();
+          const callback = vi.fn();
 
           queue.on('queueChange', callback);
           queue.addSongIdToEnd('song3');
@@ -1096,7 +1097,7 @@ describe('PlayerQueue', () => {
 
         test('should register and trigger songAdded event', () => {
           const queue = new PlayerQueue(['song1', 'song2'], 0);
-          const callback = jest.fn();
+          const callback = vi.fn();
 
           queue.on('songAdded', callback);
           queue.addSongIdToNext('newSong');
@@ -1110,7 +1111,7 @@ describe('PlayerQueue', () => {
 
         test('should register and trigger songRemoved event', () => {
           const queue = new PlayerQueue(['song1', 'song2', 'song3'], 1);
-          const callback = jest.fn();
+          const callback = vi.fn();
 
           queue.on('songRemoved', callback);
           queue.removeSongId('song2');
@@ -1124,7 +1125,7 @@ describe('PlayerQueue', () => {
 
         test('should register and trigger queueCleared event', () => {
           const queue = new PlayerQueue(['song1', 'song2'], 0);
-          const callback = jest.fn();
+          const callback = vi.fn();
 
           queue.on('queueCleared', callback);
           queue.clear();
@@ -1135,7 +1136,7 @@ describe('PlayerQueue', () => {
 
         test('should register and trigger queueReplaced event', () => {
           const queue = new PlayerQueue(['song1', 'song2'], 0);
-          const callback = jest.fn();
+          const callback = vi.fn();
 
           queue.on('queueReplaced', callback);
           queue.replaceQueue(['songA', 'songB', 'songC'], 1);
@@ -1150,7 +1151,7 @@ describe('PlayerQueue', () => {
 
         test('should register and trigger shuffled event', () => {
           const queue = new PlayerQueue(['song1', 'song2', 'song3', 'song4'], 1);
-          const callback = jest.fn();
+          const callback = vi.fn();
 
           queue.on('shuffled', callback);
           queue.shuffle();
@@ -1164,7 +1165,7 @@ describe('PlayerQueue', () => {
         test('should register and trigger restored event', () => {
           const queue = new PlayerQueue(['song1', 'song2', 'song3'], 0);
           queue.shuffle();
-          const callback = jest.fn();
+          const callback = vi.fn();
 
           queue.on('restored', callback);
           queue.restoreFromShuffle();
@@ -1175,7 +1176,7 @@ describe('PlayerQueue', () => {
 
         test('should register and trigger metadataChange event', () => {
           const queue = new PlayerQueue(['song1', 'song2'], 0);
-          const callback = jest.fn();
+          const callback = vi.fn();
 
           queue.on('metadataChange', callback);
           queue.setMetadata('playlist-123', 'playlist');
@@ -1189,7 +1190,7 @@ describe('PlayerQueue', () => {
 
         test('should remove specific listener with off', () => {
           const queue = new PlayerQueue(['song1', 'song2'], 0);
-          const callback = jest.fn();
+          const callback = vi.fn();
 
           queue.on('positionChange', callback);
           queue.moveToNext();
@@ -1202,7 +1203,7 @@ describe('PlayerQueue', () => {
 
         test('should return unsubscribe function from on', () => {
           const queue = new PlayerQueue(['song1', 'song2'], 0);
-          const callback = jest.fn();
+          const callback = vi.fn();
 
           const unsubscribe = queue.on('positionChange', callback);
           queue.moveToNext();
@@ -1215,8 +1216,8 @@ describe('PlayerQueue', () => {
 
         test('should support multiple listeners for same event', () => {
           const queue = new PlayerQueue(['song1', 'song2'], 0);
-          const callback1 = jest.fn();
-          const callback2 = jest.fn();
+          const callback1 = vi.fn();
+          const callback2 = vi.fn();
 
           queue.on('positionChange', callback1);
           queue.on('positionChange', callback2);
@@ -1228,11 +1229,11 @@ describe('PlayerQueue', () => {
 
         test('should handle errors in listeners gracefully', () => {
           const queue = new PlayerQueue(['song1', 'song2'], 0);
-          const errorCallback = jest.fn(() => {
+          const errorCallback = vi.fn(() => {
             throw new Error('Test error');
           });
-          const normalCallback = jest.fn();
-          const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+          const normalCallback = vi.fn();
+          const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
           queue.on('positionChange', errorCallback);
           queue.on('positionChange', normalCallback);
@@ -1249,8 +1250,8 @@ describe('PlayerQueue', () => {
       describe('removeAllListeners', () => {
         test('should remove all listeners for specific event type', () => {
           const queue = new PlayerQueue(['song1', 'song2'], 0);
-          const positionCallback = jest.fn();
-          const queueCallback = jest.fn();
+          const positionCallback = vi.fn();
+          const queueCallback = vi.fn();
 
           queue.on('positionChange', positionCallback);
           queue.on('queueChange', queueCallback);
@@ -1266,8 +1267,8 @@ describe('PlayerQueue', () => {
 
         test('should remove all listeners for all events when no type specified', () => {
           const queue = new PlayerQueue(['song1', 'song2'], 0);
-          const positionCallback = jest.fn();
-          const queueCallback = jest.fn();
+          const positionCallback = vi.fn();
+          const queueCallback = vi.fn();
 
           queue.on('positionChange', positionCallback);
           queue.on('queueChange', queueCallback);
@@ -1299,7 +1300,7 @@ describe('PlayerQueue', () => {
 
         test('should not emit positionChange when position does not change', () => {
           const queue = new PlayerQueue(['song1', 'song2'], 0);
-          const callback = jest.fn();
+          const callback = vi.fn();
 
           queue.on('positionChange', callback);
           queue.moveToStart(); // Already at start
@@ -1309,8 +1310,8 @@ describe('PlayerQueue', () => {
 
         test('should emit both songAdded and queueChange for batch add', () => {
           const queue = new PlayerQueue(['song1'], 0);
-          const songAddedCallback = jest.fn();
-          const queueChangeCallback = jest.fn();
+          const songAddedCallback = vi.fn();
+          const queueChangeCallback = vi.fn();
 
           queue.on('songAdded', songAddedCallback);
           queue.on('queueChange', queueChangeCallback);
@@ -1323,7 +1324,7 @@ describe('PlayerQueue', () => {
 
         test('should emit positionChange when removing current song', () => {
           const queue = new PlayerQueue(['song1', 'song2', 'song3'], 2);
-          const callback = jest.fn();
+          const callback = vi.fn();
 
           queue.on('positionChange', callback);
           queue.removeSongId('song3');
@@ -1338,9 +1339,9 @@ describe('PlayerQueue', () => {
 
         test('should emit multiple events for clear operation', () => {
           const queue = new PlayerQueue(['song1', 'song2'], 1);
-          const clearedCallback = jest.fn();
-          const queueChangeCallback = jest.fn();
-          const positionChangeCallback = jest.fn();
+          const clearedCallback = vi.fn();
+          const queueChangeCallback = vi.fn();
+          const positionChangeCallback = vi.fn();
 
           queue.on('queueCleared', clearedCallback);
           queue.on('queueChange', queueChangeCallback);
@@ -1355,8 +1356,8 @@ describe('PlayerQueue', () => {
 
         test('should emit events for shuffle and restore cycle', () => {
           const queue = new PlayerQueue(['song1', 'song2', 'song3'], 1);
-          const shuffledCallback = jest.fn();
-          const restoredCallback = jest.fn();
+          const shuffledCallback = vi.fn();
+          const restoredCallback = vi.fn();
 
           queue.on('shuffled', shuffledCallback);
           queue.on('restored', restoredCallback);
