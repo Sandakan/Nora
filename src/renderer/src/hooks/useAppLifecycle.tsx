@@ -10,11 +10,6 @@ import storage from '../utils/localStorage';
  */
 export interface AppLifecycleDependencies {
   /**
-   * Navigate to a specific page
-   */
-  changeCurrentActivePage: (pageClass: PageTitles, data?: PageData) => void;
-
-  /**
    * Toggle shuffle mode
    */
   toggleShuffling: (isShuffling?: boolean) => void;
@@ -104,7 +99,6 @@ export interface AppLifecycleDependencies {
  * @example
  * ```tsx
  * function App() {
- *   const { changeCurrentActivePage, playSong } = usePageNavigation();
  *   const { createQueue } = useQueueManagement();
  *   const { managePlaybackErrors } = usePlaybackErrors();
  *   const { toggleSongPlayback, refStartPlay } = usePlayerControl();
@@ -112,7 +106,6 @@ export interface AppLifecycleDependencies {
  *   // ... other hooks
  *
  *   useAppLifecycle({
- *     changeCurrentActivePage,
  *     playSong,
  *     createQueue,
  *     managePlaybackErrors,
@@ -131,7 +124,6 @@ export function useAppLifecycle(dependencies: AppLifecycleDependencies): void {
   const playerQueue = usePlayerQueue();
 
   const {
-    changeCurrentActivePage,
     toggleShuffling,
     toggleRepeat,
     playSongFromUnknownSource,
@@ -165,7 +157,8 @@ export function useAppLifecycle(dependencies: AppLifecycleDependencies): void {
       preferences?.defaultPageOnStartUp &&
       window.location.pathname !== `/main-player/${preferences.defaultPageOnStartUp}`
     ) {
-      changeCurrentActivePage(preferences.defaultPageOnStartUp);
+      // TODO: Implement default page navigation
+      // navigate(preferences.defaultPageOnStartUp);
     }
 
     // Restore playback state

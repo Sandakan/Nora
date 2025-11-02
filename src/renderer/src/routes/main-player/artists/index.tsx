@@ -55,7 +55,7 @@ function ArtistPage() {
   const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
   const sortingStates = useStore(store, (state) => state.localStorage.sortingStates);
 
-  const { updateCurrentlyActivePageData, toggleMultipleSelections } = useContext(AppUpdateContext);
+  const { toggleMultipleSelections } = useContext(AppUpdateContext);
   const { scrollTopOffset, sortingOrder = sortingStates?.artistsPage || 'aToZ' } =
     Route.useSearch();
   const { t } = useTranslation();
@@ -138,10 +138,6 @@ function ArtistPage() {
                 value={filteringOrder}
                 options={artistFilterOptions}
                 onChange={(e) => {
-                  updateCurrentlyActivePageData((currentPageData) => ({
-                    ...currentPageData,
-                    filteringOrder: e.currentTarget.value as ArtistFilterTypes
-                  }));
                   setFilteringOrder(e.currentTarget.value as ArtistFilterTypes);
                 }}
               />
@@ -151,13 +147,11 @@ function ArtistPage() {
                 value={sortingOrder}
                 options={artistSortOptions}
                 onChange={(e) => {
-                  const artistSortType = e.currentTarget.value as ArtistSortTypes;
-                  updateCurrentlyActivePageData((currentData) => ({
-                    ...currentData,
-                    sortingOrder: artistSortType
-                  }));
                   navigate({
-                    search: (prev) => ({ ...prev, sortingOrder: artistSortType })
+                    search: (prev) => ({
+                      ...prev,
+                      sortingOrder: e.currentTarget.value as ArtistSortTypes
+                    })
                   });
                 }}
               />

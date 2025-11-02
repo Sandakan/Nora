@@ -1,6 +1,5 @@
-import { useContext, useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
 import Button from '../Button';
 import Img from '../Img';
@@ -19,7 +18,6 @@ type Props = {
 };
 
 const SearchStartPlaceholder = (props: Props) => {
-  const { updateCurrentlyActivePageData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { searchResults, searchInput, updateSearchInput } = props;
@@ -50,17 +48,11 @@ const SearchStartPlaceholder = (props: Props) => {
             <RecentSearchResult
               key={index}
               result={result}
-              clickHandler={() => {
-                updateSearchInput(result);
-                updateCurrentlyActivePageData((currentData) => ({
-                  ...currentData,
-                  keyword: result
-                }));
-              }}
+              clickHandler={() => updateSearchInput(result)}
             />
           ))
         : [],
-    [recentSearchResults, updateCurrentlyActivePageData, updateSearchInput]
+    [recentSearchResults, updateSearchInput]
   );
 
   return (

@@ -19,9 +19,6 @@ export interface AppUpdateContextType {
   updateNotifications: (
     callback: (currentNotifications: AppNotification[]) => AppNotification[]
   ) => void;
-  changeCurrentActivePage: (pageTitle: PageTitles, data?: PageData) => void;
-  updatePageHistoryIndex: (type: 'increment' | 'decrement' | 'home', pageIndex?: number) => void;
-  updateCurrentlyActivePageData: (callback: (currentPageData: PageData) => PageData) => void;
   playSong: (songId: string, isStartPlay?: boolean) => void;
   updateCurrentSongPlaybackState: (isPlaying: boolean) => void;
   handleSkipBackwardClick: () => void;

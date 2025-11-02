@@ -187,78 +187,6 @@ export default function App() {
     playSong
   });
 
-  const updateCurrentlyActivePageData = useCallback(
-    (callback: (currentPageData: PageData) => PageData) => {
-      const { navigationHistory } = store.state;
-      const updatedData = callback(
-        navigationHistory.history[navigationHistory.pageHistoryIndex].data ?? {
-          scrollTopOffset: 0
-        }
-      );
-      dispatch({
-        type: 'CURRENT_ACTIVE_PAGE_DATA_UPDATE',
-        data: updatedData
-      });
-    },
-    []
-  );
-
-  const updatePageHistoryIndex = useCallback((type: 'increment' | 'decrement' | 'home') => {
-    const { history, pageHistoryIndex } = store.state.navigationHistory;
-    if (type === 'decrement' && pageHistoryIndex - 1 >= 0) {
-      const newPageHistoryIndex = pageHistoryIndex - 1;
-      const data = {
-        pageHistoryIndex: newPageHistoryIndex,
-        history
-      } as NavigationHistoryData;
-
-      return dispatch({
-        type: 'UPDATE_NAVIGATION_HISTORY',
-        data
-      });
-    }
-    if (type === 'increment' && pageHistoryIndex + 1 < history.length) {
-      const newPageHistoryIndex = pageHistoryIndex + 1;
-      const data = {
-        pageHistoryIndex: newPageHistoryIndex,
-        history
-      } as NavigationHistoryData;
-
-      return dispatch({
-        type: 'UPDATE_NAVIGATION_HISTORY',
-        data
-      });
-    }
-    if (type === 'home') {
-      const data: NavigationHistoryData = {
-        history: [{ pageTitle: 'Home' }],
-        pageHistoryIndex: 0
-      };
-
-      return dispatch({
-        type: 'UPDATE_NAVIGATION_HISTORY',
-        data
-      });
-    }
-    return undefined;
-  }, []);
-
-  const changeCurrentActivePage = useCallback(
-    (_pageClass: PageTitles, _data?: PageData) => {
-      // TODO: Remove this method after migrating all pages referencing this method as page navigation is now handled by TanStack Router
-      addNewNotifications([
-        {
-          content: 'Unlinked page navigation method called.',
-          iconName: 'info',
-          iconClassName: 'material-icons-round-outlined',
-          id: 'alreadyInCurrentPage',
-          duration: 2500
-        }
-      ]);
-    },
-    [addNewNotifications]
-  );
-
   const updatePlayerType = useCallback((type: PlayerTypes) => {
     if (store.state.playerType !== type) {
       dispatch({ type: 'UPDATE_PLAYER_TYPE', data: type });
@@ -289,7 +217,6 @@ export default function App() {
     toggleRepeat,
     toggleIsFavorite,
     addNewNotifications,
-    updatePageHistoryIndex,
     updatePlayerType,
     toggleMultipleSelections,
     changePromptMenuData
@@ -299,7 +226,6 @@ export default function App() {
   // Must be called after all dependencies are defined
   // This hook now manages all player event listeners, IPC controls, and lifecycle events
   useAppLifecycle({
-    changeCurrentActivePage,
     toggleShuffling,
     toggleRepeat,
     playSongFromUnknownSource,
@@ -322,12 +248,9 @@ export default function App() {
       changeUpNextSongData,
       updatePromptMenuHistoryIndex,
       playSong,
-      changeCurrentActivePage,
-      updateCurrentlyActivePageData,
       addNewNotifications,
       updateNotifications,
       createQueue,
-      updatePageHistoryIndex,
       changeQueueCurrentSongIndex,
       updateCurrentSongPlaybackState,
       updatePlayerType,
@@ -356,12 +279,9 @@ export default function App() {
       changeUpNextSongData,
       updatePromptMenuHistoryIndex,
       playSong,
-      changeCurrentActivePage,
-      updateCurrentlyActivePageData,
       addNewNotifications,
       updateNotifications,
       createQueue,
-      updatePageHistoryIndex,
       changeQueueCurrentSongIndex,
       updateCurrentSongPlaybackState,
       updatePlayerType,

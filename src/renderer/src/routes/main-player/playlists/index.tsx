@@ -56,12 +56,8 @@ function PlaylistsPage() {
     (state) => state.multipleSelectionsData.isEnabled
   );
 
-  const {
-    changePromptMenuData,
-    updateContextMenuData,
-    updateCurrentlyActivePageData,
-    toggleMultipleSelections
-  } = useContext(AppUpdateContext);
+  const { changePromptMenuData, updateContextMenuData, toggleMultipleSelections } =
+    useContext(AppUpdateContext);
   const { t } = useTranslation();
   const navigate = useNavigate({ from: Route.fullPath });
 
@@ -197,11 +193,6 @@ function PlaylistsPage() {
               value={sortingOrder}
               options={playlistSortOptions}
               onChange={(e) => {
-                const playlistSortType = e.currentTarget.value as PlaylistSortTypes;
-                updateCurrentlyActivePageData((currentData) => ({
-                  ...currentData,
-                  sortingOrder: playlistSortType
-                }));
                 navigate({
                   search: (prev) => ({
                     ...prev,

@@ -44,16 +44,8 @@ function ArtistInfoPage() {
   const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
   const preferences = useStore(store, (state) => state.localStorage.preferences);
 
-  const {
-    createQueue,
-    // updateQueueData,
-    // addNewNotifications,
-    // updateCurrentlyActivePageData,
-    // changeCurrentActivePage,
-    updateContextMenuData,
-    toggleMultipleSelections,
-    playSong
-  } = useContext(AppUpdateContext);
+  const { createQueue, updateContextMenuData, toggleMultipleSelections, playSong } =
+    useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { data: artistData } = useSuspenseQuery({
@@ -288,7 +280,7 @@ function ArtistInfoPage() {
           <Img
             src={artistData?.onlineArtworkPaths?.picture_medium}
             fallbackSrc={artistData?.artworkPaths?.artworkPath}
-            className="aspect-square! h-60 w-[15rem] rounded-full object-cover"
+            className="aspect-square! h-60 w-60 rounded-full object-cover"
             loading="eager"
             alt="Album Cover"
             onContextMenu={(e) =>
@@ -326,7 +318,7 @@ function ArtistInfoPage() {
               }
             )}
             iconName="favorite"
-            iconClassName={`!text-4xl !leading-none ${
+            iconClassName={`text-4xl! leading-none! ${
               artistData?.isAFavorite
                 ? 'material-icons-round'
                 : 'material-icons-round material-icons-round-outlined'

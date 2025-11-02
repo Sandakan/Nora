@@ -75,7 +75,6 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
   const {
     playSong,
     updateContextMenuData,
-    changeCurrentActivePage,
     updateQueueData,
     changePromptMenuData,
     addNewNotifications,
@@ -420,12 +419,14 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
         label: t('song.editSongTags'),
         class: 'edit',
         iconName: 'edit',
-        handlerFunction: () =>
-          changeCurrentActivePage('SongTagsEditor', {
-            songId,
-            songArtworkPath: artworkPaths.artworkPath,
-            songPath: path
-          }),
+        handlerFunction: () => {
+          // TODO: Implement song tags editor navigation
+          // changeCurrentActivePage('SongTagsEditor', {
+          //   songId,
+          //   songArtworkPath: artworkPaths.artworkPath,
+          //   songPath: path
+          // });
+        },
         isDisabled: isMultipleSelectionsEnabled
       },
       {
@@ -519,7 +520,6 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
     isMultipleSelectionEnabled,
     updateMultipleSelections,
     navigate,
-    changeCurrentActivePage,
     path,
     localStorageData?.preferences.doNotShowBlacklistSongConfirm
   ]);

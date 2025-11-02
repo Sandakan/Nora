@@ -54,7 +54,6 @@ const SongCard = (props: SongCardProp) => {
   const {
     playSong,
     updateContextMenuData,
-    changeCurrentActivePage,
     updateQueueData,
     addNewNotifications,
     changePromptMenuData,
@@ -366,10 +365,7 @@ const SongCard = (props: SongCardProp) => {
         label: t('common.info'),
         class: 'info',
         iconName: 'info',
-        handlerFunction: () =>
-          changeCurrentActivePage('SongInfo', {
-            songId
-          }),
+        handlerFunction: () => navigate({ to: '/main-player/songs/$songId', params: { songId } }),
         isDisabled: isMultipleSelectionsEnabled
       },
       {
@@ -387,12 +383,14 @@ const SongCard = (props: SongCardProp) => {
         label: t('song.editSongTags'),
         class: 'edit',
         iconName: 'edit',
-        handlerFunction: () =>
-          changeCurrentActivePage('SongTagsEditor', {
-            songId,
-            songArtworkPath: artworkPath,
-            songPath: path
-          }),
+        handlerFunction: () => {
+          // TODO: Implement song tags editor page navigation
+          // changeCurrentActivePage('SongTagsEditor', {
+          //   songId,
+          //   songArtworkPath: artworkPath,
+          //   songPath: path
+          // });
+        },
         isDisabled: isMultipleSelectionsEnabled
       },
       {
@@ -466,8 +464,8 @@ const SongCard = (props: SongCardProp) => {
     handlePlayBtnClick,
     toggleMultipleSelections,
     createQueue,
-    queue.currentSongIndex,
-    queue.queue,
+    queue.position,
+    queue.songIds,
     currentSongData.songId,
     currentSongData.isAFavorite,
     updateQueueData,
@@ -479,7 +477,6 @@ const SongCard = (props: SongCardProp) => {
     changePromptMenuData,
     isMultipleSelectionEnabled,
     updateMultipleSelections,
-    changeCurrentActivePage,
     navigate,
     path,
     doNotShowBlacklistSongConfirm

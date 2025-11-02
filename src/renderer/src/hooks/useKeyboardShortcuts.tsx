@@ -61,11 +61,6 @@ export interface KeyboardShortcutDependencies {
   addNewNotifications: (notifications: AppNotification[]) => void;
 
   /**
-   * Update page history index (back/forward navigation)
-   */
-  updatePageHistoryIndex: (type: 'increment' | 'decrement' | 'home') => void;
-
-  /**
    * Update player type (mini/normal)
    */
   updatePlayerType: (type: PlayerTypes) => void;
@@ -131,7 +126,6 @@ export function useKeyboardShortcuts(dependencies: KeyboardShortcutDependencies)
     toggleRepeat,
     toggleIsFavorite,
     addNewNotifications,
-    updatePageHistoryIndex,
     updatePlayerType,
     toggleMultipleSelections,
     changePromptMenuData
@@ -274,10 +268,10 @@ export function useKeyboardShortcuts(dependencies: KeyboardShortcutDependencies)
             navigate({ to: '/main-player/home' });
             break;
           case i18n.t('appShortcutsPrompt.goBack'):
-            updatePageHistoryIndex('decrement');
+            // TODO: Implement page history back navigation.
             break;
           case i18n.t('appShortcutsPrompt.goForward'):
-            updatePageHistoryIndex('increment');
+            // TODO: Implement page history forward navigation.
             break;
           case i18n.t('appShortcutsPrompt.openMiniPlayer'):
             updatePlayerType(store.state.playerType === 'mini' ? 'normal' : 'mini');
@@ -334,7 +328,6 @@ export function useKeyboardShortcuts(dependencies: KeyboardShortcutDependencies)
       addNewNotifications,
       t,
       navigate,
-      updatePageHistoryIndex,
       updatePlayerType,
       toggleMultipleSelections,
       changePromptMenuData,

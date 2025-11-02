@@ -331,16 +331,7 @@ function SongsPage() {
                   currentlyActivePage.data?.scrollTopOffset ?? 0
                 }
                 onScroll={(data) => {
-                  if (!data.scrollUpdateWasRequested && data.scrollOffset !== 0)
-                    debounce(
-                      () =>
-                        updateCurrentlyActivePageData((currentPageData) => ({
-                          ...currentPageData,
-                          scrollTopOffset: data.scrollOffset,
-                        })),
-                      500,
-                    );
-                }}
+                }
               >
                 {songs}
               </List>

@@ -1,20 +1,19 @@
-import { useContext, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import useSelectAllHandler from '../../hooks/useSelectAllHandler';
-
-import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
 import SecondaryContainer from '../SecondaryContainer';
 import SongCard from '../SongsPage/SongCard';
 
 import DefaultSongCover from '../../assets/images/webp/song_cover_default.webp';
 import Button from '../Button';
+import { useNavigate } from '@tanstack/react-router';
 
 type Props = { mostLovedSongs: AudioInfo[]; noOfVisibleSongs: number };
 
 const MostLovedSongs = (props: Props) => {
-  const { changeCurrentActivePage } = useContext(AppUpdateContext);
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const { mostLovedSongs, noOfVisibleSongs = 3 } = props;
   const MAX_SONG_LIMIT = 15;
@@ -66,12 +65,7 @@ const MostLovedSongs = (props: Props) => {
                 tooltipLabel={t('homePage.openFavoritesWithAllTimeMostListenedSortOption')}
                 iconName="apps"
                 className="show-all-btn text-sm font-normal"
-                clickHandler={() =>
-                  changeCurrentActivePage('PlaylistInfo', {
-                    playlistId: 'Favorites',
-                    sortingOrder: 'allTimeMostListened'
-                  })
-                }
+                clickHandler={() => navigate({ to: '/main-player/playlists/favorites' })}
               />
             </div>
             <div

@@ -96,15 +96,6 @@ function LyricsEditingPage() {
     }
   }, [isEditingEnhancedSyncedLyrics, lyrics]);
 
-  // useEffect(() => {
-  //   updateCurrentlyActivePageData((prevData) => {
-  //     return {
-  //       ...prevData,
-  //       isLowResponseRequired: isTheEditingSongTheCurrSong && isPlaying
-  //     };
-  //   });
-  // }, [isPlaying, isTheEditingSongTheCurrSong, updateCurrentlyActivePageData]);
-
   useEffect(() => {
     const durationUpdateFunction = (ev: Event) => {
       if ('detail' in ev && !Number.isNaN(ev.detail)) {

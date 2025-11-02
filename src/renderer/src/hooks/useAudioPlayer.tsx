@@ -1,9 +1,10 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import AudioPlayer from '../other/player';
 import roundTo from '@common/roundTo';
 
 const LOW_RESPONSE_DURATION = 100;
 const DURATION = 1000;
+const player = new AudioPlayer();
 
 /**
  * Custom hook to get the singleton AudioPlayer instance.
@@ -11,22 +12,20 @@ const DURATION = 1000;
  * @returns The AudioPlayer instance (not wrapped in a ref)
  */
 export function useAudioPlayer() {
-  const playerRef = useRef<AudioPlayer>(undefined);
-
   useEffect(() => {
     const dispatchCurrentSongTime = () => {
       const playerPositionChange = new CustomEvent('player/positionChange', {
-        detail: roundTo(playerRef.current?.currentTime || 0, 2)
+        detail: roundTo(player.currentTime || 0, 2)
       });
       document.dispatchEvent(playerPositionChange);
     };
 
     const lowResponseIntervalId = setInterval(() => {
-      if (!playerRef.current?.paused) dispatchCurrentSongTime();
+      if (!player.paused) dispatchCurrentSongTime();
     }, LOW_RESPONSE_DURATION);
 
     const pausedResponseIntervalId = setInterval(() => {
-      if (playerRef.current?.paused) dispatchCurrentSongTime();
+      if (player.paused) dispatchCurrentSongTime();
     }, DURATION);
 
     return () => {
@@ -35,9 +34,5 @@ export function useAudioPlayer() {
     };
   }, []);
 
-  if (!playerRef.current) {
-    playerRef.current = new AudioPlayer();
-  }
-
-  return playerRef.current;
+  return player;
 }
