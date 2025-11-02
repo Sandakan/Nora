@@ -13,7 +13,7 @@ import {
   boolean,
   customType
 } from 'drizzle-orm/pg-core';
-import { relations, sql, SQL } from 'drizzle-orm';
+import { relations, sql, type SQL } from 'drizzle-orm';
 
 // ============================================================================
 // Data types

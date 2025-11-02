@@ -3,6 +3,7 @@
 import Button from '@renderer/components/Button';
 import Img from '@renderer/components/Img';
 import MainContainer from '@renderer/components/MainContainer';
+import NavLink from '@renderer/components/NavLink';
 import SecondaryContainer from '@renderer/components/SecondaryContainer';
 import ListeningActivityBarGraph from '@renderer/components/SongInfoPage/ListeningActivityBarGraph';
 import SimilarTracksContainer from '@renderer/components/SongInfoPage/SimilarTracksContainer';
@@ -38,12 +39,8 @@ function SongInfoPage() {
 
   const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
 
-  const {
-    changeCurrentActivePage,
-    updateBodyBackgroundImage,
-    updateContextMenuData,
-    updateSongPosition
-  } = useContext(AppUpdateContext);
+  const { updateBodyBackgroundImage, updateContextMenuData, updateSongPosition } =
+    useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { data: songInfo } = useSuspenseQuery({
@@ -294,33 +291,30 @@ function SongInfoPage() {
             <div className="song-artists info-type-2 mb-1 flex items-center overflow-hidden text-base text-ellipsis whitespace-nowrap">
               {songArtists}
             </div>
-            <Button
-              className={`info-type-2 !mr-0 mb-5 !w-fit truncate !border-0 !p-0 ${
-                songInfo.album && 'hover:underline'
-              } ${bodyBackgroundImage && 'text-white!'}`}
-              label={songInfo.album ? songInfo.album.name : t('common.unknownAlbum')}
-              clickHandler={() => {
-                if (songInfo.album) {
-                  return changeCurrentActivePage('AlbumInfo', {
-                    albumId: songInfo.album.albumId
-                  });
-                }
-                return undefined;
-              }}
-            />
+
+            {songInfo.album && (
+              <NavLink
+                to="/main-player/albums/$albumId"
+                params={{ albumId: songInfo.album?.albumId! }}
+                className={`info-type-2 !mr-0 mb-5 !w-fit truncate !border-0 !p-0 ${
+                  songInfo.album && 'hover:underline'
+                } ${bodyBackgroundImage && 'text-white!'}`}
+              >
+                {songInfo.album ? songInfo.album.name : t('common.unknownAlbum')}
+              </NavLink>
+            )}
+
             <div
               className="info-type-3 mb-1 overflow-hidden text-sm text-ellipsis whitespace-nowrap"
               title={songDuration}
             >
               {songDuration}
             </div>
-
             {songInfo && songInfo.sampleRate && (
               <div className="info-type-3 mb-1 overflow-hidden text-sm text-ellipsis whitespace-nowrap">
                 {songInfo.sampleRate / 1000} KHZ
               </div>
             )}
-
             {songInfo && songInfo.bitrate && (
               <div className="info-type-3 mb-1 overflow-hidden text-sm text-ellipsis whitespace-nowrap">
                 {Math.floor(songInfo.bitrate / 1000)} Kbps

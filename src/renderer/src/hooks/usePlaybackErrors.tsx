@@ -1,7 +1,8 @@
-import { useCallback, useRef } from 'react';
+import { lazy, useCallback, useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import ErrorPrompt from '../components/ErrorPrompt';
 import log from '../utils/log';
+
+const ErrorPrompt = lazy(() => import('../components/ErrorPrompt'));
 
 /**
  * Hook for managing playback errors and retry logic.
