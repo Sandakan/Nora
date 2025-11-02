@@ -1,7 +1,6 @@
 import 'dotenv/config';
-import { exec } from 'child_process';
 import * as readline from 'readline';
-import { existsSync } from 'fs';
+import { existsSync, rmSync } from 'fs';
 
 const DATABASE_PATH = process.env.DATABASE_PATH;
 
@@ -29,8 +28,8 @@ const dropDatabase = () => {
   if (force) {
     executeDrop();
   } else {
-    rl.question('Are you sure you want to drop the database? (yes/no) ', (answer) => {
-      if (answer.toLowerCase() === 'yes') {
+    rl.question('Are you sure you want to drop the database? (y/n) ', (answer) => {
+      if (answer.toLowerCase() === 'y') {
         executeDrop();
       } else {
         console.log('Database drop canceled.');
@@ -41,16 +40,16 @@ const dropDatabase = () => {
 };
 
 const executeDrop = () => {
-  exec(`rm -rf "${DATABASE_PATH}"`, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`Error removing folder: ${stderr}`);
-      process.exit(1);
-    }
-    console.log(`Folder removed successfully: ${stdout}`);
+  try {
+    rmSync(DATABASE_PATH!, { recursive: true, force: true });
+    console.log(`Database folder removed successfully: ${DATABASE_PATH}`);
+  } catch (error) {
+    console.error(`Error removing folder:`, error);
+    process.exit(1);
+  } finally {
     rl.close();
-  });
+  }
 };
 
 // Start the script
 dropDatabase();
-

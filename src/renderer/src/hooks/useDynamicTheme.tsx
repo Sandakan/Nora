@@ -193,23 +193,24 @@ export function useDynamicTheme(): UseDynamicThemeReturn {
     (state) => state.localStorage.preferences.enableImageBasedDynamicThemes
   );
 
+  const currentSongPaletteData = useStore(store, (state) => state.currentSongData.paletteData);
+
   useEffect(() => {
     // Reset styles first
     setDynamicThemesFromSongPalette(undefined);
 
     // Apply dynamic theme if enabled and palette data is available
-    const isDynamicThemesEnabled =
-      isImageBasedDynamicThemesEnabled && store.state.currentSongData.paletteData;
+    const isDynamicThemesEnabled = isImageBasedDynamicThemesEnabled && currentSongPaletteData;
 
     const resetStyles = setDynamicThemesFromSongPalette(
-      isDynamicThemesEnabled ? store.state.currentSongData.paletteData : undefined
+      isDynamicThemesEnabled ? currentSongPaletteData : undefined
     );
 
     // Cleanup on unmount or when dependencies change
     return () => {
       resetStyles();
     };
-  }, [isImageBasedDynamicThemesEnabled, setDynamicThemesFromSongPalette]);
+  }, [isImageBasedDynamicThemesEnabled, setDynamicThemesFromSongPalette, currentSongPaletteData]);
 
   // Monitor dark mode setting and apply/remove 'dark' class on document.body
   const { data: userSettings } = useSuspenseQuery(settingsQuery.all);

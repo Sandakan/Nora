@@ -31,9 +31,12 @@ import { useQuery } from '@tanstack/react-query';
 import { songQuery } from '@renderer/queries/songs';
 import { queryClient } from '@renderer/index';
 import { queueQuery } from '@renderer/queries/queue';
+import { baseInfoPageSearchParamsSchema } from '@renderer/utils/zod/baseInfoPageSearchParamsSchema';
+import { zodValidator } from '@tanstack/zod-adapter';
 
 export const Route = createFileRoute('/main-player/queue/')({
-  component: RouteComponent
+  component: RouteComponent,
+  validateSearch: zodValidator(baseInfoPageSearchParamsSchema)
 });
 
 function RouteComponent() {
@@ -43,7 +46,6 @@ function RouteComponent() {
     (state) => state.multipleSelectionsData.isEnabled
   );
   const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
-  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
   const queue = useStore(store, (state) => state.localStorage.queue);
   const currentQueue = useStore(store, (state) => state.localStorage.queue.songIds);
   const preferences = useStore(store, (state) => state.localStorage.preferences);
@@ -51,6 +53,7 @@ function RouteComponent() {
   const { updateQueueData, addNewNotifications, updateContextMenuData, toggleMultipleSelections } =
     useContext(AppUpdateContext);
   const { t } = useTranslation();
+  const { scrollTopOffset } = Route.useSearch();
 
   const { data: queuedSongs } = useQuery({
     ...songQuery.queue(currentQueue),
@@ -351,7 +354,7 @@ function RouteComponent() {
                       fixedItemHeight={60}
                       ref={ListRef}
                       scrollerRef={droppableProvided.innerRef}
-                      scrollTopOffset={currentlyActivePage.data?.scrollTopOffset}
+                      scrollTopOffset={scrollTopOffset}
                       components={{
                         Item: ({ children, ...props }: { children?: ReactNode }) => (
                           <div {...props} className="height-preserving-container">

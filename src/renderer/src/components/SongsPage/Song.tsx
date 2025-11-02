@@ -237,11 +237,10 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
         iconName: 'shortcut',
         handlerFunction: () => {
           if (isMultipleSelectionsEnabled) {
-            let currentSongIndex =
-              queue.currentSongIndex ?? queue.queue.indexOf(currentSongData.songId);
+            let currentSongIndex = queue.position ?? queue.songIds.indexOf(currentSongData.songId);
             const duplicateIds: string[] = [];
 
-            const newQueue = queue.queue.filter((id) => {
+            const newQueue = queue.songIds.filter((id) => {
               const isADuplicate = songIds.includes(id);
               if (isADuplicate) duplicateIds.push(id);
 
@@ -249,7 +248,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
             });
 
             for (const duplicateId of duplicateIds) {
-              const duplicateIdPosition = queue.queue.indexOf(duplicateId);
+              const duplicateIdPosition = queue.songIds.indexOf(duplicateId);
 
               if (
                 duplicateIdPosition !== -1 &&
@@ -270,14 +269,12 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
               }
             ]);
           } else {
-            const newQueue = queue.queue.filter((id) => id !== songId);
-            const duplicateSongIndex = queue.queue.indexOf(songId);
+            const newQueue = queue.songIds.filter((id) => id !== songId);
+            const duplicateSongIndex = queue.songIds.indexOf(songId);
 
             const currentSongIndex =
-              queue.currentSongIndex &&
-              duplicateSongIndex !== -1 &&
-              duplicateSongIndex < queue.currentSongIndex
-                ? queue.currentSongIndex - 1
+              queue.position && duplicateSongIndex !== -1 && duplicateSongIndex < queue.position
+                ? queue.position - 1
                 : undefined;
 
             newQueue.splice(newQueue.indexOf(currentSongData.songId) + 1 || 0, 0, songId);
@@ -298,7 +295,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
         iconName: 'queue',
         handlerFunction: () => {
           if (isMultipleSelectionsEnabled) {
-            updateQueueData(undefined, [...queue.queue, ...songIds], false);
+            updateQueueData(undefined, [...queue.songIds, ...songIds], false);
             addNewNotifications([
               {
                 id: `${songIds.length}AddedToQueueFromMultiSelection`,
@@ -309,7 +306,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
               }
             ]);
           } else {
-            updateQueueData(undefined, [...queue.queue, songId], false);
+            updateQueueData(undefined, [...queue.songIds, songId], false);
             addNewNotifications([
               {
                 id: `${title}AddedToQueue`,
@@ -505,8 +502,8 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
     handlePlayBtnClick,
     toggleMultipleSelections,
     createQueue,
-    queue.currentSongIndex,
-    queue.queue,
+    queue.position,
+    queue.songIds,
     currentSongData.songId,
     currentSongData.isAFavorite,
     updateQueueData,
