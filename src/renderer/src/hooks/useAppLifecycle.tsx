@@ -1,7 +1,5 @@
 import { useEffect } from 'react';
 import { dispatch, store } from '../store/store';
-import { useAudioPlayer } from './useAudioPlayer';
-import { usePlayerQueue } from './usePlayerQueue';
 import PlayerQueue from '@renderer/other/playerQueue';
 import storage from '../utils/localStorage';
 
@@ -9,6 +7,16 @@ import storage from '../utils/localStorage';
  * Dependencies required by the app lifecycle hook
  */
 export interface AppLifecycleDependencies {
+  /**
+   * HTMLAudioElement instance for playback control
+   */
+  audio: HTMLAudioElement;
+
+  /**
+   * PlayerQueue instance for queue management
+   */
+  playerQueue: PlayerQueue;
+
   /**
    * Toggle shuffle mode
    */
@@ -120,10 +128,9 @@ export interface AppLifecycleDependencies {
  * ```
  */
 export function useAppLifecycle(dependencies: AppLifecycleDependencies): void {
-  const player = useAudioPlayer();
-  const playerQueue = usePlayerQueue();
-
   const {
+    audio: player,
+    playerQueue,
     toggleShuffling,
     toggleRepeat,
     playSongFromUnknownSource,

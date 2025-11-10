@@ -1,20 +1,19 @@
-import { useRef } from 'react';
-import PlayerQueue from '../other/playerQueue';
-import storage from '../utils/localStorage';
+import { getQueue } from '../other/queueSingleton';
 
 /**
  * Custom hook to get the singleton PlayerQueue instance.
- * The queue instance persists across component re-renders.
- * Initializes from localStorage if available, otherwise creates a new empty queue.
- * @returns The PlayerQueue instance (not wrapped in a ref)
+ * Returns the same queue instance across all components.
+ *
+ * ⚠️ IMPORTANT: This should only be called by:
+ * - useAudioPlayer (to pass to AudioPlayer constructor)
+ * - useQueueOperations (to get operation methods)
+ *
+ * Child components should use useQueueOperations instead.
+ *
+ * @returns The singleton PlayerQueue instance
  */
 export function usePlayerQueue() {
-  const queueRef = useRef<PlayerQueue | undefined>(undefined);
-
-  if (!queueRef.current) {
-    const storedQueue = storage.queue.getQueue();
-    queueRef.current = storedQueue ? PlayerQueue.fromJSON(storedQueue) : new PlayerQueue();
-  }
-
-  return queueRef.current;
+  // Simply return the module-level singleton
+  // No ref needed - it's already a singleton at module level
+  return getQueue();
 }

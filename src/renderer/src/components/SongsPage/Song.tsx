@@ -36,6 +36,7 @@ import { useStore } from '@tanstack/react-store';
 import { store } from '../../store/store';
 import NavLink from '../NavLink';
 import { useNavigate } from '@tanstack/react-router';
+import { useQueueOperations } from '../../hooks/useQueueOperations';
 
 interface SongProp {
   songId: string;
@@ -85,6 +86,9 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
   } = useContext(AppUpdateContext);
   const { t } = useTranslation();
   const navigate = useNavigate();
+
+  // Queue operations for context menu actions
+  const { addToNext, addToEnd } = useQueueOperations();
 
   const {
     index,
@@ -237,28 +241,8 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
         iconName: 'shortcut',
         handlerFunction: () => {
           if (isMultipleSelectionsEnabled) {
-            let currentSongIndex = queue.position ?? queue.songIds.indexOf(currentSongData.songId);
-            const duplicateIds: string[] = [];
-
-            const newQueue = queue.songIds.filter((id) => {
-              const isADuplicate = songIds.includes(id);
-              if (isADuplicate) duplicateIds.push(id);
-
-              return !isADuplicate;
-            });
-
-            for (const duplicateId of duplicateIds) {
-              const duplicateIdPosition = queue.songIds.indexOf(duplicateId);
-
-              if (
-                duplicateIdPosition !== -1 &&
-                duplicateIdPosition < currentSongIndex &&
-                currentSongIndex - 1 >= 0
-              )
-                currentSongIndex -= 1;
-            }
-            newQueue.splice(currentSongIndex + 1, 0, ...songIds);
-            updateQueueData(currentSongIndex, newQueue, undefined, false);
+            // Add multiple songs to play next (keeps duplicates)
+            addToNext(songIds, { removeDuplicates: false });
             addNewNotifications([
               {
                 id: `${title}PlayNext`,
@@ -269,16 +253,8 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
               }
             ]);
           } else {
-            const newQueue = queue.songIds.filter((id) => id !== songId);
-            const duplicateSongIndex = queue.songIds.indexOf(songId);
-
-            const currentSongIndex =
-              queue.position && duplicateSongIndex !== -1 && duplicateSongIndex < queue.position
-                ? queue.position - 1
-                : undefined;
-
-            newQueue.splice(newQueue.indexOf(currentSongData.songId) + 1 || 0, 0, songId);
-            updateQueueData(currentSongIndex, newQueue, undefined, false);
+            // Add single song to play next (keeps duplicates)
+            addToNext([songId], { removeDuplicates: false });
             addNewNotifications([
               {
                 id: `${title}PlayNext`,
@@ -295,7 +271,8 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
         iconName: 'queue',
         handlerFunction: () => {
           if (isMultipleSelectionsEnabled) {
-            updateQueueData(undefined, [...queue.songIds, ...songIds], false);
+            // Add multiple songs to end (keeps duplicates)
+            addToEnd(songIds, { removeDuplicates: false });
             addNewNotifications([
               {
                 id: `${songIds.length}AddedToQueueFromMultiSelection`,
@@ -306,7 +283,8 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
               }
             ]);
           } else {
-            updateQueueData(undefined, [...queue.songIds, songId], false);
+            // Add single song to end (keeps duplicates)
+            addToEnd([songId], { removeDuplicates: false });
             addNewNotifications([
               {
                 id: `${title}AddedToQueue`,

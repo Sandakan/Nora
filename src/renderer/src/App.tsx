@@ -1,16 +1,16 @@
 // ? BASE IMPORTS
-import { lazy, useCallback, useMemo, useRef } from 'react';
+import { lazy, useCallback, useEffect, useMemo, useRef } from 'react';
 import './assets/styles/styles.css';
 import 'material-symbols/rounded.css';
 
 // ? CONTEXTS
 import { AppUpdateContext, type AppUpdateContextType } from './contexts/AppUpdateContext';
+import { initializeQueue } from './other/queueSingleton';
 // import { SongPositionContext } from './contexts/SongPositionContext';
 
 // ? HOOKS
 import useNetworkConnectivity from './hooks/useNetworkConnectivity';
 import { useAudioPlayer } from './hooks/useAudioPlayer';
-import { usePlayerQueue } from './hooks/usePlayerQueue';
 import { useWindowManagement } from './hooks/useWindowManagement';
 import { useNotifications } from './hooks/useNotifications';
 import { useDynamicTheme } from './hooks/useDynamicTheme';
@@ -60,9 +60,16 @@ window.addEventListener('offline', updateNetworkStatus);
 // console.log('Command line args', window.api.properties.commandLineArgs);
 
 export default function App() {
+  // ? INITIALIZE QUEUE (singleton with store sync)
+  // This must be called before useAudioPlayer to ensure queue is ready
+  useEffect(() => {
+    initializeQueue();
+  }, []);
+
   // ? INITIALIZE PLAYER AND QUEUE (singleton instances via custom hooks)
   const player = useAudioPlayer();
-  const playerQueue = usePlayerQueue();
+  const audio = player.audio;
+  const playerQueue = player.queue; // Access properties directly from AudioPlayer instance
 
   // const [content, dispatch] = useReducer(reducer, DEFAULT_REDUCER_DATA);
   // // Had to use a Ref in parallel with the Reducer to avoid an issue that happens when using content.* not giving the intended data in useCallback functions even though it was added as a dependency of that function.
@@ -106,7 +113,7 @@ export default function App() {
 
   // ? INITIALIZE PLAYBACK ERRORS
   // Playback errors hook handles error management and retry logic
-  const { managePlaybackErrors } = usePlaybackErrors(player, changePromptMenuData);
+  const { managePlaybackErrors } = usePlaybackErrors(audio, changePromptMenuData);
 
   // ? INITIALIZE PLAYBACK SETTINGS
   // Playback settings hook handles repeat, volume, mute, position, favorites, and equalizer
@@ -117,11 +124,11 @@ export default function App() {
     updateSongPosition,
     toggleIsFavorite,
     updateEqualizerOptions
-  } = usePlaybackSettings(player);
+  } = usePlaybackSettings(audio);
 
   // ? INITIALIZE LISTENING DATA
   // Listening data hook handles recording song playback sessions for analytics
-  const { recordListeningData } = useListeningData(player);
+  const { recordListeningData } = useListeningData(audio);
 
   // ? INITIALIZE PLAYER CONTROL
   // Player control hook handles play/pause, song loading, and player state management
@@ -134,7 +141,7 @@ export default function App() {
     updateCurrentSongPlaybackState,
     refStartPlay
   } = usePlayerControl(
-    player,
+    audio,
     playerQueue,
     recordListeningData,
     managePlaybackErrors,
@@ -144,8 +151,9 @@ export default function App() {
 
   // ? INITIALIZE PLAYER NAVIGATION
   // Player navigation hook handles skip forward/backward and queue navigation
+  // Songs are auto-loaded by AudioPlayer on queue position changes
   const { changeQueueCurrentSongIndex, handleSkipBackwardClick, handleSkipForwardClick } =
-    usePlayerNavigation(player, playerQueue, playSong, toggleSongPlayback, recordListeningData);
+    usePlayerNavigation(audio, playerQueue, toggleSongPlayback, recordListeningData);
 
   // ? INITIALIZE APP UPDATES
   // App updates hook handles checking for updates and showing release notes
@@ -195,7 +203,7 @@ export default function App() {
 
   // ? INITIALIZE MEDIA SESSION
   // Media session hook handles OS-level media controls and browser media notifications
-  useMediaSession(player, {
+  useMediaSession(audio, {
     toggleSongPlayback,
     handleSkipBackwardClick,
     handleSkipForwardClick,
@@ -204,7 +212,7 @@ export default function App() {
 
   // ? INITIALIZE DISCORD RPC
   // Discord RPC hook handles Discord Rich Presence integration
-  useDiscordRpc(player);
+  useDiscordRpc(audio);
 
   // Set up keyboard shortcuts with all required dependencies
   useKeyboardShortcuts({
@@ -226,6 +234,8 @@ export default function App() {
   // Must be called after all dependencies are defined
   // This hook now manages all player event listeners, IPC controls, and lifecycle events
   useAppLifecycle({
+    audio,
+    playerQueue,
     toggleShuffling,
     toggleRepeat,
     playSongFromUnknownSource,
