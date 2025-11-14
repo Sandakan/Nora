@@ -1,6 +1,5 @@
 import { useCallback } from 'react';
 import { dispatch, store } from '../store/store';
-import storage from '../utils/localStorage';
 import type PlayerQueue from '../other/playerQueue';
 
 /**
@@ -101,7 +100,7 @@ export function useQueueManagement(dependencies: QueueManagementDependencies) {
       }
 
       // Persist to localStorage
-      storage.queue.setQueue(playerQueue);
+      // storage.queue.setQueue(playerQueue); // Handled by queueSingleton events
 
       // Start playing if requested
       if (startPlaying && playerQueue.currentSongId) {
@@ -141,8 +140,7 @@ export function useQueueManagement(dependencies: QueueManagementDependencies) {
     }
 
     // Event listeners will handle localStorage sync automatically
-    // But we'll keep this for now to ensure compatibility
-    storage.queue.setQueue(playerQueue);
+    // storage.queue.setQueue(playerQueue);
   }, [playerQueue, toggleShuffling]);
 
   /**
@@ -192,9 +190,8 @@ export function useQueueManagement(dependencies: QueueManagementDependencies) {
       toggleShuffling(isShuffleQueue);
 
       // Persist to localStorage
-      // Event listeners already handle localStorage sync, but keep for now
-      // to ensure compatibility during migration
-      storage.queue.setQueue(playerQueue);
+      // Event listeners already handle localStorage sync
+      // storage.queue.setQueue(playerQueue);
 
       // Start playing if requested
       if (playCurrentSongIndex && playerQueue.currentSongId) {

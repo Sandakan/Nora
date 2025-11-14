@@ -124,6 +124,19 @@ export function usePlayerControl(
       console.log('[playSong]', { songId, isStartPlay, playAsCurrentSongIndex });
 
       if (typeof songId === 'string') {
+        // Use AudioPlayer's playSongById if available (preferred path)
+        if (audioPlayer) {
+          return audioPlayer.playSongById(songId, {
+            autoPlay: isStartPlay,
+            recordListening: true,
+            onError: (error) => {
+              console.error('Error playing song via AudioPlayer:', error);
+              changePromptMenuData(true, <SongUnplayableErrorPrompt err={error as Error} />);
+            }
+          });
+        }
+
+        // Fallback to legacy direct control (deprecated)
         console.time('timeForSongFetch');
 
         return window.api.audioLibraryControls
@@ -185,7 +198,7 @@ export function usePlayerControl(
         'ERROR'
       );
     },
-    [changePromptMenuData, t, toggleSongPlayback, recordListeningData, player]
+    [audioPlayer, changePromptMenuData, toggleSongPlayback, recordListeningData, player, t]
   );
 
   const playSongFromUnknownSource = useCallback(

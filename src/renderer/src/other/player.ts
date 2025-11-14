@@ -4,7 +4,6 @@ import storage from '../utils/localStorage';
 import { equalizerBandHertzData } from './equalizerData';
 import PlayerQueue from './playerQueue';
 
-const AUDIO_FADE_INTERVAL = 50;
 const AUDIO_FADE_DURATION = 250;
 
 /**
@@ -19,13 +18,12 @@ class AudioPlayer extends EventEmitter {
 
   currentContext: AudioContext;
   equalizerBands: Map<EqualizerBandFilters, BiquadFilterNode>;
-
-  fadeOutIntervalId: NodeJS.Timeout | undefined;
-  fadeInIntervalId: NodeJS.Timeout | undefined;
+  gainNode: GainNode;
 
   unsubscribeFunc: () => void;
 
   private repeatMode: 'off' | 'one' | 'all' = 'off';
+  private pendingAutoPlay: boolean = false;
 
   constructor(queue: PlayerQueue) {
     super();
@@ -38,6 +36,7 @@ class AudioPlayer extends EventEmitter {
 
     this.currentContext = new window.AudioContext();
     this.equalizerBands = new Map();
+    this.gainNode = this.currentContext.createGain();
 
     this.currentVolume = this.audio.volume;
 
@@ -59,10 +58,12 @@ class AudioPlayer extends EventEmitter {
       console.log('[AudioPlayer.positionChange]', {
         position: this.queue.position,
         songId,
-        willLoad: !!songId
+        willLoad: !!songId,
+        pendingAutoPlay: this.pendingAutoPlay
       });
       if (songId) {
-        this.loadSong(songId);
+        this.loadSong(songId, { autoPlay: this.pendingAutoPlay });
+        this.pendingAutoPlay = false; // Reset after use
       }
     });
 
@@ -129,23 +130,14 @@ class AudioPlayer extends EventEmitter {
     }
 
     if (this.queue.hasNext) {
+      this.pendingAutoPlay = true;
       this.queue.moveToNext();
-      // Song will be auto-loaded via positionChange event
-      // After load completes, auto-resume playback
-      this.once('songLoaded', () => {
-        this.play().catch((err) =>
-          console.error('[AudioPlayer] Auto-play after song end failed:', err)
-        );
-      });
+      // Song will be auto-loaded via positionChange event with autoPlay
     } else if (this.repeatMode === 'all' && this.queue.length > 0) {
+      this.pendingAutoPlay = true;
       this.queue.moveToPosition(0);
       this.emit('repeatAll');
-      // Auto-resume for repeat-all
-      this.once('songLoaded', () => {
-        this.play().catch((err) =>
-          console.error('[AudioPlayer] Auto-play for repeat-all failed:', err)
-        );
-      });
+      // Song will be auto-loaded via positionChange event with autoPlay
     } else {
       this.emit('playbackComplete');
     }
@@ -153,14 +145,28 @@ class AudioPlayer extends EventEmitter {
 
   /**
    * Loads a song into the audio element.
-   * Fetches song data from API and sets up audio source.
-   * @param songId - The ID of the song to load
+   * Fetches song data from API if songId is provided, or uses provided songData.
+   * Sets up audio source and dispatches events.
+   * @param songIdOrData - The ID of the song to load or the song data object
    * @param options - Optional configuration for song loading
+   * @returns Promise resolving to the song data
    */
-  private async loadSong(songId: string, options?: { autoPlay?: boolean; updateStore?: boolean }) {
+  private async loadSong(
+    songIdOrData: string | AudioPlayerData,
+    options?: { autoPlay?: boolean; updateStore?: boolean }
+  ): Promise<AudioPlayerData> {
+    let songData: AudioPlayerData;
+
+    if (typeof songIdOrData === 'string') {
+      // Fetch song data if ID provided
+      songData = await window.api.audioLibraryControls.getSong(songIdOrData);
+    } else {
+      // Use provided song data
+      songData = songIdOrData;
+    }
+
     try {
-      console.log('[AudioPlayer.loadSong]', { songId, options });
-      const songData = await window.api.audioLibraryControls.getSong(songId);
+      console.log('[AudioPlayer.loadSong]', { songId: songData.songId, options });
 
       // Update store with current song data if requested
       if (options?.updateStore !== false) {
@@ -184,20 +190,26 @@ class AudioPlayer extends EventEmitter {
         this.audio.addEventListener('canplay', autoPlayHandler);
       }
 
-      await this.audio.load();
+      // Load is synchronous, no need to await
+      this.audio.load();
 
       // Dispatch custom track change event
-      const trackChangeEvent = new CustomEvent('player/trackchange', { detail: songId });
+      const trackChangeEvent = new CustomEvent('player/trackchange', { detail: songData.songId });
       this.audio.dispatchEvent(trackChangeEvent);
 
       this.emit('songLoaded', songData);
-      console.log('[AudioPlayer.loadSong.done]', { songId, title: songData.title });
+      console.log('[AudioPlayer.loadSong.done]', {
+        songId: songData.songId,
+        title: songData.title
+      });
+
+      return songData;
     } catch (error) {
       console.error(
-        `Failed to load song (ID: ${songId}):`,
+        `Failed to load song (ID: ${songData.songId}):`,
         error instanceof Error ? error.message : error
       );
-      this.emit('loadError', { songId, error });
+      this.emit('loadError', { songId: songData.songId, error });
       throw error; // Re-throw for caller to handle
     }
   }
@@ -208,51 +220,43 @@ class AudioPlayer extends EventEmitter {
    */
   destroy() {
     if (this.unsubscribeFunc) this.unsubscribeFunc();
-    if (this.fadeInIntervalId) clearInterval(this.fadeInIntervalId);
-    if (this.fadeOutIntervalId) clearInterval(this.fadeOutIntervalId);
     this.queue.removeAllListeners();
     this.removeAllListeners();
     this.audio.pause();
     this.audio.src = '';
+    this.currentContext.close();
   }
 
   private fadeOutAudio(): Promise<void> {
     return new Promise((resolve) => {
-      if (this.fadeInIntervalId) clearInterval(this.fadeInIntervalId);
-      if (this.fadeOutIntervalId) clearInterval(this.fadeOutIntervalId);
+      const currentTime = this.currentContext.currentTime;
+      const targetVolume = 0.001; // Very low but not zero to avoid clicks
+      const fadeDuration = AUDIO_FADE_DURATION / 1000; // Convert to seconds
 
-      this.fadeOutIntervalId = setInterval(() => {
-        if (this.audio.volume > 0) {
-          const rate = this.currentVolume / (100 * (AUDIO_FADE_DURATION / AUDIO_FADE_INTERVAL));
-          if (this.audio.volume - rate <= 0) this.audio.volume = 0;
-          else this.audio.volume -= rate;
-        } else {
-          this.audio.pause();
-          if (this.fadeOutIntervalId) clearInterval(this.fadeOutIntervalId);
-          resolve(undefined);
-        }
-      }, AUDIO_FADE_INTERVAL);
+      this.gainNode.gain.setValueAtTime(this.gainNode.gain.value, currentTime);
+      this.gainNode.gain.exponentialRampToValueAtTime(targetVolume, currentTime + fadeDuration);
+
+      // Schedule pause after fade completes
+      setTimeout(() => {
+        this.audio.pause();
+        resolve(undefined);
+      }, AUDIO_FADE_DURATION);
     });
   }
 
   private fadeInAudio(): Promise<void> {
     return new Promise((resolve) => {
-      if (this.fadeInIntervalId) clearInterval(this.fadeInIntervalId);
-      if (this.fadeOutIntervalId) clearInterval(this.fadeOutIntervalId);
+      const currentTime = this.currentContext.currentTime;
+      const targetVolume = this.currentVolume / 100;
+      const fadeDuration = AUDIO_FADE_DURATION / 1000; // Convert to seconds
 
-      this.fadeInIntervalId = setInterval(() => {
-        if (this.audio.volume < this.currentVolume / 100) {
-          const rate =
-            (this.currentVolume / 100 / AUDIO_FADE_INTERVAL) *
-            (AUDIO_FADE_DURATION / AUDIO_FADE_INTERVAL);
-          if (this.audio.volume + rate >= this.currentVolume / 100)
-            this.audio.volume = this.currentVolume / 100;
-          else this.audio.volume += rate;
-        } else if (this.fadeInIntervalId) {
-          clearInterval(this.fadeInIntervalId);
-          resolve(undefined);
-        }
-      }, AUDIO_FADE_INTERVAL);
+      this.gainNode.gain.setValueAtTime(this.gainNode.gain.value, currentTime);
+      this.gainNode.gain.exponentialRampToValueAtTime(targetVolume, currentTime + fadeDuration);
+
+      // Resolve after fade completes
+      setTimeout(() => {
+        resolve(undefined);
+      }, AUDIO_FADE_DURATION);
     });
   }
 
@@ -282,9 +286,12 @@ class AudioPlayer extends EventEmitter {
         const prevFilter = map.get(filterMapKeys[currentFilterIndex - 1]);
         if (prevFilter) prevFilter.connect(filter);
 
-        if (isTheLastFilter) filter.connect(this.currentContext.destination);
+        if (isTheLastFilter) filter.connect(this.gainNode);
       }
     });
+
+    // Connect gain node to destination
+    this.gainNode.connect(this.currentContext.destination);
   }
 
   // ? PLAYER RELATED STORE UPDATES HANDLING
@@ -395,12 +402,14 @@ class AudioPlayer extends EventEmitter {
     try {
       console.log('[AudioPlayer.playSongById]', { songId, autoPlay });
 
+      // Fetch song data once
+      const songData = await window.api.audioLibraryControls.getSong(songId);
+
       // Load song with store updates
-      await this.loadSong(songId, { autoPlay, updateStore: true });
+      await this.loadSong(songData, { autoPlay, updateStore: true });
 
       // Record listening data if requested
       if (recordListening) {
-        const songData = await window.api.audioLibraryControls.getSong(songId);
         // Note: Listening data recording will be handled by the hook until fully migrated
         this.emit('recordListening', { songId, duration: songData.duration });
       }
@@ -587,11 +596,9 @@ class AudioPlayer extends EventEmitter {
    * Sets the volume (0-1).
    */
   set volume(volume: number) {
-    if (this.fadeInIntervalId) clearInterval(this.fadeInIntervalId);
-    if (this.fadeOutIntervalId) clearInterval(this.fadeOutIntervalId);
-
     this.currentVolume = volume * 100;
     this.audio.volume = volume;
+    this.gainNode.gain.value = volume;
   }
 
   /**
@@ -606,6 +613,7 @@ class AudioPlayer extends EventEmitter {
    */
   set muted(value: boolean) {
     this.audio.muted = value;
+    this.gainNode.gain.value = value ? 0 : this.volume;
   }
 
   /**
