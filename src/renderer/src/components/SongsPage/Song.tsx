@@ -644,7 +644,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
           className="song-title truncate text-base font-normal outline-offset-1 transition-none focus-visible:outline!"
           disabled={isMultipleSelectionEnabled}
         >
-          {title}
+          {window.api.properties.isInDevelopment && `(${songId})`} {title}
         </NavLink>
         <div className="song-artists w-full truncate text-xs font-normal transition-none">
           {songArtists}

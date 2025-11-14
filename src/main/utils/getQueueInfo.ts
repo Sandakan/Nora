@@ -6,7 +6,11 @@ import {
   getPlaylistRelatedQueueInfo,
   getSongRelatedQueueInfo
 } from '@main/db/queries/queue';
-import { addDefaultAppProtocolToFilePath, parseSongArtworks } from '@main/fs/resolveFilePaths';
+import {
+  addDefaultAppProtocolToFilePath,
+  getPlaylistArtworkPath,
+  parseSongArtworks
+} from '@main/fs/resolveFilePaths';
 
 const addFileUrlToPath = (path?: string) => {
   if (!path) return '';
@@ -64,6 +68,22 @@ export const getQueueInfo = async (
       return {
         artworkPath: '',
         title: data?.name || ''
+      };
+    }
+
+    case 'favorites': {
+      const artwork = getPlaylistArtworkPath('Favorites', false);
+      return {
+        artworkPath: artwork.artworkPath,
+        title: 'Favorites'
+      };
+    }
+
+    case 'history': {
+      const artwork = getPlaylistArtworkPath('History', false);
+      return {
+        artworkPath: artwork.artworkPath,
+        title: 'History'
       };
     }
 

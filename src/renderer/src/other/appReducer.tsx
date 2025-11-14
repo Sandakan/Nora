@@ -191,7 +191,7 @@ export const reducer = (state: AppReducer, action: AppReducerStateActions): AppR
     case 'UP_NEXT_SONG_DATA_CHANGE':
       return {
         ...state,
-        currentSongData: action.data ?? state.currentSongData
+        upNextSongData: action.data ?? state.upNextSongData
       };
     case 'CURRENT_SONG_PLAYBACK_STATE': {
       return {

@@ -1,5 +1,6 @@
 import { EventEmitter } from 'events';
-import { store } from '../store/store';
+import { dispatch, store } from '../store/store';
+import storage from '../utils/localStorage';
 import { equalizerBandHertzData } from './equalizerData';
 import PlayerQueue from './playerQueue';
 
@@ -55,6 +56,11 @@ class AudioPlayer extends EventEmitter {
     // React to queue position changes - load the new song
     this.queue.on('positionChange', () => {
       const songId = this.queue.currentSongId;
+      console.log('[AudioPlayer.positionChange]', {
+        position: this.queue.position,
+        songId,
+        willLoad: !!songId
+      });
       if (songId) {
         this.loadSong(songId);
       }
@@ -110,20 +116,36 @@ class AudioPlayer extends EventEmitter {
   /**
    * Handles song end based on repeat mode.
    * Automatically advances queue or repeats as configured.
+   * Auto-resumes playback for the next song.
    */
-  private handleSongEnd() {
+  private async handleSongEnd() {
+    console.log('[AudioPlayer.handleSongEnd]', { repeatMode: this.repeatMode });
+
     if (this.repeatMode === 'one') {
       this.audio.currentTime = 0;
-      this.audio.play();
+      await this.play();
       this.emit('repeatOne');
       return;
     }
 
     if (this.queue.hasNext) {
       this.queue.moveToNext();
+      // Song will be auto-loaded via positionChange event
+      // After load completes, auto-resume playback
+      this.once('songLoaded', () => {
+        this.play().catch((err) =>
+          console.error('[AudioPlayer] Auto-play after song end failed:', err)
+        );
+      });
     } else if (this.repeatMode === 'all' && this.queue.length > 0) {
       this.queue.moveToPosition(0);
       this.emit('repeatAll');
+      // Auto-resume for repeat-all
+      this.once('songLoaded', () => {
+        this.play().catch((err) =>
+          console.error('[AudioPlayer] Auto-play for repeat-all failed:', err)
+        );
+      });
     } else {
       this.emit('playbackComplete');
     }
@@ -133,19 +155,50 @@ class AudioPlayer extends EventEmitter {
    * Loads a song into the audio element.
    * Fetches song data from API and sets up audio source.
    * @param songId - The ID of the song to load
+   * @param options - Optional configuration for song loading
    */
-  private async loadSong(songId: string) {
+  private async loadSong(songId: string, options?: { autoPlay?: boolean; updateStore?: boolean }) {
     try {
+      console.log('[AudioPlayer.loadSong]', { songId, options });
       const songData = await window.api.audioLibraryControls.getSong(songId);
-      this.audio.src = songData.path;
+
+      // Update store with current song data if requested
+      if (options?.updateStore !== false) {
+        dispatch({ type: 'CURRENT_SONG_DATA_CHANGE', data: songData });
+
+        // Update localStorage
+        storage.playback.setCurrentSongOptions('songId', songData.songId);
+      }
+
+      // Set audio source with cache-busting timestamp
+      this.audio.src = `${songData.path}?ts=${Date.now()}`;
+
+      // Set up one-time auto-play listener if requested
+      if (options?.autoPlay) {
+        const autoPlayHandler = () => {
+          this.play().catch((err) =>
+            console.error('[AudioPlayer] Auto-play on canplay failed:', err)
+          );
+          this.audio.removeEventListener('canplay', autoPlayHandler);
+        };
+        this.audio.addEventListener('canplay', autoPlayHandler);
+      }
+
       await this.audio.load();
+
+      // Dispatch custom track change event
+      const trackChangeEvent = new CustomEvent('player/trackchange', { detail: songId });
+      this.audio.dispatchEvent(trackChangeEvent);
+
       this.emit('songLoaded', songData);
+      console.log('[AudioPlayer.loadSong.done]', { songId, title: songData.title });
     } catch (error) {
       console.error(
         `Failed to load song (ID: ${songId}):`,
         error instanceof Error ? error.message : error
       );
       this.emit('loadError', { songId, error });
+      throw error; // Re-throw for caller to handle
     }
   }
 
@@ -265,10 +318,19 @@ class AudioPlayer extends EventEmitter {
         this.updateEqualizerPreset(localStorage.equalizerPreset);
         this.updatePlayerVolume(player.volume);
         this.updatePlaybackRate(player.playbackRate);
+        this.syncRepeatModeFromStore(player.isRepeating);
       }
     });
 
     return unsubscribeFunction;
+  }
+
+  private syncRepeatModeFromStore(isRepeating: RepeatTypes) {
+    // Convert store's RepeatTypes to AudioPlayer's repeat mode format
+    const newMode = isRepeating === 'repeat-1' ? 'one' : isRepeating === 'repeat' ? 'all' : 'off';
+    if (this.repeatMode !== newMode) {
+      this.repeatMode = newMode;
+    }
   }
 
   // ========== PUBLIC PLAYBACK CONTROLS ==========
@@ -289,6 +351,23 @@ class AudioPlayer extends EventEmitter {
   }
 
   /**
+   * Toggles playback between play and pause.
+   * @param forcePlay - If true, always play; if false, always pause; if undefined, toggle
+   * @returns Promise that resolves when fade completes
+   */
+  async togglePlayback(forcePlay?: boolean): Promise<void> {
+    const shouldPlay = forcePlay !== undefined ? forcePlay : this.audio.paused;
+
+    if (shouldPlay) {
+      if (this.audio.readyState > 0) {
+        await this.play();
+      }
+    } else {
+      await this.pause();
+    }
+  }
+
+  /**
    * Seeks to a specific time position in the current song.
    * @param time - Time in seconds to seek to
    */
@@ -296,11 +375,122 @@ class AudioPlayer extends EventEmitter {
     this.audio.currentTime = time;
   }
 
+  /**
+   * Loads and optionally plays a song by ID.
+   * This is the public API for loading songs - handles store updates, localStorage, and analytics.
+   * @param songId - The ID of the song to load
+   * @param options - Configuration options
+   * @returns Promise that resolves when song is loaded and optionally playing
+   */
+  async playSongById(
+    songId: string,
+    options: {
+      autoPlay?: boolean;
+      recordListening?: boolean;
+      onError?: (error: unknown) => void;
+    } = {}
+  ): Promise<void> {
+    const { autoPlay = true, recordListening = true, onError } = options;
+
+    try {
+      console.log('[AudioPlayer.playSongById]', { songId, autoPlay });
+
+      // Load song with store updates
+      await this.loadSong(songId, { autoPlay, updateStore: true });
+
+      // Record listening data if requested
+      if (recordListening) {
+        const songData = await window.api.audioLibraryControls.getSong(songId);
+        // Note: Listening data recording will be handled by the hook until fully migrated
+        this.emit('recordListening', { songId, duration: songData.duration });
+      }
+    } catch (error) {
+      if (onError) {
+        onError(error);
+      } else {
+        throw error;
+      }
+    }
+  }
+
   // ========== QUEUE NAVIGATION ==========
+
+  /**
+   * Skips forward to the next song in the queue.
+   * Handles repeat modes and automatically loads/plays the next song.
+   * @param reason - Why the skip occurred ('USER_SKIP' or 'PLAYER_SKIP')
+   */
+  async skipForward(reason: SongSkipReason = 'USER_SKIP'): Promise<void> {
+    console.log('[AudioPlayer.skipForward]', {
+      reason,
+      position: this.queue.position,
+      hasNext: this.queue.hasNext,
+      repeatMode: this.repeatMode
+    });
+
+    // Handle repeat-one mode (only auto-repeat, not on user skip)
+    if (this.repeatMode === 'one' && reason !== 'USER_SKIP') {
+      this.audio.currentTime = 0;
+      await this.play();
+
+      // Emit event for listening data recording (repetition)
+      if (store.state.currentSongData?.songId) {
+        this.emit('repeatSong', {
+          songId: store.state.currentSongData.songId,
+          duration: store.state.currentSongData.duration
+        });
+      }
+      return;
+    }
+
+    // Move to next song or restart queue if repeat-all
+    if (this.queue.hasNext) {
+      this.queue.moveToNext();
+      console.log('[AudioPlayer.skipForward.moved]', { position: this.queue.position });
+    } else if (this.repeatMode === 'all' && this.queue.length > 0) {
+      this.queue.moveToStart();
+    } else if (this.queue.isEmpty) {
+      console.log('[AudioPlayer.skipForward] Queue is empty.');
+    }
+    // else: at end without repeat, do nothing (song ends)
+  }
+
+  /**
+   * Skips backward to the previous song or restarts current song.
+   * If current time > 5 seconds, restarts current song.
+   * Otherwise, moves to previous song in queue.
+   */
+  skipBackward(): void {
+    console.log('[AudioPlayer.skipBackward]', {
+      currentTime: this.audio.currentTime,
+      position: this.queue.position,
+      hasPrevious: this.queue.hasPrevious
+    });
+
+    // If more than 5 seconds into song, restart it
+    if (this.audio.currentTime > 5) {
+      this.audio.currentTime = 0;
+      return;
+    }
+
+    // Move to previous song if available
+    if (this.queue.currentSongId !== null) {
+      if (this.queue.hasPrevious) {
+        this.queue.moveToPrevious();
+      } else {
+        // At first song, restart it
+        this.queue.moveToStart();
+      }
+    } else if (this.queue.length > 0) {
+      // No current song but queue has songs, play first
+      this.queue.moveToStart();
+    }
+  }
 
   /**
    * Plays the next song in the queue.
    * Delegates to queue's moveToNext() which triggers song loading.
+   * @deprecated Use skipForward() instead for better control
    */
   playNext() {
     if (this.queue.hasNext) {
@@ -311,6 +501,7 @@ class AudioPlayer extends EventEmitter {
   /**
    * Plays the previous song in the queue.
    * Delegates to queue's moveToPrevious() which triggers song loading.
+   * @deprecated Use skipBackward() instead for better control
    */
   playPrevious() {
     if (this.queue.hasPrevious) {
@@ -323,7 +514,11 @@ class AudioPlayer extends EventEmitter {
    * @param position - The queue position (0-indexed)
    */
   playSongAtPosition(position: number) {
-    this.queue.moveToPosition(position);
+    const moved = this.queue.moveToPosition(position);
+    if (!moved) {
+      console.error('[AudioPlayer.playSongAtPosition] Failed to move to position:', position);
+    }
+    // Song will be auto-loaded via queue's positionChange event
   }
 
   // ========== REPEAT MODE MANAGEMENT ==========

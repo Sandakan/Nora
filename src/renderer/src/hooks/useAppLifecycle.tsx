@@ -3,14 +3,16 @@ import { dispatch, store } from '../store/store';
 import PlayerQueue from '@renderer/other/playerQueue';
 import storage from '../utils/localStorage';
 
+import type AudioPlayer from '../other/player';
+
 /**
  * Dependencies required by the app lifecycle hook
  */
 export interface AppLifecycleDependencies {
   /**
-   * HTMLAudioElement instance for playback control
+   * AudioPlayer instance or HTMLAudioElement for playback control
    */
-  audio: HTMLAudioElement;
+  audio: AudioPlayer | HTMLAudioElement;
 
   /**
    * PlayerQueue instance for queue management
@@ -129,7 +131,7 @@ export interface AppLifecycleDependencies {
  */
 export function useAppLifecycle(dependencies: AppLifecycleDependencies): void {
   const {
-    audio: player,
+    audio: playerInstance,
     playerQueue,
     toggleShuffling,
     toggleRepeat,
@@ -144,6 +146,12 @@ export function useAppLifecycle(dependencies: AppLifecycleDependencies): void {
     refStartPlay,
     windowManagement
   } = dependencies;
+
+  // Extract audio element from AudioPlayer or use HTMLAudioElement directly
+  const player =
+    playerInstance instanceof HTMLAudioElement
+      ? playerInstance
+      : (playerInstance as AudioPlayer).audio;
 
   useEffect(() => {
     // LOCAL STORAGE
@@ -225,15 +233,8 @@ export function useAppLifecycle(dependencies: AppLifecycleDependencies): void {
 
   // Setup player queue event listeners
   useEffect(() => {
-    // Sync to localStorage on any queue change
-    const unsubscribeQueueChange = playerQueue.on('queueChange', () => {
-      storage.queue.setQueue(playerQueue);
-    });
-
-    // Sync to localStorage on position change
-    const unsubscribePositionChange = playerQueue.on('positionChange', () => {
-      storage.queue.setQueue(playerQueue);
-    });
+    // Note: localStorage queue persistence is now handled by queueSingleton.ts
+    // to avoid duplicate writes on every queue/position change
 
     // Update up next song when position changes
     const unsubscribeUpNext = playerQueue.on('positionChange', async () => {
@@ -252,8 +253,6 @@ export function useAppLifecycle(dependencies: AppLifecycleDependencies): void {
 
     // Cleanup
     return () => {
-      unsubscribeQueueChange();
-      unsubscribePositionChange();
       unsubscribeUpNext();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -296,7 +295,7 @@ export function useAppLifecycle(dependencies: AppLifecycleDependencies): void {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [managePlaybackErrors]);
 
-  // Setup player lifecycle event listeners for canplay, ended, and title bar updates
+  // Setup player lifecycle event listeners for canplay and title bar updates
   useEffect(() => {
     const displayDefaultTitleBar = () => {
       windowManagement.resetTitleBarInfo();
@@ -305,17 +304,16 @@ export function useAppLifecycle(dependencies: AppLifecycleDependencies): void {
     const playSongIfPlayable = () => {
       if (refStartPlay.current) toggleSongPlayback(true);
     };
-    const handleSkipForwardClickWithParams = () => handleSkipForwardClick('PLAYER_SKIP');
+    // Note: 'ended' event is now handled entirely by AudioPlayer.handleSongEnd()
+    // which automatically moves to the next song and resumes playback
 
     player.addEventListener('canplay', playSongIfPlayable);
-    player.addEventListener('ended', handleSkipForwardClickWithParams);
     player.addEventListener('play', windowManagement.addSongTitleToTitleBar);
     player.addEventListener('pause', displayDefaultTitleBar);
 
     return () => {
       toggleSongPlayback(false);
       player.removeEventListener('canplay', playSongIfPlayable);
-      player.removeEventListener('ended', handleSkipForwardClickWithParams);
       player.removeEventListener('play', windowManagement.addSongTitleToTitleBar);
       player.removeEventListener('pause', displayDefaultTitleBar);
     };

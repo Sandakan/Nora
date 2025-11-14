@@ -1,4 +1,6 @@
 import { Store } from '@tanstack/store';
+import { cloneDeep } from 'es-toolkit/object';
+
 import {
   type AppReducerStateActions,
   DEFAULT_REDUCER_DATA,
@@ -35,6 +37,6 @@ store.subscribe((state) => {
   // );
 
   if (window.api.properties.isInDevelopment) {
-    console.debug('store state changed:', state.currentVal);
+    console.debug('store state changed:', cloneDeep(state.currentVal));
   }
 });

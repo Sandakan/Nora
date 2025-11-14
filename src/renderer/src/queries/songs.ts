@@ -33,7 +33,8 @@ export const songQuery = createQueryKeys('songs', {
     const { songIds, sortType, filterType } = data;
     return {
       queryKey: [
-        `songIds=${songIds.sort().join(',')}`,
+        // Do NOT mutate the incoming array; copy before sort for cache key stability
+        `songIds=${[...songIds].sort().join(',')}`,
         `sortType=${sortType}`,
         `filterType=${filterType}`
       ],
@@ -49,7 +50,8 @@ export const songQuery = createQueryKeys('songs', {
     queryFn: () => window.api.audioLibraryControls.getSimilarTracksForASong(data.songId)
   }),
   queue: (songIds: string[]) => ({
-    queryKey: [`songIds=${songIds.sort().join(',')}`],
+    // Avoid mutating the provided queue array when building the cache key
+    queryKey: [`songIds=${[...songIds].sort().join(',')}`],
     queryFn: () =>
       window.api.audioLibraryControls.getSongInfo(songIds, 'addedOrder', undefined, undefined, true)
   }),

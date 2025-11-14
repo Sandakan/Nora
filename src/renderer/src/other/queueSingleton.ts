@@ -53,8 +53,15 @@ function setupQueueStoreSync(queue: PlayerQueue) {
 
   // 1. Queue → Store: When queue changes, update store
   queue.on('queueChange', () => {
+    console.log('[queueSingleton.queueChange]', {
+      queueLength: queue.length,
+      isSyncingFromStore
+    });
+
     // Skip if we're syncing from store (prevents infinite loop)
-    if (isSyncingFromStore) return;
+    if (isSyncingFromStore) {
+      return;
+    }
 
     store.setState((state) => ({
       ...state,
@@ -74,8 +81,15 @@ function setupQueueStoreSync(queue: PlayerQueue) {
   });
 
   queue.on('positionChange', () => {
+    console.log('[queueSingleton.positionChange]', {
+      position: queue.position,
+      isSyncingFromStore
+    });
+
     // Skip if we're syncing from store (prevents infinite loop)
-    if (isSyncingFromStore) return;
+    if (isSyncingFromStore) {
+      return;
+    }
 
     store.setState((state) => ({
       ...state,

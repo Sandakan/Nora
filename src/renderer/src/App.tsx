@@ -141,7 +141,7 @@ export default function App() {
     updateCurrentSongPlaybackState,
     refStartPlay
   } = usePlayerControl(
-    audio,
+    player, // Pass AudioPlayer instance instead of audio element
     playerQueue,
     recordListeningData,
     managePlaybackErrors,
@@ -153,7 +153,7 @@ export default function App() {
   // Player navigation hook handles skip forward/backward and queue navigation
   // Songs are auto-loaded by AudioPlayer on queue position changes
   const { changeQueueCurrentSongIndex, handleSkipBackwardClick, handleSkipForwardClick } =
-    usePlayerNavigation(audio, playerQueue, toggleSongPlayback, recordListeningData);
+    usePlayerNavigation(player, playerQueue, toggleSongPlayback, recordListeningData);
 
   // ? INITIALIZE APP UPDATES
   // App updates hook handles checking for updates and showing release notes
@@ -234,7 +234,7 @@ export default function App() {
   // Must be called after all dependencies are defined
   // This hook now manages all player event listeners, IPC controls, and lifecycle events
   useAppLifecycle({
-    audio,
+    audio: player, // Pass AudioPlayer instance
     playerQueue,
     toggleShuffling,
     toggleRepeat,

@@ -62,7 +62,7 @@ function FavoritesPlaylistInfoPage() {
       const queueSongIds = favoriteSongs
         .filter((song) => !song.isBlacklisted)
         .map((song) => song.songId);
-      createQueue(queueSongIds, 'playlist', false, 'favorites', false);
+      createQueue(queueSongIds, 'favorites', false, '', false);
       playSong(currSongId, true);
     },
     [createQueue, playSong, favoriteSongs]
@@ -116,9 +116,9 @@ function FavoritesPlaylistInfoPage() {
     () =>
       createQueue(
         favoriteSongs.filter((song) => !song.isBlacklisted).map((song) => song.songId),
-        'playlist',
-        true,
         'favorites',
+        true,
+        '',
         true
       ),
     [createQueue, favoriteSongs]
@@ -128,9 +128,9 @@ function FavoritesPlaylistInfoPage() {
     () =>
       createQueue(
         favoriteSongs.filter((song) => !song.isBlacklisted).map((song) => song.songId),
-        'songs',
-        false,
         'favorites',
+        false,
+        '',
         true
       ),
     [createQueue, favoriteSongs]

@@ -4,6 +4,7 @@ import { dispatch, store } from '../store/store';
 import storage from '../utils/localStorage';
 import log from '../utils/log';
 import type PlayerQueue from '../other/playerQueue';
+import type AudioPlayer from '../other/player';
 
 const ErrorPrompt = lazy(() => import('../components/ErrorPrompt'));
 const SongUnplayableErrorPrompt = lazy(() => import('../components/SongUnplayableErrorPrompt'));
@@ -42,7 +43,7 @@ const SongUnplayableErrorPrompt = lazy(() => import('../components/SongUnplayabl
  * ```
  */
 export function usePlayerControl(
-  player: HTMLAudioElement,
+  playerInstance: AudioPlayer | HTMLAudioElement,
   playerQueue: PlayerQueue,
   recordListeningData: (
     songId: string,
@@ -61,31 +62,43 @@ export function usePlayerControl(
   const { t } = useTranslation();
   const refStartPlay = useRef(false);
 
+  // Support both AudioPlayer instance and HTMLAudioElement for backward compatibility
+  const player =
+    playerInstance instanceof HTMLAudioElement
+      ? playerInstance
+      : (playerInstance as AudioPlayer).audio;
+  const audioPlayer =
+    playerInstance instanceof HTMLAudioElement ? null : (playerInstance as AudioPlayer);
+
   const toggleSongPlayback = useCallback(
     (startPlay?: boolean) => {
       if (store.state.currentSongData?.songId) {
+        // Use AudioPlayer's togglePlayback if available
+        if (audioPlayer) {
+          return audioPlayer.togglePlayback(startPlay).catch((err) => managePlaybackErrors(err));
+        }
+
+        // Fallback to direct audio element control
         if (typeof startPlay !== 'boolean' || startPlay === player.paused) {
           if (player.readyState > 0) {
             if (player.paused) {
-              player
+              return player
                 .play()
                 .then(() => {
                   const playbackChange = new CustomEvent('player/playbackChange');
                   return player.dispatchEvent(playbackChange);
                 })
                 .catch((err) => managePlaybackErrors(err));
-              return player.play();
             }
             if (player.ended) {
               player.currentTime = 0;
-              player
+              return player
                 .play()
                 .then(() => {
                   const playbackChange = new CustomEvent('player/playbackChange');
                   return player.dispatchEvent(playbackChange);
                 })
                 .catch((err) => managePlaybackErrors(err));
-              return player.play();
             }
             const playbackChange = new CustomEvent('player/playbackChange');
             player.dispatchEvent(playbackChange);
@@ -108,7 +121,8 @@ export function usePlayerControl(
 
   const playSong = useCallback(
     (songId: string, isStartPlay = true, playAsCurrentSongIndex = false) => {
-      console.log(playAsCurrentSongIndex);
+      console.log('[playSong]', { songId, isStartPlay, playAsCurrentSongIndex });
+
       if (typeof songId === 'string') {
         console.time('timeForSongFetch');
 
@@ -117,13 +131,19 @@ export function usePlayerControl(
           .then((songData) => {
             console.timeEnd('timeForSongFetch');
             if (songData) {
-              console.log('playSong', songId, songData.path);
+              console.log('[playSong.received]', {
+                songId,
+                title: songData.title,
+                path: songData.path
+              });
 
               dispatch({ type: 'CURRENT_SONG_DATA_CHANGE', data: songData });
 
               storage.playback.setCurrentSongOptions('songId', songData.songId);
 
-              player.src = `${songData.path}?ts=${Date.now()}`;
+              const newSrc = `${songData.path}?ts=${Date.now()}`;
+              console.log('[playSong.src]', { src: newSrc });
+              player.src = newSrc;
 
               const trackChangeEvent = new CustomEvent('player/trackchange', {
                 detail: songId
@@ -132,7 +152,10 @@ export function usePlayerControl(
 
               refStartPlay.current = isStartPlay;
 
-              if (isStartPlay) toggleSongPlayback();
+              if (isStartPlay) {
+                console.log('[playSong.autoStart]', { isStartPlay: true });
+                toggleSongPlayback();
+              }
 
               // Dynamic theme is now handled automatically by useDynamicTheme hook
 

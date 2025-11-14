@@ -345,7 +345,15 @@ declare global {
     songId: string;
   }
 
-  type QueueTypes = 'album' | 'playlist' | 'artist' | 'songs' | 'genre' | 'folder';
+  type QueueTypes =
+    | 'album'
+    | 'playlist'
+    | 'artist'
+    | 'songs'
+    | 'genre'
+    | 'folder'
+    | 'favorites'
+    | 'history';
 
   interface QueueInfo {
     artworkPath: string;
