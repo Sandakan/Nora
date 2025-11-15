@@ -34,16 +34,17 @@ jobs:
         with:
           node-version: 'lts/*'
           check-latest: true
-          cache: 'npm'
-          package-manager-cache: true
+          package-manager-cache: false
 
       - name: Install Dependencies
-        run: npm ci --no-fund --no-audit --include=optional
-
-      - name: Install correct Sharp Dependencies
         run: |
-          npm remove sharp
-          npm install --cpu=wasm32 sharp --no-fund --no-audit --include=optional
+          npm ci --no-fund --no-audit --include=optional
+          npm rebuild rollup
+
+      # - name: Install correct Sharp Dependencies
+      #   run: |
+      #     npm remove sharp
+      #     npm install --cpu=wasm32 sharp --no-fund --no-audit --include=optional
 
       - name: build-linux
         if: matrix.os == 'ubuntu-latest'
