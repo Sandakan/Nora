@@ -179,19 +179,28 @@ class AudioPlayer extends EventEmitter {
       // Set audio source with cache-busting timestamp
       this.audio.src = `${songData.path}?ts=${Date.now()}`;
 
-      // Set up one-time auto-play listener if requested
-      if (options?.autoPlay) {
-        const autoPlayHandler = () => {
-          this.play().catch((err) =>
-            console.error('[AudioPlayer] Auto-play on canplay failed:', err)
-          );
-          this.audio.removeEventListener('canplay', autoPlayHandler);
-        };
-        this.audio.addEventListener('canplay', autoPlayHandler);
-      }
-
       // Load is synchronous, no need to await
       this.audio.load();
+
+      // Set up auto-play if requested
+      if (options?.autoPlay) {
+        // Check if audio is already ready to play (cached/buffered)
+        if (this.audio.readyState >= 3) {
+          // HAVE_FUTURE_DATA or HAVE_ENOUGH_DATA - ready to play
+          this.play().catch((err) =>
+            console.error('[AudioPlayer] Immediate auto-play failed:', err)
+          );
+        } else {
+          // Wait for canplay event
+          const autoPlayHandler = () => {
+            this.play().catch((err) =>
+              console.error('[AudioPlayer] Auto-play on canplay failed:', err)
+            );
+            this.audio.removeEventListener('canplay', autoPlayHandler);
+          };
+          this.audio.addEventListener('canplay', autoPlayHandler);
+        }
+      }
 
       // Dispatch custom track change event
       const trackChangeEvent = new CustomEvent('player/trackchange', { detail: songData.songId });
@@ -454,9 +463,11 @@ class AudioPlayer extends EventEmitter {
 
     // Move to next song or restart queue if repeat-all
     if (this.queue.hasNext) {
+      this.pendingAutoPlay = true; // Auto-play next song on manual skip
       this.queue.moveToNext();
       console.log('[AudioPlayer.skipForward.moved]', { position: this.queue.position });
     } else if (this.repeatMode === 'all' && this.queue.length > 0) {
+      this.pendingAutoPlay = true; // Auto-play when restarting queue
       this.queue.moveToStart();
     } else if (this.queue.isEmpty) {
       console.log('[AudioPlayer.skipForward] Queue is empty.');
@@ -485,13 +496,16 @@ class AudioPlayer extends EventEmitter {
     // Move to previous song if available
     if (this.queue.currentSongId !== null) {
       if (this.queue.hasPrevious) {
+        this.pendingAutoPlay = true; // Auto-play previous song on manual skip
         this.queue.moveToPrevious();
       } else {
         // At first song, restart it
+        this.pendingAutoPlay = true;
         this.queue.moveToStart();
       }
     } else if (this.queue.length > 0) {
       // No current song but queue has songs, play first
+      this.pendingAutoPlay = true;
       this.queue.moveToStart();
     }
   }
@@ -523,6 +537,7 @@ class AudioPlayer extends EventEmitter {
    * @param position - The queue position (0-indexed)
    */
   playSongAtPosition(position: number) {
+    this.pendingAutoPlay = true; // Auto-play when manually selecting a position
     const moved = this.queue.moveToPosition(position);
     if (!moved) {
       console.error('[AudioPlayer.playSongAtPosition] Failed to move to position:', position);
