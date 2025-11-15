@@ -1,54 +1,114 @@
-import { isSongBlacklisted } from '../utils/isBlacklisted';
-import { getListeningData, getSongsData } from '../filesystem';
-import { getSongArtworkPath } from '../fs/resolveFilePaths';
+// import { getListeningData } from '../filesystem';
 import logger from '../logger';
-import sortSongs from '../utils/sortSongs';
-import paginateData from '../utils/paginateData';
-import { getSelectedPaletteData } from '../other/generatePalette';
-import filterSongs from '../utils/filterSongs';
+import { getAllSongs as getAllSavedSongs } from '@main/db/queries/songs';
+import { convertToSongData } from '../../common/convert';
+
+type SongArtwork = Awaited<
+  ReturnType<typeof getAllSavedSongs>
+>['data'][number]['artworks'][number]['artwork'];
+export const parsePaletteFromArtworks = (artworks: SongArtwork[]): PaletteData | undefined => {
+  const artworkWithPalette = artworks.find((artwork) => !!artwork.palette);
+
+  if (artworkWithPalette) {
+    const palette: PaletteData = { paletteId: String(artworkWithPalette.palette?.id) };
+
+    if (artworkWithPalette.palette && artworkWithPalette.palette.swatches.length > 0) {
+      for (const swatch of artworkWithPalette.palette.swatches) {
+        switch (swatch.swatchType) {
+          case 'DARK_VIBRANT':
+            palette.DarkVibrant = {
+              hex: swatch.hex,
+              population: swatch.population,
+              hsl: [swatch.hsl.h, swatch.hsl.s, swatch.hsl.l]
+            };
+            break;
+          case 'LIGHT_VIBRANT':
+            palette.LightVibrant = {
+              hex: swatch.hex,
+              population: swatch.population,
+              hsl: [swatch.hsl.h, swatch.hsl.s, swatch.hsl.l]
+            };
+            break;
+          case 'DARK_MUTED':
+            palette.DarkMuted = {
+              hex: swatch.hex,
+              population: swatch.population,
+              hsl: [swatch.hsl.h, swatch.hsl.s, swatch.hsl.l]
+            };
+            break;
+          case 'LIGHT_MUTED':
+            palette.LightMuted = {
+              hex: swatch.hex,
+              population: swatch.population,
+              hsl: [swatch.hsl.h, swatch.hsl.s, swatch.hsl.l]
+            };
+            break;
+          case 'MUTED':
+            palette.Muted = {
+              hex: swatch.hex,
+              population: swatch.population,
+              hsl: [swatch.hsl.h, swatch.hsl.s, swatch.hsl.l]
+            };
+            break;
+          case 'VIBRANT':
+            palette.Vibrant = {
+              hex: swatch.hex,
+              population: swatch.population,
+              hsl: [swatch.hsl.h, swatch.hsl.s, swatch.hsl.l]
+            };
+            break;
+        }
+      }
+    }
+
+    return palette;
+  }
+
+  return undefined;
+};
 
 const getAllSongs = async (
   sortType = 'aToZ' as SongSortTypes,
   filterType?: SongFilterTypes,
   paginatingData?: PaginatingData
 ) => {
-  const songsData = getSongsData();
-  const listeningData = getListeningData();
+  const songsData = await getAllSavedSongs({
+    start: paginatingData?.start ?? 0,
+    end: paginatingData?.end ?? 0,
+    filterType,
+    sortType
+  });
+  // const listeningData = getListeningData();
 
-  let result = paginateData([] as AudioInfo[], sortType, paginatingData);
+  const result: PaginatedResult<AudioInfo, SongSortTypes> = {
+    data: [],
+    total: 0,
+    sortType,
+    start: 0,
+    end: 0
+  };
 
-  if (songsData && songsData.length > 0) {
-    const audioData: AudioInfo[] = sortSongs(
-      filterSongs(songsData, filterType),
-      sortType,
-      listeningData
-    ).map((songInfo) => {
-      const isBlacklisted = isSongBlacklisted(songInfo.songId, songInfo.path);
+  if (songsData && songsData.data.length > 0) {
+    // const audioData = sortSongs(
+    //   filterSongs(songsData, filterType),
+    //   sortType,
+    //   undefined
+    //   // listeningData
+    // );
 
-      return {
-        title: songInfo.title,
-        artists: songInfo.artists,
-        album: songInfo.album,
-        duration: songInfo.duration,
-        artworkPaths: getSongArtworkPath(songInfo.songId, songInfo.isArtworkAvailable),
-        path: songInfo.path,
-        year: songInfo.year,
-        songId: songInfo.songId,
-        paletteData: getSelectedPaletteData(songInfo.paletteId),
-        addedDate: songInfo.addedDate,
-        isAFavorite: songInfo.isAFavorite,
-        isBlacklisted
-      } as AudioInfo;
-    });
+    result.data = songsData.data.map((song) => convertToSongData(song));
 
-    result = paginateData(audioData, sortType, paginatingData);
+    // result = paginateData(parsedData, sortType, paginatingData);
+    result.total = songsData.data.length;
+    result.start = songsData.start;
+    result.end = songsData.end;
   }
 
   logger.debug(`Sending data related to all the songs`, {
     sortType,
     filterType,
-    start: result.start,
-    end: result.end
+    start: songsData.start,
+    end: songsData.end
   });
   return result;
 };

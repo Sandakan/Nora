@@ -1,51 +1,50 @@
-import { getArtistsData } from '../filesystem';
-import { getArtistArtworkPath } from '../fs/resolveFilePaths';
+import { getAllArtists } from '@main/db/queries/artists';
 import logger from '../logger';
-import filterArtists from '../utils/filterArtists';
-import sortArtists from '../utils/sortArtists';
+import { convertToArtist } from '../../common/convert';
 
 const fetchArtistData = async (
   artistIdsOrNames: string[] = [],
   sortType?: ArtistSortTypes,
   filterType?: ArtistFilterTypes,
+  start = 0,
+  end = 0,
   limit = 0
-): Promise<Artist[]> => {
-  if (artistIdsOrNames) {
-    logger.debug(`Requested artists data`, {
-      artistIdsOrNamesCount: artistIdsOrNames.length,
-      sortType,
-      limit
-    });
-    const artists = getArtistsData();
-    if (artists.length > 0) {
-      let results: SavableArtist[] = [];
-      if (artistIdsOrNames.length === 0) results = artists;
-      else {
-        for (let x = 0; x < artistIdsOrNames.length; x += 1) {
-          for (let y = 0; y < artists.length; y += 1) {
-            if (
-              artistIdsOrNames[x] === artists[y].artistId ||
-              artistIdsOrNames[x] === artists[y].name
-            )
-              results.push(artists[y]);
-          }
-        }
-      }
+): Promise<PaginatedResult<Artist, ArtistSortTypes>> => {
+  const result: PaginatedResult<Artist, ArtistSortTypes> = {
+    data: [],
+    total: 0,
+    sortType,
+    start: 0,
+    end: 0
+  };
 
-      if (sortType || filterType)
-        results = sortArtists(filterArtists(results, filterType), sortType);
+  logger.debug(`Requested artists data`, {
+    artistIdsOrNamesCount: artistIdsOrNames.length,
+    sortType,
+    limit
+  });
+  const artists = await getAllArtists({
+    artistIds: artistIdsOrNames.map((id) => Number(id)).filter((id) => !isNaN(id)),
+    start,
+    end,
+    filterType,
+    sortType
+  });
 
-      const maxResults = limit || results.length;
+  const results: Artist[] = artists.data.map((artist) => convertToArtist(artist));
 
-      return results
-        .filter((_, index) => index < maxResults)
-        .map((x) => ({
-          ...x,
-          artworkPaths: getArtistArtworkPath(x.artworkName)
-        }));
-    }
-  }
-  return [];
+  result.data = results;
+  result.total = artists.data.length;
+  result.start = artists.start;
+  result.end = artists.end;
+
+  return {
+    data: results,
+    total: result.total,
+    start: result.start,
+    end: result.end,
+    sortType: result.sortType
+  } satisfies PaginatedResult<Artist, ArtistSortTypes>;
 };
 
 export default fetchArtistData;

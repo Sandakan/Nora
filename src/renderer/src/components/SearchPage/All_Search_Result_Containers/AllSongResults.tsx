@@ -6,17 +6,19 @@ import Song from '../../SongsPage/Song';
 import SecondaryContainer from '../../SecondaryContainer';
 import VirtualizedList from '../../VirtualizedList';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
-type Props = { songData: SongData[] };
+type Props = { songData: SongData[]; scrollTopOffset?: number };
 
 const AllSongResults = (prop: Props) => {
-  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
-  const preferences = useStore(store, (state) => state.localStorage.preferences);
+  const isSongIndexingEnabled = useStore(
+    store,
+    (state) => state.localStorage.preferences.isSongIndexingEnabled
+  );
 
   const { createQueue, playSong } = useContext(AppUpdateContext);
 
-  const { songData } = prop;
+  const { songData, scrollTopOffset = 0 } = prop;
 
   const selectAllHandler = useSelectAllHandler(songData, 'songs', 'songId');
 
@@ -33,7 +35,7 @@ const AllSongResults = (prop: Props) => {
 
   return (
     <SecondaryContainer
-      className="songs-container !mb-0 h-full flex-1"
+      className="songs-container mb-0! h-full flex-1"
       focusable
       onKeyDown={(e) => {
         if (e.ctrlKey && e.key === 'a') {
@@ -42,27 +44,32 @@ const AllSongResults = (prop: Props) => {
         }
       }}
     >
-      {songData && songData.length > 0 && (
-        <VirtualizedList
-          data={songData}
-          fixedItemHeight={60}
-          scrollTopOffset={currentlyActivePage.data?.scrollTopOffset}
-          itemContent={(index, song) => {
-            if (song)
-              return (
-                <Song
-                  key={index}
-                  index={index}
-                  isIndexingSongs={preferences?.isSongIndexingEnabled}
-                  onPlayClick={handleSongPlayBtnClick}
-                  selectAllHandler={selectAllHandler}
-                  {...song}
-                />
-              );
-            return <div>Bad Index</div>;
-          }}
-        />
-      )}
+      <VirtualizedList
+        data={songData}
+        fixedItemHeight={60}
+        scrollTopOffset={scrollTopOffset}
+        // onDebouncedScroll={(instance) => {
+        //   const offset = Math.floor(instance.scrollOffset || 0);
+
+        //   navigate({
+        //     replace: true,
+        //     search: (prev) => ({
+        //       ...prev,
+        //       scrollTopOffset: offset
+        //     })
+        //   });
+        // }}
+        itemContent={(index, dataItem) => (
+          <Song
+            key={dataItem.songId}
+            index={index}
+            isIndexingSongs={isSongIndexingEnabled}
+            onPlayClick={handleSongPlayBtnClick}
+            selectAllHandler={selectAllHandler}
+            {...dataItem}
+          />
+        )}
+      />
     </SecondaryContainer>
   );
 };

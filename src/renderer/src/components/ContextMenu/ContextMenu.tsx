@@ -3,7 +3,7 @@ import { memo, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } 
 import ContextMenuItem from './ContextMenuItem';
 import ContextMenuDataItem from './ContextMenuDataItem';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 const ContextMenu = memo(() => {
   const contextMenuData = useStore(store, (state) => state.contextMenuData);
@@ -80,11 +80,11 @@ const ContextMenu = memo(() => {
   );
   return (
     <div
-      className={`context-menu ${
-        isVisible ? 'scale-100 opacity-100' : 'invisible scale-75 opacity-0'
+      className={`context-menu invisible scale-75 opacity-0 ${
+        isVisible ? 'visible! scale-100! opacity-100!' : ''
       } ${
         !data && 'pt-2'
-      } absolute z-50 h-fit w-fit min-w-[15rem] origin-top-left overflow-hidden overflow-y-auto rounded-lg bg-context-menu-background/90 pb-1 pt-1 text-font-color-black shadow-[10px_0px_53px_0px_rgba(0,0,0,0.22)] backdrop-blur-md transition-[opacity,transform,visibility,width,height] dark:bg-dark-context-menu-background/90 dark:text-font-color-white`}
+      } bg-context-menu-background/90 text-font-color-black dark:bg-dark-context-menu-background/90 dark:text-font-color-white absolute z-50 h-fit w-fit min-w-[15rem] origin-top-left overflow-hidden overflow-y-auto rounded-lg pt-1 pb-1 shadow-[10px_0px_53px_0px_rgba(0,0,0,0.22)] backdrop-blur-md transition-[opacity,scale,transform,visibility,width,height]!`}
       onClick={(e) => e.stopPropagation()}
       style={{
         top: dimensions.positionY,

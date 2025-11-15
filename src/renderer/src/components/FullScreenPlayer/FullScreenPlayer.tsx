@@ -9,7 +9,7 @@ import LyricsContainer from './containers/LyricsContainer';
 import SongInfoContainer from './containers/SongInfoContainer';
 import SeekBarSlider from '../SeekBarSlider';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 // type Props = {};
 
@@ -52,19 +52,19 @@ const FullScreenPlayer = () =>
 
     return (
       <div
-        className={`full-screen-player dark relative !bg-dark-background-color-1 ${!isCurrentSongPlaying && 'paused'} ${
+        className={`full-screen-player dark bg-dark-background-color-1! relative ${!isCurrentSongPlaying && 'paused'} ${
           preferences?.isReducedMotion ? 'reduced-motion' : ''
         } grid !h-screen w-full grid-rows-[auto_1fr] overflow-y-hidden`}
       >
-        <div className="background-cover-img-container absolute left-0 top-0 h-full w-full">
+        <div className="background-cover-img-container absolute top-0 left-0 h-full w-full">
           <Img
             src={imgPath}
             fallbackSrc={DefaultSongCover}
             loading="eager"
             alt="Song Cover"
-            className={`h-full w-full object-cover shadow-lg blur-none !brightness-[.25] transition-[filter] delay-100 duration-200 ease-in-out ${isLyricsVisible ? '!blur-[2rem]' : '!blur-[2rem]'}`}
+            className={`h-full w-full object-cover shadow-lg blur-none brightness-[.25]! transition-[filter] delay-100 duration-200 ease-in-out ${isLyricsVisible ? 'blur-[2rem]!' : 'blur-[2rem]!'}`}
           />
-          {/* <div className="absolute inset-0 h-full w-full bg-gradient-to-r from-black/50 to-black/5"></div> */}
+          {/* <div className="absolute inset-0 h-full w-full bg-linear-to-r from-black/50 to-black/5"></div> */}
         </div>
         <TitleBar />
         <div
@@ -87,9 +87,9 @@ const FullScreenPlayer = () =>
             id="fullScreenPlayerSeekSlider"
             sliderOpacity={0.25}
             onSeek={(currentPosition) => setSongPos(currentPosition)}
-            className={`full-screen-player-seek-slider absolute h-fit w-full appearance-none bg-background-color-3/25 outline-none outline-1 outline-offset-1 transition-[width,height,transform] delay-200 ease-in-out before:absolute before:left-0 before:top-1/2 before:h-1 before:w-[var(--seek-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-background-color-3 before:backdrop-blur-lg before:transition-[width,height,transform] before:delay-200 before:ease-in-out before:content-[''] hover:before:h-3 focus-visible:!outline group-hover/fullScreenPlayer:-translate-y-8 group-hover/fullScreenPlayer:scale-x-95 ${
+            className={`full-screen-player-seek-slider bg-background-color-3/25 before:bg-background-color-3 absolute h-fit w-full appearance-none outline-hidden outline-offset-1 transition-[width,height,transform] delay-200 ease-in-out group-hover/fullScreenPlayer:-translate-y-8 group-hover/fullScreenPlayer:scale-x-95 before:absolute before:top-1/2 before:left-0 before:h-1 before:w-[var(--seek-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:backdrop-blur-lg before:transition-[width,height,transform] before:delay-200 before:ease-in-out before:content-[''] hover:before:h-3 focus-visible:!outline ${
               isMouseActive && 'peer-hover/songInfoContainer:before:h-3'
-            } ${!isCurrentSongPlaying && isLyricsVisible && '!-translate-y-8 !scale-x-95'}`}
+            } ${!isCurrentSongPlaying && isLyricsVisible && '-translate-y-8! scale-x-95!'}`}
           />
         </div>
       </div>

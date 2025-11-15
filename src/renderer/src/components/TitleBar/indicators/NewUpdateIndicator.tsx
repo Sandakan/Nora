@@ -4,7 +4,7 @@ import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 
 import Button from '../../Button';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 const ReleaseNotesPrompt = lazy(() => import('../../ReleaseNotesPrompt/ReleaseNotesPrompt'));
 
@@ -18,7 +18,7 @@ const NewUpdateIndicator = () => {
     <>
       {!(appUpdatesState === 'UNKNOWN') && (
         <Button
-          className={`new-update-indicator !mr-1 flex cursor-pointer items-center justify-center rounded-md !border-0 bg-background-color-2 !px-3 !py-1 text-center outline-1 outline-offset-1 transition-[background] hover:text-font-color-highlight focus-visible:!outline dark:bg-dark-background-color-2 dark:hover:text-dark-font-color-highlight ${
+          className={`new-update-indicator bg-background-color-2 hover:text-font-color-highlight dark:bg-dark-background-color-2 dark:hover:text-dark-font-color-highlight !mr-1 flex cursor-pointer items-center justify-center rounded-md !border-0 !px-3 !py-1 text-center outline-offset-1 transition-[background] focus-visible:!outline ${
             appUpdatesState === 'LATEST' && 'hidden'
           }`}
           iconClassName="material-icons-round-outlined"

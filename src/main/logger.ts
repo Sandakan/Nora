@@ -56,11 +56,11 @@ const getLogFilePath = () => {
 
 export const logFilePath = getLogFilePath();
 
-const DEFAULT_LOGGER_LEVEL = IS_DEVELOPMENT ? 'verbose' : 'debug';
+const DEFAULT_LOGGER_LEVEL = IS_DEVELOPMENT ? 'debug' : 'info';
 
 const transports = {
   console: new winston.transports.Console({
-    level: DEFAULT_LOGGER_LEVEL,
+    level: 'debug',
     format: winston.format.combine(
       winston.format.timestamp({
         format: 'YYYY-MM-DD hh:mm:ss.SSS A'
@@ -77,7 +77,6 @@ const transports = {
 };
 
 const log = winston.createLogger({
-  level: DEFAULT_LOGGER_LEVEL,
   transports: [transports.console, transports.file]
 });
 //   message: Error | string,
@@ -115,26 +114,40 @@ export const toggleVerboseLogs = (isEnabled: boolean) => {
   //   }
   // });
   if (isEnabled) {
-    transports.console.level = 'verbose';
-    transports.file.level = 'verbose';
+    transports.console.level = 'silly';
+    transports.file.level = 'silly';
   } else {
     transports.console.level = DEFAULT_LOGGER_LEVEL;
     transports.file.level = DEFAULT_LOGGER_LEVEL;
   }
 };
 
+// # NPM LOG LEVELS
+//   error: 0,
+//   warn: 1,
+//   info: 2,
+//   http: 3,
+//   verbose: 4,
+//   debug: 5,
+//   silly: 6
+
 const logger = {
   info: (message: string, data = {} as object) => {
     log.info(message, { process: 'MAIN', data });
   },
-  error: (message: string, data = {} as object) => {
-    log.error(message, { process: 'MAIN', data });
+  error: (message: string, data = {} as object, error?: unknown) => {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+
+    log.error(message, { process: 'MAIN', error: errorMessage, data });
   },
   warn: (message: string, data = {} as object) => {
     log.warn(message, { process: 'MAIN', data });
   },
   debug: (message: string, data = {} as object) => {
     log.debug(message, { process: 'MAIN', data });
+  },
+  silly: (message: string, data = {} as object) => {
+    log.silly(message, { process: 'MAIN', data });
   },
   verbose: (message: string, data = {} as object) => {
     log.verbose(message, { process: 'MAIN', data });

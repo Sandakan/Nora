@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import Button from '../Button';
 import { useStore } from '@tanstack/react-store';
-import { store } from '../../store';
+import { store } from '../../store/store';
 
 const WindowControlsContainer = () => {
   const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
@@ -12,7 +12,7 @@ const WindowControlsContainer = () => {
   const { t } = useTranslation();
 
   const close = useCallback(() => {
-    if (userData && userData.preferences.hideWindowOnClose) window.api.windowControls.hideApp();
+    if (userData && userData.hideWindowOnClose) window.api.windowControls.hideApp();
     else window.api.windowControls.closeApp();
   }, [userData]);
 
@@ -25,31 +25,31 @@ const WindowControlsContainer = () => {
       id="window-controls-container"
     >
       <Button
-        className={`minimize-btn !m-0 h-full !rounded-none !border-0 bg-transparent !px-3 text-xl outline-1 -outline-offset-2 transition-[background] ease-in-out hover:!bg-[hsla(0deg,0%,80%,0.5)] focus-visible:!outline dark:bg-transparent ${
-          bodyBackgroundImage && '!text-font-color-white'
+        className={`minimize-btn !m-0 h-full !rounded-none !border-0 bg-transparent !px-3 text-xl -outline-offset-2 transition-[background] ease-in-out hover:!bg-[hsla(0deg,0%,80%,0.5)] focus-visible:!outline dark:bg-transparent ${
+          bodyBackgroundImage && 'text-font-color-white!'
         } `}
         clickHandler={minimize}
         tooltipLabel={t('titleBar.minimize')}
         iconName="minimize"
-        iconClassName="h-fit text-xl !font-light transition-[background] ease-in-out"
+        iconClassName="h-fit text-xl font-light! transition-[background] ease-in-out"
       />
       <Button
-        className={`maximize-btn !m-0 h-full !rounded-none !border-0 bg-transparent !px-3 text-xl outline-1 -outline-offset-2 transition-[background] ease-in-out hover:!bg-[hsla(0deg,0%,80%,0.5)] focus-visible:!outline dark:bg-transparent ${
-          bodyBackgroundImage && '!text-font-color-white'
+        className={`maximize-btn !m-0 h-full !rounded-none !border-0 bg-transparent !px-3 text-xl -outline-offset-2 transition-[background] ease-in-out hover:!bg-[hsla(0deg,0%,80%,0.5)] focus-visible:!outline dark:bg-transparent ${
+          bodyBackgroundImage && 'text-font-color-white!'
         } `}
         clickHandler={maximize}
         tooltipLabel={t('titleBar.maximize')}
-        iconClassName="material-icons-round-outlined h-fit text-lg !font-light transition-[background] ease-in-out"
+        iconClassName="material-icons-round-outlined h-fit text-lg font-light! transition-[background] ease-in-out"
         iconName="crop_square"
       />
       <Button
-        className={`close-btn !m-0 h-full !rounded-none !border-0 bg-transparent !px-3 text-xl outline-1 -outline-offset-2 transition-[background] ease-in-out hover:!bg-font-color-crimson hover:!text-font-color-white focus-visible:!outline dark:bg-transparent ${
-          bodyBackgroundImage && '!text-font-color-white'
+        className={`close-btn hover:!bg-font-color-crimson hover:!text-font-color-white !m-0 h-full !rounded-none !border-0 bg-transparent !px-3 text-xl -outline-offset-2 transition-[background] ease-in-out focus-visible:!outline dark:bg-transparent ${
+          bodyBackgroundImage && 'text-font-color-white!'
         } `}
         clickHandler={close}
         tooltipLabel={t('titleBar.close')}
         iconName="close"
-        iconClassName="h-fit text-xl !font-light transition-[background] ease-in-out"
+        iconClassName="h-fit text-xl font-light! transition-[background] ease-in-out"
       />
     </div>
   );

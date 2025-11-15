@@ -1,12 +1,14 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import type { SimilarTracksOutput } from 'src/types/last_fm_similar_tracks_api';
 import UnAvailableTrack from './UnAvailableTrack';
 import TitleContainer from '../TitleContainer';
 import Song from '../SongsPage/Song';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
+import { useSuspenseQuery } from '@tanstack/react-query';
+import { songQuery } from '@renderer/queries/songs';
+import type { SimilarTracksOutput } from '../../../../types/last_fm_similar_tracks_api';
 
 type Props = { songId: string };
 
@@ -22,20 +24,12 @@ const SimilarTracksContainer = (props: Props) => {
 
   const { songId } = props;
 
-  const [similarTracks, setSimilarTracks] = useState<NonNullable<SimilarTracksOutput>>({
-    sortedAvailTracks: [],
-    sortedUnAvailTracks: []
+  const { data: similarTracks } = useSuspenseQuery({
+    ...songQuery.similarTracks({ songId }),
+    select: (data) => {
+      return data as NonNullable<SimilarTracksOutput>;
+    }
   });
-
-  useEffect(() => {
-    window.api.audioLibraryControls
-      .getSimilarTracksForASong(songId)
-      .then((res) => {
-        if (res) setSimilarTracks(res);
-        return undefined;
-      })
-      .catch((err) => console.log(err));
-  }, [songId]);
 
   const handleSongPlayBtnClick = useCallback(
     (startSongId?: string) => {
@@ -141,16 +135,16 @@ const SimilarTracksContainer = (props: Props) => {
                 label: t('common.play'),
                 clickHandler: () => handleSongPlayBtnClick(),
                 iconName: 'play_arrow',
-                className: '!bg-background-color-1/40 dark:!bg-dark-background-color-1/40'
+                className: 'bg-background-color-1/40! dark:bg-dark-background-color-1/40!'
               },
               {
                 label: t('common.playNextAll'),
                 clickHandler: addSongsToPlayNext,
                 iconName: 'shortcut',
-                className: '!bg-background-color-1/40 dark:!bg-dark-background-color-1/40'
+                className: 'bg-background-color-1/40! dark:bg-dark-background-color-1/40!'
               }
             ]}
-            titleClassName="!text-xl text-font-color-black !font-normal dark:text-font-color-white"
+            titleClassName="text-xl! text-font-color-black font-normal! dark:text-font-color-white"
             className={`title-container ${
               bodyBackgroundImage
                 ? 'text-font-color-white'
@@ -164,7 +158,7 @@ const SimilarTracksContainer = (props: Props) => {
         <>
           <TitleContainer
             title={t('songInfoPage.otherSimilarTracks')}
-            titleClassName="!text-xl text-font-color-black !font-normal dark:text-font-color-white"
+            titleClassName="text-xl! text-font-color-black font-normal! dark:text-font-color-white"
             className={`title-container ${
               bodyBackgroundImage
                 ? 'text-font-color-white'

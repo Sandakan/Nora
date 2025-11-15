@@ -59,21 +59,19 @@ const ListeningActivityBarGraph = (props: Props) => {
 
   const lastSixMonthsListeningActivity = useMemo(() => {
     if (listeningData) {
-      const listensData = listeningData.listens.map((listen) => listen.listens).flat();
+      const listensData = listeningData.playEvents;
+      const monthGroupedPlayEvents = Object.groupBy(listensData, (le) => {
+        const date = new Date(le.createdAt);
+        return date.getMonth();
+      });
+
       const monthsWithNames: { listens: number; month: string }[] = [];
 
       for (let i = 0; i < monthNames.length; i += 1) {
-        const listens = listensData
-          .map((x) => {
-            const [date, noOfListens] = x;
-            const month = new Date(date).getMonth();
-
-            if (i === month) return noOfListens;
-            return 0;
-          })
-          .reduce((prevValue, currValue) => prevValue + currValue, 0);
-
-        monthsWithNames.push({ listens, month: monthNames[i] });
+        monthsWithNames.push({
+          month: monthNames[i],
+          listens: monthGroupedPlayEvents[i]?.length ?? 0
+        });
       }
 
       const lastMonths = getLastNoOfMonths(
@@ -101,10 +99,10 @@ const ListeningActivityBarGraph = (props: Props) => {
 
   return (
     <div
-      className={`appear-from-bottom flex h-full min-h-[18rem] w-fit max-w-[60rem] flex-col rounded-md bg-background-color-2/70 py-2 text-center backdrop-blur-md dark:bg-dark-background-color-2/70 ${className}`}
+      className={`appear-from-bottom bg-background-color-2/70 dark:bg-dark-background-color-2/70 flex h-full min-h-[18rem] w-fit max-w-[60rem] flex-col rounded-md py-2 text-center backdrop-blur-md ${className}`}
       title="Bar graph about no of listens per day"
     >
-      <div className="px-2 pb-1 font-thin text-font-color dark:text-font-color-white">
+      <div className="text-font-color dark:text-font-color-white px-2 pb-1 font-thin">
         {t('songInfoPage.listeningActivityInLastMonths', {
           count: visibleNoOfMonths
         })}

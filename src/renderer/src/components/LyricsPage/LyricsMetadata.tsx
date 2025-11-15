@@ -17,7 +17,7 @@ const LyricsMetadata = (props: LyricsSourceProp) => {
   const { source, copyright, link, className, textClassName, isTranslated } = props;
   return (
     <div
-      className={`source-name mt-12 flex flex-col items-center justify-center gap-2 text-center text-[#ccc] ${className}`}
+      className={`source-name text-font-color-dimmed mt-12 flex flex-col items-center justify-center gap-2 text-center ${className}`}
     >
       {source !== 'IN_SONG_LYRICS' && (
         <div>
@@ -36,12 +36,12 @@ const LyricsMetadata = (props: LyricsSourceProp) => {
         </div>
       )}
       {copyright && (
-        <div className={`text-balance text-sm text-font-color-dimmed ${textClassName}`}>
+        <div className={`text-font-color-dimmed text-sm text-balance ${textClassName}`}>
           &copy; {copyright}
         </div>
       )}
       {isTranslated && (
-        <div className={`text-balance text-sm text-font-color-dimmed ${textClassName}`}>
+        <div className={`text-font-color-dimmed text-sm text-balance ${textClassName}`}>
           <Trans i18nKey="lyricsPage.lyricsTranslatedBy" />
         </div>
       )}

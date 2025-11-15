@@ -19,7 +19,7 @@
 //     <div
 //       className={`throttling-indicator group mr-1 flex cursor-pointer items-center justify-center rounded-md bg-background-color-2 px-3 py-1 text-center transition-[background] dark:bg-dark-background-color-2 ${
 //         !isAppThrottling &&
-//         'invisible hidden !transition-[visibility] delay-[2500ms] duration-150'
+//         'invisible hidden transition-[visibility]! delay-[2500ms] duration-150'
 //       }`}
 //       title="App is skipping some render cycles to improve performance. Do not edit lyrics when this icon is visible."
 //     >
