@@ -27,16 +27,17 @@ jobs:
 
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           node-version: 'lts/*'
           check-latest: true
+          cache: 'npm'
 
       - name: Install Dependencies
-        run: npm ci --include=optional
+        run: npm ci
 
       - name: Install correct Sharp Dependencies
         run: |
@@ -73,4 +74,3 @@ jobs:
             dist/*.blockmap
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
