@@ -1,21 +1,53 @@
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 /* eslint-disable jsx-a11y/no-noninteractive-tabindex */
+
+import { queryClient } from '@renderer/index';
+import { settingsMutation, settingsQuery } from '@renderer/queries/settings';
+import { store } from '@renderer/store/store';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { useStore } from '@tanstack/react-store';
 import { type KeyboardEvent, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import storage from '../../../utils/localStorage';
-
-import Img from '../../Img';
-
-import HomeImgLight from '../../../assets/images/webp/home-skeleton-light.webp';
 import HomeImgDark from '../../../assets/images/webp/home-skeleton-dark.webp';
+import HomeImgLight from '../../../assets/images/webp/home-skeleton-light.webp';
 import HomeImgLightDark from '../../../assets/images/webp/home-skeleton-light-dark.webp';
+import storage from '../../../utils/localStorage';
 import Checkbox from '../../Checkbox';
+import Img from '../../Img';
 import DynamicThemeSettings from './DynamicThemeSettings';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store/store';
 
 const ThemeSettings = () => {
-  const theme = useStore(store, (state) => state.userData.theme);
+  const { data: userSettings } = useQuery(settingsQuery.all);
+
+  const { mutate: changeAppTheme } = useMutation({
+    mutationKey: settingsMutation.changeAppTheme.mutationKey,
+    mutationFn: async (theme: AppTheme) => window.api.theme.changeAppTheme(theme),
+    // When mutate is called:
+    onMutate: async (theme) => {
+      await queryClient.cancelQueries({ queryKey: settingsQuery.all.queryKey });
+
+      const prevSettings = queryClient.getQueryData<typeof userSettings>(
+        settingsQuery.all.queryKey
+      );
+
+      const newSettings = {
+        ...prevSettings!,
+        isDarkMode:
+          theme === 'dark' ? true : theme === 'light' ? false : (prevSettings?.isDarkMode ?? false),
+        useSystemTheme: theme === 'system'
+      };
+      queryClient.setQueryData<typeof userSettings>(settingsQuery.all.queryKey, newSettings);
+
+      return { prevSettings, newSettings };
+    },
+    onError: (_, __, onMutateResult) =>
+      queryClient.setQueryData<typeof userSettings>(
+        settingsQuery.all.queryKey,
+        onMutateResult?.prevSettings
+      ),
+    onSettled: () => queryClient.invalidateQueries(settingsQuery.all)
+  });
+
   const currentSongPaletteData = useStore(store, (state) => state.currentSongData?.paletteData);
   const enableImageBasedDynamicThemes = useStore(
     store,
@@ -32,8 +64,11 @@ const ThemeSettings = () => {
     }
   }, []);
 
-  return theme ? (
-    <li className="main-container appearance-settings-container mb-16">
+  return userSettings ? (
+    <li
+      className="main-container appearance-settings-container mb-16"
+      id="appearance-settings-container"
+    >
       <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center text-2xl font-medium">
         <span className="material-icons-round-outlined mr-2">dark_mode</span>
         {t('settingsPage.appearance')}
@@ -46,8 +81,8 @@ const ThemeSettings = () => {
               htmlFor="lightThemeRadioBtn"
               tabIndex={0}
               className={`theme-change-radio-btn bg-background-color-2/75 hover:bg-background-color-2 dark:bg-dark-background-color-2/75 dark:hover:bg-dark-background-color-2 mb-2 flex cursor-pointer flex-col items-center rounded-md p-6 outline-offset-1 focus-within:outline-2 ${
-                !theme.useSystemTheme &&
-                !theme.isDarkMode &&
+                !userSettings.useSystemTheme &&
+                !userSettings.isDarkMode &&
                 'bg-background-color-3! dark:bg-dark-background-color-3!'
               }`}
               onKeyDown={focusInput}
@@ -58,8 +93,8 @@ const ThemeSettings = () => {
                 className="peer invisible absolute -left-[9999px] mr-4"
                 value="lightTheme"
                 id="lightThemeRadioBtn"
-                defaultChecked={!theme.useSystemTheme && !theme.isDarkMode}
-                onClick={() => window.api.theme.changeAppTheme('light')}
+                defaultChecked={!userSettings.useSystemTheme && !userSettings.isDarkMode}
+                onClick={() => changeAppTheme('light')}
               />
               <Img loading="eager" src={HomeImgLight} className="h-24 w-40 shadow-md" />
               <span className="peer-checked:text-font-color-black! dark:peer-checked:text-font-color-black! mt-4">
@@ -71,8 +106,8 @@ const ThemeSettings = () => {
               htmlFor="darkThemeRadioBtn"
               tabIndex={0}
               className={`theme-change-radio-btn bg-background-color-2/75 hover:bg-background-color-2 dark:bg-dark-background-color-2/75 dark:hover:bg-dark-background-color-2 mb-2 flex cursor-pointer flex-col items-center rounded-md p-6 outline-offset-1 focus-within:outline-2 ${
-                !theme.useSystemTheme &&
-                theme.isDarkMode &&
+                !userSettings.useSystemTheme &&
+                userSettings.isDarkMode &&
                 'bg-background-color-3! dark:bg-dark-background-color-3!'
               }`}
               onKeyDown={focusInput}
@@ -83,8 +118,8 @@ const ThemeSettings = () => {
                 className="peer invisible absolute -left-[9999px] mr-4"
                 value="darkTheme"
                 id="darkThemeRadioBtn"
-                defaultChecked={!theme.useSystemTheme && theme.isDarkMode}
-                onClick={() => window.api.theme.changeAppTheme('dark')}
+                defaultChecked={!userSettings.useSystemTheme && userSettings.isDarkMode}
+                onClick={() => changeAppTheme('dark')}
               />
               <Img loading="eager" src={HomeImgDark} className="h-24 w-40 shadow-md" />
               <span className="peer-checked:text-font-color-black! dark:peer-checked:text-font-color-black! mt-4">
@@ -96,7 +131,8 @@ const ThemeSettings = () => {
               htmlFor="systemThemeRadioBtn"
               tabIndex={0}
               className={`theme-change-radio-btn hover:bg-background-color bg-background-color-2/75 dark:bg-dark-background-color-2/75 dark:hover:bg-dark-background-color-2 mb-2 flex cursor-pointer flex-col items-center rounded-md p-6 outline-offset-1 focus-within:outline-2 ${
-                theme.useSystemTheme && 'bg-background-color-3! dark:bg-dark-background-color-3!'
+                userSettings.useSystemTheme &&
+                'bg-background-color-3! dark:bg-dark-background-color-3!'
               } `}
               onKeyDown={focusInput}
             >
@@ -106,8 +142,8 @@ const ThemeSettings = () => {
                 className="peer invisible absolute -left-[9999px] mr-4"
                 value="systemTheme"
                 id="systemThemeRadioBtn"
-                defaultChecked={theme.useSystemTheme}
-                onClick={() => window.api.theme.changeAppTheme('system')}
+                defaultChecked={userSettings.useSystemTheme}
+                onClick={() => changeAppTheme('system')}
               />
               <Img loading="eager" src={HomeImgLightDark} className="h-24 w-40 shadow-md" />
               <span className="peer-checked:text-font-color-black! dark:peer-checked:text-font-color-black! mt-4">

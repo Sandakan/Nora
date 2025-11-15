@@ -1,6 +1,9 @@
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 import Button from '@renderer/components/Button';
 import Img from '@renderer/components/Img';
 import MainContainer from '@renderer/components/MainContainer';
+import NavLink from '@renderer/components/NavLink';
 import SecondaryContainer from '@renderer/components/SecondaryContainer';
 import ListeningActivityBarGraph from '@renderer/components/SongInfoPage/ListeningActivityBarGraph';
 import SimilarTracksContainer from '@renderer/components/SongInfoPage/SimilarTracksContainer';
@@ -9,17 +12,26 @@ import SongStat from '@renderer/components/SongInfoPage/SongStat';
 import SongsWithFeaturingArtistsSuggestion from '@renderer/components/SongInfoPage/SongsWithFeaturingArtistSuggestion';
 import SongArtist from '@renderer/components/SongsPage/SongArtist';
 import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
+import { queryClient } from '@renderer/index';
+import { listenQuery } from '@renderer/queries/listens';
+import { songQuery } from '@renderer/queries/songs';
 import { store } from '@renderer/store/store';
 import calculateTimeFromSeconds from '@renderer/utils/calculateTimeFromSeconds';
-import log from '@renderer/utils/log';
 import { valueRounder } from '@renderer/utils/valueRounder';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 export const Route = createFileRoute('/main-player/songs/$songId')({
-  component: SongInfoPage
+  component: SongInfoPage,
+  loader: async (route) => {
+    const songId = route.params.songId;
+
+    await queryClient.ensureQueryData(listenQuery.single({ songId }));
+    await queryClient.ensureQueryData(songQuery.singleSongInfo({ songId }));
+  }
 });
 
 function SongInfoPage() {
@@ -27,12 +39,18 @@ function SongInfoPage() {
 
   const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
 
-  const { changeCurrentActivePage, updateBodyBackgroundImage, updateContextMenuData } =
+  const { updateBodyBackgroundImage, updateContextMenuData, updateSongPosition } =
     useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const [songInfo, setSongInfo] = useState<SongData>();
-  const [listeningData, setListeningData] = useState<SongListeningData>();
+  const { data: songInfo } = useSuspenseQuery({
+    ...songQuery.singleSongInfo({ songId }),
+    select: (data) => (Array.isArray(data) && data.length > 0 ? data[0] : undefined)
+  });
+  const { data: listeningData } = useSuspenseQuery({
+    ...listenQuery.single({ songId }),
+    select: (data) => data[0] ?? undefined
+  });
 
   const { currentMonth, currentYear } = useMemo(() => {
     const currentDate = new Date();
@@ -50,68 +68,69 @@ function SongInfoPage() {
     return timeString;
   }, [songInfo]);
 
-  const updateSongInfo = useCallback((callback: (prevData: SongData) => SongData) => {
-    setSongInfo((prevData) => {
-      if (prevData) {
-        const updatedSongData = callback(prevData);
-        return updatedSongData;
-      }
-      return prevData;
-    });
-  }, []);
-
-  const fetchSongInfo = useCallback(() => {
-    if (songId) {
-      console.time('fetchTime');
-
-      window.api.audioLibraryControls
-        .getSongInfo([songId])
-        .then((res) => {
-          console.log(`Time end : ${console.timeEnd('fetchTime')}`);
-          if (res && res.length > 0) {
-            if (res[0].isArtworkAvailable)
-              updateBodyBackgroundImage(true, res[0].artworkPaths?.artworkPath);
-            setSongInfo(res[0]);
-          }
-          return undefined;
-        })
-        .catch((err) => log(err));
-
-      window.api.audioLibraryControls
-        .getSongListeningData([songId])
-        .then((res) => {
-          if (res && res.length > 0) setListeningData(res[0]);
-          return undefined;
-        })
-        .catch((err) => log(err));
-    }
-  }, [songId, updateBodyBackgroundImage]);
-
   useEffect(() => {
-    fetchSongInfo();
-    const manageSongInfoUpdatesInSongInfoPage = (e: Event) => {
-      if ('detail' in e) {
-        const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
-        for (let i = 0; i < dataEvents.length; i += 1) {
-          const event = dataEvents[i];
-          if (
-            event.dataType === 'songs' ||
-            event.dataType === 'songs/listeningData' ||
-            event.dataType === 'songs/listeningData/fullSongListens' ||
-            event.dataType === 'songs/listeningData/inNoOfPlaylists' ||
-            event.dataType === 'songs/listeningData/listens' ||
-            event.dataType === 'songs/listeningData/skips' ||
-            event.dataType === 'songs/likes'
-          )
-            fetchSongInfo();
-        }
+    if (songInfo) {
+      if (songInfo.isArtworkAvailable) {
+        updateBodyBackgroundImage(true, songInfo.artworkPaths?.artworkPath);
       }
-    };
-    document.addEventListener('app/dataUpdates', manageSongInfoUpdatesInSongInfoPage);
-    return () => {
-      document.removeEventListener('app/dataUpdates', manageSongInfoUpdatesInSongInfoPage);
-    };
-  }, [fetchSongInfo]);
+    }
+  }, [songInfo, updateBodyBackgroundImage]);
+
+  // const updateSongInfo = useCallback((callback: (prevData: SongData) => SongData) => {
+  //   setSongInfo((prevData) => {
+  //     if (prevData) {
+  //       const updatedSongData = callback(prevData);
+  //       return updatedSongData;
+  //     }
+  //     return prevData;
+  //   });
+  // }, []);
+
+  // const fetchSongInfo = useCallback(() => {
+  //   if (songId) {
+  //     console.time('fetchTime');
+
+  //     window.api.audioLibraryControls
+  //       .getSongInfo([songId])
+  //       .then((res) => {
+  //         console.log(`Time end : ${console.timeEnd('fetchTime')}`);
+  //         if (res && res.length > 0) {
+  //           if (res[0].isArtworkAvailable)
+  //             updateBodyBackgroundImage(true, res[0].artworkPaths?.artworkPath);
+  //           setSongInfo(res[0]);
+  //         }
+  //         return undefined;
+  //       })
+  //       .catch((err) => log(err));
+  //   }
+  // }, [songId, updateBodyBackgroundImage]);
+
+  // useEffect(() => {
+  //   fetchSongInfo();
+  //   const manageSongInfoUpdatesInSongInfoPage = (e: Event) => {
+  //     if ('detail' in e) {
+  //       const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
+  //       for (let i = 0; i < dataEvents.length; i += 1) {
+  //         const event = dataEvents[i];
+  //         if (
+  //           event.dataType === 'songs' ||
+  //           event.dataType === 'songs/listeningData' ||
+  //           event.dataType === 'songs/listeningData/fullSongListens' ||
+  //           event.dataType === 'songs/listeningData/inNoOfPlaylists' ||
+  //           event.dataType === 'songs/listeningData/listens' ||
+  //           event.dataType === 'songs/listeningData/skips' ||
+  //           event.dataType === 'songs/likes'
+  //         )
+  //           fetchSongInfo();
+  //       }
+  //     }
+  //   };
+  //   document.addEventListener('app/dataUpdates', manageSongInfoUpdatesInSongInfoPage);
+  //   return () => {
+  //     document.removeEventListener('app/dataUpdates', manageSongInfoUpdatesInSongInfoPage);
+  //   };
+  // }, [fetchSongInfo]);
+
   const songArtists = useMemo(() => {
     const artists = songInfo?.artists;
     if (Array.isArray(artists) && artists.length > 0) {
@@ -145,30 +164,21 @@ function SongInfoPage() {
     let thisYearNoofListens = 0;
     let thisMonthNoOfListens = 0;
     if (listeningData) {
-      const { listens } = listeningData;
+      const { playEvents } = listeningData;
 
-      allTime = listens
-        .map((x) => x.listens)
-        .map((x) => x.map((y) => y[1]))
-        .flat(5)
-        .reduce((prevValue, currValue) => prevValue + (currValue || 0), 0);
+      allTime = playEvents.length;
 
-      for (let i = 0; i < listens.length; i += 1) {
-        if (listens[i].year === currentYear) {
-          thisYearNoofListens = listens[i].listens
-            .map((x) => x[1])
-            .flat(5)
-            .reduce((prevValue, currValue) => prevValue + (currValue || 0), 0);
+      thisYearNoofListens = playEvents.filter((pe) => {
+        const playEventDate = new Date(pe.createdAt);
+        return playEventDate.getFullYear() === currentYear;
+      }).length;
 
-          for (const listen of listens[i].listens) {
-            const [songDateNow, songListens] = listen;
-
-            const songMonth = new Date(songDateNow).getMonth();
-            if (songMonth === currentMonth) thisMonthNoOfListens += songListens;
-          }
-          console.log('thisMonth', thisMonthNoOfListens);
-        }
-      }
+      thisMonthNoOfListens = playEvents.filter((pe) => {
+        const playEventDate = new Date(pe.createdAt);
+        return (
+          playEventDate.getFullYear() === currentYear && playEventDate.getMonth() === currentMonth
+        );
+      }).length;
     }
     return {
       allTimeListens: allTime,
@@ -180,17 +190,43 @@ function SongInfoPage() {
   const { totalSongFullListens, totalSongSkips, maxSongSeekPosition, maxSongSeekFrequency } =
     useMemo(() => {
       if (listeningData) {
-        const { fullListens = 0, skips = 0, seeks = [] } = listeningData;
+        const { playEvents, skipEvents, seekEvents } = listeningData;
 
-        const sortedSeeks = seeks.sort((a, b) =>
-          a.seeks > b.seeks ? 1 : a.seeks < b.seeks ? -1 : 0
+        const groupedSeeks = Object.groupBy(seekEvents, (seek) =>
+          parseFloat(seek.position).toFixed(2)
         );
-        const maxSeekPosition = sortedSeeks.at(0)?.position;
-        const maxSeekFrequency = sortedSeeks.at(0)?.seeks;
+
+        // find the seek group with the most seeks
+        let groupWithMostSeeks: { position: string; seeks: typeof seekEvents } | null = null;
+        for (const group in groupedSeeks) {
+          if (
+            groupWithMostSeeks === null ||
+            groupedSeeks[group]!.length > groupWithMostSeeks.seeks.length
+          ) {
+            groupWithMostSeeks = { position: group, seeks: groupedSeeks[group]! };
+          }
+        }
+
+        const totalFullListens = playEvents.filter((pe) => {
+          const playbackPercentage = parseFloat(pe.playbackPercentage);
+          return playbackPercentage > 0.99;
+        }).length;
+
+        const totalSkips = skipEvents.length;
+
+        if (!groupWithMostSeeks) {
+          return {
+            totalSongFullListens: valueRounder(totalFullListens),
+            totalSongSkips: valueRounder(totalSkips)
+          };
+        }
+
+        const maxSeekPosition = parseFloat(groupWithMostSeeks.position);
+        const maxSeekFrequency = groupWithMostSeeks.seeks.length;
 
         return {
-          totalSongFullListens: valueRounder(fullListens),
-          totalSongSkips: valueRounder(skips),
+          totalSongFullListens: valueRounder(totalFullListens),
+          totalSongSkips: valueRounder(totalSkips),
           maxSongSeekPosition: maxSeekPosition,
           maxSongSeekFrequency: maxSeekFrequency
         };
@@ -255,33 +291,30 @@ function SongInfoPage() {
             <div className="song-artists info-type-2 mb-1 flex items-center overflow-hidden text-base text-ellipsis whitespace-nowrap">
               {songArtists}
             </div>
-            <Button
-              className={`info-type-2 !mr-0 mb-5 !w-fit truncate !border-0 !p-0 ${
-                songInfo.album && 'hover:underline'
-              } ${bodyBackgroundImage && 'text-white!'}`}
-              label={songInfo.album ? songInfo.album.name : t('common.unknownAlbum')}
-              clickHandler={() => {
-                if (songInfo.album) {
-                  return changeCurrentActivePage('AlbumInfo', {
-                    albumId: songInfo.album.albumId
-                  });
-                }
-                return undefined;
-              }}
-            />
+
+            {songInfo.album && (
+              <NavLink
+                to="/main-player/albums/$albumId"
+                params={{ albumId: songInfo.album?.albumId! }}
+                className={`info-type-2 !mr-0 mb-5 !w-fit truncate !border-0 !p-0 ${
+                  songInfo.album && 'hover:underline'
+                } ${bodyBackgroundImage && 'text-white!'}`}
+              >
+                {songInfo.album ? songInfo.album.name : t('common.unknownAlbum')}
+              </NavLink>
+            )}
+
             <div
               className="info-type-3 mb-1 overflow-hidden text-sm text-ellipsis whitespace-nowrap"
               title={songDuration}
             >
               {songDuration}
             </div>
-
             {songInfo && songInfo.sampleRate && (
               <div className="info-type-3 mb-1 overflow-hidden text-sm text-ellipsis whitespace-nowrap">
                 {songInfo.sampleRate / 1000} KHZ
               </div>
             )}
-
             {songInfo && songInfo.bitrate && (
               <div className="info-type-3 mb-1 overflow-hidden text-sm text-ellipsis whitespace-nowrap">
                 {Math.floor(songInfo.bitrate / 1000)} Kbps
@@ -295,7 +328,8 @@ function SongInfoPage() {
           songTitle={songInfo.title}
           artistNames={songInfo.artists?.map((x) => x.name) || []}
           path={songInfo.path}
-          updateSongInfo={updateSongInfo}
+          // updateSongInfo={updateSongInfo}
+          updateSongInfo={() => {}}
         />
 
         <SecondaryContainer className="secondary-container song-stats-container mt-8 flex h-fit flex-row flex-wrap items-center justify-center rounded-2xl p-2">
@@ -344,7 +378,10 @@ function SongInfoPage() {
                     key={6}
                     title={t('songInfoPage.mostSoughtPosition')}
                     value={
-                      <span className="flex flex-col">
+                      <span
+                        className="flex flex-col"
+                        onClick={() => updateSongPosition(maxSongSeekPosition)}
+                      >
                         <span className="text-2xl">{maxSongSeekPosition.toFixed(1)}</span>
                         <span className="text-xs">
                           {t('time.second', {

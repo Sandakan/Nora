@@ -10,6 +10,7 @@ import { store } from '../../store/store';
 type Props = {
   albumTitle: string;
   otherAlbumData?: LastFMAlbumInfo;
+  biographyClassName?: string;
 };
 
 const OnlineAlbumInfoContainer = (props: Props) => {
@@ -51,6 +52,7 @@ const OnlineAlbumInfoContainer = (props: Props) => {
       )}
       <Biography
         bioUserName={title}
+        className={props.biographyClassName}
         bio={otherAlbumData?.wiki}
         tags={otherAlbumData?.tags}
         hyperlinkData={{

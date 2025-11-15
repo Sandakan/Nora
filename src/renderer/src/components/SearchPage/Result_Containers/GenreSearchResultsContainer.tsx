@@ -13,7 +13,7 @@ type Props = {
   genres: Genre[];
   searchInput: string;
   noOfVisibleGenres?: number;
-  isPredictiveSearchEnabled: boolean;
+  isSimilaritySearchEnabled: boolean;
 };
 
 const GenreSearchResultsContainer = (props: Props) => {
@@ -26,7 +26,7 @@ const GenreSearchResultsContainer = (props: Props) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const { genres, searchInput, noOfVisibleGenres = 3, isPredictiveSearchEnabled } = props;
+  const { genres, searchInput, noOfVisibleGenres = 3, isSimilaritySearchEnabled } = props;
 
   const selectAllHandler = useSelectAllHandler(genres, 'genre', 'genreId');
 
@@ -114,7 +114,7 @@ const GenreSearchResultsContainer = (props: Props) => {
                 clickHandler={() =>
                   navigate({
                     to: '/main-player/search/all',
-                    search: { keyword: searchInput, isPredictiveSearchEnabled, filterBy: 'Genres' }
+                    search: { keyword: searchInput, isSimilaritySearchEnabled, filterBy: 'Genres' }
                   })
                 }
               />

@@ -53,4 +53,3 @@ const EditingLyricWord = (props: Props) => {
 };
 
 export default EditingLyricWord;
-

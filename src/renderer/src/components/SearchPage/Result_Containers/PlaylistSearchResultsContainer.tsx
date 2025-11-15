@@ -13,11 +13,11 @@ type Props = {
   playlists: Playlist[];
   searchInput: string;
   noOfVisiblePlaylists?: number;
-  isPredictiveSearchEnabled: boolean;
+  isSimilaritySearchEnabled: boolean;
 };
 
 const PlaylistSearchResultsContainer = (props: Props) => {
-  const { playlists, searchInput, noOfVisiblePlaylists = 4, isPredictiveSearchEnabled } = props;
+  const { playlists, searchInput, noOfVisiblePlaylists = 4, isSimilaritySearchEnabled } = props;
   const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
   const isMultipleSelectionEnabled = useStore(
     store,
@@ -121,7 +121,7 @@ const PlaylistSearchResultsContainer = (props: Props) => {
                     to: '/main-player/search/all',
                     search: {
                       keyword: searchInput,
-                      isPredictiveSearchEnabled,
+                      isSimilaritySearchEnabled,
                       filterBy: 'Playlists'
                     }
                   })

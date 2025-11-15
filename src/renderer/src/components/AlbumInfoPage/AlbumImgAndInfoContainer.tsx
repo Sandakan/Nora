@@ -54,7 +54,7 @@ const AlbumImgAndInfoContainer = (props: Props) => {
               />
             )}{' '}
           </div>
-          {albumData.title && albumData.artists && albumData.artists.length > 0 && (
+          {albumData.title && albumData.artists && (
             <div className="album-info-container text-font-color-black dark:text-font-color-white max-w-[70%]">
               <div className="font-semibold tracking-wider uppercase opacity-50">
                 {t(`common.album_one`)}

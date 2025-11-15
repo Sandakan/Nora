@@ -8,8 +8,8 @@ import { type LyricData } from '../../LyricsEditingPage/LyricsEditingPage';
 import useNetworkConnectivity from '../../../hooks/useNetworkConnectivity';
 import parseLyrics from '../../../../../common/parseLyrics';
 import isLyricsSynced, { isLyricsEnhancedSynced } from '../../../../../common/isLyricsSynced';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store/store';
+import { useQuery } from '@tanstack/react-query';
+import { settingsQuery } from '@renderer/queries/settings';
 
 type CurrentLyricsTYpe = 'synced' | 'unsynced';
 
@@ -33,9 +33,9 @@ type Props = {
 };
 
 const SongLyricsEditorInput = (props: Props) => {
-  const userData = useStore(store, (state) => state.userData);
+  const { data: userData } = useQuery(settingsQuery.all);
 
-  const { addNewNotifications, changeCurrentActivePage } = useContext(AppUpdateContext);
+  const { addNewNotifications } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { isOnline } = useNetworkConnectivity();
@@ -190,21 +190,15 @@ const SongLyricsEditorInput = (props: Props) => {
         end: lyric.end
       }));
 
-      changeCurrentActivePage('LyricsEditor', {
-        lyrics: lines,
-        songId,
-        songTitle,
-        isEditingEnhancedSyncedLyrics: currentLyricsType === 'synced' && isLyricsEnhancedSynced
-      });
+      // TODO: Implement lyrics editor page navigation
+      // changeCurrentActivePage('LyricsEditor', {
+      //   lyrics: lines,
+      //   songId,
+      //   songTitle,
+      //   isEditingEnhancedSyncedLyrics: currentLyricsType === 'synced' && isLyricsEnhancedSynced
+      // });
     }
-  }, [
-    changeCurrentActivePage,
-    currentLyricsType,
-    songId,
-    songTitle,
-    synchronizedLyrics,
-    unsynchronizedLyrics
-  ]);
+  }, [currentLyricsType, songId, songTitle, synchronizedLyrics, unsynchronizedLyrics]);
 
   return (
     <div className="song-lyrics-editor-container col-span-2 grid w-[95%] grid-cols-[minmax(50%,65%)_1fr] gap-8">
@@ -331,11 +325,11 @@ const SongLyricsEditorInput = (props: Props) => {
           className="download-synced-lyrics-btn"
           iconClassName="mr-2"
           clickHandler={downloadSyncedLyrics}
-          isDisabled={!(isOnline && userData?.preferences.isMusixmatchLyricsEnabled)}
+          isDisabled={!(isOnline && userData?.isMusixmatchLyricsEnabled)}
           isVisible={currentLyricsType === 'synced'}
           tooltipLabel={
             isOnline
-              ? userData?.preferences.isMusixmatchLyricsEnabled
+              ? userData?.isMusixmatchLyricsEnabled
                 ? undefined
                 : t('songTagsEditingPage.musixmatchNotEnabled')
               : t('common.noInternet')

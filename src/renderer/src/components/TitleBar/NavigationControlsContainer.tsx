@@ -17,7 +17,6 @@ const NavigationControlsContainer = (props: Props) => {
   // const pageHistoryIndex = useStore(store, (state) => state.navigationHistory.pageHistoryIndex);
   // const noOfPagesInHistory = useStore(store, (state) => state.navigationHistory.history.length - 1);
 
-  // const { updatePageHistoryIndex } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { disableHomeButton = false } = props;
@@ -45,7 +44,7 @@ const NavigationControlsContainer = (props: Props) => {
           tooltipLabel={t('titleBar.goHome')}
         />
       )}
-
+      {/* TODO: Implement forward navigation */}
       {/* <Button
         iconName="arrow_forward"
         iconClassName="material-icons-round-outlined text-xl!"
@@ -54,7 +53,7 @@ const NavigationControlsContainer = (props: Props) => {
             ? 'visible! translate-x-0! opacity-100! focus-visible:outline!'
             : ''
         } ${bodyBackgroundImage && 'text-font-color-white! hover:text-font-color-highlight!'}`}
-        clickHandler={() => updatePageHistoryIndex('increment')}
+        clickHandler={() => {}}
         tooltipLabel={t('titleBar.goForward')}
       /> */}
     </div>

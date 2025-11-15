@@ -57,12 +57,8 @@ function SongTagsEditingPage() {
   const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
   const currentSongData = useStore(store, (state) => state.currentSongData);
 
-  const {
-    addNewNotifications,
-    changePromptMenuData,
-    updateCurrentSongData,
-    updatePageHistoryIndex
-  } = useContext(AppUpdateContext);
+  const { addNewNotifications, changePromptMenuData, updateCurrentSongData } =
+    useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { isOnline } = useNetworkConnectivity();
@@ -559,7 +555,9 @@ function SongTagsEditingPage() {
               label={t('common.goBack')}
               iconName="arrow_back"
               className="mt-4"
-              clickHandler={() => updatePageHistoryIndex('decrement')}
+              clickHandler={() => {
+                // TODO: Implement page history back navigation.
+              }}
             />
           </div>
         )}

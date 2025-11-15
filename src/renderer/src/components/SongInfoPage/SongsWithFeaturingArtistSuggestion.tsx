@@ -22,8 +22,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
   const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
   const currentSongData = useStore(store, (state) => state.currentSongData);
 
-  const { addNewNotifications, changeCurrentActivePage, updateCurrentSongData } =
-    useContext(AppUpdateContext);
+  const { addNewNotifications, updateCurrentSongData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { songTitle = '', songId = '', artistNames, path, updateSongInfo } = props;
@@ -229,13 +228,14 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
                   iconName="edit"
                   iconClassName="material-icons-round-outlined"
                   label={t('featArtistsSuggestion.editInMetadataEditingPage')}
-                  clickHandler={() =>
-                    changeCurrentActivePage('SongTagsEditor', {
-                      songId,
-                      songPath: path,
-                      isKnownSource: true
-                    })
-                  }
+                  clickHandler={() => {
+                    // TODO: Implement song tags editor page navigation
+                    // changeCurrentActivePage('SongTagsEditor', {
+                    //   songId,
+                    //   songPath: path,
+                    //   isKnownSource: true
+                    // });
+                  }}
                 />
                 <Button
                   className="bg-background-color-1/50 hover:bg-background-color-1 hover:text-font-color-highlight! dark:bg-dark-background-color-1/50 dark:hover:bg-dark-background-color-1 dark:hover:text-dark-font-color-highlight! mr-0! border-0! px-4! py-2! transition-colors focus-visible:outline!"

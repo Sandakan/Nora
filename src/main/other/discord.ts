@@ -61,18 +61,23 @@ function loginRPC() {
   });
 }
 
-function setDiscordRPC(data: typeof defaultPayload.activity) {
+function setDiscordRPC(data: null | typeof defaultPayload.activity) {
   if (discord.user) {
-    const payload = {
-      pid: process.pid,
-      activity: data
-    };
+    const payload = data
+      ? {
+          pid: process.pid,
+          activity: data
+        }
+      : defaultPayload;
+
     if (data) {
       data.instance = true;
       data.type = ActivityType.Listening;
     }
+
     lastPayload = payload;
-    logger.debug(JSON.stringify(payload, null, 2));
+
+    logger.debug(JSON.stringify(payload));
     discord.request('SET_ACTIVITY', payload); //send raw payload to discord RPC server
   }
 }

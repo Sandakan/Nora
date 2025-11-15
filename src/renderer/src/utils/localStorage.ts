@@ -6,6 +6,7 @@ import addMissingPropsToAnObject from './addMissingPropsToAnObject';
 import isLatestVersion from './isLatestVersion';
 import { dispatch, store } from '@renderer/store/store';
 import { LOCAL_STORAGE_DEFAULT_TEMPLATE } from '@renderer/other/appReducer';
+import PlayerQueue from '@renderer/other/playerQueue';
 
 // import isLatestVersion from './isLatestVersion';
 
@@ -275,14 +276,18 @@ const setVolumeOptions = <Type extends keyof Volume, Data extends Volume[Type]>(
 
 // QUEUE
 
-const setQueue = (queue: Queue) => {
+const setQueue = (queue: PlayerQueue | PlayerQueueJson) => {
   const allItems = getAllItems();
-  setAllItems({ ...allItems, queue });
+  const queueJson = queue instanceof PlayerQueue ? queue.toJSON() : queue;
+  setAllItems({ ...allItems, queue: queueJson });
 };
 
 const getQueue = () => getAllItems().queue;
 
-const setCurrentSongIndex = (index: number | null) => setItem('queue', 'currentSongIndex', index);
+/**
+ * @deprecated Use PlayerQueue.moveToPosition() instead
+ */
+const setCurrentSongIndex = (index: number | null) => setItem('queue', 'position', index ?? 0);
 
 // IGNORED SEPARATE ARTISTS
 

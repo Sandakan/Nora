@@ -36,6 +36,7 @@ import { useStore } from '@tanstack/react-store';
 import { store } from '../../store/store';
 import NavLink from '../NavLink';
 import { useNavigate } from '@tanstack/react-router';
+import { useQueueOperations } from '../../hooks/useQueueOperations';
 
 interface SongProp {
   songId: string;
@@ -75,7 +76,6 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
   const {
     playSong,
     updateContextMenuData,
-    changeCurrentActivePage,
     updateQueueData,
     changePromptMenuData,
     addNewNotifications,
@@ -86,6 +86,9 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
   } = useContext(AppUpdateContext);
   const { t } = useTranslation();
   const navigate = useNavigate();
+
+  // Queue operations for context menu actions
+  const { addToNext, addToEnd } = useQueueOperations();
 
   const {
     index,
@@ -238,29 +241,8 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
         iconName: 'shortcut',
         handlerFunction: () => {
           if (isMultipleSelectionsEnabled) {
-            let currentSongIndex =
-              queue.currentSongIndex ?? queue.queue.indexOf(currentSongData.songId);
-            const duplicateIds: string[] = [];
-
-            const newQueue = queue.queue.filter((id) => {
-              const isADuplicate = songIds.includes(id);
-              if (isADuplicate) duplicateIds.push(id);
-
-              return !isADuplicate;
-            });
-
-            for (const duplicateId of duplicateIds) {
-              const duplicateIdPosition = queue.queue.indexOf(duplicateId);
-
-              if (
-                duplicateIdPosition !== -1 &&
-                duplicateIdPosition < currentSongIndex &&
-                currentSongIndex - 1 >= 0
-              )
-                currentSongIndex -= 1;
-            }
-            newQueue.splice(currentSongIndex + 1, 0, ...songIds);
-            updateQueueData(currentSongIndex, newQueue, undefined, false);
+            // Add multiple songs to play next (keeps duplicates)
+            addToNext(songIds, { removeDuplicates: false });
             addNewNotifications([
               {
                 id: `${title}PlayNext`,
@@ -271,18 +253,8 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
               }
             ]);
           } else {
-            const newQueue = queue.queue.filter((id) => id !== songId);
-            const duplicateSongIndex = queue.queue.indexOf(songId);
-
-            const currentSongIndex =
-              queue.currentSongIndex &&
-              duplicateSongIndex !== -1 &&
-              duplicateSongIndex < queue.currentSongIndex
-                ? queue.currentSongIndex - 1
-                : undefined;
-
-            newQueue.splice(newQueue.indexOf(currentSongData.songId) + 1 || 0, 0, songId);
-            updateQueueData(currentSongIndex, newQueue, undefined, false);
+            // Add single song to play next (keeps duplicates)
+            addToNext([songId], { removeDuplicates: false });
             addNewNotifications([
               {
                 id: `${title}PlayNext`,
@@ -299,7 +271,8 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
         iconName: 'queue',
         handlerFunction: () => {
           if (isMultipleSelectionsEnabled) {
-            updateQueueData(undefined, [...queue.queue, ...songIds], false);
+            // Add multiple songs to end (keeps duplicates)
+            addToEnd(songIds, { removeDuplicates: false });
             addNewNotifications([
               {
                 id: `${songIds.length}AddedToQueueFromMultiSelection`,
@@ -310,7 +283,8 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
               }
             ]);
           } else {
-            updateQueueData(undefined, [...queue.queue, songId], false);
+            // Add single song to end (keeps duplicates)
+            addToEnd([songId], { removeDuplicates: false });
             addNewNotifications([
               {
                 id: `${title}AddedToQueue`,
@@ -420,12 +394,14 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
         label: t('song.editSongTags'),
         class: 'edit',
         iconName: 'edit',
-        handlerFunction: () =>
-          changeCurrentActivePage('SongTagsEditor', {
-            songId,
-            songArtworkPath: artworkPaths.artworkPath,
-            songPath: path
-          }),
+        handlerFunction: () => {
+          // TODO: Implement song tags editor navigation
+          // changeCurrentActivePage('SongTagsEditor', {
+          //   songId,
+          //   songArtworkPath: artworkPaths.artworkPath,
+          //   songPath: path
+          // });
+        },
         isDisabled: isMultipleSelectionsEnabled
       },
       {
@@ -504,8 +480,8 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
     handlePlayBtnClick,
     toggleMultipleSelections,
     createQueue,
-    queue.currentSongIndex,
-    queue.queue,
+    queue.position,
+    queue.songIds,
     currentSongData.songId,
     currentSongData.isAFavorite,
     updateQueueData,
@@ -519,7 +495,6 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
     isMultipleSelectionEnabled,
     updateMultipleSelections,
     navigate,
-    changeCurrentActivePage,
     path,
     localStorageData?.preferences.doNotShowBlacklistSongConfirm
   ]);
@@ -565,13 +540,12 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
         updateContextMenuData(true, contextMenuItems, e.pageX, e.pageY, contextMenuItemData);
       }}
       onClick={(e) => {
-        clickTimeoutRef.current = setTimeout(() => {
-          if (e.getModifierState('Shift') === true && selectAllHandler) selectAllHandler(songId);
-          else if (e.getModifierState('Control') === true && !isMultipleSelectionEnabled)
-            toggleMultipleSelections(!isAMultipleSelection, 'songs', [songId]);
-          else if (isMultipleSelectionEnabled && multipleSelectionsData.selectionType === 'songs')
-            updateMultipleSelections(songId, 'songs', isAMultipleSelection ? 'remove' : 'add');
-        }, 100);
+        e.preventDefault();
+        if (e.getModifierState('Shift') === true && selectAllHandler) selectAllHandler(songId);
+        else if (e.getModifierState('Control') === true && !isMultipleSelectionEnabled)
+          toggleMultipleSelections(!isAMultipleSelection, 'songs', [songId]);
+        else if (isMultipleSelectionEnabled && multipleSelectionsData.selectionType === 'songs')
+          updateMultipleSelections(songId, 'songs', isAMultipleSelection ? 'remove' : 'add');
       }}
       onDoubleClick={() => {
         if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
@@ -668,8 +642,9 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
           params={{ songId }}
           title={title}
           className="song-title truncate text-base font-normal outline-offset-1 transition-none focus-visible:outline!"
+          disabled={isMultipleSelectionEnabled}
         >
-          {title}
+          {window.api.properties.isInDevelopment && `(${songId})`} {title}
         </NavLink>
         <div className="song-artists w-full truncate text-xs font-normal transition-none">
           {songArtists}
@@ -679,7 +654,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
             <NavLink
               to="/main-player/albums/$albumId"
               params={{ albumId: album?.albumId }}
-              disabled={album?.albumId === undefined}
+              disabled={album?.albumId === undefined || isMultipleSelectionEnabled}
               className="cursor-pointer -outline-offset-1 hover:underline focus-visible:outline!"
               title={album.name}
             >

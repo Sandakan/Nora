@@ -16,11 +16,21 @@ import { store } from '@renderer/store/store';
 import calculateTimeFromSeconds from '@renderer/utils/calculateTimeFromSeconds';
 import { createFileRoute } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useContext, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { queryClient } from '@renderer/index';
+import { artistQuery } from '@renderer/queries/aritsts';
+import { useSuspenseQuery, useMutation, useQuery } from '@tanstack/react-query';
+import { songQuery } from '@renderer/queries/songs';
+import { albumQuery } from '@renderer/queries/albums';
 
 export const Route = createFileRoute('/main-player/artists/$artistId')({
-  component: ArtistInfoPage
+  component: ArtistInfoPage,
+  loader: async (route) => {
+    const artistId = route.params.artistId;
+
+    await queryClient.ensureQueryData(artistQuery.single({ artistId }));
+  }
 });
 
 function ArtistInfoPage() {
@@ -34,22 +44,14 @@ function ArtistInfoPage() {
   const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
   const preferences = useStore(store, (state) => state.localStorage.preferences);
 
-  const {
-    createQueue,
-    updateBodyBackgroundImage,
-    // updateQueueData,
-    // addNewNotifications,
-    // updateCurrentlyActivePageData,
-    // changeCurrentActivePage,
-    updateContextMenuData,
-    toggleMultipleSelections,
-    playSong
-  } = useContext(AppUpdateContext);
+  const { createQueue, updateContextMenuData, toggleMultipleSelections, playSong } =
+    useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const [artistData, setArtistData] = useState<ArtistInfo>();
-  const [albums, setAlbums] = useState<Album[]>([]);
-  const [songs, setSongs] = useState<SongData[]>([]);
+  const { data: artistData } = useSuspenseQuery({
+    ...artistQuery.single({ artistId }),
+    select: (data) => data.data[0] ?? undefined
+  });
   const [isAllAlbumsVisible, setIsAllAlbumsVisible] = useState(false);
   const [isAllSongsVisible, setIsAllSongsVisible] = useState(false);
   const [sortingOrder, setSortingOrder] = useState<SongSortTypes>('aToZ');
@@ -62,153 +64,134 @@ function ArtistInfoPage() {
 
   const noOfVisibleAlbums = useMemo(() => Math.floor(relevantWidth / 250) || 4, [relevantWidth]);
 
-  const fetchArtistsData = useCallback(() => {
-    if (artistId) {
-      window.api.artistsData
-        .getArtistData([artistId])
-        .then((res) => {
-          if (res && res.length > 0) {
-            if (res[0].onlineArtworkPaths?.picture_medium)
-              updateBodyBackgroundImage(true, res[0].onlineArtworkPaths?.picture_medium);
-            setArtistData(res[0]);
-          }
-          return undefined;
-        })
-        .catch((err) => console.error(err));
+  const { data: onlineArtistInfo } = useQuery(artistQuery.fetchOnlineInfo({ artistId }));
+
+  const { data: songs = [] } = useQuery({
+    ...songQuery.allSongInfo({
+      songIds: artistData.songs.map((song) => song.songId) || [],
+      sortType: sortingOrder,
+      filterType: 'notSelected'
+    }),
+    enabled: !!artistData?.songs && artistData.songs.length > 0
+  });
+
+  const { data: albums = [] } = useQuery({
+    ...albumQuery.all({ albumIds: artistData.albums?.map((album) => album.albumId) || [] }),
+    enabled: !!artistData?.albums && artistData.albums.length > 0,
+    select: (data) => data.data
+  });
+
+  // const fetchSongsData = useCallback(() => {
+  //   if (artistData?.songs && artistData.songs.length > 0) {
+  //     window.api.audioLibraryControls
+  //       .getSongInfo(
+  //         artistData.songs.map((song) => song.songId),
+  //         sortingOrder
+  //       )
+  //       .then((songsData) => {
+  //         if (songsData && songsData.length > 0) setSongs(songsData);
+  //         return undefined;
+  //       })
+  //       .catch((err) => console.error(err));
+  //   }
+  //   return setSongs([]);
+  // }, [artistData?.songs, sortingOrder]);
+
+  // const fetchAlbumsData = useCallback(() => {
+  //   if (artistData?.albums && artistData.albums.length > 0) {
+  //     window.api.albumsData
+  //       .getAlbumData(artistData.albums.map((album) => album.albumId))
+  //       .then((res) => {
+  //         if (res && res.length > 0) setAlbums(res);
+  //         return undefined;
+  //       })
+  //       .catch((err) => console.error(err));
+  //   }
+  //   return setAlbums([]);
+  // }, [artistData?.albums]);
+
+  // useEffect(() => {
+  //   fetchArtistsData();
+  //   const manageArtistDataUpdatesInArtistInfoPage = (e: Event) => {
+  //     const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
+  //     if ('detail' in e) {
+  //       for (let i = 0; i < dataEvents.length; i += 1) {
+  //         const event = dataEvents[i];
+  //         if (event.dataType === 'artists') fetchArtistsData();
+  //       }
+  //     }
+  //   };
+  //   document.addEventListener('app/dataUpdates', manageArtistDataUpdatesInArtistInfoPage);
+  //   return () => {
+  //     document.removeEventListener('app/dataUpdates', manageArtistDataUpdatesInArtistInfoPage);
+  //   };
+  // }, [fetchArtistsData]);
+
+  // useEffect(() => {
+  //   fetchArtistArtworks();
+  //   const manageArtistArtworkUpdatesInArtistInfoPage = (e: Event) => {
+  //     const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
+  //     if ('detail' in e) {
+  //       for (let i = 0; i < dataEvents.length; i += 1) {
+  //         const event = dataEvents[i];
+  //         if (event.dataType === 'artists/artworks') fetchArtistArtworks();
+  //       }
+  //     }
+  //   };
+  //   document.addEventListener('app/dataUpdates', manageArtistArtworkUpdatesInArtistInfoPage);
+  //   return () => {
+  //     document.removeEventListener('app/dataUpdates', manageArtistArtworkUpdatesInArtistInfoPage);
+  //   };
+  // }, [fetchArtistArtworks]);
+
+  // useEffect(() => {
+  //   fetchSongsData();
+  //   const manageSongDataUpdatesInArtistInfoPage = (e: Event) => {
+  //     const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
+  //     if ('detail' in e) {
+  //       for (let i = 0; i < dataEvents.length; i += 1) {
+  //         const event = dataEvents[i];
+  //         if (
+  //           event.dataType === 'songs/deletedSong' ||
+  //           event.dataType === 'songs/newSong' ||
+  //           event.dataType === 'blacklist/songBlacklist' ||
+  //           (event.dataType === 'songs/likes' && event.eventData.length > 1)
+  //         )
+  //           fetchSongsData();
+  //       }
+  //     }
+  //   };
+  //   document.addEventListener('app/dataUpdates', manageSongDataUpdatesInArtistInfoPage);
+  //   return () => {
+  //     document.removeEventListener('app/dataUpdates', manageSongDataUpdatesInArtistInfoPage);
+  //   };
+  // }, [fetchSongsData]);
+
+  // useEffect(() => {
+  //   fetchAlbumsData();
+  //   const manageAlbumDataUpdatesInArtistInfoPage = (e: Event) => {
+  //     const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
+  //     if ('detail' in e) {
+  //       for (let i = 0; i < dataEvents.length; i += 1) {
+  //         const event = dataEvents[i];
+  //         if (event.dataType === 'albums/newAlbum') fetchAlbumsData();
+  //         if (event.dataType === 'albums/deletedAlbum') fetchAlbumsData();
+  //       }
+  //     }
+  //   };
+  //   document.addEventListener('app/dataUpdates', manageAlbumDataUpdatesInArtistInfoPage);
+  //   return () => {
+  //     document.removeEventListener('app/dataUpdates', manageAlbumDataUpdatesInArtistInfoPage);
+  //   };
+  // }, [fetchAlbumsData]);
+
+  const { mutate: toggleLike } = useMutation({
+    mutationFn: () =>
+      window.api.artistsData.toggleLikeArtists([artistData.artistId], !artistData.isAFavorite),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: artistQuery._def });
     }
-  }, [artistId, updateBodyBackgroundImage]);
-
-  const fetchArtistArtworks = useCallback(() => {
-    if (artistData?.artistId) {
-      window.api.artistsData
-        .getArtistArtworks(artistData.artistId)
-        .then((x) => {
-          if (x)
-            setArtistData((prevData) => {
-              if (prevData) {
-                updateBodyBackgroundImage(true, x.artistArtworks?.picture_medium);
-                return {
-                  ...prevData,
-                  onlineArtworkPaths: x.artistArtworks,
-                  artistPalette: x.artistPalette || prevData.artistPalette,
-                  artistBio: x.artistBio || prevData.artistBio,
-                  similarArtists: x.similarArtists || prevData.similarArtists,
-                  tags: x.tags
-                };
-              }
-              return undefined;
-            });
-          return undefined;
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-    }
-  }, [artistData?.artistId, updateBodyBackgroundImage]);
-
-  const fetchSongsData = useCallback(() => {
-    if (artistData?.songs && artistData.songs.length > 0) {
-      window.api.audioLibraryControls
-        .getSongInfo(
-          artistData.songs.map((song) => song.songId),
-          sortingOrder
-        )
-        .then((songsData) => {
-          if (songsData && songsData.length > 0) setSongs(songsData);
-          return undefined;
-        })
-        .catch((err) => console.error(err));
-    }
-    return setSongs([]);
-  }, [artistData?.songs, sortingOrder]);
-
-  const fetchAlbumsData = useCallback(() => {
-    if (artistData?.albums && artistData.albums.length > 0) {
-      window.api.albumsData
-        .getAlbumData(artistData.albums.map((album) => album.albumId))
-        .then((res) => {
-          if (res && res.length > 0) setAlbums(res);
-          return undefined;
-        })
-        .catch((err) => console.error(err));
-    }
-    return setAlbums([]);
-  }, [artistData?.albums]);
-
-  useEffect(() => {
-    fetchArtistsData();
-    const manageArtistDataUpdatesInArtistInfoPage = (e: Event) => {
-      const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
-      if ('detail' in e) {
-        for (let i = 0; i < dataEvents.length; i += 1) {
-          const event = dataEvents[i];
-          if (event.dataType === 'artists') fetchArtistsData();
-        }
-      }
-    };
-    document.addEventListener('app/dataUpdates', manageArtistDataUpdatesInArtistInfoPage);
-    return () => {
-      document.removeEventListener('app/dataUpdates', manageArtistDataUpdatesInArtistInfoPage);
-    };
-  }, [fetchArtistsData]);
-
-  useEffect(() => {
-    fetchArtistArtworks();
-    const manageArtistArtworkUpdatesInArtistInfoPage = (e: Event) => {
-      const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
-      if ('detail' in e) {
-        for (let i = 0; i < dataEvents.length; i += 1) {
-          const event = dataEvents[i];
-          if (event.dataType === 'artists/artworks') fetchArtistArtworks();
-        }
-      }
-    };
-    document.addEventListener('app/dataUpdates', manageArtistArtworkUpdatesInArtistInfoPage);
-    return () => {
-      document.removeEventListener('app/dataUpdates', manageArtistArtworkUpdatesInArtistInfoPage);
-    };
-  }, [fetchArtistArtworks]);
-
-  useEffect(() => {
-    fetchSongsData();
-    const manageSongDataUpdatesInArtistInfoPage = (e: Event) => {
-      const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
-      if ('detail' in e) {
-        for (let i = 0; i < dataEvents.length; i += 1) {
-          const event = dataEvents[i];
-          if (
-            event.dataType === 'songs/deletedSong' ||
-            event.dataType === 'songs/newSong' ||
-            event.dataType === 'blacklist/songBlacklist' ||
-            (event.dataType === 'songs/likes' && event.eventData.length > 1)
-          )
-            fetchSongsData();
-        }
-      }
-    };
-    document.addEventListener('app/dataUpdates', manageSongDataUpdatesInArtistInfoPage);
-    return () => {
-      document.removeEventListener('app/dataUpdates', manageSongDataUpdatesInArtistInfoPage);
-    };
-  }, [fetchSongsData]);
-
-  useEffect(() => {
-    fetchAlbumsData();
-    const manageAlbumDataUpdatesInArtistInfoPage = (e: Event) => {
-      const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
-      if ('detail' in e) {
-        for (let i = 0; i < dataEvents.length; i += 1) {
-          const event = dataEvents[i];
-          if (event.dataType === 'albums/newAlbum') fetchAlbumsData();
-          if (event.dataType === 'albums/deletedAlbum') fetchAlbumsData();
-        }
-      }
-    };
-    document.addEventListener('app/dataUpdates', manageAlbumDataUpdatesInArtistInfoPage);
-    return () => {
-      document.removeEventListener('app/dataUpdates', manageAlbumDataUpdatesInArtistInfoPage);
-    };
-  }, [fetchAlbumsData]);
+  });
 
   const artistSongsDuration = useMemo(
     () =>
@@ -297,7 +280,7 @@ function ArtistInfoPage() {
           <Img
             src={artistData?.onlineArtworkPaths?.picture_medium}
             fallbackSrc={artistData?.artworkPaths?.artworkPath}
-            className="aspect-square! h-60 w-[15rem] rounded-full object-cover"
+            className="aspect-square! h-60 w-60 rounded-full object-cover"
             loading="eager"
             alt="Album Cover"
             onContextMenu={(e) =>
@@ -335,28 +318,13 @@ function ArtistInfoPage() {
               }
             )}
             iconName="favorite"
-            iconClassName={`!text-4xl !leading-none ${
+            iconClassName={`text-4xl! leading-none! ${
               artistData?.isAFavorite
                 ? 'material-icons-round'
                 : 'material-icons-round material-icons-round-outlined'
             }`}
             clickHandler={() => {
-              if (artistData)
-                window.api.artistsData
-                  .toggleLikeArtists([artistData.artistId], !artistData.isAFavorite)
-                  .then(
-                    (res) =>
-                      res &&
-                      setArtistData((prevData) =>
-                        prevData
-                          ? {
-                              ...prevData,
-                              isAFavorite: !prevData.isAFavorite
-                            }
-                          : undefined
-                      )
-                  )
-                  .catch((err) => console.error(err));
+              if (artistData) toggleLike();
             }}
           />
         </div>
@@ -568,15 +536,15 @@ function ArtistInfoPage() {
         </MainContainer>
       )}
 
-      {artistData?.similarArtists && (
-        <SimilarArtistsContainer similarArtists={artistData.similarArtists} />
+      {onlineArtistInfo?.similarArtists && (
+        <SimilarArtistsContainer similarArtists={onlineArtistInfo.similarArtists} />
       )}
 
-      {artistData?.artistBio && (
+      {onlineArtistInfo?.artistBio && (
         <Biography
           bioUserName={artistData.name}
-          bio={artistData?.artistBio}
-          tags={artistData.tags}
+          bio={onlineArtistInfo?.artistBio}
+          tags={onlineArtistInfo.tags}
           hyperlinkData={{
             labelTitle: t('common.readMoreAboutTitle', {
               title: artistData.name

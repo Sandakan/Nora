@@ -4,7 +4,7 @@ import { songSearchSchema } from '@renderer/utils/zod/songSchema';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 import { zodValidator } from '@tanstack/zod-adapter';
-import { lazy, useCallback, useContext, useEffect, useState } from 'react';
+import { lazy, useCallback, useContext, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import storage from '@renderer/utils/localStorage';
 import useSelectAllHandler from '@renderer/hooks/useSelectAllHandler';
@@ -15,12 +15,28 @@ import { songFilterOptions, songSortOptions } from '@renderer/components/SongsPa
 import VirtualizedList from '@renderer/components/VirtualizedList';
 import Song from '@renderer/components/SongsPage/Song';
 
-import DataFetchingImage from '@assets/images/svg/Road trip_Monochromatic.svg';
 import NoSongsImage from '@assets/images/svg/Empty Inbox _Monochromatic.svg';
 import Img from '@renderer/components/Img';
+import { useSuspenseQuery } from '@tanstack/react-query';
+import { queryClient } from '@renderer/index';
+import { songQuery } from '@renderer/queries/songs';
 
 export const Route = createFileRoute('/main-player/songs/')({
   validateSearch: zodValidator(songSearchSchema),
+  loaderDeps: ({ search }) => ({
+    sortingOrder: search.sortingOrder,
+    filteringOrder: search.filteringOrder
+  }),
+  loader: async ({ deps }) => {
+    await queryClient.ensureQueryData(
+      songQuery.all({
+        sortType: deps.sortingOrder ?? 'aToZ',
+        filterType: deps.filteringOrder ?? 'notSelected',
+        start: 0,
+        end: 0
+      })
+    );
+  },
   component: SongsPage
 });
 
@@ -58,47 +74,11 @@ function SongsPage() {
   } = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
 
-  const [songData, setSongData] = useState<AudioInfo[]>([]);
-
-  const fetchSongsData = useCallback(() => {
-    console.time('songs');
-
-    window.api.audioLibraryControls
-      .getAllSongs(sortingOrder, filteringOrder)
-      .then((audioInfoArray) => {
-        console.timeEnd('songs');
-
-        if (audioInfoArray) {
-          if (audioInfoArray.data.length === 0) setSongData([]);
-          else setSongData(audioInfoArray.data);
-        }
-        return undefined;
-      })
-      .catch((err) => console.error(err));
-  }, [filteringOrder, sortingOrder]);
-
-  useEffect(() => {
-    fetchSongsData();
-    const manageSongsDataUpdatesInSongsPage = (e: Event) => {
-      if ('detail' in e) {
-        const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
-        for (let i = 0; i < dataEvents.length; i += 1) {
-          const event = dataEvents[i];
-          if (
-            event.dataType === 'songs/deletedSong' ||
-            event.dataType === 'songs/newSong' ||
-            event.dataType === 'blacklist/songBlacklist' ||
-            (event.dataType === 'songs/likes' && event.eventData.length > 1)
-          )
-            fetchSongsData();
-        }
-      }
-    };
-    document.addEventListener('app/dataUpdates', manageSongsDataUpdatesInSongsPage);
-    return () => {
-      document.removeEventListener('app/dataUpdates', manageSongsDataUpdatesInSongsPage);
-    };
-  }, [fetchSongsData]);
+  const {
+    data: { data: songData }
+  } = useSuspenseQuery(
+    songQuery.all({ sortType: sortingOrder, filterType: filteringOrder, start: 0, end: 0 })
+  );
 
   useEffect(() => {
     storage.sortingStates.setSortingStates('songsPage', sortingOrder);
@@ -108,26 +88,33 @@ function SongsPage() {
     changePromptMenuData(
       true,
       <AddMusicFoldersPrompt
-        onSuccess={(songs) => {
-          const relevantSongsData: AudioInfo[] = songs.map((song) => {
-            return {
-              title: song.title,
-              songId: song.songId,
-              artists: song.artists,
-              duration: song.duration,
-              path: song.path,
-              artworkPaths: song.artworkPaths,
-              addedDate: song.addedDate,
-              isAFavorite: song.isAFavorite,
-              isBlacklisted: song.isBlacklisted
-            };
-          });
-          setSongData(relevantSongsData);
+        onSuccess={() => {
+          // const relevantSongsData: AudioInfo[] = songs.map((song) => {
+          //   return {
+          //     title: song.title,
+          //     songId: song.songId,
+          //     artists: song.artists,
+          //     duration: song.duration,
+          //     path: song.path,
+          //     artworkPaths: song.artworkPaths,
+          //     addedDate: song.addedDate,
+          //     isAFavorite: song.isAFavorite,
+          //     isBlacklisted: song.isBlacklisted
+          //   };
+          // });
+          queryClient.invalidateQueries(
+            songQuery.all({
+              sortType: sortingOrder,
+              filterType: filteringOrder,
+              start: 0,
+              end: 0
+            })
+          );
         }}
-        onFailure={() => setSongData([])}
+        // onFailure={() => setSongData([])}
       />
     );
-  }, [changePromptMenuData]);
+  }, [changePromptMenuData, filteringOrder, sortingOrder]);
 
   const importAppData = useCallback(
     (
@@ -187,148 +174,145 @@ function SongsPage() {
         }
       }}
     >
-      <>
-        {songData && songData.length > 0 && (
-          <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-8 flex items-center pr-4 text-3xl font-medium">
-            <div className="container flex">
-              {t('common.song_other')}{' '}
-              <div className="other-stats-container text-font-color-black dark:text-font-color-white ml-12 flex items-center text-xs">
-                {isMultipleSelectionEnabled ? (
-                  <div className="text-font-color-highlight dark:text-dark-font-color-highlight text-sm">
-                    {t('common.selectionWithCount', {
-                      count: multipleSelectionsData.multipleSelections.length
-                    })}
-                  </div>
-                ) : (
-                  songData &&
-                  songData.length > 0 && (
-                    <span className="no-of-songs">
-                      {t('common.songWithCount', {
-                        count: songData.length
-                      })}
-                    </span>
-                  )
-                )}
+      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-8 flex items-center pr-4 text-3xl font-medium">
+        <div className="container flex">
+          {t('common.song_other')}{' '}
+          <div className="other-stats-container text-font-color-black dark:text-font-color-white ml-12 flex items-center text-xs">
+            {isMultipleSelectionEnabled ? (
+              <div className="text-font-color-highlight dark:text-dark-font-color-highlight text-sm">
+                {t('common.selectionWithCount', {
+                  count: multipleSelectionsData.multipleSelections.length
+                })}
               </div>
-            </div>
-            <div className="other-controls-container flex">
-              <Button
-                key={0}
-                className="more-options-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
-                iconName="more_horiz"
-                clickHandler={(e) => {
-                  e.stopPropagation();
-                  const button = e.currentTarget;
-                  const { x, y } = button.getBoundingClientRect();
-                  updateContextMenuData(
-                    true,
-                    [
-                      {
-                        label: t('settingsPage.resyncLibrary'),
-                        iconName: 'sync',
-                        handlerFunction: () => window.api.audioLibraryControls.resyncSongsLibrary()
-                      }
-                    ],
-                    x + 10,
-                    y + 50
-                  );
-                }}
-                tooltipLabel={t('common.moreOptions')}
-                onContextMenu={(e) => {
-                  e.preventDefault();
-                  updateContextMenuData(
-                    true,
-                    [
-                      {
-                        label: t('settingsPage.resyncLibrary'),
-                        iconName: 'sync',
-                        handlerFunction: () => window.api.audioLibraryControls.resyncSongsLibrary()
-                      }
-                    ],
-                    e.pageX,
-                    e.pageY
-                  );
-                }}
-              />
-              <Button
-                key={1}
-                className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
-                iconName={isMultipleSelectionEnabled ? 'remove_done' : 'checklist'}
-                clickHandler={() => toggleMultipleSelections(!isMultipleSelectionEnabled, 'songs')}
-                tooltipLabel={t(
-                  `common.${
-                    isMultipleSelectionEnabled && multipleSelectionsData.selectionType === 'songs'
-                      ? 'unselectAll'
-                      : 'select'
-                  }`
-                )}
-              />
-              <Button
-                key={2}
-                tooltipLabel={t('common.playAll')}
-                className="play-all-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
-                iconName="play_arrow"
-                clickHandler={() =>
-                  createQueue(
-                    songData.filter((song) => !song.isBlacklisted).map((song) => song.songId),
-                    'songs',
-                    false,
-                    undefined,
-                    true
-                  )
-                }
-              />
-              <Button
-                key={3}
-                label={t('common.shuffleAndPlay')}
-                className="shuffle-and-play-all-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
-                iconName="shuffle"
-                clickHandler={() =>
-                  createQueue(
-                    songData.filter((song) => !song.isBlacklisted).map((song) => song.songId),
-                    'songs',
-                    true,
-                    undefined,
-                    true
-                  )
-                }
-              />
-              <Dropdown
-                name="songsPageFilterDropdown"
-                type={`${t('common.filterBy')} :`}
-                value={filteringOrder}
-                options={songFilterOptions}
-                onChange={(e) => {
-                  navigate({
-                    search: (prev) => ({
-                      ...prev,
-                      filteringOrder: e.currentTarget.value as SongFilterTypes
-                    })
-                  });
-                }}
-              />
-              <Dropdown
-                name="songsPageSortDropdown"
-                type={`${t('common.sortBy')} :`}
-                value={sortingOrder}
-                options={songSortOptions}
-                onChange={(e) => {
-                  navigate({
-                    search: (prev) => ({
-                      ...prev,
-                      sortingOrder: e.currentTarget.value as SongSortTypes
-                    })
-                  });
-                }}
-              />
-            </div>
+            ) : (
+              songData &&
+              songData.length > 0 && (
+                <span className="no-of-songs">
+                  {t('common.songWithCount', {
+                    count: songData.length
+                  })}
+                </span>
+              )
+            )}
           </div>
-        )}
-        <div
-          className="songs-container appear-from-bottom h-full flex-1 delay-100"
-          // ref={songsContainerRef}
-        >
-          {/* <InfiniteLoader
+        </div>
+        <div className="other-controls-container flex">
+          <Button
+            key={0}
+            className="more-options-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+            iconName="more_horiz"
+            clickHandler={(e) => {
+              e.stopPropagation();
+              const button = e.currentTarget;
+              const { x, y } = button.getBoundingClientRect();
+              updateContextMenuData(
+                true,
+                [
+                  {
+                    label: t('settingsPage.resyncLibrary'),
+                    iconName: 'sync',
+                    handlerFunction: () => window.api.audioLibraryControls.resyncSongsLibrary()
+                  }
+                ],
+                x + 10,
+                y + 50
+              );
+            }}
+            tooltipLabel={t('common.moreOptions')}
+            onContextMenu={(e) => {
+              e.preventDefault();
+              updateContextMenuData(
+                true,
+                [
+                  {
+                    label: t('settingsPage.resyncLibrary'),
+                    iconName: 'sync',
+                    handlerFunction: () => window.api.audioLibraryControls.resyncSongsLibrary()
+                  }
+                ],
+                e.pageX,
+                e.pageY
+              );
+            }}
+          />
+          <Button
+            key={1}
+            className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+            iconName={isMultipleSelectionEnabled ? 'remove_done' : 'checklist'}
+            clickHandler={() => toggleMultipleSelections(!isMultipleSelectionEnabled, 'songs')}
+            tooltipLabel={t(
+              `common.${
+                isMultipleSelectionEnabled && multipleSelectionsData.selectionType === 'songs'
+                  ? 'unselectAll'
+                  : 'select'
+              }`
+            )}
+          />
+          <Button
+            key={2}
+            tooltipLabel={t('common.playAll')}
+            className="play-all-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+            iconName="play_arrow"
+            clickHandler={() =>
+              createQueue(
+                songData.filter((song) => !song.isBlacklisted).map((song) => song.songId),
+                'songs',
+                false,
+                undefined,
+                true
+              )
+            }
+          />
+          <Button
+            key={3}
+            label={t('common.shuffleAndPlay')}
+            className="shuffle-and-play-all-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+            iconName="shuffle"
+            clickHandler={() =>
+              createQueue(
+                songData.filter((song) => !song.isBlacklisted).map((song) => song.songId),
+                'songs',
+                true,
+                undefined,
+                true
+              )
+            }
+          />
+          <Dropdown
+            name="songsPageFilterDropdown"
+            type={`${t('common.filterBy')} :`}
+            value={filteringOrder}
+            options={songFilterOptions}
+            onChange={(e) => {
+              navigate({
+                search: (prev) => ({
+                  ...prev,
+                  filteringOrder: e.currentTarget.value as SongFilterTypes
+                })
+              });
+            }}
+          />
+          <Dropdown
+            name="songsPageSortDropdown"
+            type={`${t('common.sortBy')} :`}
+            value={sortingOrder}
+            options={songSortOptions}
+            onChange={(e) => {
+              navigate({
+                search: (prev) => ({
+                  ...prev,
+                  sortingOrder: e.currentTarget.value as SongSortTypes
+                })
+              });
+            }}
+          />
+        </div>
+      </div>
+      <div
+        className="songs-container appear-from-bottom h-full flex-1 delay-100"
+        // ref={songsContainerRef}
+      >
+        {/* <InfiniteLoader
             // isItemLoaded={isItemLoaded}
             itemCount={60}
             // loadMoreItems={loadMoreItems}
@@ -347,71 +331,64 @@ function SongsPage() {
                   currentlyActivePage.data?.scrollTopOffset ?? 0
                 }
                 onScroll={(data) => {
-                  if (!data.scrollUpdateWasRequested && data.scrollOffset !== 0)
-                    debounce(
-                      () =>
-                        updateCurrentlyActivePageData((currentPageData) => ({
-                          ...currentPageData,
-                          scrollTopOffset: data.scrollOffset,
-                        })),
-                      500,
-                    );
-                }}
+                }
               >
                 {songs}
               </List>
             )}
           </InfiniteLoader> */}
-          {songData && songData.length > 0 && (
-            <VirtualizedList
-              data={songData}
-              fixedItemHeight={60}
-              scrollTopOffset={scrollTopOffset}
-              itemContent={(index, song) => {
-                if (song)
-                  return (
-                    <Song
-                      key={index}
-                      index={index}
-                      isIndexingSongs={isSongIndexingEnabled}
-                      onPlayClick={handleSongPlayBtnClick}
-                      selectAllHandler={selectAllHandler}
-                      {...song}
-                    />
-                  );
-                return <div>Bad Index</div>;
-              }}
+        {songData && songData.length > 0 && (
+          <VirtualizedList
+            data={songData}
+            fixedItemHeight={60}
+            scrollTopOffset={scrollTopOffset}
+            onDebouncedScroll={(range) => {
+              navigate({
+                replace: true,
+                search: (prev) => ({
+                  ...prev,
+                  scrollTopOffset: range.startIndex
+                })
+              });
+            }}
+            itemContent={(index, song) => {
+              if (song)
+                return (
+                  <Song
+                    key={index}
+                    index={index}
+                    isIndexingSongs={isSongIndexingEnabled}
+                    onPlayClick={handleSongPlayBtnClick}
+                    selectAllHandler={selectAllHandler}
+                    {...song}
+                  />
+                );
+              return <div>Bad Index</div>;
+            }}
+          />
+        )}
+      </div>
+      {songData === null && (
+        <div className="no-songs-container text-font-color-black dark:text-font-color-white my-[8%] flex h-full w-full flex-col items-center justify-center text-center text-xl">
+          <Img src={NoSongsImage} alt="" className="mb-8 w-60" />
+          <span>{t('songsPage.empty')}</span>
+          <div className="flex items-center justify-between">
+            <Button
+              label={t('foldersPage.addFolder')}
+              iconName="create_new_folder"
+              iconClassName="material-icons-round-outlined"
+              className="bg-background-color-3! text-font-color-black! hover:border-background-color-3 dark:bg-dark-background-color-3! dark:text-font-color-black! dark:hover:border-background-color-3 mt-4 px-8 text-lg"
+              clickHandler={addNewSongs}
             />
-          )}
+            <Button
+              label={t('settingsPage.importAppData')}
+              iconName="upload"
+              className="bg-background-color-3! text-font-color-black! hover:border-background-color-3 dark:bg-dark-background-color-3! dark:text-font-color-black! dark:hover:border-background-color-3 mt-4 px-8 text-lg"
+              clickHandler={importAppData}
+            />
+          </div>
         </div>
-        {songData && songData.length === 0 && (
-          <div className="no-songs-container text-font-color-black dark:text-font-color-white my-[10%] flex h-full w-full flex-col items-center justify-center text-center text-xl">
-            <Img src={DataFetchingImage} alt="" className="mb-8 w-60" />
-            <span>{t('songsPage.loading')}</span>
-          </div>
-        )}
-        {songData === null && (
-          <div className="no-songs-container text-font-color-black dark:text-font-color-white my-[8%] flex h-full w-full flex-col items-center justify-center text-center text-xl">
-            <Img src={NoSongsImage} alt="" className="mb-8 w-60" />
-            <span>{t('songsPage.empty')}</span>
-            <div className="flex items-center justify-between">
-              <Button
-                label={t('foldersPage.addFolder')}
-                iconName="create_new_folder"
-                iconClassName="material-icons-round-outlined"
-                className="bg-background-color-3! text-font-color-black! hover:border-background-color-3 dark:bg-dark-background-color-3! dark:text-font-color-black! dark:hover:border-background-color-3 mt-4 px-8 text-lg"
-                clickHandler={addNewSongs}
-              />
-              <Button
-                label={t('settingsPage.importAppData')}
-                iconName="upload"
-                className="bg-background-color-3! text-font-color-black! hover:border-background-color-3 dark:bg-dark-background-color-3! dark:text-font-color-black! dark:hover:border-background-color-3 mt-4 px-8 text-lg"
-                clickHandler={importAppData}
-              />
-            </div>
-          </div>
-        )}
-      </>
+      )}
     </MainContainer>
   );
 }

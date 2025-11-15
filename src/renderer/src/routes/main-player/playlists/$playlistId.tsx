@@ -6,12 +6,16 @@ import TitleContainer from '@renderer/components/TitleContainer';
 import VirtualizedList from '@renderer/components/VirtualizedList';
 import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
 import useSelectAllHandler from '@renderer/hooks/useSelectAllHandler';
+import { queryClient } from '@renderer/index';
+import { playlistQuery } from '@renderer/queries/playlists';
+import { songQuery } from '@renderer/queries/songs';
 import { store } from '@renderer/store/store';
-import { playlistSearchSchema } from '@renderer/utils/zod/playlistSchema';
+import { songSearchSchema } from '@renderer/utils/zod/songSchema';
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 import { zodValidator } from '@tanstack/zod-adapter';
-import { lazy, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { lazy, useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
 const SensitiveActionConfirmPrompt = lazy(
@@ -19,13 +23,17 @@ const SensitiveActionConfirmPrompt = lazy(
 );
 
 export const Route = createFileRoute('/main-player/playlists/$playlistId')({
-  validateSearch: zodValidator(playlistSearchSchema),
-  component: PlaylistInfoPage
+  validateSearch: zodValidator(songSearchSchema),
+  component: PlaylistInfoPage,
+  loader: async ({ params }) => {
+    await queryClient.ensureQueryData(playlistQuery.single({ playlistId: params.playlistId }));
+  }
 });
 
 function PlaylistInfoPage() {
   const { playlistId } = Route.useParams();
   const { scrollTopOffset } = Route.useSearch();
+
   const queue = useStore(store, (state) => state.localStorage.queue);
   const playlistSortingState = useStore(
     store,
@@ -38,79 +46,18 @@ function PlaylistInfoPage() {
   const { sortingOrder = playlistSortingState, filteringOrder = 'notSelected' } = Route.useSearch();
   const navigate = useNavigate({ from: '/main-player/playlists/$playlistId' });
 
-  const [playlistData, setPlaylistData] = useState({} as Playlist);
-  const [playlistSongs, setPlaylistSongs] = useState([] as SongData[]);
-
-  const fetchPlaylistData = useCallback(() => {
-    if (playlistId) {
-      window.api.playlistsData
-        .getPlaylistData([playlistId])
-        .then((res) => {
-          if (res && res.length > 0 && res[0]) setPlaylistData(res[0]);
-          return undefined;
-        })
-        .catch((err) => console.error(err));
-    }
-  }, [playlistId]);
-
-  const fetchPlaylistSongsData = useCallback(() => {
-    const preserveAddedOrder = sortingOrder === 'addedOrder';
-    if (playlistData.songs && playlistData.songs.length > 0) {
-      window.api.audioLibraryControls
-        .getSongInfo(
-          playlistData.songs,
-          sortingOrder,
-          filteringOrder,
-          undefined,
-          preserveAddedOrder
-        )
-        .then((songsData) => {
-          if (songsData && songsData.length > 0) setPlaylistSongs(songsData);
-          return undefined;
-        })
-        .catch((err) => console.error(err));
-    }
-  }, [filteringOrder, playlistData.songs, sortingOrder]);
-
-  useEffect(() => {
-    fetchPlaylistData();
-    const managePlaylistUpdatesInPlaylistsInfoPage = (e: Event) => {
-      if ('detail' in e) {
-        const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
-        for (let i = 0; i < dataEvents.length; i += 1) {
-          const event = dataEvents[i];
-          if (event.dataType === 'playlists') fetchPlaylistData();
-        }
-      }
-    };
-    document.addEventListener('app/dataUpdates', managePlaylistUpdatesInPlaylistsInfoPage);
-    return () => {
-      document.removeEventListener('app/dataUpdates', managePlaylistUpdatesInPlaylistsInfoPage);
-    };
-  }, [fetchPlaylistData]);
-
-  useEffect(() => {
-    fetchPlaylistSongsData();
-    const managePlaylistSongUpdatesInPlaylistInfoPage = (e: Event) => {
-      if ('detail' in e) {
-        const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
-        for (let i = 0; i < dataEvents.length; i += 1) {
-          const event = dataEvents[i];
-          if (
-            event.dataType === 'playlists/newSong' ||
-            event.dataType === 'playlists/deletedSong' ||
-            event.dataType === 'blacklist/songBlacklist' ||
-            (event.dataType === 'songs/likes' && event.eventData.length > 1)
-          )
-            fetchPlaylistSongsData();
-        }
-      }
-    };
-    document.addEventListener('app/dataUpdates', managePlaylistSongUpdatesInPlaylistInfoPage);
-    return () => {
-      document.removeEventListener('app/dataUpdates', managePlaylistSongUpdatesInPlaylistInfoPage);
-    };
-  }, [fetchPlaylistSongsData]);
+  const { data: playlistData } = useSuspenseQuery({
+    ...playlistQuery.single({ playlistId: playlistId }),
+    select: (data) => data.data[0]
+  });
+  const { data: playlistSongs = [] } = useQuery({
+    ...songQuery.allSongInfo({
+      songIds: playlistData.songs,
+      sortType: sortingOrder,
+      filterType: filteringOrder
+    }),
+    enabled: Array.isArray(playlistData.songs)
+  });
 
   const selectAllHandler = useSelectAllHandler(playlistSongs, 'songs', 'songId');
 
@@ -124,8 +71,6 @@ function PlaylistInfoPage() {
     },
     [createQueue, playSong, playlistData.playlistId, playlistSongs]
   );
-
-  const listItems = useMemo(() => [playlistData, ...playlistSongs], [playlistData, playlistSongs]);
 
   const clearSongHistory = useCallback(() => {
     changePromptMenuData(
@@ -261,48 +206,50 @@ function PlaylistInfoPage() {
         ]}
       />
       <VirtualizedList
-        data={listItems}
+        data={playlistSongs}
         fixedItemHeight={60}
         scrollTopOffset={scrollTopOffset}
+        components={{
+          Header: () => (
+            <PlaylistInfoAndImgContainer playlist={playlistData} songs={playlistSongs} />
+          )
+        }}
         itemContent={(index, item) => {
-          if ('songId' in item)
-            return (
-              <Song
-                key={index}
-                // # Since the first element is the PlaylistInfoAndImgContainer, we need to subtract 1
-                index={index - 1}
-                isIndexingSongs={preferences.isSongIndexingEnabled}
-                onPlayClick={handleSongPlayBtnClick}
-                selectAllHandler={selectAllHandler}
-                {...item}
-                trackNo={undefined}
-                additionalContextMenuItems={[
-                  {
-                    label: t('playlistsPage.removeFromThisPlaylist'),
-                    iconName: 'playlist_remove',
-                    handlerFunction: () =>
-                      window.api.playlistsData
-                        .removeSongFromPlaylist(playlistData.playlistId, item.songId)
-                        .then(
-                          (res) =>
-                            res.success &&
-                            addNewNotifications([
-                              {
-                                id: `${item.songId}Removed`,
-                                duration: 5000,
-                                content: t('playlistsPage.removeSongFromPlaylistSuccess', {
-                                  title: item.title,
-                                  playlistName: playlistData.name
-                                })
-                              }
-                            ])
-                        )
-                        .catch((err) => console.error(err))
-                  }
-                ]}
-              />
-            );
-          return <PlaylistInfoAndImgContainer playlist={item} songs={playlistSongs} />;
+          return (
+            <Song
+              key={index}
+              index={index}
+              isIndexingSongs={preferences.isSongIndexingEnabled}
+              onPlayClick={handleSongPlayBtnClick}
+              selectAllHandler={selectAllHandler}
+              {...item}
+              trackNo={undefined}
+              additionalContextMenuItems={[
+                {
+                  label: t('playlistsPage.removeFromThisPlaylist'),
+                  iconName: 'playlist_remove',
+                  handlerFunction: () =>
+                    window.api.playlistsData
+                      .removeSongFromPlaylist(playlistData.playlistId, item.songId)
+                      .then(
+                        (res) =>
+                          res.success &&
+                          addNewNotifications([
+                            {
+                              id: `${item.songId}Removed`,
+                              duration: 5000,
+                              content: t('playlistsPage.removeSongFromPlaylistSuccess', {
+                                title: item.title,
+                                playlistName: playlistData.name
+                              })
+                            }
+                          ])
+                      )
+                      .catch((err) => console.error(err))
+                }
+              ]}
+            />
+          );
         }}
       />
       {playlistSongs.length === 0 && (

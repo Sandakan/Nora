@@ -1,10 +1,12 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 
 import Img from '../Img';
 
 import DefaultImgCover from '../../assets/images/webp/song_cover_default.webp';
 import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store/store';
+import { useQuery } from '@tanstack/react-query';
+import { playlistQuery } from '@renderer/queries/playlists';
 
 type Props = {
   className?: string;
@@ -13,47 +15,59 @@ type Props = {
   holderClassName?: string;
   type?: number;
   enableImgFadeIns?: boolean;
+  artworks?: ArtworkPaths[];
 };
 
 const MultipleArtworksCover = (props: Props) => {
-  const preferences = useStore(store, (state) => state.localStorage.preferences);
+  const enableArtworkFromSongCovers = useStore(
+    store,
+    (state) => state.localStorage.preferences.enableArtworkFromSongCovers
+  );
+  const shuffleArtworkFromSongCovers = useStore(
+    store,
+    (state) => state.localStorage.preferences.shuffleArtworkFromSongCovers
+  );
   const {
     className,
-    songIds,
+    artworks,
     imgClassName,
     holderClassName,
     type = 2,
     enableImgFadeIns = true
   } = props;
 
-  const [artworks, setArtworks] = useState<string[]>([]);
+  const { data: artworkPaths = artworks ?? [] } = useQuery({
+    ...playlistQuery.songArtworks({ songIds: props.songIds }),
+    enabled: !artworks && enableArtworkFromSongCovers,
+    select: (data) => data?.map((x) => x.artworkPaths)
+  });
 
-  useEffect(() => {
-    window.api.playlistsData
-      .getArtworksForMultipleArtworksCover(songIds)
-      .then((res) => setArtworks(res))
-      .catch((err) => console.error(err));
-  }, [songIds]);
+  // useEffect(() => {
+  //   window.api.playlistsData
+  //     .getArtworksForMultipleArtworksCover(songIds)
+  //     .then((res) => setArtworks(res))
+  //     .catch((err) => console.error(err));
+  // }, [songIds]);
 
   const images = useMemo(() => {
-    if (artworks.length > 1) {
-      const repeatedArtworks: string[] = [];
+    if (artworkPaths.length > 1) {
+      const repeatedArtworksPaths: string[] = [];
 
-      while (repeatedArtworks.length < 10) {
-        repeatedArtworks.push(...artworks);
+      while (repeatedArtworksPaths.length < 10) {
+        repeatedArtworksPaths.push(...artworkPaths.map((art) => art.artworkPath));
       }
 
-      if (preferences?.shuffleArtworkFromSongCovers) {
-        for (let i = repeatedArtworks.length - 1; i > 0; i -= 1) {
+      if (shuffleArtworkFromSongCovers) {
+        for (let i = repeatedArtworksPaths.length - 1; i > 0; i -= 1) {
           const randomIndex = Math.floor(Math.random() * (i + 1));
-          [repeatedArtworks[i], repeatedArtworks[randomIndex]] = [
-            repeatedArtworks[randomIndex],
-            repeatedArtworks[i]
+          [repeatedArtworksPaths[i], repeatedArtworksPaths[randomIndex]] = [
+            repeatedArtworksPaths[randomIndex],
+            repeatedArtworksPaths[i]
           ];
         }
       }
 
-      return repeatedArtworks
+      return repeatedArtworksPaths
         .filter((_, i) => i < (type === 1 ? 10 : 5))
         .map((artwork, i) => {
           const cond = (i + (type === 1 ? 1 : 0)) % 2 === 1;
@@ -72,7 +86,7 @@ const MultipleArtworksCover = (props: Props) => {
         });
     }
     return [];
-  }, [artworks, enableImgFadeIns, imgClassName, preferences?.shuffleArtworkFromSongCovers, type]);
+  }, [artworkPaths, enableImgFadeIns, imgClassName, shuffleArtworkFromSongCovers, type]);
 
   return (
     <div className={`relative overflow-hidden rounded-lg shadow-md ${className}`}>

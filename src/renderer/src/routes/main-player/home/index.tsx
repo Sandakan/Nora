@@ -5,19 +5,66 @@ import MostLovedSongs from '@renderer/components/HomePage/MostLovedSongs';
 import RecentlyAddedSongs from '@renderer/components/HomePage/RecentlyAddedSongs';
 import RecentlyPlayedArtists from '@renderer/components/HomePage/RecentlyPlayedArtists';
 import RecentlyPlayedSongs from '@renderer/components/HomePage/RecentlyPlayedSongs';
-import Img from '@renderer/components/Img';
 import MainContainer from '@renderer/components/MainContainer';
 import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
 import useResizeObserver from '@renderer/hooks/useResizeObserver';
 import storage from '@renderer/utils/localStorage';
 import { createFileRoute } from '@tanstack/react-router';
-import { lazy, useCallback, useContext, useEffect, useMemo, useReducer, useRef } from 'react';
+import { lazy, useCallback, useContext, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import NoSongsImage from '../../../assets/images/svg/Empty Inbox _Monochromatic.svg';
-import DataFetchingImage from '../../../assets/images/svg/Umbrella_Monochromatic.svg';
+// import DataFetchingImage from '../../../assets/images/svg/Umbrella_Monochromatic.svg';
+import { queryOptions, useSuspenseQuery } from '@tanstack/react-query';
+import { queryClient } from '@renderer/index';
+import { songQuery } from '@renderer/queries/songs';
+import { artistQuery } from '@renderer/queries/aritsts';
+import NavLink from '@renderer/components/NavLink';
+import SecondaryContainer from '@renderer/components/SecondaryContainer';
+import Img from '@renderer/components/Img';
+
+import favoritesPlaylistCoverImage from '../../../assets/images/webp/favorites-playlist-icon.webp';
+import historyPlaylistCoverImage from '../../../assets/images/webp/history-playlist-icon.webp';
+
+// TODO: Implement logic to fetch recently played songs from the backend or local storage.
+const fetchRecentlyPlayedSongs = async (
+  noOfRecentlyAddedSongCards: number
+): Promise<SongData[]> => [];
+// TODO: Implement logic to fetch recent song artists from the backend or local storage.
+const fetchRecentSongArtists = async (
+  noOfRecentlyAddedArtistCards: number
+): Promise<Artist[]> => [];
+const fetchMostLovedSongs = async (noOfMostLovedSongCards: number): Promise<AudioInfo[]> => [];
+
+const recentlyPlayedSongQueryOptions = queryOptions({
+  queryKey: ['recentlyPlayedSongs'],
+  queryFn: () => fetchRecentlyPlayedSongs(30)
+});
+const recentSongArtistsQueryOptions = queryOptions({
+  queryKey: ['recentSongArtists'],
+  queryFn: () => fetchRecentSongArtists(30)
+});
+const mostLovedSongsQueryOptions = queryOptions({
+  queryKey: ['mostLovedSongs'],
+  queryFn: () => fetchMostLovedSongs(30)
+});
 
 export const Route = createFileRoute('/main-player/home/')({
-  component: HomePage
+  component: HomePage,
+  loader: async () => {
+    await queryClient.ensureQueryData(
+      songQuery.all({ sortType: 'dateAddedDescending', start: 0, end: 30 })
+    );
+    await queryClient.ensureQueryData(recentlyPlayedSongQueryOptions);
+    await queryClient.ensureQueryData(recentSongArtistsQueryOptions);
+    await queryClient.ensureQueryData(mostLovedSongsQueryOptions);
+    await queryClient.ensureQueryData(
+      artistQuery.all({
+        sortType: 'mostLovedDescending',
+        filterType: 'notSelected',
+        start: 0,
+        end: 30
+      })
+    );
+  }
 });
 
 const ErrorPrompt = lazy(() => import('@renderer/components/ErrorPrompt'));
@@ -25,69 +72,23 @@ const AddMusicFoldersPrompt = lazy(
   () => import('@renderer/components/MusicFoldersPage/AddMusicFoldersPrompt')
 );
 
-interface HomePageReducer {
-  latestSongs: (AudioInfo | null)[];
-  recentlyPlayedSongs: SongData[];
-  recentSongArtists: Artist[];
-  mostLovedSongs: AudioInfo[];
-  mostLovedArtists: Artist[];
-}
-
-type HomePageReducerActionTypes =
-  | 'SONGS_DATA'
-  | 'RECENTLY_PLAYED_SONGS_DATA'
-  | 'RECENT_SONGS_ARTISTS'
-  | 'MOST_LOVED_ARTISTS'
-  | 'MOST_LOVED_SONGS';
-
-const reducer = (
-  state: HomePageReducer,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  action: { type: HomePageReducerActionTypes; data?: any }
-): HomePageReducer => {
-  switch (action.type) {
-    case 'SONGS_DATA':
-      return {
-        ...state,
-        latestSongs: action.data
-      };
-    case 'RECENTLY_PLAYED_SONGS_DATA':
-      return {
-        ...state,
-        recentlyPlayedSongs: action.data
-      };
-    case 'RECENT_SONGS_ARTISTS':
-      return {
-        ...state,
-        recentSongArtists: action.data
-      };
-    case 'MOST_LOVED_SONGS':
-      return {
-        ...state,
-        mostLovedSongs: action.data
-      };
-    case 'MOST_LOVED_ARTISTS':
-      return {
-        ...state,
-        mostLovedArtists: action.data
-      };
-    default:
-      return state;
-  }
-};
-
 function HomePage() {
   const { updateContextMenuData, changePromptMenuData, addNewNotifications } =
     useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const [content, dispatch] = useReducer(reducer, {
-    latestSongs: [],
-    recentlyPlayedSongs: [],
-    recentSongArtists: [],
-    mostLovedSongs: [],
-    mostLovedArtists: []
-  });
+  const {
+    data: { data: latestSongs }
+  } = useSuspenseQuery(songQuery.all({ sortType: 'dateAddedDescending', start: 0, end: 30 }));
+  const { data: recentlyPlayedSongs } = useSuspenseQuery(recentlyPlayedSongQueryOptions);
+
+  const { data: recentSongArtists } = useSuspenseQuery(recentSongArtistsQueryOptions);
+
+  const { data: mostLovedSongs } = useSuspenseQuery(mostLovedSongsQueryOptions);
+
+  const {
+    data: { data: mostLovedArtists }
+  } = useSuspenseQuery(artistQuery.all({ sortType: 'aToZ', start: 0, end: 30 }));
 
   const SONG_CARD_MIN_WIDTH = 280;
   const ARTIST_WIDTH = 175;
@@ -105,214 +106,130 @@ function HomePage() {
       };
     }, [recentlyAddedSongsContainerDiamensions]);
 
-  const fetchLatestSongs = useCallback(() => {
-    window.api.audioLibraryControls
-      .getAllSongs('dateAddedAscending', undefined, {
-        start: 0,
-        end: noOfRecentlyAddedSongCards
-      })
-      .then((audioData) => {
-        if (!audioData || audioData.data.length === 0)
-          return dispatch({ type: 'SONGS_DATA', data: [null] });
+  // const fetchRecentlyPlayedSongs = useCallback(async () => {
+  //   const recentSongs = await window.api.playlistsData
+  //     .getPlaylistData(['History'])
+  //     .catch((err) => console.error(err));
+  //   if (
+  //     Array.isArray(recentSongs) &&
+  //     recentSongs.length > 0 &&
+  //     Array.isArray(recentSongs[0].songs) &&
+  //     recentSongs[0].songs.length > 0
+  //   )
+  //     window.api.audioLibraryControls
+  //       .getSongInfo(
+  //         recentSongs[0].songs,
+  //         undefined,
+  //         undefined,
+  //         noOfRecentandLovedSongCards + 5,
+  //         true
+  //       )
+  //       .then(
+  //         (res) =>
+  //           Array.isArray(res) &&
+  //           dispatch({
+  //             type: 'RECENTLY_PLAYED_SONGS_DATA',
+  //             data: res
+  //           })
+  //       )
+  //       .catch((err) => console.error(err));
+  // }, [noOfRecentandLovedSongCards]);
 
-        dispatch({
-          type: 'SONGS_DATA',
-          data: audioData.data
-        });
-        return undefined;
-      })
-      .catch((err) => console.error(err));
-  }, [noOfRecentlyAddedSongCards]);
+  // const fetchRecentSongArtistsData = useCallback(() => {
+  //   if (content.recentlyPlayedSongs.length > 0) {
+  //     const artistIds = [
+  //       ...new Set(
+  //         content.recentlyPlayedSongs
+  //           .map((song) => (song.artists ? song.artists.map((artist) => artist.artistId) : []))
+  //           .flat()
+  //       )
+  //     ];
 
-  const fetchRecentlyPlayedSongs = useCallback(async () => {
-    const recentSongs = await window.api.playlistsData
-      .getPlaylistData(['History'])
-      .catch((err) => console.error(err));
-    if (
-      Array.isArray(recentSongs) &&
-      recentSongs.length > 0 &&
-      Array.isArray(recentSongs[0].songs) &&
-      recentSongs[0].songs.length > 0
-    )
-      window.api.audioLibraryControls
-        .getSongInfo(
-          recentSongs[0].songs,
-          undefined,
-          undefined,
-          noOfRecentandLovedSongCards + 5,
-          true
-        )
-        .then(
-          (res) =>
-            Array.isArray(res) &&
-            dispatch({
-              type: 'RECENTLY_PLAYED_SONGS_DATA',
-              data: res
-            })
-        )
-        .catch((err) => console.error(err));
-  }, [noOfRecentandLovedSongCards]);
+  //     if (artistIds.length > 0)
+  //       window.api.artistsData
+  //         .getArtistData(artistIds, undefined, undefined, noOfRecentandLovedArtists)
+  //         .then(
+  //           (res) =>
+  //             Array.isArray(res) &&
+  //             dispatch({
+  //               type: 'RECENT_SONGS_ARTISTS',
+  //               data: res
+  //             })
+  //         )
+  //         .catch((err) => console.error(err));
+  //   }
+  // }, [content.recentlyPlayedSongs, noOfRecentandLovedArtists]);
 
-  const fetchRecentArtistsData = useCallback(() => {
-    if (content.recentlyPlayedSongs.length > 0) {
-      const artistIds = [
-        ...new Set(
-          content.recentlyPlayedSongs
-            .map((song) => (song.artists ? song.artists.map((artist) => artist.artistId) : []))
-            .flat()
-        )
-      ];
+  // // ? Most loved songs are fetched after the user have made at least one favorite song from the library.
+  // const fetchMostLovedSongs = useCallback(() => {
+  //   window.api.playlistsData
+  //     .getPlaylistData(['Favorites'])
+  //     .then((res) => {
+  //       if (Array.isArray(res) && res.length > 0) {
+  //         return window.api.audioLibraryControls.getSongInfo(
+  //           res[0].songs,
+  //           'allTimeMostListened',
+  //           undefined,
+  //           noOfRecentandLovedSongCards + 5,
+  //           true
+  //         );
+  //       }
+  //       return undefined;
+  //     })
+  //     .then(
+  //       (lovedSongs) =>
+  //         Array.isArray(lovedSongs) &&
+  //         lovedSongs.length > 0 &&
+  //         dispatch({ type: 'MOST_LOVED_SONGS', data: lovedSongs })
+  //     )
+  //     .catch((err) => console.error(err));
+  // }, [noOfRecentandLovedSongCards]);
 
-      if (artistIds.length > 0)
-        window.api.artistsData
-          .getArtistData(artistIds, undefined, undefined, noOfRecentandLovedArtists)
-          .then(
-            (res) =>
-              Array.isArray(res) &&
-              dispatch({
-                type: 'RECENT_SONGS_ARTISTS',
-                data: res
-              })
-          )
-          .catch((err) => console.error(err));
-    }
-  }, [content.recentlyPlayedSongs, noOfRecentandLovedArtists]);
-
-  // ? Most loved songs are fetched after the user have made at least one favorite song from the library.
-  const fetchMostLovedSongs = useCallback(() => {
-    window.api.playlistsData
-      .getPlaylistData(['Favorites'])
-      .then((res) => {
-        if (Array.isArray(res) && res.length > 0) {
-          return window.api.audioLibraryControls.getSongInfo(
-            res[0].songs,
-            'allTimeMostListened',
-            undefined,
-            noOfRecentandLovedSongCards + 5,
-            true
-          );
-        }
-        return undefined;
-      })
-      .then(
-        (lovedSongs) =>
-          Array.isArray(lovedSongs) &&
-          lovedSongs.length > 0 &&
-          dispatch({ type: 'MOST_LOVED_SONGS', data: lovedSongs })
-      )
-      .catch((err) => console.error(err));
-  }, [noOfRecentandLovedSongCards]);
-
-  const fetchMostLovedArtists = useCallback(() => {
-    if (content.mostLovedSongs.length > 0) {
-      const artistIds = [
-        ...new Set(
-          content.mostLovedSongs
-            .map((song) => (song.artists ? song.artists.map((artist) => artist.artistId) : []))
-            .flat()
-        )
-      ];
-      window.api.artistsData
-        .getArtistData(artistIds, undefined, undefined, noOfRecentandLovedArtists)
-        .then(
-          (res) =>
-            Array.isArray(res) &&
-            dispatch({
-              type: 'MOST_LOVED_ARTISTS',
-              data: res
-            })
-        )
-        .catch((err) => console.error(err));
-    }
-  }, [content.mostLovedSongs, noOfRecentandLovedArtists]);
-
-  useEffect(() => {
-    console.log('fetchLatestSongs');
-    fetchLatestSongs();
-  }, [fetchLatestSongs]);
-
-  useEffect(() => {
-    console.log('fetchRecentlyPlayedSongs');
-    fetchRecentlyPlayedSongs();
-  }, [fetchRecentlyPlayedSongs]);
-
-  useEffect(() => {
-    console.log('fetchMostLovedSongs');
-    fetchMostLovedSongs();
-  }, [fetchMostLovedSongs]);
-
-  useEffect(() => {
-    const manageDataUpdatesInHomePage = (e: Event) => {
-      if ('detail' in e) {
-        const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
-        for (const event of dataEvents) {
-          if (event.dataType === 'playlists/history') fetchRecentlyPlayedSongs();
-          else if (
-            event.dataType === 'songs/deletedSong' ||
-            event.dataType === 'songs/updatedSong' ||
-            event.dataType === 'songs/newSong' ||
-            event.dataType === 'songs/palette' ||
-            event.dataType === 'blacklist/songBlacklist' ||
-            (event.dataType === 'songs/likes' && event.eventData.length > 1)
-          ) {
-            fetchLatestSongs();
-            fetchRecentlyPlayedSongs();
-            fetchMostLovedSongs();
-          } else if (
-            event.dataType === 'artists/artworks' ||
-            event.dataType === 'artists/deletedArtist' ||
-            event.dataType === 'artists/updatedArtist' ||
-            event.dataType === 'artists/newArtist' ||
-            (event.dataType === 'artists/likes' && event.eventData.length > 1)
-          ) {
-            fetchRecentArtistsData();
-            fetchMostLovedArtists();
-          } else if (
-            event.dataType === 'songs/likes' ||
-            event.dataType === 'songs/listeningData/listens'
-          )
-            fetchMostLovedSongs();
-        }
-      }
-    };
-
-    document.addEventListener('app/dataUpdates', manageDataUpdatesInHomePage);
-    return () => {
-      document.removeEventListener('app/dataUpdates', manageDataUpdatesInHomePage);
-    };
-  }, [
-    fetchLatestSongs,
-    fetchMostLovedArtists,
-    fetchMostLovedSongs,
-    fetchRecentArtistsData,
-    fetchRecentlyPlayedSongs
-  ]);
-
-  useEffect(() => fetchRecentArtistsData(), [fetchRecentArtistsData]);
-  useEffect(() => fetchMostLovedArtists(), [fetchMostLovedArtists]);
+  // const fetchMostLovedArtists = useCallback(() => {
+  //   if (content.mostLovedSongs.length > 0) {
+  //     const artistIds = [
+  //       ...new Set(
+  //         content.mostLovedSongs
+  //           .map((song) => (song.artists ? song.artists.map((artist) => artist.artistId) : []))
+  //           .flat()
+  //       )
+  //     ];
+  //     window.api.artistsData
+  //       .getArtistData(artistIds, undefined, undefined, noOfRecentandLovedArtists)
+  //       .then(
+  //         (res) =>
+  //           Array.isArray(res) &&
+  //           dispatch({
+  //             type: 'MOST_LOVED_ARTISTS',
+  //             data: res
+  //           })
+  //       )
+  //       .catch((err) => console.error(err));
+  //   }
+  // }, [content.mostLovedSongs, noOfRecentandLovedArtists]);
 
   const addNewSongs = useCallback(() => {
     changePromptMenuData(
       true,
       <AddMusicFoldersPrompt
-        onSuccess={(songs) => {
-          const relevantSongsData: AudioInfo[] = songs.map((song) => {
-            return {
-              title: song.title,
-              songId: song.songId,
-              artists: song.artists,
-              duration: song.duration,
-              palette: song.paletteData,
-              path: song.path,
-              artworkPaths: song.artworkPaths,
-              addedDate: song.addedDate,
-              isAFavorite: song.isAFavorite,
-              isBlacklisted: song.isBlacklisted
-            };
-          });
-          dispatch({ type: 'SONGS_DATA', data: relevantSongsData });
-        }}
-        onFailure={() => dispatch({ type: 'SONGS_DATA', data: [null] })}
+      // onSuccess={(songs) => {
+      //   const relevantSongsData: AudioInfo[] = songs.map((song) => {
+      //     return {
+      //       title: song.title,
+      //       songId: song.songId,
+      //       artists: song.artists,
+      //       duration: song.duration,
+      //       palette: song.paletteData,
+      //       path: song.path,
+      //       artworkPaths: song.artworkPaths,
+      //       addedDate: song.addedDate,
+      //       isAFavorite: song.isAFavorite,
+      //       isBlacklisted: song.isBlacklisted
+      //     };
+      //   });
+      //   // dispatch({ type: 'SONGS_DATA', data: relevantSongsData });
+      // }}
+      // onFailure={() => dispatch({ type: 'SONGS_DATA', data: [null] })}
       />
     );
   }, [changePromptMenuData]);
@@ -400,71 +317,98 @@ function HomePage() {
       ref={recentlyAddedSongsContainerRef}
     >
       <>
+        <SecondaryContainer className="appear-from-bottom mt-4 h-fit max-h-full w-full pb-4 pl-8">
+          <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center justify-between text-2xl font-medium">
+            {t('homePage.favoritesAndRecaps')}
+          </div>
+          <div className="flex gap-4">
+            <NavLink
+              to="/main-player/playlists/favorites"
+              className="bg-background-color-2/70 hover:bg-background-color-2! dark:bg-dark-background-color-2/70 dark:hover:bg-dark-background-color-2! text-font-color dark:text-dark-font-color flex h-24 min-w-60 items-center gap-4 rounded-xl px-4 py-4"
+            >
+              <Img
+                src={favoritesPlaylistCoverImage}
+                className="aspect-square h-full w-auto rounded-lg"
+              />
+              <span className="text-xl">Favorites</span>
+            </NavLink>
+            <NavLink
+              to="/main-player/playlists/history"
+              className="bg-background-color-2/70 hover:bg-background-color-2! dark:bg-dark-background-color-2/70 dark:hover:bg-dark-background-color-2! text-font-color dark:text-dark-font-color flex h-24 min-w-60 items-center gap-4 rounded-xl px-4 py-4"
+            >
+              <Img
+                src={historyPlaylistCoverImage}
+                className="aspect-square h-full w-auto rounded-lg"
+              />
+              <span className="text-xl">History</span>
+            </NavLink>
+          </div>
+        </SecondaryContainer>
         {recentlyAddedSongsContainerRef.current && (
           <>
-            {content.latestSongs[0] !== null && (
+            {latestSongs[0] !== null && (
               <RecentlyAddedSongs
-                latestSongs={content.latestSongs as AudioInfo[]}
+                latestSongs={latestSongs}
                 noOfVisibleSongs={noOfRecentlyAddedSongCards}
               />
             )}
             <RecentlyPlayedSongs
-              recentlyPlayedSongs={content.recentlyPlayedSongs.slice(
-                0,
-                noOfRecentandLovedSongCards
-              )}
+              recentlyPlayedSongs={recentlyPlayedSongs.slice(0, noOfRecentandLovedSongCards)}
               noOfVisibleSongs={noOfRecentandLovedSongCards}
             />
             <RecentlyPlayedArtists
-              recentlyPlayedSongArtists={content.recentSongArtists}
+              recentlyPlayedSongArtists={recentSongArtists}
               noOfVisibleArtists={noOfRecentandLovedArtists}
             />
             <MostLovedSongs
-              mostLovedSongs={content.mostLovedSongs.slice(0, noOfRecentandLovedSongCards)}
+              mostLovedSongs={mostLovedSongs.slice(0, noOfRecentandLovedSongCards)}
               noOfVisibleSongs={noOfRecentandLovedSongCards}
             />
             <MostLovedArtists
-              mostLovedArtists={content.mostLovedArtists}
+              mostLovedArtists={mostLovedArtists}
               noOfVisibleArtists={noOfRecentandLovedArtists}
             />
           </>
         )}
 
-        {content.latestSongs[0] === null && (
+        {latestSongs.length === 0 && (
           <div className="no-songs-container appear-from-bottom text-font-color-black dark:text-font-color-white flex h-full w-full flex-col items-center justify-center text-center text-xl">
-            <Img src={NoSongsImage} className="mb-8 w-60" alt={t('homePage.noSongsAvailable')} />
-            <div>{t('homePage.empty')}</div>
-            <div className="flex items-center justify-between">
+            <span className="material-icons-round-outlined text-font-color-highlight dark:text-dark-font-color-highlight mb-4 text-6xl">
+              brightness_empty
+            </span>{' '}
+            <div className="text-font-color-highlight dark:text-dark-font-color-highlight mb-2 text-2xl font-medium">
+              {t('homePage.empty')}
+            </div>
+            <p className="text-sm">{t('homePage.emptyDescription')}</p>
+            <div className="mt-4 flex items-center justify-between gap-4">
               <Button
+                className="mr-0!"
                 label={t('foldersPage.addFolder')}
                 iconName="create_new_folder"
                 iconClassName="material-icons-round-outlined"
-                className="bg-background-color-3! text-font-color-black! hover:border-background-color-3 dark:bg-dark-background-color-3! dark:text-font-color-black! dark:hover:border-background-color-3 mt-4 px-8 text-lg"
                 clickHandler={addNewSongs}
               />
               <Button
+                className="mr-0!"
                 label={t('settingsPage.importAppData')}
                 iconName="publish"
-                className="bg-background-color-3! text-font-color-black! hover:border-background-color-3 dark:bg-dark-background-color-3! dark:text-font-color-black! dark:hover:border-background-color-3 mt-4 px-8 text-lg"
                 clickHandler={importAppData}
               />
             </div>
           </div>
         )}
-        {content.recentlyPlayedSongs.length === 0 && content.latestSongs.length === 0 && (
+        {/* {recentlyPlayedSongs.length === 0 && latestSongs.length === 0 && (
           <div className="no-songs-container text-font-color-dimmed dark:text-dark-font-color-dimmed flex h-full w-full flex-col items-center justify-center text-center text-xl">
             <Img src={DataFetchingImage} className="mb-8 w-48" alt={t('homePage.stayCalm')} />
             <span> {t('homePage.loading')}</span>
           </div>
+        )} */}
+        {latestSongs.length > 0 && latestSongs[0] !== null && recentlyPlayedSongs.length === 0 && (
+          <div className="no-songs-container flex h-full w-full flex-col items-center justify-center text-center text-lg font-normal text-black/60 dark:text-white/60">
+            <span className="material-icons-round-outlined mb-1 text-4xl">headphones</span>{' '}
+            <p className="text-sm">{t('homePage.listenMoreToShowMetrics')}</p>
+          </div>
         )}
-        {content.latestSongs.length > 0 &&
-          content.latestSongs[0] !== null &&
-          content.recentlyPlayedSongs.length === 0 && (
-            <div className="no-songs-container flex h-full w-full flex-col items-center justify-center text-center text-lg font-normal text-black/60 dark:text-white/60">
-              <span className="material-icons-round-outlined mb-1 text-4xl">headphones</span>{' '}
-              <p className="text-sm">{t('homePage.listenMoreToShowMetrics')}</p>
-            </div>
-          )}
       </>
     </MainContainer>
   );

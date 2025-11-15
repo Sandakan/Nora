@@ -11,15 +11,30 @@ import { albumSearchSchema } from '@renderer/utils/zod/albumSchema';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 import { zodValidator } from '@tanstack/zod-adapter';
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useContext, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import storage from '@renderer/utils/localStorage';
 import Button from '@renderer/components/Button';
 import NoAlbumsImage from '@assets/images/svg/Easter bunny_Monochromatic.svg';
+import { albumQuery } from '@renderer/queries/albums';
+import { queryClient } from '@renderer/index';
+import { useSuspenseQuery } from '@tanstack/react-query';
 
 export const Route = createFileRoute('/main-player/albums/')({
   validateSearch: zodValidator(albumSearchSchema),
-  component: AlbumsPage
+  component: AlbumsPage,
+  loaderDeps: ({ search }) => ({
+    sortingOrder: search.sortingOrder
+  }),
+  loader: async ({ deps }) => {
+    await queryClient.ensureQueryData(
+      albumQuery.all({
+        sortType: deps.sortingOrder || 'aToZ',
+        start: 0,
+        end: 0
+      })
+    );
+  }
 });
 
 const MIN_ITEM_WIDTH = 220;
@@ -41,37 +56,26 @@ function AlbumsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate({ from: Route.fullPath });
 
-  const [albumsData, setAlbumsData] = useState([] as Album[]);
+  const {
+    data: { data: albumsData }
+  } = useSuspenseQuery(albumQuery.all({ sortType: sortingOrder }));
 
-  const fetchAlbumData = useCallback(
-    () =>
-      window.api.albumsData.getAlbumData([], sortingOrder).then((res) => {
-        if (res && Array.isArray(res)) {
-          if (res.length > 0) setAlbumsData(res);
-          else setAlbumsData([]);
-        }
-        return undefined;
-      }),
-    [sortingOrder]
-  );
-
-  useEffect(() => {
-    fetchAlbumData();
-    const manageDataUpdatesInAlbumsPage = (e: Event) => {
-      if ('detail' in e) {
-        const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
-        for (let i = 0; i < dataEvents.length; i += 1) {
-          const event = dataEvents[i];
-          if (event.dataType === 'albums/newAlbum') fetchAlbumData();
-          if (event.dataType === 'albums/deletedAlbum') fetchAlbumData();
-        }
-      }
-    };
-    document.addEventListener('app/dataUpdates', manageDataUpdatesInAlbumsPage);
-    return () => {
-      document.removeEventListener('app/dataUpdates', manageDataUpdatesInAlbumsPage);
-    };
-  }, [fetchAlbumData]);
+  // useEffect(() => {
+  //   const manageDataUpdatesInAlbumsPage = (e: Event) => {
+  //     if ('detail' in e) {
+  //       const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
+  //       for (let i = 0; i < dataEvents.length; i += 1) {
+  //         const event = dataEvents[i];
+  //         if (event.dataType === 'albums/newAlbum') fetchAlbumData();
+  //         if (event.dataType === 'albums/deletedAlbum') fetchAlbumData();
+  //       }
+  //     }
+  //   };
+  //   document.addEventListener('app/dataUpdates', manageDataUpdatesInAlbumsPage);
+  //   return () => {
+  //     document.removeEventListener('app/dataUpdates', manageDataUpdatesInAlbumsPage);
+  //   };
+  // }, [fetchAlbumData]);
 
   useEffect(() => {
     storage.sortingStates.setSortingStates('albumsPage', sortingOrder);
@@ -146,7 +150,12 @@ function AlbumsPage() {
               data={albumsData}
               fixedItemWidth={MIN_ITEM_WIDTH}
               fixedItemHeight={MIN_ITEM_HEIGHT}
-              // scrollTopOffset={currentlyActivePage.data?.scrollTopOffset}
+              onDebouncedScroll={(range) => {
+                navigate({
+                  replace: true,
+                  search: (prev) => ({ ...prev, scrollTopOffset: range.startIndex })
+                });
+              }}
               itemContent={(index, item) => {
                 return (
                   <Album

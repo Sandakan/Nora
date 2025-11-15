@@ -1,12 +1,11 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
-import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-
-import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
 import Button from '../Button';
 import { useStore } from '@tanstack/react-store';
 import { store } from '../../store/store';
+import { useNavigate } from '@tanstack/react-router';
 
 type Props = {
   onPopupAppears: (isVisible: boolean) => void;
@@ -18,16 +17,13 @@ const UpNextSongPopup = (props: Props) => {
   const currentSongData = useStore(store, (state) => state.currentSongData);
   const queue = useStore(store, (state) => state.localStorage.queue);
 
-  const {
-    changeCurrentActivePage
-    // changeUpNextSongData
-  } = useContext(AppUpdateContext);
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const { onPopupAppears, isSemiTransparent = false, className } = props;
 
   const [upNextSongData, setUpNextSongData] = useState<SongData>();
-  const upNextSongDataCache = useRef<SongData>();
+  const upNextSongDataCache = useRef<SongData>(null as unknown as SongData);
 
   useEffect(() => {
     onPopupAppears(!!upNextSongData);
@@ -87,9 +83,9 @@ const UpNextSongPopup = (props: Props) => {
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
     let timeIntervalId: NodeJS.Timeout;
-    if (queue.queue.length > 1 && queue.currentSongIndex !== null) {
+    if (queue.songIds.length > 1 && queue.position !== null) {
       setUpNextSongData(undefined);
-      const nextSongIndex = queue.queue[queue.currentSongIndex + 1];
+      const nextSongIndex = queue.songIds[queue.position + 1];
 
       if (nextSongIndex) {
         timeoutId = setTimeout(
@@ -117,16 +113,17 @@ const UpNextSongPopup = (props: Props) => {
       if (timeoutId) clearTimeout(timeoutId);
       if (timeIntervalId) clearInterval(timeIntervalId);
     };
-  }, [queue.currentSongIndex, queue.queue, showPopup]);
+  }, [queue.position, queue.songIds, showPopup]);
 
   const showSongInfoPage = useCallback(
     (songId: string) =>
       currentSongData.isKnownSource
-        ? changeCurrentActivePage('SongInfo', {
-            songId
+        ? navigate({
+            to: '/main-player/songs/$songId',
+            params: { songId }
           })
         : undefined,
-    [changeCurrentActivePage, currentSongData.isKnownSource]
+    [navigate, currentSongData.isKnownSource]
   );
 
   return upNextSongData ? (
@@ -158,15 +155,17 @@ const UpNextSongPopup = (props: Props) => {
               className="cursor-pointer outline-offset-1 hover:underline focus-visible:outline!"
               onClick={() =>
                 upNextSongData?.artists![0] &&
-                changeCurrentActivePage('ArtistInfo', {
-                  artistId: upNextSongData.artists[0].artistId
+                navigate({
+                  to: '/main-player/artists/$artistId',
+                  params: { artistId: upNextSongData.artists[0].artistId }
                 })
               }
               onKeyDown={(e) =>
                 e.key === 'Enter' &&
                 upNextSongData?.artists![0] &&
-                changeCurrentActivePage('ArtistInfo', {
-                  artistId: upNextSongData.artists[0].artistId
+                navigate({
+                  to: '/main-player/artists/$artistId',
+                  params: { artistId: upNextSongData.artists[0].artistId }
                 })
               }
             >

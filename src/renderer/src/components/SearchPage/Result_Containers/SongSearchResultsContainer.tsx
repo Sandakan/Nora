@@ -12,11 +12,11 @@ type Props = {
   songs: SongData[];
   searchInput: string;
   noOfVisibleSongs?: number;
-  isPredictiveSearchEnabled: boolean;
+  isSimilaritySearchEnabled: boolean;
 };
 
 const SongSearchResultsContainer = (props: Props) => {
-  const { searchInput, songs, noOfVisibleSongs = 5, isPredictiveSearchEnabled } = props;
+  const { searchInput, songs, noOfVisibleSongs = 5, isSimilaritySearchEnabled } = props;
   const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
   const isMultipleSelectionEnabled = useStore(
     store,
@@ -124,7 +124,7 @@ const SongSearchResultsContainer = (props: Props) => {
                 clickHandler={() =>
                   navigate({
                     to: '/main-player/search/all',
-                    search: { isPredictiveSearchEnabled, keyword: searchInput, filterBy: 'Songs' }
+                    search: { isSimilaritySearchEnabled, keyword: searchInput, filterBy: 'Songs' }
                   })
                 }
               />

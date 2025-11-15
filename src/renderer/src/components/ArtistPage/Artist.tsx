@@ -1,6 +1,3 @@
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-
 import { store } from '@renderer/store/store';
 import { useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
@@ -11,6 +8,7 @@ import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Button from '../Button';
 import Img from '../Img';
 import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
+import NavLink from '../NavLink';
 
 interface ArtistProp {
   index: number;
@@ -81,8 +79,10 @@ export const Artist = (props: ArtistProp) => {
       return window.api.artistsData
         .getArtistData(artistIds)
         .then((res) => {
-          if (Array.isArray(res) && res.length > 0) {
-            const songIds = res.map((artist) => artist.songs.map((song) => song.songId)).flat();
+          if (Array.isArray(res.data) && res.data.length > 0) {
+            const songIds = res.data
+              .map((artist) => artist.songs.map((song) => song.songId))
+              .flat();
             return window.api.audioLibraryControls.getSongInfo(songIds);
           }
           return undefined;
@@ -148,7 +148,7 @@ export const Artist = (props: ArtistProp) => {
           if (isMultipleSelectionsEnabled) {
             const { multipleSelections: artistIds } = multipleSelectionsData;
             return window.api.artistsData.getArtistData(artistIds).then((artists) => {
-              const songIds = artists
+              const songIds = artists.data
                 .map((artist) => artist.songs.map((song) => song.songId))
                 .flat();
               const uniqueSongIds = [...new Set(songIds)];
@@ -292,7 +292,10 @@ export const Artist = (props: ArtistProp) => {
   );
 
   return (
-    <div
+    <NavLink
+      to="/main-player/artists/$artistId"
+      params={{ artistId: props.artistId }}
+      preload={isMultipleSelectionEnabled ? false : undefined}
       // style={{ animationDelay: `${50 * (props.index + 1)}ms` }}
       className={`artist ${appearFromBottom && 'appear-from-bottom'} hover:bg-background-color-2/50 dark:hover:bg-dark-background-color-2/50 mr-2 flex h-44 w-40 cursor-pointer flex-col justify-between overflow-hidden rounded-lg p-4 ${
         props.className
@@ -302,6 +305,7 @@ export const Artist = (props: ArtistProp) => {
         updateContextMenuData(true, artistContextMenus, e.pageX, e.pageY, contextMenuItemData);
       }}
       onClick={(e) => {
+        e.preventDefault();
         if (e.getModifierState('Shift') === true && props.selectAllHandler)
           props.selectAllHandler(props.artistId);
         else if (e.getModifierState('Control') === true && !isMultipleSelectionEnabled)
@@ -350,6 +354,6 @@ export const Artist = (props: ArtistProp) => {
           clickHandler={goToArtistInfoPage}
         />
       </div>
-    </div>
+    </NavLink>
   );
 };

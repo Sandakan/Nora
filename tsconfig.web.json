@@ -15,6 +15,7 @@
     "resolveJsonModule": true,
     "module": "ES2022",
     "moduleResolution": "bundler",
+    "sourceMap": true,
     "paths": {
       "@renderer/*": [
         "src/renderer/src/*"

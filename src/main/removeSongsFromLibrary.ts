@@ -4,7 +4,6 @@ import {
   getAlbumsData,
   getArtistsData,
   getGenresData,
-  getListeningData,
   getPlaylistData,
   getSongsData,
   setAlbumsData,
@@ -272,7 +271,7 @@ const removeSongsFromLibrary = async (
   let genres = getGenresData();
   let albums = getAlbumsData();
   let playlists = getPlaylistData();
-  let listeningData = getListeningData();
+  const listeningData: SongListeningData[] = [];
   let isArtistRemoved = false;
   let isAlbumRemoved = false;
   let isPlaylistRemoved = false;
@@ -307,7 +306,7 @@ const removeSongsFromLibrary = async (
     albums = data.albums;
     playlists = data.playlists;
     genres = data.genres;
-    listeningData = data.listeningData;
+    // listeningData = data.listeningData;
     isAlbumRemoved = data.isAlbumRemoved;
     isArtistRemoved = data.isArtistRemoved;
     isPlaylistRemoved = data.isPlaylistRemoved;

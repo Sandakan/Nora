@@ -1,19 +1,15 @@
-import { lazy, useContext, useEffect, useState } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import storage from '../../../utils/localStorage';
-
-import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 
 import Button from '../../Button';
 import Checkbox from '../../Checkbox';
 import Dropdown, { type DropdownOption } from '../../Dropdown';
 
 import i18n from '../../../i18n';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store/store';
-
-const MusixmatchSettingsPrompt = lazy(() => import('../MusixmatchSettingsPrompt'));
-const MusixmatchDisclaimerPrompt = lazy(() => import('../MusixmatchDisclaimerPrompt'));
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { settingsQuery } from '@renderer/queries/settings';
+import { queryClient } from '@renderer/index';
 
 const automaticallySaveLyricsOptions: DropdownOption<AutomaticallySaveLyricsTypes>[] = [
   {
@@ -28,13 +24,28 @@ const automaticallySaveLyricsOptions: DropdownOption<AutomaticallySaveLyricsType
 ];
 
 const LyricsSettings = () => {
-  const userData = useStore(store, (state) => state.userData);
+  const { data: userSettings } = useQuery(settingsQuery.all);
 
-  const { changePromptMenuData, updateUserData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const [lyricsAutomaticallySaveState, setLyricsAutomaticallySaveState] =
     useState<AutomaticallySaveLyricsTypes>('NONE');
+
+  const { mutate: updateSaveLyricsInLrcFilesForSupportedSongs } = useMutation({
+    mutationFn: (enableSave: boolean) =>
+      window.api.settings.updateSaveLyricsInLrcFilesForSupportedSongs(enableSave),
+    onSettled: () => {
+      queryClient.invalidateQueries(settingsQuery.all);
+    }
+  });
+
+  const { mutate: updateCustomLrcFilesSaveLocation } = useMutation({
+    mutationFn: (location: string) =>
+      window.api.settings.updateCustomLrcFilesSaveLocation(location),
+    onSettled: () => {
+      queryClient.invalidateQueries(settingsQuery.all);
+    }
+  });
 
   useEffect(() => {
     const lyricsSaveState = storage.preferences.getPreferences('lyricsAutomaticallySaveState');
@@ -59,72 +70,15 @@ const LyricsSettings = () => {
   }, []);
 
   return (
-    <li className="main-container audio-playback-settings-container mb-16">
+    <li
+      className="main-container audio-playback-settings-container mb-16"
+      id="audio-playback-settings-container"
+    >
       <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center text-2xl font-medium">
         <span className="material-icons-round-outlined mr-2">notes</span>
         {t('settingsPage.lyrics')}
       </div>
       <ul className="marker:bg-font-color-highlight dark:marker:bg-dark-font-color-highlight list-disc pl-6">
-        <li className="secondary-container enable-musixmatch-lyrics mb-4">
-          <div className="description">
-            {t('settingsPage.enableMusixmatchLyricsDescription')}
-            <div className="mt-1 ml-2 text-sm font-light">
-              <Trans
-                i18nKey="settingsPage.musixmatchDisclaimerNotice"
-                components={{
-                  Button: (
-                    <Button
-                      className="text-font-color-highlight-2! dark:text-dark-font-color-highlight-2! m-0! inline! rounded-none! border-0! bg-transparent! p-0! px-2 outline-offset-1 hover:underline focus-visible:outline! dark:bg-transparent!"
-                      clickHandler={() => {
-                        changePromptMenuData(true, <MusixmatchDisclaimerPrompt />);
-                      }}
-                    />
-                  )
-                }}
-              />
-            </div>
-          </div>
-          <div className="mt-4 flex">
-            {userData?.preferences.isMusixmatchLyricsEnabled && (
-              <Button
-                label={t('settingsPage.editMusixmatchSettings')}
-                iconName="settings"
-                clickHandler={() =>
-                  changePromptMenuData(
-                    true,
-                    <MusixmatchSettingsPrompt />,
-                    'edit-musixmatch-settings'
-                  )
-                }
-              />
-            )}
-            <Button
-              label={
-                userData?.preferences.isMusixmatchLyricsEnabled
-                  ? t('settingsPage.musixmatchEnabled')
-                  : t('settingsPage.enableMusixmatch')
-              }
-              iconName={userData?.preferences.isMusixmatchLyricsEnabled ? 'done' : undefined}
-              clickHandler={() => {
-                const state = !userData?.preferences.isMusixmatchLyricsEnabled;
-                window.api.userData
-                  .saveUserData('preferences.isMusixmatchLyricsEnabled', state)
-                  .then(() =>
-                    updateUserData((prevData) => ({
-                      ...prevData,
-                      preferences: {
-                        ...prevData.preferences,
-                        isMusixmatchLyricsEnabled: state
-                      }
-                    }))
-                  )
-                  .catch((err) => console.error(err));
-              }}
-              isDisabled={userData?.preferences.isMusixmatchLyricsEnabled}
-            />
-          </div>
-        </li>
-
         <li className="save-lyrics-automatically mb-4">
           <div className="description">{t('settingsPage.saveLyricsAutomaticallyDescription')}</div>
           <div className="mt-4 flex flex-row items-center">
@@ -152,20 +106,10 @@ const LyricsSettings = () => {
           <Checkbox
             id="saveLyricsInLrcFilesForSupportedSongs"
             isChecked={
-              userData !== undefined && userData?.preferences.saveLyricsInLrcFilesForSupportedSongs
+              userSettings !== undefined && userSettings.saveLyricsInLrcFilesForSupportedSongs
             }
             checkedStateUpdateFunction={(state) =>
-              window.api.userData
-                .saveUserData('preferences.saveLyricsInLrcFilesForSupportedSongs', state)
-                .then(() =>
-                  updateUserData((prevUserData) => ({
-                    ...prevUserData,
-                    preferences: {
-                      ...prevUserData.preferences,
-                      saveLyricsInLrcFilesForSupportedSongs: state
-                    }
-                  }))
-                )
+              updateSaveLyricsInLrcFilesForSupportedSongs(state)
             }
             labelContent={t('settingsPage.saveLyricsInLrcFiles')}
           />
@@ -176,11 +120,11 @@ const LyricsSettings = () => {
             {t('settingsPage.lrcFileCustomSaveLocationDescription')}
           </div>
           <div className="mt-4 ml-2 flex-row text-sm">
-            {userData?.customLrcFilesSaveLocation && (
+            {userSettings?.customLrcFilesSaveLocation && (
               <>
                 <span>{t('settingsPage.selectedCustomLocation')}: </span>
                 <span className="text-font-color-highlight dark:text-dark-font-color-highlight mr-4">
-                  {userData.customLrcFilesSaveLocation}
+                  {userSettings.customLrcFilesSaveLocation}
                 </span>
               </>
             )}
@@ -193,16 +137,7 @@ const LyricsSettings = () => {
               clickHandler={() =>
                 window.api.settingsHelpers
                   .getFolderLocation()
-                  .then((folderPath) =>
-                    window.api.userData
-                      .saveUserData('customLrcFilesSaveLocation', folderPath)
-                      .then(() =>
-                        updateUserData((prevUserData) => ({
-                          ...prevUserData,
-                          customLrcFilesSaveLocation: folderPath
-                        }))
-                      )
-                  )
+                  .then((folderPath) => updateCustomLrcFilesSaveLocation(folderPath))
                   .catch((err) => console.warn(err))
               }
             />

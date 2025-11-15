@@ -90,7 +90,7 @@ const Img = memo((props: ImgProps) => {
   } = props;
 
   const imgRef = useRef<HTMLImageElement>(null);
-  const imgPropsRef = useRef<ImgProperties>();
+  const imgPropsRef = useRef<ImgProperties>(null);
   const errorCountRef = useRef(0);
   const isFirstTimeRef = useRef(true);
 

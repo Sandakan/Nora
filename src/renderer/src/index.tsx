@@ -9,7 +9,14 @@ import './i18n';
 import { routeTree } from './routeTree.gen';
 
 // Create a new router instance
-export const queryClient = new QueryClient();
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false, // default: true
+      staleTime: 1000 * 60 * 1 // 1 minutes
+    }
+  }
+});
 
 const history = createHashHistory();
 // Create a new router instance
@@ -20,6 +27,7 @@ export const router = createRouter({
   scrollRestoration: true,
   context: { queryClient },
   defaultPreload: 'intent',
+  defaultPreloadDelay: 100,
   defaultPreloadStaleTime: 0,
   defaultViewTransition: true,
   defaultPendingMs: 1000, // Show pending component if loader exceeds 1 second

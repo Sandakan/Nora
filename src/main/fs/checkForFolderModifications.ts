@@ -1,18 +1,17 @@
 import path from 'path';
-import { getUserData } from '../filesystem';
 import removeMusicFolder from '../core/removeMusicFolder';
 import { dirExistsSync } from '../utils/dirExists';
 import logger from '../logger';
-import { getAllFoldersFromFolderStructures } from './parseFolderStructuresForSongPaths';
+import { getAllFolders } from '@main/db/queries/folders';
 
-const checkForFolderModifications = (folderName: string) => {
-  const { musicFolders } = getUserData();
+const checkForFolderModifications = async (folderName: string) => {
+  const musicFolders = await getAllFolders();
 
-  const folders = getAllFoldersFromFolderStructures(musicFolders);
-  const musicFolderPaths = folders.map((folder) => folder.path);
+  const musicFolderPaths = musicFolders.map((folder) => folder.path);
   const foldersWithDeletedFolderName = musicFolderPaths.filter(
     (dir) => path.basename(dir) === path.basename(folderName)
   );
+
   if (foldersWithDeletedFolderName.length > 0) {
     for (let i = 0; i < foldersWithDeletedFolderName.length; i += 1) {
       try {

@@ -6,17 +6,24 @@ import TitleContainer from '@renderer/components/TitleContainer';
 import VirtualizedList from '@renderer/components/VirtualizedList';
 import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
 import useSelectAllHandler from '@renderer/hooks/useSelectAllHandler';
+import { queryClient } from '@renderer/index';
+import { genreQuery } from '@renderer/queries/genres';
+import { songQuery } from '@renderer/queries/songs';
 import { store } from '@renderer/store/store';
 import { songSearchSchema } from '@renderer/utils/zod/songSchema';
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 import { zodValidator } from '@tanstack/zod-adapter';
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
 export const Route = createFileRoute('/main-player/genres/$genreId')({
   validateSearch: zodValidator(songSearchSchema),
-  component: GenreInfoPage
+  component: GenreInfoPage,
+  loader: async ({ params }) => {
+    await queryClient.ensureQueryData(genreQuery.single({ genreId: params.genreId }));
+  }
 });
 
 function GenreInfoPage() {
@@ -35,75 +42,17 @@ function GenreInfoPage() {
     filteringOrder = 'notSelected'
   } = Route.useSearch();
 
-  const [genreData, setGenreData] = useState<Genre>();
-  const [genreSongs, setGenreSongs] = useState<AudioInfo[]>([]);
-
-  const fetchGenresData = useCallback(() => {
-    window.api.genresData
-      .getGenresData([genreId])
-      .then((res) => {
-        if (res && res.length > 0 && res[0]) setGenreData(res[0]);
-        return undefined;
-      })
-      .catch((err) => console.error(err));
-  }, [genreId]);
-
-  const fetchSongsData = useCallback(() => {
-    if (genreData && genreData.songs && genreData.songs.length > 0) {
-      window.api.audioLibraryControls
-        .getSongInfo(
-          genreData.songs.map((song) => song.songId),
-          sortingOrder,
-          filteringOrder
-        )
-        .then((res) => {
-          if (res) return setGenreSongs(res);
-          return undefined;
-        })
-        .catch((err) => console.error(err));
-    }
-    return undefined;
-  }, [filteringOrder, genreData, sortingOrder]);
-
-  useEffect(() => {
-    fetchGenresData();
-    const manageGenreUpdatesInGenresInfoPage = (e: Event) => {
-      if ('detail' in e) {
-        const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
-        for (let i = 0; i < dataEvents.length; i += 1) {
-          const event = dataEvents[i];
-          if (event.dataType === 'genres') fetchGenresData();
-        }
-      }
-    };
-    document.addEventListener('app/dataUpdates', manageGenreUpdatesInGenresInfoPage);
-    return () => {
-      document.removeEventListener('app/dataUpdates', manageGenreUpdatesInGenresInfoPage);
-    };
-  }, [fetchGenresData]);
-
-  useEffect(() => {
-    fetchSongsData();
-    const manageSongUpdatesInGenreInfoPage = (e: Event) => {
-      if ('detail' in e) {
-        const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
-        for (let i = 0; i < dataEvents.length; i += 1) {
-          const event = dataEvents[i];
-          if (
-            event.dataType === 'songs/deletedSong' ||
-            event.dataType === 'songs/newSong' ||
-            event.dataType === 'blacklist/songBlacklist' ||
-            (event.dataType === 'songs/likes' && event.eventData.length > 1)
-          )
-            fetchSongsData();
-        }
-      }
-    };
-    document.addEventListener('app/dataUpdates', manageSongUpdatesInGenreInfoPage);
-    return () => {
-      document.removeEventListener('app/dataUpdates', manageSongUpdatesInGenreInfoPage);
-    };
-  }, [fetchSongsData]);
+  const { data: genreData } = useSuspenseQuery({
+    ...genreQuery.single({ genreId }),
+    select: (data) => data.data[0]
+  });
+  const { data: genreSongs = [] } = useQuery(
+    songQuery.allSongInfo({
+      songIds: genreData?.songs.map((song) => song.songId) ?? [],
+      sortType: sortingOrder,
+      filterType: filteringOrder
+    })
+  );
 
   const selectAllHandler = useSelectAllHandler(genreSongs, 'songs', 'songId');
 
@@ -116,11 +65,6 @@ function GenreInfoPage() {
       playSong(currSongId, true);
     },
     [createQueue, genreData?.genreId, genreSongs, playSong]
-  );
-
-  const listItems = useMemo(
-    () => [genreData, ...genreSongs].filter((x) => x !== undefined) as (Genre | AudioInfo)[],
-    [genreData, genreSongs]
   );
 
   return (
@@ -215,23 +159,24 @@ function GenreInfoPage() {
       />
 
       <VirtualizedList
-        data={listItems}
+        data={genreSongs}
         fixedItemHeight={60}
         scrollTopOffset={scrollTopOffset}
+        components={{
+          Header: () => <GenreImgAndInfoContainer genreData={genreData} genreSongs={genreSongs} />
+        }}
         itemContent={(index, item) => {
-          if ('songId' in item)
-            return (
-              <Song
-                key={index}
-                index={index}
-                isIndexingSongs={preferences?.isSongIndexingEnabled}
-                onPlayClick={handleSongPlayBtnClick}
-                selectAllHandler={selectAllHandler}
-                {...item}
-                trackNo={undefined}
-              />
-            );
-          return <GenreImgAndInfoContainer genreData={item} genreSongs={genreSongs} />;
+          return (
+            <Song
+              key={index}
+              index={index}
+              isIndexingSongs={preferences?.isSongIndexingEnabled}
+              onPlayClick={handleSongPlayBtnClick}
+              selectAllHandler={selectAllHandler}
+              {...item}
+              trackNo={undefined}
+            />
+          );
         }}
       />
     </MainContainer>

@@ -4,8 +4,6 @@ import { normalizedKeys } from './appShortcuts';
 import i18n from '@renderer/i18n';
 
 export interface AppReducer {
-  userData: UserData;
-  isDarkMode: boolean;
   localStorage: LocalStorage;
   currentSongData: AudioPlayerData;
   upNextSongData?: AudioPlayerData;
@@ -30,12 +28,7 @@ export interface AppReducer {
 }
 
 export type AppReducerStateActions =
-  | { type: 'USER_DATA_CHANGE'; data: UserData }
   | { type: 'START_PLAY_STATE_CHANGE'; data: unknown }
-  | {
-      type: 'APP_THEME_CHANGE';
-      data: AppThemeData;
-    }
   | { type: 'CURRENT_SONG_DATA_CHANGE'; data: AudioPlayerData }
   | { type: 'UP_NEXT_SONG_DATA_CHANGE'; data?: AudioPlayerData }
   | { type: 'CURRENT_SONG_PLAYBACK_STATE'; data: boolean }
@@ -57,7 +50,7 @@ export type AppReducerStateActions =
   | { type: 'TOGGLE_IS_FAVORITE_STATE'; data?: boolean }
   | { type: 'TOGGLE_SHUFFLE_STATE'; data?: boolean }
   | { type: 'UPDATE_VOLUME_VALUE'; data: number }
-  | { type: 'UPDATE_QUEUE'; data: Queue }
+  | { type: 'UPDATE_QUEUE'; data: PlayerQueueJson }
   | { type: 'UPDATE_QUEUE_CURRENT_SONG_INDEX'; data: number }
   | { type: 'TOGGLE_REDUCED_MOTION'; data?: boolean }
   | { type: 'TOGGLE_SONG_INDEXING'; data?: boolean }
@@ -76,19 +69,6 @@ export type AppReducerStateActions =
 
 export const reducer = (state: AppReducer, action: AppReducerStateActions): AppReducer => {
   switch (action.type) {
-    case 'APP_THEME_CHANGE': {
-      const theme = action.data ?? USER_DATA_TEMPLATE.theme;
-      return {
-        ...state,
-        isDarkMode: theme.isDarkMode,
-        userData: { ...state.userData, theme }
-      };
-    }
-    case 'USER_DATA_CHANGE':
-      return {
-        ...state,
-        userData: action.data ?? state.userData
-      };
     case 'TOGGLE_REDUCED_MOTION':
       return {
         ...state,
@@ -211,7 +191,7 @@ export const reducer = (state: AppReducer, action: AppReducerStateActions): AppR
     case 'UP_NEXT_SONG_DATA_CHANGE':
       return {
         ...state,
-        currentSongData: action.data ?? state.currentSongData
+        upNextSongData: action.data ?? state.upNextSongData
       };
     case 'CURRENT_SONG_PLAYBACK_STATE': {
       return {
@@ -409,7 +389,7 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
     enableArtworkFromSongCovers: false,
     shuffleArtworkFromSongCovers: false,
     removeAnimationsOnBatteryPower: false,
-    isPredictiveSearchEnabled: true,
+    isSimilaritySearchEnabled: true,
     lyricsAutomaticallySaveState: 'NONE',
     showTrackNumberAsSongIndex: true,
     allowToPreventScreenSleeping: true,
@@ -431,7 +411,7 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
     },
     playbackRate: 1.0
   },
-  queue: { currentSongIndex: null, queue: [], queueType: 'songs' },
+  queue: { position: 0, songIds: [] },
   ignoredSeparateArtists: [],
   ignoredSongsWithFeatArtists: [],
   ignoredDuplicates: {
@@ -623,36 +603,42 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
       ]
     }
   ]
-};
+} satisfies LocalStorage;
 
 export const USER_DATA_TEMPLATE: UserData = {
   language: 'en',
-  theme: { isDarkMode: false, useSystemTheme: true },
-  musicFolders: [],
-  preferences: {
-    autoLaunchApp: false,
-    isMiniPlayerAlwaysOnTop: false,
-    isMusixmatchLyricsEnabled: false,
-    hideWindowOnClose: false,
-    openWindowAsHiddenOnSystemStart: false,
-    openWindowMaximizedOnStart: false,
-    sendSongScrobblingDataToLastFM: false,
-    sendSongFavoritesDataToLastFM: false,
-    sendNowPlayingSongDataToLastFM: false,
-    saveLyricsInLrcFilesForSupportedSongs: false,
-    enableDiscordRPC: false,
-    saveVerboseLogs: false
-  },
-  windowPositions: {},
-  windowDiamensions: {},
-  windowState: 'normal',
-  recentSearches: []
+  autoLaunchApp: false,
+  isMiniPlayerAlwaysOnTop: false,
+  isMusixmatchLyricsEnabled: false,
+  hideWindowOnClose: false,
+  openWindowAsHiddenOnSystemStart: false,
+  openWindowMaximizedOnStart: false,
+  sendSongScrobblingDataToLastFM: false,
+  sendSongFavoritesDataToLastFM: false,
+  sendNowPlayingSongDataToLastFM: false,
+  saveLyricsInLrcFilesForSupportedSongs: false,
+  enableDiscordRPC: false,
+  saveVerboseLogs: false,
+  customLrcFilesSaveLocation: null,
+  isDarkMode: false,
+  useSystemTheme: true,
+  lastFmSessionKey: null,
+  lastFmSessionName: null,
+  mainWindowX: null,
+  mainWindowY: null,
+  mainWindowWidth: null,
+  mainWindowHeight: null,
+  miniPlayerX: null,
+  miniPlayerY: null,
+  miniPlayerWidth: null,
+  miniPlayerHeight: null,
+  recentSearches: [],
+  windowState: 'normal'
 };
 
 const localStorage = storage.getLocalStorage();
 
 export const DEFAULT_REDUCER_DATA: AppReducer = {
-  isDarkMode: false,
   playerType: 'normal',
   player: {
     isCurrentSongPlaying: false,
@@ -663,7 +649,6 @@ export const DEFAULT_REDUCER_DATA: AppReducer = {
     isPlayerStalled: false,
     playbackRate: localStorage.playback.playbackRate
   },
-  userData: USER_DATA_TEMPLATE,
   currentSongData: {} as AudioPlayerData,
   upNextSongData: {} as AudioPlayerData,
   localStorage,

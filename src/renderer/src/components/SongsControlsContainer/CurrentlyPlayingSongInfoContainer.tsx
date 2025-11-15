@@ -24,7 +24,6 @@ const CurrentlyPlayingSongInfoContainer = () => {
   const navigate = useNavigate();
 
   const {
-    changeCurrentActivePage,
     updateContextMenuData,
     changePromptMenuData,
     toggleMultipleSelections,
@@ -66,21 +65,23 @@ const CurrentlyPlayingSongInfoContainer = () => {
   const showSongInfoPage = useCallback(
     (songId: string) =>
       currentSongData.isKnownSource
-        ? changeCurrentActivePage('SongInfo', {
-            songId
+        ? navigate({
+            to: '/main-player/songs/$songId',
+            params: { songId }
           })
         : undefined,
-    [changeCurrentActivePage, currentSongData.isKnownSource]
+    [navigate, currentSongData.isKnownSource]
   );
 
   const gotToSongAlbumPage = useCallback(
     () =>
       currentSongData.isKnownSource && currentSongData.album
-        ? changeCurrentActivePage('AlbumInfo', {
-            albumId: currentSongData.album.albumId
+        ? navigate({
+            to: '/main-player/albums/$albumId',
+            params: { albumId: currentSongData.album.albumId }
           })
         : undefined,
-    [changeCurrentActivePage, currentSongData.album, currentSongData.isKnownSource]
+    [navigate, currentSongData.album, currentSongData.isKnownSource]
   );
 
   const songArtists = useMemo(() => {
@@ -168,13 +169,15 @@ const CurrentlyPlayingSongInfoContainer = () => {
         label: t('song.editSongTags'),
         class: 'edit',
         iconName: 'edit',
-        handlerFunction: () =>
-          changeCurrentActivePage('SongTagsEditor', {
-            songId,
-            songArtworkPath: artworkPath,
-            songPath: path,
-            isKnownSource
-          })
+        handlerFunction: () => {
+          // TODO: Implement song tags editor page navigation
+          // changeCurrentActivePage('SongTagsEditor', {
+          //   songId,
+          //   songArtworkPath: artworkPath,
+          //   songPath: path,
+          //   isKnownSource
+          // });
+        }
       },
       {
         label: t('common.saveArtwork'),
@@ -237,7 +240,6 @@ const CurrentlyPlayingSongInfoContainer = () => {
     ];
   }, [
     addNewNotifications,
-    changeCurrentActivePage,
     changePromptMenuData,
     currentSongData,
     gotToSongAlbumPage,

@@ -6,18 +6,31 @@ import AllGenreResults from '@renderer/components/SearchPage/All_Search_Result_C
 import AllPlaylistResults from '@renderer/components/SearchPage/All_Search_Result_Containers/AllPlaylistResults';
 import AllSongResults from '@renderer/components/SearchPage/All_Search_Result_Containers/AllSongResults';
 import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
+import { queryClient } from '@renderer/index';
+import { searchQuery } from '@renderer/queries/search';
 import { store } from '@renderer/store/store';
-import log from '@renderer/utils/log';
 import { searchPageSchema } from '@renderer/utils/zod/searchPageSchema';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 import { zodValidator } from '@tanstack/zod-adapter';
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useContext, useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 export const Route = createFileRoute('/main-player/search/all/')({
   validateSearch: zodValidator(searchPageSchema),
-  component: RouteComponent
+  component: RouteComponent,
+  loaderDeps: ({ search }) => ({ search }),
+  loader: async ({ deps }) => {
+    await queryClient.ensureQueryData(
+      searchQuery.query({
+        keyword: deps.search.keyword,
+        filter: deps.search.filterBy,
+        isSimilaritySearchEnabled: deps.search.isSimilaritySearchEnabled,
+        updateSearchHistory: true
+      })
+    );
+  }
 });
 
 function RouteComponent() {
@@ -28,16 +41,16 @@ function RouteComponent() {
 
   const { toggleMultipleSelections } = useContext(AppUpdateContext);
   const { t } = useTranslation();
-  const { keyword, isPredictiveSearchEnabled, filterBy } = Route.useSearch();
+  const { keyword, isSimilaritySearchEnabled, filterBy } = Route.useSearch();
 
-  const [searchResults, setSearchResults] = useState({
-    albums: [],
-    artists: [],
-    songs: [],
-    playlists: [],
-    genres: [],
-    availableResults: []
-  } as SearchResult);
+  const { data: searchResults } = useSuspenseQuery(
+    searchQuery.query({
+      keyword: keyword,
+      filter: filterBy,
+      isSimilaritySearchEnabled: isSimilaritySearchEnabled,
+      updateSearchHistory: true
+    })
+  );
 
   const selectedType = useMemo((): QueueTypes | undefined => {
     if (filterBy === 'Songs') return 'songs';
@@ -47,55 +60,6 @@ function RouteComponent() {
     if (filterBy === 'Genres') return 'genre';
     return undefined;
   }, [filterBy]);
-
-  const fetchSearchResults = useCallback(() => {
-    if (keyword.trim() !== '') {
-      window.api.search
-        .search(filterBy, keyword, false, isPredictiveSearchEnabled)
-        .then((results) => {
-          return setSearchResults(results);
-        })
-        .catch((err) => log(err, undefined, 'WARN'));
-    } else
-      setSearchResults({
-        albums: [],
-        artists: [],
-        songs: [],
-        playlists: [],
-        genres: [],
-        availableResults: []
-      });
-  }, [filterBy, isPredictiveSearchEnabled, keyword]);
-
-  useEffect(() => {
-    fetchSearchResults();
-    const manageSearchResultsUpdatesInAllSearchResultsPage = (e: Event) => {
-      if ('detail' in e) {
-        const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
-        for (let i = 0; i < dataEvents.length; i += 1) {
-          const event = dataEvents[i];
-          if (
-            event.dataType === 'songs' ||
-            event.dataType === 'artists' ||
-            event.dataType === 'albums' ||
-            event.dataType === 'playlists/newPlaylist' ||
-            event.dataType === 'playlists/deletedPlaylist' ||
-            event.dataType === 'genres/newGenre' ||
-            event.dataType === 'genres/deletedGenre' ||
-            event.dataType === 'blacklist/songBlacklist'
-          )
-            fetchSearchResults();
-        }
-      }
-    };
-    document.addEventListener('app/dataUpdates', manageSearchResultsUpdatesInAllSearchResultsPage);
-    return () => {
-      document.removeEventListener(
-        'app/dataUpdates',
-        manageSearchResultsUpdatesInAllSearchResultsPage
-      );
-    };
-  }, [fetchSearchResults]);
 
   return (
     <MainContainer className="main-container all-search-results-container h-full! pb-0!">

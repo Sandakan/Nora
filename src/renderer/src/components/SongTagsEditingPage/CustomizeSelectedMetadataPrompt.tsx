@@ -98,7 +98,7 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
         : []
       : undefined;
     const artistData = isArtistsSelected
-      ? await window.api.artistsData.getArtistData(artists)
+      ? await window.api.artistsData.getArtistData(artists).then((res) => res.data)
       : undefined;
     const genreData = isGenresSelected
       ? genres
@@ -148,7 +148,7 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
     changePromptMenuData(false, undefined, '');
 
     const albumData = album ? await window.api.albumsData.getAlbumData([album]) : [];
-    const artistData = await window.api.artistsData.getArtistData(artists);
+    const artistData = await window.api.artistsData.getArtistData(artists).then((res) => res.data);
     const genreData = genres ? await window.api.genresData.getGenresData(genres) : [];
 
     updateSongInfo((prevData) => {

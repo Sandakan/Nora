@@ -7,6 +7,7 @@ import Button from '../Button';
 import splitFeaturingArtists from '../../utils/splitFeaturingArtists';
 import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store/store';
+import { useNavigate } from '@tanstack/react-router';
 
 type Props = {
   name?: string;
@@ -14,11 +15,12 @@ type Props = {
 };
 
 const SeparateArtistsSuggestion = (props: Props) => {
+  const navigate = useNavigate();
+
   const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
   const currentSongData = useStore(store, (state) => state.currentSongData);
 
-  const { addNewNotifications, changeCurrentActivePage, updateCurrentSongData } =
-    useContext(AppUpdateContext);
+  const { addNewNotifications, updateCurrentSongData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { name = '', artistId = '' } = props;
@@ -83,7 +85,7 @@ const SeparateArtistsSuggestion = (props: Props) => {
             }));
           }
           setIsIgnored(true);
-          changeCurrentActivePage('Home');
+          navigate({ to: '/main-player/home' });
 
           return addNewNotifications([
             {
@@ -103,7 +105,6 @@ const SeparateArtistsSuggestion = (props: Props) => {
     [
       addNewNotifications,
       artistId,
-      changeCurrentActivePage,
       currentSongData.songId,
       separatedArtistsNames,
       t,

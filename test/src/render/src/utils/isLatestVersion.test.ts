@@ -1,4 +1,5 @@
-import isLatestVersion from '../src/renderer/src/utils/isLatestVersion';
+import { describe, test, expect } from 'vitest';
+import isLatestVersion from '../../../../../src/renderer/src/utils/isLatestVersion';
 
 describe('App versions check', () => {
   test('Basic version checks', () => {

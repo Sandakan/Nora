@@ -12,12 +12,12 @@ import { useNavigate } from '@tanstack/react-router';
 type Props = {
   artists: Artist[];
   searchInput: string;
-  isPredictiveSearchEnabled: boolean;
+  isSimilaritySearchEnabled: boolean;
   noOfVisibleArtists?: number;
 };
 
 const ArtistsSearchResultsContainer = (props: Props) => {
-  const { artists, searchInput, noOfVisibleArtists = 5, isPredictiveSearchEnabled } = props;
+  const { artists, searchInput, noOfVisibleArtists = 5, isSimilaritySearchEnabled } = props;
   const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
   const isMultipleSelectionEnabled = useStore(
     store,
@@ -119,7 +119,7 @@ const ArtistsSearchResultsContainer = (props: Props) => {
                 clickHandler={() =>
                   navigate({
                     to: '/main-player/search/all',
-                    search: { keyword: searchInput, isPredictiveSearchEnabled, filterBy: 'Artists' }
+                    search: { keyword: searchInput, isSimilaritySearchEnabled, filterBy: 'Artists' }
                   })
                 }
               />

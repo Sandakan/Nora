@@ -53,9 +53,9 @@ const TitleBar = memo(() => {
             </span>
           </span>
         </div>
-        {playerType !== 'full' && <NavigationControlsContainer />}
+        {playerType !== 'full' ? <NavigationControlsContainer /> : <div />}
       </div>
-      {window.api.properties.isInDevelopment && <CurrentLocationContainer />}
+      {window.api.properties.isInDevelopment ? <CurrentLocationContainer /> : <div />}
       <div className="window-controls-and-special-controls-and-indicators-container flex h-full flex-row">
         <div className="special-controls-and-indicators-container mr-2 flex items-center justify-between py-1">
           <div className="indicators-container flex flex-row">

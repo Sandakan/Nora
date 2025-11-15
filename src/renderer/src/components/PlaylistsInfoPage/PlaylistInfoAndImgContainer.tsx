@@ -33,7 +33,12 @@ const PlaylistInfoAndImgContainer = (props: Props) => {
           <div className="playlist-cover-container mt-2 overflow-hidden">
             {preferences.enableArtworkFromSongCovers && playlist.songs.length > 1 ? (
               <div className="relative h-60 w-60">
-                <MultipleArtworksCover songIds={playlist.songs} className="h-60 w-60" type={1} />
+                <MultipleArtworksCover
+                  songIds={playlist.songs}
+                  artworks={songs.map((song) => song.artworkPaths)}
+                  className="h-60 w-60"
+                  type={1}
+                />
                 <Img
                   src={playlist.artworkPaths.artworkPath}
                   alt="Playlist Cover"

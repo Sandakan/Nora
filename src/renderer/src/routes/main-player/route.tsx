@@ -4,7 +4,9 @@ import Img from '@renderer/components/Img';
 import PromptMenu from '@renderer/components/PromptMenu/PromptMenu';
 import SongControlsContainer from '@renderer/components/SongsControlsContainer/SongControlsContainer';
 import TitleBar from '@renderer/components/TitleBar/TitleBar';
+import { settingsQuery } from '@renderer/queries/settings';
 import { store } from '@renderer/store/store';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 
@@ -21,7 +23,12 @@ function RouteComponent() {
       (state.isOnBatteryPower && state.localStorage.preferences.removeAnimationsOnBatteryPower)
     );
   });
-  const isDarkMode = useStore(store, (state) => state.isDarkMode);
+  const {
+    data: { isDarkMode }
+  } = useSuspenseQuery({
+    ...settingsQuery.all,
+    select: (data) => ({ isDarkMode: data.isDarkMode })
+  });
   const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
 
   return (

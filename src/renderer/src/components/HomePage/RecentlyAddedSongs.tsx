@@ -1,17 +1,17 @@
-import { type ForwardedRef, forwardRef, useContext, useMemo } from 'react';
+import { type ForwardedRef, forwardRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import useSelectAllHandler from '../../hooks/useSelectAllHandler';
 import SongCard from '../SongsPage/SongCard';
 import DefaultSongCover from '../../assets/images/webp/song_cover_default.webp';
 import SecondaryContainer from '../SecondaryContainer';
 import Button from '../Button';
+import { useNavigate } from '@tanstack/react-router';
 
 type Props = { latestSongs: AudioInfo[]; noOfVisibleSongs: number };
 
 const RecentlyAddedSongs = forwardRef((props: Props, ref: ForwardedRef<HTMLDivElement>) => {
-  const { changeCurrentActivePage } = useContext(AppUpdateContext);
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const { latestSongs, noOfVisibleSongs = 6 } = props;
   const MAX_SONG_LIMIT = 30;
@@ -68,8 +68,8 @@ const RecentlyAddedSongs = forwardRef((props: Props, ref: ForwardedRef<HTMLDivEl
               iconName="apps"
               className="show-all-btn text-sm font-normal"
               clickHandler={() =>
-                changeCurrentActivePage('Songs', {
-                  sortingOrder: 'dateAddedAscending'
+                navigate({
+                  to: '/main-player/songs'
                 })
               }
             />

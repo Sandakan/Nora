@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/no-noninteractive-tabindex */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import { lazy, useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -21,6 +20,7 @@ import DefaultSongCover from '../../assets/images/webp/song_cover_default.webp';
 import { useStore } from '@tanstack/react-store';
 import { store } from '../../store/store';
 import { useNavigate } from '@tanstack/react-router';
+import NavLink from '../NavLink';
 
 interface SongCardProp {
   index: number;
@@ -54,7 +54,6 @@ const SongCard = (props: SongCardProp) => {
   const {
     playSong,
     updateContextMenuData,
-    changeCurrentActivePage,
     updateQueueData,
     addNewNotifications,
     changePromptMenuData,
@@ -138,11 +137,6 @@ const SongCard = (props: SongCardProp) => {
           subTitle: artists?.map((artist) => artist.name).join(', ') ?? t('common.unknownArtist'),
           artworkPath
         };
-
-  const showSongInfoPage = () =>
-    changeCurrentActivePage('SongInfo', {
-      songId
-    });
 
   const handleLikeButtonClick = useCallback(() => {
     window.api.playerControls
@@ -371,10 +365,7 @@ const SongCard = (props: SongCardProp) => {
         label: t('common.info'),
         class: 'info',
         iconName: 'info',
-        handlerFunction: () =>
-          changeCurrentActivePage('SongInfo', {
-            songId
-          }),
+        handlerFunction: () => navigate({ to: '/main-player/songs/$songId', params: { songId } }),
         isDisabled: isMultipleSelectionsEnabled
       },
       {
@@ -392,12 +383,14 @@ const SongCard = (props: SongCardProp) => {
         label: t('song.editSongTags'),
         class: 'edit',
         iconName: 'edit',
-        handlerFunction: () =>
-          changeCurrentActivePage('SongTagsEditor', {
-            songId,
-            songArtworkPath: artworkPath,
-            songPath: path
-          }),
+        handlerFunction: () => {
+          // TODO: Implement song tags editor page navigation
+          // changeCurrentActivePage('SongTagsEditor', {
+          //   songId,
+          //   songArtworkPath: artworkPath,
+          //   songPath: path
+          // });
+        },
         isDisabled: isMultipleSelectionsEnabled
       },
       {
@@ -471,8 +464,8 @@ const SongCard = (props: SongCardProp) => {
     handlePlayBtnClick,
     toggleMultipleSelections,
     createQueue,
-    queue.currentSongIndex,
-    queue.queue,
+    queue.position,
+    queue.songIds,
     currentSongData.songId,
     currentSongData.isAFavorite,
     updateQueueData,
@@ -484,7 +477,6 @@ const SongCard = (props: SongCardProp) => {
     changePromptMenuData,
     isMultipleSelectionEnabled,
     updateMultipleSelections,
-    changeCurrentActivePage,
     navigate,
     path,
     doNotShowBlacklistSongConfirm
@@ -542,6 +534,7 @@ const SongCard = (props: SongCardProp) => {
         updateContextMenuData(true, contextMenuItems, e.pageX, e.pageY, contextMenuItemData);
       }}
       onClick={(e) => {
+        e.preventDefault();
         if (e.getModifierState('Shift') === true && selectAllHandler) selectAllHandler(songId);
         else if (e.getModifierState('Control') === true && !isMultipleSelectionEnabled)
           toggleMultipleSelections(!isAMultipleSelection, 'songs', [songId]);
@@ -611,18 +604,17 @@ const SongCard = (props: SongCardProp) => {
         </div>
         <div className="song-info-and-play-btn-container flex w-full items-center justify-between">
           <div className="song-info-container text-font-color-white dark:text-font-color-white max-w-[75%]">
-            <div
-              className="song-title cursor-pointer overflow-hidden text-xl font-normal text-ellipsis whitespace-nowrap outline-offset-1 transition-none hover:underline focus-visible:outline!"
+            <NavLink
+              to="/main-player/songs/$songId"
+              params={{ songId }}
+              preload={isMultipleSelectionEnabled ? false : undefined}
+              className={`song-title cursor-pointer overflow-hidden text-xl font-normal text-ellipsis whitespace-nowrap outline-offset-1 transition-none hover:underline focus-visible:outline!`}
               title={title}
-              onClick={(e) => {
-                e.stopPropagation();
-                showSongInfoPage();
-              }}
-              onKeyDown={(e) => e.key === 'Enter' && showSongInfoPage()}
               tabIndex={0}
+              disabled={isMultipleSelectionEnabled}
             >
               {title}
-            </div>
+            </NavLink>
             <div
               className="song-artists w-full max-w-full truncate text-sm transition-none"
               title={artists ? artists.map((x) => x.name).join(', ') : t('common.unknownArtist')}

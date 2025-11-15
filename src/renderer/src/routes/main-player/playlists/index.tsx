@@ -1,92 +1,86 @@
 import Button from '@renderer/components/Button';
-import type { DropdownOption } from '@renderer/components/Dropdown';
 import Dropdown from '@renderer/components/Dropdown';
 import MainContainer from '@renderer/components/MainContainer';
 import { Playlist } from '@renderer/components/PlaylistsPage/Playlist';
 import VirtualizedGrid from '@renderer/components/VirtualizedGrid';
 import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
 import useSelectAllHandler from '@renderer/hooks/useSelectAllHandler';
-import i18n from '@renderer/i18n';
 import { store } from '@renderer/store/store';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
-import { lazy, useCallback, useContext, useEffect, useState } from 'react';
+import { lazy, useCallback, useContext, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import storage from '@renderer/utils/localStorage';
+import { queryClient } from '@renderer/index';
+import { playlistQuery } from '@renderer/queries/playlists';
+import { zodValidator } from '@tanstack/zod-adapter';
+import { playlistSearchSchema } from '@renderer/utils/zod/playlistSchema';
+import { playlistSortOptions } from '@renderer/components/PlaylistsPage/PlaylistOptions';
+import { useSuspenseQuery } from '@tanstack/react-query';
+import Img from '@renderer/components/Img';
+import NoPlaylistsImage from '@assets/images/svg/Empty Inbox _Monochromatic.svg';
 
 export const Route = createFileRoute('/main-player/playlists/')({
-  component: PlaylistsPage
+  validateSearch: zodValidator(playlistSearchSchema),
+  component: PlaylistsPage,
+  loaderDeps: ({ search }) => ({
+    sortingOrder: search.sortingOrder
+  }),
+  loader: async ({ deps }) => {
+    await queryClient.ensureQueryData(
+      playlistQuery.all({
+        sortType: deps.sortingOrder || 'aToZ',
+        start: 0,
+        end: 30
+      })
+    );
+  }
 });
 
 const NewPlaylistPrompt = lazy(
   () => import('@renderer/components/PlaylistsPage/NewPlaylistPrompt')
 );
 
-const playlistSortOptions: DropdownOption<PlaylistSortTypes>[] = [
-  { label: i18n.t('sortTypes.aToZ'), value: 'aToZ' },
-  { label: i18n.t('sortTypes.zToA'), value: 'zToA' },
-  {
-    label: i18n.t('sortTypes.noOfSongsDescending'),
-    value: 'noOfSongsDescending'
-  },
-  {
-    label: i18n.t('sortTypes.noOfSongsAscending'),
-    value: 'noOfSongsAscending'
-  }
-];
-
 const MIN_ITEM_WIDTH = 175;
 const MIN_ITEM_HEIGHT = 220;
 
 function PlaylistsPage() {
-  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
   const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
-  const sortingStates = useStore(store, (state) => state.localStorage.sortingStates);
+  const playlistsPageSortingState = useStore(
+    store,
+    (state) => state.localStorage.sortingStates.playlistsPage
+  );
+  const { sortingOrder = playlistsPageSortingState || 'aToZ' } = Route.useSearch();
   const isMultipleSelectionEnabled = useStore(
     store,
     (state) => state.multipleSelectionsData.isEnabled
   );
 
-  const {
-    changePromptMenuData,
-    updateContextMenuData,
-    updateCurrentlyActivePageData,
-    toggleMultipleSelections
-  } = useContext(AppUpdateContext);
+  const { changePromptMenuData, updateContextMenuData, toggleMultipleSelections } =
+    useContext(AppUpdateContext);
   const { t } = useTranslation();
+  const navigate = useNavigate({ from: Route.fullPath });
 
-  const [playlists, setPlaylists] = useState([] as Playlist[]);
-  const [sortingOrder, setSortingOrder] = useState<PlaylistSortTypes>(
-    (currentlyActivePage?.data?.sortingOrder as PlaylistSortTypes) ||
-      sortingStates?.playlistsPage ||
-      'aToZ'
-  );
+  const {
+    data: { data: playlists }
+  } = useSuspenseQuery(playlistQuery.all({ sortType: sortingOrder }));
 
-  const fetchPlaylistData = useCallback(
-    () =>
-      window.api.playlistsData.getPlaylistData([], sortingOrder).then((res) => {
-        if (res && res.length > 0) setPlaylists(res);
-        return undefined;
-      }),
-    [sortingOrder]
-  );
-
-  useEffect(() => {
-    fetchPlaylistData();
-    const managePlaylistDataUpdatesInPlaylistsPage = (e: Event) => {
-      if ('detail' in e) {
-        const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
-        for (let i = 0; i < dataEvents.length; i += 1) {
-          const event = dataEvents[i];
-          if (event.dataType === 'playlists') fetchPlaylistData();
-        }
-      }
-    };
-    document.addEventListener('app/dataUpdates', managePlaylistDataUpdatesInPlaylistsPage);
-    return () => {
-      document.removeEventListener('app/dataUpdates', managePlaylistDataUpdatesInPlaylistsPage);
-    };
-  }, [fetchPlaylistData]);
+  // useEffect(() => {
+  //   fetchPlaylistData();
+  //   const managePlaylistDataUpdatesInPlaylistsPage = (e: Event) => {
+  //     if ('detail' in e) {
+  //       const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
+  //       for (let i = 0; i < dataEvents.length; i += 1) {
+  //         const event = dataEvents[i];
+  //         if (event.dataType === 'playlists') fetchPlaylistData();
+  //       }
+  //     }
+  //   };
+  //   document.addEventListener('app/dataUpdates', managePlaylistDataUpdatesInPlaylistsPage);
+  //   return () => {
+  //     document.removeEventListener('app/dataUpdates', managePlaylistDataUpdatesInPlaylistsPage);
+  //   };
+  // }, [fetchPlaylistData]);
 
   useEffect(() => {
     storage.sortingStates.setSortingStates('playlistsPage', sortingOrder);
@@ -100,10 +94,18 @@ function PlaylistsPage() {
         true,
         <NewPlaylistPrompt
           currentPlaylists={playlists}
-          updatePlaylists={(newPlaylists) => setPlaylists(newPlaylists)}
+          updatePlaylists={() =>
+            queryClient.invalidateQueries(
+              playlistQuery.all({
+                sortType: sortingOrder,
+                start: 0,
+                end: 0
+              })
+            )
+          }
         />
       ),
-    [changePromptMenuData, playlists]
+    [changePromptMenuData, playlists, sortingOrder]
   );
 
   return (
@@ -149,77 +151,83 @@ function PlaylistsPage() {
                   })}
                 </div>
               ) : (
-                playlists.length > 0 && (
-                  <span className="no-of-artists">
-                    {t('common.playlistWithCount', { count: playlists.length })}
-                  </span>
-                )
+                <span className="no-of-artists">
+                  {t('common.playlistWithCount', { count: playlists.length })}
+                </span>
               )}
             </div>
           </div>
-          {playlists.length > 0 && (
-            <div className="other-control-container flex">
-              <Button
-                className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
-                iconName={isMultipleSelectionEnabled ? 'remove_done' : 'checklist'}
-                clickHandler={() =>
-                  toggleMultipleSelections(!isMultipleSelectionEnabled, 'playlist')
-                }
-                tooltipLabel={t(`common.${isMultipleSelectionEnabled ? 'unselectAll' : 'select'}`)}
-              />
-              <Button
-                label={t(`playlistsPage.importPlaylist`)}
-                className="import-playlist-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
-                iconName="publish"
-                clickHandler={(_, setIsDisabled, setIsPending) => {
-                  setIsDisabled(true);
-                  setIsPending(true);
+          <div className="other-control-container flex">
+            <Button
+              className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+              iconName={isMultipleSelectionEnabled ? 'remove_done' : 'checklist'}
+              clickHandler={() => toggleMultipleSelections(!isMultipleSelectionEnabled, 'playlist')}
+              tooltipLabel={t(`common.${isMultipleSelectionEnabled ? 'unselectAll' : 'select'}`)}
+              isDisabled={playlists.length === 0}
+            />
+            <Button
+              label={t(`playlistsPage.importPlaylist`)}
+              className="import-playlist-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+              iconName="publish"
+              clickHandler={(_, setIsDisabled, setIsPending) => {
+                setIsDisabled(true);
+                setIsPending(true);
 
-                  return window.api.playlistsData
-                    .importPlaylist()
-                    .finally(() => {
-                      setIsDisabled(false);
-                      setIsPending(false);
-                    })
-                    .catch((err) => console.error(err));
-                }}
-              />
-              <Button
-                label={t(`playlistsPage.addPlaylist`)}
-                className="add-new-playlist-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
-                iconName="add"
-                clickHandler={createNewPlaylist}
-              />
-              <Dropdown
-                name="playlistsSortDropdown"
-                value={sortingOrder}
-                options={playlistSortOptions}
-                onChange={(e) => {
-                  const playlistSortType = e.currentTarget.value as PlaylistSortTypes;
-                  updateCurrentlyActivePageData((currentData) => ({
-                    ...currentData,
-                    sortingOrder: playlistSortType
-                  }));
-                  setSortingOrder(playlistSortType);
-                }}
-              />
-            </div>
-          )}
+                return window.api.playlistsData
+                  .importPlaylist()
+                  .finally(() => {
+                    setIsDisabled(false);
+                    setIsPending(false);
+                  })
+                  .catch((err) => console.error(err));
+              }}
+            />
+            <Button
+              label={t(`playlistsPage.addPlaylist`)}
+              className="add-new-playlist-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+              iconName="add"
+              clickHandler={createNewPlaylist}
+            />
+            <Dropdown
+              name="playlistsSortDropdown"
+              value={sortingOrder}
+              options={playlistSortOptions}
+              onChange={(e) => {
+                navigate({
+                  search: (prev) => ({
+                    ...prev,
+                    sortingOrder: e.currentTarget.value as PlaylistSortTypes
+                  })
+                });
+              }}
+            />
+          </div>
         </div>
 
-        <div className="playlists-container appear-from-bottom flex h-full flex-wrap delay-100">
-          {playlists && playlists.length > 0 && (
+        {playlists.length > 0 && (
+          <div className="playlists-container appear-from-bottom flex h-full flex-wrap delay-100">
             <VirtualizedGrid
               data={playlists}
               fixedItemWidth={MIN_ITEM_WIDTH}
               fixedItemHeight={MIN_ITEM_HEIGHT}
-              // scrollTopOffset={currentlyActivePage.data?.scrollTopOffset}
+              onDebouncedScroll={(range) => {
+                navigate({
+                  replace: true,
+                  search: (prev) => ({ ...prev, scrollTopOffset: range.startIndex })
+                });
+              }}
               itemContent={(index, playlist) => {
                 return <Playlist index={index} selectAllHandler={selectAllHandler} {...playlist} />;
               }}
             />
-          )}
-        </div>
+          </div>
+        )}
+        {playlists.length === 0 && (
+          <div className="no-playlists-container text-font-color-black dark:text-font-color-white my-[10%] flex h-full w-full flex-col items-center justify-center text-center text-xl">
+            <Img src={NoPlaylistsImage} alt="" className="mb-8 w-60" />
+            <span>{t('playlistsPage.empty')}</span>
+          </div>
+        )}
       </>
     </MainContainer>
   );

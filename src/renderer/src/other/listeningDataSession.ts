@@ -77,8 +77,8 @@ class ListeningDataSession {
       if (!this.passedFullListenRange && this.seconds > fullListenRange) {
         this.passedFullListenRange = true;
         console.warn(`User listened to 90% of ${this.songId}`);
-        if (this.isKnownSource)
-          window.api.audioLibraryControls.updateSongListeningData(this.songId, 'fullListens', 1);
+        // if (this.isKnownSource)
+        //   window.api.audioLibraryControls.updateSongListeningData(this.songId, 'fullListens', 1);
       }
       // listen for scrobbling event
       if (this.isScrobbling && !this.passedScrobblingRange && this.seconds > scrobblingRange) {
@@ -94,18 +94,28 @@ class ListeningDataSession {
 
   stopRecording(isSongEnded = false) {
     try {
+      if (this.passedSkipRange) {
+        const playbackPercentage = this.seconds / this.duration;
+
+        window.api.audioLibraryControls.updateSongListeningData(
+          this.songId,
+          'LISTEN',
+          this.passedFullListenRange && playbackPercentage > 0.99 ? 1 : playbackPercentage
+        );
+      }
+
       if (!isSongEnded && !this.passedFullListenRange)
         console.warn(`User skipped ${this.songId} before 90% completion.`);
       if (!this.passedSkipRange) {
         console.warn(`User skipped ${this.songId}. before 10% completion.`);
         if (this.isKnownSource)
-          window.api.audioLibraryControls.updateSongListeningData(this.songId, 'skips', 1);
+          window.api.audioLibraryControls.updateSongListeningData(this.songId, 'SKIP', 1);
       }
 
-      const seeks = this.seeks.filter((seekInstance) => seekInstance.seeks >= 3);
-      if (seeks.length > 0 && this.isKnownSource) {
-        window.api.audioLibraryControls.updateSongListeningData(this.songId, 'seeks', seeks);
-      }
+      // const seeks = this.seeks.filter((seekInstance) => seekInstance.seeks >= 3);
+      // if (seeks.length > 0 && this.isKnownSource) {
+      //   window.api.audioLibraryControls.updateSongListeningData(this.songId, 'SEEKS', seeks);
+      // }
 
       this.abortController.abort();
       clearInterval(this.intervalId);
@@ -117,6 +127,8 @@ class ListeningDataSession {
   }
 
   set addSeekPosition(seekPosition: number) {
+    window.api.audioLibraryControls.updateSongListeningData(this.songId, 'SEEK', seekPosition);
+
     const seekRange = 5;
     for (const seek of this.seeks) {
       const isSeekPositionInRange =
