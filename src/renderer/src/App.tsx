@@ -130,6 +130,20 @@ export default function App() {
   // Listening data hook handles recording song playback sessions for analytics
   const { recordListeningData } = useListeningData(audio);
 
+  // ? WIRE UP LISTENING DATA RECORDING TO PLAYER EVENTS
+  // Listen for songLoaded events from AudioPlayer to record listening data
+  useEffect(() => {
+    const handleSongLoaded = (songData: AudioPlayerData) => {
+      recordListeningData(songData.songId, songData.duration, false, true);
+    };
+
+    player.on('songLoaded', handleSongLoaded);
+
+    return () => {
+      player.off('songLoaded', handleSongLoaded);
+    };
+  }, [player, recordListeningData]);
+
   // ? INITIALIZE PLAYER CONTROL
   // Player control hook handles play/pause, song loading, and player state management
   const {
