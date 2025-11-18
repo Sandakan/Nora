@@ -18,6 +18,7 @@ import logger from './logger';
 
 export const removeDeletedArtistDataOfSong = (artists: SavableArtist[], song: SavableSongData) => {
   let isArtistRemoved = false;
+
   if (
     Array.isArray(artists) &&
     artists.length > 0 &&

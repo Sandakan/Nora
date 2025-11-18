@@ -9,16 +9,6 @@ import {
   removeDeletedArtistDataOfSong,
   removeDeletedGenreDataOfSong
 } from '../removeSongsFromLibrary';
-import {
-  getAlbumsData,
-  getArtistsData,
-  getGenresData,
-  getSongsData,
-  setAlbumsData,
-  setArtistsData,
-  setGenresData,
-  setSongsData
-} from '../filesystem';
 import { dataUpdateEvent, sendMessageToRenderer } from '../main';
 import logger from '../logger';
 import {
@@ -36,11 +26,6 @@ import { getSongByPath } from '@main/db/queries/songs';
 import { convertToSongData } from '../../common/convert';
 
 const reParseSong = async (filePath: string) => {
-  const songs = getSongsData();
-  const artists = getArtistsData();
-  const albums = getAlbumsData();
-  const genres = getGenresData();
-
   const songPath = removeDefaultAppProtocolFromFilePath(filePath);
   const songData = await getSongByPath(songPath);
   try {
