@@ -3,6 +3,7 @@ import storage from '../../../utils/localStorage';
 import Checkbox from '../../Checkbox';
 import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store/store';
+import CollapsibleSection from "./CollapsibleSection";
 
 const PreferencesSettings = () => {
   const userData = useStore(store, (state) => state.userData);
@@ -11,13 +12,18 @@ const PreferencesSettings = () => {
 
   return (
     <li
-      className="main-container preferences-settings-container mb-16"
+      className="main-container preferences-settings-container mb-4"
       id="preferences-settings-container"
     >
-      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center text-2xl font-medium">
+    <CollapsibleSection
+      defaultOpen={false}
+      title={
+      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight flex items-center text-2xl font-medium">
         <span className="material-icons-round-outlined mr-2">tune</span>
         {t('settingsPage.preferences')}
       </div>
+      }
+    >
       <ul className="marker:bg-background-color-3 dark:marker:bg-background-color-3 list-disc pl-6">
         <li className="checkbox-container">
           <div className="secondary-container toggle-song-indexing mb-4">
@@ -105,6 +111,7 @@ const PreferencesSettings = () => {
           </div>
         </li>
       </ul>
+    </CollapsibleSection>
     </li>
   );
 };
