@@ -8,8 +8,8 @@ import { type LyricData } from '../../LyricsEditingPage/LyricsEditingPage';
 import useNetworkConnectivity from '../../../hooks/useNetworkConnectivity';
 import parseLyrics from '../../../../../common/parseLyrics';
 import isLyricsSynced, { isLyricsEnhancedSynced } from '../../../../../common/isLyricsSynced';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { useQuery } from '@tanstack/react-query';
+import { settingsQuery } from '@renderer/queries/settings';
 
 type CurrentLyricsTYpe = 'synced' | 'unsynced';
 
@@ -33,9 +33,9 @@ type Props = {
 };
 
 const SongLyricsEditorInput = (props: Props) => {
-  const userData = useStore(store, (state) => state.userData);
+  const { data: userData } = useQuery(settingsQuery.all);
 
-  const { addNewNotifications, changeCurrentActivePage } = useContext(AppUpdateContext);
+  const { addNewNotifications } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { isOnline } = useNetworkConnectivity();
@@ -190,21 +190,15 @@ const SongLyricsEditorInput = (props: Props) => {
         end: lyric.end
       }));
 
-      changeCurrentActivePage('LyricsEditor', {
-        lyrics: lines,
-        songId,
-        songTitle,
-        isEditingEnhancedSyncedLyrics: currentLyricsType === 'synced' && isLyricsEnhancedSynced
-      });
+      // TODO: Implement lyrics editor page navigation
+      // changeCurrentActivePage('LyricsEditor', {
+      //   lyrics: lines,
+      //   songId,
+      //   songTitle,
+      //   isEditingEnhancedSyncedLyrics: currentLyricsType === 'synced' && isLyricsEnhancedSynced
+      // });
     }
-  }, [
-    changeCurrentActivePage,
-    currentLyricsType,
-    songId,
-    songTitle,
-    synchronizedLyrics,
-    unsynchronizedLyrics
-  ]);
+  }, [currentLyricsType, songId, songTitle, synchronizedLyrics, unsynchronizedLyrics]);
 
   return (
     <div className="song-lyrics-editor-container col-span-2 grid w-[95%] grid-cols-[minmax(50%,65%)_1fr] gap-8">
@@ -212,10 +206,10 @@ const SongLyricsEditorInput = (props: Props) => {
         {/* <label htmlFor="song-lyrics-id3-tag">Lyrics</label> */}
         <div className="flex items-center">
           <Button
-            className={`mr-3 flex w-fit cursor-pointer list-none items-center !border-0 px-4 py-2 text-font-color-black outline-1 outline-offset-1 transition-[background,color] duration-200 focus-visible:!outline ${
+            className={`text-font-color-black mr-3 flex w-fit cursor-pointer list-none items-center !border-0 px-4 py-2 outline-offset-1 transition-[background,color] duration-200 focus-visible:!outline ${
               currentLyricsType === 'synced'
-                ? 'bg-background-color-3 dark:bg-dark-background-color-3 dark:!text-font-color-black'
-                : 'bg-background-color-2 hover:bg-background-color-3 dark:bg-dark-background-color-2 dark:text-font-color-white dark:hover:bg-dark-background-color-3 dark:hover:!text-font-color-black'
+                ? 'bg-background-color-3 dark:bg-dark-background-color-3 dark:text-font-color-black!'
+                : 'bg-background-color-2 hover:bg-background-color-3 dark:bg-dark-background-color-2 dark:text-font-color-white dark:hover:bg-dark-background-color-3 dark:hover:text-font-color-black!'
             }`}
             clickHandler={() => setCurrentLyricsType('synced')}
             label={t('common.syncedLyrics')}
@@ -223,10 +217,10 @@ const SongLyricsEditorInput = (props: Props) => {
             iconClassName="material-icons-round-outlined"
           />
           <Button
-            className={`mr-3 flex w-fit cursor-pointer list-none items-center !border-0 px-4 py-2 text-font-color-black outline-1 outline-offset-1 transition-[background,color] duration-200 focus-visible:!outline ${
+            className={`text-font-color-black mr-3 flex w-fit cursor-pointer list-none items-center !border-0 px-4 py-2 outline-offset-1 transition-[background,color] duration-200 focus-visible:!outline ${
               currentLyricsType === 'unsynced'
-                ? 'bg-background-color-3 dark:bg-dark-background-color-3 dark:!text-font-color-black'
-                : 'bg-background-color-2 hover:bg-background-color-3 dark:bg-dark-background-color-2 dark:text-font-color-white dark:hover:bg-dark-background-color-3 dark:hover:!text-font-color-black'
+                ? 'bg-background-color-3 dark:bg-dark-background-color-3 dark:text-font-color-black!'
+                : 'bg-background-color-2 hover:bg-background-color-3 dark:bg-dark-background-color-2 dark:text-font-color-white dark:hover:bg-dark-background-color-3 dark:hover:text-font-color-black!'
             }`}
             clickHandler={() => setCurrentLyricsType('unsynced')}
             label={t('common.unsyncedLyrics')}
@@ -237,7 +231,7 @@ const SongLyricsEditorInput = (props: Props) => {
 
         <textarea
           id="song-lyrics-id3-tag"
-          className="mt-4 max-h-80 min-h-[12rem] rounded-2xl border-[0.15rem] border-background-color-2 bg-background-color-2 p-4 transition-colors focus:border-font-color-highlight dark:border-dark-background-color-2 dark:bg-dark-background-color-2 dark:focus:border-dark-font-color-highlight"
+          className="border-background-color-2 bg-background-color-2 focus:border-font-color-highlight dark:border-dark-background-color-2 dark:bg-dark-background-color-2 dark:focus:border-dark-font-color-highlight mt-4 max-h-80 min-h-[12rem] rounded-2xl border-[0.15rem] p-4 transition-colors"
           name="lyrics"
           placeholder={t('common.lyrics')}
           value={
@@ -262,7 +256,7 @@ const SongLyricsEditorInput = (props: Props) => {
           }}
         />
         {currentLyricsType === 'synced' && (
-          <div className="ml-2 mt-1 flex items-center">
+          <div className="mt-1 ml-2 flex items-center">
             <span
               className={`material-icons-round-outlined mr-2 cursor-pointer !text-lg ${
                 isSynchronizedLyricsEnhancedSynced &&
@@ -293,20 +287,20 @@ const SongLyricsEditorInput = (props: Props) => {
         )}
 
         {synchronizedLyrics && !isSynchronizedLyricsSynced && (
-          <p className="ml-2 mt-2 flex items-center text-sm font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+          <p className="text-font-color-highlight dark:text-dark-font-color-highlight mt-2 ml-2 flex items-center text-sm font-medium">
             <span className="material-icons-round-outlined mr-2 text-xl">error</span>{' '}
             {t('songTagsEditingPage.avoidUnsyncedOnSyncedLyricsTab')}
           </p>
         )}
         {unsynchronizedLyrics && isUnsynchronizedLyricsSynced && (
-          <p className="ml-2 mt-2 flex text-sm font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+          <p className="text-font-color-highlight dark:text-dark-font-color-highlight mt-2 ml-2 flex text-sm font-medium">
             <span className="material-icons-round-outlined mr-2 text-xl">error</span>{' '}
             {t('songTagsEditingPage.avoidSyncedOnUnsyncedLyricsTab')}
           </p>
         )}
 
         {isLyricsSavingPending && (
-          <p className="ml-2 mt-2 flex items-center text-sm font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+          <p className="text-font-color-highlight dark:text-dark-font-color-highlight mt-2 ml-2 flex items-center text-sm font-medium">
             <span className="material-icons-round-outlined mr-2 text-xl">error</span>{' '}
             {t('songTagsEditingPage.pendingLyricsSavesAvailable')}
           </p>
@@ -331,11 +325,11 @@ const SongLyricsEditorInput = (props: Props) => {
           className="download-synced-lyrics-btn"
           iconClassName="mr-2"
           clickHandler={downloadSyncedLyrics}
-          isDisabled={!(isOnline && userData?.preferences.isMusixmatchLyricsEnabled)}
+          isDisabled={!(isOnline && userData?.isMusixmatchLyricsEnabled)}
           isVisible={currentLyricsType === 'synced'}
           tooltipLabel={
             isOnline
-              ? userData?.preferences.isMusixmatchLyricsEnabled
+              ? userData?.isMusixmatchLyricsEnabled
                 ? undefined
                 : t('songTagsEditingPage.musixmatchNotEnabled')
               : t('common.noInternet')

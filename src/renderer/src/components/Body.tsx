@@ -3,7 +3,7 @@ import { Suspense, lazy, memo, useEffect, useRef } from 'react';
 import SuspenseLoader from './SuspenseLoader';
 import ErrorBoundary from './ErrorBoundary';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 const HomePage = lazy(() => import('./HomePage/HomePage'));
 const ArtistPage = lazy(() => import('./ArtistPage/ArtistPage'));
@@ -65,7 +65,7 @@ const Body = memo(() => {
 
   return (
     <div
-      className="body relative order-2 !h-full w-full overflow-hidden rounded-tl-lg lg:pl-14 [&>*]:overflow-x-hidden"
+      className="body relative order-2 h-full! w-full overflow-hidden rounded-tl-lg *:overflow-x-hidden lg:pl-14"
       ref={bodyRef}
     >
       <ErrorBoundary>

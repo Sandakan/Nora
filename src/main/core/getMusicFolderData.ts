@@ -1,49 +1,7 @@
 import sortFolders from '../utils/sortFolders';
-import { getSongsData, getUserData } from '../filesystem';
-import { isFolderBlacklisted } from '../utils/isBlacklisted';
+import { getAllMusicFolders } from '@main/db/queries/folders';
 
-const getRelevantSongsofFolders = (folderPath: string) => {
-  const songs = getSongsData();
-  const isSongsAvailable = songs.length > 0;
-
-  const songIds: string[] = [];
-  if (isSongsAvailable) {
-    for (let i = 0; i < songs.length; i += 1) {
-      const song = songs[i];
-      if (song.path.includes(folderPath)) songIds.push(song.songId);
-    }
-  }
-
-  return songIds;
-};
-
-const createFolderData = (folderStructures: FolderStructure[]): MusicFolder[] => {
-  const foldersData: MusicFolder[] = [];
-
-  for (const structure of folderStructures) {
-    const songIds = getRelevantSongsofFolders(structure.path);
-    const folderData: MusicFolder = {
-      ...structure,
-      subFolders: createFolderData(structure.subFolders),
-      songIds,
-      isBlacklisted: isFolderBlacklisted(structure.path)
-    };
-
-    if (structure.subFolders.length > 0) {
-      const subFolderData = createFolderData(structure.subFolders);
-      folderData.subFolders = subFolderData;
-    }
-
-    foldersData.push(folderData);
-  }
-
-  return foldersData;
-};
-
-const selectStructure = (
-  folderPath: string,
-  folders: FolderStructure[]
-): FolderStructure | undefined => {
+const selectStructure = (folderPath: string, folders: MusicFolder[]): MusicFolder | undefined => {
   for (const folder of folders) {
     if (folder.path === folderPath) return folder;
     if (folder.subFolders.length > 0) {
@@ -54,9 +12,9 @@ const selectStructure = (
   return undefined;
 };
 
-const selectStructures = (folderPaths: string[]) => {
-  const { musicFolders } = getUserData();
-  const output: FolderStructure[] = [];
+const selectStructures = async (folderPaths: string[]) => {
+  const musicFolders = await getAllMusicFolders();
+  const output: MusicFolder[] = [];
 
   for (const folderPath of folderPaths) {
     const selectedFolder = selectStructure(folderPath, musicFolders);
@@ -66,21 +24,15 @@ const selectStructures = (folderPaths: string[]) => {
   return output;
 };
 
-const getMusicFolderData = (folderPaths: string[] = [], sortType?: FolderSortTypes) => {
-  const userData = getUserData();
+const getMusicFolderData = async (folderPaths: string[] = [], sortType?: FolderSortTypes) => {
+  const musicFolders = await getAllMusicFolders();
 
-  if (userData) {
-    const { musicFolders } = userData;
+  if (Array.isArray(musicFolders) && musicFolders?.length > 0) {
+    const selectedMusicFolders =
+      folderPaths.length === 0 ? musicFolders : await selectStructures(folderPaths);
 
-    if (Array.isArray(musicFolders) && musicFolders?.length > 0) {
-      const selectedMusicFolders =
-        folderPaths.length === 0 ? musicFolders : selectStructures(folderPaths);
-
-      const folders: MusicFolder[] = createFolderData(selectedMusicFolders);
-
-      if (sortType) return sortFolders(folders, sortType);
-      return folders;
-    }
+    if (sortType) return sortFolders(selectedMusicFolders, sortType);
+    return selectedMusicFolders;
   }
   return [];
 };

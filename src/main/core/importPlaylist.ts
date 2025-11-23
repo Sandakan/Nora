@@ -4,11 +4,10 @@ import type { OpenDialogOptions } from 'electron';
 
 import { sendMessageToRenderer, showOpenDialog } from '../main';
 import logger from '../logger';
-import { getPlaylistData, getSongsData } from '../filesystem';
 import { appPreferences } from '../../../package.json';
 import addNewPlaylist from './addNewPlaylist';
-import addSongsToPlaylist from './addSongsToPlaylist';
-import toggleLikeSongs from './toggleLikeSongs';
+import { getSongsInPathList } from '@main/db/queries/songs';
+import { getPlaylistByName, linkSongsWithPlaylist } from '@main/db/queries/playlists';
 
 const DEFAULT_EXPORT_DIALOG_OPTIONS: OpenDialogOptions = {
   title: `Select a Destination where your M3U8 file is`,
@@ -34,17 +33,6 @@ const isASongPath = (text: string) => {
   return false;
 };
 
-const getSongDataFromSongPath = (songPath: string) => {
-  const songs = getSongsData();
-  return songs.find((song) => song.path === songPath);
-};
-
-const checkPlaylist = (playlistName: string) => {
-  const playlistData = getPlaylistData();
-
-  return playlistData.find((playlist) => playlist.name === playlistName);
-};
-
 const importPlaylist = async () => {
   try {
     const destinations = await showOpenDialog(DEFAULT_EXPORT_DIALOG_OPTIONS);
@@ -63,10 +51,12 @@ const importPlaylist = async () => {
 
           const songPaths = textArr.filter((line) => isASongPath(line));
 
-          for (const songPath of songPaths) {
-            const songData = getSongDataFromSongPath(songPath);
+          const availableSongs = await getSongsInPathList(songPaths);
 
-            if (songData) availSongIdsForPlaylist.push(songData.songId);
+          for (const songPath of songPaths) {
+            const songData = availableSongs.find((song) => song.path === songPath);
+
+            if (songData) availSongIdsForPlaylist.push(songData.id.toString());
             else unavailableSongPaths.push(songPath);
           }
 
@@ -84,16 +74,14 @@ const importPlaylist = async () => {
           if (availSongIdsForPlaylist.length > 0) {
             const playlistName = fileName;
 
-            const availablePlaylist = checkPlaylist(playlistName);
+            const availablePlaylist = await getPlaylistByName(playlistName);
 
             if (availablePlaylist) {
               try {
-                if (availablePlaylist.playlistId === 'Favorites') {
-                  const newAvailSongIds = availSongIdsForPlaylist.filter(
-                    (id) => !availablePlaylist.songs.includes(id)
-                  );
-                  await toggleLikeSongs(newAvailSongIds, true);
-                } else addSongsToPlaylist(availablePlaylist.playlistId, availSongIdsForPlaylist);
+                await linkSongsWithPlaylist(
+                  availSongIdsForPlaylist.map((id) => Number(id)),
+                  availablePlaylist.id
+                );
                 logger.debug(
                   `Imported ${availSongIdsForPlaylist.length} songs to the existing '${availablePlaylist.name}' playlist.`,
                   {

@@ -147,8 +147,8 @@
   "sortTypes": {
     "aToZ": "A to Z",
     "zToA": "Z to A",
-    "dateAddedAscending": "Newest",
-    "dateAddedDescending": "Oldest",
+    "dateAddedAscending": "Oldest",
+    "dateAddedDescending": "Newest",
     "releasedYearAscending": "Released year (Ascending)",
     "releasedYearDescending": "Released year (Descending)",
     "allTimeMostListened": "Most-listened (All time)",
@@ -174,7 +174,8 @@
     "notSelected": "Not Selected",
     "blacklistedSongs": "Blacklisted songs",
     "whitelistedSongs": "Whitelisted songs",
-    "favorites": "Favorites"
+    "favorites": "Favorites",
+    "nonFavorites": "Non-favorites"
   },
 
   "equalizerPresets": {
@@ -276,6 +277,7 @@
 
   "homePage": {
     "empty": "There's nothing here..",
+    "emptyDescription": "It seems like you haven't added any music folders to your library yet.",
     "loading": "Hold on. We are getting everything ready for you...",
     "listenMoreToShowMetrics": "Listen to more songs to show additional metrics.",
 
@@ -290,7 +292,8 @@
     "openFavoritesWithAllTimeMostListenedSortOption": "Opens 'Favorites' playlist with 'AllTimeMostListened' sort option",
 
     "noSongsAvailable": "No songs available",
-    "stayCalm": "Stay calm"
+    "stayCalm": "Stay calm",
+    "favoritesAndRecaps": "Favorites and Recaps"
   },
 
   "searchPage": {
@@ -337,7 +340,11 @@
     "createdOn": "Created on {{val, datetime}}",
     "clearSongHistoryConfirm": "Clear song history",
     "clearSongHistoryConfirmNotice": "Are you sure you want to clear your song history? This action cannot be undone.",
-    "clearSongHistorySuccess": "Your song history has been cleared successfully."
+    "clearSongHistorySuccess": "Your song history has been cleared successfully.",
+    "empty": "No playlists created yet.",
+
+    "favorites": "Favorites",
+    "history": "History"
   },
 
   "albumsPage": {
@@ -461,6 +468,7 @@
     "otherApplications": "Other applications",
     "artworkCache": "Artwork cache",
     "tempArtworkCache": "Temp artwork cache",
+    "databaseData": "Database",
     "songsData": "Song data",
     "artistsData": "Artist data",
     "albumsData": "Album data",

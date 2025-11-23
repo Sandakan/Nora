@@ -5,11 +5,12 @@ import TitleContainer from '../TitleContainer';
 import UnAvailableTrack from '../SongInfoPage/UnAvailableTrack';
 import type { LastFMAlbumInfo } from 'src/types/last_fm_album_info_api';
 import { useStore } from '@tanstack/react-store';
-import { store } from '../../store';
+import { store } from '../../store/store';
 
 type Props = {
   albumTitle: string;
   otherAlbumData?: LastFMAlbumInfo;
+  biographyClassName?: string;
 };
 
 const OnlineAlbumInfoContainer = (props: Props) => {
@@ -39,18 +40,19 @@ const OnlineAlbumInfoContainer = (props: Props) => {
         <>
           <TitleContainer
             title={t('albumInfoPage.unavailableTracks')}
-            titleClassName="!text-2xl text-font-color-black !font-normal dark:text-font-color-white"
+            titleClassName="text-2xl! text-font-color-black font-normal! dark:text-font-color-white"
             className={`title-container ${
               bodyBackgroundImage
                 ? 'text-font-color-white'
                 : 'text-font-color-black dark:text-font-color-white'
-            } mb-4 mt-1 pr-4 text-2xl`}
+            } mt-1 mb-4 pr-4 text-2xl`}
           />
           <div className="my-2 flex flex-wrap">{unAvailableAlbumTrackComponents}</div>
         </>
       )}
       <Biography
         bioUserName={title}
+        className={props.biographyClassName}
         bio={otherAlbumData?.wiki}
         tags={otherAlbumData?.tags}
         hyperlinkData={{

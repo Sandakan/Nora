@@ -1,15 +1,14 @@
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-
+import { store } from '@renderer/store/store';
+import { useNavigate } from '@tanstack/react-router';
+import { useStore } from '@tanstack/react-store';
 import { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import DefaultArtistCover from '../../assets/images/webp/artist_cover_default.webp';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Button from '../Button';
 import Img from '../Img';
 import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import NavLink from '../NavLink';
 
 interface ArtistProp {
   index: number;
@@ -36,9 +35,8 @@ export const Artist = (props: ArtistProp) => {
   const queue = useStore(store, (state) => state.localStorage.queue);
 
   const { t } = useTranslation();
-
+  const navigate = useNavigate();
   const {
-    changeCurrentActivePage,
     updateContextMenuData,
     createQueue,
     updateQueueData,
@@ -51,12 +49,10 @@ export const Artist = (props: ArtistProp) => {
 
   const [isAFavorite, setIsAFavorite] = useState(props.isAFavorite);
 
-  const goToArtistInfoPage = useCallback(() => {
-    changeCurrentActivePage('ArtistInfo', {
-      artistName: props.name,
-      artistId: props.artistId
-    });
-  }, [changeCurrentActivePage, props.artistId, props.name]);
+  const goToArtistInfoPage = useCallback(
+    () => navigate({ to: '/main-player/artists/$artistId', params: { artistId: props.artistId } }),
+    [navigate, props.artistId]
+  );
 
   const playArtistSongs = useCallback(
     (isShuffle = false) =>
@@ -83,8 +79,10 @@ export const Artist = (props: ArtistProp) => {
       return window.api.artistsData
         .getArtistData(artistIds)
         .then((res) => {
-          if (Array.isArray(res) && res.length > 0) {
-            const songIds = res.map((artist) => artist.songs.map((song) => song.songId)).flat();
+          if (Array.isArray(res.data) && res.data.length > 0) {
+            const songIds = res.data
+              .map((artist) => artist.songs.map((song) => song.songId))
+              .flat();
             return window.api.audioLibraryControls.getSongInfo(songIds);
           }
           return undefined;
@@ -150,7 +148,7 @@ export const Artist = (props: ArtistProp) => {
           if (isMultipleSelectionsEnabled) {
             const { multipleSelections: artistIds } = multipleSelectionsData;
             return window.api.artistsData.getArtistData(artistIds).then((artists) => {
-              const songIds = artists
+              const songIds = artists.data
                 .map((artist) => artist.songs.map((song) => song.songId))
                 .flat();
               const uniqueSongIds = [...new Set(songIds)];
@@ -275,7 +273,7 @@ export const Artist = (props: ArtistProp) => {
             title: props.name,
             artworkPath:
               props?.onlineArtworkPaths?.picture_small || props?.artworkPaths?.optimizedArtworkPath,
-            artworkClassName: '!rounded-full',
+            artworkClassName: 'rounded-full!',
             subTitle: t(`common.songWithCount`, {
               count: props.songIds.length
             })
@@ -294,16 +292,20 @@ export const Artist = (props: ArtistProp) => {
   );
 
   return (
-    <div
+    <NavLink
+      to="/main-player/artists/$artistId"
+      params={{ artistId: props.artistId }}
+      preload={isMultipleSelectionEnabled ? false : undefined}
       // style={{ animationDelay: `${50 * (props.index + 1)}ms` }}
-      className={`artist ${appearFromBottom && 'appear-from-bottom'} mr-2 flex h-44 w-40 cursor-pointer flex-col justify-between overflow-hidden rounded-lg p-4 hover:bg-background-color-2/50 dark:hover:bg-dark-background-color-2/50 ${
+      className={`artist ${appearFromBottom && 'appear-from-bottom'} hover:bg-background-color-2/50 dark:hover:bg-dark-background-color-2/50 mr-2 flex h-44 w-40 cursor-pointer flex-col justify-between overflow-hidden rounded-lg p-4 ${
         props.className
-      } ${isAMultipleSelection ? '!bg-background-color-3 dark:!bg-dark-background-color-3' : ''}`}
+      } ${isAMultipleSelection ? 'bg-background-color-3! dark:bg-dark-background-color-3!' : ''}`}
       onContextMenu={(e) => {
         e.stopPropagation();
         updateContextMenuData(true, artistContextMenus, e.pageX, e.pageY, contextMenuItemData);
       }}
       onClick={(e) => {
+        e.preventDefault();
         if (e.getModifierState('Shift') === true && props.selectAllHandler)
           props.selectAllHandler(props.artistId);
         else if (e.getModifierState('Control') === true && !isMultipleSelectionEnabled)
@@ -320,8 +322,8 @@ export const Artist = (props: ArtistProp) => {
       <div className="artist-img-container relative flex h-3/4 items-center justify-center">
         {isAFavorite && (
           <span
-            className={`material-icons-round absolute -bottom-2 z-10 flex rounded-full bg-background-color-1 p-2 text-2xl !text-font-color-highlight shadow-lg dark:bg-dark-background-color-2 dark:!text-dark-font-color-highlight ${
-              isAMultipleSelection && '!bg-background-color-3 dark:!bg-dark-background-color-3'
+            className={`material-icons-round bg-background-color-1 !text-font-color-highlight dark:bg-dark-background-color-2 dark:!text-dark-font-color-highlight absolute -bottom-2 z-10 flex rounded-full p-2 text-2xl shadow-lg ${
+              isAMultipleSelection && 'bg-background-color-3! dark:bg-dark-background-color-3!'
             }`}
           >
             favorite
@@ -339,19 +341,19 @@ export const Artist = (props: ArtistProp) => {
           <MultipleSelectionCheckbox
             id={props.artistId}
             selectionType="artist"
-            className="absolute bottom-3 right-3 z-10"
+            className="absolute right-3 bottom-3 z-10"
           />
         )}
       </div>
-      <div className="artist-info-container max-h-1/5 relative">
+      <div className="artist-info-container relative max-h-1/5">
         <Button
-          className={`name-container !m-0 !block !w-full !max-w-full truncate !rounded-none !border-0 bg-transparent !p-0 text-center !text-lg outline-1 outline-offset-1 hover:bg-transparent hover:underline focus-visible:!outline lg:text-base dark:bg-transparent dark:hover:bg-transparent ${
-            isAMultipleSelection && '!text-font-color-black dark:!text-font-color-black'
+          className={`name-container !m-0 !block !w-full !max-w-full truncate !rounded-none !border-0 bg-transparent !p-0 text-center !text-lg outline-offset-1 hover:bg-transparent hover:underline focus-visible:!outline lg:text-base dark:bg-transparent dark:hover:bg-transparent ${
+            isAMultipleSelection && 'text-font-color-black! dark:text-font-color-black!'
           }`}
           label={props.name === '' ? 'Unknown Artist' : props.name}
           clickHandler={goToArtistInfoPage}
         />
       </div>
-    </div>
+    </NavLink>
   );
 };

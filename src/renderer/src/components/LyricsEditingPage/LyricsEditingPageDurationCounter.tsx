@@ -31,7 +31,7 @@ const LyricsEditingPageDurationCounter = (props: Props) => {
     <span className="">
       {t('lyricsEditingPage.playbackTime')} : {roundedSongPosition}{' '}
       {offset !== 0 && (
-        <span className="font-medium uppercase text-font-color-highlight dark:text-dark-font-color-highlight">
+        <span className="text-font-color-highlight dark:text-dark-font-color-highlight font-medium uppercase">
           {offset > 0 && '+'}{' '}
           {t('lyricsEditingPage.offsetWithCount', {
             count: offset

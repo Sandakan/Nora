@@ -1,35 +1,32 @@
-import { getPlaylistData } from '../filesystem';
-import { getPlaylistArtworkPath } from '../fs/resolveFilePaths';
-import logger from '../logger';
-import sortPlaylists from '../utils/sortPlaylists';
+import { getAllPlaylists } from '@main/db/queries/playlists';
+import { convertToPlaylist } from '../../common/convert';
 
-const sendPlaylistData = (
+const sendPlaylistData = async (
   playlistIds = [] as string[],
   sortType?: PlaylistSortTypes,
+  start = 0,
+  end = 0,
   onlyMutablePlaylists = false
-): Playlist[] => {
-  const playlists = getPlaylistData();
-  if (playlistIds && playlists && Array.isArray(playlists)) {
-    let results: SavablePlaylist[] = [];
-    logger.debug(`Requested playlists data`, { playlistIds });
-    if (playlistIds.length === 0) results = playlists;
-    else {
-      for (let x = 0; x < playlists.length; x += 1) {
-        for (let y = 0; y < playlistIds.length; y += 1) {
-          if (playlists[x].playlistId === playlistIds[y]) results.push(playlists[x]);
-        }
-      }
-    }
-    if (sortType) results = sortPlaylists(results, sortType);
-    const updatedResults: Playlist[] = results.map((x) => ({
-      ...x,
-      artworkPaths: getPlaylistArtworkPath(x.playlistId, x.isArtworkAvailable)
-    }));
-    return onlyMutablePlaylists
-      ? updatedResults.filter((result) => result.playlistId !== 'History')
-      : updatedResults;
-  }
-  return [];
+): Promise<PaginatedResult<Playlist, PlaylistSortTypes>> => {
+  const playlists = await getAllPlaylists({
+    playlistIds: playlistIds.map((id) => Number(id)).filter((id) => !isNaN(id)),
+    start,
+    end,
+    sortType
+  });
+
+  const results: Playlist[] = playlists.data.map((playlist) => convertToPlaylist(playlist));
+
+  // return onlyMutablePlaylists
+  //   ? updatedResults.filter((result) => result.playlistId !== 'History')
+  //   : updatedResults;
+  return {
+    data: results,
+    total: results.length,
+    sortType: playlists.sortType,
+    start: playlists.start,
+    end: playlists.end
+  };
 };
 
 export default sendPlaylistData;

@@ -7,7 +7,9 @@ import SongArtist from '../SongsPage/SongArtist';
 import DefaultAlbumCover from '../../assets/images/webp/album_cover_default.webp';
 import Button from '../Button';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
+import { useNavigate } from '@tanstack/react-router';
+import NavLink from '../NavLink';
 
 interface AlbumProp extends Album {
   index: number;
@@ -22,10 +24,8 @@ export const Album = (props: AlbumProp) => {
   );
   const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
   const queue = useStore(store, (state) => state.localStorage.queue);
-  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
 
   const {
-    changeCurrentActivePage,
     createQueue,
     updateContextMenuData,
     updateQueueData,
@@ -34,6 +34,7 @@ export const Album = (props: AlbumProp) => {
     toggleMultipleSelections
   } = useContext(AppUpdateContext);
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const playAlbumSongs = useCallback(
     (isShuffle = false) => {
@@ -137,11 +138,11 @@ export const Album = (props: AlbumProp) => {
 
   const showAlbumInfoPage = useCallback(
     () =>
-      currentlyActivePage?.data?.albumId !== props.albumId &&
-      changeCurrentActivePage('AlbumInfo', {
-        albumId: props.albumId
+      navigate({
+        to: '/main-player/albums/$albumId',
+        params: { albumId: props.albumId }
       }),
-    [changeCurrentActivePage, currentlyActivePage?.data, props.albumId]
+    [navigate, props.albumId]
   );
 
   const isAMultipleSelection = useMemo(() => {
@@ -166,7 +167,7 @@ export const Album = (props: AlbumProp) => {
               artistId={artist.artistId}
               name={artist.name}
               className={
-                isAMultipleSelection ? '!text-font-color-black dark:!text-font-color-black' : ''
+                isAMultipleSelection ? 'text-font-color-black! dark:text-font-color-black!' : ''
               }
             />
           ];
@@ -315,20 +316,23 @@ export const Album = (props: AlbumProp) => {
   );
 
   return (
-    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
-    <div
+    <NavLink
+      to="/main-player/albums/$albumId"
+      params={{ albumId: props.albumId }}
+      preload={isMultipleSelectionEnabled ? false : undefined}
       // style={{ animationDelay: `${50 * (props.index + 1)}ms` }}
-      className={`album h-68 group mb-2 mr-6 flex w-48 flex-col justify-between overflow-hidden rounded-md p-4 ${
+      className={`album group mr-6 mb-2 flex h-68 w-48 flex-col justify-between overflow-hidden rounded-md p-4 ${
         props.className ?? ''
       } ${
         isAMultipleSelection
-          ? 'bg-background-color-3 !text-font-color-black dark:bg-dark-background-color-3 dark:!text-font-color-black'
+          ? 'bg-background-color-3 text-font-color-black! dark:bg-dark-background-color-3 dark:text-font-color-black!'
           : 'hover:bg-background-color-2/50 dark:hover:bg-dark-background-color-2/50'
       }`}
       onContextMenu={(e) =>
         updateContextMenuData(true, contextMenuItems, e.pageX, e.pageY, contextMenuItemData)
       }
       onClick={(e) => {
+        e.preventDefault();
         if (e.getModifierState('Shift') === true && props.selectAllHandler)
           props.selectAllHandler(props.albumId);
         else if (e.getModifierState('Control') === true && !isMultipleSelectionEnabled)
@@ -343,20 +347,20 @@ export const Album = (props: AlbumProp) => {
           <MultipleSelectionCheckbox
             id={props.albumId}
             selectionType="album"
-            className="absolute bottom-3 right-3 z-10"
+            className="absolute right-3 bottom-3 z-10"
           />
         ) : (
           <Button
-            className="absolute bottom-[5%] right-[5%] z-[1] !m-0 !rounded-none !border-0 bg-transparent !p-0 !text-font-color-white opacity-0 outline-1 outline-offset-1 transition-opacity hover:bg-transparent hover:!opacity-100 focus-visible:!opacity-100 focus-visible:!outline group-focus-within:opacity-75 group-hover:opacity-75 dark:bg-transparent dark:hover:bg-transparent"
+            className="text-font-color-white! absolute right-[5%] bottom-[5%] z-1 m-0! rounded-none! border-0! bg-transparent p-0! opacity-0 outline-offset-1 transition-opacity group-focus-within:opacity-75 group-hover:opacity-75 hover:bg-transparent hover:opacity-100! focus-visible:opacity-100! focus-visible:outline! dark:bg-transparent dark:hover:bg-transparent"
             iconName="play_circle"
-            iconClassName="!text-5xl !leading-none"
+            iconClassName="text-5xl! leading-none!"
             clickHandler={(e) => {
               e.stopPropagation();
               playAlbumSongs();
             }}
           />
         )}
-        <div className="album-cover-container relative h-full overflow-hidden rounded-lg before:invisible before:absolute before:h-full before:w-full before:bg-gradient-to-b before:from-[hsla(0,0%,0%,0%)] before:to-[hsla(0,0%,0%,50%)] before:opacity-0 before:transition-[visibility,opacity] before:duration-300 before:content-[''] group-focus-within:before:visible group-focus-within:before:opacity-100 group-hover:before:visible group-hover:before:opacity-100">
+        <div className="album-cover-container relative h-full overflow-hidden rounded-lg before:invisible before:absolute before:h-full before:w-full before:bg-linear-to-b before:from-[hsla(0,0%,0%,0%)] before:to-[hsla(0,0%,0%,50%)] before:opacity-0 before:transition-[visibility,opacity] before:duration-300 before:content-[''] group-focus-within:before:visible group-focus-within:before:opacity-100 group-hover:before:visible group-hover:before:opacity-100">
           <Img
             src={props.artworkPaths.artworkPath}
             fallbackSrc={DefaultAlbumCover}
@@ -368,13 +372,13 @@ export const Album = (props: AlbumProp) => {
         </div>
       </div>
       <div
-        className={`album-info-container mt-2 h-fit w-full pl-2 text-font-color-black dark:text-font-color-white ${
-          isAMultipleSelection && '!text-font-color-black dark:!text-font-color-black'
+        className={`album-info-container text-font-color-black dark:text-font-color-white mt-2 h-fit w-full pl-2 ${
+          isAMultipleSelection && 'text-font-color-black! dark:text-font-color-black!'
         }`}
       >
         <Button
-          className={`album-title pointer !m-0 !block w-full truncate !rounded-none !border-0 bg-transparent !p-0 !text-left text-xl outline-1 outline-offset-1 hover:bg-transparent hover:underline focus-visible:!outline dark:bg-transparent dark:hover:bg-transparent ${
-            isAMultipleSelection ? '!text-font-color-black dark:!text-font-color-black' : ''
+          className={`album-title pointer !m-0 !block w-full truncate !rounded-none !border-0 bg-transparent !p-0 !text-left text-xl outline-offset-1 hover:bg-transparent hover:underline focus-visible:!outline dark:bg-transparent dark:hover:bg-transparent ${
+            isAMultipleSelection ? 'text-font-color-black! dark:text-font-color-black!' : ''
           }`}
           label={props.title}
           clickHandler={showAlbumInfoPage}
@@ -387,10 +391,10 @@ export const Album = (props: AlbumProp) => {
             {albumArtists}
           </div>
         )}
-        <div className="album-no-of-songs w-full overflow-hidden text-ellipsis whitespace-nowrap text-xs">
+        <div className="album-no-of-songs w-full overflow-hidden text-xs text-ellipsis whitespace-nowrap">
           {t('common.songWithCount', { count: props.songs.length })}
         </div>
       </div>
-    </div>
+    </NavLink>
   );
 };

@@ -5,3 +5,4 @@ LICENSE.md
 tsconfig.json
 tsconfig.*.json
 **/thunder-tests
+routeTree.gen.ts

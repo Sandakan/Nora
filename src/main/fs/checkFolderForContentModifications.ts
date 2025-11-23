@@ -3,8 +3,10 @@ import fs from 'fs/promises';
 import logger from '../logger';
 import { sendMessageToRenderer } from '../main';
 import { tryToParseSong } from '../parseSong/parseSong';
-import { getSongsData, supportedMusicExtensions } from '../filesystem';
+import { supportedMusicExtensions } from '../filesystem';
 import removeSongsFromLibrary from '../removeSongsFromLibrary';
+import { getFolderFromPath } from '@main/db/queries/folders';
+import { isSongWithPathAvailable } from '@main/db/queries/songs';
 
 const getFolderDirs = async (folderPath: string) => {
   try {
@@ -43,17 +45,17 @@ const checkFolderForContentModifications = async (
 ) => {
   logger.debug('Started checking folder for modifications.');
 
+  const folder = await getFolderFromPath(folderPath);
   const dirs = await getFolderDirs(folderPath);
-  const songs = getSongsData();
-  if (Array.isArray(dirs) && songs && Array.isArray(songs)) {
+  const isSongExtensionSupported = supportedMusicExtensions.includes(path.extname(filename));
+
+  if (Array.isArray(dirs)) {
     const songPath = path.normalize(path.join(folderPath, filename));
     // checks whether the songs is newly added or deleted.
-    const isNewlyAddedSong =
-      dirs.some((dir) => dir === filename) &&
-      supportedMusicExtensions.includes(path.extname(filename));
-    const isADeletedSong = songs.some((song) => song.path === songPath);
+    const isNewlyAddedSong = dirs.some((dir) => dir === filename) && isSongExtensionSupported;
+    const isADeletedSong = await isSongWithPathAvailable(songPath);
 
-    if (isNewlyAddedSong) return tryToParseSong(songPath, false, true);
+    if (isNewlyAddedSong) return tryToParseSong(songPath, folder?.id, false, true);
     if (isADeletedSong) return tryToRemoveSongFromLibrary(folderPath, filename, abortSignal);
   }
   return undefined;

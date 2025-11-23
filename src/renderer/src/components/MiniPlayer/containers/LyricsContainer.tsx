@@ -6,7 +6,7 @@ import LyricLine from '../../LyricsPage/LyricLine';
 import useSkipLyricsLines from '../../../hooks/useSkipLyricsLines';
 import LyricsMetadata from '../../LyricsPage/LyricsMetadata';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 type Props = { isLyricsVisible: boolean };
 
@@ -128,8 +128,8 @@ const LyricsContainer = (props: Props) => {
           source={source}
           copyright={lyrics.lyrics.copyright}
           link={link}
-          className="!mt-2"
-          textClassName="!text-xs"
+          className="mt-2!"
+          textClassName="text-xs!"
         />
       );
     }
@@ -138,8 +138,8 @@ const LyricsContainer = (props: Props) => {
 
   return (
     <div
-      className={`mini-player-lyrics-container absolute top-0 flex h-full w-full select-none flex-col items-center overflow-hidden px-4 py-12 transition-[filter] group-focus-within:blur-sm group-focus-within:brightness-50 group-hover:blur-sm group-hover:brightness-50 ${
-        !isCurrentSongPlaying ? 'blur-sm brightness-50' : ''
+      className={`mini-player-lyrics-container absolute top-0 flex h-full w-full flex-col items-center overflow-hidden px-4 py-12 transition-[filter] select-none group-focus-within:blur-xs group-focus-within:brightness-50 group-hover:blur-xs group-hover:brightness-50 ${
+        !isCurrentSongPlaying ? 'blur-xs brightness-50' : ''
       }`}
       id="miniPlayerLyricsContainer"
     >
@@ -150,12 +150,12 @@ const LyricsContainer = (props: Props) => {
         </>
       )}
       {isLyricsVisible && lyrics && !lyrics.lyrics.isSynced && (
-        <div className="flex h-full w-full items-center justify-center text-font-color-white opacity-75">
+        <div className="text-font-color-white flex h-full w-full items-center justify-center opacity-75">
           {t('lyricsPage.noSyncedLyrics')}
         </div>
       )}
       {isLyricsVisible && lyrics === undefined && (
-        <div className="flex h-full w-full items-center justify-center text-font-color-white">
+        <div className="text-font-color-white flex h-full w-full items-center justify-center">
           {t('lyricsPage.noLyrics')}
         </div>
       )}

@@ -11,7 +11,6 @@ import {
   getGenresData,
   getPaletteData,
   getSongsData,
-  getUserData,
   setAlbumsData,
   setArtistsData,
   setGenresData,
@@ -43,6 +42,7 @@ import isPathAWebURL from './utils/isPathAWebUrl';
 import { appPreferences } from '../../package.json';
 import saveLyricsToLRCFile from './core/saveLyricsToLrcFile';
 import logger from './logger';
+import { getUserSettings } from './db/queries/settings';
 
 const { metadataEditingSupportedExtensions } = appPreferences;
 
@@ -57,8 +57,8 @@ const pendingMetadataUpdates = new Map<string, PendingMetadataUpdates>();
 
 export const isMetadataUpdatesPending = (songPath: string) => pendingMetadataUpdates.has(songPath);
 
-export const savePendingMetadataUpdates = (currentSongPath = '', forceSave = false) => {
-  const userData = getUserData();
+export const savePendingMetadataUpdates = async (currentSongPath = '', forceSave = false) => {
+  const { saveLyricsInLrcFilesForSupportedSongs } = await getUserSettings();
   const pathExt = path.extname(currentSongPath).replace(/\W/, '');
   const isASupportedFormat = metadataEditingSupportedExtensions.includes(pathExt);
 
@@ -77,7 +77,7 @@ export const savePendingMetadataUpdates = (currentSongPath = '', forceSave = fal
       try {
         NodeID3.update(pendingMetadata.tags, songPath);
 
-        if (!isASupportedFormat || userData.preferences.saveLyricsInLrcFilesForSupportedSongs) {
+        if (!isASupportedFormat || saveLyricsInLrcFilesForSupportedSongs) {
           const { title = '', synchronisedLyrics, unsynchronisedLyrics } = pendingMetadata.tags;
 
           const lyrics = parseLyricsFromID3Format(synchronisedLyrics, unsynchronisedLyrics);
@@ -846,7 +846,7 @@ const updateSongId3Tags = async (
           };
 
           // Kept to be saved later
-          const updatedData = addMetadataToPendingQueue({
+          const updatedData = await addMetadataToPendingQueue({
             songPath: song.path,
             tags: id3Tags,
             isKnownSource: true,

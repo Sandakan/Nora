@@ -12,7 +12,7 @@ import { AppUpdateContext } from '../contexts/AppUpdateContext';
 import calculateTime from '../utils/calculateTime';
 import debounce from '../utils/debounce';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 type Props = {
   id: string;
@@ -139,7 +139,7 @@ const SeekBarSlider = (props: Props) => {
       id={id}
       className={
         className ||
-        "seek-bar-slider relative float-left m-0 h-6 w-full appearance-none bg-[transparent] p-0 outline-none outline-1 outline-offset-1 before:absolute before:left-0 before:top-1/2 before:h-1 before:w-[var(--seek-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-seekbar-background-color/75 before:transition-[width,background] before:content-[''] hover:before:bg-font-color-highlight focus-visible:!outline dark:before:bg-dark-seekbar-background-color/75 dark:hover:before:bg-dark-font-color-highlight"
+        "seek-bar-slider before:bg-seekbar-background-color/75 hover:before:bg-font-color-highlight dark:before:bg-dark-seekbar-background-color/75 dark:hover:before:bg-dark-font-color-highlight relative float-left m-0 h-6 w-full appearance-none bg-[transparent] p-0 outline-hidden outline-offset-1 before:absolute before:top-1/2 before:left-0 before:h-1 before:w-[var(--seek-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:transition-[width,background] before:content-[''] focus-visible:outline!"
       }
       min={0}
       max={(currentSongData.duration || 0) >= songPos ? currentSongData.duration || 0 : songPos}

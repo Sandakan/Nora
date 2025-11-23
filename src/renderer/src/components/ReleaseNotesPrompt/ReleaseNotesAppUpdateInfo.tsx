@@ -10,7 +10,7 @@ const ReleaseNotesAppUpdateInfo = (props: { state: AppUpdatesState }) => {
     return (
       <>
         <br />
-        <span className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
+        <span className="text-font-color-highlight dark:text-dark-font-color-highlight text-sm">
           {t('releaseNotesPrompt.latestVersion')}
         </span>
       </>
@@ -22,10 +22,10 @@ const ReleaseNotesAppUpdateInfo = (props: { state: AppUpdatesState }) => {
         i18nKey="releaseNotesPrompt.oldVersion"
         components={{
           br: <br />,
-          span: <span className="text-sm text-font-color-crimson" />,
+          span: <span className="text-font-color-crimson text-sm" />,
           Hyperlink: (
             <Hyperlink
-              className="font-base text-sm text-font-color-highlight-2 underline dark:text-dark-font-color-highlight-2"
+              className="font-base text-font-color-highlight-2 dark:text-dark-font-color-highlight-2 text-sm underline"
               link={`${repository.url}/releases`}
               linkTitle={t('releaseNotesPrompt.noraReleases')}
             />
@@ -41,7 +41,7 @@ const ReleaseNotesAppUpdateInfo = (props: { state: AppUpdatesState }) => {
         components={{
           br: <br />,
           div: <div />,
-          span: <span className="text-sm text-font-color-crimson" />
+          span: <span className="text-font-color-crimson text-sm" />
         }}
       />
     );
@@ -53,7 +53,7 @@ const ReleaseNotesAppUpdateInfo = (props: { state: AppUpdatesState }) => {
       components={{
         br: <br />,
         div: <div />,
-        span: <span className="text-sm text-font-color-crimson" />
+        span: <span className="text-font-color-crimson text-sm" />
       }}
     />
   );

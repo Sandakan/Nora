@@ -19,7 +19,7 @@ const ResetTagsToDefaultPrompt = (props: Props) => {
   const entries = (dataEntries.filter((x) => x[1]) ?? []).map(([x], i) => (
     <div key={i}>
       {x.toUpperCase()} :
-      <span className="ml-2 font-medium uppercase text-font-color-crimson">
+      <span className="text-font-color-crimson ml-2 font-medium uppercase">
         {t('resetTagsToDefaultPrompt.changed')}
       </span>
     </div>
@@ -27,7 +27,7 @@ const ResetTagsToDefaultPrompt = (props: Props) => {
 
   return (
     <div>
-      <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
+      <div className="title-container text-font-color-black dark:text-font-color-white mt-1 mb-8 flex items-center pr-4 text-3xl font-medium">
         {t('resetTagsToDefaultPrompt.title')}
       </div>
       <div className="description">{t('resetTagsToDefaultPrompt.description')}</div>
@@ -40,7 +40,7 @@ const ResetTagsToDefaultPrompt = (props: Props) => {
         />
         <Button
           label={t('resetTagsToDefaultPrompt.resetToDefault')}
-          className="w-[12rem] !bg-background-color-3 !text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:text-font-color-black dark:hover:border-background-color-3"
+          className="bg-background-color-3! text-font-color-black! hover:border-background-color-3 dark:bg-dark-background-color-3! dark:text-font-color-black dark:hover:border-background-color-3 w-[12rem]"
           clickHandler={resetButtonHandler}
         />
       </div>

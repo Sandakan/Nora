@@ -152,7 +152,7 @@ const AddMusicFoldersPrompt = (props: Props) => {
   const isAddFolderButtonDisabled = selectedNoOfParentFolders === 0;
   return (
     <div className="">
-      <div className="title-container mb-4 flex items-center text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mb-4 flex items-center text-3xl font-medium">
         <span className="material-icons-round-outlined mr-2 text-4xl">create_new_folder</span>{' '}
         {t('addMusicFoldersPrompt.title')}
       </div>
@@ -170,7 +170,7 @@ const AddMusicFoldersPrompt = (props: Props) => {
               label={t('addMusicFoldersPrompt.chooseFolders')}
               iconName="folder"
               iconClassName="material-icons-round-outlined"
-              className="!mr-0 mt-4"
+              className="mt-4 mr-0!"
               clickHandler={getFolderInfo}
             />
           </div>
@@ -178,7 +178,7 @@ const AddMusicFoldersPrompt = (props: Props) => {
       </div>
       {folders.length > 0 && (
         <div className="mt-10 flex items-center justify-end">
-          <div className="folder-info-container mr-8 text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
+          <div className="folder-info-container text-font-color-highlight dark:text-dark-font-color-highlight mr-8 text-sm">
             <span>
               {t('folder.selectedParentFolderCount', {
                 count: selectedNoOfParentFolders
@@ -201,7 +201,7 @@ const AddMusicFoldersPrompt = (props: Props) => {
             <Button
               label={t('addMusicFoldersPrompt.addSelectedFolders')}
               iconName="done"
-              className="!bg-background-color-3 !text-font-color-black"
+              className="bg-background-color-3! text-font-color-black!"
               clickHandler={(_, setIsDisabled, setIsPending) => {
                 const validFolders = removeUnselectedFolders(folders);
                 console.log(validFolders);

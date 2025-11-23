@@ -2,7 +2,7 @@ import { useContext, useMemo } from 'react';
 import { AppUpdateContext } from '../contexts/AppUpdateContext';
 import Checkbox from './Checkbox';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 type Props = {
   id: string;
@@ -31,7 +31,7 @@ const MultipleSelectionCheckbox = (props: Props) => {
       checkedStateUpdateFunction={(state) =>
         updateMultipleSelections(id, selectionType, state ? 'remove' : 'add')
       }
-      className={`[&>.checkmark]:peer-checked:!shadow-lg [&>.checkmark]:dark:peer-checked:!border-font-color-highlight [&>.checkmark]:dark:peer-checked:!bg-font-color-highlight [&>.checkmark]:dark:peer-checked:!text-font-color-highlight ${
+      className={`dark:peer-checked:[&>.checkmark]:border-font-color-highlight! dark:peer-checked:[&>.checkmark]:bg-font-color-highlight! dark:peer-checked:[&>.checkmark]:text-font-color-highlight! peer-checked:[&>.checkmark]:shadow-lg! ${
         multipleSelectionsData.isEnabled ? '' : 'hidden'
       } !m-0 ${className}`}
     />

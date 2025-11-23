@@ -1,12 +1,11 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
-import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-
-import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
 import Button from '../Button';
 import { useStore } from '@tanstack/react-store';
-import { store } from '../../store';
+import { store } from '../../store/store';
+import { useNavigate } from '@tanstack/react-router';
 
 type Props = {
   onPopupAppears: (isVisible: boolean) => void;
@@ -18,16 +17,13 @@ const UpNextSongPopup = (props: Props) => {
   const currentSongData = useStore(store, (state) => state.currentSongData);
   const queue = useStore(store, (state) => state.localStorage.queue);
 
-  const {
-    changeCurrentActivePage
-    // changeUpNextSongData
-  } = useContext(AppUpdateContext);
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const { onPopupAppears, isSemiTransparent = false, className } = props;
 
   const [upNextSongData, setUpNextSongData] = useState<SongData>();
-  const upNextSongDataCache = useRef<SongData>();
+  const upNextSongDataCache = useRef<SongData>(null as unknown as SongData);
 
   useEffect(() => {
     onPopupAppears(!!upNextSongData);
@@ -87,9 +83,9 @@ const UpNextSongPopup = (props: Props) => {
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
     let timeIntervalId: NodeJS.Timeout;
-    if (queue.queue.length > 1 && queue.currentSongIndex !== null) {
+    if (queue.songIds.length > 1 && queue.position !== null) {
       setUpNextSongData(undefined);
-      const nextSongIndex = queue.queue[queue.currentSongIndex + 1];
+      const nextSongIndex = queue.songIds[queue.position + 1];
 
       if (nextSongIndex) {
         timeoutId = setTimeout(
@@ -117,32 +113,33 @@ const UpNextSongPopup = (props: Props) => {
       if (timeoutId) clearTimeout(timeoutId);
       if (timeIntervalId) clearInterval(timeIntervalId);
     };
-  }, [queue.currentSongIndex, queue.queue, showPopup]);
+  }, [queue.position, queue.songIds, showPopup]);
 
   const showSongInfoPage = useCallback(
     (songId: string) =>
       currentSongData.isKnownSource
-        ? changeCurrentActivePage('SongInfo', {
-            songId
+        ? navigate({
+            to: '/main-player/songs/$songId',
+            params: { songId }
           })
         : undefined,
-    [changeCurrentActivePage, currentSongData.isKnownSource]
+    [navigate, currentSongData.isKnownSource]
   );
 
   return upNextSongData ? (
     <div
-      className={`next-song appear-from-bottom group/nextSong relative flex max-w-full items-center rounded-full px-3 py-1 text-xs text-font-color-black dark:text-font-color-white ${
+      className={`next-song appear-from-bottom group/nextSong text-font-color-black dark:text-font-color-white relative flex max-w-full items-center rounded-full px-3 py-1 text-xs ${
         isSemiTransparent
-          ? 'bg-background-color-2/75 backdrop-blur-sm dark:bg-dark-background-color-2/75'
+          ? 'bg-background-color-2/75 dark:bg-dark-background-color-2/75 backdrop-blur-xs'
           : 'bg-background-color-2 dark:bg-dark-background-color-2'
       } ${className}`}
     >
       <p className="truncate">
-        <span className="font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+        <span className="text-font-color-highlight dark:text-dark-font-color-highlight font-medium">
           {t('player.upNext')}
         </span>{' '}
         <span
-          className="cursor-pointer outline-1 outline-offset-1 hover:underline focus-visible:!outline"
+          className="cursor-pointer outline-offset-1 hover:underline focus-visible:outline!"
           onClick={() => showSongInfoPage(upNextSongData.songId)}
           onKeyDown={(e) => e.key === 'Enter' && showSongInfoPage(upNextSongData.songId)}
         >
@@ -151,22 +148,24 @@ const UpNextSongPopup = (props: Props) => {
         {upNextSongData.artists && upNextSongData.artists.length > 0 && (
           <>
             {' '}
-            <span className="font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+            <span className="text-font-color-highlight dark:text-dark-font-color-highlight font-medium">
               {t('player.by')}
             </span>{' '}
             <span
-              className="cursor-pointer outline-1 outline-offset-1 hover:underline focus-visible:!outline"
+              className="cursor-pointer outline-offset-1 hover:underline focus-visible:outline!"
               onClick={() =>
                 upNextSongData?.artists![0] &&
-                changeCurrentActivePage('ArtistInfo', {
-                  artistId: upNextSongData.artists[0].artistId
+                navigate({
+                  to: '/main-player/artists/$artistId',
+                  params: { artistId: upNextSongData.artists[0].artistId }
                 })
               }
               onKeyDown={(e) =>
                 e.key === 'Enter' &&
                 upNextSongData?.artists![0] &&
-                changeCurrentActivePage('ArtistInfo', {
-                  artistId: upNextSongData.artists[0].artistId
+                navigate({
+                  to: '/main-player/artists/$artistId',
+                  params: { artistId: upNextSongData.artists[0].artistId }
                 })
               }
             >
@@ -181,7 +180,7 @@ const UpNextSongPopup = (props: Props) => {
       <Button
         iconName="close"
         tooltipLabel={t('player.closeUpNext')}
-        className="!m-0 !hidden !border-none !py-0 !pl-1 !pr-0 !text-base !text-font-color-highlight outline-1 outline-offset-1 focus-visible:!outline group-hover/nextSong:!flex dark:!text-dark-font-color-highlight"
+        className="text-font-color-highlight! dark:text-dark-font-color-highlight! m-0! hidden! border-none! py-0! pr-0! pl-1! text-base! outline-offset-1 group-hover/nextSong:flex! focus-visible:outline!"
         clickHandler={() => setUpNextSongData(undefined)}
       />
     </div>

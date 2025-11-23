@@ -14,7 +14,7 @@ import { version, releaseNotes as currentReleaseNotes, urls } from '../../../../
 import localReleseNotes from '../../../../../release-notes.json';
 import ReleaseNotesAppUpdateInfo from './ReleaseNotesAppUpdateInfo';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 const ReleaseNotesPrompt = () => {
   const appUpdatesState = useStore(store, (state) => state.appUpdatesState);
@@ -119,7 +119,7 @@ const ReleaseNotesPrompt = () => {
       });
 
       return (
-        <ul className="mb-12 mt-8 flex list-disc flex-col justify-center px-8 marker:text-font-color-highlight dark:marker:text-dark-font-color-highlight">
+        <ul className="marker:text-font-color-highlight dark:marker:text-dark-font-color-highlight mt-8 mb-12 flex list-disc flex-col justify-center px-8">
           {notes}
         </ul>
       );

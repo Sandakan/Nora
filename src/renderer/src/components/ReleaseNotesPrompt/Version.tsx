@@ -56,7 +56,7 @@ const Version = (props: VersionProp) => {
       {Array.isArray(notes.new) && notes.new.length > 0 && (
         <>
           <h3 className="mb-2 px-4 text-lg">{t('releaseNotesPrompt.newFeaturesAndUpdates')}</h3>
-          <ul className="notes list-disc px-8 font-light text-[hsla(0,0%,0%,0.8)] marker:text-font-color-highlight dark:text-[hsla(0,0%,100%,0.8)] dark:marker:text-dark-font-color-highlight">
+          <ul className="notes marker:text-font-color-highlight dark:marker:text-dark-font-color-highlight list-disc px-8 font-light text-[hsla(0,0%,0%,0.8)] dark:text-[hsla(0,0%,100%,0.8)]">
             {notes.new.map((note, index) => (
               <VersionNote
                 key={`${version}-feature-${index}`}
@@ -70,7 +70,7 @@ const Version = (props: VersionProp) => {
       {Array.isArray(notes.fixed) && notes.fixed.length > 0 && (
         <>
           <h3 className="mb-2 px-4 text-lg">{t('releaseNotesPrompt.fixesAndImprovements')}</h3>
-          <ul className="notes list-disc px-8 font-light text-[hsla(0,0%,0%,0.8)] marker:text-font-color-highlight dark:text-[hsla(0,0%,100%,0.8)] dark:marker:text-dark-font-color-highlight">
+          <ul className="notes marker:text-font-color-highlight dark:marker:text-dark-font-color-highlight list-disc px-8 font-light text-[hsla(0,0%,0%,0.8)] dark:text-[hsla(0,0%,100%,0.8)]">
             {notes.fixed.map((note, index) => (
               <VersionNote
                 key={`${version}-fix-${index}`}
@@ -84,7 +84,7 @@ const Version = (props: VersionProp) => {
       {Array.isArray(notes.knownIssues) && notes.knownIssues.length > 0 && (
         <>
           <h3 className="mb-2 px-4 text-lg">{t('releaseNotesPrompt.issuesAndBugs')}</h3>
-          <ul className="notes list-disc px-8 font-light text-[hsla(0,0%,0%,0.8)] marker:text-font-color-highlight dark:text-[hsla(0,0%,100%,0.8)] dark:marker:text-dark-font-color-highlight">
+          <ul className="notes marker:text-font-color-highlight dark:marker:text-dark-font-color-highlight list-disc px-8 font-light text-[hsla(0,0%,0%,0.8)] dark:text-[hsla(0,0%,100%,0.8)]">
             {notes.knownIssues.map((note, index) => (
               <VersionNote
                 key={`${version}-issue-${index}`}
@@ -98,7 +98,7 @@ const Version = (props: VersionProp) => {
       {Array.isArray(notes.developerUpdates) && notes.developerUpdates.length > 0 && (
         <>
           <h3 className="mb-2 px-4 text-lg">{t('releaseNotesPrompt.developerUpdates')}</h3>
-          <ul className="notes list-disc px-8 font-light text-[hsla(0,0%,0%,0.8)] marker:text-font-color-highlight dark:text-[hsla(0,0%,100%,0.8)] dark:marker:text-dark-font-color-highlight">
+          <ul className="notes marker:text-font-color-highlight dark:marker:text-dark-font-color-highlight list-disc px-8 font-light text-[hsla(0,0%,0%,0.8)] dark:text-[hsla(0,0%,100%,0.8)]">
             {notes.developerUpdates.map((note, index) => (
               <VersionNote
                 key={`${version}-issue-${index}`}
@@ -109,7 +109,7 @@ const Version = (props: VersionProp) => {
           </ul>
         </>
       )}
-      <div className="mb-4 mt-8 h-[2px] w-full bg-[hsla(0,0%,80%,0.25)] group-last:invisible" />
+      <div className="mt-8 mb-4 h-[2px] w-full bg-[hsla(0,0%,80%,0.25)] group-last:invisible" />
     </div>
   );
 };

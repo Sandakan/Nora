@@ -28,17 +28,18 @@ export const getDefaultSongCoverImgBuffer = async () => {
 
 export const generateCoverBuffer = async (
   cover?: musicMetaData.IPicture[] | string,
-  noDefaultOnUndefined = false
+  defaultOnUndefined = true,
+  appendDefaultArtworkLocationToPath = true
 ) => {
-  if (
-    (cover === undefined || (typeof cover !== 'string' && cover[0].data === undefined)) &&
-    noDefaultOnUndefined
-  )
+  if ((!cover || (typeof cover !== 'string' && cover[0].data === undefined)) && !defaultOnUndefined)
     return undefined;
+
   if (cover) {
     if (typeof cover === 'string') {
       try {
-        const imgPath = path.join(DEFAULT_ARTWORK_SAVE_LOCATION, cover);
+        const imgPath = appendDefaultArtworkLocationToPath
+          ? path.join(DEFAULT_ARTWORK_SAVE_LOCATION, cover)
+          : cover;
         const isWebp = path.extname(imgPath) === '.webp';
 
         const buffer = isWebp ? await sharp(imgPath).png().toBuffer() : await fs.readFile(imgPath);

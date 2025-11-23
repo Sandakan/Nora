@@ -1,0 +1,134 @@
+import { and, eq, inArray, sql } from 'drizzle-orm';
+import { db } from '../db';
+import {
+  albumsArtworks,
+  artistsArtworks,
+  artworks,
+  artworksGenres,
+  artworkSourceEnum,
+  artworksPlaylists,
+  artworksSongs
+} from '../schema';
+
+export const saveArtworks = async (
+  data: {
+    path: string;
+    width: number;
+    height: number;
+    source: (typeof artworkSourceEnum.enumValues)[number];
+  }[],
+  trx: DB | DBTransaction = db
+) => {
+  const res = await trx.insert(artworks).values(data).returning();
+
+  return res;
+};
+
+export const linkArtworksToSong = async (
+  data: (typeof artworksSongs.$inferInsert)[],
+  trx: DB | DBTransaction = db
+) => {
+  return trx.insert(artworksSongs).values(data).returning();
+};
+
+export const syncSongArtworks = async (
+  songId: number,
+  artworksIds: number[],
+  trx: DB | DBTransaction = db
+) => {
+  // Get current artwork ids for the song
+  const current = await trx
+    .select({ artworkId: artworksSongs.artworkId })
+    .from(artworksSongs)
+    .where(eq(artworksSongs.songId, songId));
+
+  const currentIds = current.map((row) => row.artworkId);
+
+  // Determine which to add and which to remove
+  const toAdd = artworksIds.filter((id) => !currentIds.includes(id));
+  const toRemove = currentIds.filter((id) => !artworksIds.includes(id));
+
+  // Remove unlinked
+  if (toRemove.length > 0) {
+    await trx
+      .delete(artworksSongs)
+      .where(and(eq(artworksSongs.songId, songId), inArray(artworksSongs.artworkId, toRemove)));
+  }
+
+  // Add new links
+  if (toAdd.length > 0) {
+    await trx.insert(artworksSongs).values(toAdd.map((artworkId) => ({ songId, artworkId })));
+  }
+
+  // Return the final set
+  return await trx
+    .select({ artworkId: artworksSongs.artworkId })
+    .from(artworksSongs)
+    .where(eq(artworksSongs.songId, songId));
+};
+
+export const linkArtworksToAlbum = async (
+  data: (typeof albumsArtworks.$inferInsert)[],
+  trx: DB | DBTransaction = db
+) => {
+  return trx.insert(albumsArtworks).values(data).returning();
+};
+
+export const linkArtworksToGenre = async (
+  data: (typeof artworksGenres.$inferInsert)[],
+  trx: DB | DBTransaction = db
+) => {
+  return trx.insert(artworksGenres).values(data).returning();
+};
+
+export const linkArtworksToArtist = async (
+  data: (typeof artistsArtworks.$inferInsert)[],
+  trx: DB | DBTransaction = db
+) => {
+  return trx.insert(artistsArtworks).values(data).returning();
+};
+
+export const linkArtworkToPlaylist = async (
+  playlistId: number,
+  artworkId: number,
+  trx: DB | DBTransaction = db
+) => {
+  return await trx.insert(artworksPlaylists).values({ playlistId, artworkId });
+};
+
+export const getArtistOnlineArtworksCount = async (
+  artistId: number,
+  trx: DB | DBTransaction = db
+) => {
+  const data = await trx
+    .select({ count: sql`COUNT(*)` })
+    .from(artworks)
+    .innerJoin(artistsArtworks, eq(artistsArtworks.artworkId, artworks.id))
+    .where(eq(artistsArtworks.artistId, artistId));
+
+  return data.at(0)?.count ?? 0;
+};
+
+export const deleteArtworks = async (artworkIds: number[], trx: DB | DBTransaction = db) => {
+  const data = await trx.delete(artworks).where(inArray(artworks.id, artworkIds)).returning();
+  return data;
+};
+
+export const updateArtwork = async (
+  artworkId: number,
+  data: Partial<typeof artworks.$inferInsert>,
+  trx: DB | DBTransaction = db
+) => {
+  const updated = await trx.update(artworks).set(data).where(eq(artworks.id, artworkId));
+
+  return updated;
+};
+
+export const getArtworkIdsOfSong = async (songId: number, trx: DB | DBTransaction = db) => {
+  const data = await trx
+    .select({ artworkId: artworksSongs.artworkId })
+    .from(artworksSongs)
+    .where(eq(artworksSongs.songId, songId));
+
+  return data;
+};
