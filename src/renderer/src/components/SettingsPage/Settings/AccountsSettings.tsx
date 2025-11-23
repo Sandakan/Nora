@@ -8,6 +8,7 @@ import LastFMIcon from '../../../assets/images/webp/last-fm-logo.webp';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { settingsQuery } from '@renderer/queries/settings';
 import { queryClient } from '@renderer/index';
+import CollapsibleSection from "./CollapsibleSection";
 
 const AccountsSettings = () => {
   const { data: userSettings } = useQuery(settingsQuery.all);
@@ -52,13 +53,18 @@ const AccountsSettings = () => {
 
   return (
     <li
-      className="main-container startup-settings-container mb-16"
+      className="main-container startup-settings-container mb-4"
       id="accounts-settings-container"
     >
-      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center text-2xl font-medium">
+    <CollapsibleSection
+      defaultOpen={false}
+      title={
+      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight flex items-center text-2xl font-medium">
         <span className="material-icons-round-outlined mr-2">account_circle</span>
         {t('settingsPage.accounts')}
       </div>
+      }
+    >
       <ul className="marker:bg-background-color-3 dark:marker:bg-background-color-3 list-disc pl-6">
         <li className="discord-rpc-integration mb-4">
           <div className="description">{t('settingsPage.enableDiscordRpcDescription')}</div>
@@ -164,6 +170,7 @@ const AccountsSettings = () => {
           </ul>
         </li>
       </ul>
+    </CollapsibleSection>
     </li>
   );
 };

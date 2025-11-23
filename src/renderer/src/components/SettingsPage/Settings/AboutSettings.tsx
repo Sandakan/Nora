@@ -24,6 +24,7 @@ import DiscordLightIcon from '../../../assets/images/svg/discord_dark_mode.svg';
 import SLFlag from '../../../assets/images/webp/sl-flag.webp';
 import { store } from '@renderer/store/store';
 import { useStore } from '@tanstack/react-store';
+import CollapsibleSection from "./CollapsibleSection";
 
 const ReleaseNotesPrompt = lazy(() => import('../../ReleaseNotesPrompt/ReleaseNotesPrompt'));
 const ResetAppConfirmationPrompt = lazy(() => import('../ResetAppConfirmationPrompt'));
@@ -57,10 +58,15 @@ const AboutSettings = () => {
 
   return (
     <li className="main-container about-container" id="about-settings-container">
-      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center text-2xl font-medium">
+    <CollapsibleSection
+      defaultOpen={false}
+      title={
+      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight flex items-center text-2xl font-medium">
         <span className="material-icons-round-outlined mr-2">info</span>
         About
       </div>
+      }
+    >
       <div className="pl-2">
         <div className="mb-2 flex items-center justify-between p-2 text-lg">
           <div className="flex items-center">
@@ -431,6 +437,7 @@ const AboutSettings = () => {
           </div>
         </div>
       </div>
+    </CollapsibleSection>
     </li>
   );
 };

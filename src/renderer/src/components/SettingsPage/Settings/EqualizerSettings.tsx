@@ -11,6 +11,7 @@ import EqualierBand from './EqualierBand';
 import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store/store';
 import { LOCAL_STORAGE_DEFAULT_TEMPLATE } from '@renderer/other/appReducer';
+import CollapsibleSection from "./CollapsibleSection";
 
 const presets: EqualizerPresetDropdownOptions[] = equalizerPresetsData.map((presetData) => {
   return {
@@ -101,13 +102,18 @@ const EqualizerSettings = () => {
 
   return (
     <li
-      className="main-container equalizer-settings-container mb-12"
+      className="main-container equalizer-settings-container mb-4"
       id="equalizer-settings-container"
     >
-      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center text-2xl font-medium">
+    <CollapsibleSection
+      defaultOpen={false}
+      title={
+      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight flex items-center text-2xl font-medium">
         <span className="material-icons-round-outlined mr-2">graphic_eq</span>
         {t('settingsPage.equalizer')}
       </div>
+      }
+    >
       <div className="pl-6">
         <div className="flex items-center justify-between">
           <Dropdown
@@ -150,6 +156,7 @@ const EqualizerSettings = () => {
           {equalizerBands}
         </div>
       </div>
+    </CollapsibleSection>
     </li>
   );
 };

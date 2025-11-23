@@ -3,6 +3,7 @@ import storage from '../../../utils/localStorage';
 import Checkbox from '../../Checkbox';
 import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store/store';
+import CollapsibleSection from "./CollapsibleSection";
 
 const PerformanceSettings = () => {
   const localStorageData = useStore(store, (state) => state.localStorage);
@@ -11,13 +12,18 @@ const PerformanceSettings = () => {
 
   return (
     <li
-      className="main-container performance-settings-container mb-16"
+      className="main-container performance-settings-container mb-4"
       id="performance-settings-container"
     >
-      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center text-2xl font-medium">
+    <CollapsibleSection
+      defaultOpen={false}
+      title={
+      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight flex items-center text-2xl font-medium">
         <span className="material-icons-round-outlined mr-2 leading-none">offline_bolt</span>
         <span> {t('settingsPage.performance')}</span>
       </div>
+      }
+    >
       <ul className="marker:bg-background-color-3 dark:marker:bg-background-color-3 list-disc pl-6">
         <li className="secondary-container toggle-remove-animations-on-battery-power mb-4">
           <div className="description">{t('settingsPage.removeAnimationOnBatteryDescription')}</div>
@@ -50,6 +56,7 @@ const PerformanceSettings = () => {
           />
         </li>
       </ul>
+    </CollapsibleSection>
     </li>
   );
 };

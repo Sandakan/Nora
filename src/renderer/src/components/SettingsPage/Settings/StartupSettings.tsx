@@ -3,6 +3,7 @@ import Checkbox from '../../Checkbox';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { settingsQuery } from '@renderer/queries/settings';
 import { queryClient } from '@renderer/index';
+import CollapsibleSection from "./CollapsibleSection";
 
 const StartupSettings = () => {
   const { data: userSettings } = useQuery(settingsQuery.all);
@@ -26,11 +27,16 @@ const StartupSettings = () => {
   });
 
   return (
-    <li className="main-container startup-settings-container mb-16" id="startup-settings-container">
-      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center text-2xl font-medium">
+    <li className="main-container startup-settings-container mb-4" id="startup-settings-container">
+    <CollapsibleSection
+      defaultOpen={false}
+      title={
+      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight flex items-center text-2xl font-medium">
         <span className="material-icons-round-outlined mr-2">restart_alt</span>
         {t('settingsPage.startupAndWindowCustomization')}
       </div>
+      }
+    >
       <ul className="marker:bg-background-color-3 dark:marker:bg-background-color-3 list-disc pl-6">
         <li className="auto-launch-at-startup-checkbox-container mb-4">
           <div className="description">{t('settingsPage.autoLaunchAtStartDescription')}</div>
@@ -74,6 +80,7 @@ const StartupSettings = () => {
           />
         </li>
       </ul>
+    </CollapsibleSection>
     </li>
   );
 };

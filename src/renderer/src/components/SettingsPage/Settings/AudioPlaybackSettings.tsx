@@ -8,6 +8,7 @@ import Checkbox from '../../Checkbox';
 import i18n from '../../../i18n';
 import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store/store';
+import CollapsibleSection from "./CollapsibleSection";
 
 const second = i18n.t('settingsPage.second');
 const seconds = i18n.t('settingsPage.second_other');
@@ -46,13 +47,18 @@ const AudioPlaybackSettings = () => {
 
   return (
     <li
-      className="main-container audio-playback-settings-container mb-16"
+      className="main-container audio-playback-settings-container mb-4"
       id="audio-playback-settings-container"
     >
-      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center text-2xl font-medium">
+    <CollapsibleSection
+      defaultOpen={false}
+      title={
+      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight flex items-center text-2xl font-medium">
         <span className="material-icons-round-outlined mr-2">slow_motion_video</span>
         {t('settingsPage.audioPlayback')}
       </div>
+      }
+    >
       <ul className="marker:bg-font-color-highlight dark:marker:bg-dark-font-color-highlight list-disc pl-6">
         <li className="secondary-container show-remaining-song-duration mb-4">
           <div className="description">
@@ -125,6 +131,7 @@ const AudioPlaybackSettings = () => {
           />
         </li>
       </ul>
+    </CollapsibleSection>
     </li>
   );
 };

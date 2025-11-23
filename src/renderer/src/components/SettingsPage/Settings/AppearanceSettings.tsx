@@ -15,6 +15,7 @@ import storage from '../../../utils/localStorage';
 import Checkbox from '../../Checkbox';
 import Img from '../../Img';
 import DynamicThemeSettings from './DynamicThemeSettings';
+import CollapsibleSection from "./CollapsibleSection";
 
 const ThemeSettings = () => {
   const { data: userSettings } = useQuery(settingsQuery.all);
@@ -66,13 +67,18 @@ const ThemeSettings = () => {
 
   return userSettings ? (
     <li
-      className="main-container appearance-settings-container mb-16"
+      className="main-container appearance-settings-container mb-4"
       id="appearance-settings-container"
     >
-      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center text-2xl font-medium">
+    <CollapsibleSection
+      defaultOpen={false}
+      title={
+      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight flex items-center text-2xl font-medium">
         <span className="material-icons-round-outlined mr-2">dark_mode</span>
         {t('settingsPage.appearance')}
       </div>
+      }
+    >
       <ul className="marker:bg-font-color-highlight dark:marker:bg-dark-font-color-highlight list-disc pl-6">
         <li>
           <div className="description">{t('settingsPage.changeTheme')}</div>
@@ -169,6 +175,7 @@ const ThemeSettings = () => {
           )}
         </li>
       </ul>
+    </CollapsibleSection>
     </li>
   ) : null;
 };
