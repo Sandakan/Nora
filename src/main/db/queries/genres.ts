@@ -90,6 +90,16 @@ export const linkSongToGenre = async (
   return trx.insert(genresSongs).values({ genreId, songId });
 };
 
+export const unlinkSongFromGenre = async (
+  genreId: number,
+  songId: number,
+  trx: DB | DBTransaction = db
+) => {
+  return trx
+    .delete(genresSongs)
+    .where(and(eq(genresSongs.genreId, genreId), eq(genresSongs.songId, songId)));
+};
+
 export const createGenre = async (
   genre: typeof genres.$inferInsert,
   trx: DB | DBTransaction = db

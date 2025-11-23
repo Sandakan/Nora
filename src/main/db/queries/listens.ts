@@ -1,4 +1,4 @@
-import { inArray, sql } from 'drizzle-orm';
+import { eq, inArray, sql } from 'drizzle-orm';
 import { db } from '../db';
 import { playEvents, seekEvents, skipEvents } from '../schema';
 
@@ -59,4 +59,16 @@ export const addSongSkipEvent = (
   trx: DB | DBTransaction = db
 ) => {
   return trx.insert(skipEvents).values({ position, songId });
+};
+
+export const deleteSongPlayEvents = (songId: number, trx: DB | DBTransaction = db) => {
+  return trx.delete(playEvents).where(eq(playEvents.songId, songId));
+};
+
+export const deleteSongSeekEvents = (songId: number, trx: DB | DBTransaction = db) => {
+  return trx.delete(seekEvents).where(eq(seekEvents.songId, songId));
+};
+
+export const deleteSongSkipEvents = (songId: number, trx: DB | DBTransaction = db) => {
+  return trx.delete(skipEvents).where(eq(skipEvents.songId, songId));
 };

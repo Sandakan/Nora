@@ -123,3 +123,12 @@ export const updateArtwork = async (
 
   return updated;
 };
+
+export const getArtworkIdsOfSong = async (songId: number, trx: DB | DBTransaction = db) => {
+  const data = await trx
+    .select({ artworkId: artworksSongs.artworkId })
+    .from(artworksSongs)
+    .where(eq(artworksSongs.songId, songId));
+
+  return data;
+};

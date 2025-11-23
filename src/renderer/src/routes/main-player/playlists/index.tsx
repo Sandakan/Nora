@@ -19,6 +19,11 @@ import { playlistSortOptions } from '@renderer/components/PlaylistsPage/Playlist
 import { useSuspenseQuery } from '@tanstack/react-query';
 import Img from '@renderer/components/Img';
 import NoPlaylistsImage from '@assets/images/svg/Empty Inbox _Monochromatic.svg';
+import SecondaryContainer from '@renderer/components/SecondaryContainer';
+import NavLink from '@renderer/components/NavLink';
+
+import favoritesPlaylistCoverImage from '../../../assets/images/webp/favorites-playlist-icon.webp';
+import historyPlaylistCoverImage from '../../../assets/images/webp/history-playlist-icon.webp';
 
 export const Route = createFileRoute('/main-player/playlists/')({
   validateSearch: zodValidator(playlistSearchSchema),
@@ -207,6 +212,34 @@ function PlaylistsPage() {
         {playlists.length > 0 && (
           <div className="playlists-container appear-from-bottom flex h-full flex-wrap delay-100">
             <VirtualizedGrid
+              components={{
+                Header: () => (
+                  <SecondaryContainer className="appear-from-bottom h-fit max-h-full w-full pb-4">
+                    <div className="flex gap-4">
+                      <NavLink
+                        to="/main-player/playlists/favorites"
+                        className="bg-background-color-2/70 hover:bg-background-color-2! dark:bg-dark-background-color-2/70 dark:hover:bg-dark-background-color-2! text-font-color dark:text-dark-font-color flex h-24 min-w-60 items-center gap-4 rounded-xl px-4 py-4"
+                      >
+                        <Img
+                          src={favoritesPlaylistCoverImage}
+                          className="aspect-square h-full w-auto rounded-lg"
+                        />
+                        <span className="text-xl">Favorites</span>
+                      </NavLink>
+                      <NavLink
+                        to="/main-player/playlists/history"
+                        className="bg-background-color-2/70 hover:bg-background-color-2! dark:bg-dark-background-color-2/70 dark:hover:bg-dark-background-color-2! text-font-color dark:text-dark-font-color flex h-24 min-w-60 items-center gap-4 rounded-xl px-4 py-4"
+                      >
+                        <Img
+                          src={historyPlaylistCoverImage}
+                          className="aspect-square h-full w-auto rounded-lg"
+                        />
+                        <span className="text-xl">History</span>
+                      </NavLink>
+                    </div>
+                  </SecondaryContainer>
+                )
+              }}
               data={playlists}
               fixedItemWidth={MIN_ITEM_WIDTH}
               fixedItemHeight={MIN_ITEM_HEIGHT}

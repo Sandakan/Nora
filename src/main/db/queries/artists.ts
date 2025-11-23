@@ -59,6 +59,16 @@ export const linkSongToArtist = async (
   return trx.insert(artistsSongs).values({ artistId, songId }).returning();
 };
 
+export const unlinkSongFromArtist = async (
+  artistId: number,
+  songId: number,
+  trx: DB | DBTransaction = db
+) => {
+  return trx
+    .delete(artistsSongs)
+    .where(and(eq(artistsSongs.artistId, artistId), eq(artistsSongs.songId, songId)));
+};
+
 export const createArtist = async (
   artist: typeof artists.$inferInsert,
   trx: DB | DBTransaction = db
@@ -236,6 +246,15 @@ export const getArtistsByName = async (names: string[], trx: DB | DBTransaction 
       }
     }
   });
+
+  return data;
+};
+
+export const getArtistSongIds = async (artistId: number, trx: DB | DBTransaction = db) => {
+  const data = await trx
+    .select({ songId: artistsSongs.songId })
+    .from(artistsSongs)
+    .where(eq(artistsSongs.artistId, artistId));
 
   return data;
 };

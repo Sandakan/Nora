@@ -750,3 +750,7 @@ export const getSongByIdForSongID3Tags = async (songId: number, trx: DB | DBTran
   });
   return song;
 };
+
+export const removeSongById = async (songId: number, trx: DB | DBTransaction = db) => {
+  await trx.delete(songs).where(eq(songs.id, songId));
+};

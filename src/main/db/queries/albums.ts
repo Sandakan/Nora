@@ -119,6 +119,16 @@ export const linkSongToAlbum = async (
   return trx.insert(albumsSongs).values({ albumId, songId });
 };
 
+export const unlinkSongFromAlbum = async (
+  albumId: number,
+  songId: number,
+  trx: DB | DBTransaction = db
+) => {
+  return trx
+    .delete(albumsSongs)
+    .where(and(eq(albumsSongs.albumId, albumId), eq(albumsSongs.songId, songId)));
+};
+
 export const linkArtistToAlbum = async (
   albumId: number,
   artistId: number,
