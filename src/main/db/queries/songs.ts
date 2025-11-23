@@ -754,3 +754,11 @@ export const getSongByIdForSongID3Tags = async (songId: number, trx: DB | DBTran
 export const removeSongById = async (songId: number, trx: DB | DBTransaction = db) => {
   await trx.delete(songs).where(eq(songs.id, songId));
 };
+
+export const updateSongModifiedAtByPath = async (
+  songPath: string,
+  modifiedAt: Date,
+  trx: DB | DBTransaction = db
+) => {
+  await trx.update(songs).set({ fileModifiedAt: modifiedAt }).where(eq(songs.path, songPath));
+};

@@ -4,19 +4,7 @@ import { statSync } from 'fs';
 import NodeID3 from 'node-id3';
 import sharp from 'sharp';
 
-import {
-  DEFAULT_FILE_URL,
-  getAlbumsData,
-  getArtistsData,
-  getGenresData,
-  getPaletteData,
-  getSongsData,
-  setAlbumsData,
-  setArtistsData,
-  setGenresData,
-  setPaletteData,
-  setSongsData
-} from './filesystem';
+import { DEFAULT_FILE_URL } from './filesystem';
 import {
   getArtistArtworkPath,
   getSongArtworkPath,
@@ -43,6 +31,7 @@ import { appPreferences } from '../../package.json';
 import saveLyricsToLRCFile from './core/saveLyricsToLrcFile';
 import logger from './logger';
 import { getUserSettings } from './db/queries/settings';
+import { updateSongModifiedAtByPath } from './db/queries/songs';
 
 const { metadataEditingSupportedExtensions } = appPreferences;
 
@@ -117,12 +106,7 @@ export const savePendingMetadataUpdates = async (currentSongPath = '', forceSave
           const modifiedDate = stats.mtime.getTime();
           if (isACurrentlyPlayingSong) return { modifiedDate };
 
-          const songs = getSongsData();
-
-          for (const song of songs) {
-            if (song.path === songPath) song.modifiedDate = modifiedDate;
-          }
-          setSongsData(songs);
+          await updateSongModifiedAtByPath(songPath, new Date(modifiedDate));
           dataUpdateEvent('songs/updatedSong');
         }
       } catch (error) {
