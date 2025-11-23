@@ -107,6 +107,7 @@
     "build:mac": "npm run prebuild:wasm && npm run build && electron-builder --mac --publish=never",
     "build:mac-arm64": "npm run prebuild:wasm && npm run build && electron-builder --mac --arm64 --publish=never",
     "build:linux": "npm run prebuild:wasm && npm run build && electron-builder --linux --publish=never",
+    "build:flatpak": "npm run build && electron-builder --linux --dir --publish=never",
     "db:migrate": "drizzle-kit migrate",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
