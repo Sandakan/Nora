@@ -5,6 +5,7 @@ import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import i18n, { supportedLanguagesDropdownOptions } from '../../../i18n';
 import { useQuery } from '@tanstack/react-query';
 import { settingsQuery } from '@renderer/queries/settings';
+import CollapsibleSection from "./CollapsibleSection";
 
 const LanguageSettings = () => {
   const { t } = useTranslation();
@@ -15,13 +16,18 @@ const LanguageSettings = () => {
 
   return (
     <li
-      className="main-container performance-settings-container mb-16"
+      className="main-container performance-settings-container mb-4"
       id="language-settings-container"
     >
-      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center text-2xl font-medium">
+    <CollapsibleSection
+      defaultOpen={false}
+      title={
+      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight flex items-center text-2xl font-medium">
         <span className="material-icons-round-outlined mr-2 leading-none">translate</span>
         <span>{t('settingsPage.language')}</span>
       </div>
+      }
+    >
       <ul className="marker:bg-background-color-3 dark:marker:bg-background-color-3 list-disc pl-6">
         <li className="seekbar-scroll-interval mb-4">
           <div className="description">{t('settingsPage.languageDescription')}</div>
@@ -57,6 +63,7 @@ const LanguageSettings = () => {
           />
         </li>
       </ul>
+    </CollapsibleSection>
     </li>
   );
 };
