@@ -7,8 +7,8 @@ import { removeDefaultAppProtocolFromFilePath } from './fs/resolveFilePaths';
 import { appPreferences } from '../../package.json';
 import { dataUpdateEvent, sendMessageToRenderer } from './main';
 import saveLyricsToLRCFile from './core/saveLyricsToLrcFile';
-import { getUserData } from './filesystem';
 import logger from './logger';
+import { getUserSettings } from './db/queries/settings';
 
 const { metadataEditingSupportedExtensions } = appPreferences;
 
@@ -21,14 +21,14 @@ type PendingSongLyrics = {
 const pendingSongLyrics = new Map<string, PendingSongLyrics>();
 
 const saveLyricsToSong = async (songPathWithProtocol: string, songLyrics: SongLyrics) => {
-  const userData = getUserData();
+  const { saveLyricsInLrcFilesForSupportedSongs } = await getUserSettings();
   const songPath = removeDefaultAppProtocolFromFilePath(songPathWithProtocol);
 
   if (songLyrics && songLyrics.lyrics.parsedLyrics.length > 0) {
     const pathExt = path.extname(songPath).replace(/\W/, '');
     const isASupportedFormat = metadataEditingSupportedExtensions.includes(pathExt);
 
-    if (!isASupportedFormat || userData.preferences.saveLyricsInLrcFilesForSupportedSongs)
+    if (!isASupportedFormat || saveLyricsInLrcFilesForSupportedSongs)
       saveLyricsToLRCFile(songPath, songLyrics);
 
     if (isASupportedFormat) {

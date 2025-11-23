@@ -69,7 +69,7 @@ const NewPlaylistPrompt = (props: NewPlaylistPromptProp) => {
           className="aspect-square w-full max-w-[15rem] rounded-xl shadow-lg"
         />
         <Button
-          className="artwork-update-btn absolute -bottom-4 -right-8 mr-0 aspect-square rounded-full border-none !bg-background-color-3 outline-1 outline-offset-1 transition-[background] hover:!bg-font-color-highlight focus-visible:!outline dark:!bg-dark-background-color-2 dark:hover:!bg-dark-background-color-3 dark:hover:text-font-color-black"
+          className="artwork-update-btn bg-background-color-3! hover:bg-font-color-highlight! dark:bg-dark-background-color-2! dark:hover:bg-dark-background-color-3! dark:hover:text-font-color-black absolute -right-8 -bottom-4 mr-0 aspect-square rounded-full border-none outline-offset-1 transition-[background] focus-visible:outline!"
           iconName="edit"
           iconClassName="group:hover:text-font-color-black dark:group:hover:text-font-color-black mr-0"
           clickHandler={() =>
@@ -87,7 +87,7 @@ const NewPlaylistPrompt = (props: NewPlaylistPromptProp) => {
       <input
         type="text"
         name="playlistName"
-        className="playlist-name-input w-fit min-w-[400px] max-w-[75%] rounded-2xl border-[transparent] !bg-background-color-2 px-6 py-3 text-lg text-font-color-black outline-none dark:!bg-dark-background-color-2 dark:text-font-color-white"
+        className="playlist-name-input bg-background-color-2! text-font-color-black dark:bg-dark-background-color-2! dark:text-font-color-white w-fit max-w-[75%] min-w-[400px] rounded-2xl border-[transparent] px-6 py-3 text-lg outline-hidden"
         placeholder={t('renamePlaylistPrompt.playlistName')}
         value={input}
         onChange={(e) => setInput(e.target.value)}
@@ -100,7 +100,7 @@ const NewPlaylistPrompt = (props: NewPlaylistPromptProp) => {
       <Button
         label={t('playlistsPage.addPlaylist')}
         iconName="add"
-        className="!mr-0 mt-6 cursor-pointer justify-center !bg-background-color-3 p-2 !px-8 !py-3 text-lg !text-font-color-black dark:!bg-dark-background-color-3 dark:text-font-color-black"
+        className="bg-background-color-3! text-font-color-black! dark:bg-dark-background-color-3! dark:text-font-color-black mt-6 mr-0! cursor-pointer justify-center p-2 px-8! py-3! text-lg"
         clickHandler={() => createNewPlaylist(input)}
       />
     </div>

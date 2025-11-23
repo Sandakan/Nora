@@ -2,10 +2,32 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Main - attach",
+      "name": "Renderer - Attach",
+      "port": 5173,
+      "request": "attach",
+      "type": "chrome",
+      "webRoot": "${workspaceFolder}",
+      "timeout": 60000
+    },
+    {
+      "name": "Main - Launch",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceRoot}",
+      "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron-vite",
+      "windows": {
+        "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron-vite.cmd"
+      },
+      "runtimeArgs": [ "--sourcemap" ],
+      "env": {
+        "REMOTE_DEBUGGING_PORT": "9222"
+      }
+    },
+    {
+      "name": "Main - Attach",
       "port": 5858,
       "request": "attach",
-      "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+      "skipFiles": [ "<node_internals>/**", "**/node_modules/**" ],
       "type": "node",
       "timeout": 15000,
       "restart": {
@@ -13,26 +35,26 @@
         "maxAttempts": 10
       },
       "showAsyncStacks": true,
-      "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"],
+      "resolveSourceMapLocations": [ "${workspaceFolder}/**", "!**/node_modules/**" ],
       "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/out/**/*.js", "!**/node_modules/**"]
+      "smartStep": true,
+      "pauseForSourceMap": true,
+      "outFiles": [ "${workspaceFolder}/out/**/*.js", "!**/node_modules/**" ]
     },
-    {
-      "name": "Renderer - Attach",
-      "port": 9223,
-      "request": "attach",
-      "type": "chrome",
-      "webRoot": "${workspaceFolder}",
-      "showAsyncStacks": true,
-      "sourceMaps": true
-    }
   ],
   "compounds": [
     {
-      "name": "Debug All",
-      "configurations": ["Renderer - Attach", "Main - attach"],
+      "name": "Attach All",
+      "configurations": [ "Renderer - Attach", "Main - Attach" ],
       "presentation": {
         "order": 1
+      }
+    },
+    {
+      "name": "Launch and Attach",
+      "configurations": [ "Main - Launch", "Renderer - Attach" ],
+      "presentation": {
+        "order": 2
       }
     }
   ]

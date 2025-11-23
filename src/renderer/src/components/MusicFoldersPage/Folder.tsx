@@ -12,7 +12,8 @@ const BlacklistFolderConfrimPrompt = lazy(() => import('./BlacklistFolderConfirm
 
 import FolderImg from '../../assets/images/webp/empty-folder.webp';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
+import { useNavigate } from '@tanstack/react-router';
 
 type FolderProps = {
   folderPath: string;
@@ -32,7 +33,6 @@ const Folder = (props: FolderProps) => {
   const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
 
   const {
-    changeCurrentActivePage,
     updateContextMenuData,
     changePromptMenuData,
     updateMultipleSelections,
@@ -49,6 +49,7 @@ const Folder = (props: FolderProps) => {
     subFolders = []
   } = props;
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const { length: noOfSongs } = songIds;
 
@@ -74,7 +75,7 @@ const Folder = (props: FolderProps) => {
           subFolders={subFolder.subFolders}
           isBlacklisted={subFolder.isBlacklisted}
           songIds={subFolder.songIds}
-          className={`!w-full ${className}`}
+          className={`w-full! ${className}`}
         />
       ));
     }
@@ -92,11 +93,9 @@ const Folder = (props: FolderProps) => {
 
   const openMusicFolderInfoPage = useCallback(() => {
     if (folderPath) {
-      changeCurrentActivePage('MusicFolderInfo', {
-        folderPath
-      });
+      navigate({ to: '/main-player/folders/$folderPath', params: { folderPath } });
     }
-  }, [changeCurrentActivePage, folderPath]);
+  }, [folderPath, navigate]);
 
   const contextMenuItems = useMemo((): ContextMenuItem[] => {
     const { multipleSelections: folderPaths } = multipleSelectionsData;
@@ -208,13 +207,13 @@ const Folder = (props: FolderProps) => {
             title: t('folder.selectedFolderCount', {
               count: multipleSelectionsData.multipleSelections.length
             }),
-            artworkClassName: '!w-6',
+            artworkClassName: 'w-6!',
             artworkPath: FolderImg
           }
         : {
             title: folderName || 'Unknown Folder',
             artworkPath: FolderImg,
-            artworkClassName: '!w-6',
+            artworkClassName: 'w-6!',
             subTitle: t('common.songWithCount', { count: noOfSongs }),
             subTitle2:
               subFolders.length > 0
@@ -237,14 +236,14 @@ const Folder = (props: FolderProps) => {
     <div className={`mb-2 flex w-full flex-col justify-between ${className}`}>
       <div
         role="button"
-        className={`group flex w-full cursor-pointer items-center justify-between rounded-md px-4 py-2 outline-1 -outline-offset-2 transition-colors focus-visible:!outline dark:text-font-color-white ${
+        className={`group dark:text-font-color-white flex w-full cursor-pointer items-center justify-between rounded-md px-4 py-2 -outline-offset-2 transition-colors focus-visible:!outline ${
           isAMultipleSelection
-            ? '!bg-background-color-3/90 !text-font-color-black dark:!bg-dark-background-color-3/90 dark:!text-font-color-black'
-            : 'hover:!bg-background-color-2 dark:hover:!bg-dark-background-color-2'
-        } ${isBlacklisted && '!opacity-50'} ${
+            ? 'bg-background-color-3/90! text-font-color-black! dark:bg-dark-background-color-3/90! dark:text-font-color-black!'
+            : 'hover:bg-background-color-2! dark:hover:bg-dark-background-color-2!'
+        } ${isBlacklisted && 'opacity-50!'} ${
           (index + 1) % 2 === 1
             ? 'bg-background-color-2/50 dark:bg-dark-background-color-2/40'
-            : '!bg-background-color-1 dark:!bg-dark-background-color-1'
+            : 'bg-background-color-1! dark:bg-dark-background-color-1!'
         }`}
         onClick={(e) => {
           e.stopPropagation();
@@ -267,11 +266,11 @@ const Folder = (props: FolderProps) => {
       >
         <div className="folder-img-and-info-container flex items-center">
           {multipleSelectionsData.selectionType === 'folder' ? (
-            <div className="relative ml-1 mr-4 flex h-fit items-center rounded-lg bg-background-color-1 p-1 text-font-color-highlight dark:bg-dark-background-color-1 dark:text-dark-background-color-3">
+            <div className="bg-background-color-1 text-font-color-highlight dark:bg-dark-background-color-1 dark:text-dark-background-color-3 relative mr-4 ml-1 flex h-fit items-center rounded-lg p-1">
               <MultipleSelectionCheckbox id={folderPath} selectionType="folder" />
             </div>
           ) : (
-            <div className="relative ml-1 mr-4 h-fit rounded-2xl bg-background-color-1 px-3 text-font-color-highlight group-even:bg-background-color-2/75 group-hover:bg-background-color-1 dark:bg-dark-background-color-1 dark:text-dark-background-color-3 dark:group-even:bg-dark-background-color-2/50 dark:group-hover:bg-dark-background-color-1">
+            <div className="bg-background-color-1 text-font-color-highlight group-even:bg-background-color-2/75 group-hover:bg-background-color-1 dark:bg-dark-background-color-1 dark:text-dark-background-color-3 dark:group-even:bg-dark-background-color-2/50 dark:group-hover:bg-dark-background-color-1 relative mr-4 ml-1 h-fit rounded-2xl px-3">
               {index + 1}
             </div>
           )}
@@ -312,8 +311,8 @@ const Folder = (props: FolderProps) => {
           )}
           {subFolders.length > 0 && (
             <Button
-              className="ml-4 !rounded-full !border-none !p-1 group-hover:bg-background-color-1 dark:group-hover:bg-dark-background-color-1"
-              iconClassName="!text-2xl !leading-none"
+              className="group-hover:bg-background-color-1 dark:group-hover:bg-dark-background-color-1 ml-4 rounded-full! border-none! p-1!"
+              iconClassName="text-2xl! leading-none!"
               iconName={isSubFoldersVisible ? 'arrow_drop_up' : 'arrow_drop_down'}
               clickHandler={(e) => {
                 e.stopPropagation();
@@ -324,7 +323,7 @@ const Folder = (props: FolderProps) => {
         </div>
       </div>
       {subFolders.length > 0 && isSubFoldersVisible && (
-        <div className="ml-4 mt-4 border-l-[3px] border-background-color-2 pl-4 dark:border-dark-background-color-2/50">
+        <div className="border-background-color-2 dark:border-dark-background-color-2/50 mt-4 ml-4 border-l-[3px] pl-4">
           {subFoldersComponents}
         </div>
       )}

@@ -6,13 +6,14 @@ import SecondaryContainer from '../../SecondaryContainer';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
+import { useNavigate } from '@tanstack/react-router';
 
 type Props = {
   genres: Genre[];
   searchInput: string;
   noOfVisibleGenres?: number;
-  isPredictiveSearchEnabled: boolean;
+  isSimilaritySearchEnabled: boolean;
 };
 
 const GenreSearchResultsContainer = (props: Props) => {
@@ -21,10 +22,11 @@ const GenreSearchResultsContainer = (props: Props) => {
     store,
     (state) => state.multipleSelectionsData.isEnabled
   );
-  const { toggleMultipleSelections, changeCurrentActivePage } = useContext(AppUpdateContext);
+  const { toggleMultipleSelections } = useContext(AppUpdateContext);
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
-  const { genres, searchInput, noOfVisibleGenres = 3, isPredictiveSearchEnabled } = props;
+  const { genres, searchInput, noOfVisibleGenres = 3, isSimilaritySearchEnabled } = props;
 
   const selectAllHandler = useSelectAllHandler(genres, 'genre', 'genreId');
 
@@ -55,7 +57,7 @@ const GenreSearchResultsContainer = (props: Props) => {
 
   return (
     <SecondaryContainer
-      className={`secondary-container genres-list-container appear-from=bottom mt-4 text-font-color-black dark:text-font-color-white ${
+      className={`secondary-container genres-list-container appear-from=bottom text-font-color-black dark:text-font-color-white mt-4 ${
         genreResults.length > 0 ? 'active relative' : 'invisible absolute'
       }`}
       focusable
@@ -67,7 +69,7 @@ const GenreSearchResultsContainer = (props: Props) => {
       }}
     >
       <>
-        <div className="title-container mb-8 mt-1 flex items-center pr-4 text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+        <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-8 flex items-center pr-4 text-2xl font-medium">
           <div className="container flex">
             Genres
             <div className="other-stats-container ml-12 flex items-center text-xs">
@@ -110,11 +112,9 @@ const GenreSearchResultsContainer = (props: Props) => {
                 iconName="apps"
                 className="show-all-btn text-sm font-normal"
                 clickHandler={() =>
-                  changeCurrentActivePage('AllSearchResults', {
-                    searchQuery: searchInput,
-                    searchFilter: 'Genres' as SearchFilters,
-                    searchResults: genres,
-                    isPredictiveSearchEnabled
+                  navigate({
+                    to: '/main-player/search/all',
+                    search: { keyword: searchInput, isSimilaritySearchEnabled, filterBy: 'Genres' }
                   })
                 }
               />

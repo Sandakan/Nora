@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer } from 'electron';
+import { contextBridge, ipcRenderer, webUtils } from 'electron';
 // const { contextBridge, ipcRenderer } = require('electron');
 import type { LastFMTrackInfoApi } from '../types/last_fm_api';
 import type { SimilarTracksOutput } from '../types/last_fm_similar_tracks_api';
@@ -83,15 +83,22 @@ const audioLibraryControls = {
     preserveIdOrder = false
   ): Promise<SongData[] | undefined> =>
     ipcRenderer.invoke('app/getSongInfo', songIds, sortType, filterType, limit, preserveIdOrder),
+  getAllHistorySongs: (
+    sortType?: SongSortTypes,
+    paginatingData?: PaginatingData
+  ): Promise<PaginatedResult<SongData, SongSortTypes>> =>
+    ipcRenderer.invoke('app/getAllHistorySongs', sortType, paginatingData),
+  getAllFavoriteSongs: (
+    sortType?: SongSortTypes,
+    paginatingData?: PaginatingData
+  ): Promise<PaginatedResult<SongData, SongSortTypes>> =>
+    ipcRenderer.invoke('app/getAllFavoriteSongs', sortType, paginatingData),
   getSongListeningData: (songIds: string[]): Promise<SongListeningData[]> =>
     ipcRenderer.invoke('app/getSongListeningData', songIds),
-  updateSongListeningData: <
-    DataType extends keyof ListeningDataTypes,
-    Value extends ListeningDataTypes[DataType]
-  >(
+  updateSongListeningData: (
     songId: string,
-    dataType: DataType,
-    dataUpdateType: Value
+    dataType: ListeningDataEvents,
+    dataUpdateType: number
   ): Promise<void> =>
     ipcRenderer.invoke('app/updateSongListeningData', songId, dataType, dataUpdateType),
   resyncSongsLibrary: (): Promise<true> => ipcRenderer.invoke('app/resyncSongsLibrary'),
@@ -187,9 +194,9 @@ const search = {
     filter: SearchFilters,
     value: string,
     updateSearchHistory?: boolean,
-    isPredictiveSearchEnabled?: boolean
+    isSimilaritySearchEnabled?: boolean
   ): Promise<SearchResult> =>
-    ipcRenderer.invoke('app/search', filter, value, updateSearchHistory, isPredictiveSearchEnabled),
+    ipcRenderer.invoke('app/search', filter, value, updateSearchHistory, isSimilaritySearchEnabled),
   clearSearchHistory: (searchText?: string[]): Promise<boolean> =>
     ipcRenderer.invoke('app/clearSearchHistory', searchText)
 };
@@ -223,7 +230,7 @@ const lyrics = {
 
   resetLyrics: (): Promise<SongLyrics> => ipcRenderer.invoke('app/resetLyrics'),
 
-  saveLyricsToSong: (songPath: string, text: SongLyrics) =>
+  saveLyricsToSong: (songPath: string, text: SongLyrics): Promise<void> =>
     ipcRenderer.invoke('app/saveLyricsToSong', songPath, text)
 };
 
@@ -296,7 +303,42 @@ const userData = {
 // $ STORAGE DATA
 const storageData = {
   getStorageUsage: (forceRefresh?: boolean): Promise<StorageMetrics> =>
-    ipcRenderer.invoke('app/getStorageUsage', forceRefresh)
+    ipcRenderer.invoke('app/getStorageUsage', forceRefresh),
+  getDatabaseMetrics: (): Promise<DatabaseMetrics> => ipcRenderer.invoke('app/getDatabaseMetrics')
+};
+
+//  $ USER SETTINGS
+const settings = {
+  getUserSettings: (): Promise<UserSettings> => ipcRenderer.invoke('app/getUserSettings'),
+  saveUserSettings: (settings: Partial<UserSettings>): Promise<void> =>
+    ipcRenderer.invoke('app/saveUserSettings', settings),
+
+  updateDiscordRpcState: (enableDiscordRpc: boolean): Promise<void> =>
+    ipcRenderer.invoke('app/saveUserSettings', { enableDiscordRPC: enableDiscordRpc }),
+  updateSongScrobblingToLastFMState: (enableScrobbling: boolean): Promise<void> =>
+    ipcRenderer.invoke('app/saveUserSettings', {
+      sendSongScrobblingDataToLastFM: enableScrobbling
+    }),
+  updateSongFavoritesToLastFMState: (enableFavorites: boolean): Promise<void> =>
+    ipcRenderer.invoke('app/saveUserSettings', {
+      sendSongFavoritesDataToLastFM: enableFavorites
+    }),
+  updateNowPlayingSongDataToLastFMState: (enableNowPlaying: boolean): Promise<void> =>
+    ipcRenderer.invoke('app/saveUserSettings', {
+      sendNowPlayingSongDataToLastFM: enableNowPlaying
+    }),
+  updateSaveLyricsInLrcFilesForSupportedSongs: (enableSave: boolean): Promise<void> =>
+    ipcRenderer.invoke('app/saveUserSettings', {
+      saveLyricsInLrcFilesForSupportedSongs: enableSave
+    }),
+  updateCustomLrcFilesSaveLocation: (location: string): Promise<void> =>
+    ipcRenderer.invoke('app/saveUserSettings', { customLrcFilesSaveLocation: location }),
+  updateOpenWindowAsHiddenOnSystemStart: (enable: boolean): Promise<void> =>
+    ipcRenderer.invoke('app/saveUserSettings', { openWindowAsHiddenOnSystemStart: enable }),
+  updateHideWindowOnCloseState: (enable: boolean): Promise<void> =>
+    ipcRenderer.invoke('app/saveUserSettings', { hideWindowOnClose: enable }),
+  updateSaveVerboseLogs: (enable: boolean): Promise<void> =>
+    ipcRenderer.invoke('app/saveUserSettings', { saveVerboseLogs: enable })
 };
 
 // $ FOLDER DATA
@@ -323,9 +365,19 @@ const artistsData = {
     artistIdsOrNames?: string[],
     sortType?: ArtistSortTypes,
     filterType?: ArtistFilterTypes,
+    start?: number,
+    end?: number,
     limit?: number
-  ): Promise<Artist[]> =>
-    ipcRenderer.invoke('app/getArtistData', artistIdsOrNames, sortType, filterType, limit),
+  ): Promise<PaginatedResult<Artist, ArtistSortTypes>> =>
+    ipcRenderer.invoke(
+      'app/getArtistData',
+      artistIdsOrNames,
+      sortType,
+      filterType,
+      start,
+      end,
+      limit
+    ),
   toggleLikeArtists: (
     artistIds: string[],
     likeArtist?: boolean
@@ -337,14 +389,24 @@ const artistsData = {
 
 // $ GENRES DATA
 const genresData = {
-  getGenresData: (genreNamesOrIds?: string[], sortType?: GenreSortTypes): Promise<Genre[]> =>
-    ipcRenderer.invoke('app/getGenresData', genreNamesOrIds, sortType)
+  getGenresData: (
+    genreNamesOrIds?: string[],
+    sortType?: GenreSortTypes,
+    start?: number,
+    end?: number
+  ): Promise<PaginatedResult<Genre, GenreSortTypes>> =>
+    ipcRenderer.invoke('app/getGenresData', genreNamesOrIds, sortType, start, end)
 };
 
 // $ ALBUMS DATA
 const albumsData = {
-  getAlbumData: (albumTitlesOrIds?: string[], sortType?: AlbumSortTypes): Promise<Album[]> =>
-    ipcRenderer.invoke('app/getAlbumData', albumTitlesOrIds, sortType),
+  getAlbumData: (
+    albumTitlesOrIds?: string[],
+    sortType?: AlbumSortTypes,
+    start?: number,
+    end?: number
+  ): Promise<PaginatedResult<Album, AlbumSortTypes>> =>
+    ipcRenderer.invoke('app/getAlbumData', albumTitlesOrIds, sortType, start, end),
   getAlbumInfoFromLastFM: (albumId: string): Promise<LastFMAlbumInfo | undefined> =>
     ipcRenderer.invoke('app/getAlbumInfoFromLastFM', albumId)
 };
@@ -354,9 +416,18 @@ const playlistsData = {
   getPlaylistData: (
     playlistIds?: string[],
     sortType?: PlaylistSortTypes,
+    start?: number,
+    end?: number,
     onlyMutablePlaylists?: boolean
-  ): Promise<Playlist[]> =>
-    ipcRenderer.invoke('app/getPlaylistData', playlistIds, sortType, onlyMutablePlaylists),
+  ): Promise<PaginatedResult<Playlist, PlaylistSortTypes>> =>
+    ipcRenderer.invoke(
+      'app/getPlaylistData',
+      playlistIds,
+      sortType,
+      start,
+      end,
+      onlyMutablePlaylists
+    ),
   addNewPlaylist: (
     playlistName: string,
     songIds?: string[],
@@ -376,11 +447,18 @@ const playlistsData = {
     ipcRenderer.invoke('app/removeSongFromPlaylist', playlistId, songId),
   removePlaylists: (playlistIds: string[]) =>
     ipcRenderer.invoke('app/removePlaylists', playlistIds),
-  getArtworksForMultipleArtworksCover: (songIds: string[]): Promise<string[]> =>
+  getArtworksForMultipleArtworksCover: (
+    songIds: string[]
+  ): Promise<{ songId: string; artworkPaths: ArtworkPaths }[]> =>
     ipcRenderer.invoke('app/getArtworksForMultipleArtworksCover', songIds),
   exportPlaylist: (playlistId: string): Promise<void> =>
     ipcRenderer.invoke('app/exportPlaylist', playlistId),
   importPlaylist: (): Promise<void> => ipcRenderer.invoke('app/importPlaylist')
+};
+
+const queue = {
+  getQueueInfo: (queueType: QueueTypes, id: string): Promise<QueueInfo | undefined> =>
+    ipcRenderer.invoke('app/getQueueInfo', queueType, id)
 };
 
 // $ APP LOGS
@@ -442,6 +520,10 @@ const appControls = {
 
 // $ OTHER
 const utils = {
+  showFilePath: (file: File) => {
+    const path = webUtils.getPathForFile(file);
+    return path;
+  },
   path: {
     join: (...args: string[]) => args.join('/')
   },
@@ -490,9 +572,11 @@ export const api = {
   playlistsData,
   log,
   miniPlayer,
+  settings,
   settingsHelpers,
   appControls,
-  utils
+  utils,
+  queue
 };
 
 contextBridge.exposeInMainWorld('api', api);

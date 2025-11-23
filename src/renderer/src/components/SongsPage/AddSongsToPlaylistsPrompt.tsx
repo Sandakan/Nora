@@ -8,6 +8,8 @@ import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Checkbox from '../Checkbox';
 import Button from '../Button';
 import Img from '../Img';
+import { useSuspenseQuery } from '@tanstack/react-query';
+import { playlistQuery } from '@renderer/queries/playlists';
 
 interface AddSongsToPlaylistProp {
   songIds: string[];
@@ -27,10 +29,10 @@ const SelectablePlaylist = (props: SelectablePlaylistProp) => {
 
   return (
     <div
-      className={`playlist appear-from-bottom group ${playlistId} mb-6 mr-4 flex h-52 w-[9.5rem] flex-col justify-between rounded-xl p-4 text-font-color-black dark:text-font-color-white ${
+      className={`playlist appear-from-bottom group ${playlistId} text-font-color-black dark:text-font-color-white mr-4 mb-6 flex h-52 w-[9.5rem] flex-col justify-between rounded-xl p-4 ${
         isChecked
-          ? 'bg-background-color-3 !text-font-color-black dark:bg-dark-background-color-3 dark:!text-font-color-black'
-          : 'hover:bg-background-color-2 hover:dark:bg-dark-background-color-2'
+          ? 'bg-background-color-3 text-font-color-black! dark:bg-dark-background-color-3 dark:text-font-color-black!'
+          : 'hover:bg-background-color-2 dark:hover:bg-dark-background-color-2'
       }`}
       onClick={() => playlistCheckedStateUpdateFunc(!isChecked)}
       onKeyDown={() => playlistCheckedStateUpdateFunc(!isChecked)}
@@ -42,7 +44,7 @@ const SelectablePlaylist = (props: SelectablePlaylistProp) => {
           id={playlistId}
           checkedStateUpdateFunction={playlistCheckedStateUpdateFunc}
           isChecked={isChecked}
-          className="absolute bottom-3 right-3"
+          className="absolute right-3 bottom-3"
         />
         <div className="playlist-cover-container h-full cursor-pointer overflow-hidden rounded-lg">
           <Img
@@ -55,7 +57,7 @@ const SelectablePlaylist = (props: SelectablePlaylistProp) => {
       </div>
       <div className="playlist-info-container">
         <div
-          className="title playlist-title w-full overflow-hidden overflow-ellipsis whitespace-nowrap text-xl"
+          className="title playlist-title w-full overflow-hidden text-xl text-ellipsis whitespace-nowrap"
           title={name}
         >
           {name}
@@ -77,27 +79,10 @@ const AddSongsToPlaylistsPrompt = (props: AddSongsToPlaylistProp) => {
   const { t } = useTranslation();
 
   const { songIds } = props;
-  const [playlists, setPlaylists] = useState([] as SelectPlaylist[]);
-
-  useEffect(() => {
-    window.api.playlistsData
-      .getPlaylistData([], undefined, true)
-      .then((res) => {
-        if (res.length > 0) {
-          setPlaylists(() =>
-            res.map((playlist) => {
-              return {
-                ...playlist,
-                isSelected:
-                  songIds.length === 1 && playlist.songs.some((id) => songIds.includes(id))
-              };
-            })
-          );
-        }
-        return undefined;
-      })
-      .catch((err) => console.error(err));
-  }, [songIds]);
+  const { data: playlists } = useSuspenseQuery({
+    ...playlistQuery.all({ sortType: 'aToZ' }),
+    select: (data) => data.data
+  });
 
   const addSongsToPlaylists = useCallback(() => {
     const selectedPlaylists = playlists.filter((playlist) => playlist.isSelected);
@@ -168,7 +153,7 @@ const AddSongsToPlaylistsPrompt = (props: AddSongsToPlaylistProp) => {
 
   return (
     <>
-      <div className="title-container mb-4 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center pr-4 text-3xl font-medium">
         {t('addSongsToPlaylistsPrompt.selectPlaylistsToAdd', { count: songIds.length })}
       </div>
       {songIds.length > 1 && <p>&bull; {t('addSongsToPlaylistsPrompt.duplicationNotice')}</p>}
@@ -176,7 +161,7 @@ const AddSongsToPlaylistsPrompt = (props: AddSongsToPlaylistProp) => {
         <div className="playlists-container mt-4 flex h-full flex-wrap">{playlistComponents}</div>
       )}
       <div className="buttons-and-other-info-container flex items-center justify-end">
-        <span className="mr-12 text-font-color-highlight dark:text-dark-font-color-highlight">
+        <span className="text-font-color-highlight dark:text-dark-font-color-highlight mr-12">
           {t('common.selectionWithCount', { count: noOfSelectedPlaylists })}
         </span>
         <div className="buttons-container flex">
@@ -189,7 +174,7 @@ const AddSongsToPlaylistsPrompt = (props: AddSongsToPlaylistProp) => {
             label={t('song.addToPlaylists')}
             iconName="playlist_add"
             clickHandler={addSongsToPlaylists}
-            className="!bg-background-color-3 px-6 text-font-color-black dark:!bg-dark-background-color-3 dark:!text-font-color-black"
+            className="bg-background-color-3! text-font-color-black dark:bg-dark-background-color-3! dark:text-font-color-black! px-6"
           />
         </div>
       </div>

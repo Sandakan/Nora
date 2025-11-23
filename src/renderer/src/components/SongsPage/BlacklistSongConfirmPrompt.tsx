@@ -16,14 +16,14 @@ const BlacklistSongConfrimPrompt = (props: { songIds: string[]; title?: string }
   const [isDoNotShowAgain, setIsDoNotShowAgain] = useState(false);
   return (
     <>
-      <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-8 flex items-center pr-4 text-3xl font-medium">
         {t('blacklistSongConfirmPrompt.title', { count: songIds.length })}
       </div>
       <div className="description">
         {t('blacklistSongConfirmPrompt.message', { count: songIds.length })}
         <div className="mt-4">
           {t('blacklistSongConfirmPrompt.effectTitle')}
-          <ul className="list-inside list-disc pl-4 marker:text-font-color-highlight dark:marker:text-dark-font-color-highlight">
+          <ul className="marker:text-font-color-highlight dark:marker:text-dark-font-color-highlight list-inside list-disc pl-4">
             <li>
               <Trans
                 i18nKey="blacklistSongConfirmPrompt.effect1"
@@ -71,7 +71,7 @@ const BlacklistSongConfrimPrompt = (props: { songIds: string[]; title?: string }
       <div className="buttons-container flex items-center justify-end">
         <Button
           label={t('song.blacklistSong', { count: songIds.length })}
-          className="blacklist-song-btn mt-4 !bg-background-color-3 px-8 text-lg text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:!text-font-color-black dark:hover:border-background-color-3"
+          className="blacklist-song-btn bg-background-color-3! text-font-color-black hover:border-background-color-3 dark:bg-dark-background-color-3! dark:text-font-color-black! dark:hover:border-background-color-3 mt-4 px-8 text-lg"
           clickHandler={() =>
             window.api.audioLibraryControls
               .blacklistSongs(songIds)

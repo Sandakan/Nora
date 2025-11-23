@@ -20,7 +20,7 @@ interface AppNotificationConfig extends Partial<AppNotification> {
 }
 
 const defaultButtonStyles =
-  '!bg-background-color-3 dark:!bg-dark-background-color-3 !text-font-color-black dark:!text-font-color-black !font-light';
+  'bg-background-color-3! dark:bg-dark-background-color-3! text-font-color-black! dark:text-font-color-black! font-light!';
 
 const notificationsFromMainConfig: AppNotificationConfig[] = [
   {

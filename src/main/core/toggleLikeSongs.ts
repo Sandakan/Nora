@@ -1,58 +1,11 @@
-import {
-  addAFavoriteToLastFM,
-  removeAFavoriteFromLastFM
-} from '../other/lastFm/sendFavoritesDataToLastFM';
-import { getSongsData, setSongsData } from '../filesystem';
-import { getSongArtworkPath } from '../fs/resolveFilePaths';
 import logger from '../logger';
-import { dataUpdateEvent, sendMessageToRenderer } from '../main';
-import addToFavorites from './addToFavorites';
-import removeFromFavorites from './removeFromFavorites';
-
-const likeTheSong = (song: SavableSongData, preventLogging = false) => {
-  if (!song.isAFavorite) {
-    addToFavorites(song.songId);
-
-    const songArtists = song.artists?.map((artist) => artist.name);
-    addAFavoriteToLastFM(song.title, songArtists);
-
-    if (!preventLogging)
-      sendMessageToRenderer({
-        messageCode: 'SONG_LIKE',
-        data: {
-          name: song.title.length > 20 ? `${song.title.substring(0, 20).trim()}...` : song.title,
-          artworkPath: getSongArtworkPath(song.songId, song.isArtworkAvailable).artworkPath
-        }
-      });
-    song.isAFavorite = true;
-    return song;
-  }
-  return undefined;
-};
-
-const dislikeTheSong = (song: SavableSongData, preventLogging = false) => {
-  if (song.isAFavorite) {
-    song.isAFavorite = false;
-    removeFromFavorites(song.songId);
-
-    const songArtists = song.artists?.map((artist) => artist.name);
-    removeAFavoriteFromLastFM(song.title, songArtists);
-
-    if (!preventLogging)
-      sendMessageToRenderer({
-        messageCode: 'SONG_DISLIKE',
-        data: {
-          name: song.title.length > 20 ? `${song.title.substring(0, 20).trim()}...` : song.title,
-          artworkPath: getSongArtworkPath(song.songId, song.isArtworkAvailable).artworkPath
-        }
-      });
-    return song;
-  }
-  return undefined;
-};
+import { dataUpdateEvent } from '../main';
+import { db } from '@main/db/db';
+import { getSongFavoriteStatuses, updateSongFavoriteStatuses } from '@main/db/queries/songs';
 
 const toggleLikeSongs = async (songIds: string[], isLikeSong?: boolean) => {
-  const songs = getSongsData();
+  const songStatuses = await getSongFavoriteStatuses(songIds.map((id) => Number(id)));
+
   const result: ToggleLikeSongReturnValue = {
     likes: [],
     dislikes: []
@@ -60,51 +13,37 @@ const toggleLikeSongs = async (songIds: string[], isLikeSong?: boolean) => {
 
   logger.info(`Requested to like/dislike song(s).`, { songIds, isLikeSong });
 
-  if (songs.length > 0) {
-    const preventNotifications = songIds.length > 5;
+  const likeGroupedSongData = Object.groupBy(songStatuses, (status) =>
+    status.isFavorite ? 'liked' : 'notLiked'
+  );
 
-    const updatedSongs = songs.map((song) => {
-      const isSongIdAvailable = songIds.includes(song.songId);
+  await db.transaction(async (trx) => {
+    if (isLikeSong !== undefined) {
+      if (likeGroupedSongData.liked) {
+        const dislikedSongIds = likeGroupedSongData.liked.map((status) => status.id);
 
-      if (isSongIdAvailable) {
-        if (isLikeSong === undefined) {
-          if (song.isAFavorite) {
-            const dislikedSongData = dislikeTheSong(song, preventNotifications);
-            if (dislikedSongData) {
-              result.dislikes.push(song.songId);
-              return dislikedSongData;
-            }
-            return song;
-          }
-          const likedSongData = likeTheSong(song, preventNotifications);
-          if (likedSongData) {
-            result.likes.push(song.songId);
-            return likedSongData;
-          }
-          return song;
-        }
-        if (isLikeSong) {
-          const likedSongData = likeTheSong(song, preventNotifications);
-          if (likedSongData) {
-            result.likes.push(song.songId);
-            return likedSongData;
-          }
-          return song;
-        }
-        const dislikedSongData = dislikeTheSong(song, preventNotifications);
-        if (dislikedSongData) {
-          result.dislikes.push(song.songId);
-          return dislikedSongData;
-        }
-        return song;
+        await updateSongFavoriteStatuses(dislikedSongIds, false, trx);
+
+        result.dislikes.push(...dislikedSongIds.map((id) => id.toString()));
       }
-      return song;
-    });
 
-    setSongsData(updatedSongs);
-    dataUpdateEvent('songs/likes', [...result.likes, ...result.dislikes]);
-    return result;
-  }
+      if (likeGroupedSongData.notLiked) {
+        const likedSongIds = likeGroupedSongData.notLiked.map((status) => status.id);
+
+        await updateSongFavoriteStatuses(likedSongIds, true, trx);
+
+        result.likes.push(...likedSongIds.map((id) => id.toString()));
+      }
+    } else {
+      await updateSongFavoriteStatuses(
+        songIds.map((id) => Number(id)),
+        isLikeSong!,
+        trx
+      );
+    }
+  });
+
+  dataUpdateEvent('songs/likes', [...result.likes, ...result.dislikes]);
   return result;
 };
 

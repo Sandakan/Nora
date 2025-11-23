@@ -1,6 +1,5 @@
 import type Conf from 'conf';
-import { BLACKLIST_TEMPLATE, PLAYLIST_DATA_TEMPLATE, USER_DATA_TEMPLATE } from './filesystem';
-import { encrypt } from './utils/safeStorage';
+import { BLACKLIST_TEMPLATE, PLAYLIST_DATA_TEMPLATE } from './filesystem';
 import logger from './logger';
 
 type StoreNames =
@@ -154,53 +153,6 @@ export const genreMigrations = {
       version: '2.0.0-stable'
     });
     store.set('genres', []);
-  }
-};
-
-export const userDataMigrations = {
-  '3.0.0-stable': (store: Conf<{ version?: string; userData: UserData }>) => {
-    logger.debug('Starting the userData.json migration process.', {
-      version: '3.0.0-stable'
-    });
-    store.set('userData', USER_DATA_TEMPLATE);
-  },
-  '2.5.0-stable': (store: Conf<{ version?: string; userData: UserData }>) => {
-    logger.debug('Starting the userData.json migration process.', {
-      version: '2.5.0-stable'
-    });
-    const userData = store.get('userData');
-    userData.language = 'en';
-
-    store.set('userData', userData);
-  },
-  '2.4.0-stable': (store: Conf<{ version?: string; userData: UserData }>) => {
-    logger.debug('Starting the userData.json migration process.', {
-      version: '2.4.0-stable'
-    });
-
-    const userData = store.get('userData');
-
-    userData.windowState = 'normal';
-    userData.preferences.sendSongScrobblingDataToLastFM = false;
-    userData.preferences.sendSongFavoritesDataToLastFM = false;
-    userData.preferences.sendNowPlayingSongDataToLastFM = false;
-    try {
-      if (userData.customMusixmatchUserToken && userData.customMusixmatchUserToken.length === 54)
-        userData.customMusixmatchUserToken = encrypt(userData.customMusixmatchUserToken);
-    } catch (error) {
-      logger.debug('Error occurred when encrypting customMusixmatchUserToken', {
-        error
-      });
-      userData.customMusixmatchUserToken = undefined;
-    }
-
-    store.set('userData', userData);
-  },
-  '2.0.0-stable': (store: Conf<{ version?: string; userData: UserData }>) => {
-    logger.debug('Starting the userData.json migration process.', {
-      version: '2.0.0-stable'
-    });
-    store.set('userData', USER_DATA_TEMPLATE);
   }
 };
 

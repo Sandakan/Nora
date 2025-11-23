@@ -1,50 +1,71 @@
-import { useContext, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 
 import Button from '../../Button';
 import Checkbox from '../../Checkbox';
 
 import LastFMIcon from '../../../assets/images/webp/last-fm-logo.webp';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { settingsQuery } from '@renderer/queries/settings';
+import { queryClient } from '@renderer/index';
 
 const AccountsSettings = () => {
-  const userData = useStore(store, (state) => state.userData);
-  const { updateUserData } = useContext(AppUpdateContext);
+  const { data: userSettings } = useQuery(settingsQuery.all);
   const { t } = useTranslation();
 
   const isLastFmConnected = useMemo(
-    () => !!userData?.lastFmSessionData,
-    [userData?.lastFmSessionData]
+    () => !!userSettings?.lastFmSessionKey,
+    [userSettings?.lastFmSessionKey]
   );
 
+  const { mutate: updateDiscordRpcState } = useMutation({
+    mutationFn: (enableDiscordRpc: boolean) =>
+      window.api.settings.updateDiscordRpcState(enableDiscordRpc),
+    onSettled: () => {
+      queryClient.invalidateQueries(settingsQuery.all);
+    }
+  });
+
+  const { mutate: updateSongScrobblingToLastFMState } = useMutation({
+    mutationFn: (enableScrobbling: boolean) =>
+      window.api.settings.updateSongScrobblingToLastFMState(enableScrobbling),
+    onSettled: () => {
+      queryClient.invalidateQueries(settingsQuery.all);
+    }
+  });
+
+  const { mutate: updateSongFavoritesToLastFMState } = useMutation({
+    mutationFn: (enableFavorites: boolean) =>
+      window.api.settings.updateSongFavoritesToLastFMState(enableFavorites),
+    onSettled: () => {
+      queryClient.invalidateQueries(settingsQuery.all);
+    }
+  });
+
+  const { mutate: updateSendNowPlayingSongDataToLastFMState } = useMutation({
+    mutationFn: (enableNowPlaying: boolean) =>
+      window.api.settings.updateNowPlayingSongDataToLastFMState(enableNowPlaying),
+    onSettled: () => {
+      queryClient.invalidateQueries(settingsQuery.all);
+    }
+  });
+
   return (
-    <li className="main-container startup-settings-container mb-16">
-      <div className="title-container mb-4 mt-1 flex items-center text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+    <li
+      className="main-container startup-settings-container mb-16"
+      id="accounts-settings-container"
+    >
+      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center text-2xl font-medium">
         <span className="material-icons-round-outlined mr-2">account_circle</span>
         {t('settingsPage.accounts')}
       </div>
-      <ul className="list-disc pl-6 marker:bg-background-color-3 dark:marker:bg-background-color-3">
+      <ul className="marker:bg-background-color-3 dark:marker:bg-background-color-3 list-disc pl-6">
         <li className="discord-rpc-integration mb-4">
           <div className="description">{t('settingsPage.enableDiscordRpcDescription')}</div>
           <Checkbox
             id="enableDiscordRpc"
-            isChecked={userData?.preferences.enableDiscordRPC ?? false}
-            checkedStateUpdateFunction={(state) =>
-              window.api.userData
-                .saveUserData('preferences.enableDiscordRPC', state)
-                .then(() =>
-                  updateUserData((prevData) => ({
-                    ...prevData,
-                    preferences: {
-                      ...prevData.preferences,
-                      enableDiscordRPC: state
-                    }
-                  }))
-                )
-                .catch((err) => console.error(err))
-            }
+            isChecked={userSettings?.enableDiscordRPC ?? false}
+            checkedStateUpdateFunction={(state) => updateDiscordRpcState(state)}
             labelContent={t('settingsPage.enableDiscordRpc')}
           />
         </li>
@@ -58,7 +79,7 @@ const AccountsSettings = () => {
                 !isLastFmConnected && 'brightness-90 grayscale'
               }`}
             />
-            <div className="flex-grow-0">
+            <div className="grow-0">
               <p
                 className={`flex items-center font-semibold uppercase ${
                   isLastFmConnected ? 'text-green-500' : 'text-red-500'
@@ -70,8 +91,8 @@ const AccountsSettings = () => {
                     : 'settingsPage.lastFmNotConnected'
                 )}{' '}
                 {isLastFmConnected &&
-                  userData?.lastFmSessionData &&
-                  `(${t('settingsPage.loggedInAs')} ${userData.lastFmSessionData.name})`}
+                  userSettings?.lastFmSessionName &&
+                  `(${t('settingsPage.loggedInAs')} ${userSettings.lastFmSessionName})`}
               </p>
               <ul className="list-inside list-disc text-sm">
                 <li>{t('settingsPage.lastFmDescription1')}</li>
@@ -91,7 +112,7 @@ const AccountsSettings = () => {
               />
             </div>
           </div>
-          <ul className="mt-4 list-disc pl-8 marker:bg-background-color-3 dark:marker:bg-background-color-3">
+          <ul className="marker:bg-background-color-3 dark:marker:bg-background-color-3 mt-4 list-disc pl-8">
             <li
               className={`last-fm-integration mb-4 transition-opacity ${
                 !isLastFmConnected && 'cursor-not-allowed opacity-50'
@@ -100,20 +121,8 @@ const AccountsSettings = () => {
               <div className="description">{t('settingsPage.scrobblingDescription')}</div>
               <Checkbox
                 id="sendSongScrobblingDataToLastFM"
-                isChecked={!!userData?.preferences.sendSongScrobblingDataToLastFM}
-                checkedStateUpdateFunction={(state) =>
-                  window.api.userData
-                    .saveUserData('preferences.sendSongScrobblingDataToLastFM', state)
-                    .then(() =>
-                      updateUserData((prevUserData) => ({
-                        ...prevUserData,
-                        preferences: {
-                          ...prevUserData.preferences,
-                          sendSongScrobblingDataToLastFM: state
-                        }
-                      }))
-                    )
-                }
+                isChecked={!!userSettings?.sendSongScrobblingDataToLastFM}
+                checkedStateUpdateFunction={(state) => updateSongScrobblingToLastFMState(state)}
                 labelContent={t('settingsPage.enableScrobbling')}
                 isDisabled={!isLastFmConnected}
               />
@@ -128,20 +137,8 @@ const AccountsSettings = () => {
               </div>
               <Checkbox
                 id="sendSongFavoritesDataToLastFM"
-                isChecked={!!userData?.preferences.sendSongFavoritesDataToLastFM}
-                checkedStateUpdateFunction={(state) =>
-                  window.api.userData
-                    .saveUserData('preferences.sendSongFavoritesDataToLastFM', state)
-                    .then(() =>
-                      updateUserData((prevUserData) => ({
-                        ...prevUserData,
-                        preferences: {
-                          ...prevUserData.preferences,
-                          sendSongFavoritesDataToLastFM: state
-                        }
-                      }))
-                    )
-                }
+                isChecked={!!userSettings?.sendSongFavoritesDataToLastFM}
+                checkedStateUpdateFunction={(state) => updateSongFavoritesToLastFMState(state)}
                 labelContent={t('settingsPage.sendFavoritesToLastFm')}
                 isDisabled={!isLastFmConnected}
               />
@@ -156,19 +153,9 @@ const AccountsSettings = () => {
               </div>
               <Checkbox
                 id="sendNowPlayingSongDataToLastFM"
-                isChecked={!!userData?.preferences.sendNowPlayingSongDataToLastFM}
+                isChecked={!!userSettings?.sendNowPlayingSongDataToLastFM}
                 checkedStateUpdateFunction={(state) =>
-                  window.api.userData
-                    .saveUserData('preferences.sendNowPlayingSongDataToLastFM', state)
-                    .then(() =>
-                      updateUserData((prevUserData) => ({
-                        ...prevUserData,
-                        preferences: {
-                          ...prevUserData.preferences,
-                          sendNowPlayingSongDataToLastFM: state
-                        }
-                      }))
-                    )
+                  updateSendNowPlayingSongDataToLastFMState(state)
                 }
                 labelContent={t('settingsPage.sendNowPlayingToLastFm')}
                 isDisabled={!isLastFmConnected}

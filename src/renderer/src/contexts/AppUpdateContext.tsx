@@ -1,7 +1,6 @@
 import { createContext, type ReactNode } from 'react';
 
 export interface AppUpdateContextType {
-  updateUserData: (callback: (prevState: UserData) => UserData | Promise<UserData> | void) => void;
   updateCurrentSongData: (callback: (prevState: AudioPlayerData) => AudioPlayerData) => void;
   updateContextMenuData: (
     isVisible: boolean,
@@ -20,14 +19,12 @@ export interface AppUpdateContextType {
   updateNotifications: (
     callback: (currentNotifications: AppNotification[]) => AppNotification[]
   ) => void;
-  changeCurrentActivePage: (pageTitle: PageTitles, data?: PageData) => void;
-  updatePageHistoryIndex: (type: 'increment' | 'decrement' | 'home', pageIndex?: number) => void;
-  updateCurrentlyActivePageData: (callback: (currentPageData: PageData) => PageData) => void;
   playSong: (songId: string, isStartPlay?: boolean) => void;
   updateCurrentSongPlaybackState: (isPlaying: boolean) => void;
   handleSkipBackwardClick: () => void;
   handleSkipForwardClick: (reason: SongSkipReason) => void;
   toggleShuffling: (isShuffling?: boolean) => void;
+  toggleQueueShuffle: () => void;
   toggleSongPlayback: () => void;
   toggleRepeat: (newState?: RepeatTypes) => void;
   toggleIsFavorite: (isFavorite: boolean, onlyChangeCurrentSongData?: boolean) => void;

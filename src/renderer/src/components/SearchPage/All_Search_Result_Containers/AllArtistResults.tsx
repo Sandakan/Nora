@@ -3,7 +3,7 @@ import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
 import SecondaryContainer from '../../SecondaryContainer';
 import VirtualizedGrid from '../../VirtualizedGrid';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 type Props = { artistData: Artist[] };
 
@@ -19,7 +19,7 @@ const AllArtistResults = (prop: Props) => {
 
   return (
     <SecondaryContainer
-      className="artists-container !mb-0 flex !h-full flex-wrap"
+      className="artists-container mb-0! flex h-full! flex-wrap"
       focusable
       onKeyDown={(e) => {
         if (e.ctrlKey && e.key === 'a') {

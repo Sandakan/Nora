@@ -1,5 +1,3 @@
-/* eslint-disable jsx-a11y/no-noninteractive-tabindex */
-/* eslint-disable jsx-a11y/no-static-element-interactions */
 import { lazy, useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
@@ -10,7 +8,9 @@ import SongArtist from '../SongsPage/SongArtist';
 import DefaultSongCover from '../../assets/images/webp/song_cover_default.webp';
 import UpNextSongPopup from './UpNextSongPopup';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
+import NavLink from '../NavLink';
+import { useNavigate } from '@tanstack/react-router';
 
 const AddSongsToPlaylistsPrompt = lazy(() => import('../SongsPage/AddSongsToPlaylistsPrompt'));
 const BlacklistSongConfrimPrompt = lazy(() => import('../SongsPage/BlacklistSongConfirmPrompt'));
@@ -21,9 +21,9 @@ const DeleteSongsFromSystemConfrimPrompt = lazy(
 const CurrentlyPlayingSongInfoContainer = () => {
   const currentSongData = useStore(store, (state) => state.currentSongData);
   const preferences = useStore(store, (state) => state.localStorage.preferences);
+  const navigate = useNavigate();
 
   const {
-    changeCurrentActivePage,
     updateContextMenuData,
     changePromptMenuData,
     toggleMultipleSelections,
@@ -47,39 +47,41 @@ const CurrentlyPlayingSongInfoContainer = () => {
             src={artist.onlineArtworkPaths?.picture_small}
             fallbackSrc={artist.artworkPath}
             loading="eager"
-            className={`absolute aspect-square w-6 rounded-full border-2 border-background-color-1 dark:border-dark-background-color-1 ${
+            className={`border-background-color-1 dark:border-dark-background-color-1 absolute aspect-square w-6 rounded-full border-2 ${
               index === 0 ? 'z-2' : '-translate-x-2'
             }`}
-            onClick={() => {
-              changeCurrentActivePage('ArtistInfo', {
-                artistName: artist.name,
-                artistId: artist.artistId
-              });
-            }}
+            onClick={() =>
+              navigate({
+                to: '/main-player/artists/$artistId',
+                params: { artistId: artist.artistId }
+              })
+            }
             alt=""
           />
         ));
     return undefined;
-  }, [changeCurrentActivePage, currentSongData.artists, currentSongData.songId]);
+  }, [currentSongData.artists, currentSongData.songId, navigate]);
 
   const showSongInfoPage = useCallback(
     (songId: string) =>
       currentSongData.isKnownSource
-        ? changeCurrentActivePage('SongInfo', {
-            songId
+        ? navigate({
+            to: '/main-player/songs/$songId',
+            params: { songId }
           })
         : undefined,
-    [changeCurrentActivePage, currentSongData.isKnownSource]
+    [navigate, currentSongData.isKnownSource]
   );
 
   const gotToSongAlbumPage = useCallback(
     () =>
       currentSongData.isKnownSource && currentSongData.album
-        ? changeCurrentActivePage('AlbumInfo', {
-            albumId: currentSongData.album.albumId
+        ? navigate({
+            to: '/main-player/albums/$albumId',
+            params: { albumId: currentSongData.album.albumId }
           })
         : undefined,
-    [changeCurrentActivePage, currentSongData.album, currentSongData.isKnownSource]
+    [navigate, currentSongData.album, currentSongData.isKnownSource]
   );
 
   const songArtists = useMemo(() => {
@@ -167,13 +169,15 @@ const CurrentlyPlayingSongInfoContainer = () => {
         label: t('song.editSongTags'),
         class: 'edit',
         iconName: 'edit',
-        handlerFunction: () =>
-          changeCurrentActivePage('SongTagsEditor', {
-            songId,
-            songArtworkPath: artworkPath,
-            songPath: path,
-            isKnownSource
-          })
+        handlerFunction: () => {
+          // TODO: Implement song tags editor page navigation
+          // changeCurrentActivePage('SongTagsEditor', {
+          //   songId,
+          //   songArtworkPath: artworkPath,
+          //   songPath: path,
+          //   isKnownSource
+          // });
+        }
       },
       {
         label: t('common.saveArtwork'),
@@ -236,7 +240,6 @@ const CurrentlyPlayingSongInfoContainer = () => {
     ];
   }, [
     addNewNotifications,
-    changeCurrentActivePage,
     changePromptMenuData,
     currentSongData,
     gotToSongAlbumPage,
@@ -276,14 +279,15 @@ const CurrentlyPlayingSongInfoContainer = () => {
       <div className="song-info-container relative flex h-full w-full flex-col items-start justify-center drop-shadow-lg lg:ml-4 lg:w-full">
         {currentSongData.title && (
           <div className="song-title flex w-full items-center">
-            <div
-              className={`w-fit max-w-full cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-2xl font-medium text-font-color-highlight outline-1 outline-offset-1 focus-visible:!outline ${
+            <NavLink
+              to="/main-player/songs/$songId"
+              params={{ songId: currentSongData.songId }}
+              className={`text-font-color-highlight w-fit max-w-full cursor-pointer overflow-hidden text-2xl font-medium text-ellipsis whitespace-nowrap outline-offset-1 focus-visible:!outline ${
                 currentSongData.isKnownSource && 'hover:underline'
               }`}
+              disabled={!currentSongData.isKnownSource}
               id="currentSongTitle"
               title={currentSongData.title}
-              onClick={() => showSongInfoPage(currentSongData.songId)}
-              onKeyDown={(e) => e.key === 'Enter' && showSongInfoPage(currentSongData.songId)}
               onContextMenu={(e) => {
                 e.stopPropagation();
                 updateContextMenuData(
@@ -297,10 +301,10 @@ const CurrentlyPlayingSongInfoContainer = () => {
               tabIndex={0}
             >
               {currentSongData.title}
-            </div>
+            </NavLink>
             {!currentSongData.isKnownSource && (
               <span
-                className="material-icons-round-outlined ml-2 cursor-pointer text-xl font-light text-font-color-highlight hover:underline dark:text-dark-font-color-highlight"
+                className="material-icons-round-outlined text-font-color-highlight dark:text-dark-font-color-highlight ml-2 cursor-pointer text-xl font-light hover:underline"
                 title="You are playing from an unknown source. Some features are disabled."
               >
                 error
@@ -324,7 +328,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
                   {songArtistsImages}
                 </span>
               )}
-            <span className="flex w-3/4 grow-0 text-xs text-font-color-black/90 dark:text-font-color-white/90">
+            <span className="text-font-color-black/90 dark:text-font-color-white/90 flex w-3/4 grow-0 text-xs">
               {songArtists}
             </span>
           </div>

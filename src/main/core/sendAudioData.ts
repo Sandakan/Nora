@@ -1,129 +1,130 @@
-import { app } from 'electron';
-import { parseFile } from 'music-metadata';
-
-import { isSongBlacklisted } from '../utils/isBlacklisted';
-import { getArtistsData, getSongsData } from '../filesystem';
-import { getSongArtworkPath, resolveSongFilePath } from '../fs/resolveFilePaths';
+import {
+  parseArtistOnlineArtworks,
+  parseSongArtworks,
+  removeDefaultAppProtocolFromFilePath,
+  resolveSongFilePath
+} from '../fs/resolveFilePaths';
 import logger from '../logger';
-import getArtistInfoFromNet from './getArtistInfoFromNet';
-import { addToSongsHistory } from './addToSongsHistory';
-import updateSongListeningData from './updateSongListeningData';
-// import { setDiscordRpcActivity } from '../other/discordRPC';
-import { setCurrentSongPath } from '../main';
-import { getSelectedPaletteData } from '../other/generatePalette';
+import { IS_DEVELOPMENT, setCurrentSongPath } from '../main';
+import { getPlayableSongById } from '@main/db/queries/songs';
+import { parsePaletteFromArtworks } from './getAllSongs';
+import { setDiscordRpcActivity } from '@main/other/discordRPC';
+import { addSongToPlayHistory } from '@main/db/queries/history';
+import sharp from 'sharp';
 
-const IS_DEVELOPMENT = !app.isPackaged || process.env.NODE_ENV === 'development';
-
-const getArtworkData = (artworkData?: Buffer | Uint8Array) => {
+export const parseArtworkDataForAudioPlayerData = (artworkData?: Buffer | Uint8Array) => {
   if (artworkData === undefined) return undefined;
 
   if (IS_DEVELOPMENT) return Buffer.from(artworkData).toString('base64');
   return artworkData;
 };
 
-const getRelevantArtistData = (
-  songArtists?: {
-    artistId: string;
-    name: string;
-  }[]
-) => {
-  const artists = getArtistsData();
-  const relevantArtists: {
-    artistId: string;
-    artworkName?: string;
-    name: string;
-    onlineArtworkPaths?: OnlineArtistArtworks;
-  }[] = [];
+// const getRelevantArtistData = (
+//   songArtists?: {
+//     artistId: string;
+//     name: string;
+//   }[]
+// ) => {
+//   const artists = getArtistsData();
+//   const relevantArtists: {
+//     artistId: string;
+//     artworkName?: string;
+//     name: string;
+//     onlineArtworkPaths?: OnlineArtistArtworks;
+//   }[] = [];
 
-  if (songArtists) {
-    for (const songArtist of songArtists) {
-      for (const artist of artists) {
-        if (artist.artistId === songArtist.artistId) {
-          if (!artist.onlineArtworkPaths)
-            getArtistInfoFromNet(artist.artistId).catch((error) =>
-              logger.warn('Failed to get artist info from net', { err: error })
-            );
+//   if (songArtists) {
+//     for (const songArtist of songArtists) {
+//       for (const artist of artists) {
+//         if (artist.artistId === songArtist.artistId) {
+//           if (!artist.onlineArtworkPaths)
+//             getArtistInfoFromNet(artist.artistId).catch((error) =>
+//               logger.warn('Failed to get artist info from net', { err: error })
+//             );
 
-          const { artistId, name, artworkName, onlineArtworkPaths } = artist;
+//           const { artistId, name, artworkName, onlineArtworkPaths } = artist;
 
-          relevantArtists.push({
-            artistId,
-            name,
-            artworkName,
-            onlineArtworkPaths
-          });
-        }
-      }
-    }
+//           relevantArtists.push({
+//             artistId,
+//             name,
+//             artworkName,
+//             onlineArtworkPaths
+//           });
+//         }
+//       }
+//     }
+//   }
+
+//   return relevantArtists;
+// };
+
+const getArtworkBuffer = async (artworkPath: string) => {
+  try {
+    const realPath = removeDefaultAppProtocolFromFilePath(artworkPath);
+    const buffer = await sharp(realPath).toBuffer();
+
+    return buffer;
+  } catch (error) {
+    // Failed to get artwork buffer most probably becuase the artwork path is a packaged path
+    return undefined;
   }
-
-  return relevantArtists;
 };
 
-const sendAudioData = async (audioId: string): Promise<AudioPlayerData> => {
-  logger.debug(`Fetching song data for song id -${audioId}-`);
+const sendAudioData = async (songId: string): Promise<AudioPlayerData> => {
+  logger.debug(`Fetching song data for song id -${songId}-`);
   try {
-    const songs = getSongsData();
+    const song = await getPlayableSongById(Number(songId));
 
-    if (songs) {
-      for (let x = 0; x < songs.length; x += 1) {
-        if (songs[x].songId === audioId) {
-          const song = songs[x];
-          // TODO: Unknown type error
-          const metadata = await parseFile(song.path);
+    if (song) {
+      const artists: AudioPlayerData['artists'] =
+        song.artists?.map((a) => ({
+          artistId: String(a.artist.id),
+          name: a.artist.name,
+          onlineArtworkPaths: parseArtistOnlineArtworks(a.artist.artworks.map((aw) => aw.artwork))
+        })) ?? [];
 
-          if (metadata) {
-            const artworkData = metadata.common.picture
-              ? metadata.common.picture[0].data
-              : undefined;
+      const artworks = song.artworks.map((a) => a.artwork);
+      const artworkPaths = parseSongArtworks(artworks);
+      const songArtwork = artworkPaths.artworkPath;
+      const artworkData = await getArtworkBuffer(songArtwork);
 
-            addToSongsHistory(song.songId);
-            const songArtists = getRelevantArtistData(song.artists);
+      const albumObj = song.albums?.[0]?.album;
+      const album = albumObj ? { albumId: String(albumObj.id), name: albumObj.title } : undefined;
+      const isBlacklisted = song.isBlacklisted;
+      const isAFavorite = song.isFavorite;
 
-            const data: AudioPlayerData = {
-              title: song.title,
-              artists: songArtists.length > 0 ? songArtists : song.artists,
-              duration: song.duration,
-              // artwork: await getArtworkLink(artworkData),
-              artwork: getArtworkData(artworkData),
-              artworkPath: getSongArtworkPath(song.songId, song.isArtworkAvailable).artworkPath,
-              path: resolveSongFilePath(song.path),
-              songId: song.songId,
-              isAFavorite: song.isAFavorite,
-              album: song.album,
-              paletteData: getSelectedPaletteData(song.paletteId),
-              isKnownSource: true,
-              isBlacklisted: isSongBlacklisted(song.songId, song.path)
-            };
+      const data: AudioPlayerData = {
+        title: song.title,
+        artists,
+        duration: Number(song.duration),
+        artwork: parseArtworkDataForAudioPlayerData(artworkData),
+        artworkPath: songArtwork,
+        path: resolveSongFilePath(song.path),
+        songId: String(song.id),
+        isAFavorite,
+        album,
+        paletteData: parsePaletteFromArtworks(artworks),
+        isKnownSource: true, // this is always true here because the song is from the library
+        isBlacklisted
+      };
 
-            updateSongListeningData(song.songId, 'listens', 1);
+      addSongToPlayHistory(Number(songId));
 
-            // const now = Date.now();
-            // setDiscordRpcActivity({
-            //   details: `Listening to '${data.title}'`,
-            //   state: `By ${data.artists?.map((artist) => artist.name).join(', ')}`,
-            //   largeImageKey: 'nora_logo',
-            //   smallImageKey: 'song_artwork',
-            //   startTimestamp: now,
-            //   endTimestamp: now + data.duration * 1000
-            // });
-            setCurrentSongPath(song.path);
-            return data;
-            // returnlogger.debug(`total : ${console.timeEnd('total')}`);
-          }
-          logger.error(`Failed to parse the song to get metadata`, { audioId });
-          throw new Error('ERROR OCCURRED WHEN PARSING THE SONG TO GET METADATA');
-        }
-      }
-      logger.error(`No matching song to send audio data`, { audioId });
-      throw new Error('SONG_NOT_FOUND' as ErrorCodes);
+      const now = Date.now();
+      setDiscordRpcActivity({
+        details: `Listening to '${data.title}'`,
+        state: `By ${data.artists?.map((artist) => artist.name).join(', ')}`,
+        largeImageKey: 'nora_logo',
+        smallImageKey: 'song_artwork',
+        startTimestamp: now,
+        endTimestamp: now + data.duration * 1000
+      });
+      setCurrentSongPath(song.path);
+
+      return data;
     }
-    logger.error(`Failed to read data.json because it doesn't exist or is empty.`, {
-      audioId,
-      songs: typeof songs,
-      isArray: Array.isArray(songs)
-    });
-    throw new Error('EMPTY_SONG_ARRAY' as ErrorCodes);
+    logger.error(`No matching song to send audio data`, { audioId: songId });
+    throw new Error('SONG_NOT_FOUND' as ErrorCodes);
   } catch (error) {
     logger.error(`Failed to send songs data.`, { err: error });
     throw new Error('SONG_DATA_SEND_FAILED' as ErrorCodes);

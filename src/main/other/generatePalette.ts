@@ -1,18 +1,13 @@
 import { Vibrant } from 'node-vibrant/node';
 import { timeEnd, timeStart } from '../utils/measureTimeUsage';
 import logger from '../logger';
-import {
-  getGenresData,
-  getPaletteData,
-  getSongsData,
-  setGenresData,
-  setPaletteData,
-  setSongsData
-} from '../filesystem';
-import { generateCoverBuffer } from '../parseSong/generateCoverBuffer';
 import { dataUpdateEvent, sendMessageToRenderer } from '../main';
 import roundTo from '../../common/roundTo';
 import { generateRandomId } from '../utils/randomId';
+import { createArtworkPalette, getLowResArtworksWithoutPalettes } from '@main/db/queries/palettes';
+import { db } from '@main/db/db';
+import { swatchTypeEnum } from '@db/schema';
+import generateCoverBuffer from '@main/parseSong/generateCoverBuffer';
 
 export const DEFAULT_SONG_PALETTE: PaletteData = {
   paletteId: 'DEFAULT_PALETTE',
@@ -96,127 +91,91 @@ const generatePalette = async (artwork?: Buffer | string): Promise<PaletteData |
 };
 
 const generatePalettesForSongs = async () => {
-  const songs = getSongsData();
-  const palettes = getPaletteData();
+  const artworks = await getLowResArtworksWithoutPalettes();
 
-  if (Array.isArray(songs) && songs.length > 0) {
+  if (artworks.length > 0) {
     let x = 0;
-    const noOfNoPaletteSongs = songs.reduce((acc, song) => (!song.paletteId ? acc + 1 : acc), 0);
+    const noOfNoPaletteArtworks = artworks.reduce(
+      (acc, artwork) => (!artwork.paletteId ? acc + 1 : acc),
+      0
+    );
 
-    if (noOfNoPaletteSongs > 0) {
+    if (noOfNoPaletteArtworks > 0) {
       const start = timeStart();
 
-      for (let i = 0; i < songs.length; i += 1) {
-        const song = songs[i];
-        if (!song.paletteId) {
-          // const metadata = await musicMetaData.parseFile(song.path);
+      await db.transaction(async (trx) => {
+        for (let i = 0; i < artworks.length; i += 1) {
+          const artwork = artworks[i];
 
-          const coverBuffer = await generateCoverBuffer(
-            song.isArtworkAvailable ? `${song.songId}-optimized.webp` : undefined,
-            true
-          );
+          if (!artwork.paletteId) {
+            const buffer = await generateCoverBuffer(artwork.path, false, false);
+            const palette = await generatePalette(buffer);
 
-          const palette = await generatePalette(coverBuffer);
+            await savePalette(artwork.id, palette, trx);
+            x += 1;
 
-          // const swatch =
-          //   palette && palette.DarkVibrant && palette.LightVibrant
-          //     ? {
-          //         DarkVibrant: palette.DarkVibrant,
-          //         LightVibrant: palette.LightVibrant
-          //       }
-          //     : undefined;
-
-          song.paletteId = palette?.paletteId;
-          if (palette) palettes.push(palette);
-          x += 1;
-
-          sendMessageToRenderer({
-            messageCode: 'SONG_PALETTE_GENERATING_PROCESS_UPDATE',
-            data: { total: noOfNoPaletteSongs, value: x }
-          });
+            sendMessageToRenderer({
+              messageCode: 'SONG_PALETTE_GENERATING_PROCESS_UPDATE',
+              data: { total: noOfNoPaletteArtworks, value: x }
+            });
+          }
         }
-      }
+      });
 
-      timeEnd(start, 'Time to finish generating palettes for songs');
+      timeEnd(start, 'Time to finish generating palettes');
 
-      setSongsData(songs);
-      setPaletteData(palettes);
       dataUpdateEvent('songs/palette');
     } else sendMessageToRenderer({ messageCode: 'NO_MORE_SONG_PALETTES' });
   }
 };
 
-export const getSelectedPaletteData = (paletteId?: string) => {
-  const palettes = getPaletteData();
+const savePalette = async (
+  artworkId: number,
+  palette: PaletteData | undefined,
+  trx: DBTransaction
+) => {
+  if (palette) {
+    const swatches: Parameters<typeof createArtworkPalette>[0]['swatches'] = [];
 
-  if (paletteId) {
-    for (const palette of palettes) {
-      if (palette.paletteId === paletteId) return palette;
-    }
-  }
-  return undefined;
-};
+    const swatchTypes: {
+      key: keyof typeof palette;
+      label: (typeof swatchTypeEnum.enumValues)[number];
+    }[] = [
+      { key: 'DarkVibrant', label: 'DARK_VIBRANT' },
+      { key: 'LightVibrant', label: 'LIGHT_VIBRANT' },
+      { key: 'DarkMuted', label: 'DARK_MUTED' },
+      { key: 'LightMuted', label: 'LIGHT_MUTED' },
+      { key: 'Muted', label: 'MUTED' },
+      { key: 'Vibrant', label: 'VIBRANT' }
+    ];
 
-const generatePalettesForGenres = async () => {
-  const genres = getGenresData();
-  const songs = getSongsData();
+    swatchTypes.forEach(({ key, label }) => {
+      const swatch = palette[key];
 
-  if (Array.isArray(songs) && Array.isArray(genres) && songs.length > 0 && genres.length > 0) {
-    let x = 0;
-    const noOfNoPaletteGenres = genres.reduce(
-      (acc, genre) => (!genre?.paletteId ? acc + 1 : acc),
-      0
-    );
-
-    if (noOfNoPaletteGenres > 0) {
-      const start = timeStart();
-
-      for (let i = 0; i < genres.length; i += 1) {
-        const genreArtworkName = genres[i].artworkName;
-        if (!genres[i]?.paletteId) {
-          if (genreArtworkName) {
-            const artNameWithoutExt = genreArtworkName.split('.')[0];
-
-            for (const song of songs) {
-              if (song.songId === artNameWithoutExt) {
-                genres[i].paletteId = song.paletteId;
-                x += 1;
-                break;
-              }
-            }
-          } else {
-            const coverBuffer = await generateCoverBuffer(
-              genreArtworkName?.replace('.webp', '-optimized.webp'),
-              true
-            );
-
-            const palette = await generatePalette(coverBuffer);
-
-            genres[i].paletteId = palette?.paletteId;
-            x += 1;
-          }
-
-          sendMessageToRenderer({
-            messageCode: 'SONG_PALETTE_GENERATING_PROCESS_UPDATE',
-            data: { total: noOfNoPaletteGenres, value: x }
-          });
-        }
+      if (swatch && typeof swatch === 'object') {
+        swatches.push({
+          hex: swatch.hex,
+          hsl: {
+            h: swatch.hsl[0],
+            s: swatch.hsl[1],
+            l: swatch.hsl[2]
+          },
+          population: swatch.population,
+          swatchType: label
+        });
       }
-      timeEnd(start, 'Time to finish generating palettes for genres');
+    });
 
-      setGenresData(genres);
-      dataUpdateEvent('genres/backgroundColor');
-    } else sendMessageToRenderer({ messageCode: 'NO_MORE_SONG_PALETTES' });
+    await createArtworkPalette({ artworkId, swatches }, trx);
   }
 };
 
 export const generatePalettes = async () => {
-  return generatePalettesForSongs()
-    .then(() => {
-      setTimeout(generatePalettesForGenres, 1000);
-      return undefined;
-    })
-    .catch((error) => logger.error('Failed to generating palettes.', { error }));
+  try {
+    await generatePalettesForSongs();
+  } catch (error) {
+    logger.error('Failed to generate palettes for songs.', { error });
+  }
 };
 
 export default generatePalette;

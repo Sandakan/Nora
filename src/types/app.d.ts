@@ -2,10 +2,13 @@ import NodeID3 from 'node-id3';
 import { ReactElement, ReactNode } from 'react';
 import { ButtonProps } from '../renderer/src/components/Button';
 import { DropdownOption } from '../renderer/src/components/Dropdown';
+import { songSortTypes } from '../renderer/src/components/SongsPage/SongOptions';
 import { api } from '../preload';
 import { LastFMSessionData } from './last_fm_api';
 import { SimilarArtist, Tag } from './last_fm_artist_info_api';
 import { resources } from 'src/renderer/src/i18n';
+import type { db } from '@main/db/db';
+import type { GetAllSongListeningDataReturnType } from '@main/db/queries/listens';
 
 declare global {
   interface Window {
@@ -171,7 +174,7 @@ declare global {
 
   interface PaginatedResult<DataType, SortType extends string> {
     data: DataType[];
-    sortType: SortType;
+    sortType?: SortType;
     start: number;
     end: number;
     total: number;
@@ -185,37 +188,13 @@ declare global {
   // ? Song listening data related types
 
   interface SongListeningData {
-    /** song id of the relevant song */
     songId: string;
-    /** no of song skips.
-     * Incremented if the song is skipped less than 5 seconds */
-    skips?: number;
-    /** no of full listens.
-     * Incremented if the user has listened to more than 80% of the song. */
-    fullListens?: number;
-    /** no of playlists the song was added.
-     * Incremented if the user added the song to any playlist. */
-    inNoOfPlaylists?: number;
-    /** an array of listening records for each year. */
-    listens: YearlyListeningRate[];
-    /** an array of listening records for each year. */
-    seeks?: SongSeek[];
+    playEvents: { playbackPercentage: string; createdAt: Date }[];
+    skipEvents: { position: string; createdAt: Date }[];
+    seekEvents: { position: string; createdAt: Date }[];
   }
 
-  interface SongSeek {
-    position: number;
-    seeks: number;
-  }
-  interface YearlyListeningRate {
-    year: number;
-    /** [Date in milliseconds, No of listens in that day] [] */
-    listens: [number, number][];
-  }
-
-  interface ListeningDataTypes extends Omit<SongListeningData, 'listens'> {
-    listens: number;
-  }
-
+  type ListeningDataEvents = 'SKIP' | 'SEEK' | 'LISTEN';
   // ? Audio player and lyrics related types
 
   type RepeatTypes = 'false' | 'repeat' | 'repeat-1';
@@ -366,7 +345,21 @@ declare global {
     songId: string;
   }
 
-  type QueueTypes = 'album' | 'playlist' | 'artist' | 'songs' | 'genre' | 'folder';
+  type QueueTypes =
+    | 'album'
+    | 'playlist'
+    | 'artist'
+    | 'songs'
+    | 'genre'
+    | 'folder'
+    | 'favorites'
+    | 'history';
+
+  interface QueueInfo {
+    artworkPath: string;
+    onlineArtworkPath?: string;
+    title: string;
+  }
 
   // ? User data related types
 
@@ -424,39 +417,38 @@ declare global {
     folderBlacklist: string[];
   }
 
-  interface UserData {
-    language: LanguageCodes;
-    theme: AppThemeData;
-    musicFolders: FolderStructure[];
-    preferences: {
-      autoLaunchApp: boolean;
-      openWindowMaximizedOnStart: boolean;
-      openWindowAsHiddenOnSystemStart: boolean;
-      isMiniPlayerAlwaysOnTop: boolean;
-      isMusixmatchLyricsEnabled: boolean;
-      hideWindowOnClose: boolean;
-      sendSongScrobblingDataToLastFM: boolean;
-      sendSongFavoritesDataToLastFM: boolean;
-      sendNowPlayingSongDataToLastFM: boolean;
-      saveLyricsInLrcFilesForSupportedSongs: boolean;
-      enableDiscordRPC: boolean;
-      saveVerboseLogs: boolean;
-    };
-    windowPositions: {
-      mainWindow?: WindowCordinates;
-      miniPlayer?: WindowCordinates;
-    };
-    windowDiamensions: {
-      mainWindow?: WindowCordinates;
-      miniPlayer?: WindowCordinates;
-    };
-    windowState: WindowState;
+  interface UserSettings {
+    language: string;
+    isDarkMode: boolean;
+    useSystemTheme: boolean;
+    autoLaunchApp: boolean;
+    openWindowMaximizedOnStart: boolean;
+    openWindowAsHiddenOnSystemStart: boolean;
+    isMiniPlayerAlwaysOnTop: boolean;
+    isMusixmatchLyricsEnabled: boolean;
+    hideWindowOnClose: boolean;
+    sendSongScrobblingDataToLastFM: boolean;
+    sendSongFavoritesDataToLastFM: boolean;
+    sendNowPlayingSongDataToLastFM: boolean;
+    saveLyricsInLrcFilesForSupportedSongs: boolean;
+    enableDiscordRPC: boolean;
+    saveVerboseLogs: boolean;
+    mainWindowX: number | null;
+    mainWindowY: number | null;
+    miniPlayerX: number | null;
+    miniPlayerY: number | null;
+    mainWindowWidth: number | null;
+    mainWindowHeight: number | null;
+    miniPlayerWidth: number | null;
+    miniPlayerHeight: number | null;
+    windowState: string;
     recentSearches: string[];
-    customMusixmatchUserToken?: string;
-    lastFmSessionData?: LastFMSessionData;
-    storageMetrics?: StorageMetrics;
-    customLrcFilesSaveLocation?: string;
+    customLrcFilesSaveLocation: string | null;
+    lastFmSessionName: string | null;
+    lastFmSessionKey: string | null;
   }
+
+  interface UserData extends UserSettings {}
 
   type LanguageCodes = NoInfer<keyof typeof resources>;
 
@@ -486,10 +478,20 @@ declare global {
     noOfSongs?: number;
   }
 
+  interface SavedFolderStructure extends FolderStructure {
+    id: number;
+    subFolders: SavedFolderStructure[];
+  }
+
   interface MusicFolder extends FolderStructure {
     songIds: string[];
     isBlacklisted: boolean;
     subFolders: MusicFolder[];
+  }
+
+  interface SavedMusicFolder extends MusicFolder {
+    id: number;
+    subFolders: SavedMusicFolder[];
   }
 
   // ? LocalStorage related types
@@ -509,7 +511,7 @@ declare global {
     enableArtworkFromSongCovers: boolean;
     shuffleArtworkFromSongCovers: boolean;
     removeAnimationsOnBatteryPower: boolean;
-    isPredictiveSearchEnabled: boolean;
+    isSimilaritySearchEnabled: boolean;
     lyricsAutomaticallySaveState: AutomaticallySaveLyricsTypes;
     showTrackNumberAsSongIndex: boolean;
     allowToPreventScreenSleeping: boolean;
@@ -625,16 +627,66 @@ declare global {
     editNextAndCurrentStartAndEndTagsAutomatically: boolean;
   }
 
+  interface Shortcut {
+    label: string;
+    keys: string[];
+  }
+
+  interface ShortcutCategory {
+    shortcutCategoryTitle: string;
+    shortcuts: Shortcut[];
+  }
+
+  type ShortcutCategoryList = ShortcutCategory[];
+
+  interface PlayerQueueMetadata {
+    queueId?: string;
+    queueType?: QueueTypes;
+  }
+
+  type QueueEventType =
+    | 'positionChange'
+    | 'queueChange'
+    | 'songAdded'
+    | 'songRemoved'
+    | 'queueCleared'
+    | 'queueReplaced'
+    | 'shuffled'
+    | 'restored'
+    | 'metadataChange';
+
+  type QueueEventCallback<T = unknown> = (data: T) => void;
+
+  interface QueueEventData {
+    positionChange: { oldPosition: number; newPosition: number; currentSongId: string | null };
+    queueChange: { queue: string[]; length: number };
+    songAdded: { songId: string; position: number };
+    songRemoved: { songId: string; position: number };
+    queueCleared: Record<string, never>;
+    queueReplaced: { oldQueue: string[]; newQueue: string[]; newPosition: number };
+    shuffled: { originalQueue: string[]; shuffledQueue: string[]; positions: number[] };
+    restored: { restoredQueue: string[] };
+    metadataChange: { queueId?: string; queueType?: QueueTypes };
+  }
+
+  interface PlayerQueueJson {
+    songIds: string[];
+    position: number;
+    queueBeforeShuffle?: number[];
+    metadata?: PlayerQueueMetadata;
+  }
+
   interface LocalStorage {
     preferences: Preferences;
     playback: Playback;
-    queue: Queue;
+    queue: PlayerQueueJson;
     ignoredSeparateArtists: string[];
     ignoredSongsWithFeatArtists: string[];
     ignoredDuplicates: IgnoredDuplicates;
     sortingStates: SortingStates;
     equalizerPreset: Equalizer;
     lyricsEditorSettings: LyricsEditorSettings;
+    keyboardShortcuts: ShortcutCategoryList;
   }
 
   // ? Playlists related types
@@ -747,14 +799,7 @@ declare global {
     tempArtworkCacheSize: number;
     totalArtworkCacheSize: number;
     logSize: number;
-    songDataSize: number;
-    artistDataSize: number;
-    albumDataSize: number;
-    genreDataSize: number;
-    playlistDataSize: number;
-    paletteDataSize: number;
-    userDataSize: number;
-    librarySize: number;
+    databaseSize: number;
     totalKnownItemsSize: number;
     otherSize: number;
   }
@@ -766,6 +811,14 @@ declare global {
     appDataSizes: AppDataStorageMetrics;
     totalSize: number;
     generatedDate: string;
+  }
+
+  interface DatabaseMetrics {
+    songCount: number;
+    artistCount: number;
+    albumCount: number;
+    genreCount: number;
+    playlistCount: number;
   }
 
   // ? Search related types
@@ -883,6 +936,7 @@ declare global {
     | 'PLAYLIST_EXPORT_SUCCESS'
     | 'PLAYLIST_IMPORT_SUCCESS'
     | 'PLAYLIST_RENAME_SUCCESS'
+    | 'PLAYLIST_RENAME_FAILED'
     | 'PLAYLIST_IMPORT_TO_EXISTING_PLAYLIST'
     | 'SONG_REPARSE_SUCCESS'
     | 'ADDED_SONGS_TO_PLAYLIST'
@@ -989,29 +1043,14 @@ declare global {
     | 'sortingStates.artistsPage'
     | 'sortingStates.genresPage';
 
-  type SongFilterTypes = 'notSelected' | 'blacklistedSongs' | 'whitelistedSongs';
-
-  type SongSortTypes =
-    | 'aToZ'
-    | 'zToA'
-    | 'addedOrder'
-    | 'dateAddedAscending'
-    | 'dateAddedDescending'
-    | 'releasedYearAscending'
-    | 'releasedYearDescending'
-    | 'trackNoAscending'
-    | 'trackNoDescending'
-    | 'artistNameAscending'
-    | 'artistNameDescending'
-    | 'allTimeMostListened'
-    | 'allTimeLeastListened'
-    | 'monthlyMostListened'
-    | 'monthlyLeastListened'
-    | 'artistNameDescending'
-    | 'albumNameAscending'
-    | 'albumNameDescending'
+  type SongFilterTypes =
+    | 'notSelected'
     | 'blacklistedSongs'
-    | 'whitelistedSongs';
+    | 'whitelistedSongs'
+    | 'favorites'
+    | 'nonFavorites';
+
+  type SongSortTypes = (typeof songSortTypes)[number];
 
   type ArtistFilterTypes = 'notSelected' | 'favorites';
 
@@ -1172,14 +1211,20 @@ declare global {
     onlineArtworkPaths?: OnlineArtistArtworks;
   };
 
+  type SongTagsGenreData = {
+    genreId?: string;
+    name: string;
+    artworkPath?: string;
+  };
+
   interface SongTags {
     title: string;
     artists?: SongTagsArtistData[];
     albumArtists?: SongTagsArtistData[];
-    album?: SongTagsAlbumData;
+    albums?: SongTagsAlbumData[];
     trackNumber?: number;
     releasedYear?: number;
-    genres?: { genreId?: string; name: string; artworkPath?: string }[];
+    genres?: SongTagsGenreData[];
     composer?: string;
     synchronizedLyrics?: string;
     unsynchronizedLyrics?: string;
@@ -1266,4 +1311,41 @@ declare global {
     | 'favorites_artwork'
     | 'genre_artwork'
     | 'playlist_artwork';
+
+  interface SearchUrlParams {
+    scrollTopOffset?: number;
+  }
+
+  interface LyricData {
+    text: string | Omit<SyncedLyricsLineWord, 'unparsedText'>[];
+    start?: number;
+    end?: number;
+  }
+
+  interface LyricsLineData {
+    text: string;
+    start?: number;
+    end?: number;
+    unparsedText?: string;
+    isActive: boolean;
+  }
+
+  interface EditingLyricsLineData {
+    text: string | LyricsLineData[];
+    start?: number;
+    end?: number;
+  }
+  interface ExtendedEditingLyricsLineData extends EditingLyricsLineData {
+    index: number;
+    isActive: boolean;
+  }
+
+  type Routes = 'lyrics-editor';
+  type LyricsEditorRouteState = { songId: string; lyrics?: LyricData[] };
+  interface RouteStates {
+    'lyrics-editor': LyricsEditorRouteState;
+  }
+
+  type DB = typeof db;
+  type DBTransaction = Parameters<Parameters<DB['transaction']>[0]>[0];
 }

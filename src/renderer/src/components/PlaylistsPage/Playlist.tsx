@@ -1,6 +1,3 @@
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-
 import { lazy, useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -12,7 +9,9 @@ import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
 import DefaultPlaylistCover from '../../assets/images/webp/playlist_cover_default.webp';
 import MultipleArtworksCover from './MultipleArtworksCover';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
+import { useNavigate } from '@tanstack/react-router';
+import NavLink from '../NavLink';
 
 const ConfirmDeletePlaylistsPrompt = lazy(() => import('./ConfirmDeletePlaylistsPrompt'));
 const RenamePlaylistPrompt = lazy(() => import('./RenamePlaylistPrompt'));
@@ -34,7 +33,6 @@ export const Playlist = (props: PlaylistProp) => {
   const {
     updateQueueData,
     updateContextMenuData,
-    changeCurrentActivePage,
     changePromptMenuData,
     createQueue,
     toggleMultipleSelections,
@@ -42,13 +40,15 @@ export const Playlist = (props: PlaylistProp) => {
     addNewNotifications
   } = useContext(AppUpdateContext);
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const openPlaylistInfoPage = useCallback(
     () =>
-      changeCurrentActivePage('PlaylistInfo', {
-        playlistId: props.playlistId
+      navigate({
+        to: '/main-player/playlists/$playlistId',
+        params: { playlistId: props.playlistId }
       }),
-    [changeCurrentActivePage, props.playlistId]
+    [navigate, props.playlistId]
   );
 
   const isAMultipleSelection = useMemo(() => {
@@ -90,7 +90,7 @@ export const Playlist = (props: PlaylistProp) => {
       window.api.playlistsData
         .getPlaylistData(playlistIds)
         .then((playlists) => {
-          const ids = playlists.map((playlist) => playlist.songs).flat();
+          const ids = playlists.data.map((playlist) => playlist.songs).flat();
 
           return window.api.audioLibraryControls.getSongInfo(
             ids,
@@ -362,12 +362,15 @@ export const Playlist = (props: PlaylistProp) => {
   );
 
   return (
-    <div
+    <NavLink
+      to={'/main-player/playlists/$playlistId'}
+      params={{ playlistId: props.playlistId }}
+      preload={isMultipleSelectionEnabled ? false : undefined}
       className={`playlist group hover:bg-background-color-2/50 dark:hover:bg-dark-background-color-2/50 ${
         props.playlistId
-      } mb-8 mr-12 flex h-fit max-h-52 min-h-[12rem] w-36 flex-col justify-between rounded-md p-4 text-font-color-black dark:text-font-color-white ${
+      } text-font-color-black dark:text-font-color-white mr-12 mb-8 flex h-fit max-h-52 min-h-[12rem] w-36 flex-col justify-between rounded-md p-4 ${
         isAMultipleSelection
-          ? '!bg-background-color-3 !text-font-color-black dark:!bg-dark-background-color-3 dark:!text-font-color-black'
+          ? 'bg-background-color-3! text-font-color-black! dark:bg-dark-background-color-3! dark:text-font-color-black!'
           : ''
       }`}
       data-playlist-id={props.playlistId}
@@ -377,6 +380,7 @@ export const Playlist = (props: PlaylistProp) => {
         updateContextMenuData(true, contextMenus, e.pageX, e.pageY, contextMenuItemData);
       }}
       onClick={(e) => {
+        e.preventDefault();
         if (e.getModifierState('Shift') === true && props.selectAllHandler)
           props.selectAllHandler(props.playlistId);
         else if (e.getModifierState('Control') === true && !isMultipleSelectionEnabled)
@@ -390,19 +394,19 @@ export const Playlist = (props: PlaylistProp) => {
         else openPlaylistInfoPage();
       }}
     >
-      <div className="playlist-cover-and-play-btn-container relative aspect-square w-full cursor-pointer overflow-hidden rounded-xl before:invisible before:absolute before:z-10 before:h-full before:w-full before:bg-gradient-to-b before:from-[hsla(0,0%,0%,0%)] before:to-[hsla(0,0%,0%,40%)] before:opacity-0 before:transition-[visibility,opacity] before:duration-300 before:content-[''] group-focus-within:before:visible group-focus-within:before:opacity-100 group-hover:before:visible group-hover:before:opacity-100">
+      <div className="playlist-cover-and-play-btn-container relative aspect-square w-full cursor-pointer overflow-hidden rounded-xl before:invisible before:absolute before:z-10 before:h-full before:w-full before:bg-linear-to-b before:from-[hsla(0,0%,0%,0%)] before:to-[hsla(0,0%,0%,40%)] before:opacity-0 before:transition-[visibility,opacity] before:duration-300 before:content-[''] group-focus-within:before:visible group-focus-within:before:opacity-100 group-hover:before:visible group-hover:before:opacity-100">
         {isMultipleSelectionEnabled && multipleSelectionsData.selectionType === 'playlist' ? (
           <MultipleSelectionCheckbox
             id={props.playlistId}
             selectionType="playlist"
-            className="absolute bottom-3 right-3 z-10"
+            className="absolute right-3 bottom-3 z-10"
           />
         ) : (
           <Button
-            className="absolute bottom-2 right-2 z-10 !m-0 translate-y-10 scale-90 !rounded-none !border-0 bg-transparent !p-0 text-font-color-white opacity-0 outline-1 outline-offset-1 transition-[opacity,transform] delay-100 duration-200 ease-in-out hover:bg-transparent focus-visible:!outline group-focus-within:translate-y-0 group-focus-within:scale-100 group-focus-within:opacity-100 group-hover:translate-y-0 group-hover:scale-100 group-hover:opacity-100 dark:bg-transparent dark:!text-font-color-white dark:hover:bg-transparent"
+            className="text-font-color-white dark:text-font-color-white! absolute right-2 bottom-2 z-10 m-0! translate-y-10 scale-90 rounded-none! border-0! bg-transparent p-0! opacity-0 outline-offset-1 transition-[opacity,transform] delay-100 duration-200 ease-in-out group-focus-within:translate-y-0 group-focus-within:scale-100 group-focus-within:opacity-100 group-hover:translate-y-0 group-hover:scale-100 group-hover:opacity-100 hover:bg-transparent focus-visible:outline! dark:bg-transparent dark:hover:bg-transparent"
             clickHandler={() => playAllSongs()}
             iconName="play_circle"
-            iconClassName="!text-4xl !leading-none !text-inherit"
+            iconClassName="text-4xl! leading-none! text-inherit!"
           />
         )}
         <div className="playlist-cover-container h-full cursor-pointer overflow-hidden">
@@ -417,7 +421,7 @@ export const Playlist = (props: PlaylistProp) => {
                 src={props.artworkPaths.artworkPath}
                 alt="Playlist Cover"
                 loading="lazy"
-                className="!absolute bottom-1 left-1 h-8 w-8 !rounded-md"
+                className="absolute! bottom-1 left-1 h-8 w-8 rounded-md!"
                 enableImgFadeIns={!isMultipleSelectionEnabled}
               />
             </div>
@@ -434,8 +438,8 @@ export const Playlist = (props: PlaylistProp) => {
       </div>
       <div className="playlist-info-container mt-2">
         <Button
-          className={`playlist-title !m-0 !block w-full truncate !rounded-none !border-0 bg-transparent !p-0 !text-left !text-xl outline-1 outline-offset-1 hover:bg-transparent hover:underline focus-visible:!outline dark:bg-transparent dark:hover:bg-transparent ${
-            isAMultipleSelection && '!text-font-color-black dark:!text-font-color-black'
+          className={`playlist-title !m-0 !block w-full truncate !rounded-none !border-0 bg-transparent !p-0 !text-left !text-xl outline-offset-1 hover:bg-transparent hover:underline focus-visible:!outline dark:bg-transparent dark:hover:bg-transparent ${
+            isAMultipleSelection && 'text-font-color-black! dark:text-font-color-black!'
           }`}
           tooltipLabel={props.name}
           clickHandler={() =>
@@ -453,6 +457,6 @@ export const Playlist = (props: PlaylistProp) => {
           {t('common.songWithCount', { count: props.songs.length })}
         </div>
       </div>
-    </div>
+    </NavLink>
   );
 };
