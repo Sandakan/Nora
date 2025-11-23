@@ -3,6 +3,7 @@ import storage from '../../../utils/localStorage';
 import Checkbox from '../../Checkbox';
 import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store/store';
+import CollapsibleSection from "./CollapsibleSection";
 
 const AccessibilitySettings = () => {
   const preferences = useStore(store, (state) => state.localStorage.preferences);
@@ -10,13 +11,18 @@ const AccessibilitySettings = () => {
 
   return (
     <li
-      className="main-container accessibility-settings-container mb-16"
+      className="main-container accessibility-settings-container mb-4"
       id="accessibility-settings-container"
     >
-      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center text-2xl font-medium">
+    <CollapsibleSection
+      defaultOpen={false}
+      title={
+      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight flex items-center text-2xl font-medium">
         <span className="material-icons-round-outlined mr-2">settings_accessibility</span>
         {t('settingsPage.accessibility')}
       </div>
+      }
+    >
       <ul className="marker:bg-background-color-3 dark:marker:bg-background-color-3 list-disc pl-6">
         <li className="secondary-container toggle-reduced-motion mb-4">
           <div className="description">{t('settingsPage.reducedMotionDescription')}</div>
@@ -30,6 +36,7 @@ const AccessibilitySettings = () => {
           />
         </li>
       </ul>
+    </CollapsibleSection>
     </li>
   );
 };
