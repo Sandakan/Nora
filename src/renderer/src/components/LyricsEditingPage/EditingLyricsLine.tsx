@@ -2,15 +2,10 @@ import { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useSta
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
-import type {
-  EditingLyricsLineData,
-  ExtendedEditingLyricsLineData,
-  LyricsLineData
-} from './LyricsEditingPage';
 import Button from '../Button';
 import EditingLyricWord from './EditingLyricWord';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 interface Props extends ExtendedEditingLyricsLineData {
   isPlaying: boolean;
@@ -116,7 +111,7 @@ const EditingLyricsLine = (props: Props) => {
   const lyricsLineComponent = !isEditing ? (
     <span
       className={`scale-75 cursor-pointer text-center text-5xl font-medium opacity-50 transition-[opacity,transform] ${shouldHighlight && 'text-font-color-highlight dark:text-dark-font-color-highlight'} ${
-        shouldHighlight ? '!scale-100 !opacity-100 group-hover:opacity-75' : ''
+        shouldHighlight ? 'scale-100! opacity-100! group-hover:opacity-75' : ''
       } ${typeof content.text === 'object' && 'flex flex-wrap items-center justify-center text-wrap'}`}
     >
       {typeof content.text === 'string'
@@ -131,7 +126,7 @@ const EditingLyricsLine = (props: Props) => {
     // eslint-disable-next-line jsx-a11y/no-static-element-interactions
     <div
       className={`group mb-2 flex flex-col items-center justify-center rounded-xl py-4 ${
-        isEditing && `w-full bg-background-color-2/50 shadow-xl dark:bg-dark-background-color-2/50`
+        isEditing && `bg-background-color-2/50 dark:bg-dark-background-color-2/50 w-full shadow-xl`
       } `}
       ref={lineRef}
       onKeyDown={(e) => isEditing && e.stopPropagation()}
@@ -153,7 +148,7 @@ const EditingLyricsLine = (props: Props) => {
         <input
           type="text"
           placeholder={t('lyricsEditingPage.lyricsText')}
-          className="my-2 w-[90%] rounded-xl border-[3px] border-background-color-1 bg-background-color-1 px-4 py-4 text-center dark:border-dark-background-color-1 dark:bg-dark-background-color-1"
+          className="border-background-color-1 bg-background-color-1 dark:border-dark-background-color-1 dark:bg-dark-background-color-1 my-2 w-[90%] rounded-xl border-[3px] px-4 py-4 text-center"
           value={
             typeof content.text === 'string'
               ? content.text
@@ -180,7 +175,7 @@ const EditingLyricsLine = (props: Props) => {
           <input
             type="number"
             placeholder={t('lyricsEditingPage.startInSeconds')}
-            className="mx-2 my-1 min-w-[20%] rounded-xl border-[3px] border-background-color-1 bg-background-color-1 px-1 py-2 text-center dark:border-dark-background-color-1 dark:bg-dark-background-color-1"
+            className="border-background-color-1 bg-background-color-1 dark:border-dark-background-color-1 dark:bg-dark-background-color-1 mx-2 my-1 min-w-[20%] rounded-xl border-[3px] px-1 py-2 text-center"
             value={content.start ?? 0}
             onChange={(e) =>
               dispatch({
@@ -193,7 +188,7 @@ const EditingLyricsLine = (props: Props) => {
           <input
             type="number"
             placeholder={t('lyricsEditingPage.endInSeconds')}
-            className="mx-2 my-1 min-w-[20%] rounded-xl border-[3px] border-background-color-1 bg-background-color-1 px-1 py-2 text-center dark:border-dark-background-color-1 dark:bg-dark-background-color-1"
+            className="border-background-color-1 bg-background-color-1 dark:border-dark-background-color-1 dark:bg-dark-background-color-1 mx-2 my-1 min-w-[20%] rounded-xl border-[3px] px-1 py-2 text-center"
             value={content.end ?? 0}
             onChange={(e) =>
               dispatch({
@@ -217,7 +212,7 @@ const EditingLyricsLine = (props: Props) => {
             <Button
               className={`my-2 text-xs opacity-75 ${
                 isEditing &&
-                '!border-background-color-1 hover:!border-background-color-3 dark:!border-dark-background-color-1 dark:hover:!border-dark-background-color-3'
+                'border-background-color-1! hover:border-background-color-3! dark:border-dark-background-color-1! dark:hover:border-dark-background-color-3!'
               }`}
               label={t('settingsPage.reset')}
               iconName="restart_alt"
@@ -231,7 +226,7 @@ const EditingLyricsLine = (props: Props) => {
             <Button
               className={`my-2 text-xs opacity-75 ${
                 isEditing &&
-                '!border-background-color-1 hover:!border-background-color-3 dark:!border-dark-background-color-1 dark:hover:!border-dark-background-color-3'
+                'border-background-color-1! hover:border-background-color-3! dark:border-dark-background-color-1! dark:hover:border-dark-background-color-3!'
               }`}
               label={t('lyricsEditingPage.deleteLine')}
               iconName="delete"
@@ -250,7 +245,7 @@ const EditingLyricsLine = (props: Props) => {
             <Button
               className={`my-2 text-xs opacity-75 ${
                 isEditing &&
-                '!border-background-color-1 hover:!border-background-color-3 dark:!border-dark-background-color-1 dark:hover:!border-dark-background-color-3'
+                'border-background-color-1! hover:border-background-color-3! dark:border-dark-background-color-1! dark:hover:border-dark-background-color-3!'
               }`}
               label={t('lyricsEditingPage.addLineAbove')}
               iconName="step_out"
@@ -273,7 +268,7 @@ const EditingLyricsLine = (props: Props) => {
             <Button
               className={`my-2 text-xs opacity-75 ${
                 isEditing &&
-                '!border-background-color-1 hover:!border-background-color-3 dark:!border-dark-background-color-1 dark:hover:!border-dark-background-color-3'
+                'border-background-color-1! hover:border-background-color-3! dark:border-dark-background-color-1! dark:hover:border-dark-background-color-3!'
               }`}
               label={t('lyricsEditingPage.addLineBelow')}
               iconName="step_into"
@@ -299,7 +294,7 @@ const EditingLyricsLine = (props: Props) => {
           <Button
             className={`my-2 text-xs opacity-75 ${
               isEditing &&
-              '!border-background-color-1 hover:!border-background-color-3 dark:!border-dark-background-color-1 dark:hover:!border-dark-background-color-3'
+              'border-background-color-1! hover:border-background-color-3! dark:border-dark-background-color-1! dark:hover:border-dark-background-color-3!'
             }`}
             label={t('lyricsEditingPage.addInstrumentalLineBelow')}
             iconName="music_note"
@@ -323,7 +318,7 @@ const EditingLyricsLine = (props: Props) => {
         <Button
           className={`my-2 !mr-0 text-xs opacity-75 ${
             isEditing &&
-            '!border-background-color-1 hover:!border-background-color-3 dark:!border-dark-background-color-1 dark:hover:!border-dark-background-color-3'
+            'border-background-color-1! hover:border-background-color-3! dark:border-dark-background-color-1! dark:hover:border-dark-background-color-3!'
           }`}
           label={t(`lyricsEditingPage.${isEditing ? 'finishEditing' : 'editLine'}`)}
           iconName={isEditing ? 'done' : 'edit'}

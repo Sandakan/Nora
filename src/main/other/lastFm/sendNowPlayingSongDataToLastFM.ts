@@ -1,39 +1,42 @@
-import { getSongsData, getUserData } from '../../filesystem';
 import logger from '../../logger';
 import type {
   LastFMScrobblePostResponse,
   updateNowPlayingParams
 } from '../../../types/last_fm_api';
-import { checkIfConnectedToInternet, getSongsOutsideLibraryData } from '../../main';
+import { checkIfConnectedToInternet } from '../../main';
 import generateApiRequestBodyForLastFMPostRequests from './generateApiRequestBodyForLastFMPostRequests';
 import getLastFmAuthData from './getLastFMAuthData';
+import { getSongById } from '@main/db/queries/songs';
+import { convertToSongData } from '../../../common/convert';
+import { getUserSettings } from '@main/db/queries/settings';
 
 const sendNowPlayingSongDataToLastFM = async (songId: string) => {
   try {
-    const userData = getUserData();
+    const { sendNowPlayingSongDataToLastFM: isScrobblingEnabled } = await getUserSettings();
     const isConnectedToInternet = checkIfConnectedToInternet();
 
-    const isScrobblingEnabled = userData.preferences.sendNowPlayingSongDataToLastFM;
-
     if (isScrobblingEnabled && isConnectedToInternet) {
-      const songs = getSongsData();
-      let song = songs.find((x) => x.songId === songId);
+      const songData = await getSongById(Number(songId));
 
-      if (song === undefined) {
-        const songsOutsideLibrary = getSongsOutsideLibraryData();
-        const data = songsOutsideLibrary.find((x) => x.songId === songId);
-        if (data)
-          song = {
-            ...data,
-            albumArtists: [],
-            trackNo: undefined,
-            isArtworkAvailable: !!data.artworkPath,
-            addedDate: Date.now()
-          };
-      }
+      // TODO: Handle songs outside library properly in DB
+      // const songs = getSongsData();
+      // let song = songs.find((x) => x.songId === songId);
+      // if (song === undefined) {
+      //   const songsOutsideLibrary = getSongsOutsideLibraryData();
+      //   const data = songsOutsideLibrary.find((x) => x.songId === songId);
+      //   if (data)
+      //     song = {
+      //       ...data,
+      //       albumArtists: [],
+      //       trackNo: undefined,
+      //       isArtworkAvailable: !!data.artworkPath,
+      //       addedDate: Date.now()
+      //     };
+      // }
 
-      if (song) {
-        const authData = getLastFmAuthData();
+      if (songData) {
+        const song = convertToSongData(songData);
+        const authData = await getLastFmAuthData();
 
         const url = new URL('http://ws.audioscrobbler.com/2.0/');
         url.searchParams.set('format', 'json');

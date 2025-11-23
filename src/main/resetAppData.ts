@@ -2,18 +2,9 @@ import fs from 'fs/promises';
 import path from 'path';
 import { app } from 'electron';
 import logger from './logger';
+import { nukeDatabase } from '@main/db/db';
 
-const resourcePaths = [
-  'songs.json',
-  'artists.json',
-  'albums.json',
-  'genres.json',
-  'playlists.json',
-  'userData.json',
-  'listening_data.json',
-  'blacklist.json',
-  'song_covers'
-];
+const resourcePaths = ['listening_data.json', 'song_covers'];
 const userDataPath = app.getPath('userData');
 
 const manageErrors = (error: Error) => {
@@ -27,13 +18,18 @@ const manageErrors = (error: Error) => {
 
 const resetAppData = async () => {
   try {
+    await nukeDatabase();
+
     for (const resourcePath of resourcePaths) {
       const isResourcePathADirectory = path.extname(resourcePath) === '';
 
       if (isResourcePathADirectory)
         await fs
           .rm(path.join(userDataPath, resourcePath), {
-            recursive: true
+            recursive: true,
+            maxRetries: 5,
+            retryDelay: 150,
+            force: true
           })
           .catch(manageErrors);
       else await fs.unlink(path.join(userDataPath, resourcePath)).catch(manageErrors);

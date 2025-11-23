@@ -76,12 +76,7 @@ import getArtistInfoFromNet from './core/getArtistInfoFromNet';
 import getSongLyrics from './core/getSongLyrics';
 import sendAudioDataFromPath from './core/sendAudioDataFromPath';
 import saveLyricsToSong from './saveLyricsToSong';
-import {
-  getUserData,
-  setUserData as saveUserData,
-  getListeningData,
-  getBlacklistData
-} from './filesystem';
+import { getBlacklistData } from './filesystem';
 import changeAppTheme from './core/changeAppTheme';
 import checkForStartUpSongs from './core/checkForStartUpSongs';
 import checkForNewSongs from './core/checkForNewSongs';
@@ -92,6 +87,12 @@ import convertLyricsToPinyin from './utils/convertToPinyin';
 import convertLyricsToRomaja from './utils/convertToRomaja';
 import resetLyrics from './utils/resetLyrics';
 import logger, { logFilePath } from './logger';
+import { getListeningData } from './core/getListeningData';
+import { getUserSettings, saveUserSettings } from './db/queries/settings';
+import { getQueueInfo } from './utils/getQueueInfo';
+import { getDatabaseMetrics } from './db/queries/other';
+import { getAllHistorySongs } from './core/getAllHistorySongs';
+import { getAllFavoriteSongs } from './core/getAllFavoriteSongs';
 
 export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSignal) {
   if (mainWindow) {
@@ -139,9 +140,9 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     powerMonitor.addListener('on-ac', toggleOnBatteryPower);
     powerMonitor.addListener('on-battery', toggleOnBatteryPower);
 
-    ipcMain.on('app/getSongPosition', (_, position: number) =>
-      saveUserData('currentSong.stoppedPosition', position)
-    );
+    // ipcMain.on('app/getSongPosition', (_, position: number) =>
+    //   saveUserData('currentSong.stoppedPosition', position)
+    // );
 
     ipcMain.handle('app/addSongsFromFolderStructures', (_, structures: FolderStructure[]) =>
       addSongsFromFolderStructures(structures)
@@ -171,15 +172,30 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       ) => getAllSongs(sortType, filterType, paginatingData)
     );
 
-    ipcMain.handle('app/saveUserData', (_, dataType: UserDataTypes, data: string) =>
-      saveUserData(dataType, data)
+    ipcMain.handle(
+      'app/getAllHistorySongs',
+      (_, sortType?: SongSortTypes, paginatingData?: PaginatingData) =>
+        getAllHistorySongs(sortType, paginatingData)
     );
 
-    ipcMain.handle('app/getStorageUsage', (_, forceRefresh?: boolean) =>
-      getStorageUsage(forceRefresh)
+    ipcMain.handle(
+      'app/getAllFavoriteSongs',
+      (_, sortType?: SongSortTypes, paginatingData?: PaginatingData) =>
+        getAllFavoriteSongs(sortType, paginatingData)
     );
 
-    ipcMain.handle('app/getUserData', () => getUserData());
+    // ipcMain.handle('app/saveUserData', (_, dataType: UserDataTypes, data: string) =>
+    //   saveUserData(dataType, data)
+    // );
+    ipcMain.handle('app/saveUserSettings', (_, settings: Partial<UserSettings>) =>
+      saveUserSettings(settings)
+    );
+
+    ipcMain.handle('app/getStorageUsage', () => getStorageUsage());
+    ipcMain.handle('app/getDatabaseMetrics', () => getDatabaseMetrics());
+
+    ipcMain.handle('app/getUserData', async () => await getUserSettings());
+    ipcMain.handle('app/getUserSettings', async () => await getUserSettings());
 
     ipcMain.handle(
       'app/search',
@@ -188,8 +204,8 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
         searchFilters: SearchFilters,
         value: string,
         updateSearchHistory?: boolean,
-        isPredictiveSearchEnabled?: boolean
-      ) => search(searchFilters, value, updateSearchHistory, isPredictiveSearchEnabled)
+        isSimilaritySearchEnabled?: boolean
+      ) => search(searchFilters, value, updateSearchHistory, isSimilaritySearchEnabled)
     );
 
     ipcMain.handle(
@@ -241,12 +257,8 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
 
     ipcMain.handle(
       'app/updateSongListeningData',
-      <DataType extends keyof ListeningDataTypes, Value extends ListeningDataTypes[DataType]>(
-        _: unknown,
-        songId: string,
-        dataType: DataType,
-        value: Value
-      ) => updateSongListeningData(songId, dataType, value)
+      (_: unknown, songId: string, dataType: ListeningDataEvents, value: number) =>
+        updateSongListeningData(songId, dataType, value)
     );
 
     ipcMain.handle('app/generatePalettes', generatePalettes);
@@ -286,26 +298,34 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
         artistIdsOrNames?: string[],
         sortType?: ArtistSortTypes,
         filterType?: ArtistFilterTypes,
+        start?: number,
+        end?: number,
         limit?: number
-      ) => fetchArtistData(artistIdsOrNames, sortType, filterType, limit)
+      ) => fetchArtistData(artistIdsOrNames, sortType, filterType, start, end, limit)
     );
 
     ipcMain.handle(
       'app/getGenresData',
-      (_, genreNamesOrIds?: string[], sortType?: GenreSortTypes) =>
-        getGenresInfo(genreNamesOrIds, sortType)
+      (_, genreNamesOrIds?: string[], sortType?: GenreSortTypes, start?: number, end?: number) =>
+        getGenresInfo(genreNamesOrIds, sortType, start, end)
     );
 
     ipcMain.handle(
       'app/getAlbumData',
-      (_, albumTitlesOrIds?: string[], sortType?: AlbumSortTypes) =>
-        fetchAlbumData(albumTitlesOrIds, sortType)
+      (_, albumTitlesOrIds?: string[], sortType?: AlbumSortTypes, start?: number, end?: number) =>
+        fetchAlbumData(albumTitlesOrIds, sortType, start, end)
     );
 
     ipcMain.handle(
       'app/getPlaylistData',
-      (_, playlistIds?: string[], sortType?: AlbumSortTypes, onlyMutablePlaylists = false) =>
-        sendPlaylistData(playlistIds, sortType, onlyMutablePlaylists)
+      (
+        _,
+        playlistIds?: string[],
+        sortType?: AlbumSortTypes,
+        start?: number,
+        end?: number,
+        onlyMutablePlaylists = false
+      ) => sendPlaylistData(playlistIds, sortType, start, end, onlyMutablePlaylists)
     );
 
     ipcMain.handle('app/getArtistDuplicates', (_, artistName: string) =>
@@ -328,6 +348,10 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       'app/resolveFeaturingArtists',
       (_, songId: string, featArtistNames: string[], removeFeatInfoInTitle?: boolean) =>
         resolveFeaturingArtists(songId, featArtistNames, removeFeatInfoInTitle)
+    );
+
+    ipcMain.handle('app/getQueueInfo', (_, queueType: QueueTypes, id: string) =>
+      getQueueInfo(queueType, id)
     );
 
     ipcMain.handle(

@@ -3,23 +3,26 @@ import { useTranslation } from 'react-i18next';
 import Dropdown from '../../Dropdown';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import i18n, { supportedLanguagesDropdownOptions } from '../../../i18n';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { useQuery } from '@tanstack/react-query';
+import { settingsQuery } from '@renderer/queries/settings';
 
 const LanguageSettings = () => {
   const { t } = useTranslation();
-  const userData = useStore(store, (state) => state.userData);
+  const { data: userSettings } = useQuery(settingsQuery.all);
 
   const { addNewNotifications } = useContext(AppUpdateContext);
-  const appLang = userData?.language || 'en';
+  const appLang = userSettings?.language || 'en';
 
   return (
-    <li className="main-container performance-settings-container mb-16">
-      <div className="title-container mb-4 mt-1 flex items-center text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+    <li
+      className="main-container performance-settings-container mb-16"
+      id="language-settings-container"
+    >
+      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center text-2xl font-medium">
         <span className="material-icons-round-outlined mr-2 leading-none">translate</span>
         <span>{t('settingsPage.language')}</span>
       </div>
-      <ul className="list-disc pl-6 marker:bg-background-color-3 dark:marker:bg-background-color-3">
+      <ul className="marker:bg-background-color-3 dark:marker:bg-background-color-3 list-disc pl-6">
         <li className="seekbar-scroll-interval mb-4">
           <div className="description">{t('settingsPage.languageDescription')}</div>
           <Dropdown

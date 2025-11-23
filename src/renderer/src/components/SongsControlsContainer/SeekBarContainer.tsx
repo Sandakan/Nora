@@ -2,7 +2,7 @@ import { useState } from 'react';
 import calculateTime from '../../utils/calculateTime';
 import SeekBarSlider from '../SeekBarSlider';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 const SeekBarContainer = () => {
   const currentSongData = useStore(store, (state) => state.currentSongData);

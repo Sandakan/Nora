@@ -1,5 +1,5 @@
 import path from 'path';
-import fs, { Dirent } from 'fs';
+import fs, { type Dirent } from 'fs';
 
 const isPathADir = (pathOrDir: string | Dirent) => {
   try {

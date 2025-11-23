@@ -1,14 +1,14 @@
 import { translate } from '@vitalets/google-translate-api';
-import { getCachedLyrics, updateCachedLyrics } from '../core/getSongLyrics';
-import parseLyrics, { INSTRUMENTAL_LYRIC_IDENTIFIER } from '../../common/parseLyrics';
-import { sendMessageToRenderer } from '../main';
+import type { RawResponse } from '@vitalets/google-translate-api/dist/cjs/types';
 import { version } from '../../../package.json';
-import logger from '../logger';
+import parseLyrics, { INSTRUMENTAL_LYRIC_IDENTIFIER } from '../../common/parseLyrics';
+import { getCachedLyrics, updateCachedLyrics } from '../core/getSongLyrics';
 import {
   getLrcLyricLinesFromParsedLyrics,
   getLrcLyricsMetadata
 } from '../core/saveLyricsToLrcFile';
-import type { RawResponse } from '@vitalets/google-translate-api/dist/cjs/types';
+import logger from '../logger';
+import { sendMessageToRenderer } from '../main';
 
 const GOOGLE_TRANSLATE_COPYRIGHT_STRING = ' Lyrics translated using Google Translate.';
 
@@ -75,40 +75,49 @@ const getTranslatedLyrics = async (languageCode: string) => {
         if (translatedLyric && 'trans' in translatedLyric) {
           const translatedText = translatedLyric.trans.trim();
 
-          if (
-            translatedText !== INSTRUMENTAL_LYRIC_IDENTIFIER &&
-            lyric.originalText !== translatedText
-          )
-            lyric.translatedTexts.push({
-              lang: translatedLang,
-              text: translatedText.replaceAll('\n', '')
-            });
+          if (translatedText !== INSTRUMENTAL_LYRIC_IDENTIFIER) {
+            const isTranslatedTextTheSame =
+              (typeof lyric.originalText === 'string' &&
+                lyric.originalText.trim() === INSTRUMENTAL_LYRIC_IDENTIFIER) ||
+              (Array.isArray(lyric.originalText) &&
+                lyric.originalText
+                  .map((x) => x.text)
+                  .join(' ')
+                  .trim() === INSTRUMENTAL_LYRIC_IDENTIFIER);
+
+            if (!isTranslatedTextTheSame) {
+              lyric.translatedTexts.push({
+                lang: translatedLang,
+                text: translatedText.replaceAll('\n', '')
+              });
+            }
+          }
         }
+
+        const lrcLyricsLines = getLrcLyricLinesFromParsedLyrics(parsedLyrics);
+        lyricsArr.push(...lrcLyricsLines);
+
+        if (cachedLyrics.lyrics.translatedLanguages) {
+          if (!cachedLyrics.lyrics.translatedLanguages.includes(translatedLang))
+            cachedLyrics.lyrics.translatedLanguages.push(translatedLang);
+        } else cachedLyrics.lyrics.translatedLanguages = [translatedLang];
+        cachedLyrics.lyrics.isTranslated = true;
+
+        const translatedLyrics = parseLyrics(lyricsArr.join('\n'));
+        const convertedLyrics = cachedLyrics.lyrics.parsedLyrics.map((line) => line.romanizedText);
+        const isRomanized = cachedLyrics.lyrics.isRomanized;
+
+        cachedLyrics.lyrics = translatedLyrics;
+        cachedLyrics.lyrics.parsedLyrics.map((line, index) => {
+          line.romanizedText = convertedLyrics[index];
+        });
+        cachedLyrics.lyrics.isRomanized = isRomanized;
+        updateCachedLyrics(() => cachedLyrics);
+
+        sendMessageToRenderer({
+          messageCode: 'LYRICS_TRANSLATION_SUCCESS'
+        });
       }
-
-      const lrcLyricsLines = getLrcLyricLinesFromParsedLyrics(parsedLyrics);
-      lyricsArr.push(...lrcLyricsLines);
-
-      if (cachedLyrics.lyrics.translatedLanguages) {
-        if (!cachedLyrics.lyrics.translatedLanguages.includes(translatedLang))
-          cachedLyrics.lyrics.translatedLanguages.push(translatedLang);
-      } else cachedLyrics.lyrics.translatedLanguages = [translatedLang];
-      cachedLyrics.lyrics.isTranslated = true;
-
-      const translatedLyrics = parseLyrics(lyricsArr.join('\n'));
-      const convertedLyrics = cachedLyrics.lyrics.parsedLyrics.map((line) => line.romanizedText);
-      const isRomanized = cachedLyrics.lyrics.isRomanized;
-
-      cachedLyrics.lyrics = translatedLyrics;
-      cachedLyrics.lyrics.parsedLyrics.map((line, index) => {
-        line.romanizedText = convertedLyrics[index];
-      });
-      cachedLyrics.lyrics.isRomanized = isRomanized;
-      updateCachedLyrics(() => cachedLyrics);
-
-      sendMessageToRenderer({
-        messageCode: 'LYRICS_TRANSLATION_SUCCESS'
-      });
     }
     return cachedLyrics;
   } catch (error) {

@@ -1,47 +1,37 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
 import Button from '../Button';
 import Img from '../Img';
 import RecentSearchResult from './RecentSearchResult';
 
 import SearchSomethingImage from '../../assets/images/svg/Flying kite_Monochromatic.svg';
+import { useSuspenseQuery } from '@tanstack/react-query';
+import { queryClient } from '@renderer/index';
+import { searchQuery } from '@renderer/queries/search';
 
 type Props = {
   searchInput: string;
-  searchResults: SearchResult;
+  searchResults?: SearchResult;
 
   updateSearchInput: (input: string) => void;
 };
 
 const SearchStartPlaceholder = (props: Props) => {
-  const { updateCurrentlyActivePageData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { searchResults, searchInput, updateSearchInput } = props;
 
-  const [recentSearchResults, setRecentSearchResults] = useState([] as string[]);
-
-  const fetchRecentSearchResults = useCallback(() => {
-    window.api.userData
-      .getUserData()
-      .then((data) => {
-        if (data && Array.isArray(data.recentSearches))
-          return setRecentSearchResults(data.recentSearches);
-        return undefined;
-      })
-      .catch((err) => console.error(err));
-  }, []);
+  const { data: recentSearchResults } = useSuspenseQuery(searchQuery.recentResults);
 
   useEffect(() => {
-    fetchRecentSearchResults();
     const manageSearchResultsUpdatesInSearchPage = (e: Event) => {
       if ('detail' in e) {
         const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
         for (let i = 0; i < dataEvents.length; i += 1) {
           const event = dataEvents[i];
-          if (event.dataType === 'userData/recentSearches') fetchRecentSearchResults();
+          if (event.dataType === 'userData/recentSearches')
+            queryClient.invalidateQueries(searchQuery.recentResults);
         }
       }
     };
@@ -49,9 +39,7 @@ const SearchStartPlaceholder = (props: Props) => {
     return () => {
       document.removeEventListener('app/dataUpdates', manageSearchResultsUpdatesInSearchPage);
     };
-  }, [fetchRecentSearchResults]);
-
-  useEffect(() => fetchRecentSearchResults(), [fetchRecentSearchResults]);
+  }, []);
 
   const recentSearchResultComponents = useMemo(
     () =>
@@ -60,31 +48,25 @@ const SearchStartPlaceholder = (props: Props) => {
             <RecentSearchResult
               key={index}
               result={result}
-              clickHandler={() => {
-                updateSearchInput(result);
-                updateCurrentlyActivePageData((currentData) => ({
-                  ...currentData,
-                  keyword: result
-                }));
-              }}
+              clickHandler={() => updateSearchInput(result)}
             />
           ))
         : [],
-    [recentSearchResults, updateCurrentlyActivePageData, updateSearchInput]
+    [recentSearchResults, updateSearchInput]
   );
 
   return (
     <>
       {searchInput.trim() === '' && (
-        <div className="search-start-placeholder active appear-from-bottom relative flex !h-full w-full flex-col items-center justify-center text-center">
+        <div className="search-start-placeholder active appear-from-bottom relative flex h-full! w-full flex-col items-center justify-center text-center">
           <Img
             src={SearchSomethingImage}
             className={
-              searchResults.songs.length === 0 &&
-              searchResults.artists.length === 0 &&
-              searchResults.albums.length === 0 &&
-              searchResults.playlists.length === 0 &&
-              searchResults.genres.length === 0 &&
+              searchResults?.songs.length === 0 &&
+              searchResults?.artists.length === 0 &&
+              searchResults?.albums.length === 0 &&
+              searchResults?.playlists.length === 0 &&
+              searchResults?.genres.length === 0 &&
               searchInput.trim() === ''
                 ? 'mb-4 w-60 max-w-full'
                 : ''
@@ -92,7 +74,7 @@ const SearchStartPlaceholder = (props: Props) => {
             alt=""
           />
 
-          <div className="description text-xl text-font-color-black dark:text-font-color-white">
+          <div className="description text-font-color-black dark:text-font-color-white text-xl">
             {t('searchPage.searchForAnythingInLibrary')}
           </div>
           <div className="recent-search-results-container mt-4 flex w-[clamp(12.5rem,90%,50rem)] flex-wrap items-center justify-center">
@@ -101,7 +83,7 @@ const SearchStartPlaceholder = (props: Props) => {
           {recentSearchResultComponents.length > 0 && (
             <Button
               label="clear search history"
-              className="!m-0 !mt-4 !rounded-none !border-0 !p-0 !text-font-color-highlight outline-1 outline-offset-1 hover:underline focus-visible:!outline dark:!text-dark-font-color-highlight/75"
+              className="text-font-color-highlight! dark:text-dark-font-color-highlight/75! m-0! mt-4! rounded-none! border-0! p-0! outline-offset-1 hover:underline focus-visible:outline!"
               clickHandler={(_, setIsDisabled) => {
                 setIsDisabled(true);
                 window.api.search.clearSearchHistory().catch((err) => {

@@ -1,5 +1,3 @@
-/* eslint-disable jsx-a11y/no-noninteractive-tabindex */
-
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import {
@@ -35,7 +33,10 @@ import Button from '../Button';
 
 import { appPreferences } from '../../../../../package.json';
 import { useStore } from '@tanstack/react-store';
-import { store } from '../../store';
+import { store } from '../../store/store';
+import NavLink from '../NavLink';
+import { useNavigate } from '@tanstack/react-router';
+import { useQueueOperations } from '../../hooks/useQueueOperations';
 
 interface SongProp {
   songId: string;
@@ -71,12 +72,10 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
     (state) => state.multipleSelectionsData.isEnabled
   );
   const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
-  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
 
   const {
     playSong,
     updateContextMenuData,
-    changeCurrentActivePage,
     updateQueueData,
     changePromptMenuData,
     addNewNotifications,
@@ -86,6 +85,10 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
     createQueue
   } = useContext(AppUpdateContext);
   const { t } = useTranslation();
+  const navigate = useNavigate();
+
+  // Queue operations for context menu actions
+  const { addToNext, addToEnd } = useQueueOperations();
 
   const {
     index,
@@ -180,7 +183,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
               name={artist.name}
               className={`${
                 (currentSongData.songId === songId || isAMultipleSelection) &&
-                'dark:!text-font-color-black'
+                'dark:text-font-color-black!'
               }`}
             />
           ];
@@ -195,36 +198,10 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [artists, currentSongData.songId, isAMultipleSelection, songId]);
 
-  const goToSongInfoPage = useCallback(() => {
-    if (
-      currentlyActivePage.pageTitle !== 'SongInfo' &&
-      currentlyActivePage?.data?.songId !== songId
-    )
-      changeCurrentActivePage('SongInfo', {
-        songId
-      });
-  }, [
-    changeCurrentActivePage,
-    currentlyActivePage?.data?.songId,
-    currentlyActivePage.pageTitle,
-    songId
-  ]);
-
-  const goToAlbumInfoPage = useCallback(() => {
-    if (
-      album?.albumId &&
-      currentlyActivePage.pageTitle !== 'AlbumInfo' &&
-      currentlyActivePage?.data?.albumId !== album.albumId
-    )
-      changeCurrentActivePage('AlbumInfo', {
-        albumId: album.albumId
-      });
-  }, [
-    album?.albumId,
-    changeCurrentActivePage,
-    currentlyActivePage?.data?.albumId,
-    currentlyActivePage.pageTitle
-  ]);
+  const goToSongInfoPage = useCallback(
+    () => navigate({ to: '/main-player/songs/$songId', params: { songId } }),
+    [navigate, songId]
+  );
 
   const contextMenuItems: ContextMenuItem[] = useMemo(() => {
     const isMultipleSelectionsEnabled =
@@ -264,29 +241,8 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
         iconName: 'shortcut',
         handlerFunction: () => {
           if (isMultipleSelectionsEnabled) {
-            let currentSongIndex =
-              queue.currentSongIndex ?? queue.queue.indexOf(currentSongData.songId);
-            const duplicateIds: string[] = [];
-
-            const newQueue = queue.queue.filter((id) => {
-              const isADuplicate = songIds.includes(id);
-              if (isADuplicate) duplicateIds.push(id);
-
-              return !isADuplicate;
-            });
-
-            for (const duplicateId of duplicateIds) {
-              const duplicateIdPosition = queue.queue.indexOf(duplicateId);
-
-              if (
-                duplicateIdPosition !== -1 &&
-                duplicateIdPosition < currentSongIndex &&
-                currentSongIndex - 1 >= 0
-              )
-                currentSongIndex -= 1;
-            }
-            newQueue.splice(currentSongIndex + 1, 0, ...songIds);
-            updateQueueData(currentSongIndex, newQueue, undefined, false);
+            // Add multiple songs to play next (keeps duplicates)
+            addToNext(songIds, { removeDuplicates: false });
             addNewNotifications([
               {
                 id: `${title}PlayNext`,
@@ -297,18 +253,8 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
               }
             ]);
           } else {
-            const newQueue = queue.queue.filter((id) => id !== songId);
-            const duplicateSongIndex = queue.queue.indexOf(songId);
-
-            const currentSongIndex =
-              queue.currentSongIndex &&
-              duplicateSongIndex !== -1 &&
-              duplicateSongIndex < queue.currentSongIndex
-                ? queue.currentSongIndex - 1
-                : undefined;
-
-            newQueue.splice(newQueue.indexOf(currentSongData.songId) + 1 || 0, 0, songId);
-            updateQueueData(currentSongIndex, newQueue, undefined, false);
+            // Add single song to play next (keeps duplicates)
+            addToNext([songId], { removeDuplicates: false });
             addNewNotifications([
               {
                 id: `${title}PlayNext`,
@@ -325,7 +271,8 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
         iconName: 'queue',
         handlerFunction: () => {
           if (isMultipleSelectionsEnabled) {
-            updateQueueData(undefined, [...queue.queue, ...songIds], false);
+            // Add multiple songs to end (keeps duplicates)
+            addToEnd(songIds, { removeDuplicates: false });
             addNewNotifications([
               {
                 id: `${songIds.length}AddedToQueueFromMultiSelection`,
@@ -336,7 +283,8 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
               }
             ]);
           } else {
-            updateQueueData(undefined, [...queue.queue, songId], false);
+            // Add single song to end (keeps duplicates)
+            addToEnd([songId], { removeDuplicates: false });
             addNewNotifications([
               {
                 id: `${title}AddedToQueue`,
@@ -436,8 +384,9 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
         iconName: 'album',
         handlerFunction: () =>
           album &&
-          changeCurrentActivePage('AlbumInfo', {
-            albumId: album?.albumId
+          navigate({
+            to: '/main-player/albums/$albumId',
+            params: { albumId: album.albumId }
           }),
         isDisabled: !album
       },
@@ -445,12 +394,14 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
         label: t('song.editSongTags'),
         class: 'edit',
         iconName: 'edit',
-        handlerFunction: () =>
-          changeCurrentActivePage('SongTagsEditor', {
-            songId,
-            songArtworkPath: artworkPaths.artworkPath,
-            songPath: path
-          }),
+        handlerFunction: () => {
+          // TODO: Implement song tags editor navigation
+          // changeCurrentActivePage('SongTagsEditor', {
+          //   songId,
+          //   songArtworkPath: artworkPaths.artworkPath,
+          //   songPath: path
+          // });
+        },
         isDisabled: isMultipleSelectionsEnabled
       },
       {
@@ -529,8 +480,8 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
     handlePlayBtnClick,
     toggleMultipleSelections,
     createQueue,
-    queue.currentSongIndex,
-    queue.queue,
+    queue.position,
+    queue.songIds,
     currentSongData.songId,
     currentSongData.isAFavorite,
     updateQueueData,
@@ -543,7 +494,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
     changePromptMenuData,
     isMultipleSelectionEnabled,
     updateMultipleSelections,
-    changeCurrentActivePage,
+    navigate,
     path,
     localStorageData?.preferences.doNotShowBlacklistSongConfirm
   ]);
@@ -570,32 +521,31 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
       data-index={index}
       {...provided?.draggableProps}
       {...provided?.dragHandleProps}
-      className={`${songId} group relative mb-2 mr-4 flex h-[3.25rem] w-[98%] overflow-hidden rounded-lg p-[0.2rem] px-2 outline-1 -outline-offset-2 transition-[background,color,opacity] ease-in-out focus-visible:!outline ${
+      className={`${songId} group relative mr-4 mb-2 flex h-[3.25rem] w-[98%] overflow-hidden rounded-lg p-[0.2rem] px-2 -outline-offset-2 transition-[background,color,opacity] ease-in-out focus-visible:!outline ${
         currentSongData.songId === songId || isAMultipleSelection
           ? bodyBackgroundImage
-            ? `bg-background-color-3/70 text-font-color-black shadow-lg backdrop-blur-md dark:bg-dark-background-color-3/70`
-            : 'bg-background-color-3 text-font-color-black shadow-lg dark:bg-dark-background-color-3'
+            ? `bg-background-color-3/70 text-font-color-black dark:bg-dark-background-color-3/70 shadow-lg backdrop-blur-md`
+            : 'bg-background-color-3 text-font-color-black dark:bg-dark-background-color-3 shadow-lg'
           : bodyBackgroundImage
-            ? `bg-background-color-2/70 backdrop-blur-md hover:!bg-background-color-2 dark:bg-dark-background-color-2/70 dark:hover:!bg-dark-background-color-2`
+            ? `bg-background-color-2/70 hover:bg-background-color-2! dark:bg-dark-background-color-2/70 dark:hover:bg-dark-background-color-2! backdrop-blur-md`
             : `odd:bg-background-color-2/70 hover:!bg-background-color-2 dark:odd:bg-dark-background-color-2/50 dark:hover:!bg-dark-background-color-2 ${
                 (index + 1) % 2 === 1
-                  ? '!bg-background-color-2/70 dark:!bg-dark-background-color-2/50'
-                  : '!bg-background-color-1 dark:!bg-dark-background-color-1'
+                  ? 'bg-background-color-2/70! dark:bg-dark-background-color-2/50!'
+                  : 'bg-background-color-1! dark:bg-dark-background-color-1!'
               }`
-      } ${!isAMultipleSelection && isBlacklisted && '!opacity-30'}`}
+      } ${!isAMultipleSelection && isBlacklisted && 'opacity-30!'}`}
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();
         updateContextMenuData(true, contextMenuItems, e.pageX, e.pageY, contextMenuItemData);
       }}
       onClick={(e) => {
-        clickTimeoutRef.current = setTimeout(() => {
-          if (e.getModifierState('Shift') === true && selectAllHandler) selectAllHandler(songId);
-          else if (e.getModifierState('Control') === true && !isMultipleSelectionEnabled)
-            toggleMultipleSelections(!isAMultipleSelection, 'songs', [songId]);
-          else if (isMultipleSelectionEnabled && multipleSelectionsData.selectionType === 'songs')
-            updateMultipleSelections(songId, 'songs', isAMultipleSelection ? 'remove' : 'add');
-        }, 100);
+        e.preventDefault();
+        if (e.getModifierState('Shift') === true && selectAllHandler) selectAllHandler(songId);
+        else if (e.getModifierState('Control') === true && !isMultipleSelectionEnabled)
+          toggleMultipleSelections(!isAMultipleSelection, 'songs', [songId]);
+        else if (isMultipleSelectionEnabled && multipleSelectionsData.selectionType === 'songs')
+          updateMultipleSelections(songId, 'songs', isAMultipleSelection ? 'remove' : 'add');
       }}
       onDoubleClick={() => {
         if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
@@ -605,11 +555,11 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
     >
       <div
         className={`song-cover-and-play-btn-container flex w-[clamp(6rem,15%,9rem)] shrink-0 items-center justify-center ${
-          !isIndexingSongs && '!w-[clamp(4rem,10%,6rem)]'
+          !isIndexingSongs && 'w-[clamp(4rem,10%,6rem)]!'
         }`}
       >
         {isMultipleSelectionEnabled && multipleSelectionsData.selectionType === 'songs' ? (
-          <div className="relative mx-1 flex h-fit items-center rounded-lg bg-background-color-1 p-1 text-font-color-highlight dark:bg-dark-background-color-1 dark:text-dark-background-color-3">
+          <div className="bg-background-color-1 text-font-color-highlight dark:bg-dark-background-color-1 dark:text-dark-background-color-3 relative mx-1 flex h-fit items-center rounded-lg p-1">
             <MultipleSelectionCheckbox id={songId} selectionType="songs" />
           </div>
         ) : isBlacklisted ? (
@@ -626,8 +576,8 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
             title={t('notifications.songBlacklisted', { title })}
           >
             <span
-              className={`material-icons-round mx-2 text-2xl text-font-color-black dark:text-font-color-white ${
-                currentSongData.songId === songId && 'dark:!text-font-color-black'
+              className={`material-icons-round text-font-color-black dark:text-font-color-white mx-2 text-2xl ${
+                currentSongData.songId === songId && 'dark:text-font-color-black!'
               } `}
             >
               block
@@ -636,7 +586,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
         ) : isIndexingSongs ||
           (trackNo && localStorageData.preferences.showTrackNumberAsSongIndex) ? (
           <div
-            className={`relative mx-1 flex items-center justify-center rounded-2xl bg-background-color-1 px-3 py-1 text-center text-font-color-highlight group-even:bg-background-color-2/75 group-hover:bg-background-color-1 dark:bg-dark-background-color-1 dark:text-dark-background-color-3 dark:group-even:bg-dark-background-color-2/50 dark:group-hover:bg-dark-background-color-1 ${
+            className={`bg-background-color-1 text-font-color-highlight group-even:bg-background-color-2/75 group-hover:bg-background-color-1 dark:bg-dark-background-color-1 dark:text-dark-background-color-3 dark:group-even:bg-dark-background-color-2/50 dark:group-hover:bg-dark-background-color-1 relative mx-1 flex items-center justify-center rounded-2xl px-3 py-1 text-center ${
               index < 10
                 ? 'min-w-[1.75rem]'
                 : index < 100
@@ -646,7 +596,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
                     : 'min-w-[3.75rem]'
             }`}
           >
-            <span className="min-w-2 text-sm font-medium leading-tight">
+            <span className="min-w-2 text-sm leading-tight font-medium">
               {trackNo ?? index + 1}
             </span>
           </div>
@@ -654,17 +604,17 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
           ''
         )}
         <div
-          className={`song-cover-container relative ml-2 mr-4 flex h-[90%] min-w-12 flex-row items-center justify-center overflow-hidden rounded-md ${
+          className={`song-cover-container relative mr-4 ml-2 flex h-[90%] min-w-12 flex-row items-center justify-center overflow-hidden rounded-md ${
             (isIndexingSongs || isMultipleSelectionEnabled || isBlacklisted) && 'sm:hidden'
           }`}
         >
-          <div className="play-btn-container absolute left-1/2 top-1/2 z-10 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center">
+          <div className="play-btn-container absolute top-1/2 left-1/2 z-10 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center">
             <Button
-              className="!m-0 !rounded-none !border-0 bg-transparent !p-0 outline-1 outline-offset-1 hover:bg-transparent focus-visible:!outline dark:bg-transparent dark:hover:bg-transparent"
-              iconClassName={`!text-3xl text-font-color-white text-opacity-0 !leading-none ${
-                currentSongData.songId === songId && 'text-opacity-100'
-              } group-focus-within:text-opacity-100 group-hover:text-opacity-100 ${
-                isSongPlaying && '!text-font-color-white/75'
+              className="m-0! rounded-none! border-0! bg-transparent p-0! outline-offset-1 transition-colors! hover:bg-transparent focus-visible:outline! dark:bg-transparent dark:hover:bg-transparent"
+              iconClassName={`!text-3xl text-font-color-white/0 !leading-none ${
+                currentSongData.songId === songId && 'text-font-color-white/100'
+              } group-focus-within:text-font-color-white/100 group-hover:text-font-color-white/100 ${
+                isSongPlaying && 'text-font-color-white/75!'
               }`}
               clickHandler={handlePlayBtnClick}
               iconName={isSongPlaying ? 'pause_circle' : 'play_circle'}
@@ -674,7 +624,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
             src={artworkPaths?.optimizedArtworkPath || DefaultSongCover}
             loading="eager"
             alt="Song cover"
-            className={`aspect-square max-h-full min-w-full object-contain py-[0.1rem] transition-[filter] duration-300 group-focus-within:brightness-50 group-hover:brightness-50 ${
+            className={`aspect-square max-h-full min-w-full object-contain py-[0.1rem] transition-[filter]! duration-300 group-focus-within:brightness-50 group-hover:brightness-50 ${
               isSongPlaying ? 'brightness-50' : ''
             }`}
             enableImgFadeIns={false}
@@ -682,34 +632,34 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
         </div>
       </div>
       <div
-        className={`song-info-container grid grow grid-cols-[35%_2fr_1fr_minmax(4rem,5rem)_minmax(4.5rem,6.5rem)] items-center gap-3 text-font-color-black lg:grid-cols-[40%_1fr_minmax(4rem,5rem)_minmax(4.5rem,6.5rem)] lg:!gap-0 sm:grid-cols-[45%_1fr_minmax(4.5rem,6rem)] sm:gap-2 dark:text-font-color-white ${
+        className={`song-info-container text-font-color-black dark:text-font-color-white grid grow grid-cols-[35%_2fr_1fr_minmax(4rem,5rem)_minmax(4.5rem,6.5rem)] items-center gap-3 sm:grid-cols-[45%_1fr_minmax(4.5rem,6rem)] sm:gap-2 lg:grid-cols-[40%_1fr_minmax(4rem,5rem)_minmax(4.5rem,6.5rem)] lg:!gap-0 ${
           (currentSongData.songId === songId || isAMultipleSelection) &&
-          'dark:!text-font-color-black'
+          'dark:text-font-color-black!'
         }`}
       >
-        <div
-          className="song-title truncate text-base font-normal outline-1 outline-offset-1 transition-none focus-visible:!outline"
-          tabIndex={0}
-          onKeyDown={(e) => e.key === 'Enter' && goToSongInfoPage()}
+        <NavLink
+          to="/main-player/songs/$songId"
+          params={{ songId }}
           title={title}
+          className="song-title truncate text-base font-normal outline-offset-1 transition-none focus-visible:outline!"
+          disabled={isMultipleSelectionEnabled}
         >
-          {title}
-        </div>
+          {window.api.properties.isInDevelopment && `(${songId})`} {title}
+        </NavLink>
         <div className="song-artists w-full truncate text-xs font-normal transition-none">
           {songArtists}
         </div>
-        <div className="song-album w-full truncate text-xs transition-none lg:hidden md:hidden sm:hidden">
+        <div className="song-album w-full truncate text-xs transition-none sm:hidden md:hidden lg:hidden">
           {album?.name ? (
-            <span
-              className="cursor-pointer outline-1 -outline-offset-1 hover:underline focus-visible:!outline"
-              tabIndex={0}
+            <NavLink
+              to="/main-player/albums/$albumId"
+              params={{ albumId: album?.albumId }}
+              disabled={album?.albumId === undefined || isMultipleSelectionEnabled}
+              className="cursor-pointer -outline-offset-1 hover:underline focus-visible:outline!"
               title={album.name}
-              role="button"
-              onClick={goToAlbumInfoPage}
-              onKeyDown={(e) => e.key === 'Enter' && goToAlbumInfoPage()}
             >
               {album.name}
-            </span>
+            </NavLink>
           ) : (
             t('common.unknownAlbum')
           )}
@@ -719,20 +669,20 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
             ? songId
             : (year ?? '----')}
         </div>
-        <div className="song-duration flex !w-full items-center justify-between pl-2 pr-4 text-center transition-none sm:pr-1">
+        <div className="song-duration flex w-full! items-center justify-between pr-4 pl-2 text-center transition-none sm:pr-1">
           <Button
-            className="!mr-0 mt-1 !rounded-none !border-0 bg-transparent !p-0 !text-inherit outline-1 outline-offset-1 focus-visible:!outline dark:bg-transparent"
+            className="mt-1 mr-0! rounded-none! border-0! bg-transparent p-0! text-inherit! outline-offset-1 focus-visible:outline! dark:bg-transparent"
             iconName="favorite"
             iconClassName={`${
               isAFavorite ? 'material-icons-round' : 'material-icons-round-outlined'
             } !leading-none !text-xl !font-light md:hidden ${
               isAFavorite
                 ? currentSongData.songId === songId || isAMultipleSelection
-                  ? '!text-font-color-black dark:!text-font-color-black'
-                  : '!text-font-color-highlight dark:!text-dark-background-color-3'
+                  ? 'text-font-color-black! dark:text-font-color-black!'
+                  : 'text-font-color-highlight! dark:text-dark-background-color-3!'
                 : currentSongData.songId === songId || isAMultipleSelection
-                  ? '!text-font-color-black dark:!text-font-color-black'
-                  : '!text-font-color-highlight dark:!text-dark-background-color-3'
+                  ? 'text-font-color-black! dark:text-font-color-black!'
+                  : 'text-font-color-highlight! dark:text-dark-background-color-3!'
             }`}
             tooltipLabel={t(`song.${isAFavorite ? 'likedThisSong' : 'dislikedThisSong'}`)}
             clickHandler={(e) => {

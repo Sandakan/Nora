@@ -1,7 +1,7 @@
 import { type ReactElement, lazy, useCallback, useContext } from 'react';
 import { AppUpdateContext } from '../contexts/AppUpdateContext';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 const OpenLinkConfirmPrompt = lazy(() => import('./OpenLinkConfirmPrompt'));
 
@@ -48,7 +48,7 @@ const Hyperlink = (props: HyperlinkProp) => {
 
   return (
     <span
-      className={`about-link w-fit cursor-pointer font-medium text-font-color-highlight-2 underline outline-1 outline-offset-1 focus:!outline dark:text-dark-font-color-highlight-2 ${className}`}
+      className={`about-link text-font-color-highlight-2 dark:text-dark-font-color-highlight-2 w-fit cursor-pointer font-medium underline outline-offset-1 focus:outline! ${className}`}
       title={link}
       onClick={openLinkConfirmPrompt}
       role="link"

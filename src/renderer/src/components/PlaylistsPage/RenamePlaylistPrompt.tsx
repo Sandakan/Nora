@@ -41,7 +41,7 @@ const RenamePlaylistPrompt = (props: Props) => {
       <input
         type="text"
         name="playlistName"
-        className="playlist-name-input w-fit min-w-[400px] max-w-[75%] rounded-2xl border-[transparent] !bg-background-color-2 px-6 py-3 text-lg text-font-color-black outline-none dark:!bg-dark-background-color-2 dark:text-font-color-white"
+        className="playlist-name-input bg-background-color-2! text-font-color-black dark:bg-dark-background-color-2! dark:text-font-color-white w-fit max-w-[75%] min-w-[400px] rounded-2xl border-[transparent] px-6 py-3 text-lg outline-hidden"
         placeholder={t('renamePlaylistPrompt.playlistName')}
         value={input}
         onChange={(e) => setInput(e.target.value)}
@@ -54,7 +54,7 @@ const RenamePlaylistPrompt = (props: Props) => {
       <Button
         label={t('playlist.renamePlaylist')}
         iconName="edit"
-        className="!mr-0 mt-6 cursor-pointer justify-center !bg-background-color-3 p-2 !px-8 !py-3 text-lg !text-font-color-black dark:!bg-dark-background-color-3 dark:text-font-color-black"
+        className="bg-background-color-3! text-font-color-black! dark:bg-dark-background-color-3! dark:text-font-color-black mt-6 mr-0! cursor-pointer justify-center p-2 px-8! py-3! text-lg"
         clickHandler={() => renamePlaylist(input)}
       />
     </div>

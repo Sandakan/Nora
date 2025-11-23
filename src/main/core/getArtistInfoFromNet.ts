@@ -1,14 +1,16 @@
 import { default as stringSimilarity, ReturnTypeEnums } from 'didyoumean2';
 
-import { getArtistsData, setArtistsData } from '../filesystem';
 import logger from '../logger';
 import generatePalette from '../other/generatePalette';
 import { checkIfConnectedToInternet, dataUpdateEvent } from '../main';
-import { getArtistArtworkPath } from '../fs/resolveFilePaths';
 import getArtistInfoFromLastFM from '../other/lastFm/getArtistInfoFromLastFM';
 
 import type { DeezerArtistInfo, DeezerArtistInfoApi } from '../../types/deezer_api';
 import type { SimilarArtist } from '../../types/last_fm_artist_info_api';
+import { getArtistById, getArtistsByName } from '@main/db/queries/artists';
+import { convertToArtist } from '../../common/convert';
+import { linkArtworksToArtist, saveArtworks } from '@main/db/queries/artworks';
+import { db } from '@main/db/db';
 
 const DEEZER_BASE_URL = 'https://api.deezer.com/';
 
@@ -109,86 +111,119 @@ const getArtistArtworksFromNet = async (artist: SavableArtist) => {
   return undefined;
 };
 
-const getArtistDataFromSavableArtistData = (artist: SavableArtist): Artist => {
-  const artworkPaths = getArtistArtworkPath(artist.artworkName);
-  return { ...artist, artworkPaths };
-};
-
 type ArtistInfoPayload = Awaited<ReturnType<typeof getArtistInfoFromLastFM>>;
 
-const getSimilarArtistsFromArtistInfo = (data: ArtistInfoPayload, artists: SavableArtist[]) => {
-  const unparsedsimilarArtistData = data.artist?.similar?.artist;
-  const availableArtists: SimilarArtist[] = [];
-  const unAvailableArtists: SimilarArtist[] = [];
+const getSimilarArtistsFromArtistInfo = async (data: ArtistInfoPayload) => {
+  const unparsedSimilarArtistData = data.artist?.similar?.artist || [];
 
-  if (Array.isArray(unparsedsimilarArtistData)) {
-    similarArtistLoop: for (const unparsedSimilarArtist of unparsedsimilarArtistData) {
-      for (const artist of artists) {
-        if (artist.name === unparsedSimilarArtist.name) {
-          availableArtists.push({
-            name: artist.name,
-            url: unparsedSimilarArtist.url,
-            artistData: getArtistDataFromSavableArtistData(artist)
-          });
-          continue similarArtistLoop;
-        }
-      }
-      unAvailableArtists.push({
-        name: unparsedSimilarArtist.name,
-        url: unparsedSimilarArtist.url
-      });
-    }
-  }
+  const names = unparsedSimilarArtistData.map((a) => a.name);
+
+  const similarArtists = await getArtistsByName(names);
+
+  const groupedArtistsByAvailability = Object.groupBy(unparsedSimilarArtistData, (a) =>
+    similarArtists?.some((b) => b.name === a.name) ? 'available' : 'unavailable'
+  );
+
+  const { available = [], unavailable = [] } = groupedArtistsByAvailability;
+
+  const availableArtists: SimilarArtist[] = available.map((a) => {
+    const data = similarArtists.find((similarArtist) => similarArtist.name === a.name)!;
+
+    return {
+      name: a.name,
+      url: a.url,
+      artistData: convertToArtist(data)
+    };
+  });
+  const unAvailableArtists: SimilarArtist[] = unavailable.map((a) => ({
+    name: a.name,
+    url: a.url
+  }));
 
   return { availableArtists, unAvailableArtists };
+};
+
+const saveArtistOnlineArtworks = async (artistId: string, artistArtworks: OnlineArtistArtworks) => {
+  const artworks: { path: string; width: number; height: number }[] = [];
+
+  if (artistArtworks.picture_small) {
+    artworks.push({
+      path: artistArtworks.picture_small,
+      width: 56,
+      height: 56
+    });
+  }
+
+  if (artistArtworks.picture_medium) {
+    artworks.push({
+      path: artistArtworks.picture_medium,
+      width: 250,
+      height: 250
+    });
+  }
+
+  if (artistArtworks.picture_xl) {
+    artworks.push({
+      path: artistArtworks.picture_xl,
+      width: 1000,
+      height: 1000
+    });
+  }
+
+  await db.transaction(async (trx) => {
+    const savedArtworks = await saveArtworks(
+      artworks.map((artwork) => ({ ...artwork, source: 'REMOTE' })),
+      trx
+    );
+
+    await linkArtworksToArtist(
+      savedArtworks.map((artwork) => ({
+        artistId: Number(artistId),
+        artworkId: artwork.id
+      })),
+      trx
+    );
+  });
 };
 
 const getArtistInfoFromNet = async (artistId: string): Promise<ArtistInfoFromNet> => {
   logger.debug(
     `Requested artist information related to an artist with id ${artistId} from the internet`
   );
-  const artists = getArtistsData();
-  if (Array.isArray(artists) && artists.length > 0) {
-    for (let x = 0; x < artists.length; x += 1) {
-      if (artists[x].artistId === artistId) {
-        const artist = artists[x];
-        const [artistArtworks, artistInfo] = await Promise.all([
-          getArtistArtworksFromNet(artist),
-          getArtistInfoFromLastFM(artist.name)
-        ]);
+  const artistData = await getArtistById(Number(artistId));
 
-        if (artistArtworks && artistInfo) {
-          const artistPalette = await generatePalette(artistArtworks.picture_medium);
-          const similarArtists = getSimilarArtistsFromArtistInfo(artistInfo, artists);
-
-          if (!artist.onlineArtworkPaths) {
-            artists[x].onlineArtworkPaths = artistArtworks;
-            setArtistsData(artists);
-            dataUpdateEvent('artists/artworks');
-          }
-          return {
-            artistArtworks,
-            artistBio: artistInfo.artist.bio.summary,
-            artistPalette,
-            similarArtists,
-            tags: artistInfo.artist?.tags?.tag || []
-          };
-        }
-
-        const errMessage = `Failed to fetch artist info or artworks from deezer network from last-fm network.`;
-        logger.error(errMessage, { artistId, artistInfo, artistArtworks });
-        throw new Error(errMessage);
-      }
-    }
-    logger.debug(
-      `No artists found with the given name ${artistId} when trying to fetch artist info from the internet.`
-    );
-    throw new Error(`no artists found with the given name ${artistId}`);
+  if (!artistData) {
+    logger.error(`Artist with id of ${artistId} not found in the database.`);
+    throw new Error('ARTIST_NOT_FOUND' as MessageCodes);
   }
-  logger.debug(
-    `ERROR OCCURRED WHEN SEARCHING FOR ARTISTS IN getArtistInfoFromNet FUNCTION. ARTISTS ARRAY IS EMPTY.`
-  );
-  throw new Error('NO_ARTISTS_FOUND' as MessageCodes);
+
+  const artist = convertToArtist(artistData);
+
+  const [artistArtworks, artistInfo] = await Promise.all([
+    getArtistArtworksFromNet(artist),
+    getArtistInfoFromLastFM(artist.name)
+  ]);
+
+  if (artistArtworks && artistInfo) {
+    const artistPalette = await generatePalette(artistArtworks.picture_medium);
+    const similarArtists = await getSimilarArtistsFromArtistInfo(artistInfo);
+
+    if (!artist.onlineArtworkPaths) {
+      await saveArtistOnlineArtworks(artistId, artistArtworks);
+      dataUpdateEvent('artists/artworks');
+    }
+    return {
+      artistArtworks,
+      artistBio: artistInfo.artist.bio.summary,
+      artistPalette,
+      similarArtists,
+      tags: artistInfo.artist?.tags?.tag || []
+    };
+  }
+
+  const errMessage = `Failed to fetch artist info or artworks from deezer network from last-fm network.`;
+  logger.error(errMessage, { artistId, artistInfo, artistArtworks });
+  throw new Error(errMessage);
 };
 
 export default getArtistInfoFromNet;

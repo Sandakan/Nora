@@ -1,14 +1,11 @@
+import { type CSSProperties, type ForwardedRef, type ReactNode, forwardRef, useMemo } from 'react';
 import {
-  type CSSProperties,
-  type ForwardedRef,
-  type ReactNode,
-  forwardRef,
-  useContext,
-  useMemo
-} from 'react';
-import { type GridComponents, VirtuosoGrid, type VirtuosoHandle } from 'react-virtuoso';
-import { AppUpdateContext } from '../contexts/AppUpdateContext';
-import debounce from '../utils/debounce';
+  type GridComponents,
+  VirtuosoGrid,
+  type VirtuosoHandle,
+  type ListRange
+} from 'react-virtuoso';
+import { useDebouncedCallback } from '@tanstack/react-pacer';
 
 type Props<T extends object> = {
   data: T[];
@@ -22,11 +19,12 @@ type Props<T extends object> = {
   useWindowScroll?: boolean;
   style?: CSSProperties;
   noRangeUpdates?: boolean;
+  onChange?: (range: ListRange) => void;
+  onDebouncedScroll?: (range: ListRange) => void;
 };
 
+const PRELOADED_ITEM_THROUGH_VIEWPORT_COUNT = 5;
 const Grid = <T extends object>(props: Props<T>, ref) => {
-  const { updateCurrentlyActivePageData } = useContext(AppUpdateContext);
-
   const {
     data,
     fixedItemHeight,
@@ -37,8 +35,18 @@ const Grid = <T extends object>(props: Props<T>, ref) => {
     scrollerRef,
     useWindowScroll = false,
     style: mainStyle,
-    noRangeUpdates = false
+    onChange,
+    onDebouncedScroll
   } = props;
+
+  const handleDebouncedScroll = useDebouncedCallback(
+    (range: ListRange) => {
+      if (onDebouncedScroll) {
+        onDebouncedScroll(range);
+      }
+    },
+    { wait: 2500 }
+  );
 
   const gridComponents = useMemo(
     () => ({
@@ -82,22 +90,22 @@ const Grid = <T extends object>(props: Props<T>, ref) => {
       }}
       // className="pb-4"
       data={data}
-      overscan={fixedItemHeight * 5}
+      overscan={25}
       useWindowScroll={useWindowScroll}
       components={{ ...gridComponents, ...components }}
       ref={ref}
       initialTopMostItemIndex={{ index: scrollTopOffset ?? 0 }}
       scrollerRef={scrollerRef}
+      increaseViewportBy={{
+        top: fixedItemHeight * PRELOADED_ITEM_THROUGH_VIEWPORT_COUNT,
+        bottom: fixedItemHeight * PRELOADED_ITEM_THROUGH_VIEWPORT_COUNT
+      }}
       rangeChanged={(range) => {
-        if (!noRangeUpdates)
-          debounce(
-            () =>
-              updateCurrentlyActivePageData((currentPageData) => ({
-                ...currentPageData,
-                scrollTopOffset: range.startIndex <= 5 ? 0 : range.startIndex + 5
-              })),
-            500
-          );
+        // To fix the issue of sending incorrect startIndex due to viewport increase
+        // range.startIndex = Math.max(0, range.startIndex);
+
+        if (onChange) onChange(range);
+        handleDebouncedScroll(range);
       }}
       itemContent={itemContent}
     />

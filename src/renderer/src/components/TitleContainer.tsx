@@ -79,12 +79,12 @@ const TitleContainer = (props: Props) => {
 
   return (
     <div
-      className={`title-container mb-4 mt-1 flex items-center justify-between text-font-color-black dark:text-font-color-white ${className}`}
+      className={`title-container text-font-color-black dark:text-font-color-white mt-1 mb-4 flex items-center justify-between ${className}`}
       // ref={containerRef}
     >
       <div className="grid grid-flow-col items-center gap-5">
         <p
-          className={`text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight ${titleClassName}`}
+          className={`text-font-color-highlight dark:text-dark-font-color-highlight text-3xl font-medium ${titleClassName}`}
         >
           {title}
         </p>

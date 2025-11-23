@@ -35,13 +35,13 @@ const SelectableFolder = (props: Props) => {
     <div className="group">
       <label
         htmlFor={`${structure.path}RevealBtn`}
-        className={`mb-2 flex cursor-pointer items-center justify-between rounded-md bg-background-color-2 px-2 py-4 transition-opacity dark:bg-dark-background-color-2/50 dark:text-font-color-white ${
+        className={`bg-background-color-2 dark:bg-dark-background-color-2/50 dark:text-font-color-white mb-2 flex cursor-pointer items-center justify-between rounded-md px-2 py-4 transition-opacity ${
           !isSelected && 'opacity-30'
         }`}
       >
         <div className="flex items-center">
           <Checkbox
-            className="!mx-2 !my-0"
+            className="mx-2! my-0!"
             id={structure.path}
             isChecked={structure.isSelected ?? false}
             checkedStateUpdateFunction={(state) => updateFolders(state, structure)}
@@ -60,8 +60,8 @@ const SelectableFolder = (props: Props) => {
         </div>
         {subFolders.length > 0 && (
           <Button
-            className="!rounded-full !border-none !p-1 group-hover:bg-background-color-1 dark:group-hover:bg-dark-background-color-1"
-            iconClassName="!text-2xl !leading-none"
+            className="group-hover:bg-background-color-1 dark:group-hover:bg-dark-background-color-1 rounded-full! border-none! p-1!"
+            iconClassName="text-2xl! leading-none!"
             id={`${structure.path}RevealBtn`}
             iconName={isSubFoldersVisible ? 'arrow_drop_up' : 'arrow_drop_down'}
             clickHandler={(e) => {
@@ -72,7 +72,7 @@ const SelectableFolder = (props: Props) => {
         )}
       </label>
       {subFolders.length > 0 && isSubFoldersVisible && (
-        <div className="ml-4 mt-1 border-l-[3px] border-background-color-2 pl-4 dark:border-dark-background-color-2/50">
+        <div className="border-background-color-2 dark:border-dark-background-color-2/50 mt-1 ml-4 border-l-[3px] pl-4">
           {subFoldersComponents}
         </div>
       )}

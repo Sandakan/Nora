@@ -18,11 +18,11 @@ const NoLyrics = (props: NoLyricsProp) => {
   }, [buttons]);
 
   return (
-    <div className="no-lyrics-container flex h-full flex-col items-center justify-center text-center text-font-color-black/75 dark:text-font-color-white/60">
-      <span className="material-icons-round-outlined mb-4 text-6xl text-font-color-highlight dark:text-dark-font-color-highlight">
+    <div className="no-lyrics-container text-font-color-black/75 dark:text-font-color-white/60 flex h-full flex-col items-center justify-center text-center">
+      <span className="material-icons-round-outlined text-font-color-highlight dark:text-dark-font-color-highlight mb-4 text-6xl">
         {iconName}
       </span>
-      <p className="mb-2 text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+      <p className="text-font-color-highlight dark:text-dark-font-color-highlight mb-2 text-2xl font-medium">
         {title}
       </p>
       <p className="text-sm">{description}</p>

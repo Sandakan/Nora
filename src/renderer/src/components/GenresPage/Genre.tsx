@@ -1,5 +1,3 @@
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
 import { useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
@@ -7,8 +5,10 @@ import Img from '../Img';
 import DefaultGenreCover from '../../assets/images/webp/genre-cover-default.webp';
 import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
 import Button from '../Button';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 import { useStore } from '@tanstack/react-store';
+import { useNavigate } from '@tanstack/react-router';
+import NavLink from '../NavLink';
 
 interface GenreProp {
   index: number;
@@ -31,7 +31,6 @@ const Genre = (props: GenreProp) => {
   const queue = useStore(store, (state) => state.localStorage.queue);
 
   const {
-    changeCurrentActivePage,
     createQueue,
     updateQueueData,
     addNewNotifications,
@@ -40,13 +39,15 @@ const Genre = (props: GenreProp) => {
     updateMultipleSelections
   } = useContext(AppUpdateContext);
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const goToGenreInfoPage = useCallback(
     () =>
-      changeCurrentActivePage('GenreInfo', {
-        genreId
+      navigate({
+        to: '/main-player/genres/$genreId',
+        params: { genreId }
       }),
-    [changeCurrentActivePage, genreId]
+    [genreId, navigate]
   );
 
   const backgroundColor = useMemo(() => {
@@ -56,7 +57,7 @@ const Genre = (props: GenreProp) => {
 
       return `hsl(${hsl[0] * 360} ${hsl[1] * 100}% ${hsl[2] * 100}%)`;
     }
-    return 'hsl(0 0% 0%)';
+    return undefined;
   }, [paletteData?.DarkVibrant]);
 
   const playGenreSongs = useCallback(
@@ -292,16 +293,20 @@ const Genre = (props: GenreProp) => {
   );
 
   return (
-    <div
-      className={`genre group relative mb-6 mr-10 flex h-36 w-72 cursor-pointer items-center gap-4 overflow-hidden rounded-2xl p-4 text-background-color-2 transition-[border,border-color] dark:text-dark-background-color-2 ${className} ${
+    <NavLink
+      to="/main-player/genres/$genreId"
+      params={{ genreId }}
+      preload={isMultipleSelectionEnabled ? false : undefined}
+      className={`genre group bg-background-color-2/70 hover:bg-background-color-2! dark:bg-dark-background-color-2/70 dark:hover:bg-dark-background-color-2! text-background-color-2 dark:text-dark-background-color-2 relative mr-10 mb-6 flex h-36 w-72 cursor-pointer items-center gap-4 overflow-hidden rounded-2xl p-4 backdrop-blur-md transition-[border,border-color] ${className} ${
         isMultipleSelectionEnabled &&
         multipleSelectionsData.selectionType === 'genre' &&
         'border-4 border-transparent'
-      } ${isAMultipleSelection && '!border-font-color-highlight dark:!border-dark-font-color-highlight'}`}
+      } ${isAMultipleSelection && 'border-font-color-highlight! dark:border-dark-font-color-highlight!'}`}
       style={{
         backgroundColor
       }}
       onClick={(e) => {
+        e.preventDefault();
         if (e.getModifierState('Shift') === true && selectAllHandler) selectAllHandler(genreId);
         else if (e.getModifierState('Control') === true && !isMultipleSelectionEnabled)
           toggleMultipleSelections(!isAMultipleSelection, 'genre', [genreId]);
@@ -321,22 +326,22 @@ const Genre = (props: GenreProp) => {
           enableImgFadeIns={!isMultipleSelectionEnabled}
         />
       </div>
-      <div className="genre-info-container w-3/5 flex-grow-0">
+      <div className="genre-info-container w-3/5 grow-0">
         <Button
-          className="genre-title !m-0 !block w-full truncate !rounded-none !border-0 bg-transparent !p-0 !text-left !text-2xl text-font-color-white outline-1 outline-offset-1 hover:bg-transparent focus-visible:!outline dark:bg-transparent dark:text-font-color-white dark:hover:bg-transparent"
+          className="genre-title text-font-color-white dark:text-font-color-white m-0! block! w-full truncate rounded-none! border-0! bg-transparent p-0! text-left! text-2xl! outline-offset-1 hover:bg-transparent focus-visible:outline! dark:bg-transparent dark:hover:bg-transparent"
           label={title}
           clickHandler={goToGenreInfoPage}
         />
-        <div className="genre-no-of-songs text-sm text-font-color-white/75 dark:text-font-color-white/75">
+        <div className="genre-no-of-songs text-font-color-white/75 dark:text-font-color-white/75 text-sm">
           {t(`common.songWithCount`, {
             count: songIds.length
           })}
         </div>
         {isMultipleSelectionEnabled && multipleSelectionsData.selectionType === 'genre' && (
-          <MultipleSelectionCheckbox id={genreId} selectionType="genre" className="z-10 !mt-2" />
+          <MultipleSelectionCheckbox id={genreId} selectionType="genre" className="z-10 mt-2!" />
         )}
       </div>
-    </div>
+    </NavLink>
   );
 };
 

@@ -1,14 +1,14 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
+import { SYNCED_LYRICS_REGEX } from '@common/isLyricsSynced';
+import { store } from '@renderer/store/store';
+import { useStore } from '@tanstack/react-store';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import roundTo from '../../../../common/roundTo';
-import { syncedLyricsRegex } from './LyricsPage';
-import LyricsProgressBar from './LyricsProgressBar';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import EnhancedSyncedLyricWord from '../LyricsEditingPage/EnhancedSyncedLyricWord';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import LyricsProgressBar from './LyricsProgressBar';
 
 interface LyricProp {
   lyric: string | SyncedLyricsLineWord[];
@@ -19,9 +19,19 @@ interface LyricProp {
   isAutoScrolling?: boolean;
 }
 
+// const syncedLyricsRegex = /^\[\d+:\d{1,2}\.\d{1,3}]/gm;
+
 const lyricsScrollIntoViewEvent = new CustomEvent('lyrics/scrollIntoView', {
   detail: 'scrollingUsingScrollIntoView'
 });
+
+const getLyricText = (lyrics: string) => {
+  const match = SYNCED_LYRICS_REGEX.exec(lyrics);
+  SYNCED_LYRICS_REGEX.lastIndex = 0;
+
+  if (match && match.groups && match.groups.lyric) return match.groups.lyric.trim();
+  return lyrics;
+};
 
 const LyricLine = (props: LyricProp) => {
   const playerType = useStore(store, (state) => state.playerType);
@@ -79,7 +89,7 @@ const LyricLine = (props: LyricProp) => {
   }, [handleLyricsActivity]);
 
   const lyricString = useMemo(() => {
-    if (typeof lyric === 'string') return lyric.replaceAll(syncedLyricsRegex, '').trim();
+    if (typeof lyric === 'string') return getLyricText(lyric);
 
     const extendedLyricLines = lyric.map((extendedText, i) => {
       return (
@@ -101,8 +111,7 @@ const LyricLine = (props: LyricProp) => {
     if (translatedLyricLines.length === 0) return undefined;
 
     const translatedLyric = translatedLyricLines[0].text;
-    if (typeof translatedLyric === 'string')
-      return translatedLyric.replaceAll(syncedLyricsRegex, '').trim();
+    if (typeof translatedLyric === 'string') return getLyricText(translatedLyric);
 
     const extendedLyricLines = translatedLyric.map((extendedText, i) => {
       return (
@@ -122,8 +131,7 @@ const LyricLine = (props: LyricProp) => {
 
   const convertedLyricString = useMemo(() => {
     if (!convertedLyric || convertedLyric.length === 0) return undefined;
-    if (typeof convertedLyric === 'string')
-      return convertedLyric.replaceAll(syncedLyricsRegex, '').trim();
+    if (typeof convertedLyric === 'string') return getLyricText(convertedLyric);
 
     const extendedLyricLines = convertedLyric.map((extendedText, i) => {
       return (
@@ -159,17 +167,17 @@ const LyricLine = (props: LyricProp) => {
             })
           : undefined
       }
-      className={`highlight duration-250 z-0 mb-5 flex w-fit select-none flex-col items-center justify-center text-balance text-center text-5xl font-medium text-font-color-black transition-[transform,color,filter] first:mt-8 last:mb-4 empty:mb-16 dark:text-font-color-white ${
+      className={`highlight text-font-color-black/20 dark:text-font-color-white/20 z-0 mb-5 flex w-fit flex-col items-center justify-center text-center text-5xl font-medium text-balance transition-[transform,translate,scale,color,filter] duration-250 select-none first:mt-8 last:mb-4 empty:mb-16 ${
         syncedLyrics
           ? `cursor-pointer blur-[1px] ${
               isInRange
-                ? '!scale-100 font-medium text-font-color-highlight !text-opacity-90 !blur-0 dark:!text-dark-font-color-highlight [&>div>span]:!mr-3'
-                : 'scale-[.7] !text-opacity-20 hover:!text-opacity-75'
+                ? 'text-font-color-highlight/100! dark:text-dark-font-color-highlight/100! scale-100! font-medium blur-none! [&>div>span]:mr-3!'
+                : 'scale-75!'
             }`
-          : '!text-4xl'
-      } ${playerType === 'mini' && '!mb-2 !text-2xl !text-font-color-white'} ${
+          : 'text-font-color-black! dark:text-font-color-white! scale-100! text-4xl! font-medium blur-none! [&>div>span]:mr-3'
+      } ${playerType === 'mini' && 'text-font-color-white/20! mb-2! text-2xl!'} ${
         playerType === 'full' &&
-        '!mb-6 origin-left !items-start !justify-start !text-left !text-7xl !text-font-color-white'
+        'text-font-color-white/20! mb-6! origin-left items-start! justify-start! text-left! text-7xl!'
       }`}
       ref={lyricsRef}
       onClick={() =>
@@ -191,7 +199,7 @@ const LyricLine = (props: LyricProp) => {
               handlerFunction: () =>
                 window.navigator.clipboard.writeText(
                   typeof lyric === 'string'
-                    ? lyric.replaceAll(syncedLyricsRegex, '').trim()
+                    ? getLyricText(lyric)
                     : lyric.map((x) => x.text).join(' ')
                 )
             }
@@ -203,7 +211,7 @@ const LyricLine = (props: LyricProp) => {
     >
       {lyricStringLineSecondaryUpper && (
         <div
-          className={`flex flex-row flex-wrap ${playerType !== 'full' && 'items-center justify-center'} ${syncedLyrics && isInRange ? '!text-xl !text-font-color-black/50 dark:!text-font-color-white/50' : '!text-xl'}`}
+          className={`flex flex-row flex-wrap ${playerType !== 'full' && 'items-center justify-center'} ${syncedLyrics && isInRange ? 'text-font-color-black/50! dark:text-font-color-white/50! text-xl!' : 'text-xl!'}`}
         >
           {lyricStringLineSecondaryUpper}
         </div>

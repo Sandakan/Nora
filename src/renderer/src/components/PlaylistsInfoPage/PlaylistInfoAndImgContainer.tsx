@@ -6,7 +6,7 @@ import MultipleArtworksCover from '../PlaylistsPage/MultipleArtworksCover';
 import DefaultPlaylistCover from '../../assets/images/webp/playlist_cover_default.webp';
 import { useMemo } from 'react';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 type Props = {
   playlist: Playlist;
@@ -33,12 +33,17 @@ const PlaylistInfoAndImgContainer = (props: Props) => {
           <div className="playlist-cover-container mt-2 overflow-hidden">
             {preferences.enableArtworkFromSongCovers && playlist.songs.length > 1 ? (
               <div className="relative h-60 w-60">
-                <MultipleArtworksCover songIds={playlist.songs} className="h-60 w-60" type={1} />
+                <MultipleArtworksCover
+                  songIds={playlist.songs}
+                  artworks={songs.map((song) => song.artworkPaths)}
+                  className="h-60 w-60"
+                  type={1}
+                />
                 <Img
                   src={playlist.artworkPaths.artworkPath}
                   alt="Playlist Cover"
                   loading="eager"
-                  className="!absolute bottom-4 right-4 h-16 w-16 !rounded-lg"
+                  className="absolute! right-4 bottom-4 h-16 w-16 rounded-lg!"
                 />
               </div>
             ) : (
@@ -51,14 +56,14 @@ const PlaylistInfoAndImgContainer = (props: Props) => {
               />
             )}
           </div>
-          <div className="playlist-info-container ml-8 text-font-color-black dark:text-font-color-white">
-            <div className="font-semibold uppercase tracking-wider opacity-50">
+          <div className="playlist-info-container text-font-color-black dark:text-font-color-white ml-8">
+            <div className="font-semibold tracking-wider uppercase opacity-50">
               {t('common.playlist_one')}
             </div>
-            <div className="playlist-name mb-2 w-full overflow-hidden text-ellipsis whitespace-nowrap text-5xl text-font-color-highlight dark:text-dark-font-color-highlight">
+            <div className="playlist-name text-font-color-highlight dark:text-dark-font-color-highlight mb-2 w-full overflow-hidden text-5xl text-ellipsis whitespace-nowrap">
               {playlist.name}
             </div>
-            <div className="playlist-no-of-songs w-full overflow-hidden text-ellipsis whitespace-nowrap text-base">
+            <div className="playlist-no-of-songs w-full overflow-hidden text-base text-ellipsis whitespace-nowrap">
               {t('common.songWithCount', { count: playlist.songs.length })}
             </div>
             {songs.length > 0 && (

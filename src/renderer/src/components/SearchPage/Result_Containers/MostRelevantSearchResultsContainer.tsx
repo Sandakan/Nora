@@ -5,7 +5,8 @@ import SecondaryContainer from '../../SecondaryContainer';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import { MostRelevantResult } from '../MostRelevantResult';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
+import { useNavigate } from '@tanstack/react-router';
 
 type Props = { searchResults: SearchResult };
 
@@ -16,8 +17,9 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
   const queue = useStore(store, (state) => state.localStorage.queue);
 
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
-  const { playSong, changeCurrentActivePage, updateQueueData, createQueue, addNewNotifications } =
+  const { playSong, updateQueueData, createQueue, addNewNotifications } =
     useContext(AppUpdateContext);
 
   const MostRelevantResults: ReactNode[] = [];
@@ -133,9 +135,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             class: 'info',
             iconName: 'info',
             handlerFunction: () =>
-              changeCurrentActivePage('SongInfo', {
-                songId: firstResult.songId
-              })
+              navigate({ to: '/main-player/songs/$songId', params: { songId: firstResult.songId } })
           }
         ]}
       />
@@ -186,9 +186,9 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             label: t('common.info'),
             iconName: 'info',
             handlerFunction: () =>
-              changeCurrentActivePage('ArtistInfo', {
-                artistName: firstResult.name,
-                artistId: firstResult.artistId
+              navigate({
+                to: '/main-player/artists/$artistId',
+                params: { artistId: firstResult.artistId }
               })
           },
           {
@@ -372,7 +372,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
       }`}
     >
       <>
-        <div className="title-container mb-8 mt-1 flex items-center pr-4 text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+        <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-8 flex items-center pr-4 text-2xl font-medium">
           {t('searchPage.mostRelevant')}
         </div>
         <div
@@ -380,7 +380,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             isOverScrolling ? 'overscroll-contain' : 'overscroll-auto'
           } transition-[transform,opacity] ${
             MostRelevantResults.length > 0
-              ? 'visible flex translate-y-0 pb-4 opacity-100 [&>div.active]:flex [&>div]:hidden'
+              ? 'visible flex translate-y-0 pb-4 opacity-100 [&>div]:hidden [&>div.active]:flex'
               : 'tranlate-y-8 invisible opacity-0'
           }`}
           ref={mostRelevantResultContainerRef}

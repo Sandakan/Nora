@@ -2,7 +2,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { app } from 'electron';
 import Store from 'electron-store';
-import logger, { toggleVerboseLogs } from './logger';
+import logger from './logger';
 import { dataUpdateEvent } from './main';
 import { appPreferences, version } from '../../package.json';
 import {
@@ -11,43 +11,25 @@ import {
   blacklistMigrations,
   generateMigrationMessage,
   genreMigrations,
-  listeningDataMigrations,
   playlistMigrations,
-  songMigrations,
-  userDataMigrations
+  songMigrations
 } from './migrations';
-import { encrypt } from './utils/safeStorage';
-import type { LastFMSessionData } from '../types/last_fm_api';
 import { DEFAULT_SONG_PALETTE } from './other/generatePalette';
 import isPathADir from './utils/isPathADir';
-import { clearDiscordRpcActivity } from './other/discordRPC';
+import '@db/db';
 
 export const DEFAULT_ARTWORK_SAVE_LOCATION = path.join(app.getPath('userData'), 'song_covers');
 export const DEFAULT_FILE_URL = 'nora://localfiles/';
 
-export const USER_DATA_TEMPLATE: UserData = {
-  language: 'en',
-  theme: { isDarkMode: false, useSystemTheme: true },
-  musicFolders: [],
-  preferences: {
-    autoLaunchApp: false,
-    isMiniPlayerAlwaysOnTop: false,
-    isMusixmatchLyricsEnabled: false,
-    hideWindowOnClose: false,
-    openWindowAsHiddenOnSystemStart: false,
-    openWindowMaximizedOnStart: false,
-    sendSongScrobblingDataToLastFM: false,
-    sendSongFavoritesDataToLastFM: false,
-    sendNowPlayingSongDataToLastFM: false,
-    saveLyricsInLrcFilesForSupportedSongs: false,
-    enableDiscordRPC: false,
-    saveVerboseLogs: false
-  },
-  windowPositions: {},
-  windowDiamensions: {},
-  windowState: 'normal',
-  recentSearches: []
-};
+// const user: typeof usersTable.$inferInsert = {
+//   name: 'John',
+//   age: 30,
+//   email: 'john@example.com'
+// };
+// await db.insert(usersTable).values(user);
+// console.log('New user created!');
+// const users = await db.select().from(usersTable);
+// console.log('Getting all users from the database: ', users);
 
 export const HISTORY_PLAYLIST_TEMPLATE: SavablePlaylist = {
   name: 'History',
@@ -155,39 +137,6 @@ const playlistDataStore = new Store({
   migrations: playlistMigrations
 });
 
-const userDataStore = new Store({
-  name: 'userData',
-  defaults: {
-    version,
-    userData: USER_DATA_TEMPLATE
-  },
-  schema: {
-    version: { type: ['string', 'null'] },
-    userData: {
-      type: 'object'
-    }
-  },
-  beforeEachMigration: (_, context) => generateMigrationMessage('userData.json', context),
-  migrations: userDataMigrations
-});
-
-const listeningDataStore = new Store({
-  name: 'listening_data',
-  clearInvalidConfig: true,
-  defaults: {
-    version,
-    listeningData: []
-  },
-  schema: {
-    version: { type: ['string', 'null'] },
-    listeningData: {
-      type: 'array'
-    }
-  },
-  beforeEachMigration: (_, context) => generateMigrationMessage('listening_data.json', context),
-  migrations: listeningDataMigrations
-});
-
 const blacklistStore = new Store({
   name: 'blacklist',
   clearInvalidConfig: true,
@@ -242,124 +191,8 @@ let cachedPlaylistsData = playlistDataStore.get(
   'playlists',
   PLAYLIST_DATA_TEMPLATE
 ) as SavablePlaylist[];
-let cachedUserData: UserData = userDataStore.get('userData', USER_DATA_TEMPLATE) as UserData;
-let cachedListeningData = listeningDataStore.get('listeningData', []) as SongListeningData[];
 let cachedBlacklist = blacklistStore.get('blacklist', BLACKLIST_TEMPLATE) as Blacklist;
 let cachedPaletteData = paletteStore.get('palettes', PALETTE_DATA_TEMPLATE) as PaletteData[];
-
-// ? USER DATA GETTERS AND SETTERS
-
-export const getUserData = () => {
-  if (cachedUserData && Object.keys(cachedUserData).length !== 0) return cachedUserData;
-  return userDataStore.get('userData', USER_DATA_TEMPLATE) as UserData;
-};
-
-const initUserDataRelatedUpdates = () => {
-  const { preferences } = getUserData();
-
-  toggleVerboseLogs(preferences.saveVerboseLogs);
-};
-initUserDataRelatedUpdates();
-
-export const saveUserData = (userData: UserData) => {
-  cachedUserData = userData;
-  userDataStore.set('userData', userData);
-};
-
-export function setUserData(dataType: UserDataTypes, data: unknown) {
-  const userData = getUserData();
-  if (userData) {
-    if (dataType === 'theme' && typeof data === 'object')
-      userData.theme = data as typeof userData.theme;
-    else if (dataType === 'musicFolders' && Array.isArray(data)) {
-      userData.musicFolders = data;
-    } else if (dataType === 'language' && typeof data === 'string') {
-      userData.language = data;
-    } else if (dataType === 'windowPositions.mainWindow' && typeof data === 'object') {
-      userData.windowPositions.mainWindow = data as WindowCordinates;
-    } else if (dataType === 'windowPositions.miniPlayer' && typeof data === 'object') {
-      userData.windowPositions.miniPlayer = data as WindowCordinates;
-    } else if (dataType === 'windowDiamensions.mainWindow' && typeof data === 'object') {
-      userData.windowDiamensions.mainWindow = data as WindowCordinates;
-    } else if (dataType === 'windowDiamensions.miniPlayer' && typeof data === 'object') {
-      userData.windowDiamensions.miniPlayer = data as WindowCordinates;
-    } else if (dataType === 'windowState' && typeof data === 'string') {
-      userData.windowState = data as WindowState;
-    } else if (dataType === 'recentSearches' && Array.isArray(data)) {
-      userData.recentSearches = data as string[];
-    } else if (dataType === 'preferences.autoLaunchApp' && typeof data === 'boolean') {
-      userData.preferences.autoLaunchApp = data;
-    } else if (dataType === 'preferences.isMusixmatchLyricsEnabled' && typeof data === 'boolean') {
-      userData.preferences.isMusixmatchLyricsEnabled = data;
-    } else if (dataType === 'preferences.isMiniPlayerAlwaysOnTop' && typeof data === 'boolean') {
-      userData.preferences.isMiniPlayerAlwaysOnTop = data;
-    } else if (dataType === 'preferences.hideWindowOnClose' && typeof data === 'boolean') {
-      userData.preferences.hideWindowOnClose = data;
-    } else if (
-      dataType === 'preferences.saveLyricsInLrcFilesForSupportedSongs' &&
-      typeof data === 'boolean'
-    ) {
-      userData.preferences.saveLyricsInLrcFilesForSupportedSongs = data;
-    } else if (
-      dataType === 'preferences.openWindowAsHiddenOnSystemStart' &&
-      typeof data === 'boolean'
-    ) {
-      userData.preferences.openWindowAsHiddenOnSystemStart = data;
-    } else if (
-      dataType === 'preferences.sendSongScrobblingDataToLastFM' &&
-      typeof data === 'boolean'
-    ) {
-      userData.preferences.sendSongScrobblingDataToLastFM = data;
-    } else if (
-      dataType === 'preferences.sendSongFavoritesDataToLastFM' &&
-      typeof data === 'boolean'
-    ) {
-      userData.preferences.sendSongFavoritesDataToLastFM = data;
-    } else if (
-      dataType === 'preferences.sendNowPlayingSongDataToLastFM' &&
-      typeof data === 'boolean'
-    ) {
-      userData.preferences.sendNowPlayingSongDataToLastFM = data;
-    } else if (dataType === 'preferences.enableDiscordRPC' && typeof data === 'boolean') {
-      userData.preferences.enableDiscordRPC = data;
-      if (!data) clearDiscordRpcActivity();
-    } else if (dataType === 'preferences.saveVerboseLogs' && typeof data === 'boolean') {
-      userData.preferences.saveVerboseLogs = data;
-      toggleVerboseLogs(data);
-    } else if (dataType === 'customMusixmatchUserToken' && typeof data === 'string') {
-      const encryptedToken = encrypt(data);
-      userData.customMusixmatchUserToken = encryptedToken;
-    } else if (dataType === 'customLrcFilesSaveLocation' && typeof data === 'string') {
-      userData.customLrcFilesSaveLocation = data;
-    } else if (dataType === 'lastFmSessionData' && typeof data === 'object') {
-      userData.lastFmSessionData = data as LastFMSessionData;
-    } else if (dataType === 'storageMetrics' && typeof data === 'object') {
-      userData.storageMetrics = data as StorageMetrics;
-    } else
-      return logger.error('Failed to set user data due to invalid dataType or data.', {
-        dataType,
-        data
-      });
-
-    saveUserData(userData);
-
-    if (dataType === 'musicFolders') dataUpdateEvent('userData/musicFolder');
-    else if (
-      dataType === 'windowDiamensions.mainWindow' ||
-      dataType === 'windowDiamensions.miniPlayer'
-    )
-      dataUpdateEvent('userData/windowDiamension');
-    else if (dataType === 'windowPositions.mainWindow' || dataType === 'windowPositions.miniPlayer')
-      dataUpdateEvent('userData/windowPosition');
-    else if (dataType.includes('sortingStates')) dataUpdateEvent('userData/sortingStates');
-    else if (dataType.includes('preferences')) dataUpdateEvent('settings/preferences');
-    else if (dataType === 'recentSearches') dataUpdateEvent('userData/recentSearches');
-    else dataUpdateEvent('userData');
-  } else {
-    logger.error(`Failed to read user data because array is empty.`, { userData });
-  }
-  return undefined;
-}
 
 // ? SONG DATA GETTERS AND SETTERS
 
@@ -431,84 +264,6 @@ export const setGenresData = (updatedGenres: SavableGenre[]) => {
   genreStore.set('genres', updatedGenres);
 };
 
-// ? SONG LISTENING DATA GETTERS AND SETTERS
-
-export const createNewListeningDataInstance = (songId: string) => {
-  const date = new Date();
-  const currentYear = date.getFullYear();
-
-  const newListeningData: SongListeningData = {
-    songId,
-    skips: 0,
-    fullListens: 0,
-    inNoOfPlaylists: 0,
-    listens: [{ year: currentYear, listens: [] }],
-    seeks: []
-  };
-  return newListeningData;
-};
-
-export const getListeningData = (songIds = [] as string[]): SongListeningData[] => {
-  const data =
-    cachedListeningData && cachedListeningData.length > 0
-      ? cachedListeningData
-      : (listeningDataStore.get('listeningData', []) as SongListeningData[]);
-
-  const results =
-    songIds.length === 0 ? data : data.filter((x) => songIds.some((songId) => x.songId === songId));
-
-  if (results.length === 0) {
-    if (songIds.length === 0) return [];
-    const defaultOutputs: SongListeningData[] = songIds.map((id) =>
-      createNewListeningDataInstance(id)
-    );
-    return defaultOutputs;
-  }
-
-  const listeningData: SongListeningData[] = results.map((x) => {
-    const { songId, skips = 0, fullListens = 0, inNoOfPlaylists = 0, listens, seeks = [] } = x;
-
-    return {
-      songId,
-      skips,
-      fullListens,
-      inNoOfPlaylists,
-      listens,
-      seeks
-    };
-  });
-
-  return listeningData;
-};
-
-export const saveListeningData = (listeningData: SongListeningData[]) => {
-  cachedListeningData = listeningData;
-  return listeningDataStore.set('listeningData', listeningData);
-};
-
-export const setListeningData = (data: SongListeningData) => {
-  const results =
-    cachedListeningData && cachedListeningData.length > 0
-      ? cachedListeningData
-      : (listeningDataStore.get('listeningData', []) as SongListeningData[]);
-
-  for (let i = 0; i < results.length; i += 1) {
-    if (results[i].songId === data.songId) {
-      results[i].skips = data.skips;
-      results[i].fullListens = data.fullListens;
-      results[i].inNoOfPlaylists = data.inNoOfPlaylists;
-      results[i].listens = data.listens;
-      results[i].seeks = data.seeks;
-
-      break;
-    }
-  }
-
-  results.push(data);
-  saveListeningData(results);
-  return dataUpdateEvent('songs/listeningData');
-};
-
 // ? PLAYLIST DATA GETTERS AND SETTERS
 
 export const getPlaylistData = (playlistIds = [] as string[]) => {
@@ -546,33 +301,6 @@ export const getBlacklistData = (): Blacklist => {
   return blacklistStore.get('blacklist') as Blacklist;
 };
 
-export const addToBlacklist = (
-  str: string,
-  blacklistType: 'SONG_BLACKLIST' | 'FOLDER_BLACKLIST'
-) => {
-  switch (blacklistType) {
-    case 'SONG_BLACKLIST':
-      cachedBlacklist.songBlacklist.push(str);
-      dataUpdateEvent('blacklist/songBlacklist');
-      break;
-
-    case 'FOLDER_BLACKLIST':
-      cachedBlacklist.folderBlacklist.push(str);
-      dataUpdateEvent('blacklist/folderBlacklist');
-      break;
-
-    default:
-      throw new Error('unknown blacklist type');
-  }
-  blacklistStore.set('blacklist', cachedBlacklist);
-};
-
-export const updateBlacklist = (callback: (_prevBlacklist: Blacklist) => Blacklist) => {
-  const updatedBlacklist = callback(cachedBlacklist);
-  cachedBlacklist = updatedBlacklist;
-  blacklistStore.set('blacklist', updatedBlacklist);
-};
-
 export const setBlacklist = (updatedBlacklist: Blacklist) => {
   cachedBlacklist = updatedBlacklist;
   blacklistStore.set('blacklist', updatedBlacklist);
@@ -608,19 +336,3 @@ export async function getDirectoriesRecursive(srcpath: string): Promise<string[]
     return [];
   }
 }
-
-export const resetAppCache = () => {
-  cachedSongsData = [];
-  cachedArtistsData = [];
-  cachedAlbumsData = [];
-  cachedGenresData = [];
-  cachedPlaylistsData = [...PLAYLIST_DATA_TEMPLATE];
-  cachedUserData = { ...USER_DATA_TEMPLATE };
-  songStore.store = { version, songs: [] };
-  artistStore.store = { version, artists: [] };
-  albumStore.store = { version, albums: [] };
-  genreStore.store = { version, genres: [] };
-  userDataStore.store = { version, userData: USER_DATA_TEMPLATE };
-  playlistDataStore.store = { version, playlists: PLAYLIST_DATA_TEMPLATE };
-  logger.info(`In-app cache reset successfully.`);
-};
