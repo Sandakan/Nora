@@ -5,6 +5,7 @@ import calculateElapsedTime from '../../../utils/calculateElapsedTime';
 import parseByteSizes from '../../../utils/parseByteSizes';
 import { useQuery } from '@tanstack/react-query';
 import { settingsQuery } from '@renderer/queries/settings';
+import CollapsibleSection from "./CollapsibleSection";
 
 const StorageSettings = () => {
   const { t } = useTranslation();
@@ -62,11 +63,16 @@ const StorageSettings = () => {
   }%`;
 
   return (
-    <li className="main-container storage-settings-container mb-16" id="storage-settings-container">
-      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center text-2xl font-medium">
+    <li className="main-container storage-settings-container mb-4" id="storage-settings-container">
+    <CollapsibleSection
+      defaultOpen={false}
+      title={
+      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight flex items-center text-2xl font-medium">
         <span className="material-icons-round-outlined mr-2">hard_drive</span>
         {t('settingsPage.storage')}
       </div>
+      }
+    >
       <p>{t('settingsPage.storageDescription')}</p>
 
       {storageMetrics && (
@@ -240,6 +246,7 @@ const StorageSettings = () => {
           />
         </div>
       )}
+    </CollapsibleSection>
     </li>
   );
 };
