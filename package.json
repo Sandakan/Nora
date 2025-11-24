@@ -136,7 +136,6 @@
     "@tanstack/react-router": "^1.114.34",
     "@tanstack/react-store": "^0.8.0",
     "@tanstack/react-virtual": "^3.10.4",
-    "@tanstack/zod-adapter": "^1.119.0",
     "@vitalets/google-translate-api": "^9.2.0",
     "@vitejs/plugin-react": "^5.0.2",
     "didyoumean2": "^7.0.2",
