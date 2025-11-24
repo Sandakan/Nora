@@ -15,12 +15,11 @@ import { songSearchSchema } from '@renderer/utils/zod/songSchema';
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
-import { zodValidator } from '@tanstack/zod-adapter';
 import { useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
 export const Route = createFileRoute('/main-player/albums/$albumId')({
-  validateSearch: zodValidator(songSearchSchema),
+  validateSearch: songSearchSchema,
   component: AlbumInfoPage,
   loader: async ({ params }) => {
     await queryClient.ensureQueryData(albumQuery.single({ albumId: params.albumId }));
@@ -184,3 +183,4 @@ function AlbumInfoPage() {
     </MainContainer>
   );
 }
+

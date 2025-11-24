@@ -10,7 +10,6 @@ import { store } from '@renderer/store/store';
 import { albumSearchSchema } from '@renderer/utils/zod/albumSchema';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
-import { zodValidator } from '@tanstack/zod-adapter';
 import { useContext, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import storage from '@renderer/utils/localStorage';
@@ -21,7 +20,7 @@ import { queryClient } from '@renderer/index';
 import { useSuspenseQuery } from '@tanstack/react-query';
 
 export const Route = createFileRoute('/main-player/albums/')({
-  validateSearch: zodValidator(albumSearchSchema),
+  validateSearch: albumSearchSchema,
   component: AlbumsPage,
   loaderDeps: ({ search }) => ({
     sortingOrder: search.sortingOrder
@@ -189,3 +188,4 @@ function AlbumsPage() {
     </MainContainer>
   );
 }
+

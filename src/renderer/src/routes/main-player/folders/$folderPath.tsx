@@ -13,10 +13,9 @@ import { songFilterOptions, songSortOptions } from '@renderer/components/SongsPa
 import VirtualizedList from '@renderer/components/VirtualizedList';
 import Song from '@renderer/components/SongsPage/Song';
 import { songSearchSchema } from '@renderer/utils/zod/songSchema';
-import { zodValidator } from '@tanstack/zod-adapter';
 
 export const Route = createFileRoute('/main-player/folders/$folderPath')({
-  validateSearch: zodValidator(songSearchSchema),
+  validateSearch: songSearchSchema,
   component: MusicFolderInfoPage
 });
 function MusicFolderInfoPage() {
@@ -275,3 +274,4 @@ function MusicFolderInfoPage() {
     </MainContainer>
   );
 }
+
