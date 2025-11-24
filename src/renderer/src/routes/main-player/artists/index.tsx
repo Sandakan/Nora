@@ -15,7 +15,6 @@ import { queryClient } from '@renderer/index';
 import { artistQuery } from '@renderer/queries/aritsts';
 
 import NoArtistImage from '@assets/images/svg/Sun_Monochromatic.svg';
-import { zodValidator } from '@tanstack/zod-adapter';
 import { artistSearchSchema } from '@renderer/utils/zod/artistSchema';
 import {
   artistFilterOptions,
@@ -25,7 +24,7 @@ import Img from '@renderer/components/Img';
 import { useSuspenseQuery } from '@tanstack/react-query';
 
 export const Route = createFileRoute('/main-player/artists/')({
-  validateSearch: zodValidator(artistSearchSchema),
+  validateSearch: artistSearchSchema,
   component: ArtistPage,
   loaderDeps: ({ search }) => ({
     sortingOrder: search.sortingOrder,
@@ -209,3 +208,4 @@ function ArtistPage() {
     </MainContainer>
   );
 }
+

@@ -13,7 +13,6 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { appPreferences } from '../../../../../../package.json';
 import { lyricsSchema } from '@renderer/utils/zod/lyricsSchema';
-import { zodValidator } from '@tanstack/zod-adapter';
 import { updateRouteState } from '@renderer/store/routeStateStore';
 import { lyricsQuery } from '@renderer/queries/lyrics';
 import { queryClient } from '@renderer/index';
@@ -23,7 +22,7 @@ const { metadataEditingSupportedExtensions } = appPreferences;
 
 export const Route = createFileRoute('/main-player/lyrics/')({
   component: LyricsPage,
-  validateSearch: zodValidator(lyricsSchema)
+  validateSearch: lyricsSchema
 });
 
 function LyricsPage() {
@@ -401,7 +400,7 @@ function LyricsPage() {
   return (
     <MainContainer
       noDefaultStyles
-      className={`lyrics-container appear-from-bottom relative flex h-full flex-col ![overflow-anchor:none] ${
+      className={`lyrics-container appear-from-bottom relative flex h-full flex-col [overflow-anchor:none]! ${
         lyrics && isOnline ? 'justify-start' : 'items-center justify-center'
       }`}
     >
@@ -638,3 +637,4 @@ function LyricsPage() {
     </MainContainer>
   );
 }
+
