@@ -70,7 +70,7 @@ import {
 import deleteSongsFromSystem from './core/deleteSongsFromSystem';
 import removeMusicFolder from './core/removeMusicFolder';
 import restoreBlacklistedSongs from './core/restoreBlacklistedSongs';
-import updateSongId3Tags, { isMetadataUpdatesPending } from './updateSongId3Tags';
+import updateSongId3Tags, { isMetadataUpdatesPending } from './updateSong/updateSongId3Tags';
 import addSongsFromFolderStructures from './core/addMusicFolder';
 import getArtistInfoFromNet from './core/getArtistInfoFromNet';
 import getSongLyrics from './core/getSongLyrics';

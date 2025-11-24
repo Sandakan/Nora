@@ -4,34 +4,34 @@ import { statSync } from 'fs';
 import NodeID3 from 'node-id3';
 import sharp from 'sharp';
 
-import { DEFAULT_FILE_URL } from './filesystem';
+import { DEFAULT_FILE_URL } from '../filesystem';
 import {
   getArtistArtworkPath,
   getSongArtworkPath,
   removeDefaultAppProtocolFromFilePath
-} from './fs/resolveFilePaths';
+} from '../fs/resolveFilePaths';
 import {
   dataUpdateEvent,
   getCurrentSongPath,
   getSongsOutsideLibraryData,
   sendMessageToRenderer,
   updateSongsOutsideLibraryData
-} from './main';
-import { generateRandomId } from './utils/randomId';
-import { createTempArtwork, removeArtwork, storeArtworks } from './other/artworks';
-import generatePalette from './other/generatePalette';
-import { parseLyricsFromID3Format, updateCachedLyrics } from './core/getSongLyrics';
-import parseLyrics from '../common/parseLyrics';
-import convertParsedLyricsToNodeID3Format from './core/convertParsedLyricsToNodeID3Format';
-import sendSongID3Tags from './core/sendSongId3Tags';
-import { isSongBlacklisted } from './utils/isBlacklisted';
-import isPathAWebURL from './utils/isPathAWebUrl';
+} from '../main';
+import { generateRandomId } from '../utils/randomId';
+import { createTempArtwork, removeArtwork, storeArtworks } from '../other/artworks';
+import generatePalette from '../other/generatePalette';
+import { parseLyricsFromID3Format, updateCachedLyrics } from '../core/getSongLyrics';
+import parseLyrics from '../../common/parseLyrics';
+import convertParsedLyricsToNodeID3Format from '../core/convertParsedLyricsToNodeID3Format';
+import sendSongID3Tags from '../core/sendSongId3Tags';
+import { isSongBlacklisted } from '../utils/isBlacklisted';
+import isPathAWebURL from '../utils/isPathAWebUrl';
 
-import { appPreferences } from '../../package.json';
-import saveLyricsToLRCFile from './core/saveLyricsToLrcFile';
-import logger from './logger';
-import { getUserSettings } from './db/queries/settings';
-import { updateSongModifiedAtByPath } from './db/queries/songs';
+import { appPreferences } from '../../../package.json';
+import saveLyricsToLRCFile from '../core/saveLyricsToLrcFile';
+import logger from '../logger';
+import { getUserSettings } from '../db/queries/settings';
+import { updateSongModifiedAtByPath } from '../db/queries/songs';
 
 const { metadataEditingSupportedExtensions } = appPreferences;
 

@@ -1,4 +1,4 @@
-import updateSongId3Tags from '../updateSongId3Tags';
+import updateSongId3Tags from '../updateSong/updateSongId3Tags';
 import {
   getAlbumsData,
   getArtistsData,

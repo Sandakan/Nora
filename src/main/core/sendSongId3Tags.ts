@@ -12,7 +12,7 @@ import {
 import { isLyricsSavePending } from '../saveLyricsToSong';
 import logger from '../logger';
 import { getSongsOutsideLibraryData } from '../main';
-import { isMetadataUpdatesPending } from '../updateSongId3Tags';
+import { isMetadataUpdatesPending } from '../updateSong/updateSongId3Tags';
 
 import { appPreferences } from '../../../package.json';
 import { getSongByIdForSongID3Tags } from '@main/db/queries/songs';

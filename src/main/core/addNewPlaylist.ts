@@ -1,4 +1,4 @@
-import { generateLocalArtworkBuffer } from '@main/updateSongId3Tags';
+import { generateLocalArtworkBuffer } from '@main/updateSong/updateSongId3Tags';
 import logger from '../logger';
 import { dataUpdateEvent } from '../main';
 import { storeArtworks } from '../other/artworks';

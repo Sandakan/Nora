@@ -2,7 +2,7 @@ import { storeArtworks } from '../other/artworks';
 import { dataUpdateEvent } from '../main';
 import { resetArtworkCache } from '../fs/resolveFilePaths';
 import logger from '../logger';
-import { generateLocalArtworkBuffer } from '@main/updateSongId3Tags';
+import { generateLocalArtworkBuffer } from '@main/updateSong/updateSongId3Tags';
 import { linkArtworkToPlaylist } from '@main/db/queries/artworks';
 import { db } from '@main/db/db';
 

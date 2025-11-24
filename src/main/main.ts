@@ -23,7 +23,7 @@ import {
 } from 'electron';
 
 import { version, appPreferences } from '../../package.json';
-import { savePendingMetadataUpdates } from './updateSongId3Tags';
+import { savePendingMetadataUpdates } from './updateSong/updateSongId3Tags';
 import addWatchersToFolders from './fs/addWatchersToFolders';
 
 import addWatchersToParentFolders from './fs/addWatchersToParentFolders';
