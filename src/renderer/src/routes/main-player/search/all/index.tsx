@@ -13,12 +13,11 @@ import { searchPageSchema } from '@renderer/utils/zod/searchPageSchema';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
-import { zodValidator } from '@tanstack/zod-adapter';
 import { useContext, useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 export const Route = createFileRoute('/main-player/search/all/')({
-  validateSearch: zodValidator(searchPageSchema),
+  validateSearch: searchPageSchema,
   component: RouteComponent,
   loaderDeps: ({ search }) => ({ search }),
   loader: async ({ deps }) => {
@@ -108,3 +107,4 @@ function RouteComponent() {
     </MainContainer>
   );
 }
+

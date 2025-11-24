@@ -14,7 +14,6 @@ import { songSearchSchema } from '@renderer/utils/zod/songSchema';
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
-import { zodValidator } from '@tanstack/zod-adapter';
 import { lazy, useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -23,7 +22,7 @@ const SensitiveActionConfirmPrompt = lazy(
 );
 
 export const Route = createFileRoute('/main-player/playlists/$playlistId')({
-  validateSearch: zodValidator(songSearchSchema),
+  validateSearch: songSearchSchema,
   component: PlaylistInfoPage,
   loader: async ({ params }) => {
     await queryClient.ensureQueryData(playlistQuery.single({ playlistId: params.playlistId }));
@@ -261,3 +260,4 @@ function PlaylistInfoPage() {
     </MainContainer>
   );
 }
+

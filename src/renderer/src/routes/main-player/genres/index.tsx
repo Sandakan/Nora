@@ -14,14 +14,13 @@ import Genre from '@renderer/components/GenresPage/Genre';
 import NoSongsImage from '@assets/images/svg/Summer landscape_Monochromatic.svg';
 import Img from '@renderer/components/Img';
 import { genreSortOptions } from '@renderer/components/GenresPage/genreOptions';
-import { zodValidator } from '@tanstack/zod-adapter';
 import { genreSearchSchema } from '@renderer/utils/zod/genreSchema';
 import { queryClient } from '@renderer/index';
 import { genreQuery } from '@renderer/queries/genres';
 import { useSuspenseQuery } from '@tanstack/react-query';
 
 export const Route = createFileRoute('/main-player/genres/')({
-  validateSearch: zodValidator(genreSearchSchema),
+  validateSearch: genreSearchSchema,
   component: GenresPage,
   loaderDeps: ({ search }) => ({
     sortingOrder: search.sortingOrder
@@ -178,3 +177,4 @@ function GenresPage() {
     </MainContainer>
   );
 }
+

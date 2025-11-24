@@ -14,12 +14,11 @@ import { songSearchSchema } from '@renderer/utils/zod/songSchema';
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
-import { zodValidator } from '@tanstack/zod-adapter';
 import { useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
 export const Route = createFileRoute('/main-player/genres/$genreId')({
-  validateSearch: zodValidator(songSearchSchema),
+  validateSearch: songSearchSchema,
   component: GenreInfoPage,
   loader: async ({ params }) => {
     await queryClient.ensureQueryData(genreQuery.single({ genreId: params.genreId }));
@@ -182,3 +181,4 @@ function GenreInfoPage() {
     </MainContainer>
   );
 }
+

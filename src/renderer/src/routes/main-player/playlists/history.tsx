@@ -12,12 +12,11 @@ import { songSearchSchema } from '@renderer/utils/zod/songSchema';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
-import { zodValidator } from '@tanstack/zod-adapter';
 import { useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import historyPlaylistCoverImage from '../../../assets/images/webp/history-playlist-icon.webp';
 export const Route = createFileRoute('/main-player/playlists/history')({
-  validateSearch: zodValidator(songSearchSchema),
+  validateSearch: songSearchSchema,
   component: HistoryPlaylistInfoPage
 });
 
