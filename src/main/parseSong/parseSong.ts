@@ -1,6 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
-import * as musicMetaData from 'music-metadata';
+// import * as musicMetaData from 'music-metadata';
+import { File } from 'node-taglib-sharp';
 
 import logger from '../logger';
 import { dataUpdateEvent, sendMessageToRenderer } from '../main';
@@ -101,7 +102,8 @@ export const parseSong = async (
     //  logger.debug('song stream not readable', undefined, 'ERROR');
 
     const stats = await fs.stat(absoluteFilePath);
-    const metadata: musicMetaData.IAudioMetadata = await musicMetaData.parseFile(absoluteFilePath);
+    const file = File.createFromPath(absoluteFilePath);
+    const metadata = file.tag;
 
     // songFileStream.close();
 
@@ -118,7 +120,7 @@ export const parseSong = async (
       // timeEnd(start2, 'Time to start organizing metadata');
 
       const songTitle =
-        metadata.common.title ||
+        metadata.title ||
         path.basename(absoluteFilePath, path.extname(absoluteFilePath)) ||
         'Unknown Title';
 
@@ -137,14 +139,14 @@ export const parseSong = async (
       // if (metadata.common.lyrics)
       //   consolelogger.debug(metadata.common.title, metadata.common.lyrics);
 
-      const artistsData = getArtistNamesFromSong(metadata.common.artist);
-      const albumArtistsData = getArtistNamesFromSong(metadata.common.albumartist);
-      const albumData = getAlbumInfoFromSong(metadata.common.album);
-      const genresData = getGenreInfoFromSong(metadata.common.genre);
+      const artistsData = getArtistNamesFromSong(metadata.performers.join(', '));
+      const albumArtistsData = getArtistNamesFromSong(metadata.albumArtists.join(', '));
+      const albumData = getAlbumInfoFromSong(metadata.album);
+      const genresData = getGenreInfoFromSong(metadata.genres);
 
       const songInfo: typeof songs.$inferInsert = {
         title: songTitle,
-        duration: getSongDurationFromSong(metadata.format.duration).toFixed(2),
+        duration: getSongDurationFromSong(metadata.duration).toFixed(2),
         year: metadata.common?.year || undefined,
         path: absoluteFilePath,
         sampleRate: metadata.format.sampleRate,
