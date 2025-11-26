@@ -1,5 +1,5 @@
 import path from 'path';
-import * as musicMetaData from 'music-metadata';
+import { File } from 'node-taglib-sharp';
 import { appPreferences } from '../../../package.json';
 import { createTempArtwork } from '../other/artworks';
 import { DEFAULT_FILE_URL } from '../filesystem';
@@ -25,14 +25,15 @@ const sendAudioDataFromPath = async (songPath: string): Promise<AudioPlayerData>
         throw new Error('Audio data generation failed.');
       }
 
-      const metadata = await musicMetaData.parseFile(songPath);
+      const file = File.createFromPath(songPath);
+      const metadata = file.tag;
       if (metadata) {
-        const artworkData = metadata.common?.picture?.at(0)?.data;
+        const artworkData = metadata.pictures?.at(0)?.data?.toByteArray();
 
         const tempArtworkPath = path.join(
           DEFAULT_FILE_URL,
-          metadata.common.picture
-            ? ((await createTempArtwork(metadata.common.picture[0].data).catch((error) => {
+          metadata.pictures
+            ? ((await createTempArtwork(metadata.pictures[0].data.toByteArray()).catch((error) => {
                 logger.error(`Failed to create song artwork from an unknown source.`, {
                   error,
                   songPath
@@ -42,16 +43,15 @@ const sendAudioDataFromPath = async (songPath: string): Promise<AudioPlayerData>
             : songCoverImage
         );
 
-        const title =
-          metadata.common.title || path.basename(songPath).split('.')[0] || 'Unknown Title';
+        const title = metadata.title || path.basename(songPath).split('.')[0] || 'Unknown Title';
 
         const data: AudioPlayerData = {
           title,
-          artists: metadata.common.artists?.map((artistName) => ({
+          artists: metadata.performers?.map((artistName) => ({
             artistId: '',
             name: artistName
           })),
-          duration: metadata.format.duration ?? 0,
+          duration: (file.properties.durationMilliseconds ?? 0) / 1000,
           artwork: parseArtworkDataForAudioPlayerData(artworkData),
           artworkPath: tempArtworkPath,
           path: path.join(DEFAULT_FILE_URL, songPath),

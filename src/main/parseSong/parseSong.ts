@@ -1,6 +1,5 @@
 import fs from 'fs/promises';
 import path from 'path';
-// import * as musicMetaData from 'music-metadata';
 import { File } from 'node-taglib-sharp';
 
 import logger from '../logger';
@@ -146,14 +145,14 @@ export const parseSong = async (
 
       const songInfo: typeof songs.$inferInsert = {
         title: songTitle,
-        duration: getSongDurationFromSong(metadata.duration).toFixed(2),
-        year: metadata.common?.year || undefined,
+        duration: getSongDurationFromSong(file.properties.durationMilliseconds / 1000).toFixed(2),
+        year: metadata.year || undefined,
         path: absoluteFilePath,
-        sampleRate: metadata.format.sampleRate,
-        bitRate: metadata?.format?.bitrate ? Math.ceil(metadata.format.bitrate) : undefined,
-        noOfChannels: metadata?.format?.numberOfChannels,
-        diskNumber: metadata?.common?.disk?.no ?? undefined,
-        trackNumber: metadata?.common?.track?.no ?? undefined,
+        sampleRate: file.properties.audioSampleRate,
+        bitRate: file.properties.audioBitrate ? Math.ceil(file.properties.audioBitrate) : undefined,
+        noOfChannels: file.properties.audioChannels,
+        diskNumber: metadata.disc ?? undefined,
+        trackNumber: metadata.track ?? undefined,
         fileCreatedAt: stats ? stats.birthtime : new Date(),
         fileModifiedAt: stats ? stats.mtime : new Date(),
         folderId
@@ -164,9 +163,7 @@ export const parseSong = async (
 
         const artworkData = await storeArtworks(
           'songs',
-          metadata.common?.picture?.at(0)
-            ? Buffer.from(metadata.common.picture[0].data)
-            : undefined,
+          metadata.pictures?.at(0) ? metadata.pictures[0].data.toByteArray() : undefined,
           trx
         );
 

@@ -108,7 +108,7 @@ const generatePalettesForSongs = async () => {
           const artwork = artworks[i];
 
           if (!artwork.paletteId) {
-            const buffer = await generateCoverBuffer(artwork.path, false, false);
+            const buffer = await generateCoverBuffer(artwork.path, false);
             const palette = await generatePalette(buffer);
 
             await savePalette(artwork.id, palette, trx);
