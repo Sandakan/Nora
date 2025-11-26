@@ -6,7 +6,8 @@ import type { LastFMAlbumInfo } from '../types/last_fm_album_info_api';
 
 const properties = {
   isInDevelopment: process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true',
-  commandLineArgs: process.argv
+  commandLineArgs: process.argv,
+  platform: process.platform
 };
 
 const windowControls = {
@@ -580,3 +581,4 @@ export const api = {
 };
 
 contextBridge.exposeInMainWorld('api', api);
+
