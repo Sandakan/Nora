@@ -672,7 +672,7 @@ export const getSongIdFromSongPath = async (path: string, trx: DB | DBTransactio
   return song?.id ?? null;
 };
 
-export const getSongByIdForSongID3Tags = async (songId: number, trx: DB | DBTransaction = db) => {
+export const getSongByIdForSongMetadata = async (songId: number, trx: DB | DBTransaction = db) => {
   const song = await trx.query.songs.findFirst({
     where: eq(songs.id, songId),
     with: {

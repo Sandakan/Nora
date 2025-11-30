@@ -1,5 +1,5 @@
 import updateSongId3Tags from '../updateSong/updateSongId3Tags';
-import sendSongID3Tags from './sendSongId3Tags';
+import sendSongID3Tags from './sendSongMetadata';
 import { getArtistsData } from '../filesystem';
 import logger from '../logger';
 

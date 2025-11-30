@@ -3,6 +3,7 @@ import { readFile } from 'fs/promises';
 import { statSync } from 'fs';
 import NodeID3 from 'node-id3';
 import sharp from 'sharp';
+import { File } from 'node-taglib-sharp';
 
 import { DEFAULT_FILE_URL } from '../filesystem';
 import {
@@ -23,7 +24,7 @@ import generatePalette from '../other/generatePalette';
 import { parseLyricsFromID3Format, updateCachedLyrics } from '../core/getSongLyrics';
 import parseLyrics from '../../common/parseLyrics';
 import convertParsedLyricsToNodeID3Format from '../core/convertParsedLyricsToNodeID3Format';
-import sendSongID3Tags from '../core/sendSongId3Tags';
+import sendSongMetadata from '../core/sendSongMetadata';
 import { isSongBlacklisted } from '../utils/isBlacklisted';
 import isPathAWebURL from '../utils/isPathAWebUrl';
 
@@ -64,6 +65,7 @@ export const savePendingMetadataUpdates = async (currentSongPath = '', forceSave
 
     if (forceSave || !isACurrentlyPlayingSong) {
       try {
+        const file = File.createFromPath(songPath);
         NodeID3.update(pendingMetadata.tags, songPath);
 
         if (!isASupportedFormat || saveLyricsInLrcFilesForSupportedSongs) {
@@ -665,7 +667,7 @@ const updateSongId3TagsOfUnknownSource = async (
     if (songOutsideLibraryData.path === songPath) {
       const songPathWithoutDefaultUrl = removeDefaultAppProtocolFromFilePath(songPath);
 
-      const oldSongTags = await sendSongID3Tags(songPath, false);
+      const oldSongTags = await sendSongMetadata(songPath, false);
       const oldNodeID3Tags = await NodeID3.Promise.read(songPathWithoutDefaultUrl);
 
       // ?  /////////// ARTWORK DATA FOR SONGS FROM UNKNOWN SOURCES /////////////////

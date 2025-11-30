@@ -1,6 +1,6 @@
 import path from 'path';
-import NodeID3 from 'node-id3';
-import { parseSyncedLyricsFromAudioDataSource } from '../../common/parseLyrics';
+import { File } from 'node-taglib-sharp';
+// import { parseSyncedLyricsFromAudioDataSource } from '../../common/parseLyrics';
 import {
   parseAlbumArtworks,
   parseArtistArtworks,
@@ -15,38 +15,39 @@ import { getSongsOutsideLibraryData } from '../main';
 import { isMetadataUpdatesPending } from '../updateSong/updateSongId3Tags';
 
 import { appPreferences } from '../../../package.json';
-import { getSongByIdForSongID3Tags } from '@main/db/queries/songs';
+import { getSongByIdForSongMetadata } from '@main/db/queries/songs';
 
 const { metadataEditingSupportedExtensions } = appPreferences;
 
-const getSongId3Tags = (songPath: string) => NodeID3.Promise.read(songPath, { noRaw: true });
 
-const getUnsynchronizedLyricsFromSongID3Tags = (songID3Tags: NodeID3.Tags) => {
-  const { unsynchronisedLyrics } = songID3Tags;
+const getSongFileObject = (songPath: string) => File.createFromPath(songPath);
 
-  if (unsynchronisedLyrics) return unsynchronisedLyrics.text;
+// const getUnsynchronizedLyricsFromSongID3Tags = (songID3Tags: SongTags) => {
+//   const { unsynchronisedLyrics } = songID3Tags;
 
-  return undefined;
-};
+//   if (unsynchronisedLyrics) return unsynchronisedLyrics.text;
 
-const getSynchronizedLyricsFromSongID3Tags = (songID3Tags: NodeID3.Tags) => {
-  const { synchronisedLyrics } = songID3Tags;
+//   return undefined;
+// };
 
-  if (Array.isArray(synchronisedLyrics) && synchronisedLyrics.length > 0) {
-    const syncedLyricsData = synchronisedLyrics[synchronisedLyrics.length - 1];
-    const parsedSyncedLyrics = parseSyncedLyricsFromAudioDataSource(syncedLyricsData);
+// const getSynchronizedLyricsFromSongID3Tags = (songID3Tags: SongTags) => {
+//   const { synchronisedLyrics } = songID3Tags;
 
-    return parsedSyncedLyrics?.unparsedLyrics;
-  }
-  return undefined;
-};
+//   if (Array.isArray(synchronisedLyrics) && synchronisedLyrics.length > 0) {
+//     const syncedLyricsData = synchronisedLyrics[synchronisedLyrics.length - 1];
+//     const parsedSyncedLyrics = parseSyncedLyricsFromAudioDataSource(syncedLyricsData);
 
-const sendSongID3Tags = async (songIdOrPath: string, isKnownSource = true): Promise<SongTags> => {
-  logger.debug(`Requested song ID3 tags for a song`, { songIdOrPath, isKnownSource });
+//     return parsedSyncedLyrics?.unparsedLyrics;
+//   }
+//   return undefined;
+// };
+
+const sendSongMetadata = async (songIdOrPath: string, isKnownSource = true): Promise<SongTags> => {
+  logger.debug(`Requested song metadata of a song`, { songIdOrPath, isKnownSource });
 
   if (isKnownSource) {
     const songId = songIdOrPath;
-    const song = await getSongByIdForSongID3Tags(Number(songId));
+    const song = await getSongByIdForSongMetadata(Number(songId));
 
     if (song) {
       const pathExt = path.extname(song.path).replace(/\W/, '');
@@ -55,36 +56,37 @@ const sendSongID3Tags = async (songIdOrPath: string, isKnownSource = true): Prom
       if (!isASupporedFormat)
         throw new Error(`No support for editing song metadata in '${pathExt}' format.`);
 
-      const songTags = await getSongId3Tags(song.path);
+      const songFile = getSongFileObject(song.path);
+      const songMetadata = songFile.tag;
 
       const songAlbums: SongTags['albums'] =
         song.albums.length > 0
           ? song.albums.map((a) => ({
-              title: a.album.title,
-              albumId: String(a.album.id),
-              noOfSongs: 0,
-              artists: a.album.artists?.map((a) => a.artist.name),
-              artworkPath: parseAlbumArtworks(a.album.artworks.map((artwork) => artwork.artwork))
-                .artworkPath
-            }))
-          : songTags.album
+            title: a.album.title,
+            albumId: String(a.album.id),
+            noOfSongs: 0,
+            artists: a.album.artists?.map((a) => a.artist.name),
+            artworkPath: parseAlbumArtworks(a.album.artworks.map((artwork) => artwork.artwork))
+              .artworkPath
+          }))
+          : songMetadata.album
             ? [
-                {
-                  title: songTags.album ?? 'Unknown Album',
-                  albumId: undefined
-                }
-              ]
+              {
+                title: songMetadata.album ?? 'Unknown Album',
+                albumId: undefined
+              }
+            ]
             : undefined;
       const songArtists: SongTags['artists'] = song.artists
         ? song.artists.map((artist) => ({
-            name: artist.artist.name,
-            artistId: String(artist.artist.id),
-            artworkPath: parseArtistArtworks(artist.artist.artworks.map((aw) => aw.artwork))
-              .artworkPath,
-            onlineArtworkPaths: parseArtistOnlineArtworks(
-              artist.artist.artworks.map((aw) => aw.artwork)
-            )
-          }))
+          name: artist.artist.name,
+          artistId: String(artist.artist.id),
+          artworkPath: parseArtistArtworks(artist.artist.artworks.map((aw) => aw.artwork))
+            .artworkPath,
+          onlineArtworkPaths: parseArtistOnlineArtworks(
+            artist.artist.artworks.map((aw) => aw.artwork)
+          )
+        }))
         : undefined;
       const songAlbumArtists: SongTags['albumArtists'] = song.albums
         .map((album) =>
@@ -101,32 +103,32 @@ const sendSongID3Tags = async (songIdOrPath: string, isKnownSource = true): Prom
         .flat();
       const songGenres: SongTags['genres'] = song.genres
         ? song.genres.map((genre) => ({
-            name: genre.genre.name,
-            genreId: String(genre.genre.id),
-            artworkPath: parseGenreArtworks(genre.genre.artworks.map((aw) => aw.artwork))
-              .artworkPath
-          }))
+          name: genre.genre.name,
+          genreId: String(genre.genre.id),
+          artworkPath: parseGenreArtworks(genre.genre.artworks.map((aw) => aw.artwork))
+            .artworkPath
+        }))
         : undefined;
 
-      if (songTags) {
-        const title = song.title ?? songTags.title ?? 'Unknown Title';
+      if (songMetadata) {
+        const title = song.title ?? songMetadata.title ?? 'Unknown Title';
         const tagArtists =
           songArtists ??
-          songTags.artist?.split(',').map((artist) => ({
+          songMetadata.performers?.map((artist) => ({
             name: artist.trim(),
             artistId: undefined
           }));
         const tagAlbumArtists =
           songAlbumArtists ??
-          songTags.performerInfo?.split(',').map((artist) => ({
+          songMetadata.albumArtists?.map((artist) => ({
             name: artist.trim(),
             artistId: undefined
           }));
         const tagGenres =
           songGenres ??
-          songTags.genre?.split(',').map((genre) => ({ genreId: undefined, name: genre.trim() }));
+          songMetadata.genres?.map((genre) => ({ genreId: undefined, name: genre.trim() }));
         const trackNumber =
-          song.trackNumber ?? (Number(songTags.trackNumber?.split('/').shift()) || undefined);
+          song.trackNumber ?? songMetadata.trackCount;
         const artworks = song.artworks.map((a) => a.artwork);
 
         const res: SongTags = {
@@ -135,10 +137,10 @@ const sendSongID3Tags = async (songIdOrPath: string, isKnownSource = true): Prom
           albumArtists: tagAlbumArtists,
           albums: songAlbums,
           genres: tagGenres,
-          releasedYear: Number(songTags.year) || undefined,
-          composer: songTags.composer,
-          synchronizedLyrics: getSynchronizedLyricsFromSongID3Tags(songTags),
-          unsynchronizedLyrics: getUnsynchronizedLyricsFromSongID3Tags(songTags),
+          releasedYear: Number(songMetadata.year) || undefined,
+          composer: songMetadata.composers ? songMetadata.composers.join(', ') : undefined,
+          // synchronizedLyrics: getSynchronizedLyricsFromSongID3Tags(songMetadata),
+          // unsynchronizedLyrics: getUnsynchronizedLyricsFromSongID3Tags(songMetadata),
           artworkPath: parseSongArtworks(artworks).artworkPath,
           duration: parseFloat(song.duration),
           trackNumber,
@@ -147,8 +149,7 @@ const sendSongID3Tags = async (songIdOrPath: string, isKnownSource = true): Prom
         };
         return res;
       }
-      logger.debug(`Failed parse song metadata`, { songIdOrPath, isKnownSource });
-      throw new Error('Failed parse song metadata');
+
     }
   } else {
     const songPathWithDefaultUrl = songIdOrPath;
@@ -164,23 +165,24 @@ const sendSongID3Tags = async (songIdOrPath: string, isKnownSource = true): Prom
       const songsOutsideLibraryData = getSongsOutsideLibraryData();
       for (const songOutsideLibraryData of songsOutsideLibraryData) {
         if (songOutsideLibraryData.path === songPathWithDefaultUrl) {
-          const songTags = await getSongId3Tags(songPath);
+          const songFile = getSongFileObject(songPath);
+          const songMetadata = songFile.tag;
 
           const res: SongTags = {
-            title: songTags.title || '',
-            artists: songTags.artist ? [{ name: songTags.artist }] : undefined,
-            albums: songTags.album
+            title: songMetadata.title || '',
+            artists: songMetadata.performers ? songMetadata.performers.map((performer) => ({ name: performer })) : undefined,
+            albums: songMetadata.album
               ? [
-                  {
-                    title: songTags.album ?? 'Unknown Album'
-                  }
-                ]
+                {
+                  title: songMetadata.album ?? 'Unknown Album'
+                }
+              ]
               : undefined,
-            genres: songTags.genre ? [{ name: songTags.genre }] : undefined,
-            releasedYear: Number(songTags.year) || undefined,
-            composer: songTags.composer,
-            synchronizedLyrics: getSynchronizedLyricsFromSongID3Tags(songTags),
-            unsynchronizedLyrics: getUnsynchronizedLyricsFromSongID3Tags(songTags),
+                genres: songMetadata.genres ? songMetadata.genres.map((genre) => ({ name: genre })) : undefined,
+            releasedYear: Number(songMetadata.year) || undefined,
+            composer: songMetadata.composers ? songMetadata.composers.join(', ') : undefined,
+            // synchronizedLyrics: getSynchronizedLyricsFromSongID3Tags(songTags),
+            // unsynchronizedLyrics: getUnsynchronizedLyricsFromSongID3Tags(songTags),
             artworkPath: songOutsideLibraryData.artworkPath,
             duration: songOutsideLibraryData.duration
           };
@@ -198,4 +200,4 @@ const sendSongID3Tags = async (songIdOrPath: string, isKnownSource = true): Prom
   throw new Error('DATA_FILE_ERROR' as MessageCodes);
 };
 
-export default sendSongID3Tags;
+export default sendSongMetadata;

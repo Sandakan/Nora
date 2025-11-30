@@ -11,7 +11,7 @@ import {
 } from '../filesystem';
 import { generateRandomId } from '../utils/randomId';
 import { getSelectedArtist } from './resolveDuplicates';
-import sendSongID3Tags from './sendSongId3Tags';
+import sendSongID3Tags from './sendSongMetadata';
 
 export const resolveSeparateArtists = async (
   separateArtistId: string,

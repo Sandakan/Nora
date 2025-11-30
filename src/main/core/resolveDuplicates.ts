@@ -6,7 +6,7 @@ import {
   setAlbumsData,
   setSongsData
 } from '../filesystem';
-import sendSongID3Tags from './sendSongId3Tags';
+import sendSongID3Tags from './sendSongMetadata';
 
 export const getSelectedArtist = (artistIdOrName: string) => {
   const artists = getArtistsData();

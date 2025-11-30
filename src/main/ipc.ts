@@ -44,7 +44,7 @@ import reParseSong from './parseSong/reParseSong';
 import { compare } from './utils/safeStorage';
 import sendAudioData from './core/sendAudioData';
 import toggleLikeSongs from './core/toggleLikeSongs';
-import sendSongID3Tags from './core/sendSongId3Tags';
+import sendSongID3Tags from './core/sendSongMetadata';
 import removeSongFromPlaylist from './core/removeSongFromPlaylist';
 import addSongsToPlaylist from './core/addSongsToPlaylist';
 import removePlaylists from './core/removePlaylists';
