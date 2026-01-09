@@ -4,16 +4,16 @@ import { checkIfConnectedToInternet } from '../../main';
 import generateApiRequestBodyForLastFMPostRequests from './generateApiRequestBodyForLastFMPostRequests';
 import getLastFmAuthData from './getLastFMAuthData';
 import { getSongById } from '@main/db/queries/songs';
-import { convertToSongData } from '../../../common/convert';
+import { convertToSongData } from '@main/utils/convert';
 import { getUserSettings } from '@main/db/queries/settings';
 
-const scrobbleSong = async (songId: string, startTimeInSecs: number) => {
+const scrobbleSong = async (songId: number, startTimeInSecs: number) => {
   try {
     const { sendSongScrobblingDataToLastFM: isScrobblingEnabled } = await getUserSettings();
     const isConnectedToInternet = checkIfConnectedToInternet();
 
     if (isScrobblingEnabled && isConnectedToInternet) {
-      const songData = await getSongById(Number(songId));
+      const songData = await getSongById(songId);
 
       if (songData) {
         const song = convertToSongData(songData);

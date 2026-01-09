@@ -43,7 +43,7 @@ const SongArtwork = (props: Props) => {
                 updateSongInfo((prevData) => ({
                   ...prevData,
                   artworkPath: res,
-                  album: prevData.album ? { ...prevData.album, artworkPath: res } : undefined
+                  albums: prevData.albums ? [{ ...prevData.albums[0], artworkPath: res }] : undefined
                 }))
               )
               .catch((err) => console.error(err))
@@ -60,7 +60,7 @@ const SongArtwork = (props: Props) => {
               updateSongInfo((prevData) => ({
                 ...prevData,
                 artworkPath: undefined,
-                album: prevData.album ? { ...prevData.album, artworkPath: undefined } : undefined
+                albums: prevData.albums ? [{ ...prevData.albums[0], artworkPath: undefined }] : undefined
               }))
             }
           />

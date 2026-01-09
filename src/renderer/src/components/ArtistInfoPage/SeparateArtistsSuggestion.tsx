@@ -11,7 +11,7 @@ import { useNavigate } from '@tanstack/react-router';
 
 type Props = {
   name?: string;
-  artistId?: string;
+  artistId?: number;
 };
 
 const SeparateArtistsSuggestion = (props: Props) => {
@@ -23,7 +23,7 @@ const SeparateArtistsSuggestion = (props: Props) => {
   const { addNewNotifications, updateCurrentSongData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const { name = '', artistId = '' } = props;
+  const { name = '', artistId } = props;
 
   const [isIgnored, setIsIgnored] = useState(false);
   const [isMessageVisible, setIsMessageVisible] = useState(true);
@@ -34,7 +34,8 @@ const SeparateArtistsSuggestion = (props: Props) => {
   );
 
   useEffect(() => {
-    if (ignoredArtists.length > 0) setIsIgnored(ignoredArtists.includes(artistId));
+    if (ignoredArtists.length > 0 && artistId !== undefined)
+      setIsIgnored(ignoredArtists.includes(artistId));
   }, [artistId, ignoredArtists]);
 
   const separatedArtistsNames = useMemo(() => {
@@ -74,6 +75,8 @@ const SeparateArtistsSuggestion = (props: Props) => {
     (setIsDisabled: (_state: boolean) => void, setIsPending: (_state: boolean) => void) => {
       setIsDisabled(true);
       setIsPending(true);
+
+      if (artistId === undefined) return;
 
       window.api.suggestions
         .resolveSeparateArtists(artistId, separatedArtistsNames)
@@ -179,7 +182,8 @@ const SeparateArtistsSuggestion = (props: Props) => {
                   iconClassName="material-icons-round-outlined"
                   label="Ignore"
                   clickHandler={() => {
-                    storage.ignoredSeparateArtists.setIgnoredSeparateArtists([artistId]);
+                    if (artistId !== undefined)
+                      storage.ignoredSeparateArtists.setIgnoredSeparateArtists([artistId]);
                     setIsIgnored(true);
                     addNewNotifications([
                       {

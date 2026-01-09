@@ -1,20 +1,27 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSuspenseQuery } from '@tanstack/react-query';
 
 import Button from '../Button';
 import { useStore } from '@tanstack/react-store';
 import { store } from '../../store/store';
+import { settingsQuery } from '../../queries/settings';
 
 const WindowControlsContainer = () => {
   const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
-  const userData = useStore(store, (state) => state.userData);
+  const {
+    data: { hideWindowOnClose }
+  } = useSuspenseQuery({
+    ...settingsQuery.all,
+    select: (data) => ({ hideWindowOnClose: data.hideWindowOnClose })
+  });
 
   const { t } = useTranslation();
 
   const close = useCallback(() => {
-    if (userData && userData.hideWindowOnClose) window.api.windowControls.hideApp();
+    if (hideWindowOnClose) window.api.windowControls.hideApp();
     else window.api.windowControls.closeApp();
-  }, [userData]);
+  }, [hideWindowOnClose]);
 
   const minimize = useCallback(() => window.api.windowControls.minimizeApp(), []);
   const maximize = useCallback(() => window.api.windowControls.toggleMaximizeApp(), []);

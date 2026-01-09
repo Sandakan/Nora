@@ -90,6 +90,15 @@ export const linkSongToGenre = async (
   return trx.insert(genresSongs).values({ genreId, songId });
 };
 
+/**
+ * Unlinks a song from a genre by deleting the relationship in the genresSongs table.
+ * This does NOT delete the genre or song themselves - only the relationship between them.
+ * 
+ * @param genreId - The ID of the genre
+ * @param songId - The ID of the song
+ * @param trx - Database transaction instance (defaults to main db connection)
+ * @returns Promise that resolves when the relationship is deleted
+ */
 export const unlinkSongFromGenre = async (
   genreId: number,
   songId: number,
@@ -121,4 +130,39 @@ export const getLinkedSongGenre = async (
     .limit(1);
 
   return data.at(0);
+};
+
+export const getGenreByName = async (name: string, trx: DB | DBTransaction = db) => {
+  const data = await trx.query.genres.findFirst({
+    where: (g) => eq(g.nameCI, name)
+  });
+
+  return data;
+};
+
+export const getGenreSongIds = async (genreId: number, trx: DB | DBTransaction = db) => {
+  const data = await trx
+    .select({ songId: genresSongs.songId })
+    .from(genresSongs)
+    .where(eq(genresSongs.genreId, genreId));
+
+  return data.map((row) => row.songId);
+};
+
+/**
+ * Deletes a genre from the database.
+ * 
+ * **Cascade Behavior:**
+ * - All entries in `genresSongs` linking this genre to songs are automatically deleted (ON DELETE CASCADE)
+ * - All entries in `artworksGenres` linking this genre to artworks are automatically deleted (ON DELETE CASCADE)
+ * 
+ * **Important:** This function should only be called after verifying the genre has no remaining songs.
+ * Use `getGenreSongIds()` to check before deletion to prevent data inconsistency.
+ * 
+ * @param genreId - The ID of the genre to delete
+ * @param trx - Database transaction instance (defaults to main db connection)
+ * @returns Promise that resolves when the genre is deleted
+ */
+export const deleteGenre = async (genreId: number, trx: DB | DBTransaction = db) => {
+  return trx.delete(genres).where(eq(genres.id, genreId));
 };

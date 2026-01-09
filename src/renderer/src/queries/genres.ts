@@ -9,8 +9,10 @@ export const genreQuery = createQueryKeys('genres', {
       queryFn: () => window.api.genresData.getGenresData([], sortType as GenreSortTypes, start, end)
     };
   },
-  single: (data: { genreId: string }) => ({
-    queryKey: [data.genreId],
-    queryFn: () => window.api.genresData.getGenresData([data.genreId])
-  })
+  single: (data: { genreId: number }) => {
+    return {
+      queryKey: [data.genreId],
+      queryFn: () => window.api.genresData.getGenresData([data.genreId])
+    };
+  }
 });

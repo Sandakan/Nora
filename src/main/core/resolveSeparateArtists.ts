@@ -1,6 +1,6 @@
 import { getArtistArtworkPath } from '../fs/resolveFilePaths';
 import logger from '../logger';
-import updateSongId3Tags from '../updateSongId3Tags';
+import updateSongId3Tags from '../updateSong/updateSongId3Tags';
 import {
   getAlbumsData,
   getArtistsData,
@@ -9,12 +9,11 @@ import {
   setArtistsData,
   setSongsData
 } from '../filesystem';
-import { generateRandomId } from '../utils/randomId';
 import { getSelectedArtist } from './resolveDuplicates';
-import sendSongID3Tags from './sendSongId3Tags';
+import sendSongID3Tags from './sendSongMetadata';
 
 export const resolveSeparateArtists = async (
-  separateArtistId: string,
+  separateArtistId: number,
   separateArtistNames: string[]
 ) => {
   let updatedData: UpdateSongDataResult | undefined;
@@ -41,7 +40,7 @@ export const resolveSeparateArtists = async (
         availArtists.push(artistsData[artistData.index]);
       } else
         newArtists.push({
-          artistId: generateRandomId(),
+          artistId: Math.floor(Math.random() * 1000000),
           isAFavorite: false,
           name: artistName,
           songs: selectedArtist?.songs,

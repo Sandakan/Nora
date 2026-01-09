@@ -7,7 +7,7 @@ import { unlinkSongFromGenre } from './db/queries/genres';
 import { deleteArtworks, getArtworkIdsOfSong } from './db/queries/artworks';
 import { db } from './db/db';
 import { getSongByPath, removeSongById } from './db/queries/songs';
-import { convertToSongData } from '../common/convert';
+import { convertToSongData } from './utils/convert';
 
 export const removeDeletedArtistDataOfSong = async (song: SavableSongData, trx: DBTransaction) => {
   let isArtistRemoved = false;

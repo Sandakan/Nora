@@ -13,16 +13,16 @@ import NavLink from '../NavLink';
 interface ArtistProp {
   index: number;
   className?: string;
-  artistId: string;
+  artistId: number;
   name: string;
   artworkPaths: ArtworkPaths;
-  songIds: string[];
+  songIds: number[];
   onlineArtworkPaths?: {
     picture_small: string;
     picture_medium: string;
   };
   isAFavorite: boolean;
-  selectAllHandler?: (_upToId?: string) => void;
+  selectAllHandler?: (_upToId?: number) => void;
   appearFromBottom?: boolean;
 }
 
@@ -50,7 +50,11 @@ export const Artist = (props: ArtistProp) => {
   const [isAFavorite, setIsAFavorite] = useState(props.isAFavorite);
 
   const goToArtistInfoPage = useCallback(
-    () => navigate({ to: '/main-player/artists/$artistId', params: { artistId: props.artistId } }),
+    () =>
+      navigate({
+        to: '/main-player/artists/$artistId',
+        params: { artistId: String(props.artistId) }
+      }),
     [navigate, props.artistId]
   );
 
@@ -152,7 +156,7 @@ export const Artist = (props: ArtistProp) => {
                 .map((artist) => artist.songs.map((song) => song.songId))
                 .flat();
               const uniqueSongIds = [...new Set(songIds)];
-              updateQueueData(undefined, [...queue.queue, ...uniqueSongIds], false);
+              updateQueueData(undefined, [...queue.songIds, ...uniqueSongIds], false);
               return addNewNotifications([
                 {
                   id: `${uniqueSongIds.length}AddedToQueueFromMultiSelection`,
@@ -164,7 +168,7 @@ export const Artist = (props: ArtistProp) => {
               ]);
             });
           }
-          updateQueueData(undefined, [...queue.queue, ...props.songIds], false, false);
+          updateQueueData(undefined, [...queue.songIds, ...props.songIds], false, false);
           return addNewNotifications([
             {
               id: 'addSongsToQueue',
@@ -250,7 +254,7 @@ export const Artist = (props: ArtistProp) => {
     playArtistSongsForMultipleSelections,
     playArtistSongs,
     updateQueueData,
-    queue.queue,
+    queue.songIds,
     props.songIds,
     props.artistId,
     addNewNotifications,
@@ -294,7 +298,7 @@ export const Artist = (props: ArtistProp) => {
   return (
     <NavLink
       to="/main-player/artists/$artistId"
-      params={{ artistId: props.artistId }}
+      params={{ artistId: String(props.artistId) }}
       preload={isMultipleSelectionEnabled ? false : undefined}
       // style={{ animationDelay: `${50 * (props.index + 1)}ms` }}
       className={`artist ${appearFromBottom && 'appear-from-bottom'} hover:bg-background-color-2/50 dark:hover:bg-dark-background-color-2/50 mr-2 flex h-44 w-40 cursor-pointer flex-col justify-between overflow-hidden rounded-lg p-4 ${

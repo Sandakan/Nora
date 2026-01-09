@@ -23,7 +23,7 @@ const changeAppTheme = async (theme?: AppTheme) => {
   await saveUserSettings({ isDarkMode: updatedIsDarkMode, useSystemTheme: updatedUseSystemTheme });
 
   mainWindow?.setBackgroundColor(await getBackgroundColor());
-  dataUpdateEvent('userData/theme', [theme ?? 'system']);
+  dataUpdateEvent('userData/theme');
 };
 
 export default changeAppTheme;

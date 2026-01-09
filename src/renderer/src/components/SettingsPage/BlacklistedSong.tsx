@@ -6,7 +6,7 @@ import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Button from '../Button';
 
 interface BlacklistedSongProp {
-  songId: string;
+  songId: number;
   title: string;
   index: number;
   songPath: string;

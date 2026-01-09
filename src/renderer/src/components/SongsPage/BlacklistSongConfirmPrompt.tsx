@@ -8,7 +8,7 @@ import Checkbox from '../Checkbox';
 
 import storage from '../../utils/localStorage';
 
-const BlacklistSongConfrimPrompt = (props: { songIds: string[]; title?: string }) => {
+const BlacklistSongConfrimPrompt = (props: { songIds: number[]; title?: string }) => {
   const { addNewNotifications, changePromptMenuData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 

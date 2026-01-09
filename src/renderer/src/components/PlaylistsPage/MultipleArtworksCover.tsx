@@ -10,7 +10,7 @@ import { playlistQuery } from '@renderer/queries/playlists';
 
 type Props = {
   className?: string;
-  songIds: string[];
+  songIds: number[];
   imgClassName?: string;
   holderClassName?: string;
   type?: number;

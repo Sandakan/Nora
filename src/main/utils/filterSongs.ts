@@ -4,8 +4,8 @@ function filterSongs(data: GetAllSongsReturnType, filterType?: SongFilterTypes) 
   if (data && data.length > 0 && filterType) {
     if (filterType === 'notSelected') return data;
 
-    if (filterType === 'blacklistedSongs') return data.filter((song) => !!song.blacklist);
-    if (filterType === 'whitelistedSongs') return data.filter((song) => !song.blacklist);
+    if (filterType === 'blacklistedSongs') return data.filter((song) => song.isBlacklisted);
+    if (filterType === 'whitelistedSongs') return data.filter((song) => !song.isBlacklisted);
   }
 
   return data;

@@ -13,7 +13,6 @@ import { useTranslation } from 'react-i18next';
 import storage from '@renderer/utils/localStorage';
 import { queryClient } from '@renderer/index';
 import { playlistQuery } from '@renderer/queries/playlists';
-import { zodValidator } from '@tanstack/zod-adapter';
 import { playlistSearchSchema } from '@renderer/utils/zod/playlistSchema';
 import { playlistSortOptions } from '@renderer/components/PlaylistsPage/PlaylistOptions';
 import { useSuspenseQuery } from '@tanstack/react-query';
@@ -26,7 +25,7 @@ import favoritesPlaylistCoverImage from '../../../assets/images/webp/favorites-p
 import historyPlaylistCoverImage from '../../../assets/images/webp/history-playlist-icon.webp';
 
 export const Route = createFileRoute('/main-player/playlists/')({
-  validateSearch: zodValidator(playlistSearchSchema),
+  validateSearch: playlistSearchSchema,
   component: PlaylistsPage,
   loaderDeps: ({ search }) => ({
     sortingOrder: search.sortingOrder
@@ -265,3 +264,4 @@ function PlaylistsPage() {
     </MainContainer>
   );
 }
+

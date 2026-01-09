@@ -31,8 +31,8 @@ import { db } from '@main/db/db';
 //   return artist;
 // };
 
-const toggleLikeArtists = async (artistIds: string[], isLikeArtist?: boolean) => {
-  const artists = await getArtistFavoriteStatus(artistIds.map((id) => Number(id)));
+const toggleLikeArtists = async (artistIds: number[], isLikeArtist?: boolean) => {
+  const artists = await getArtistFavoriteStatus(artistIds);
   const result: ToggleLikeSongReturnValue = {
     likes: [],
     dislikes: []
@@ -56,7 +56,7 @@ const toggleLikeArtists = async (artistIds: string[], isLikeArtist?: boolean) =>
 
         await updateArtistFavoriteStatus(dislikedArtistIds, status, trx);
 
-        result.dislikes.push(...dislikedArtistIds.map((id) => id.toString()));
+        result.dislikes.push(...dislikedArtistIds);
       }
 
       if (favoriteGroupedArtists.notFavorite) {
@@ -66,7 +66,7 @@ const toggleLikeArtists = async (artistIds: string[], isLikeArtist?: boolean) =>
 
         await updateArtistFavoriteStatus(likedArtistIds, status, trx);
 
-        result.likes.push(...likedArtistIds.map((id) => id.toString()));
+        result.likes.push(...likedArtistIds);
       }
     });
 

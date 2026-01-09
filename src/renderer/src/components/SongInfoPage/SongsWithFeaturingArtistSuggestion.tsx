@@ -11,7 +11,7 @@ import { store } from '@renderer/store/store';
 
 type Props = {
   songTitle?: string;
-  songId?: string;
+  songId?: number;
   artistNames: string[];
   path: string;
   updateSongInfo: (callback: (prevData: SongData) => SongData) => void;
@@ -25,7 +25,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
   const { addNewNotifications, updateCurrentSongData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const { songTitle = '', songId = '', artistNames, path, updateSongInfo } = props;
+  const { songTitle = '', songId, artistNames, updateSongInfo } = props;
 
   const [isIgnored, setIsIgnored] = useState(false);
   const [isRemovingFeatInfoFromTitle, setIsRemovingFeatInfoFromTitle] = useState(true);
@@ -38,10 +38,12 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
   );
 
   useEffect(() => {
-    if (isIgnored === false && ignoredSongs.length > 0) setIsIgnored(ignoredSongs.includes(songId));
+    if (isIgnored === false && ignoredSongs.length > 0 && songId)
+      setIsIgnored(ignoredSongs.includes(songId));
   }, [songId, ignoredSongs, songTitle, isIgnored]);
 
   useEffect(() => {
+    if (!songTitle) return;
     const featArtistsExec = featArtistsRegex.exec(songTitle);
     featArtistsRegex.lastIndex = 0;
 
@@ -84,6 +86,8 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
 
   const addFeatArtistsToSong = useCallback(
     (setIsDisabled: (_state: boolean) => void, setIsPending: (_state: boolean) => void) => {
+      if (!songId) return;
+
       setIsDisabled(true);
       setIsPending(true);
 
@@ -140,6 +144,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
   );
 
   const ignoreSuggestion = useCallback(() => {
+    if (!songId) return;
     storage.ignoredSongsWithFeatArtists.setIgnoredSongsWithFeatArtists([songId]);
 
     setIsIgnored(true);

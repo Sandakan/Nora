@@ -16,6 +16,7 @@
       "electron-vite/node"
     ],
     "paths": {
+      "@common/*": [ "./src/common/*" ],
       "@main/*": [ "./src/main/*" ], "@db/*": [ "./src/main/db/*" ], },
     "noImplicitAny": true,
     "useUnknownInCatchVariables": true,

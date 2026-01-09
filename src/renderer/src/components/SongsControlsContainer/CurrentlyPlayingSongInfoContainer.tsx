@@ -53,7 +53,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
             onClick={() =>
               navigate({
                 to: '/main-player/artists/$artistId',
-                params: { artistId: artist.artistId }
+                params: { artistId: String(artist.artistId) }
               })
             }
             alt=""
@@ -63,11 +63,11 @@ const CurrentlyPlayingSongInfoContainer = () => {
   }, [currentSongData.artists, currentSongData.songId, navigate]);
 
   const showSongInfoPage = useCallback(
-    (songId: string) =>
+    (songId: number) =>
       currentSongData.isKnownSource
         ? navigate({
             to: '/main-player/songs/$songId',
-            params: { songId }
+            params: { songId: String(songId) }
           })
         : undefined,
     [navigate, currentSongData.isKnownSource]
@@ -78,7 +78,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
       currentSongData.isKnownSource && currentSongData.album
         ? navigate({
             to: '/main-player/albums/$albumId',
-            params: { albumId: currentSongData.album.albumId }
+            params: { albumId: String(currentSongData.album.albumId) }
           })
         : undefined,
     [navigate, currentSongData.album, currentSongData.isKnownSource]
@@ -127,8 +127,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
   }, [currentSongData, t]);
 
   const contextMenuItems = useMemo((): ContextMenuItem[] => {
-    const { title, songId, album, artworkPath, isBlacklisted, isKnownSource, path } =
-      currentSongData;
+    const { title, songId, album, artworkPath, isBlacklisted, isKnownSource } = currentSongData;
 
     return [
       {
@@ -281,8 +280,8 @@ const CurrentlyPlayingSongInfoContainer = () => {
           <div className="song-title flex w-full items-center">
             <NavLink
               to="/main-player/songs/$songId"
-              params={{ songId: currentSongData.songId }}
-              className={`text-font-color-highlight w-fit max-w-full cursor-pointer overflow-hidden text-2xl font-medium text-ellipsis whitespace-nowrap outline-offset-1 focus-visible:!outline ${
+              params={{ songId: String(currentSongData.songId) }}
+              className={`text-font-color-highlight w-fit max-w-full cursor-pointer overflow-hidden text-2xl font-medium text-ellipsis whitespace-nowrap outline-offset-1 focus-visible:outline! ${
                 currentSongData.isKnownSource && 'hover:underline'
               }`}
               disabled={!currentSongData.isKnownSource}

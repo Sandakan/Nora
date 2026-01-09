@@ -53,7 +53,7 @@ const toggleBlacklistFolders = async (folderPaths: string[], isBlacklistFolder?:
   }
 
   setBlacklist(blacklist);
-  dataUpdateEvent('blacklist/folderBlacklist', [...result.blacklists, ...result.whitelists]);
+  dataUpdateEvent('blacklist/folderBlacklist');
   return result;
 };
 

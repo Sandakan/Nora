@@ -400,7 +400,7 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
   },
   playback: {
     currentSong: {
-      songId: '',
+      songId: null,
       stoppedPosition: 0
     },
     isRepeating: 'false',

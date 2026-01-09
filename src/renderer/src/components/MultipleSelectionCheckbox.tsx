@@ -5,7 +5,7 @@ import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store/store';
 
 type Props = {
-  id: string;
+  id:  number;
   selectionType: QueueTypes;
   className?: string;
 };
@@ -26,14 +26,14 @@ const MultipleSelectionCheckbox = (props: Props) => {
 
   return (
     <Checkbox
-      id={id}
+      id={String(id)}
       isChecked={isChecked}
       checkedStateUpdateFunction={(state) =>
         updateMultipleSelections(id, selectionType, state ? 'remove' : 'add')
       }
       className={`dark:peer-checked:[&>.checkmark]:border-font-color-highlight! dark:peer-checked:[&>.checkmark]:bg-font-color-highlight! dark:peer-checked:[&>.checkmark]:text-font-color-highlight! peer-checked:[&>.checkmark]:shadow-lg! ${
         multipleSelectionsData.isEnabled ? '' : 'hidden'
-      } !m-0 ${className}`}
+      } m-0! ${className}`}
     />
   );
 };

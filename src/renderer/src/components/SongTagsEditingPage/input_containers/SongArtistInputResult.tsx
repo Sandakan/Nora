@@ -4,7 +4,7 @@ import DefaultArtistArtwork from '../../../assets/images/webp/artist_cover_defau
 
 type Props = {
   artistData: {
-    artistId?: string | undefined;
+    artistId?: number | undefined;
     name: string;
     artworkPath?: string | undefined;
     onlineArtworkPaths?: OnlineArtistArtworks | undefined;

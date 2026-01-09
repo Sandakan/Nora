@@ -7,7 +7,7 @@ import type {
 } from '../../../types/last_fm_similar_tracks_api';
 import { checkIfConnectedToInternet } from '../../main';
 import { getSongById, getSongsByNames } from '@main/db/queries/songs';
-import { convertToSongData } from '../../../common/convert';
+import { convertToSongData } from '@main/utils/convert';
 
 const sortSimilarTracks = (a: ParsedSimilarTrack, b: ParsedSimilarTrack) => {
   if (a.match > b.match) return -1;
@@ -53,7 +53,7 @@ const parseSimilarTracks = async (similarTracks: SimilarTrack[]) => {
   return { sortedAvailTracks, sortedUnAvailTracks };
 };
 
-const getSimilarTracks = async (songId: string): Promise<SimilarTracksOutput> => {
+const getSimilarTracks = async (songId: number): Promise<SimilarTracksOutput> => {
   try {
     const LAST_FM_API_KEY = import.meta.env.MAIN_VITE_LAST_FM_API_KEY;
     if (!LAST_FM_API_KEY) throw new Error('LastFM api key not found.');
@@ -61,7 +61,7 @@ const getSimilarTracks = async (songId: string): Promise<SimilarTracksOutput> =>
     const isOnline = checkIfConnectedToInternet();
     if (!isOnline) throw new Error('App not connected to internet.');
 
-    const song = await getSongById(Number(songId));
+    const song = await getSongById(songId);
     if (!song) throw new Error(`Song with id of ${songId} not found in the database.`);
 
     const { title, artists } = convertToSongData(song);

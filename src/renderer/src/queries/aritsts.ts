@@ -28,22 +28,23 @@ export const artistQuery = createQueryKeys('artists', {
         )
     };
   },
-  single: (data: { artistId: string }) => {
-    const { artistId } = data;
+  single: (data: { artistId: number }) => {
 
     return {
-      queryKey: [artistId],
-      queryFn: () => window.api.artistsData.getArtistData([artistId])
+      queryKey: [data.artistId],
+      queryFn: () => window.api.artistsData.getArtistData([data.artistId])
     };
   },
-  fetchOnlineInfo: (data: { artistId: string }) => ({
-    queryKey: [data.artistId],
-    queryFn: () => window.api.artistsData.getArtistArtworks(data.artistId)
-  })
+  fetchOnlineInfo: (data: { artistId: number }) => {
+    return {
+      queryKey: [data.artistId],
+      queryFn: () => window.api.artistsData.getArtistArtworks(data.artistId)
+    };
+  }
 });
 
 export const artistMutations = {
-  toggleLike: (data: { artistIds: string[]; isLikeArtist?: boolean }) => ({
+  toggleLike: (data: { artistIds: number[]; isLikeArtist?: boolean }) => ({
     invalidatingQueryKeys: [['artists']],
     mutationFn: () => window.api.artistsData.toggleLikeArtists(data.artistIds, data.isLikeArtist)
   })

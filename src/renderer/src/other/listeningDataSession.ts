@@ -1,7 +1,7 @@
 import calculateTime from '../utils/calculateTime';
 
 class ListeningDataSession {
-  songId: string;
+  songId: number;
   duration: number;
   abortController: AbortController;
   isPaused: boolean;
@@ -20,7 +20,7 @@ class ListeningDataSession {
   seeks: { position: number; seeks: number }[];
   startTime: Date;
 
-  constructor(songId: string, duration: number, chosenByUser = false, isKnownSource = true) {
+  constructor(songId: number, duration: number, chosenByUser = false, isKnownSource = true) {
     this.songId = songId;
     this.duration = duration;
     this.isKnownSource = isKnownSource;

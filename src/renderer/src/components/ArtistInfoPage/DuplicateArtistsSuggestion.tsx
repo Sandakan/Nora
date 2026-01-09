@@ -10,7 +10,7 @@ import { useNavigate } from '@tanstack/react-router';
 
 type Props = {
   name: string;
-  artistId: string;
+  artistId: number;
 };
 
 const DuplicateArtistsSuggestion = (props: Props) => {
@@ -34,7 +34,7 @@ const DuplicateArtistsSuggestion = (props: Props) => {
 
   useEffect(() => {
     const isIgnored =
-      ignoredDuplicateArtists.length > 0 && ignoredDuplicateArtists.some((x) => x.includes(name));
+      ignoredDuplicateArtists.length > 0 && ignoredDuplicateArtists.some((x) => x === artistId);
 
     if (isIgnored) setIsVisible(false);
 
@@ -60,7 +60,7 @@ const DuplicateArtistsSuggestion = (props: Props) => {
                 artistId !== artist.artistId &&
                 navigate({
                   to: '/main-player/artists/$artistId',
-                  params: { artistId: artist.artistId }
+                  params: { artistId: String(artist.artistId) }
                 })
               }
             />
@@ -78,7 +78,7 @@ const DuplicateArtistsSuggestion = (props: Props) => {
 
   const linkToArtist = useCallback(
     (
-      selectedId: string,
+      selectedId: number,
       setIsDisabled: (_state: boolean) => void,
       setIsPending: (_state: boolean) => void
     ) => {

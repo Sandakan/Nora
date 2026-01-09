@@ -2,13 +2,13 @@ import { getPlaylistById, unlinkSongsFromPlaylist } from '@main/db/queries/playl
 import logger from '../logger';
 import { dataUpdateEvent } from '../main';
 
-const removeSongFromPlaylist = async (playlistId: string, songId: string) => {
+const removeSongFromPlaylist = async (playlistId: number, songId: number) => {
   logger.debug(`Requested to remove a song from playlist.`, { playlistId, songId });
 
-  const playlist = await getPlaylistById(Number(playlistId));
+  const playlist = await getPlaylistById(playlistId);
 
   if (playlist) {
-    await unlinkSongsFromPlaylist([Number(songId)], playlist.id);
+    await unlinkSongsFromPlaylist([songId], playlist.id);
 
     dataUpdateEvent('playlists/deletedSong');
     return logger.info(`song removed from playlist successfully.`, { playlistId, songId });

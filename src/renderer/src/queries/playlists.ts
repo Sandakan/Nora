@@ -28,12 +28,17 @@ export const playlistQuery = createQueryKeys('playlists', {
         )
     };
   },
-  single: (data: { playlistId: string }) => ({
-    queryKey: [data.playlistId],
-    queryFn: () => window.api.playlistsData.getPlaylistData([data.playlistId])
-  }),
-  songArtworks: (data: { songIds: string[] }) => ({
-    queryKey: ['songArtworks', `songIds=${data.songIds.join(',')}`],
-    queryFn: () => window.api.playlistsData.getArtworksForMultipleArtworksCover(data.songIds)
-  })
+  single: (data: { playlistId: number }) => {
+    return {
+      queryKey: [data.playlistId],
+      queryFn: () => window.api.playlistsData.getPlaylistData([data.playlistId])
+    };
+  },
+  songArtworks: (data: { songIds: (string | number)[] }) => {
+    const stringIds = data.songIds.map(String);
+    return {
+      queryKey: ['songArtworks', `songIds=${stringIds.join(',')}`],
+      queryFn: () => window.api.playlistsData.getArtworksForMultipleArtworksCover(stringIds.map(Number))
+    };
+  }
 });

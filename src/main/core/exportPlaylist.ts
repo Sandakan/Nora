@@ -60,8 +60,8 @@ const createM3u8FileForPlaylist = async (
   }
 };
 
-const exportPlaylist = async (playlistId: string) => {
-  const playlist = await getPlaylistWithSongPaths(Number(playlistId));
+const exportPlaylist = async (playlistId: number) => {
+  const playlist = await getPlaylistWithSongPaths(playlistId);
 
   if (playlist == null)
     return logger.warn("Failed to export playlist because requested playlist didn't exist", {

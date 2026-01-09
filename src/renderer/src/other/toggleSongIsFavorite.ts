@@ -1,5 +1,5 @@
 const toggleSongIsFavorite = async (
-  songId: string,
+  songId: number,
   isCurrentSongAFavorite: boolean,
   isFavorite?: boolean,
   onlyChangeCurrentSongData = false

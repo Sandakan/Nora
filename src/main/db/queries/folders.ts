@@ -168,7 +168,7 @@ const getMusicFolder = async (
         fileCreatedDate: folder.folderCreatedAt!,
         lastParsedDate: folder.lastParsedAt!
       },
-      songIds: folder.songs.map((song) => song.id.toString()),
+      songIds: folder.songs.map((song) => song.id),
       isBlacklisted: folder.isBlacklisted,
       subFolders
     });
@@ -198,7 +198,7 @@ export const getAllMusicFolders = async (trx: DB | DBTransaction = db): Promise<
             fileCreatedDate: folder.folderCreatedAt!,
             lastParsedDate: folder.lastParsedAt!
           },
-          songIds: folder.songs.map((song) => song.id.toString()),
+          songIds: folder.songs.map((song) => song.id),
           isBlacklisted: folder.isBlacklisted,
           subFolders: await getMusicFolder(folder.id, trx)
         }) satisfies MusicFolder

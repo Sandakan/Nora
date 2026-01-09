@@ -37,7 +37,7 @@ export function useQueueOperations() {
    * @param options.removeDuplicates - Remove existing occurrences before adding (default: true)
    */
   const addToNext = useCallback(
-    (songIds: string[], options: { removeDuplicates?: boolean } = { removeDuplicates: true }) => {
+    (songIds: number[], options: { removeDuplicates?: boolean } = { removeDuplicates: true }) => {
       if (options.removeDuplicates) {
         // Remove existing occurrences first
         songIds.forEach((id) => queue.removeSongId(id));
@@ -55,7 +55,7 @@ export function useQueueOperations() {
    * @param options.removeDuplicates - Remove existing occurrences before adding (default: false)
    */
   const addToEnd = useCallback(
-    (songIds: string[], options: { removeDuplicates?: boolean } = { removeDuplicates: false }) => {
+    (songIds: number[], options: { removeDuplicates?: boolean } = { removeDuplicates: false }) => {
       if (options.removeDuplicates) {
         songIds.forEach((id) => queue.removeSongId(id));
       }
@@ -70,7 +70,7 @@ export function useQueueOperations() {
    * Remove songs from the queue.
    * @param songIds - Array of song IDs to remove
    */
-  const removeSongs = useCallback((songIds: string[]) => {
+  const removeSongs = useCallback((songIds: number[]) => {
     songIds.forEach((id) => queue.removeSongId(id));
     // Store sync happens automatically via queueSingleton event listeners
   }, []);
@@ -82,7 +82,7 @@ export function useQueueOperations() {
    * @param metadata - Optional queue metadata to set
    */
   const replaceQueue = useCallback(
-    (songIds: string[], startPosition: number = 0, metadata?: PlayerQueueMetadata) => {
+    (songIds: number[], startPosition: number = 0, metadata?: PlayerQueueMetadata) => {
       queue.replaceQueue(songIds, startPosition, true, metadata);
       // Store sync happens automatically via queueSingleton event listeners
     },

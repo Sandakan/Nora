@@ -3,7 +3,7 @@ import { Store } from '@tanstack/react-store';
 
 export const DEFAULT_ROUTE_STATE_DATA: RouteStates = {
   'lyrics-editor': {
-    songId: '',
+    songId: 0,
     lyrics: []
   }
 };

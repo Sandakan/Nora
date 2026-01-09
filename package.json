@@ -115,6 +115,7 @@
     "db:studio": "drizzle-kit studio --verbose",
     "db:seed": "drizzle-kit seed",
     "db:drop": "node ./scripts/dropDatabase.ts",
+    "logs": "node ./scripts/colorize-logs.ts --use-env-log-path",
     "renderer:generate-routes": "tsr generate",
     "renderer:watch-routes": "tsr watch",
     "preversion": "npm test",
@@ -135,14 +136,12 @@
     "@tanstack/react-query-devtools": "^5.52.2",
     "@tanstack/react-router": "^1.114.34",
     "@tanstack/react-store": "^0.8.0",
-    "@tanstack/react-virtual": "^3.10.4",
-    "@tanstack/zod-adapter": "^1.119.0",
     "@vitalets/google-translate-api": "^9.2.0",
     "@vitejs/plugin-react": "^5.0.2",
     "didyoumean2": "^7.0.2",
     "discord-rpc": "^4.0.1",
     "dotenv": "^17.0.1",
-    "drizzle-orm": "^0.44.0",
+    "drizzle-orm": "^0.45.0",
     "electron-store": "^11.0.2",
     "electron-updater": "^6.2.1",
     "es-toolkit": "^1.41.0",
@@ -150,6 +149,7 @@
     "mime": "^4.0.6",
     "music-metadata": "^11.0.0",
     "node-id3": "^0.2.6",
+    "node-taglib-sharp": "^6.0.1",
     "node-vibrant": "^4.0.0",
     "pinyin-pro": "^3.26.0",
     "react-i18next": "^16.0.0",
@@ -161,7 +161,7 @@
     "tailwind-merge": "^3.0.2",
     "wanakana": "^5.3.1",
     "winston": "^3.17.0",
-    "zod": "^3.25.76"
+    "zod": "^4.1.13"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.5",
@@ -187,7 +187,7 @@
     "electron": "^39.2.1",
     "electron-builder": "^26.0.12",
     "electron-devtools-installer": "^4.0.0",
-    "electron-vite": "^4.0.0",
+    "electron-vite": "^5.0.0",
     "eslint": "^9.12.0",
     "eslint-import-resolver-typescript": "^4.1.1",
     "eslint-plugin-drizzle": "^0.2.3",
@@ -200,7 +200,7 @@
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "globals": "^16.0.0",
     "husky": "^9.0.11",
-    "material-symbols": "^0.39.1",
+    "material-symbols": "^0.40.0",
     "prettier": "^3.2.4",
     "prettier-plugin-tailwindcss": "^0.7.1",
     "react": "^19.0.0",
@@ -209,6 +209,7 @@
     "typescript": "^5.8.0",
     "typescript-eslint": "^8.18.2",
     "vite": "^7.0.2",
-    "vitest": "^4.0.6"
+    "vitest": "^4.0.6",
+    "yoctocolors": "^2.1.2"
   }
 }

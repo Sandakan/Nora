@@ -1,7 +1,7 @@
 // import { getListeningData } from '../filesystem';
 import logger from '../logger';
 import { getAllSongs as getAllSavedSongs } from '@main/db/queries/songs';
-import { convertToSongData } from '../../common/convert';
+import { convertToSongData } from '../utils/convert';
 
 type SongArtwork = Awaited<
   ReturnType<typeof getAllSavedSongs>

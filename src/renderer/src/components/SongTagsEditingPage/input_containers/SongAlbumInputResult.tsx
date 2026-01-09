@@ -3,13 +3,7 @@ import Img from '../../Img';
 import DefaultAlbumArtwork from '../../../assets/images/webp/album_cover_default.webp';
 
 type Props = {
-  albumData: {
-    title: string;
-    albumId?: string | undefined;
-    noOfSongs?: number | undefined;
-    artists?: string[] | undefined;
-    artworkPath?: string | undefined;
-  };
+  albumData: SongTagsAlbumData;
   updateSongInfo: (callback: (prevData: SongTags) => SongTags) => void;
   updateAlbumKeyword: (keyword: string) => void;
 };
@@ -20,7 +14,7 @@ const SongAlbumInputResult = (props: Props) => {
     <button
       type="button"
       key={albumData.albumId ?? albumData.title}
-      className="border-background-color-2 hover:bg-background-color-2 dark:border-dark-background-color-2 dark:hover:bg-dark-background-color-2 flex w-full cursor-pointer border-b-[1px] px-4 py-2 text-left font-light outline-offset-1 last:border-b-0 only:border-b-0 focus-visible:outline!"
+      className="border-background-color-2 hover:bg-background-color-2 dark:border-dark-background-color-2 dark:hover:bg-dark-background-color-2 flex w-full cursor-pointer border-b px-4 py-2 text-left font-light outline-offset-1 last:border-b-0 only:border-b-0 focus-visible:outline!"
       onClick={() => {
         updateSongInfo((prevData) => {
           return {

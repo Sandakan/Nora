@@ -10,7 +10,7 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { songQuery } from '@renderer/queries/songs';
 import type { SimilarTracksOutput } from '../../../../types/last_fm_similar_tracks_api';
 
-type Props = { songId: string };
+type Props = { songId: number };
 
 const SimilarTracksContainer = (props: Props) => {
   const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
@@ -32,7 +32,7 @@ const SimilarTracksContainer = (props: Props) => {
   });
 
   const handleSongPlayBtnClick = useCallback(
-    (startSongId?: string) => {
+    (startSongId?: number) => {
       const songs = similarTracks.sortedAvailTracks.map((song) => song.songData!);
       const queueSongIds = songs.filter((song) => !song.isBlacklisted).map((song) => song.songId);
 
@@ -46,10 +46,10 @@ const SimilarTracksContainer = (props: Props) => {
     const songs = similarTracks.sortedAvailTracks.map((song) => song.songData!);
     const queueSongIds = songs.filter((song) => !song.isBlacklisted).map((song) => song.songId);
 
-    let currentSongIndex = queue.currentSongIndex ?? queue.queue.indexOf(currentSongData.songId);
-    const duplicateIds: string[] = [];
+    let currentSongIndex = queue.position ?? queue.songIds.indexOf(currentSongData.songId);
+    const duplicateIds: number[] = [];
 
-    const newQueue = queue.queue.filter((id) => {
+    const newQueue = queue.songIds.filter((id) => {
       const isADuplicate = queueSongIds.includes(id);
       if (isADuplicate) duplicateIds.push(id);
 
@@ -57,7 +57,7 @@ const SimilarTracksContainer = (props: Props) => {
     });
 
     for (const duplicateId of duplicateIds) {
-      const duplicateIdPosition = queue.queue.indexOf(duplicateId);
+      const duplicateIdPosition = queue.songIds.indexOf(duplicateId);
 
       if (
         duplicateIdPosition !== -1 &&
@@ -80,8 +80,8 @@ const SimilarTracksContainer = (props: Props) => {
     ]);
   }, [
     similarTracks.sortedAvailTracks,
-    queue.currentSongIndex,
-    queue.queue,
+    queue.position,
+    queue.songIds,
     currentSongData.songId,
     updateQueueData,
     addNewNotifications,

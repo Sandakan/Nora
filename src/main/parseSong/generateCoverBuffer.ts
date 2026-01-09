@@ -1,7 +1,6 @@
 import path from 'path';
 import fs from 'fs/promises';
 
-import * as musicMetaData from 'music-metadata';
 import sharp from 'sharp';
 
 import logger from '../logger';
@@ -27,13 +26,9 @@ export const getDefaultSongCoverImgBuffer = async () => {
 };
 
 export const generateCoverBuffer = async (
-  cover?: musicMetaData.IPicture[] | string,
-  defaultOnUndefined = true,
+  cover?: string,
   appendDefaultArtworkLocationToPath = true
 ) => {
-  if ((!cover || (typeof cover !== 'string' && cover[0].data === undefined)) && !defaultOnUndefined)
-    return undefined;
-
   if (cover) {
     if (typeof cover === 'string') {
       try {
@@ -50,19 +45,6 @@ export const generateCoverBuffer = async (
         return getDefaultSongCoverImgBuffer();
       }
     }
-
-    if (cover[0].format === 'image/webp') {
-      try {
-        const buffer = await sharp(cover[0].data).png().toBuffer();
-        return buffer;
-      } catch (error) {
-        logger.debug('Failed to get artwork buffer of a song.', { error });
-        return getDefaultSongCoverImgBuffer();
-      }
-    }
-
-    // return cover[0].data;
-    return Buffer.from(cover[0].data.buffer, 0, cover[0].data.length);
   }
 
   return getDefaultSongCoverImgBuffer();

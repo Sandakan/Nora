@@ -4,7 +4,7 @@ import { getBlacklistData, setBlacklist } from '../filesystem';
 import logger from '../logger';
 import getSongInfo from './getSongInfo';
 
-const restoreBlacklistedSongs = async (blacklistedSongIds: string[]) => {
+const restoreBlacklistedSongs = async (blacklistedSongIds: number[]) => {
   const blacklist = getBlacklistData();
   const filteredIds = blacklistedSongIds.filter((id) => !blacklist.songBlacklist.includes(id));
   blacklist.songBlacklist = blacklist.songBlacklist.filter(

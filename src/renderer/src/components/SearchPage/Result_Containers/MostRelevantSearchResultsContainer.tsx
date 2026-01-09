@@ -67,14 +67,14 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             label: t('common.playNext'),
             iconName: 'shortcut',
             handlerFunction: () => {
-              const newQueue = queue.queue.filter((id) => id !== firstResult.songId);
-              const duplicateSongIndex = queue.queue.indexOf(firstResult.songId);
+              const newQueue = queue.songIds.filter((id) => id !== firstResult.songId);
+              const duplicateSongIndex = queue.songIds.indexOf(firstResult.songId);
 
               const currentSongIndex =
-                queue.currentSongIndex &&
+                queue.position !== undefined &&
                 duplicateSongIndex !== -1 &&
-                duplicateSongIndex < queue.currentSongIndex
-                  ? queue.currentSongIndex - 1
+                duplicateSongIndex < queue.position
+                  ? queue.position - 1
                   : undefined;
 
               newQueue.splice(
@@ -103,7 +103,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             label: t('common.addToQueue'),
             iconName: 'queue',
             handlerFunction: () => {
-              updateQueueData(undefined, [...queue.queue, firstResult.songId]);
+              updateQueueData(undefined, [...queue.songIds, firstResult.songId]);
               addNewNotifications(
                 [
                   {
@@ -135,7 +135,10 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             class: 'info',
             iconName: 'info',
             handlerFunction: () =>
-              navigate({ to: '/main-player/songs/$songId', params: { songId: firstResult.songId } })
+              navigate({
+                to: '/main-player/songs/$songId',
+                params: { songId: String(firstResult.songId) }
+              })
           }
         ]}
       />
@@ -188,7 +191,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             handlerFunction: () =>
               navigate({
                 to: '/main-player/artists/$artistId',
-                params: { artistId: firstResult.artistId }
+                params: { artistId: String(firstResult.artistId) }
               })
           },
           {
@@ -196,7 +199,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             iconName: 'queue',
             handlerFunction: () => {
               updateQueueData(undefined, [
-                ...queue.queue,
+                ...queue.songIds,
                 ...firstResult.songs.map((song) => song.songId)
               ]);
               addNewNotifications([
@@ -265,8 +268,8 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             label: t('common.addToQueue'),
             iconName: 'queue',
             handlerFunction: () => {
-              queue.queue.push(...firstResult.songs.map((song) => song.songId));
-              updateQueueData(undefined, queue.queue, false);
+              queue.songIds.push(...firstResult.songs.map((song) => song.songId));
+              updateQueueData(undefined, queue.songIds, false);
               addNewNotifications([
                 {
                   id: 'addedToQueue',

@@ -29,7 +29,7 @@ const SongSearchResultsContainer = (props: Props) => {
   const navigate = useNavigate();
 
   const handleSongPlayBtnClick = useCallback(
-    (currSongId: string) => {
+    (currSongId: number) => {
       const queueSongIds = songs.filter((song) => !song.isBlacklisted).map((song) => song.songId);
       createQueue(queueSongIds, 'songs', false, undefined, false);
       playSong(currSongId, true);

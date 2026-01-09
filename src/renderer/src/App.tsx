@@ -264,38 +264,41 @@ export default function App() {
     windowManagement
   });
 
-  const appUpdateContextValues: AppUpdateContextType = useMemo(
-    () => ({
-      updateCurrentSongData,
-      updateContextMenuData,
-      changePromptMenuData,
-      changeUpNextSongData,
-      updatePromptMenuHistoryIndex,
-      playSong,
-      addNewNotifications,
-      updateNotifications,
-      createQueue,
-      changeQueueCurrentSongIndex,
-      updateCurrentSongPlaybackState,
-      updatePlayerType,
-      handleSkipBackwardClick,
-      handleSkipForwardClick,
-      updateSongPosition,
-      updateVolume,
-      toggleMutedState,
-      toggleRepeat,
-      toggleShuffling,
-      toggleQueueShuffle,
-      toggleIsFavorite,
-      toggleSongPlayback,
-      updateQueueData,
-      clearAudioPlayerData,
-      updateBodyBackgroundImage,
-      updateMultipleSelections,
-      toggleMultipleSelections,
-      updateAppUpdatesState,
-      updateEqualizerOptions
-    }),
+  const appUpdateContextValues = useMemo<AppUpdateContextType>(
+    () => {
+      const contextValue: AppUpdateContextType = {
+        updateCurrentSongData,
+        updateContextMenuData,
+        changePromptMenuData,
+        changeUpNextSongData,
+        updatePromptMenuHistoryIndex,
+        playSong,
+        addNewNotifications,
+        updateNotifications,
+        createQueue,
+        changeQueueCurrentSongIndex,
+        updateCurrentSongPlaybackState,
+        updatePlayerType,
+        handleSkipBackwardClick,
+        handleSkipForwardClick,
+        updateSongPosition,
+        updateVolume,
+        toggleMutedState,
+        toggleRepeat,
+        toggleShuffling,
+        toggleQueueShuffle,
+        toggleIsFavorite,
+        toggleSongPlayback,
+        updateQueueData,
+        clearAudioPlayerData,
+        updateBodyBackgroundImage,
+        updateMultipleSelections,
+        toggleMultipleSelections,
+        updateAppUpdatesState,
+        updateEqualizerOptions
+      };
+      return contextValue;
+    },
     [
       updateCurrentSongData,
       updateContextMenuData,

@@ -1,6 +1,6 @@
 import { getAllSongListeningData } from '@main/db/queries/listens';
 
-export const getListeningData = async (songIds: string[]) => {
+export const getListeningData = async (songIds: number[]) => {
   if (songIds.length === 0) return [];
 
   const listeningData = await getAllSongListeningData(

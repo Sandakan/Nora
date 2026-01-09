@@ -2,11 +2,11 @@ import { useCallback } from 'react';
 import { dispatch, store } from '../store/store';
 
 export interface UseMultiSelectionReturn {
-  updateMultipleSelections: (id: string, selectionType: QueueTypes, type: 'add' | 'remove') => void;
+  updateMultipleSelections: (id: number, selectionType: QueueTypes, type: 'add' | 'remove') => void;
   toggleMultipleSelections: (
     isEnabled?: boolean,
     selectionType?: QueueTypes,
-    addSelections?: string[],
+    addSelections?: number[],
     replaceSelections?: boolean
   ) => void;
 }
@@ -37,7 +37,7 @@ export interface UseMultiSelectionReturn {
  */
 export function useMultiSelection(): UseMultiSelectionReturn {
   const updateMultipleSelections = useCallback(
-    (id: string, selectionType: QueueTypes, type: 'add' | 'remove') => {
+    (id: number, selectionType: QueueTypes, type: 'add' | 'remove') => {
       // Prevent changing selection type mid-selection
       if (
         store.state.multipleSelectionsData.selectionType &&
@@ -73,7 +73,7 @@ export function useMultiSelection(): UseMultiSelectionReturn {
     (
       isEnabled?: boolean,
       selectionType?: QueueTypes,
-      addSelections?: string[],
+      addSelections?: number[],
       replaceSelections = false
     ) => {
       const updatedSelectionData = store.state.multipleSelectionsData;

@@ -6,7 +6,8 @@ import type { LastFMAlbumInfo } from '../types/last_fm_album_info_api';
 
 const properties = {
   isInDevelopment: process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true',
-  commandLineArgs: process.argv
+  commandLineArgs: process.argv,
+  platform: process.platform
 };
 
 const windowControls = {
@@ -45,7 +46,7 @@ const playerControls = {
     ipcRenderer.send('app/setDiscordRpcActivity', options),
 
   toggleLikeSongs: (
-    songIds: string[],
+    songIds: number[],
     isLikeSong?: boolean
   ): Promise<ToggleLikeSongReturnValue | undefined> =>
     ipcRenderer.invoke('app/toggleLikeSongs', songIds, isLikeSong),
@@ -67,7 +68,7 @@ const audioLibraryControls = {
   ): Promise<SongData[]> =>
     ipcRenderer.invoke('app/addSongsFromFolderStructures', structures, sortType),
 
-  getSong: (songId: string, updateListeningRate = true): Promise<AudioPlayerData> =>
+  getSong: (songId: number, updateListeningRate = true): Promise<AudioPlayerData> =>
     ipcRenderer.invoke('app/getSong', songId, updateListeningRate),
   getAllSongs: (
     sortType?: SongSortTypes,
@@ -76,7 +77,7 @@ const audioLibraryControls = {
   ): Promise<PaginatedResult<AudioInfo, SongSortTypes>> =>
     ipcRenderer.invoke('app/getAllSongs', sortType, filterType, paginatingData),
   getSongInfo: (
-    songIds: string[],
+    songIds: number[],
     sortType?: SongSortTypes,
     filterType?: SongFilterTypes,
     limit?: number,
@@ -93,10 +94,10 @@ const audioLibraryControls = {
     paginatingData?: PaginatingData
   ): Promise<PaginatedResult<SongData, SongSortTypes>> =>
     ipcRenderer.invoke('app/getAllFavoriteSongs', sortType, paginatingData),
-  getSongListeningData: (songIds: string[]): Promise<SongListeningData[]> =>
+  getSongListeningData: (songIds: number[]): Promise<SongListeningData[]> =>
     ipcRenderer.invoke('app/getSongListeningData', songIds),
   updateSongListeningData: (
-    songId: string,
+    songId: number,
     dataType: ListeningDataEvents,
     dataUpdateType: number
   ): Promise<void> =>
@@ -104,9 +105,9 @@ const audioLibraryControls = {
   resyncSongsLibrary: (): Promise<true> => ipcRenderer.invoke('app/resyncSongsLibrary'),
 
   getBlacklistData: (): Promise<Blacklist> => ipcRenderer.invoke('app/getBlacklistData'),
-  blacklistSongs: (songIds: string[]): Promise<void> =>
+  blacklistSongs: (songIds: number[]): Promise<void> =>
     ipcRenderer.invoke('app/blacklistSongs', songIds),
-  restoreBlacklistedSongs: (songIds: string[]): Promise<void> =>
+  restoreBlacklistedSongs: (songIds: number[]): Promise<void> =>
     ipcRenderer.invoke('app/restoreBlacklistedSongs', songIds),
   deleteSongsFromSystem: (
     absoluteFilePaths: string[],
@@ -115,11 +116,11 @@ const audioLibraryControls = {
     ipcRenderer.invoke('app/deleteSongsFromSystem', absoluteFilePaths, isPermanentDelete),
   generatePalettes: (): Promise<void> => ipcRenderer.invoke('app/generatePalettes'),
   clearSongHistory: (): PromiseFunctionReturn => ipcRenderer.invoke('app/clearSongHistory'),
-  scrobbleSong: (songId: string, startTimeInSecs: number): Promise<void> =>
+  scrobbleSong: (songId: number, startTimeInSecs: number): Promise<void> =>
     ipcRenderer.invoke('app/scrobbleSong', songId, startTimeInSecs),
-  sendNowPlayingSongDataToLastFM: (songId: string): Promise<void> =>
+  sendNowPlayingSongDataToLastFM: (songId: number): Promise<void> =>
     ipcRenderer.invoke('app/sendNowPlayingSongDataToLastFM', songId),
-  getSimilarTracksForASong: (songId: string): Promise<SimilarTracksOutput> =>
+  getSimilarTracksForASong: (songId: number): Promise<SimilarTracksOutput> =>
     ipcRenderer.invoke('app/getSimilarTracksForASong', songId)
 };
 
@@ -128,19 +129,19 @@ const suggestions = {
     ipcRenderer.invoke('app/getArtistDuplicates', artistName),
 
   resolveArtistDuplicates: (
-    selectedArtistId: string,
-    duplicateIds: string[]
+    selectedArtistId: number,
+    duplicateIds: number[]
   ): Promise<UpdateSongDataResult | undefined> =>
     ipcRenderer.invoke('app/resolveArtistDuplicates', selectedArtistId, duplicateIds),
 
   resolveSeparateArtists: (
-    separateArtistId: string,
+    separateArtistId: number,
     separateArtistNames: string[]
   ): Promise<UpdateSongDataResult | undefined> =>
     ipcRenderer.invoke('app/resolveSeparateArtists', separateArtistId, separateArtistNames),
 
   resolveFeaturingArtists: (
-    songId: string,
+    songId: number,
     featArtistNames: string[],
     removeFeatInfoInTitle?: boolean
   ): Promise<UpdateSongDataResult | undefined> =>
@@ -266,10 +267,10 @@ const songUpdates = {
     ipcRenderer.invoke('app/getSongId3Tags', songIdOrPath, isKnownSource),
   getImgFileLocation: (): Promise<string> => ipcRenderer.invoke('app/getImgFileLocation'),
 
-  revealSongInFileExplorer: (songId: string): void =>
+  revealSongInFileExplorer: (songId: number): void =>
     ipcRenderer.send('app/revealSongInFileExplorer', songId),
-  saveArtworkToSystem: (songId: string, saveName?: string): void =>
-    ipcRenderer.send('app/saveArtworkToSystem', songId, saveName),
+  saveArtworkToSystem: (artworkPath: string, saveName?: string): void =>
+    ipcRenderer.send('app/saveArtworkToSystem', artworkPath, saveName),
   isMetadataUpdatesPending: (songPath: string): Promise<boolean> =>
     ipcRenderer.invoke('app/isMetadataUpdatesPending', songPath)
 };
@@ -362,59 +363,65 @@ const folderData = {
 // $ ARTISTS DATA
 const artistsData = {
   getArtistData: (
-    artistIdsOrNames?: string[],
+    artistIdsOrNames?: (string | number)[],
     sortType?: ArtistSortTypes,
     filterType?: ArtistFilterTypes,
     start?: number,
     end?: number,
     limit?: number
-  ): Promise<PaginatedResult<Artist, ArtistSortTypes>> =>
-    ipcRenderer.invoke(
+  ): Promise<PaginatedResult<Artist, ArtistSortTypes>> => {
+    const stringIds = artistIdsOrNames?.map(String);
+    return ipcRenderer.invoke(
       'app/getArtistData',
-      artistIdsOrNames,
+      stringIds,
       sortType,
       filterType,
       start,
       end,
       limit
-    ),
+    );
+  },
   toggleLikeArtists: (
-    artistIds: string[],
+    artistIds: number[],
     likeArtist?: boolean
   ): Promise<ToggleLikeSongReturnValue | undefined> =>
     ipcRenderer.invoke('app/toggleLikeArtists', artistIds, likeArtist),
-  getArtistArtworks: (artistId: string): Promise<ArtistInfoFromNet | undefined> =>
+  getArtistArtworks: (artistId: number): Promise<ArtistInfoFromNet | undefined> =>
     ipcRenderer.invoke('app/getArtistArtworks', artistId)
 };
 
 // $ GENRES DATA
 const genresData = {
   getGenresData: (
-    genreNamesOrIds?: string[],
+    genreNamesOrIds?: (string | number)[],
     sortType?: GenreSortTypes,
     start?: number,
     end?: number
-  ): Promise<PaginatedResult<Genre, GenreSortTypes>> =>
-    ipcRenderer.invoke('app/getGenresData', genreNamesOrIds, sortType, start, end)
+  ): Promise<PaginatedResult<Genre, GenreSortTypes>> => {
+    const stringIds = genreNamesOrIds?.map(String);
+    return ipcRenderer.invoke('app/getGenresData', stringIds, sortType, start, end);
+  }
 };
 
 // $ ALBUMS DATA
 const albumsData = {
   getAlbumData: (
-    albumTitlesOrIds?: string[],
+    albumTitlesOrIds?: (string | number)[],
     sortType?: AlbumSortTypes,
     start?: number,
     end?: number
-  ): Promise<PaginatedResult<Album, AlbumSortTypes>> =>
-    ipcRenderer.invoke('app/getAlbumData', albumTitlesOrIds, sortType, start, end),
-  getAlbumInfoFromLastFM: (albumId: string): Promise<LastFMAlbumInfo | undefined> =>
+  ): Promise<PaginatedResult<Album, AlbumSortTypes>> => {
+    const stringIds = albumTitlesOrIds?.map(String);
+    return ipcRenderer.invoke('app/getAlbumData', stringIds, sortType, start, end);
+  },
+  getAlbumInfoFromLastFM: (albumId: number): Promise<LastFMAlbumInfo | undefined> =>
     ipcRenderer.invoke('app/getAlbumInfoFromLastFM', albumId)
 };
 
 // $ PLAYLIST DATA AND CONTROLS
 const playlistsData = {
   getPlaylistData: (
-    playlistIds?: string[],
+    playlistIds?: number[],
     sortType?: PlaylistSortTypes,
     start?: number,
     end?: number,
@@ -430,28 +437,28 @@ const playlistsData = {
     ),
   addNewPlaylist: (
     playlistName: string,
-    songIds?: string[],
+    songIds?: number[],
     artworkPath?: string
   ): Promise<{ success: boolean; message?: string; playlist?: Playlist }> =>
     ipcRenderer.invoke('app/addNewPlaylist', playlistName, songIds, artworkPath),
-  addSongsToPlaylist: (playlistId: string, songIds: string[]): PromiseFunctionReturn =>
+  addSongsToPlaylist: (playlistId: number, songIds: number[]): PromiseFunctionReturn =>
     ipcRenderer.invoke('app/addSongsToPlaylist', playlistId, songIds),
   addArtworkToAPlaylist: (
-    playlistId: string,
+    playlistId: number,
     artworkPath: string
   ): Promise<ArtworkPaths | undefined> =>
     ipcRenderer.invoke('app/addArtworkToAPlaylist', playlistId, artworkPath),
-  renameAPlaylist: (playlistId: string, newName: string): Promise<void> =>
+  renameAPlaylist: (playlistId: number, newName: string): Promise<void> =>
     ipcRenderer.invoke('app/renameAPlaylist', playlistId, newName),
-  removeSongFromPlaylist: (playlistId: string, songId: string): PromiseFunctionReturn =>
+  removeSongFromPlaylist: (playlistId: number, songId: number): PromiseFunctionReturn =>
     ipcRenderer.invoke('app/removeSongFromPlaylist', playlistId, songId),
-  removePlaylists: (playlistIds: string[]) =>
+  removePlaylists: (playlistIds: number[]) =>
     ipcRenderer.invoke('app/removePlaylists', playlistIds),
   getArtworksForMultipleArtworksCover: (
-    songIds: string[]
-  ): Promise<{ songId: string; artworkPaths: ArtworkPaths }[]> =>
+    songIds: number[]
+  ): Promise<{ songId: number; artworkPaths: ArtworkPaths }[]> =>
     ipcRenderer.invoke('app/getArtworksForMultipleArtworksCover', songIds),
-  exportPlaylist: (playlistId: string): Promise<void> =>
+  exportPlaylist: (playlistId: number): Promise<void> =>
     ipcRenderer.invoke('app/exportPlaylist', playlistId),
   importPlaylist: (): Promise<void> => ipcRenderer.invoke('app/importPlaylist')
 };
@@ -580,3 +587,4 @@ export const api = {
 };
 
 contextBridge.exposeInMainWorld('api', api);
+
