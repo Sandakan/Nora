@@ -6,7 +6,7 @@ const localStorageMigrationData: MigrationData = {
     storage.equalizerPreset = LOCAL_STORAGE_DEFAULT_TEMPLATE.equalizerPreset;
     return storage;
   },
-  "4.0.0-alpha.2": (_) => {
+  "4.0.0-alpha.3": (_) => {
     return LOCAL_STORAGE_DEFAULT_TEMPLATE;
   },
 };
