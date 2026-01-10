@@ -1,60 +1,70 @@
 // import { getListeningData } from '../filesystem';
-import logger from '../logger';
-import { getAllSongs as getAllSavedSongs } from '@main/db/queries/songs';
-import { convertToSongData } from '../utils/convert';
+import logger from "../logger";
+import {
+  getAllSongs as getAllSavedSongs,
+  getAllSongsCursor as getAllSavedSongsCursor,
+} from "@main/db/queries/songs";
+import { convertToSongData } from "../utils/convert";
 
 type SongArtwork = Awaited<
   ReturnType<typeof getAllSavedSongs>
->['data'][number]['artworks'][number]['artwork'];
-export const parsePaletteFromArtworks = (artworks: SongArtwork[]): PaletteData | undefined => {
+>["data"][number]["artworks"][number]["artwork"];
+export const parsePaletteFromArtworks = (
+  artworks: SongArtwork[],
+): PaletteData | undefined => {
   const artworkWithPalette = artworks.find((artwork) => !!artwork.palette);
 
   if (artworkWithPalette) {
-    const palette: PaletteData = { paletteId: String(artworkWithPalette.palette?.id) };
+    const palette: PaletteData = {
+      paletteId: String(artworkWithPalette.palette?.id),
+    };
 
-    if (artworkWithPalette.palette && artworkWithPalette.palette.swatches.length > 0) {
+    if (
+      artworkWithPalette.palette &&
+      artworkWithPalette.palette.swatches.length > 0
+    ) {
       for (const swatch of artworkWithPalette.palette.swatches) {
         switch (swatch.swatchType) {
-          case 'DARK_VIBRANT':
+          case "DARK_VIBRANT":
             palette.DarkVibrant = {
               hex: swatch.hex,
               population: swatch.population,
-              hsl: [swatch.hsl.h, swatch.hsl.s, swatch.hsl.l]
+              hsl: [swatch.hsl.h, swatch.hsl.s, swatch.hsl.l],
             };
             break;
-          case 'LIGHT_VIBRANT':
+          case "LIGHT_VIBRANT":
             palette.LightVibrant = {
               hex: swatch.hex,
               population: swatch.population,
-              hsl: [swatch.hsl.h, swatch.hsl.s, swatch.hsl.l]
+              hsl: [swatch.hsl.h, swatch.hsl.s, swatch.hsl.l],
             };
             break;
-          case 'DARK_MUTED':
+          case "DARK_MUTED":
             palette.DarkMuted = {
               hex: swatch.hex,
               population: swatch.population,
-              hsl: [swatch.hsl.h, swatch.hsl.s, swatch.hsl.l]
+              hsl: [swatch.hsl.h, swatch.hsl.s, swatch.hsl.l],
             };
             break;
-          case 'LIGHT_MUTED':
+          case "LIGHT_MUTED":
             palette.LightMuted = {
               hex: swatch.hex,
               population: swatch.population,
-              hsl: [swatch.hsl.h, swatch.hsl.s, swatch.hsl.l]
+              hsl: [swatch.hsl.h, swatch.hsl.s, swatch.hsl.l],
             };
             break;
-          case 'MUTED':
+          case "MUTED":
             palette.Muted = {
               hex: swatch.hex,
               population: swatch.population,
-              hsl: [swatch.hsl.h, swatch.hsl.s, swatch.hsl.l]
+              hsl: [swatch.hsl.h, swatch.hsl.s, swatch.hsl.l],
             };
             break;
-          case 'VIBRANT':
+          case "VIBRANT":
             palette.Vibrant = {
               hex: swatch.hex,
               population: swatch.population,
-              hsl: [swatch.hsl.h, swatch.hsl.s, swatch.hsl.l]
+              hsl: [swatch.hsl.h, swatch.hsl.s, swatch.hsl.l],
             };
             break;
         }
@@ -68,15 +78,52 @@ export const parsePaletteFromArtworks = (artworks: SongArtwork[]): PaletteData |
 };
 
 const getAllSongs = async (
-  sortType = 'aToZ' as SongSortTypes,
+  sortType = "aToZ" as SongSortTypes,
   filterType?: SongFilterTypes,
-  paginatingData?: PaginatingData
+  paginatingData?: PaginatingData | CursorPaginatingData,
 ) => {
+  // Determine if cursor-based pagination is requested
+  const isCursorBased = paginatingData && "cursor" in paginatingData;
+
+  if (isCursorBased) {
+    // Use cursor-based pagination
+    const cursorPaginatingData = paginatingData as CursorPaginatingData;
+    const songsData = await getAllSavedSongsCursor({
+      cursor: cursorPaginatingData.cursor,
+      limit: cursorPaginatingData.limit ?? 50,
+      filterType,
+      sortType,
+    });
+
+    const result: CursorPaginatedResult<
+      AudioInfo,
+      SongSortTypes,
+      SongFilterTypes
+    > = {
+      data: songsData.data.map((song) => convertToSongData(song)),
+      sortType,
+      filterType,
+      nextCursor: songsData.nextCursor,
+      hasMore: songsData.hasMore,
+    };
+
+    logger.debug(`Sending cursor-based paginated songs`, {
+      sortType,
+      filterType,
+      hasMore: songsData.hasMore,
+      resultCount: result.data.length,
+    });
+
+    return result;
+  }
+
+  // Use legacy offset-based pagination
+  const offsetPaginatingData = paginatingData as PaginatingData | undefined;
   const songsData = await getAllSavedSongs({
-    start: paginatingData?.start ?? 0,
-    end: paginatingData?.end ?? 0,
+    start: offsetPaginatingData?.start ?? 0,
+    end: offsetPaginatingData?.end ?? 0,
     filterType,
-    sortType
+    sortType,
   });
   // const listeningData = getListeningData();
 
@@ -85,7 +132,7 @@ const getAllSongs = async (
     total: 0,
     sortType,
     start: 0,
-    end: 0
+    end: 0,
   };
 
   if (songsData && songsData.data.length > 0) {
@@ -104,12 +151,14 @@ const getAllSongs = async (
     result.end = songsData.end;
   }
 
-  logger.debug(`Sending data related to all the songs`, {
+  logger.debug(`Sending offset-based paginated songs`, {
     sortType,
     filterType,
     start: songsData.start,
-    end: songsData.end
+    end: songsData.end,
+    resultCount: result.data.length,
   });
+
   return result;
 };
 

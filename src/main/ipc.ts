@@ -50,6 +50,7 @@ import addSongsToPlaylist from './core/addSongsToPlaylist';
 import removePlaylists from './core/removePlaylists';
 import addNewPlaylist from './core/addNewPlaylist';
 import getAllSongs from './core/getAllSongs';
+import { getAllSongsCursor } from '@main/db/queries/songs';
 import toggleLikeArtists from './core/toggleLikeArtists';
 import fetchSongInfoFromLastFM from './core/fetchSongInfoFromLastFM';
 import clearSongHistory from './core/clearSongHistory';
@@ -168,8 +169,21 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
         _,
         sortType?: SongSortTypes,
         filterType?: SongFilterTypes,
-        paginatingData?: PaginatingData
-      ) => getAllSongs(sortType, filterType, paginatingData)
+        paginatingData?: PaginatingData | CursorPaginatingData
+      ) => {
+        // Check if it's cursor-based pagination
+        if (paginatingData && 'cursor' in paginatingData) {
+          return getAllSongsCursor({
+            cursor: paginatingData.cursor,
+            limit: paginatingData.limit,
+            sortType,
+            filterType
+          });
+        }
+        
+        // Otherwise use legacy offset-based pagination
+        return getAllSongs(sortType, filterType, paginatingData as PaginatingData);
+      }
     );
 
     ipcMain.handle(

@@ -1,192 +1,245 @@
-import { contextBridge, ipcRenderer, webUtils } from 'electron';
+import { contextBridge, ipcRenderer, webUtils } from "electron";
 // const { contextBridge, ipcRenderer } = require('electron');
-import type { LastFMTrackInfoApi } from '../types/last_fm_api';
-import type { SimilarTracksOutput } from '../types/last_fm_similar_tracks_api';
-import type { LastFMAlbumInfo } from '../types/last_fm_album_info_api';
+import type { LastFMTrackInfoApi } from "../types/last_fm_api";
+import type { SimilarTracksOutput } from "../types/last_fm_similar_tracks_api";
+import type { LastFMAlbumInfo } from "../types/last_fm_album_info_api";
 
 const properties = {
-  isInDevelopment: process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true',
+  isInDevelopment: process.env.NODE_ENV === "development" ||
+    process.env.DEBUG_PROD === "true",
   commandLineArgs: process.argv,
-  platform: process.platform
+  platform: process.platform,
 };
 
 const windowControls = {
-  minimizeApp: (): void => ipcRenderer.send('app/minimize'),
-  toggleMaximizeApp: (): void => ipcRenderer.send('app/toggleMaximize'),
-  closeApp: (): void => ipcRenderer.send('app/close'),
-  hideApp: (): void => ipcRenderer.send('app/hide'),
-  showApp: (): void => ipcRenderer.send('app/show'),
+  minimizeApp: (): void => ipcRenderer.send("app/minimize"),
+  toggleMaximizeApp: (): void => ipcRenderer.send("app/toggleMaximize"),
+  closeApp: (): void => ipcRenderer.send("app/close"),
+  hideApp: (): void => ipcRenderer.send("app/hide"),
+  showApp: (): void => ipcRenderer.send("app/show"),
   changePlayerType: (type: PlayerTypes): Promise<void> =>
-    ipcRenderer.invoke('app/changePlayerType', type),
-  onWindowFocus: (callback: (e: unknown) => void) => ipcRenderer.on('app/focused', callback),
-  onWindowBlur: (callback: (e: unknown) => void) => ipcRenderer.on('app/blurred', callback)
+    ipcRenderer.invoke("app/changePlayerType", type),
+  onWindowFocus: (callback: (e: unknown) => void) =>
+    ipcRenderer.on("app/focused", callback),
+  onWindowBlur: (callback: (e: unknown) => void) =>
+    ipcRenderer.on("app/blurred", callback),
 };
 
 const theme = {
   listenForSystemThemeChanges: (
-    callback: (e: unknown, isDarkMode: boolean, usingSystemTheme: boolean) => void
-  ) => ipcRenderer.on('app/systemThemeChange', callback),
-  changeAppTheme: (appTheme?: AppTheme): void => ipcRenderer.send('app/changeAppTheme', appTheme),
+    callback: (
+      e: unknown,
+      isDarkMode: boolean,
+      usingSystemTheme: boolean,
+    ) => void,
+  ) => ipcRenderer.on("app/systemThemeChange", callback),
+  changeAppTheme: (appTheme?: AppTheme): void =>
+    ipcRenderer.send("app/changeAppTheme", appTheme),
   stoplisteningForSystemThemeChanges: (
-    callback: (e: unknown, isDarkMode: boolean, usingSystemTheme: boolean) => void
-  ) => ipcRenderer.removeListener('app/systemThemeChange', callback)
+    callback: (
+      e: unknown,
+      isDarkMode: boolean,
+      usingSystemTheme: boolean,
+    ) => void,
+  ) => ipcRenderer.removeListener("app/systemThemeChange", callback),
 };
 
 const playerControls = {
   songPlaybackStateChange: (isPlaying: boolean): void =>
-    ipcRenderer.send('app/player/songPlaybackStateChange', isPlaying),
+    ipcRenderer.send("app/player/songPlaybackStateChange", isPlaying),
   toggleSongPlayback: (callback: (e: unknown) => void) =>
-    ipcRenderer.on('app/player/toggleSongPlaybackState', callback),
+    ipcRenderer.on("app/player/toggleSongPlaybackState", callback),
   skipForwardToNextSong: (callback: (e: unknown) => void) =>
-    ipcRenderer.on('app/player/skipForward', callback),
+    ipcRenderer.on("app/player/skipForward", callback),
   skipBackwardToPreviousSong: (callback: (e: unknown) => void) =>
-    ipcRenderer.on('app/player/skipBackward', callback),
-  sendSongPosition: (position: number): void => ipcRenderer.send('app/getSongPosition', position),
+    ipcRenderer.on("app/player/skipBackward", callback),
+  sendSongPosition: (position: number): void =>
+    ipcRenderer.send("app/getSongPosition", position),
   setDiscordRpcActivity: (options: unknown): void =>
-    ipcRenderer.send('app/setDiscordRpcActivity', options),
+    ipcRenderer.send("app/setDiscordRpcActivity", options),
 
   toggleLikeSongs: (
     songIds: number[],
-    isLikeSong?: boolean
+    isLikeSong?: boolean,
   ): Promise<ToggleLikeSongReturnValue | undefined> =>
-    ipcRenderer.invoke('app/toggleLikeSongs', songIds, isLikeSong),
+    ipcRenderer.invoke("app/toggleLikeSongs", songIds, isLikeSong),
 
   removeTogglePlaybackStateEvent: (callback: (e: unknown) => void) =>
-    ipcRenderer.removeListener('app/player/toggleSongPlaybackState', callback),
+    ipcRenderer.removeListener("app/player/toggleSongPlaybackState", callback),
   removeSkipBackwardToPreviousSongEvent: (callback: (e: unknown) => void) =>
-    ipcRenderer.removeListener('app/player/skipBackward', callback),
+    ipcRenderer.removeListener("app/player/skipBackward", callback),
   removeSkipForwardToNextSongEvent: (callback: (e: unknown) => void) =>
-    ipcRenderer.removeListener('app/player/skipForward', callback)
+    ipcRenderer.removeListener("app/player/skipForward", callback),
 };
 
 const audioLibraryControls = {
   checkForStartUpSongs: (): Promise<AudioPlayerData | undefined> =>
-    ipcRenderer.invoke('app/checkForStartUpSongs'),
+    ipcRenderer.invoke("app/checkForStartUpSongs"),
   addSongsFromFolderStructures: (
     structures: FolderStructure[],
-    sortType?: SongSortTypes
+    sortType?: SongSortTypes,
   ): Promise<SongData[]> =>
-    ipcRenderer.invoke('app/addSongsFromFolderStructures', structures, sortType),
+    ipcRenderer.invoke(
+      "app/addSongsFromFolderStructures",
+      structures,
+      sortType,
+    ),
 
-  getSong: (songId: number, updateListeningRate = true): Promise<AudioPlayerData> =>
-    ipcRenderer.invoke('app/getSong', songId, updateListeningRate),
+  getSong: (
+    songId: number,
+    updateListeningRate = true,
+  ): Promise<AudioPlayerData> =>
+    ipcRenderer.invoke("app/getSong", songId, updateListeningRate),
   getAllSongs: (
     sortType?: SongSortTypes,
     filterType?: SongFilterTypes,
-    paginatingData?: PaginatingData
-  ): Promise<PaginatedResult<AudioInfo, SongSortTypes>> =>
-    ipcRenderer.invoke('app/getAllSongs', sortType, filterType, paginatingData),
+    paginatingData?: PaginatingData | CursorPaginatingData,
+  ): Promise<
+    | PaginatedResult<AudioInfo, SongSortTypes>
+    | CursorPaginatedResult<AudioInfo, SongSortTypes, SongFilterTypes>
+  > =>
+    ipcRenderer.invoke("app/getAllSongs", sortType, filterType, paginatingData),
   getSongInfo: (
     songIds: number[],
     sortType?: SongSortTypes,
     filterType?: SongFilterTypes,
     limit?: number,
-    preserveIdOrder = false
+    preserveIdOrder = false,
   ): Promise<SongData[] | undefined> =>
-    ipcRenderer.invoke('app/getSongInfo', songIds, sortType, filterType, limit, preserveIdOrder),
+    ipcRenderer.invoke(
+      "app/getSongInfo",
+      songIds,
+      sortType,
+      filterType,
+      limit,
+      preserveIdOrder,
+    ),
   getAllHistorySongs: (
     sortType?: SongSortTypes,
-    paginatingData?: PaginatingData
+    paginatingData?: PaginatingData,
   ): Promise<PaginatedResult<SongData, SongSortTypes>> =>
-    ipcRenderer.invoke('app/getAllHistorySongs', sortType, paginatingData),
+    ipcRenderer.invoke("app/getAllHistorySongs", sortType, paginatingData),
   getAllFavoriteSongs: (
     sortType?: SongSortTypes,
-    paginatingData?: PaginatingData
+    paginatingData?: PaginatingData,
   ): Promise<PaginatedResult<SongData, SongSortTypes>> =>
-    ipcRenderer.invoke('app/getAllFavoriteSongs', sortType, paginatingData),
+    ipcRenderer.invoke("app/getAllFavoriteSongs", sortType, paginatingData),
   getSongListeningData: (songIds: number[]): Promise<SongListeningData[]> =>
-    ipcRenderer.invoke('app/getSongListeningData', songIds),
+    ipcRenderer.invoke("app/getSongListeningData", songIds),
   updateSongListeningData: (
     songId: number,
     dataType: ListeningDataEvents,
-    dataUpdateType: number
+    dataUpdateType: number,
   ): Promise<void> =>
-    ipcRenderer.invoke('app/updateSongListeningData', songId, dataType, dataUpdateType),
-  resyncSongsLibrary: (): Promise<true> => ipcRenderer.invoke('app/resyncSongsLibrary'),
+    ipcRenderer.invoke(
+      "app/updateSongListeningData",
+      songId,
+      dataType,
+      dataUpdateType,
+    ),
+  resyncSongsLibrary: (): Promise<true> =>
+    ipcRenderer.invoke("app/resyncSongsLibrary"),
 
-  getBlacklistData: (): Promise<Blacklist> => ipcRenderer.invoke('app/getBlacklistData'),
+  getBlacklistData: (): Promise<Blacklist> =>
+    ipcRenderer.invoke("app/getBlacklistData"),
   blacklistSongs: (songIds: number[]): Promise<void> =>
-    ipcRenderer.invoke('app/blacklistSongs', songIds),
+    ipcRenderer.invoke("app/blacklistSongs", songIds),
   restoreBlacklistedSongs: (songIds: number[]): Promise<void> =>
-    ipcRenderer.invoke('app/restoreBlacklistedSongs', songIds),
+    ipcRenderer.invoke("app/restoreBlacklistedSongs", songIds),
   deleteSongsFromSystem: (
     absoluteFilePaths: string[],
-    isPermanentDelete: boolean
+    isPermanentDelete: boolean,
   ): PromiseFunctionReturn =>
-    ipcRenderer.invoke('app/deleteSongsFromSystem', absoluteFilePaths, isPermanentDelete),
-  generatePalettes: (): Promise<void> => ipcRenderer.invoke('app/generatePalettes'),
-  clearSongHistory: (): PromiseFunctionReturn => ipcRenderer.invoke('app/clearSongHistory'),
+    ipcRenderer.invoke(
+      "app/deleteSongsFromSystem",
+      absoluteFilePaths,
+      isPermanentDelete,
+    ),
+  generatePalettes: (): Promise<void> =>
+    ipcRenderer.invoke("app/generatePalettes"),
+  clearSongHistory: (): PromiseFunctionReturn =>
+    ipcRenderer.invoke("app/clearSongHistory"),
   scrobbleSong: (songId: number, startTimeInSecs: number): Promise<void> =>
-    ipcRenderer.invoke('app/scrobbleSong', songId, startTimeInSecs),
+    ipcRenderer.invoke("app/scrobbleSong", songId, startTimeInSecs),
   sendNowPlayingSongDataToLastFM: (songId: number): Promise<void> =>
-    ipcRenderer.invoke('app/sendNowPlayingSongDataToLastFM', songId),
+    ipcRenderer.invoke("app/sendNowPlayingSongDataToLastFM", songId),
   getSimilarTracksForASong: (songId: number): Promise<SimilarTracksOutput> =>
-    ipcRenderer.invoke('app/getSimilarTracksForASong', songId)
+    ipcRenderer.invoke("app/getSimilarTracksForASong", songId),
 };
 
 const suggestions = {
   getArtistDuplicates: (artistName: string): Promise<Artist[]> =>
-    ipcRenderer.invoke('app/getArtistDuplicates', artistName),
+    ipcRenderer.invoke("app/getArtistDuplicates", artistName),
 
   resolveArtistDuplicates: (
     selectedArtistId: number,
-    duplicateIds: number[]
+    duplicateIds: number[],
   ): Promise<UpdateSongDataResult | undefined> =>
-    ipcRenderer.invoke('app/resolveArtistDuplicates', selectedArtistId, duplicateIds),
+    ipcRenderer.invoke(
+      "app/resolveArtistDuplicates",
+      selectedArtistId,
+      duplicateIds,
+    ),
 
   resolveSeparateArtists: (
     separateArtistId: number,
-    separateArtistNames: string[]
+    separateArtistNames: string[],
   ): Promise<UpdateSongDataResult | undefined> =>
-    ipcRenderer.invoke('app/resolveSeparateArtists', separateArtistId, separateArtistNames),
+    ipcRenderer.invoke(
+      "app/resolveSeparateArtists",
+      separateArtistId,
+      separateArtistNames,
+    ),
 
   resolveFeaturingArtists: (
     songId: number,
     featArtistNames: string[],
-    removeFeatInfoInTitle?: boolean
+    removeFeatInfoInTitle?: boolean,
   ): Promise<UpdateSongDataResult | undefined> =>
     ipcRenderer.invoke(
-      'app/resolveFeaturingArtists',
+      "app/resolveFeaturingArtists",
       songId,
       featArtistNames,
-      removeFeatInfoInTitle
-    )
+      removeFeatInfoInTitle,
+    ),
 };
 
 // $ APP PLAYER UNKNOWN SONGS FETCHING APIS
 const unknownSource = {
-  playSongFromUnknownSource: (callback: (_: unknown, audioPlayerData: AudioPlayerData) => void) =>
-    ipcRenderer.on('app/playSongFromUnknownSource', callback),
+  playSongFromUnknownSource: (
+    callback: (_: unknown, audioPlayerData: AudioPlayerData) => void,
+  ) => ipcRenderer.on("app/playSongFromUnknownSource", callback),
   getSongFromUnknownSource: (songPath: string): Promise<AudioPlayerData> =>
-    ipcRenderer.invoke('app/getSongFromUnknownSource', songPath),
+    ipcRenderer.invoke("app/getSongFromUnknownSource", songPath),
   removePlaySongFromUnknownSourceEvent: (
-    callback: (_: unknown, audioPlayerData: AudioPlayerData) => void
-  ) => ipcRenderer.removeListener('app/playSongFromUnknownSource', callback)
+    callback: (_: unknown, audioPlayerData: AudioPlayerData) => void,
+  ) => ipcRenderer.removeListener("app/playSongFromUnknownSource", callback),
 };
 
 // $ QUIT EVENT HANDLING
 const quitEvent = {
   beforeQuitEvent: (callback: (e: unknown) => void) =>
-    ipcRenderer.on('app/beforeQuitEvent', callback),
+    ipcRenderer.on("app/beforeQuitEvent", callback),
   removeBeforeQuitEventListener: (callback: (...args: unknown[]) => void) =>
-    ipcRenderer.removeListener('app/beforeQuitEvent', callback)
+    ipcRenderer.removeListener("app/beforeQuitEvent", callback),
 };
 
 // $ SYSTEM BATTERY RELATED EVENTS
 const battery = {
-  listenForBatteryPowerStateChanges: (callback: (_: unknown, isOnBatteryPower: boolean) => void) =>
-    ipcRenderer.on('app/isOnBatteryPower', callback),
+  listenForBatteryPowerStateChanges: (
+    callback: (_: unknown, isOnBatteryPower: boolean) => void,
+  ) => ipcRenderer.on("app/isOnBatteryPower", callback),
   stopListeningForBatteryPowerStateChanges: (
-    callback: (_: unknown, isOnBatteryPower: boolean) => void
-  ) => ipcRenderer.removeListener('app/isOnBatteryPower', callback)
+    callback: (_: unknown, isOnBatteryPower: boolean) => void,
+  ) => ipcRenderer.removeListener("app/isOnBatteryPower", callback),
 };
 
 // $ APP FULL-SCREEN EVENTS
 const fullscreen = {
   onEnterFullscreen: (callback: (e: unknown) => void) =>
-    ipcRenderer.on('app/enteredFullscreen', callback),
+    ipcRenderer.on("app/enteredFullscreen", callback),
   onLeaveFullscreen: (callback: (e: unknown) => void) =>
-    ipcRenderer.on('app/leftFullscreen', callback)
+    ipcRenderer.on("app/leftFullscreen", callback),
 };
 
 // $ APP SEARCH
@@ -195,11 +248,17 @@ const search = {
     filter: SearchFilters,
     value: string,
     updateSearchHistory?: boolean,
-    isSimilaritySearchEnabled?: boolean
+    isSimilaritySearchEnabled?: boolean,
   ): Promise<SearchResult> =>
-    ipcRenderer.invoke('app/search', filter, value, updateSearchHistory, isSimilaritySearchEnabled),
+    ipcRenderer.invoke(
+      "app/search",
+      filter,
+      value,
+      updateSearchHistory,
+      isSimilaritySearchEnabled,
+    ),
   clearSearchHistory: (searchText?: string[]): Promise<boolean> =>
-    ipcRenderer.invoke('app/clearSearchHistory', searchText)
+    ipcRenderer.invoke("app/clearSearchHistory", searchText),
 };
 
 // $ SONG LYRICS
@@ -208,48 +267,57 @@ const lyrics = {
     songInfo: LyricsRequestTrackInfo,
     lyricsType?: LyricsTypes,
     lyricsRequestType?: LyricsRequestTypes,
-    saveLyricsAutomatically?: AutomaticallySaveLyricsTypes
+    saveLyricsAutomatically?: AutomaticallySaveLyricsTypes,
   ): Promise<SongLyrics | undefined> =>
     ipcRenderer.invoke(
-      'app/getSongLyrics',
+      "app/getSongLyrics",
       songInfo,
       lyricsType,
       lyricsRequestType,
-      saveLyricsAutomatically
+      saveLyricsAutomatically,
     ),
 
-  getTranslatedLyrics: (languageCode: LanguageCodes): Promise<SongLyrics | undefined> =>
-    ipcRenderer.invoke('app/getTranslatedLyrics', languageCode),
+  getTranslatedLyrics: (
+    languageCode: LanguageCodes,
+  ): Promise<SongLyrics | undefined> =>
+    ipcRenderer.invoke("app/getTranslatedLyrics", languageCode),
 
-  romanizeLyrics: (): Promise<SongLyrics | undefined> => ipcRenderer.invoke('app/romanizeLyrics'),
+  romanizeLyrics: (): Promise<SongLyrics | undefined> =>
+    ipcRenderer.invoke("app/romanizeLyrics"),
 
   convertLyricsToPinyin: (): Promise<SongLyrics | undefined> =>
-    ipcRenderer.invoke('app/convertLyricsToPinyin'),
+    ipcRenderer.invoke("app/convertLyricsToPinyin"),
 
   convertLyricsToRomaja: (): Promise<SongLyrics | undefined> =>
-    ipcRenderer.invoke('app/convertLyricsToRomaja'),
+    ipcRenderer.invoke("app/convertLyricsToRomaja"),
 
-  resetLyrics: (): Promise<SongLyrics> => ipcRenderer.invoke('app/resetLyrics'),
+  resetLyrics: (): Promise<SongLyrics> => ipcRenderer.invoke("app/resetLyrics"),
 
   saveLyricsToSong: (songPath: string, text: SongLyrics): Promise<void> =>
-    ipcRenderer.invoke('app/saveLyricsToSong', songPath, text)
+    ipcRenderer.invoke("app/saveLyricsToSong", songPath, text),
 };
 
 // $ APP MESSAGES
 const messages = {
   getMessageFromMain: (
-    callback: (event: unknown, messageCode: MessageCodes, data: Record<string, unknown>) => void
-  ) => ipcRenderer.on('app/sendMessageToRendererEvent', callback),
+    callback: (
+      event: unknown,
+      messageCode: MessageCodes,
+      data: Record<string, unknown>,
+    ) => void,
+  ) => ipcRenderer.on("app/sendMessageToRendererEvent", callback),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   removeMessageToRendererEventListener: (callback: (...args: any[]) => void) =>
-    ipcRenderer.removeListener('app/sendMessageToRendererEvent', callback)
+    ipcRenderer.removeListener("app/sendMessageToRendererEvent", callback),
 };
 
 // $ APP DATA UPDATE EVENTS
 const dataUpdates = {
-  dataUpdateEvent: (callback: (e: unknown, dataEvents: DataUpdateEvent[]) => void) =>
-    ipcRenderer.on('app/dataUpdateEvent', callback),
-  removeDataUpdateEventListeners: () => ipcRenderer.removeAllListeners('app/dataUpdateEvent')
+  dataUpdateEvent: (
+    callback: (e: unknown, dataEvents: DataUpdateEvent[]) => void,
+  ) => ipcRenderer.on("app/dataUpdateEvent", callback),
+  removeDataUpdateEventListeners: () =>
+    ipcRenderer.removeAllListeners("app/dataUpdateEvent"),
 };
 
 // $  UPDATE SONG DATA
@@ -258,106 +326,148 @@ const songUpdates = {
     songIdOrPath: string,
     tags: SongTags,
     sendUpdatedData: boolean,
-    isKnownSource: boolean
+    isKnownSource: boolean,
   ): Promise<UpdateSongDataResult> =>
-    ipcRenderer.invoke('app/updateSongId3Tags', songIdOrPath, tags, sendUpdatedData, isKnownSource),
+    ipcRenderer.invoke(
+      "app/updateSongId3Tags",
+      songIdOrPath,
+      tags,
+      sendUpdatedData,
+      isKnownSource,
+    ),
   reParseSong: (songPath: string): Promise<SavableSongData | undefined> =>
-    ipcRenderer.invoke('app/reParseSong', songPath),
-  getSongId3Tags: (songIdOrPath: string, isKnownSource: boolean): Promise<SongTags> =>
-    ipcRenderer.invoke('app/getSongId3Tags', songIdOrPath, isKnownSource),
-  getImgFileLocation: (): Promise<string> => ipcRenderer.invoke('app/getImgFileLocation'),
+    ipcRenderer.invoke("app/reParseSong", songPath),
+  getSongId3Tags: (
+    songIdOrPath: string,
+    isKnownSource: boolean,
+  ): Promise<SongTags> =>
+    ipcRenderer.invoke("app/getSongId3Tags", songIdOrPath, isKnownSource),
+  getImgFileLocation: (): Promise<string> =>
+    ipcRenderer.invoke("app/getImgFileLocation"),
 
   revealSongInFileExplorer: (songId: number): void =>
-    ipcRenderer.send('app/revealSongInFileExplorer', songId),
+    ipcRenderer.send("app/revealSongInFileExplorer", songId),
   saveArtworkToSystem: (artworkPath: string, saveName?: string): void =>
-    ipcRenderer.send('app/saveArtworkToSystem', artworkPath, saveName),
+    ipcRenderer.send("app/saveArtworkToSystem", artworkPath, saveName),
   isMetadataUpdatesPending: (songPath: string): Promise<boolean> =>
-    ipcRenderer.invoke('app/isMetadataUpdatesPending', songPath)
+    ipcRenderer.invoke("app/isMetadataUpdatesPending", songPath),
 };
 
 // $ FETCH SONG DATA FROM INTERNET
 const songDataFromInternet = {
   searchSongMetadataResultsInInternet: (
     songTitle: string,
-    songArtists: string[]
+    songArtists: string[],
   ): Promise<SongMetadataResultFromInternet[]> =>
-    ipcRenderer.invoke('app/searchSongMetadataResultsInInternet', songTitle, songArtists),
+    ipcRenderer.invoke(
+      "app/searchSongMetadataResultsInInternet",
+      songTitle,
+      songArtists,
+    ),
   fetchSongMetadataFromInternet: (
     songTitle: string,
-    songArtists: string[]
+    songArtists: string[],
   ): Promise<SongMetadataResultFromInternet[]> =>
-    ipcRenderer.invoke('app/fetchSongMetadataFromInternet', songTitle, songArtists),
+    ipcRenderer.invoke(
+      "app/fetchSongMetadataFromInternet",
+      songTitle,
+      songArtists,
+    ),
   fetchSongInfoFromNet: (
     songTitle: string,
-    songArtists: string[]
+    songArtists: string[],
   ): Promise<LastFMTrackInfoApi | undefined> =>
-    ipcRenderer.invoke('app/fetchSongInfoFromNet', songTitle, songArtists)
+    ipcRenderer.invoke("app/fetchSongInfoFromNet", songTitle, songArtists),
 };
 
 // $ APP USER DATA
 const userData = {
-  getUserData: (): Promise<UserData> => ipcRenderer.invoke('app/getUserData'),
+  getUserData: (): Promise<UserData> => ipcRenderer.invoke("app/getUserData"),
   saveUserData: (dataType: UserDataTypes, data: unknown) =>
-    ipcRenderer.invoke('app/saveUserData', dataType, data)
+    ipcRenderer.invoke("app/saveUserData", dataType, data),
 };
 
 // $ STORAGE DATA
 const storageData = {
   getStorageUsage: (forceRefresh?: boolean): Promise<StorageMetrics> =>
-    ipcRenderer.invoke('app/getStorageUsage', forceRefresh),
-  getDatabaseMetrics: (): Promise<DatabaseMetrics> => ipcRenderer.invoke('app/getDatabaseMetrics')
+    ipcRenderer.invoke("app/getStorageUsage", forceRefresh),
+  getDatabaseMetrics: (): Promise<DatabaseMetrics> =>
+    ipcRenderer.invoke("app/getDatabaseMetrics"),
 };
 
 //  $ USER SETTINGS
 const settings = {
-  getUserSettings: (): Promise<UserSettings> => ipcRenderer.invoke('app/getUserSettings'),
+  getUserSettings: (): Promise<UserSettings> =>
+    ipcRenderer.invoke("app/getUserSettings"),
   saveUserSettings: (settings: Partial<UserSettings>): Promise<void> =>
-    ipcRenderer.invoke('app/saveUserSettings', settings),
+    ipcRenderer.invoke("app/saveUserSettings", settings),
 
   updateDiscordRpcState: (enableDiscordRpc: boolean): Promise<void> =>
-    ipcRenderer.invoke('app/saveUserSettings', { enableDiscordRPC: enableDiscordRpc }),
-  updateSongScrobblingToLastFMState: (enableScrobbling: boolean): Promise<void> =>
-    ipcRenderer.invoke('app/saveUserSettings', {
-      sendSongScrobblingDataToLastFM: enableScrobbling
+    ipcRenderer.invoke("app/saveUserSettings", {
+      enableDiscordRPC: enableDiscordRpc,
+    }),
+  updateSongScrobblingToLastFMState: (
+    enableScrobbling: boolean,
+  ): Promise<void> =>
+    ipcRenderer.invoke("app/saveUserSettings", {
+      sendSongScrobblingDataToLastFM: enableScrobbling,
     }),
   updateSongFavoritesToLastFMState: (enableFavorites: boolean): Promise<void> =>
-    ipcRenderer.invoke('app/saveUserSettings', {
-      sendSongFavoritesDataToLastFM: enableFavorites
+    ipcRenderer.invoke("app/saveUserSettings", {
+      sendSongFavoritesDataToLastFM: enableFavorites,
     }),
-  updateNowPlayingSongDataToLastFMState: (enableNowPlaying: boolean): Promise<void> =>
-    ipcRenderer.invoke('app/saveUserSettings', {
-      sendNowPlayingSongDataToLastFM: enableNowPlaying
+  updateNowPlayingSongDataToLastFMState: (
+    enableNowPlaying: boolean,
+  ): Promise<void> =>
+    ipcRenderer.invoke("app/saveUserSettings", {
+      sendNowPlayingSongDataToLastFM: enableNowPlaying,
     }),
-  updateSaveLyricsInLrcFilesForSupportedSongs: (enableSave: boolean): Promise<void> =>
-    ipcRenderer.invoke('app/saveUserSettings', {
-      saveLyricsInLrcFilesForSupportedSongs: enableSave
+  updateSaveLyricsInLrcFilesForSupportedSongs: (
+    enableSave: boolean,
+  ): Promise<void> =>
+    ipcRenderer.invoke("app/saveUserSettings", {
+      saveLyricsInLrcFilesForSupportedSongs: enableSave,
     }),
   updateCustomLrcFilesSaveLocation: (location: string): Promise<void> =>
-    ipcRenderer.invoke('app/saveUserSettings', { customLrcFilesSaveLocation: location }),
+    ipcRenderer.invoke("app/saveUserSettings", {
+      customLrcFilesSaveLocation: location,
+    }),
   updateOpenWindowAsHiddenOnSystemStart: (enable: boolean): Promise<void> =>
-    ipcRenderer.invoke('app/saveUserSettings', { openWindowAsHiddenOnSystemStart: enable }),
+    ipcRenderer.invoke("app/saveUserSettings", {
+      openWindowAsHiddenOnSystemStart: enable,
+    }),
   updateHideWindowOnCloseState: (enable: boolean): Promise<void> =>
-    ipcRenderer.invoke('app/saveUserSettings', { hideWindowOnClose: enable }),
+    ipcRenderer.invoke("app/saveUserSettings", { hideWindowOnClose: enable }),
   updateSaveVerboseLogs: (enable: boolean): Promise<void> =>
-    ipcRenderer.invoke('app/saveUserSettings', { saveVerboseLogs: enable })
+    ipcRenderer.invoke("app/saveUserSettings", { saveVerboseLogs: enable }),
 };
 
 // $ FOLDER DATA
 const folderData = {
-  getFolderData: (folderPaths: string[], sortType?: FolderSortTypes): Promise<MusicFolder[]> =>
-    ipcRenderer.invoke('app/getFolderData', folderPaths, sortType),
+  getFolderData: (
+    folderPaths: string[],
+    sortType?: FolderSortTypes,
+  ): Promise<MusicFolder[]> =>
+    ipcRenderer.invoke("app/getFolderData", folderPaths, sortType),
   blacklistFolders: (folderPaths: string[]): Promise<void> =>
-    ipcRenderer.invoke('app/blacklistFolders', folderPaths),
+    ipcRenderer.invoke("app/blacklistFolders", folderPaths),
   restoreBlacklistedFolders: (folderPaths: string[]): Promise<void> =>
-    ipcRenderer.invoke('app/restoreBlacklistedFolders', folderPaths),
-  toggleBlacklistedFolders: (folderPaths: string[], isBlacklistFolder?: boolean): Promise<void> =>
-    ipcRenderer.invoke('app/toggleBlacklistedFolders', folderPaths, isBlacklistFolder),
+    ipcRenderer.invoke("app/restoreBlacklistedFolders", folderPaths),
+  toggleBlacklistedFolders: (
+    folderPaths: string[],
+    isBlacklistFolder?: boolean,
+  ): Promise<void> =>
+    ipcRenderer.invoke(
+      "app/toggleBlacklistedFolders",
+      folderPaths,
+      isBlacklistFolder,
+    ),
   revealFolderInFileExplorer: (folderPath: string): void =>
-    ipcRenderer.send('app/revealFolderInFileExplorer', folderPath),
+    ipcRenderer.send("app/revealFolderInFileExplorer", folderPath),
   getFolderStructures: (): Promise<FolderStructure[]> =>
-    ipcRenderer.invoke('app/getFolderStructures'),
+    ipcRenderer.invoke("app/getFolderStructures"),
   removeAMusicFolder: (absolutePath: string): Promise<void> =>
-    ipcRenderer.invoke('app/removeAMusicFolder', absolutePath)
+    ipcRenderer.invoke("app/removeAMusicFolder", absolutePath),
 };
 
 // $ ARTISTS DATA
@@ -368,26 +478,28 @@ const artistsData = {
     filterType?: ArtistFilterTypes,
     start?: number,
     end?: number,
-    limit?: number
+    limit?: number,
   ): Promise<PaginatedResult<Artist, ArtistSortTypes>> => {
     const stringIds = artistIdsOrNames?.map(String);
     return ipcRenderer.invoke(
-      'app/getArtistData',
+      "app/getArtistData",
       stringIds,
       sortType,
       filterType,
       start,
       end,
-      limit
+      limit,
     );
   },
   toggleLikeArtists: (
     artistIds: number[],
-    likeArtist?: boolean
+    likeArtist?: boolean,
   ): Promise<ToggleLikeSongReturnValue | undefined> =>
-    ipcRenderer.invoke('app/toggleLikeArtists', artistIds, likeArtist),
-  getArtistArtworks: (artistId: number): Promise<ArtistInfoFromNet | undefined> =>
-    ipcRenderer.invoke('app/getArtistArtworks', artistId)
+    ipcRenderer.invoke("app/toggleLikeArtists", artistIds, likeArtist),
+  getArtistArtworks: (
+    artistId: number,
+  ): Promise<ArtistInfoFromNet | undefined> =>
+    ipcRenderer.invoke("app/getArtistArtworks", artistId),
 };
 
 // $ GENRES DATA
@@ -396,11 +508,17 @@ const genresData = {
     genreNamesOrIds?: (string | number)[],
     sortType?: GenreSortTypes,
     start?: number,
-    end?: number
+    end?: number,
   ): Promise<PaginatedResult<Genre, GenreSortTypes>> => {
     const stringIds = genreNamesOrIds?.map(String);
-    return ipcRenderer.invoke('app/getGenresData', stringIds, sortType, start, end);
-  }
+    return ipcRenderer.invoke(
+      "app/getGenresData",
+      stringIds,
+      sortType,
+      start,
+      end,
+    );
+  },
 };
 
 // $ ALBUMS DATA
@@ -409,13 +527,21 @@ const albumsData = {
     albumTitlesOrIds?: (string | number)[],
     sortType?: AlbumSortTypes,
     start?: number,
-    end?: number
+    end?: number,
   ): Promise<PaginatedResult<Album, AlbumSortTypes>> => {
     const stringIds = albumTitlesOrIds?.map(String);
-    return ipcRenderer.invoke('app/getAlbumData', stringIds, sortType, start, end);
+    return ipcRenderer.invoke(
+      "app/getAlbumData",
+      stringIds,
+      sortType,
+      start,
+      end,
+    );
   },
-  getAlbumInfoFromLastFM: (albumId: number): Promise<LastFMAlbumInfo | undefined> =>
-    ipcRenderer.invoke('app/getAlbumInfoFromLastFM', albumId)
+  getAlbumInfoFromLastFM: (
+    albumId: number,
+  ): Promise<LastFMAlbumInfo | undefined> =>
+    ipcRenderer.invoke("app/getAlbumInfoFromLastFM", albumId),
 };
 
 // $ PLAYLIST DATA AND CONTROLS
@@ -425,47 +551,61 @@ const playlistsData = {
     sortType?: PlaylistSortTypes,
     start?: number,
     end?: number,
-    onlyMutablePlaylists?: boolean
+    onlyMutablePlaylists?: boolean,
   ): Promise<PaginatedResult<Playlist, PlaylistSortTypes>> =>
     ipcRenderer.invoke(
-      'app/getPlaylistData',
+      "app/getPlaylistData",
       playlistIds,
       sortType,
       start,
       end,
-      onlyMutablePlaylists
+      onlyMutablePlaylists,
     ),
   addNewPlaylist: (
     playlistName: string,
     songIds?: number[],
-    artworkPath?: string
+    artworkPath?: string,
   ): Promise<{ success: boolean; message?: string; playlist?: Playlist }> =>
-    ipcRenderer.invoke('app/addNewPlaylist', playlistName, songIds, artworkPath),
-  addSongsToPlaylist: (playlistId: number, songIds: number[]): PromiseFunctionReturn =>
-    ipcRenderer.invoke('app/addSongsToPlaylist', playlistId, songIds),
+    ipcRenderer.invoke(
+      "app/addNewPlaylist",
+      playlistName,
+      songIds,
+      artworkPath,
+    ),
+  addSongsToPlaylist: (
+    playlistId: number,
+    songIds: number[],
+  ): PromiseFunctionReturn =>
+    ipcRenderer.invoke("app/addSongsToPlaylist", playlistId, songIds),
   addArtworkToAPlaylist: (
     playlistId: number,
-    artworkPath: string
+    artworkPath: string,
   ): Promise<ArtworkPaths | undefined> =>
-    ipcRenderer.invoke('app/addArtworkToAPlaylist', playlistId, artworkPath),
+    ipcRenderer.invoke("app/addArtworkToAPlaylist", playlistId, artworkPath),
   renameAPlaylist: (playlistId: number, newName: string): Promise<void> =>
-    ipcRenderer.invoke('app/renameAPlaylist', playlistId, newName),
-  removeSongFromPlaylist: (playlistId: number, songId: number): PromiseFunctionReturn =>
-    ipcRenderer.invoke('app/removeSongFromPlaylist', playlistId, songId),
+    ipcRenderer.invoke("app/renameAPlaylist", playlistId, newName),
+  removeSongFromPlaylist: (
+    playlistId: number,
+    songId: number,
+  ): PromiseFunctionReturn =>
+    ipcRenderer.invoke("app/removeSongFromPlaylist", playlistId, songId),
   removePlaylists: (playlistIds: number[]) =>
-    ipcRenderer.invoke('app/removePlaylists', playlistIds),
+    ipcRenderer.invoke("app/removePlaylists", playlistIds),
   getArtworksForMultipleArtworksCover: (
-    songIds: number[]
+    songIds: number[],
   ): Promise<{ songId: number; artworkPaths: ArtworkPaths }[]> =>
-    ipcRenderer.invoke('app/getArtworksForMultipleArtworksCover', songIds),
+    ipcRenderer.invoke("app/getArtworksForMultipleArtworksCover", songIds),
   exportPlaylist: (playlistId: number): Promise<void> =>
-    ipcRenderer.invoke('app/exportPlaylist', playlistId),
-  importPlaylist: (): Promise<void> => ipcRenderer.invoke('app/importPlaylist')
+    ipcRenderer.invoke("app/exportPlaylist", playlistId),
+  importPlaylist: (): Promise<void> => ipcRenderer.invoke("app/importPlaylist"),
 };
 
 const queue = {
-  getQueueInfo: (queueType: QueueTypes, id: string): Promise<QueueInfo | undefined> =>
-    ipcRenderer.invoke('app/getQueueInfo', queueType, id)
+  getQueueInfo: (
+    queueType: QueueTypes,
+    id: string,
+  ): Promise<QueueInfo | undefined> =>
+    ipcRenderer.invoke("app/getQueueInfo", queueType, id),
 };
 
 // $ APP LOGS
@@ -473,56 +613,68 @@ const log = {
   sendLogs: (
     mes: string | Error,
     data?: Record<string, unknown>,
-    logToConsoleType: LogMessageTypes = 'INFO',
+    logToConsoleType: LogMessageTypes = "INFO",
     forceWindowRestart = false,
-    forceMainRestart = false
+    forceMainRestart = false,
   ): Promise<unknown> => {
     return ipcRenderer.invoke(
-      'app/getRendererLogs',
+      "app/getRendererLogs",
       mes,
       data,
       logToConsoleType,
       forceWindowRestart,
-      forceMainRestart
+      forceMainRestart,
     );
   },
-  openLogFile: (): void => ipcRenderer.send('app/openLogFile')
+  openLogFile: (): void => ipcRenderer.send("app/openLogFile"),
 };
 
 // $ APP MINI PLAYER CONTROLS
 const miniPlayer = {
-  toggleMiniPlayerAlwaysOnTop: (isMiniPlayerAlwaysOnTop: boolean): Promise<void> =>
-    ipcRenderer.invoke('app/toggleMiniPlayerAlwaysOnTop', isMiniPlayerAlwaysOnTop)
+  toggleMiniPlayerAlwaysOnTop: (
+    isMiniPlayerAlwaysOnTop: boolean,
+  ): Promise<void> =>
+    ipcRenderer.invoke(
+      "app/toggleMiniPlayerAlwaysOnTop",
+      isMiniPlayerAlwaysOnTop,
+    ),
 };
 
 // $ APP SETTINGS HELPER FUNCTIONS
 const settingsHelpers = {
-  getAppLanguage: (lang: LanguageCodes): void => ipcRenderer.send('app/getAppLanguage', lang),
-  openInBrowser: (url: string): void => ipcRenderer.send('app/openInBrowser', url),
+  getAppLanguage: (lang: LanguageCodes): void =>
+    ipcRenderer.send("app/getAppLanguage", lang),
+  openInBrowser: (url: string): void =>
+    ipcRenderer.send("app/openInBrowser", url),
   toggleAutoLaunch: (autoLaunchState: boolean): Promise<void> =>
-    ipcRenderer.invoke('app/toggleAutoLaunch', autoLaunchState),
-  openDevtools: () => ipcRenderer.send('app/openDevTools'),
+    ipcRenderer.invoke("app/toggleAutoLaunch", autoLaunchState),
+  openDevtools: () => ipcRenderer.send("app/openDevTools"),
   networkStatusChange: (isConnected: boolean): void =>
-    ipcRenderer.send('app/networkStatusChange', isConnected),
+    ipcRenderer.send("app/networkStatusChange", isConnected),
   exportAppData: (localStorageData: string): Promise<void> =>
-    ipcRenderer.invoke('app/exportAppData', localStorageData),
-  importAppData: (): Promise<void | LocalStorage> => ipcRenderer.invoke('app/importAppData'),
-  compareEncryptedData: (): Promise<boolean> => ipcRenderer.invoke('app/compareEncryptedData'),
-  loginToLastFmInBrowser: () => ipcRenderer.send('app/loginToLastFmInBrowser'),
-  getFolderLocation: (): Promise<string> => ipcRenderer.invoke('app/getFolderLocation')
+    ipcRenderer.invoke("app/exportAppData", localStorageData),
+  importAppData: (): Promise<void | LocalStorage> =>
+    ipcRenderer.invoke("app/importAppData"),
+  compareEncryptedData: (): Promise<boolean> =>
+    ipcRenderer.invoke("app/compareEncryptedData"),
+  loginToLastFmInBrowser: () => ipcRenderer.send("app/loginToLastFmInBrowser"),
+  getFolderLocation: (): Promise<string> =>
+    ipcRenderer.invoke("app/getFolderLocation"),
 };
 
 // $ APP RESTART OR RESET
 const appControls = {
-  restartRenderer: (reason: string): void => ipcRenderer.send('app/restartRenderer', reason),
-  restartApp: (reason: string): void => ipcRenderer.send('app/restartApp', reason),
+  restartRenderer: (reason: string): void =>
+    ipcRenderer.send("app/restartRenderer", reason),
+  restartApp: (reason: string): void =>
+    ipcRenderer.send("app/restartApp", reason),
   resetApp: (): void => {
-    ipcRenderer.removeAllListeners('app/beforeQuitEvent');
-    ipcRenderer.send('app/resetApp');
+    ipcRenderer.removeAllListeners("app/beforeQuitEvent");
+    ipcRenderer.send("app/resetApp");
   },
-  stopScreenSleeping: () => ipcRenderer.send('app/stopScreenSleeping'),
+  stopScreenSleeping: () => ipcRenderer.send("app/stopScreenSleeping"),
 
-  allowScreenSleeping: () => ipcRenderer.send('app/allowScreenSleeping')
+  allowScreenSleeping: () => ipcRenderer.send("app/allowScreenSleeping"),
 };
 
 // $ OTHER
@@ -532,25 +684,27 @@ const utils = {
     return path;
   },
   path: {
-    join: (...args: string[]) => args.join('/')
+    join: (...args: string[]) => args.join("/"),
   },
   getExtension: (dir: string) => {
     const regex = /(?<name>.+)\.(?<ext>[\w\d]+)(?<search>\?.+)?$/;
     const match = dir.match(regex);
-    const ext = match?.groups?.ext || '';
+    const ext = match?.groups?.ext || "";
     return ext;
   },
   getBaseName: (dir: string) => {
-    const base =
-      dir
-        .split(/[/\\]/)
-        .filter((x) => x)
-        .at(-1) || '';
+    const base = dir
+      .split(/[/\\]/)
+      .filter((x) => x)
+      .at(-1) || "";
     return base;
   },
   removeDefaultAppProtocolFromFilePath: (filePath: string) => {
-    return filePath.replace(/nora:[/\\]{1,2}localfiles[/\\]{1,2}|\?[\w+=\w+&?]+$/gm, '');
-  }
+    return filePath.replace(
+      /nora:[/\\]{1,2}localfiles[/\\]{1,2}|\?[\w+=\w+&?]+$/gm,
+      "",
+    );
+  },
 };
 
 export const api = {
@@ -583,8 +737,7 @@ export const api = {
   settingsHelpers,
   appControls,
   utils,
-  queue
+  queue,
 };
 
-contextBridge.exposeInMainWorld('api', api);
-
+contextBridge.exposeInMainWorld("api", api);
