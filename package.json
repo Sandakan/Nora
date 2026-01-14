@@ -147,7 +147,7 @@
     "es-toolkit": "^1.41.0",
     "i18next": "^25.7.4",
     "mime": "^4.1.0",
-    "music-metadata": "^11.00.5",
+    "music-metadata": "^11.10.5",
     "node-id3": "^0.2.6",
     "node-taglib-sharp": "^6.0.1",
     "node-vibrant": "^4.0.0",
