@@ -142,7 +142,7 @@
     "didyoumean2": "^7.0.2",
     "discord-rpc": "^4.0.1",
     "dotenv": "^17.2.3",
-    "drizzle-orm": "^0.44.0",
+    "drizzle-orm": "^0.45.1",
     "electron-store": "^11.0.2",
     "electron-updater": "^6.2.1",
     "es-toolkit": "^1.41.0",
