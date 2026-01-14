@@ -3,7 +3,7 @@ import logger from '../logger';
 import { dataUpdateEvent } from '../main';
 
 const updateSongListeningData = async (
-  songId: string,
+  songId: number,
   dataType: ListeningDataEvents,
   value: number
 ) => {
@@ -11,11 +11,11 @@ const updateSongListeningData = async (
     logger.debug(`Requested to update listening data.`, { songId, dataType, value });
 
     if (dataType === 'LISTEN' && typeof value === 'number')
-      await addSongPlayEvent(Number(songId), value.toString());
+      await addSongPlayEvent(songId, value.toString());
     else if (dataType === 'SKIP' && typeof value === 'number')
-      await addSongSkipEvent(Number(songId), value.toString());
+      await addSongSkipEvent(songId, value.toString());
     else if (dataType === 'SEEK' && typeof value === 'number')
-      await addSongSeekEvent(Number(songId), value.toString());
+      await addSongSeekEvent(songId, value.toString());
     else {
       logger.error(`Requested to update song listening data with unknown data type`, { dataType });
       throw new Error(

@@ -1,5 +1,7 @@
 import { lazy, useContext, useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { useSuspenseQuery } from '@tanstack/react-query';
+import { settingsQuery } from '@renderer/queries/settings';
 
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 
@@ -22,8 +24,6 @@ import GithubLightIcon from '../../../assets/images/svg/github-white.svg';
 import DiscordDarkIcon from '../../../assets/images/svg/discord_light_mode.svg';
 import DiscordLightIcon from '../../../assets/images/svg/discord_dark_mode.svg';
 import SLFlag from '../../../assets/images/webp/sl-flag.webp';
-import { store } from '@renderer/store/store';
-import { useStore } from '@tanstack/react-store';
 
 const ReleaseNotesPrompt = lazy(() => import('../../ReleaseNotesPrompt/ReleaseNotesPrompt'));
 const ResetAppConfirmationPrompt = lazy(() => import('../ResetAppConfirmationPrompt'));
@@ -33,7 +33,12 @@ const ClearLocalStoragePrompt = lazy(() => import('../ClearLocalStoragePrompt'))
 const OpenLinkConfirmPrompt = lazy(() => import('../../OpenLinkConfirmPrompt'));
 
 const AboutSettings = () => {
-  const isDarkMode = useStore(store, (state) => state.isDarkMode);
+  const {
+    data: { isDarkMode }
+  } = useSuspenseQuery({
+    ...settingsQuery.all,
+    select: (data) => ({ isDarkMode: data.isDarkMode })
+  });
   const { changePromptMenuData, addNewNotifications } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 

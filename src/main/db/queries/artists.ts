@@ -59,6 +59,15 @@ export const linkSongToArtist = async (
   return trx.insert(artistsSongs).values({ artistId, songId }).returning();
 };
 
+/**
+ * Unlinks a song from an artist by deleting the relationship in the artistsSongs table.
+ * This does NOT delete the artist or song themselves - only the relationship between them.
+ * 
+ * @param artistId - The ID of the artist
+ * @param songId - The ID of the song
+ * @param trx - Database transaction instance (defaults to main db connection)
+ * @returns Promise that resolves when the relationship is deleted
+ */
 export const unlinkSongFromArtist = async (
   artistId: number,
   songId: number,
@@ -257,4 +266,23 @@ export const getArtistSongIds = async (artistId: number, trx: DB | DBTransaction
     .where(eq(artistsSongs.artistId, artistId));
 
   return data;
+};
+
+/**
+ * Deletes an artist from the database.
+ * 
+ * **Cascade Behavior:**
+ * - All entries in `artistsSongs` linking this artist to songs are automatically deleted (ON DELETE CASCADE)
+ * - All entries in `albumsArtists` linking this artist to albums are automatically deleted (ON DELETE CASCADE)
+ * - All entries in `artistsArtworks` linking this artist to artworks are automatically deleted (ON DELETE CASCADE)
+ * 
+ * **Important:** This function should only be called after verifying the artist has no remaining songs.
+ * Use `getArtistSongIds()` to check before deletion to prevent data inconsistency.
+ * 
+ * @param artistId - The ID of the artist to delete
+ * @param trx - Database transaction instance (defaults to main db connection)
+ * @returns Promise that resolves when the artist is deleted
+ */
+export const deleteArtist = async (artistId: number, trx: DB | DBTransaction = db) => {
+  return trx.delete(artists).where(eq(artists.id, artistId));
 };

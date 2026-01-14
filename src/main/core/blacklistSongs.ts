@@ -2,7 +2,7 @@ import { getBlacklistData, setBlacklist } from '../filesystem';
 import logger from '../logger';
 import { dataUpdateEvent } from '../main';
 
-const blacklistSongs = (songIds: string[]) => {
+const blacklistSongs = (songIds: number[]) => {
   const blacklist = getBlacklistData();
 
   blacklist.songBlacklist = Array.from(new Set([...blacklist.songBlacklist, ...songIds]));

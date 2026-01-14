@@ -1,11 +1,10 @@
 import { useTranslation } from 'react-i18next';
-import storage from '../../../utils/localStorage';
-import Checkbox from '../../Checkbox';
 import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store/store';
+import storage from '../../../utils/localStorage';
+import Checkbox from '../../Checkbox';
 
 const PreferencesSettings = () => {
-  const userData = useStore(store, (state) => state.userData);
   const preferences = useStore(store, (state) => state.localStorage.preferences);
   const { t } = useTranslation();
 
@@ -56,7 +55,7 @@ const PreferencesSettings = () => {
             </div>
             <Checkbox
               id="showArtistArtworkNearSongControls"
-              isChecked={userData !== undefined && preferences?.showArtistArtworkNearSongControls}
+              isChecked={preferences?.showArtistArtworkNearSongControls}
               checkedStateUpdateFunction={(state) =>
                 storage.preferences.setPreferences('showArtistArtworkNearSongControls', state)
               }

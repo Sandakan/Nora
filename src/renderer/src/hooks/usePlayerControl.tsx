@@ -46,7 +46,7 @@ export function usePlayerControl(
   playerInstance: AudioPlayer | HTMLAudioElement,
   playerQueue: PlayerQueue,
   recordListeningData: (
-    songId: string,
+    songId: number,
     songDuration: number,
     repetition?: boolean,
     isKnownSource?: boolean
@@ -120,10 +120,10 @@ export function usePlayerControl(
   );
 
   const playSong = useCallback(
-    (songId: string, isStartPlay = true, playAsCurrentSongIndex = false) => {
+    (songId: number, isStartPlay = true, playAsCurrentSongIndex = false) => {
       console.log('[playSong]', { songId, isStartPlay, playAsCurrentSongIndex });
 
-      if (typeof songId === 'string') {
+      if (typeof songId === 'number') {
         // Use AudioPlayer's playSongById if available (preferred path)
         if (audioPlayer) {
           return audioPlayer.playSongById(songId, {

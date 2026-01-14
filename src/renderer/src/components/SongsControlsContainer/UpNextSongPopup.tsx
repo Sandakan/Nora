@@ -116,11 +116,11 @@ const UpNextSongPopup = (props: Props) => {
   }, [queue.position, queue.songIds, showPopup]);
 
   const showSongInfoPage = useCallback(
-    (songId: string) =>
+    (songId: number) =>
       currentSongData.isKnownSource
         ? navigate({
             to: '/main-player/songs/$songId',
-            params: { songId }
+            params: { songId: String(songId) }
           })
         : undefined,
     [navigate, currentSongData.isKnownSource]
@@ -157,7 +157,7 @@ const UpNextSongPopup = (props: Props) => {
                 upNextSongData?.artists![0] &&
                 navigate({
                   to: '/main-player/artists/$artistId',
-                  params: { artistId: upNextSongData.artists[0].artistId }
+                  params: { artistId: String(upNextSongData.artists[0].artistId) }
                 })
               }
               onKeyDown={(e) =>
@@ -165,7 +165,7 @@ const UpNextSongPopup = (props: Props) => {
                 upNextSongData?.artists![0] &&
                 navigate({
                   to: '/main-player/artists/$artistId',
-                  params: { artistId: upNextSongData.artists[0].artistId }
+                  params: { artistId: String(upNextSongData.artists[0].artistId) }
                 })
               }
             >

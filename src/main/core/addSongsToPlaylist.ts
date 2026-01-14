@@ -2,27 +2,27 @@ import { sendMessageToRenderer } from '../main';
 import logger from '../logger';
 import { getPlaylistById, linkSongsWithPlaylist } from '@main/db/queries/playlists';
 
-const addSongsToPlaylist = async (playlistId: string, songIds: string[]) => {
+const addSongsToPlaylist = async (playlistId: number, songIds: number[]) => {
   logger.debug(`Requested to add songs to a playlist.`, {
     playlistId,
     songIds
   });
-  const addedIds: string[] = [];
-  const existingIds: string[] = [];
+  const addedIds: number[] = [];
+  const existingIds: number[] = [];
 
-  const playlist = await getPlaylistById(Number(playlistId));
+  const playlist = await getPlaylistById(playlistId);
 
   if (playlist) {
     for (let i = 0; i < songIds.length; i += 1) {
       const songId = songIds[i];
 
-      const isSongIdInPlaylist = playlist.songs.some((song) => song.songId === Number(songId));
+      const isSongIdInPlaylist = playlist.songs.some((song) => song.songId === songId);
 
       if (!isSongIdInPlaylist) addedIds.push(songId);
       else existingIds.push(songId);
     }
     await linkSongsWithPlaylist(
-      addedIds.map((id) => Number(id)),
+      addedIds,
       playlist.id
     );
 

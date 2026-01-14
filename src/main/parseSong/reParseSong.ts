@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
-import * as musicMetaData from 'music-metadata';
+import { File } from 'node-taglib-sharp';
 
 import { removeArtwork, storeArtworks } from '../other/artworks';
 import { removeDefaultAppProtocolFromFilePath } from '../fs/resolveFilePaths';
@@ -24,7 +24,7 @@ import manageGenresOfParsedSong from './manageGenresOfParsedSong';
 import { generatePalettes } from '../other/generatePalette';
 import manageAlbumArtistOfParsedSong from './manageAlbumArtistOfParsedSong';
 import { getSongByPath, updateSongByPath } from '@main/db/queries/songs';
-import { convertToSongData } from '../../common/convert';
+import { convertToSongData } from '@main/utils/convert';
 import { db } from '@main/db/db';
 import { linkArtworksToSong } from '@main/db/queries/artworks';
 import type { songs } from '@main/db/schema';
@@ -37,10 +37,12 @@ const reParseSong = async (filePath: string) => {
       const song = convertToSongData(songData);
       const { songId, isArtworkAvailable, artworkPaths: oldArtworkPaths } = song;
       const stats = await fs.stat(songPath);
-      const metadata = await musicMetaData.parseFile(songPath);
+
+      const file = File.createFromPath(songPath);
+      const metadata = file.tag;
 
       const songTitle =
-        metadata.common.title || path.basename(songPath, path.extname(songPath)) || 'Unknown Title';
+        metadata.title || path.basename(songPath, path.extname(songPath)) || 'Unknown Title';
 
       if (metadata) {
         if (isArtworkAvailable && !oldArtworkPaths.isDefaultArtwork) {
@@ -49,21 +51,24 @@ const reParseSong = async (filePath: string) => {
 
         const updatedSong: Partial<typeof songs.$inferInsert> = {
           title: songTitle,
-          duration: getSongDurationFromSong(metadata.format.duration).toFixed(2),
-          year: metadata.common?.year || undefined,
-          sampleRate: metadata.format.sampleRate,
-          bitRate: metadata?.format?.bitrate ? Math.ceil(metadata.format.bitrate) : undefined,
-          noOfChannels: metadata?.format?.numberOfChannels,
-          diskNumber: metadata?.common?.disk?.no ?? undefined,
-          trackNumber: metadata?.common?.track?.no ?? undefined,
+          duration: getSongDurationFromSong(file.properties.durationMilliseconds / 1000).toFixed(2),
+          year: metadata.year || undefined,
+          path: songPath,
+          sampleRate: file.properties.audioSampleRate,
+          bitRate: file.properties.audioBitrate
+            ? Math.ceil(file.properties.audioBitrate)
+            : undefined,
+          noOfChannels: file.properties.audioChannels,
+          diskNumber: metadata.disc ?? undefined,
+          trackNumber: metadata.track ?? undefined,
           fileCreatedAt: stats ? stats.birthtime : new Date(),
           fileModifiedAt: stats ? stats.mtime : new Date()
         };
 
-        const artistsData = getArtistNamesFromSong(metadata.common.artist);
-        const albumArtistsData = getArtistNamesFromSong(metadata.common.albumartist);
-        const albumData = getAlbumInfoFromSong(metadata.common.album);
-        const genresData = getGenreInfoFromSong(metadata.common.genre);
+        const artistsData = getArtistNamesFromSong(metadata.performers.join(', '));
+        const albumArtistsData = getArtistNamesFromSong(metadata.albumArtists.join(', '));
+        const albumData = getAlbumInfoFromSong(metadata.album);
+        const genresData = getGenreInfoFromSong(metadata.genres);
 
         await db.transaction(async (trx) => {
           await removeDeletedArtistDataOfSong(song, trx);
@@ -77,9 +82,7 @@ const reParseSong = async (filePath: string) => {
 
           const artworkData = await storeArtworks(
             'songs',
-            metadata.common?.picture?.at(0)
-              ? Buffer.from(metadata.common.picture[0].data)
-              : undefined,
+            metadata.pictures?.at(0) ? metadata.pictures[0].data.toByteArray() : undefined,
             trx
           );
 

@@ -94,7 +94,7 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
 
     const albumData = isAlbumSelected
       ? album
-        ? await window.api.albumsData.getAlbumData([album])
+        ? await window.api.albumsData.getAlbumData([album]).then((res) => res.data)
         : []
       : undefined;
     const artistData = isArtistsSelected
@@ -102,7 +102,7 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
       : undefined;
     const genreData = isGenresSelected
       ? genres
-        ? await window.api.genresData.getGenresData(genres)
+        ? await window.api.genresData.getGenresData(genres).then((res) => res.data)
         : []
       : undefined;
 
@@ -123,9 +123,11 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
             ? lyrics
             : prevData?.unsynchronizedLyrics,
         artworkPath: selectedArtwork || prevData?.artworkPath,
-        album: albumData
-          ? manageAlbumData(albumData, album, selectedArtwork || prevData?.artworkPath)
-          : prevData.album,
+        albums: albumData
+          ? [manageAlbumData(albumData, album, selectedArtwork || prevData?.artworkPath)].filter(
+              (x): x is SongTagsAlbumData => x !== undefined
+            )
+          : prevData.albums,
         artists: artistData ? manageArtistsData(artistData, artists) : prevData.artists,
         genres: genreData ? manageGenresData(genreData, genres) : prevData.genres
       };
@@ -147,9 +149,13 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
   const updateAllMetadata = useCallback(async () => {
     changePromptMenuData(false, undefined, '');
 
-    const albumData = album ? await window.api.albumsData.getAlbumData([album]) : [];
+    const albumData = album
+      ? await window.api.albumsData.getAlbumData([album]).then((res) => res.data)
+      : [];
     const artistData = await window.api.artistsData.getArtistData(artists).then((res) => res.data);
-    const genreData = genres ? await window.api.genresData.getGenresData(genres) : [];
+    const genreData = genres
+      ? await window.api.genresData.getGenresData(genres).then((res) => res.data)
+      : [];
 
     updateSongInfo((prevData) => {
       const artworkPath = selectedArtwork || prevData?.artworkPath;
@@ -162,7 +168,9 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
           !isLyricsSynchronised && lyrics ? lyrics : prevData?.unsynchronizedLyrics,
         artworkPath,
         artists: manageArtistsData(artistData, artists),
-        album: manageAlbumData(albumData, album, artworkPath),
+        albums: [manageAlbumData(albumData, album, artworkPath)].filter(
+          (x): x is SongTagsAlbumData => x !== undefined
+        ),
         genres: manageGenresData(genreData, genres)
       } as SongTags;
     });

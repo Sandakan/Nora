@@ -23,7 +23,7 @@ const AllSongResults = (prop: Props) => {
   const selectAllHandler = useSelectAllHandler(songData, 'songs', 'songId');
 
   const handleSongPlayBtnClick = useCallback(
-    (currSongId: string) => {
+    (currSongId: number) => {
       const queueSongIds = songData
         .filter((song) => !song.isBlacklisted)
         .map((song) => song.songId);

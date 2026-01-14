@@ -35,7 +35,7 @@ export interface MetadataKeywords {
 }
 
 type ArtistResult = {
-  artistId?: string;
+  artistId?: number;
   name: string;
   artworkPath?: string;
   onlineArtworkPaths?: OnlineArtistArtworks;
@@ -43,13 +43,13 @@ type ArtistResult = {
 
 type AlbumResult = {
   title: string;
-  albumId?: string;
+  albumId?: number;
   noOfSongs?: number;
   artists?: string[];
   artworkPath?: string;
 };
 
-type GenreResult = { genreId?: string; name: string; artworkPath?: string };
+type GenreResult = { genreId?: number; name: string; artworkPath?: string };
 
 const { metadataEditingSupportedExtensions } = appPreferences;
 
@@ -86,7 +86,7 @@ function SongTagsEditingPage() {
 
   const { songId, songPath, isKnownSource } = useMemo(
     () => ({
-      songId: currentlyActivePage.data?.songId as string,
+      songId: currentlyActivePage.data?.songId as number,
       songPath: currentlyActivePage.data?.songPath as string,
       isKnownSource: (currentlyActivePage.data?.isKnownSource as boolean) ?? true
     }),
@@ -104,7 +104,7 @@ function SongTagsEditingPage() {
   const getSongId3Tags = useCallback(() => {
     if (songId)
       window.api.songUpdates
-        .getSongId3Tags(isKnownSource ? songId : songPath, isKnownSource)
+        .getSongId3Tags(isKnownSource ? String(songId) : songPath, isKnownSource)
         .then((res) => {
           if (res) {
             console.log(res);
@@ -282,7 +282,7 @@ function SongTagsEditingPage() {
     console.log(songInfo);
     window.api.songUpdates
       .updateSongId3Tags(
-        isKnownSource ? songId : songPath,
+        isKnownSource ? String(songId) : songPath,
         songInfo,
         songId === currentSongData.songId,
         isKnownSource
@@ -305,7 +305,7 @@ function SongTagsEditingPage() {
           //   },
           // ]);
           return window.api.songUpdates.getSongId3Tags(
-            isKnownSource ? songId : songPath,
+            isKnownSource ? String(songId) : songPath,
             isKnownSource
           );
         }
@@ -417,7 +417,7 @@ function SongTagsEditingPage() {
                     ? songInfo.artists.map((x) => x.name).join(', ')
                     : t('common.unknownArtist')}
                 </div>
-                <div className="song-album">{songInfo.album?.title}</div>
+                <div className="song-album">{songInfo.albums?.[0]?.title}</div>
                 <Button
                   label={t('songTagsEditingPage.searchMetadataOnInternet')}
                   iconName="download"
@@ -444,7 +444,7 @@ function SongTagsEditingPage() {
               <SongAlbumArtistsInput
                 artistResults={albumArtistResults}
                 albumArtistKeyword={albumArtistKeyword}
-                songAlbum={songInfo.album}
+                songAlbum={songInfo.albums?.[0]}
                 songAlbumArtists={songInfo.albumArtists}
                 updateAlbumArtistKeyword={updateAlbumArtistKeyword}
                 updateSongInfo={updateSongInfo}
@@ -455,7 +455,7 @@ function SongTagsEditingPage() {
                 albumResults={albumResults}
                 updateAlbumKeyword={updateAlbumKeyword}
                 updateSongInfo={updateSongInfo}
-                songAlbum={songInfo.album}
+                songAlbum={songInfo.albums?.[0]}
               />
               {/* SONG GENRES */}
               <SongGenresInput
@@ -479,7 +479,7 @@ function SongTagsEditingPage() {
                 songId={songId}
                 songArtists={songInfo.artists}
                 songPath={songPath}
-                album={songInfo.album?.title}
+                album={songInfo.albums?.[0]?.title}
                 duration={songInfo.duration}
                 synchronizedLyrics={songInfo.synchronizedLyrics}
                 unsynchronizedLyrics={songInfo.unsynchronizedLyrics}

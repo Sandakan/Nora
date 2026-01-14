@@ -12,13 +12,14 @@ import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store/store';
 import { useNavigate } from '@tanstack/react-router';
 import NavLink from '../NavLink';
+import { SpecialPlaylists } from '@common/playlists.enum';
 
 const ConfirmDeletePlaylistsPrompt = lazy(() => import('./ConfirmDeletePlaylistsPrompt'));
 const RenamePlaylistPrompt = lazy(() => import('./RenamePlaylistPrompt'));
 
 interface PlaylistProp extends Playlist {
   index: number;
-  selectAllHandler?: (_upToId?: string) => void;
+  selectAllHandler?: (_upToId?: number) => void;
 }
 
 export const Playlist = (props: PlaylistProp) => {
@@ -46,7 +47,7 @@ export const Playlist = (props: PlaylistProp) => {
     () =>
       navigate({
         to: '/main-player/playlists/$playlistId',
-        params: { playlistId: props.playlistId }
+        params: { playlistId: String(props.playlistId) }
       }),
     [navigate, props.playlistId]
   );
@@ -141,10 +142,10 @@ export const Playlist = (props: PlaylistProp) => {
       })
       .then((songs) => {
         if (Array.isArray(songs)) {
-          queue.queue.push(
+          queue.songIds.push(
             ...songs.filter((song) => !song.isBlacklisted).map((song) => song.songId)
           );
-          updateQueueData(undefined, queue.queue);
+          updateQueueData(undefined, queue.songIds);
           addNewNotifications([
             {
               id: 'newSongsToQueue',
@@ -158,7 +159,7 @@ export const Playlist = (props: PlaylistProp) => {
         return undefined;
       })
       .catch((err) => console.error(err));
-  }, [addNewNotifications, multipleSelectionsData, queue.queue, t, updateQueueData]);
+  }, [addNewNotifications, multipleSelectionsData, queue.songIds, t, updateQueueData]);
 
   const contextMenus: ContextMenuItem[] = useMemo(() => {
     const { multipleSelections: playlistIds } = multipleSelectionsData;
@@ -194,8 +195,8 @@ export const Playlist = (props: PlaylistProp) => {
         handlerFunction: () => {
           if (isMultipleSelectionsEnabled) addToQueueForMultipleSelections();
           else {
-            queue.queue.push(...props.songs);
-            updateQueueData(undefined, queue.queue);
+            queue.songIds.push(...props.songs);
+            updateQueueData(undefined, queue.songIds);
             addNewNotifications([
               {
                 id: 'newSongsToQueue',
@@ -243,7 +244,8 @@ export const Playlist = (props: PlaylistProp) => {
         },
         isDisabled: isMultipleSelectionsEnabled
           ? false
-          : props.playlistId === 'History' || props.playlistId === 'Favorites'
+          : props.playlistId === SpecialPlaylists.Favorites ||
+            props.playlistId === SpecialPlaylists.History // Special playlists IDs for History and Favorites
       },
       {
         label: t('playlist.renamePlaylist'),
@@ -253,7 +255,8 @@ export const Playlist = (props: PlaylistProp) => {
         },
         isDisabled: isMultipleSelectionsEnabled
           ? false
-          : props.playlistId === 'History' || props.playlistId === 'Favorites'
+          : props.playlistId === SpecialPlaylists.Favorites ||
+            props.playlistId === SpecialPlaylists.History // Special playlists IDs for History and Favorites
       },
       {
         label: t(`common.${isAMultipleSelection ? 'unselect' : 'select'}`),
@@ -293,7 +296,8 @@ export const Playlist = (props: PlaylistProp) => {
         handlerFunction: () => true,
         isDisabled: isMultipleSelectionsEnabled
           ? false
-          : props.playlistId === 'History' || props.playlistId === 'Favorites'
+          : props.playlistId === SpecialPlaylists.Favorites ||
+            props.playlistId === SpecialPlaylists.History // Special playlists IDs for History and Favorites
       },
       {
         label: t(
@@ -312,7 +316,8 @@ export const Playlist = (props: PlaylistProp) => {
         },
         isDisabled: isMultipleSelectionsEnabled
           ? false
-          : props.playlistId === 'History' || props.playlistId === 'Favorites'
+          : props.playlistId === SpecialPlaylists.Favorites ||
+            props.playlistId === SpecialPlaylists.History // Special playlists IDs for History and Favorites
       }
     ];
   }, [
@@ -326,7 +331,7 @@ export const Playlist = (props: PlaylistProp) => {
     playAllSongs,
     playAllSongsForMultipleSelections,
     props,
-    queue.queue,
+    queue.songIds,
     t,
     toggleMultipleSelections,
     updateMultipleSelections,
@@ -364,11 +369,11 @@ export const Playlist = (props: PlaylistProp) => {
   return (
     <NavLink
       to={'/main-player/playlists/$playlistId'}
-      params={{ playlistId: props.playlistId }}
+      params={{ playlistId: String(props.playlistId) }}
       preload={isMultipleSelectionEnabled ? false : undefined}
       className={`playlist group hover:bg-background-color-2/50 dark:hover:bg-dark-background-color-2/50 ${
         props.playlistId
-      } text-font-color-black dark:text-font-color-white mr-12 mb-8 flex h-fit max-h-52 min-h-[12rem] w-36 flex-col justify-between rounded-md p-4 ${
+      } text-font-color-black dark:text-font-color-white mr-12 mb-8 flex h-fit max-h-52 min-h-48 w-36 flex-col justify-between rounded-md p-4 ${
         isAMultipleSelection
           ? 'bg-background-color-3! text-font-color-black! dark:bg-dark-background-color-3! dark:text-font-color-black!'
           : ''
@@ -438,19 +443,21 @@ export const Playlist = (props: PlaylistProp) => {
       </div>
       <div className="playlist-info-container mt-2">
         <Button
-          className={`playlist-title !m-0 !block w-full truncate !rounded-none !border-0 bg-transparent !p-0 !text-left !text-xl outline-offset-1 hover:bg-transparent hover:underline focus-visible:!outline dark:bg-transparent dark:hover:bg-transparent ${
+          className={`playlist-title m-0! block! w-full truncate rounded-none! border-0! bg-transparent p-0! text-left! text-xl! outline-offset-1 hover:bg-transparent hover:underline focus-visible:outline! dark:bg-transparent dark:hover:bg-transparent ${
             isAMultipleSelection && 'text-font-color-black! dark:text-font-color-black!'
           }`}
           tooltipLabel={props.name}
-          clickHandler={() =>
-            isMultipleSelectionEnabled && multipleSelectionsData.selectionType === 'playlist'
-              ? updateMultipleSelections(
-                  props.playlistId,
-                  'playlist',
-                  isAMultipleSelection ? 'remove' : 'add'
-                )
-              : openPlaylistInfoPage()
-          }
+          clickHandler={() => {
+            if (isMultipleSelectionEnabled && multipleSelectionsData.selectionType === 'playlist') {
+              updateMultipleSelections(
+                props.playlistId,
+                'playlist',
+                isAMultipleSelection ? 'remove' : 'add'
+              );
+            } else {
+              openPlaylistInfoPage();
+            }
+          }}
           label={props.name}
         />
         <div className="playlist-no-of-songs text-sm font-light">

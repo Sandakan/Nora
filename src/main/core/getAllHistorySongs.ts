@@ -1,5 +1,5 @@
 import { getAllSongsInHistory } from '@main/db/queries/history';
-import { convertToSongData } from '../../common/convert';
+import { convertToSongData } from '../utils/convert';
 
 export const getAllHistorySongs = async (
   sortType?: SongSortTypes,

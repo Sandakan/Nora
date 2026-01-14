@@ -8,7 +8,7 @@ import Checkbox from '../Checkbox';
 import { useStore } from '@tanstack/react-store';
 import { store } from '../../store/store';
 
-const DeleteSongFromSystemConfirmPrompt = (props: { songIds: string[] }) => {
+const DeleteSongFromSystemConfirmPrompt = (props: { songIds: number[] }) => {
   const currentSongData = useStore(store, (state) => state.currentSongData);
 
   const { addNewNotifications, changePromptMenuData, clearAudioPlayerData } =

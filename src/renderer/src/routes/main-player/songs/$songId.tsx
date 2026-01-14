@@ -1,6 +1,5 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import Button from '@renderer/components/Button';
 import Img from '@renderer/components/Img';
 import MainContainer from '@renderer/components/MainContainer';
 import NavLink from '@renderer/components/NavLink';
@@ -27,7 +26,7 @@ import { useTranslation } from 'react-i18next';
 export const Route = createFileRoute('/main-player/songs/$songId')({
   component: SongInfoPage,
   loader: async (route) => {
-    const songId = route.params.songId;
+    const songId = Number(route.params.songId);
 
     await queryClient.ensureQueryData(listenQuery.single({ songId }));
     await queryClient.ensureQueryData(songQuery.singleSongInfo({ songId }));
@@ -35,7 +34,7 @@ export const Route = createFileRoute('/main-player/songs/$songId')({
 });
 
 function SongInfoPage() {
-  const { songId } = Route.useParams();
+  const { songId } = Route.useParams({ select: (params) => ({ songId: Number(params.songId) }) });
 
   const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
 
@@ -295,8 +294,8 @@ function SongInfoPage() {
             {songInfo.album && (
               <NavLink
                 to="/main-player/albums/$albumId"
-                params={{ albumId: songInfo.album?.albumId! }}
-                className={`info-type-2 !mr-0 mb-5 !w-fit truncate !border-0 !p-0 ${
+                params={{ albumId: String(songInfo.album?.albumId!) }}
+                className={`info-type-2 mr-0! mb-5 w-fit! truncate border-0! p-0! ${
                   songInfo.album && 'hover:underline'
                 } ${bodyBackgroundImage && 'text-white!'}`}
               >
@@ -336,7 +335,7 @@ function SongInfoPage() {
           {listeningData && (
             <div className="grid w-full grid-flow-col place-content-center gap-4 py-4 pr-4 xl:grid-flow-row">
               <ListeningActivityBarGraph listeningData={listeningData} className="xl:order-2" />
-              <div className="stat-cards grid max-h-full w-fit min-w-[32rem] grid-cols-2 flex-wrap items-center justify-center gap-4 place-self-center xl:order-1 xl:mt-4 xl:flex xl:max-h-none xl:grid-cols-3 xl:grid-rows-2">
+              <div className="stat-cards grid max-h-full w-fit min-w-lg grid-cols-2 flex-wrap items-center justify-center gap-4 place-self-center xl:order-1 xl:mt-4 xl:flex xl:max-h-none xl:grid-cols-3 xl:grid-rows-2">
                 <SongStat
                   key={0}
                   title={t('songInfoPage.allTimeListens')}

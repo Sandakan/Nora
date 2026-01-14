@@ -9,7 +9,7 @@ export interface QueueManagementDependencies {
   /** The PlayerQueue instance */
   playerQueue: PlayerQueue;
   /** Function to play a song by ID */
-  playSong: (songId: string, isStartPlay?: boolean, playAsCurrentSongIndex?: boolean) => void;
+  playSong: (songId: number, isStartPlay?: boolean, playAsCurrentSongIndex?: boolean) => void;
 }
 
 /**
@@ -82,14 +82,17 @@ export function useQueueManagement(dependencies: QueueManagementDependencies) {
    */
   const createQueue = useCallback(
     (
-      newQueue: string[],
+      newQueue: number[],
       queueType: QueueTypes,
       isShuffleQueue = store.state.player.isShuffling,
-      queueId?: string,
+      queueId?: string | number,
       startPlaying = false
     ) => {
       // Replace the queue with new songs, starting at position 0
-      playerQueue.replaceQueue(newQueue, 0, true, { queueId, queueType });
+      playerQueue.replaceQueue(newQueue, 0, true, {
+        queueId: queueId === undefined ? undefined : String(queueId),
+        queueType
+      });
 
       // Update shuffle state
       toggleShuffling(isShuffleQueue);
@@ -127,8 +130,10 @@ export function useQueueManagement(dependencies: QueueManagementDependencies) {
     if (wasShuffling) {
       // Restore from shuffle
       if (playerQueue.canRestoreFromShuffle()) {
-        const targetSongId = playerQueue.currentSongId ?? '';
-        playerQueue.restoreFromShuffle(targetSongId);
+        const currentId = playerQueue.currentSongId;
+        if (currentId !== null) {
+          playerQueue.restoreFromShuffle(currentId);
+        }
       }
       toggleShuffling(false);
     } else {
@@ -162,7 +167,7 @@ export function useQueueManagement(dependencies: QueueManagementDependencies) {
   const updateQueueData = useCallback(
     (
       currentSongIndex?: number | null,
-      newQueue?: string[],
+      newQueue?: number[],
       isShuffleQueue = false,
       playCurrentSongIndex = true,
       restoreAndClearPreviousQueue = false
@@ -177,8 +182,10 @@ export function useQueueManagement(dependencies: QueueManagementDependencies) {
 
       // Restore from shuffle if requested
       if (restoreAndClearPreviousQueue && playerQueue.canRestoreFromShuffle()) {
-        const targetSongId = playerQueue.currentSongId ?? '';
-        playerQueue.restoreFromShuffle(targetSongId);
+        const currentId = playerQueue.currentSongId;
+        if (currentId !== null) {
+          playerQueue.restoreFromShuffle(currentId);
+        }
       }
 
       // Shuffle if requested

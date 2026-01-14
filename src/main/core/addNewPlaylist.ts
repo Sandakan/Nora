@@ -1,4 +1,4 @@
-import { generateLocalArtworkBuffer } from '@main/updateSongId3Tags';
+import { generateLocalArtworkBuffer } from '@main/updateSong/updateSongId3Tags';
 import logger from '../logger';
 import { dataUpdateEvent } from '../main';
 import { storeArtworks } from '../other/artworks';
@@ -9,7 +9,7 @@ import {
   getPlaylistByName,
   linkSongsWithPlaylist
 } from '@main/db/queries/playlists';
-import { convertToPlaylist } from '../../common/convert';
+import { convertToPlaylist } from '../utils/convert';
 import { linkArtworkToPlaylist } from '@main/db/queries/artworks';
 
 const createNewPlaylist = async (name: string, songIds?: string[], artworkPath?: string) => {

@@ -3,8 +3,8 @@ import { dataUpdateEvent } from '../main';
 import { db } from '@main/db/db';
 import { getSongFavoriteStatuses, updateSongFavoriteStatuses } from '@main/db/queries/songs';
 
-const toggleLikeSongs = async (songIds: string[], isLikeSong?: boolean) => {
-  const songStatuses = await getSongFavoriteStatuses(songIds.map((id) => Number(id)));
+const toggleLikeSongs = async (songIds: number[], isLikeSong?: boolean) => {
+  const songStatuses = await getSongFavoriteStatuses(songIds);
 
   const result: ToggleLikeSongReturnValue = {
     likes: [],
@@ -24,7 +24,7 @@ const toggleLikeSongs = async (songIds: string[], isLikeSong?: boolean) => {
 
         await updateSongFavoriteStatuses(dislikedSongIds, false, trx);
 
-        result.dislikes.push(...dislikedSongIds.map((id) => id.toString()));
+        result.dislikes.push(...dislikedSongIds);
       }
 
       if (likeGroupedSongData.notLiked) {
@@ -32,14 +32,10 @@ const toggleLikeSongs = async (songIds: string[], isLikeSong?: boolean) => {
 
         await updateSongFavoriteStatuses(likedSongIds, true, trx);
 
-        result.likes.push(...likedSongIds.map((id) => id.toString()));
+        result.likes.push(...likedSongIds);
       }
     } else {
-      await updateSongFavoriteStatuses(
-        songIds.map((id) => Number(id)),
-        isLikeSong!,
-        trx
-      );
+      await updateSongFavoriteStatuses(songIds, isLikeSong!, trx);
     }
   });
 

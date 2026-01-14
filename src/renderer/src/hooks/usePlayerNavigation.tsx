@@ -37,7 +37,7 @@ export function usePlayerNavigation(
   playerQueue: PlayerQueue,
   toggleSongPlayback: (startPlay?: boolean) => void,
   recordListeningData: (
-    songId: string,
+    songId: number,
     songDuration: number,
     repetition?: boolean,
     isKnownSource?: boolean
@@ -108,7 +108,7 @@ export function usePlayerNavigation(
       if (audioPlayer) {
         // Set up listener for repeat event to record listening data
         if (reason !== 'USER_SKIP') {
-          const handleRepeat = (data: { songId: string; duration: number }) => {
+          const handleRepeat = (data: { songId: number; duration: number }) => {
             recordListeningData(data.songId, data.duration, true);
             audioPlayer.off('repeatSong', handleRepeat);
           };

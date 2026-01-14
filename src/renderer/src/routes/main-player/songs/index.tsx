@@ -3,7 +3,6 @@ import { store } from '@renderer/store/store';
 import { songSearchSchema } from '@renderer/utils/zod/songSchema';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
-import { zodValidator } from '@tanstack/zod-adapter';
 import { lazy, useCallback, useContext, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import storage from '@renderer/utils/localStorage';
@@ -22,7 +21,7 @@ import { queryClient } from '@renderer/index';
 import { songQuery } from '@renderer/queries/songs';
 
 export const Route = createFileRoute('/main-player/songs/')({
-  validateSearch: zodValidator(songSearchSchema),
+  validateSearch: songSearchSchema,
   loaderDeps: ({ search }) => ({
     sortingOrder: search.sortingOrder,
     filteringOrder: search.filteringOrder
@@ -143,7 +142,7 @@ function SongsPage() {
   const selectAllHandler = useSelectAllHandler(songData, 'songs', 'songId');
 
   const handleSongPlayBtnClick = useCallback(
-    (currSongId: string) => {
+    (currSongId: number) => {
       const queueSongIds = songData
         .filter((song) => !song.isBlacklisted)
         .map((song) => song.songId);
@@ -392,3 +391,4 @@ function SongsPage() {
     </MainContainer>
   );
 }
+

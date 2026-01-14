@@ -37,13 +37,13 @@ export interface AppLifecycleDependencies {
   /**
    * Play a song by ID
    */
-  playSong: (songId: string, isStartPlay?: boolean, playAsCurrentSongIndex?: boolean) => void;
+  playSong: (songId: number, isStartPlay?: boolean, playAsCurrentSongIndex?: boolean) => void;
 
   /**
    * Create a new queue
    */
   createQueue: (
-    newQueue: string[],
+    newQueue: number[],
     queueType: QueueTypes,
     isShuffleQueue?: boolean,
     queueId?: string,

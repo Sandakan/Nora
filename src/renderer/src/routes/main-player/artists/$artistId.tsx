@@ -27,14 +27,16 @@ import { albumQuery } from '@renderer/queries/albums';
 export const Route = createFileRoute('/main-player/artists/$artistId')({
   component: ArtistInfoPage,
   loader: async (route) => {
-    const artistId = route.params.artistId;
+    const artistId = Number(route.params.artistId);
 
     await queryClient.ensureQueryData(artistQuery.single({ artistId }));
   }
 });
 
 function ArtistInfoPage() {
-  const { artistId } = Route.useParams();
+  const { artistId } = Route.useParams({
+    select: (params) => ({ artistId: Number(params.artistId) })
+  });
 
   const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
   const isMultipleSelectionEnabled = useStore(
@@ -228,7 +230,7 @@ function ArtistInfoPage() {
   const selectAllHandlerForSongs = useSelectAllHandler(songs, 'songs', 'songId');
 
   const handleSongPlayBtnClick = useCallback(
-    (currSongId: string) => {
+    (currSongId: number) => {
       const queueSongIds = songs.filter((song) => !song.isBlacklisted).map((song) => song.songId);
       createQueue(queueSongIds, 'artist', false, artistData?.artistId, false);
       playSong(currSongId, true);

@@ -7,7 +7,7 @@ export const manageAlbumData = (
     return {
       title: albumData[0].title,
       albumId: albumData[0].albumId,
-      artists: albumData[0].artists?.map((x) => x.artistId),
+      artists: albumData[0].artists?.map((x) => x.name),
       artworkPath: albumData[0].artworkPaths.artworkPath,
       noOfSongs: albumData[0].songs.length
     };
@@ -19,15 +19,8 @@ export const manageAlbumData = (
 export const manageArtistsData = (
   artistData: Artist[],
   artists: string[]
-):
-  | {
-      artistId?: string;
-      name: string;
-      artworkPath?: string;
-      onlineArtworkPaths?: OnlineArtistArtworks;
-    }[]
-  | undefined => {
-  const artistsInfo: ReturnType<typeof manageArtistsData> = artistData.map((data) => ({
+): SongTagsArtistData[] | undefined => {
+  const artistsInfo: SongTagsArtistData[] = artistData.map((data) => ({
     name: data.name,
     artistId: data.artistId,
     artworkPath: data.artworkPaths.optimizedArtworkPath,
@@ -44,15 +37,9 @@ export const manageArtistsData = (
 export const manageGenresData = (
   genreData: Genre[],
   genres?: string[]
-):
-  | {
-      genreId?: string | undefined;
-      name: string;
-      artworkPath?: string | undefined;
-    }[]
-  | undefined => {
+): SongTagsGenreData[] | undefined => {
   if (genres) {
-    const genresInfo: ReturnType<typeof manageGenresData> = genreData.map((data) => ({
+    const genresInfo: SongTagsGenreData[] = genreData.map((data) => ({
       name: data.name,
       genreId: data.genreId,
       artworkPath: data.artworkPaths.optimizedArtworkPath

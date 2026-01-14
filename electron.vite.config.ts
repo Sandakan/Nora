@@ -1,7 +1,7 @@
 import tailwindcss from '@tailwindcss/vite';
 import { tanstackRouter } from '@tanstack/router-plugin/vite';
 import react from '@vitejs/plugin-react';
-import { defineConfig, externalizeDepsPlugin } from 'electron-vite';
+import { defineConfig } from 'electron-vite';
 import { resolve } from 'path';
 
 export default defineConfig({
@@ -9,9 +9,8 @@ export default defineConfig({
     build: {
       sourcemap: true,
       minify: true,
-      rollupOptions: { input: '/src/main/main.ts', external: ['sharp'] }
+      rollupOptions: { input: '/src/main/main.ts', external: ['sharp'] },
     },
-    plugins: [externalizeDepsPlugin()],
     resolve: {
       alias: {
         '@db': resolve(import.meta.dirname, './src/main/db'),
@@ -20,7 +19,6 @@ export default defineConfig({
     }
   },
   preload: {
-    plugins: [externalizeDepsPlugin()],
 
     build: {
       sourcemap: true,

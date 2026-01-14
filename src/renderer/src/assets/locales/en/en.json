@@ -231,7 +231,7 @@
     "playingNow": "Playing now",
     "blacklisted": "Blacklisted",
     "likedThisSong": "You liked this song",
-    "dislikedThisSong": "You didn't this song"
+    "dislikedThisSong": "You didn't like this song"
   },
 
   "artist": {
@@ -655,7 +655,7 @@
     "composer": "Composer",
     "syncedLyricsFetchFailed": "Failed to fetch synced lyrics.",
     "lyricsEnhancedSynced": "Lyrics are enhanced synced.",
-    "lyricsNotEnhancedSynced": "Lyrics are enhanced synced.",
+    "lyricsNotEnhancedSynced": "Lyrics are not enhanced synced.",
     "enhancedLyricsSupported": "Enhanced synced lyrics supported.",
     "readMoreAboutLrc": "$t(common.readMoreAboutTitle, {\"title\": \"LRC format\"})",
     "avoidUnsyncedOnSyncedLyricsTab": "Avoid entering unsynchronized lyrics in the synchronized lyrics tab.",

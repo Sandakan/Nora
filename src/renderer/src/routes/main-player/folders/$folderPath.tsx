@@ -13,10 +13,9 @@ import { songFilterOptions, songSortOptions } from '@renderer/components/SongsPa
 import VirtualizedList from '@renderer/components/VirtualizedList';
 import Song from '@renderer/components/SongsPage/Song';
 import { songSearchSchema } from '@renderer/utils/zod/songSchema';
-import { zodValidator } from '@tanstack/zod-adapter';
 
 export const Route = createFileRoute('/main-player/folders/$folderPath')({
-  validateSearch: zodValidator(songSearchSchema),
+  validateSearch: songSearchSchema,
   component: MusicFolderInfoPage
 });
 function MusicFolderInfoPage() {
@@ -114,7 +113,7 @@ function MusicFolderInfoPage() {
   const selectAllHandler = useSelectAllHandler(folderSongs, 'songs', 'songId');
 
   const handleSongPlayBtnClick = useCallback(
-    (currSongId?: string, shuffleQueue = false, startPlaying = false) => {
+    (currSongId?: number, shuffleQueue = false, startPlaying = false) => {
       const queueSongIds = folderSongs
         .filter((song) => !song.isBlacklisted)
         .map((song) => song.songId);
@@ -275,3 +274,4 @@ function MusicFolderInfoPage() {
     </MainContainer>
   );
 }
+

@@ -32,11 +32,10 @@ import { songQuery } from '@renderer/queries/songs';
 import { queryClient } from '@renderer/index';
 import { queueQuery } from '@renderer/queries/queue';
 import { baseInfoPageSearchParamsSchema } from '@renderer/utils/zod/baseInfoPageSearchParamsSchema';
-import { zodValidator } from '@tanstack/zod-adapter';
 
 export const Route = createFileRoute('/main-player/queue/')({
   component: RouteComponent,
-  validateSearch: zodValidator(baseInfoPageSearchParamsSchema)
+  validateSearch: baseInfoPageSearchParamsSchema
 });
 
 function RouteComponent() {
@@ -364,7 +363,7 @@ function RouteComponent() {
                       }}
                       itemContent={(index, song) => {
                         return (
-                          <Draggable draggableId={song.songId} index={index} key={song.songId}>
+                          <Draggable draggableId={String(song.songId)} index={index} key={song.songId}>
                             {(provided) => {
                               const { multipleSelections: songIds } = multipleSelectionsData;
                               const isMultipleSelectionsEnabled =
@@ -423,3 +422,4 @@ function RouteComponent() {
     </MainContainer>
   );
 }
+
