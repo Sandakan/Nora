@@ -2,14 +2,14 @@
     Represents a queue of songs to be played in the music player.
 */
 class PlayerQueue {
-  songIds: string[];
+  songIds: number[];
   position: number;
   queueBeforeShuffle?: number[];
   metadata?: PlayerQueueMetadata;
   private listeners: Map<QueueEventType, Set<QueueEventCallback<unknown>>>;
 
   constructor(
-    songIds: string[] = [],
+    songIds: number[] = [],
     position = 0,
     queueBeforeShuffle?: number[],
     metadata?: PlayerQueueMetadata
@@ -21,11 +21,11 @@ class PlayerQueue {
     this.listeners = new Map();
   }
 
-  get currentSongId(): string | null {
+  get currentSongId(): number | null {
     return this.songIds[this.position] || null;
   }
 
-  set currentSongId(songId: string) {
+  set currentSongId(songId: number) {
     const index = this.songIds.indexOf(songId);
     if (index !== -1) {
       this.position = index;
@@ -51,11 +51,11 @@ class PlayerQueue {
     return this.position > 0;
   }
 
-  get nextSongId(): string | null {
+  get nextSongId(): number | null {
     return this.songIds[this.position + 1] || null;
   }
 
-  get previousSongId(): string | null {
+  get previousSongId(): number | null {
     return this.songIds[this.position - 1] || null;
   }
 
@@ -263,7 +263,7 @@ class PlayerQueue {
    * Adds song IDs to the next position in the queue
    * @param songIds - Array of song IDs to add
    */
-  addSongIdsToNext(songIds: string[]): void {
+  addSongIdsToNext(songIds: number[]): void {
     console.log('[PlayerQueue.addSongIdsToNext]', {
       addingCount: songIds.length,
       currentPosition: this.position,
@@ -285,7 +285,7 @@ class PlayerQueue {
    * Adds song IDs to the end of the queue
    * @param songIds - Array of song IDs to add
    */
-  addSongIdsToEnd(songIds: string[]): void {
+  addSongIdsToEnd(songIds: number[]): void {
     console.log('[PlayerQueue.addSongIdsToEnd]', {
       addingCount: songIds.length,
       currentPosition: this.position,
@@ -307,7 +307,7 @@ class PlayerQueue {
    * Adds a single song ID to the next position
    * @param songId - Song ID to add
    */
-  addSongIdToNext(songId: string): void {
+  addSongIdToNext(songId: number): void {
     this.songIds.splice(this.position + 1, 0, songId);
     this.emit('songAdded', { songId, position: this.position + 1 });
     this.emit('queueChange', { queue: [...this.songIds], length: this.songIds.length });
@@ -317,7 +317,7 @@ class PlayerQueue {
    * Adds a single song ID to the end of the queue
    * @param songId - Song ID to add
    */
-  addSongIdToEnd(songId: string): void {
+  addSongIdToEnd(songId: number): void {
     const position = this.songIds.length;
     this.songIds.push(songId);
     this.emit('songAdded', { songId, position });
@@ -329,7 +329,7 @@ class PlayerQueue {
    * @param songId - Song ID to remove
    * @returns true if removed successfully, false if not found
    */
-  removeSongId(songId: string): boolean {
+  removeSongId(songId: number): boolean {
     const index = this.songIds.indexOf(songId);
     console.log('[PlayerQueue.removeSongId]', {
       songId,
@@ -374,7 +374,7 @@ class PlayerQueue {
    * @param position - Position to remove (0-indexed)
    * @returns the removed song ID, or null if position is invalid
    */
-  removeSongAtPosition(position: number): string | null {
+  removeSongAtPosition(position: number): number | null {
     if (position >= 0 && position < this.songIds.length) {
       const [removed] = this.songIds.splice(position, 1);
       this.emit('songRemoved', { songId: removed, position });
@@ -437,7 +437,7 @@ class PlayerQueue {
    * @param metadata - Optional queue metadata to set
    */
   replaceQueue(
-    songIds: string[],
+    songIds: number[],
     newPosition = 0,
     clearShuffleHistory = true,
     metadata?: PlayerQueueMetadata
@@ -487,7 +487,7 @@ class PlayerQueue {
    * Shuffles the queue randomly, keeping the current song at the start
    * @returns object containing the shuffled queue and position mapping
    */
-  shuffle(): { shuffledQueue: string[]; positions: number[] } {
+  shuffle(): { shuffledQueue: number[]; positions: number[] } {
     console.log('[PlayerQueue.shuffle]', {
       queueLength: this.songIds.length,
       currentPosition: this.position,
@@ -544,12 +544,12 @@ class PlayerQueue {
    * @param positionMapping - Array of positions to restore the original order
    * @param currentSongId - Optional current song ID to maintain after restore
    */
-  restoreFromPositions(positionMapping: number[], currentSongId?: string): void {
+  restoreFromPositions(positionMapping: number[], currentSongId?: number): void {
     if (positionMapping.length !== this.songIds.length) {
       return;
     }
 
-    const restoredQueue: string[] = [];
+    const restoredQueue: number[] = [];
     const currentQueue = [...this.songIds];
 
     for (let i = 0; i < positionMapping.length; i += 1) {
@@ -585,7 +585,7 @@ class PlayerQueue {
    * @param currentSongId - Optional current song ID to maintain after restore
    * @returns true if restored successfully, false if no shuffle history exists
    */
-  restoreFromShuffle(currentSongId?: string): boolean {
+  restoreFromShuffle(currentSongId?: number): boolean {
     if (!this.queueBeforeShuffle || this.queueBeforeShuffle.length === 0) {
       return false;
     }
@@ -636,7 +636,7 @@ class PlayerQueue {
    * @param position - Position to get (0-indexed)
    * @returns the song ID at the position, or null if invalid
    */
-  getSongIdAtPosition(position: number): string | null {
+  getSongIdAtPosition(position: number): number | null {
     return this.songIds[position] || null;
   }
 
@@ -645,7 +645,7 @@ class PlayerQueue {
    * @param songId - Song ID to find
    * @returns the position (0-indexed), or -1 if not found
    */
-  getPositionOfSongId(songId: string): number {
+  getPositionOfSongId(songId: number): number {
     return this.songIds.indexOf(songId);
   }
 
@@ -654,7 +654,7 @@ class PlayerQueue {
    * @param songId - Song ID to check
    * @returns true if the song is in the queue
    */
-  hasSongId(songId: string): boolean {
+  hasSongId(songId: number): boolean {
     return this.songIds.includes(songId);
   }
 
@@ -662,7 +662,7 @@ class PlayerQueue {
    * Gets a copy of all song IDs in the queue
    * @returns array of all song IDs
    */
-  getAllSongIds(): string[] {
+  getAllSongIds(): number[] {
     return [...this.songIds];
   }
 
@@ -670,7 +670,7 @@ class PlayerQueue {
    * Gets remaining song IDs after the current position
    * @returns array of song IDs after current position
    */
-  getRemainingSongIds(): string[] {
+  getRemainingSongIds(): number[] {
     return this.songIds.slice(this.position + 1);
   }
 
@@ -678,7 +678,7 @@ class PlayerQueue {
    * Gets previous song IDs before the current position
    * @returns array of song IDs before current position
    */
-  getPreviousSongIds(): string[] {
+  getPreviousSongIds(): number[] {
     return this.songIds.slice(0, this.position);
   }
 
@@ -714,7 +714,7 @@ class PlayerQueue {
    * @returns a new PlayerQueue instance
    */
   static fromJSON(json: {
-    songIds: string[];
+    songIds: number[];
     position: number;
     queueBeforeShuffle?: number[];
     metadata?: PlayerQueueMetadata;

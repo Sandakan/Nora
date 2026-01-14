@@ -4,9 +4,10 @@ import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
 import Button from '../Button';
+import { SpecialPlaylists } from '@common/playlists.enum';
 
 interface ConfirmDeletePlaylistProp {
-  playlistIds: string[];
+  playlistIds: number[];
   playlistName?: string;
 }
 
@@ -33,9 +34,7 @@ const ConfirmDeletePlaylistsPrompt = (props: ConfirmDeletePlaylistProp) => {
   }, [playlistIds]);
 
   const arePlaylistsRemovable = useMemo(() => {
-    const unRemovablePlaylistIds = ['History', 'Favorites'];
-
-    return !playlistIds.some((playlistId) => unRemovablePlaylistIds.includes(playlistId));
+    return !playlistIds.some((playlistId) => SpecialPlaylists.isSpecialPlaylistId(playlistId));
   }, [playlistIds]);
 
   const removePlaylists = useCallback(() => {
@@ -91,7 +90,7 @@ const ConfirmDeletePlaylistsPrompt = (props: ConfirmDeletePlaylistProp) => {
             label={t('playlist.deletePlaylist', {
               count: playlistsData.length
             })}
-            className="delete-playlist-btn danger-btn bg-font-color-crimson! text-font-color-white hover:border-font-color-crimson dark:bg-font-color-crimson! dark:text-font-color-white dark:hover:border-font-color-crimson float-right h-10 w-48 cursor-pointer rounded-lg border-[transparent] outline-hidden ease-in-out"
+            className="delete-playlist-btn danger-btn bg-font-color-crimson! text-font-color-white hover:border-font-color-crimson dark:bg-font-color-crimson! dark:text-font-color-white dark:hover:border-font-color-crimson float-right h-10 w-48 cursor-pointer rounded-lg border-transparent outline-hidden ease-in-out"
             clickHandler={removePlaylists}
           />
         </div>

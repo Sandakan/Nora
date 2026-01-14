@@ -7,21 +7,9 @@ import SongAlbumInputResult from './SongAlbumInputResult';
 import DefaultSongArtwork from '../../../assets/images/webp/song_cover_default.webp';
 
 type Props = {
-  songAlbum?: {
-    title: string;
-    albumId?: string | undefined;
-    noOfSongs?: number | undefined;
-    artists?: string[] | undefined;
-    artworkPath?: string | undefined;
-  };
+  songAlbum?: SongTagsAlbumData;
   albumKeyword: string;
-  albumResults: {
-    title: string;
-    albumId?: string;
-    noOfSongs?: number;
-    artists?: string[];
-    artworkPath?: string;
-  }[];
+  albumResults: SongTagsAlbumData[];
   updateSongInfo: (callback: (prevSongInfo: SongTags) => SongTags) => void;
   updateAlbumKeyword: (keyword: string) => void;
 };
@@ -31,7 +19,7 @@ const SongAlbumInput = (props: Props) => {
 
   const { albumKeyword, albumResults, songAlbum, updateAlbumKeyword, updateSongInfo } = props;
   return (
-    <div className="tag-input flex max-w-2xl min-w-[10rem] flex-col">
+    <div className="tag-input flex max-w-2xl min-w-40 flex-col">
       <label htmlFor="songAlbumNameId3Tag">{t('songTagsEditingPage.albumName')}</label>
       <div className="border-background-color-2 dark:border-dark-background-color-2 mt-2 w-[90%] rounded-xl border-2 p-2">
         <div className="album-names-container p-2 empty:py-2 empty:after:block empty:after:w-full empty:after:text-center empty:after:text-[#ccc] empty:after:content-['No_album_selected_for_this_song.'] dark:empty:after:text-[#ccc]">

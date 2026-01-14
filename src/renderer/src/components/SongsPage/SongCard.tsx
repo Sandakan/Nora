@@ -24,17 +24,17 @@ import NavLink from '../NavLink';
 
 interface SongCardProp {
   index: number;
-  songId: string;
+  songId: number;
   artworkPath: string;
   path: string;
   title: string;
-  artists?: { name: string; artistId: string }[];
-  album?: { name: string; albumId: string };
+  artists?: { name: string; artistId: number }[];
+  album?: { name: string; albumId: number };
   palette?: NodeVibrantPalette;
   isAFavorite: boolean;
   className?: string;
   isBlacklisted: boolean;
-  selectAllHandler?: (_upToId?: string) => void;
+  selectAllHandler?: (_upToId?: number) => void;
 }
 
 const SongCard = (props: SongCardProp) => {
@@ -191,11 +191,10 @@ const SongCard = (props: SongCardProp) => {
         iconName: 'shortcut',
         handlerFunction: () => {
           if (isMultipleSelectionsEnabled) {
-            let currentSongIndex =
-              queue.currentSongIndex ?? queue.queue.indexOf(currentSongData.songId);
-            const duplicateIds: string[] = [];
+            let currentSongIndex = queue.position ?? queue.songIds.indexOf(currentSongData.songId);
+            const duplicateIds: number[] = [];
 
-            const newQueue = queue.queue.filter((id) => {
+            const newQueue = queue.songIds.filter((id) => {
               const isADuplicate = songIds.includes(id);
               if (isADuplicate) duplicateIds.push(id);
 
@@ -203,7 +202,7 @@ const SongCard = (props: SongCardProp) => {
             });
 
             for (const duplicateId of duplicateIds) {
-              const duplicateIdPosition = queue.queue.indexOf(duplicateId);
+              const duplicateIdPosition = queue.songIds.indexOf(duplicateId);
 
               if (
                 duplicateIdPosition !== -1 &&
@@ -226,16 +225,14 @@ const SongCard = (props: SongCardProp) => {
               }
             ]);
           } else {
-            const newQueue = queue.queue.filter((id) => id !== songId);
+            const newQueue = queue.songIds.filter((id) => id !== songId);
             newQueue.splice(newQueue.indexOf(currentSongData.songId) + 1 || 0, 0, songId);
 
-            const duplicateSongIndex = queue.queue.indexOf(songId);
+            const duplicateSongIndex = queue.songIds.indexOf(songId);
 
             const currentSongIndex =
-              queue.currentSongIndex &&
-              duplicateSongIndex !== -1 &&
-              duplicateSongIndex < queue.currentSongIndex
-                ? queue.currentSongIndex - 1
+              queue.position && duplicateSongIndex !== -1 && duplicateSongIndex < queue.position
+                ? queue.position - 1
                 : undefined;
 
             updateQueueData(currentSongIndex, newQueue, undefined, false);
@@ -255,7 +252,7 @@ const SongCard = (props: SongCardProp) => {
         iconName: 'queue',
         handlerFunction: () => {
           if (isMultipleSelectionsEnabled) {
-            updateQueueData(undefined, [...queue.queue, ...songIds], false);
+            updateQueueData(undefined, [...queue.songIds, ...songIds], false);
             addNewNotifications([
               {
                 id: `${songIds.length}AddedToQueueFromMultiSelection`,
@@ -266,7 +263,7 @@ const SongCard = (props: SongCardProp) => {
               }
             ]);
           } else {
-            updateQueueData(undefined, [...queue.queue, songId], false);
+            updateQueueData(undefined, [...queue.songIds, songId], false);
             addNewNotifications([
               {
                 id: `${title}AddedToQueue`,
@@ -365,7 +362,8 @@ const SongCard = (props: SongCardProp) => {
         label: t('common.info'),
         class: 'info',
         iconName: 'info',
-        handlerFunction: () => navigate({ to: '/main-player/songs/$songId', params: { songId } }),
+        handlerFunction: () =>
+          navigate({ to: '/main-player/songs/$songId', params: { songId: String(songId) } }),
         isDisabled: isMultipleSelectionsEnabled
       },
       {
@@ -375,7 +373,7 @@ const SongCard = (props: SongCardProp) => {
           album &&
           navigate({
             to: '/main-player/albums/$albumId',
-            params: { albumId: album.albumId }
+            params: { albumId: String(album.albumId) }
           }),
         isDisabled: !album
       },
@@ -561,10 +559,10 @@ const SongCard = (props: SongCardProp) => {
       >
         <div className="song-states-container flex items-center justify-between">
           <div className="state-info flex">
-            {typeof queue.currentSongIndex === 'number' &&
-              Array.isArray(queue.queue) &&
-              queue.queue.length > 0 &&
-              queue?.queue?.at(queue.currentSongIndex + 1) === songId && (
+            {typeof queue.position === 'number' &&
+              Array.isArray(queue.songIds) &&
+              queue.songIds.length > 0 &&
+              queue?.songIds?.at(queue.position + 1) === songId && (
                 <span className="text-font-color-white! mr-2 font-semibold uppercase opacity-50 transition-opacity group-hover/songCard:opacity-90 last:mr-0">
                   {t('song.playingNext')}
                 </span>
@@ -576,10 +574,10 @@ const SongCard = (props: SongCardProp) => {
             )}
             {isBlacklisted &&
               !(
-                typeof queue.currentSongIndex === 'number' &&
-                Array.isArray(queue.queue) &&
-                queue.queue.length > 0 &&
-                queue?.queue?.at(queue.currentSongIndex + 1) === songId &&
+                typeof queue.position === 'number' &&
+                Array.isArray(queue.songIds) &&
+                queue.songIds.length > 0 &&
+                queue?.songIds?.at(queue.position + 1) === songId &&
                 currentSongData.songId === songId
               ) && (
                 <span className="text-font-color-white! mr-2 font-semibold uppercase opacity-50 transition-opacity group-hover/songCard:opacity-90 last:mr-0">
@@ -606,7 +604,7 @@ const SongCard = (props: SongCardProp) => {
           <div className="song-info-container text-font-color-white dark:text-font-color-white max-w-[75%]">
             <NavLink
               to="/main-player/songs/$songId"
-              params={{ songId }}
+              params={{ songId: String(songId) }}
               preload={isMultipleSelectionEnabled ? false : undefined}
               className={`song-title cursor-pointer overflow-hidden text-xl font-normal text-ellipsis whitespace-nowrap outline-offset-1 transition-none hover:underline focus-visible:outline!`}
               title={title}

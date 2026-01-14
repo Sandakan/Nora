@@ -12,17 +12,17 @@ import { songSearchSchema } from '@renderer/utils/zod/songSchema';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
-import { zodValidator } from '@tanstack/zod-adapter';
 import { useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import historyPlaylistCoverImage from '../../../assets/images/webp/history-playlist-icon.webp';
+import { SpecialPlaylists } from '@common/playlists.enum';
 export const Route = createFileRoute('/main-player/playlists/history')({
-  validateSearch: zodValidator(songSearchSchema),
+  validateSearch: songSearchSchema,
   component: HistoryPlaylistInfoPage
 });
 
 const playlistData: Playlist = {
-  playlistId: 'history',
+  playlistId: SpecialPlaylists.History, // Special ID for History playlist
   name: 'History',
   artworkPaths: {
     artworkPath: historyPlaylistCoverImage,
@@ -57,7 +57,7 @@ function HistoryPlaylistInfoPage() {
   const selectAllHandler = useSelectAllHandler(historySongs, 'songs', 'songId');
 
   const handleSongPlayBtnClick = useCallback(
-    (currSongId: string) => {
+    (currSongId: number) => {
       const queueSongIds = historySongs
         .filter((song) => !song.isBlacklisted)
         .map((song) => song.songId);
@@ -99,7 +99,7 @@ function HistoryPlaylistInfoPage() {
     const validSongIds = historySongs
       .filter((song) => !song.isBlacklisted)
       .map((song) => song.songId);
-    updateQueueData(undefined, [...queue.queue, ...validSongIds]);
+    updateQueueData(undefined, [...queue.songIds, ...validSongIds]);
     addNewNotifications([
       {
         id: `addedToQueue`,
@@ -109,7 +109,7 @@ function HistoryPlaylistInfoPage() {
         })
       }
     ]);
-  }, [addNewNotifications, historySongs, queue.queue, t, updateQueueData]);
+  }, [addNewNotifications, historySongs, queue.songIds, t, updateQueueData]);
 
   const shuffleAndPlaySongs = useCallback(
     () =>
@@ -244,4 +244,3 @@ function HistoryPlaylistInfoPage() {
     </MainContainer>
   );
 }
-

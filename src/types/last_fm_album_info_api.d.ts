@@ -13,6 +13,8 @@ interface ParsedAlbumTrack extends Omit<ParsedSimilarTrack, 'match'> {
   rank: number;
 }
 
+export { ParsedAlbumTrack };
+
 export interface LastFMAlbumInfo {
   sortedAvailAlbumTracks: ParsedAlbumTrack[];
   sortedAvailNonAlbumTracks: ParsedAlbumTrack[];
@@ -23,7 +25,7 @@ export interface LastFMAlbumInfo {
   wiki?: string;
 }
 
-interface AlbumInfo {
+export interface AlbumInfo {
   artist: string;
   mbid: string;
   tags: Tags;
@@ -36,7 +38,7 @@ interface AlbumInfo {
   wiki: Wiki;
 }
 
-type ParsedAlbumInfo = Omit<AlbumInfo, 'playcount' | 'listeners' | 'image'>;
+export type ParsedAlbumInfo = Omit<AlbumInfo, 'playcount' | 'listeners' | 'image'>;
 
 interface Image {
   size: string;
@@ -51,6 +53,8 @@ interface Tag {
   url: string;
   name: string;
 }
+
+export { Tag };
 
 interface Tracks {
   track: Track | Track[];
@@ -74,6 +78,8 @@ interface Artist {
   name: string;
   mbid: string;
 }
+
+export { Artist as LastFMTrackArtist };
 
 interface Streamable {
   fulltrack: string;

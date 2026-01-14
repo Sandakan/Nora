@@ -79,13 +79,13 @@ declare global {
   // ? Song data related types
 
   interface SavableSongData {
-    songId: string;
+    songId: number;
     title: string;
     duration: number;
-    artists?: { artistId: string; name: string }[];
-    album?: { albumId: string; name: string };
-    genres?: { genreId: string; name: string }[];
-    albumArtists?: { artistId: string; name: string }[];
+    artists?: { artistId: number; name: string }[];
+    album?: { albumId: number; name: string };
+    genres?: { genreId: number; name: string }[];
+    albumArtists?: { artistId: number; name: string }[];
     bitrate?: number;
     trackNo?: number;
     discNo?: number;
@@ -135,10 +135,10 @@ declare global {
   }
 
   interface AudioPlayerData {
-    songId: string;
+    songId: number;
     title: string;
     artists?: {
-      artistId: string;
+      artistId: number;
       name: string;
       artworkPath?: string;
       onlineArtworkPaths?: OnlineArtistArtworks;
@@ -148,7 +148,7 @@ declare global {
     artworkPath?: string;
     path: string;
     isAFavorite: boolean;
-    album?: { albumId: string; name: string };
+    album?: { albumId: number; name: string };
     paletteData?: PaletteData;
     isKnownSource: boolean;
     isBlacklisted: boolean;
@@ -156,12 +156,12 @@ declare global {
 
   interface AudioInfo {
     title: string;
-    artists?: { artistId: string; name: string }[];
-    album?: { albumId: string; name: string };
+    artists?: { artistId: number; name: string }[];
+    album?: { albumId: number; name: string };
     duration: number;
     artworkPaths: ArtworkPaths;
     path: string;
-    songId: string;
+    songId: number;
     addedDate: number;
     isAFavorite: boolean;
     year?: number;
@@ -181,14 +181,14 @@ declare global {
   }
 
   interface ToggleLikeSongReturnValue {
-    likes: string[];
-    dislikes: string[];
+    likes: number[];
+    dislikes: number[];
   }
 
   // ? Song listening data related types
 
   interface SongListeningData {
-    songId: string;
+    songId: number;
     playEvents: { playbackPercentage: string; createdAt: Date }[];
     skipEvents: { position: string; createdAt: Date }[];
     seekEvents: { position: string; createdAt: Date }[];
@@ -287,39 +287,39 @@ declare global {
   // node-id3 synchronisedLyrics types.
   type UnsynchronisedLyrics =
     | {
-        language: string;
-        text: string;
-      }
+      language: string;
+      text: string;
+    }
     | undefined;
 
   type SynchronisedLyrics =
     | Array<{
+      /**
+       * 3 letter ISO 639-2 language code, for example: eng
+       * @see {@link https://id3.org/ISO%20639-2 ISO 639-2}
+       */
+      language: string;
+      /**
+       * Absolute time unit:
+       * {@link TagConstants.TimeStampFormat}
+       */
+      timeStampFormat: number;
+      /**
+       * {@link TagConstants.SynchronisedLyrics.ContentType}
+       */
+      contentType: number;
+      /**
+       * Content descriptor
+       */
+      shortText?: string;
+      synchronisedText: Array<{
+        text: string;
         /**
-         * 3 letter ISO 639-2 language code, for example: eng
-         * @see {@link https://id3.org/ISO%20639-2 ISO 639-2}
+         * Absolute time in unit according to `timeStampFormat`.
          */
-        language: string;
-        /**
-         * Absolute time unit:
-         * {@link TagConstants.TimeStampFormat}
-         */
-        timeStampFormat: number;
-        /**
-         * {@link TagConstants.SynchronisedLyrics.ContentType}
-         */
-        contentType: number;
-        /**
-         * Content descriptor
-         */
-        shortText?: string;
-        synchronisedText: Array<{
-          text: string;
-          /**
-           * Absolute time in unit according to `timeStampFormat`.
-           */
-          timeStamp: number;
-        }>;
-      }>
+        timeStamp: number;
+      }>;
+    }>
     | undefined;
 
   interface LyricsMetadataFromShortText {
@@ -330,7 +330,7 @@ declare global {
 
   interface Queue {
     currentSongIndex: number | null;
-    queue: string[];
+    songIds: number[];
     queueBeforeShuffle?: number[];
     queueId?: string;
     queueType: QueueTypes;
@@ -342,7 +342,7 @@ declare global {
     path: string;
     artworkPath: string;
     duration: number;
-    songId: string;
+    songId: number;
   }
 
   type QueueTypes =
@@ -413,7 +413,7 @@ declare global {
     | 'NO_NETWORK_CONNECTION';
 
   interface Blacklist {
-    songBlacklist: string[];
+    songBlacklist: number[];
     folderBlacklist: string[];
   }
 
@@ -448,7 +448,7 @@ declare global {
     lastFmSessionKey: string | null;
   }
 
-  interface UserData extends UserSettings {}
+  interface UserData extends UserSettings { }
 
   type LanguageCodes = NoInfer<keyof typeof resources>;
 
@@ -484,7 +484,7 @@ declare global {
   }
 
   interface MusicFolder extends FolderStructure {
-    songIds: string[];
+    songIds: number[];
     isBlacklisted: boolean;
     subFolders: MusicFolder[];
   }
@@ -521,7 +521,7 @@ declare global {
   }
 
   interface CurrentSong {
-    songId: string | null;
+    songId: number | null;
     stoppedPosition: number;
     playlistId?: string;
   }
@@ -608,9 +608,9 @@ declare global {
   }
 
   interface IgnoredDuplicates {
-    artists: string[];
-    albums: string[];
-    genres: string[];
+    artists: number[];
+    albums: number[];
+    genres: number[];
   }
 
   interface SortingStates {
@@ -658,19 +658,19 @@ declare global {
   type QueueEventCallback<T = unknown> = (data: T) => void;
 
   interface QueueEventData {
-    positionChange: { oldPosition: number; newPosition: number; currentSongId: string | null };
-    queueChange: { queue: string[]; length: number };
-    songAdded: { songId: string; position: number };
-    songRemoved: { songId: string; position: number };
+    positionChange: { oldPosition: number; newPosition: number; currentSongId: number | null };
+    queueChange: { queue: number[]; length: number };
+    songAdded: { songId: number; position: number };
+    songRemoved: { songId: number; position: number };
     queueCleared: Record<string, never>;
-    queueReplaced: { oldQueue: string[]; newQueue: string[]; newPosition: number };
-    shuffled: { originalQueue: string[]; shuffledQueue: string[]; positions: number[] };
-    restored: { restoredQueue: string[] };
+    queueReplaced: { oldQueue: number[]; newQueue: number[]; newPosition: number };
+    shuffled: { originalQueue: number[]; shuffledQueue: number[]; positions: number[] };
+    restored: { restoredQueue: number[] };
     metadataChange: { queueId?: string; queueType?: QueueTypes };
   }
 
   interface PlayerQueueJson {
-    songIds: string[];
+    songIds: number[];
     position: number;
     queueBeforeShuffle?: number[];
     metadata?: PlayerQueueMetadata;
@@ -680,8 +680,8 @@ declare global {
     preferences: Preferences;
     playback: Playback;
     queue: PlayerQueueJson;
-    ignoredSeparateArtists: string[];
-    ignoredSongsWithFeatArtists: string[];
+    ignoredSeparateArtists: number[];
+    ignoredSongsWithFeatArtists: number[];
     ignoredDuplicates: IgnoredDuplicates;
     sortingStates: SortingStates;
     equalizerPreset: Equalizer;
@@ -692,10 +692,10 @@ declare global {
   // ? Playlists related types
 
   interface SavablePlaylist {
-    playlistId: 'Favorites' | 'History' | string;
+    playlistId: number;
     name: string;
     /** song ids of the songs in the playlist */
-    songs: string[];
+    songs: number[];
     createdDate: Date;
     isArtworkAvailable: boolean;
   }
@@ -707,11 +707,11 @@ declare global {
   // ? Genre related types
 
   interface SavableGenre {
-    genreId: string;
+    genreId: number;
     name: string;
     songs: {
       title: string;
-      songId: string;
+      songId: number;
     }[];
     artworkName?: string;
     paletteId?: string;
@@ -725,15 +725,15 @@ declare global {
   // ? Albums related types
 
   interface SavableAlbum {
-    albumId: string;
+    albumId: number;
     title: string;
     artists?: {
       name: string;
-      artistId: string;
+      artistId: number;
     }[];
     songs: {
       title: string;
-      songId: string;
+      songId: number;
     }[];
     year?: number;
     artworkName?: string;
@@ -746,14 +746,14 @@ declare global {
   // ? Artists related types
 
   interface SavableArtist {
-    artistId: string;
+    artistId: number;
     songs: {
       title: string;
-      songId: string;
+      songId: number;
     }[];
     albums?: {
       title: string;
-      albumId: string;
+      albumId: number;
     }[];
     name: string;
     isAFavorite: boolean;
@@ -999,7 +999,7 @@ declare global {
 
   interface MultipleSelectionData {
     isEnabled: boolean;
-    multipleSelections: string[];
+    multipleSelections: number[];
     selectionType?: QueueTypes;
   }
 
@@ -1162,7 +1162,7 @@ declare global {
 
   interface DataUpdateEvent {
     dataType: DataUpdateEventTypes;
-    eventData: { data?: string[]; message?: string }[];
+    eventData: { data?: number[]; message?: string }[];
   }
 
   interface DetailAvailableEvent<DetailType> extends Event {
@@ -1198,21 +1198,21 @@ declare global {
   // ? SongTags related types
   type SongTagsAlbumData = {
     title: string;
-    albumId?: string;
+    albumId?: number;
     noOfSongs?: number;
     artists?: string[];
     artworkPath?: string;
   };
 
   type SongTagsArtistData = {
-    artistId?: string;
+    artistId?: number;
     name: string;
     artworkPath?: string;
     onlineArtworkPaths?: OnlineArtistArtworks;
   };
 
   type SongTagsGenreData = {
-    genreId?: string;
+    genreId?: number;
     name: string;
     artworkPath?: string;
   };
@@ -1236,7 +1236,7 @@ declare global {
 
   interface SongOutsideLibraryData {
     title: string;
-    songId: string;
+    songId: number;
     duration: number;
     path: string;
     artworkPath?: string;
@@ -1341,7 +1341,7 @@ declare global {
   }
 
   type Routes = 'lyrics-editor';
-  type LyricsEditorRouteState = { songId: string; lyrics?: LyricData[] };
+  type LyricsEditorRouteState = { songId: number; lyrics?: LyricData[] };
   interface RouteStates {
     'lyrics-editor': LyricsEditorRouteState;
   }

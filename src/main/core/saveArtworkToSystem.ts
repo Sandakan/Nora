@@ -4,7 +4,10 @@ import sharp from 'sharp';
 import logger from '../logger';
 import { sendMessageToRenderer, showSaveDialog } from '../main';
 import isPathAWebURL from '../utils/isPathAWebUrl';
-import { fetchArtworkBufferFromURL, generateLocalArtworkBuffer } from '../updateSongId3Tags';
+import {
+  fetchArtworkBufferFromURL,
+  generateLocalArtworkBuffer
+} from '../updateSong/updateSongId3Tags';
 import { removeDefaultAppProtocolFromFilePath } from '../fs/resolveFilePaths';
 
 const getSaveOptions = (saveName?: string) => {

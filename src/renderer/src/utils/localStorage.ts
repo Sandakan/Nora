@@ -291,7 +291,7 @@ const setCurrentSongIndex = (index: number | null) => setItem('queue', 'position
 
 // IGNORED SEPARATE ARTISTS
 
-const setIgnoredSeparateArtists = (artists: string[]) => {
+const setIgnoredSeparateArtists = (artists: number[]) => {
   const allItems = getAllItems();
   setAllItems({
     ...allItems,
@@ -303,7 +303,7 @@ const getIgnoredSeparateArtists = () => getFullItem('ignoredSeparateArtists');
 
 // IGNORED SONGS WITH FEATURING ARTISTS
 
-const setIgnoredSongsWithFeatArtists = (ignoredSongIds: string[]) => {
+const setIgnoredSongsWithFeatArtists = (ignoredSongIds: number[]) => {
   const allItems = getAllItems();
   setAllItems({
     ...allItems,

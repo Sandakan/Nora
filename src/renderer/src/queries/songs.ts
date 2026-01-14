@@ -26,7 +26,7 @@ export const songQuery = createQueryKeys('songs', {
     };
   },
   allSongInfo: (data: {
-    songIds: string[];
+    songIds: number[];
     sortType: SongSortTypes;
     filterType?: SongFilterTypes;
   }) => {
@@ -41,20 +41,32 @@ export const songQuery = createQueryKeys('songs', {
       queryFn: () => window.api.audioLibraryControls.getSongInfo(songIds, sortType, filterType)
     };
   },
-  singleSongInfo: (data: { songId: string }) => ({
-    queryKey: [data.songId],
-    queryFn: () => window.api.audioLibraryControls.getSongInfo([data.songId])
-  }),
-  similarTracks: (data: { songId: string }) => ({
-    queryKey: [data.songId],
-    queryFn: () => window.api.audioLibraryControls.getSimilarTracksForASong(data.songId)
-  }),
-  queue: (songIds: string[]) => ({
-    // Avoid mutating the provided queue array when building the cache key
-    queryKey: [`songIds=${[...songIds].sort().join(',')}`],
-    queryFn: () =>
-      window.api.audioLibraryControls.getSongInfo(songIds, 'addedOrder', undefined, undefined, true)
-  }),
+  singleSongInfo: (data: { songId: number }) => {
+    return {
+      queryKey: [data.songId],
+      queryFn: () => window.api.audioLibraryControls.getSongInfo([data.songId])
+    };
+  },
+  similarTracks: (data: { songId: number }) => {
+    return {
+      queryKey: [data.songId],
+      queryFn: () => window.api.audioLibraryControls.getSimilarTracksForASong(data.songId)
+    };
+  },
+  queue: (songIds: number[]) => {
+    return {
+      // Avoid mutating the provided queue array when building the cache key
+      queryKey: [`songIds=${[...songIds].sort().join(',')}`],
+      queryFn: () =>
+        window.api.audioLibraryControls.getSongInfo(
+          songIds,
+          'addedOrder',
+          undefined,
+          undefined,
+          true
+        )
+    };
+  },
   favorites: (data: { sortType: SongSortTypes; start?: number; end?: number; limit?: number }) => {
     const { sortType = 'addedOrder', start = 0, end = 0, limit } = data;
 

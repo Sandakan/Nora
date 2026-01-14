@@ -12,18 +12,18 @@ import { songSearchSchema } from '@renderer/utils/zod/songSchema';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
-import { zodValidator } from '@tanstack/zod-adapter';
 import { useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import favoritesPlaylistCoverImage from '../../../assets/images/webp/favorites-playlist-icon.webp';
+import { SpecialPlaylists } from '../../../../../common/playlists.enum';
 
 export const Route = createFileRoute('/main-player/playlists/favorites')({
-  validateSearch: zodValidator(songSearchSchema),
+  validateSearch: songSearchSchema,
   component: FavoritesPlaylistInfoPage
 });
 
 const playlistData: Playlist = {
-  playlistId: 'favorites',
+  playlistId: SpecialPlaylists.Favorites, // Special ID for Favorites playlist
   name: 'Favorites',
   artworkPaths: {
     artworkPath: favoritesPlaylistCoverImage,
@@ -58,7 +58,7 @@ function FavoritesPlaylistInfoPage() {
   const selectAllHandler = useSelectAllHandler(favoriteSongs, 'songs', 'songId');
 
   const handleSongPlayBtnClick = useCallback(
-    (currSongId: string) => {
+    (currSongId: number) => {
       const queueSongIds = favoriteSongs
         .filter((song) => !song.isBlacklisted)
         .map((song) => song.songId);
@@ -100,7 +100,7 @@ function FavoritesPlaylistInfoPage() {
     const validSongIds = favoriteSongs
       .filter((song) => !song.isBlacklisted)
       .map((song) => song.songId);
-    updateQueueData(undefined, [...queue.queue, ...validSongIds]);
+    updateQueueData(undefined, [...queue.songIds, ...validSongIds]);
     addNewNotifications([
       {
         id: `addedToQueue`,
@@ -110,7 +110,7 @@ function FavoritesPlaylistInfoPage() {
         })
       }
     ]);
-  }, [addNewNotifications, favoriteSongs, queue.queue, t, updateQueueData]);
+  }, [addNewNotifications, favoriteSongs, queue.songIds, t, updateQueueData]);
 
   const shuffleAndPlaySongs = useCallback(
     () =>

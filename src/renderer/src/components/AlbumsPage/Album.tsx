@@ -14,7 +14,7 @@ import NavLink from '../NavLink';
 interface AlbumProp extends Album {
   index: number;
   className?: string;
-  selectAllHandler?: (_upToId?: string) => void;
+  selectAllHandler?: (_upToId?: number) => void;
 }
 
 export const Album = (props: AlbumProp) => {
@@ -119,10 +119,10 @@ export const Album = (props: AlbumProp) => {
       })
       .then((songs) => {
         if (Array.isArray(songs)) {
-          queue.queue.push(
+          queue.songIds.push(
             ...songs.filter((song) => !song.isBlacklisted).map((song) => song.songId)
           );
-          updateQueueData(undefined, queue.queue);
+          updateQueueData(undefined, queue.songIds);
           addNewNotifications([
             {
               id: 'newSongsToQueue',
@@ -134,13 +134,13 @@ export const Album = (props: AlbumProp) => {
         return undefined;
       })
       .catch((err) => console.error(err));
-  }, [addNewNotifications, multipleSelectionsData, queue.queue, t, updateQueueData]);
+  }, [addNewNotifications, multipleSelectionsData, queue.songIds, t, updateQueueData]);
 
   const showAlbumInfoPage = useCallback(
     () =>
       navigate({
         to: '/main-player/albums/$albumId',
-        params: { albumId: props.albumId }
+        params: { albumId: String(props.albumId) }
       }),
     [navigate, props.albumId]
   );
@@ -218,8 +218,8 @@ export const Album = (props: AlbumProp) => {
         handlerFunction: () => {
           if (isMultipleSelectionsEnabled) addToQueueForMultipleSelections();
           else {
-            queue.queue.push(...props.songs.map((song) => song.songId));
-            updateQueueData(undefined, queue.queue);
+            queue.songIds.push(...props.songs.map((song) => song.songId));
+            updateQueueData(undefined, queue.songIds);
             addNewNotifications([
               {
                 id: 'newSongsToQueue',
@@ -276,7 +276,7 @@ export const Album = (props: AlbumProp) => {
     playAlbumSongsForMultipleSelections,
     props.albumId,
     props.songs,
-    queue.queue,
+    queue.songIds,
     showAlbumInfoPage,
     t,
     toggleMultipleSelections,
@@ -318,7 +318,7 @@ export const Album = (props: AlbumProp) => {
   return (
     <NavLink
       to="/main-player/albums/$albumId"
-      params={{ albumId: props.albumId }}
+      params={{ albumId: String(props.albumId) }}
       preload={isMultipleSelectionEnabled ? false : undefined}
       // style={{ animationDelay: `${50 * (props.index + 1)}ms` }}
       className={`album group mr-6 mb-2 flex h-68 w-48 flex-col justify-between overflow-hidden rounded-md p-4 ${

@@ -14,7 +14,7 @@ import {
   convertToGenre,
   convertToPlaylist,
   convertToSongData
-} from '../common/convert';
+} from './utils/convert';
 import { getUserSettings, saveUserSettings } from './db/queries/settings';
 import { dataUpdateEvent } from './main';
 

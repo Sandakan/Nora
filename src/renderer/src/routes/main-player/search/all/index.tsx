@@ -13,12 +13,11 @@ import { searchPageSchema } from '@renderer/utils/zod/searchPageSchema';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
-import { zodValidator } from '@tanstack/zod-adapter';
 import { useContext, useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 export const Route = createFileRoute('/main-player/search/all/')({
-  validateSearch: zodValidator(searchPageSchema),
+  validateSearch: searchPageSchema,
   component: RouteComponent,
   loaderDeps: ({ search }) => ({ search }),
   loader: async ({ deps }) => {
@@ -72,11 +71,28 @@ function RouteComponent() {
               }`}
               values={{
                 query: keyword,
-                filter: t(
-                  `common.${
-                    selectedType === undefined || selectedType === 'songs' ? 'song' : selectedType
-                  }_other`
-                )
+                filter: (() => {
+                  switch (selectedType) {
+                    case 'artist':
+                      return t('common.artist_other');
+                    case 'playlist':
+                      return t('common.playlist_other');
+                    case 'album':
+                      return t('common.album_other');
+                    case 'genre':
+                      return t('common.genre_other');
+                    case 'folder':
+                      return t('common.folder_other');
+                    case 'favorites':
+                      return t('playlistsPage.favorites');
+                    case 'history':
+                      return t('playlistsPage.history');
+
+                    // For song and other types
+                    default:
+                      return t('common.song_other');
+                  }
+                })()
               }}
               components={{
                 span: (

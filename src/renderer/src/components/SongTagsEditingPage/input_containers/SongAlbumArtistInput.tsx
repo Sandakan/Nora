@@ -8,20 +8,20 @@ import SongArtistInputResult from './SongArtistInputResult';
 type Props = {
   songAlbum?: {
     title: string;
-    albumId?: string | undefined;
+    albumId?: number | undefined;
     noOfSongs?: number | undefined;
     artists?: string[] | undefined;
     artworkPath?: string | undefined;
   };
   songAlbumArtists?: {
-    artistId?: string | undefined;
+    artistId?: number | undefined;
     name: string;
     artworkPath?: string | undefined;
     onlineArtworkPaths?: OnlineArtistArtworks | undefined;
   }[];
   albumArtistKeyword: string;
   artistResults: {
-    artistId?: string;
+    artistId?: number;
     name: string;
     artworkPath?: string;
     onlineArtworkPaths?: OnlineArtistArtworks;

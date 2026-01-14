@@ -16,6 +16,7 @@ import {
 } from './migrations';
 import { DEFAULT_SONG_PALETTE } from './other/generatePalette';
 import isPathADir from './utils/isPathADir';
+import { SpecialPlaylists } from '../common/playlists.enum';
 import '@db/db';
 
 export const DEFAULT_ARTWORK_SAVE_LOCATION = path.join(app.getPath('userData'), 'song_covers');
@@ -33,14 +34,14 @@ export const DEFAULT_FILE_URL = 'nora://localfiles/';
 
 export const HISTORY_PLAYLIST_TEMPLATE: SavablePlaylist = {
   name: 'History',
-  playlistId: 'History',
+  playlistId: SpecialPlaylists.History,
   createdDate: new Date(),
   songs: [],
   isArtworkAvailable: true
 };
 export const FAVORITES_PLAYLIST_TEMPLATE: SavablePlaylist = {
   name: 'Favorites',
-  playlistId: 'Favorites',
+  playlistId: SpecialPlaylists.Favorites,
   createdDate: new Date(),
   songs: [],
   isArtworkAvailable: true
@@ -266,7 +267,7 @@ export const setGenresData = (updatedGenres: SavableGenre[]) => {
 
 // ? PLAYLIST DATA GETTERS AND SETTERS
 
-export const getPlaylistData = (playlistIds = [] as string[]) => {
+export const getPlaylistData = (playlistIds = [] as number[]) => {
   logger.debug(`Requesting playlist data for ids`, { playlistIds });
   if (Array.isArray(cachedPlaylistsData) && cachedPlaylistsData.length !== 0) {
     if (playlistIds && playlistIds.length === 0) return cachedPlaylistsData;

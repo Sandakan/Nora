@@ -1,4 +1,4 @@
-import { convertToSongData } from '../../common/convert';
+import { convertToSongData } from '../utils/convert';
 import { getAllSongsInFavorite } from '@main/db/queries/songs';
 
 export const getAllFavoriteSongs = async (

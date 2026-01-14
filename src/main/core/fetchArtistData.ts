@@ -1,6 +1,6 @@
 import { getAllArtists } from '@main/db/queries/artists';
 import logger from '../logger';
-import { convertToArtist } from '../../common/convert';
+import { convertToArtist } from '../utils/convert';
 
 const fetchArtistData = async (
   artistIdsOrNames: string[] = [],

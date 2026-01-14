@@ -3,7 +3,7 @@ import { AppUpdateContext } from '../contexts/AppUpdateContext';
 import { useStore } from '@tanstack/react-store';
 import { store } from '../store/store';
 
-const slice = (arr: string[], start: number, end: number) => {
+const slice = (arr: number[], start: number, end: number) => {
   if (start > end) {
     return arr.slice(end, start + 1).reverse();
   }
@@ -14,19 +14,16 @@ const slice = (arr: string[], start: number, end: number) => {
 const useSelectAllHandler = <Obj extends Record<string, any>>(
   arr: Obj[],
   selectionType: QueueTypes,
-  idProperty: keyof Pick<
-    Obj,
-    { [Prop in keyof Obj]: Obj[Prop] extends string ? Prop : never }[keyof Obj]
-  >
+  idProperty: keyof Obj
 ) => {
   const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
 
   const { toggleMultipleSelections } = useContext(AppUpdateContext);
 
   const selectAllHandler = useCallback(
-    (upToId?: string) => {
-      const getItemFromIndex = (id?: string) => {
-        if (id) {
+    (upToId?: number) => {
+      const getItemFromIndex = (id?: number) => {
+        if (id !== undefined) {
           for (let x = 0; x < arr.length; x += 1) {
             if (arr[x][idProperty] === id) return x;
           }
@@ -34,8 +31,8 @@ const useSelectAllHandler = <Obj extends Record<string, any>>(
         return undefined;
       };
 
-      const ids: string[] = multipleSelectionsData.multipleSelections;
-      if (upToId) {
+      const ids: number[] = multipleSelectionsData.multipleSelections;
+      if (upToId !== undefined) {
         if (multipleSelectionsData.multipleSelections.length > 0) {
           const currIndex = getItemFromIndex(upToId);
           const lastAddedId = multipleSelectionsData.multipleSelections.at(-1);
@@ -44,7 +41,7 @@ const useSelectAllHandler = <Obj extends Record<string, any>>(
 
           if (lastAddedIndex !== undefined && currIndex !== undefined) {
             const selectedIds = slice(
-              arr.map((prop) => prop[idProperty] as string),
+              arr.map((prop) => prop[idProperty] as number),
               lastAddedIndex,
               currIndex
             );
@@ -52,7 +49,7 @@ const useSelectAllHandler = <Obj extends Record<string, any>>(
           }
         } else ids.push(upToId);
       } else {
-        const selectedIds = arr.map((prop) => prop[idProperty]);
+        const selectedIds = arr.map((prop) => prop[idProperty] as number);
         if (selectedIds.length !== multipleSelectionsData.multipleSelections.length)
           ids.push(...selectedIds);
       }

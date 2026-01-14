@@ -10,7 +10,6 @@ import { store } from '@renderer/store/store';
 import { lyricsEditorSchema } from '@renderer/utils/zod/lyricsEditorSchema';
 import { createFileRoute } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
-import { zodValidator } from '@tanstack/zod-adapter';
 import {
   lazy,
   useCallback,
@@ -25,7 +24,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 export const Route = createFileRoute('/main-player/lyrics/editor/$songId')({
   component: LyricsEditingPage,
-  validateSearch: zodValidator(lyricsEditorSchema)
+  validateSearch: lyricsEditorSchema
 });
 
 const LyricsEditorHelpPrompt = lazy(
@@ -52,7 +51,7 @@ function LyricsEditingPage() {
 
   const { changePromptMenuData, playSong, updateContextMenuData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
-  const { songId } = Route.useParams();
+  const { songId } = Route.useParams({ select: (params) => ({ songId: Number(params.songId) }) });
   const { songTitle, isEditingEnhancedSyncedLyrics } = Route.useSearch();
 
   const lyrics = useStore(routeStateStore, (state) => {

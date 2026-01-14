@@ -1,191 +1,158 @@
- <h1 align="center">
-   <img class="logo" src="resources/other/nora_logo_banner.webp">
-   <!-- <p>Nora Player</p> -->
- </h1>
-
- <div align="center">
-  <img alt="GitHub all releases" src="https://img.shields.io/github/downloads/Sandakan/Nora/total?label=all%20time%20downloads&style=for-the-badge">
-  <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/downloads/Sandakan/Nora/v3.1.0-stable/total?style=for-the-badge">
-  <img alt="GitHub package.json version" src="https://img.shields.io/github/package-json/v/Sandakan/Nora?color=blue&label=latest%20version&style=for-the-badge">
-  <a href="https://github.com/Sandakan/Nora/blob/master/LICENSE"><img alt="GitHub license" src="https://img.shields.io/github/license/Sandakan/Nora?style=for-the-badge"></a>
-  <a href="https://github.com/Sandakan/Nora/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues/Sandakan/Oto-Music-for-Desktop?style=for-the-badge"></a>
-  <img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/Sandakan/Nora/build.yml?branch=master&style=for-the-badge">
-  <br/>
-  <br/>
-  <a title="Crowdin" target="_blank" href="https://crowdin.com/project/nora"><img src="https://badges.crowdin.net/nora/localized.svg"></a>
- </div>
-
- <br/>
-
 <div align="center">
-Nora is an elegant music player built using Electron and React. 
-<br>
-Inspired from <a href="https://play.google.com/store/apps/details?id=com.piyush.music&gl=us">Oto Music (Android)</a> by Piyush Mamidwar.
+
+<img src="resources/other/nora_logo_banner.webp" alt="Nora Logo">
+
+# Nora Player
+
+### An elegant music player for the modern desktop
+
+Built with Electron and React • Inspired by [Oto Music](https://play.google.com/store/apps/details?id=com.piyush.music&gl=us)
+
+![GitHub all releases](https://img.shields.io/github/downloads/Sandakan/Nora/total?label=all%20time%20downloads&style=for-the-badge)
+![GitHub release (latest by date)](https://img.shields.io/github/downloads/Sandakan/Nora/v3.1.0-stable/total?style=for-the-badge)
+![GitHub package.json version](https://img.shields.io/github/package-json/v/Sandakan/Nora?color=blue&label=latest%20version&style=for-the-badge)
+
+[![GitHub license](https://img.shields.io/github/license/Sandakan/Nora?style=for-the-badge)](https://github.com/Sandakan/Nora/blob/master/LICENSE)
+[![GitHub issues](https://img.shields.io/github/issues/Sandakan/Oto-Music-for-Desktop?style=for-the-badge)](https://github.com/Sandakan/Nora/issues)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Sandakan/Nora/build.yml?branch=master&style=for-the-badge)
+
+[![Crowdin](https://badges.crowdin.net/nora/localized.svg)](https://crowdin.com/project/nora)
+
+[Download](https://github.com/Sandakan/Nora/releases/latest) • [Features](#-features) • [Build Guide](#-build-from-source) • [Changelog](/changelog.md) • [Discord](https://discord.gg/c5rGKnBs4y)
+
 </div>
 
-<br/>
+---
 
-<div align="center">
-  <a href="#app-features">Features</a> &bull;
-  <a href="#build-this-project-on-your-system">Build on your system</a> &bull;
-  <a href="#user-feedback">User feedback</a> &bull;
-  <a href="/changelog.md">Changelog</a> &bull;
-  <a href="https://github.com/Sandakan/Nora/releases">Download</a>
-</div>
+## 🎯 Why Nora?
 
-<br/>
+Nora reimagines desktop music playback with thoughtful design and powerful features. Built to overcome the limitations of default music apps, it provides an intuitive and beautiful experience that puts your music front and center.
 
 ![Nora Banner Artwork](/resources/other/artwork%200.webp)
 
-<br/>
+## ✨ Features
 
-With simplicity and design in mind, this app was made to overcome problems when using default music apps on platforms that lack essential features.
+**Library Management**
+- ✅ Organize songs, artists, albums, and playlists with ease
+- ✅ Advanced search with smart song filters
+- ✅ Edit song metadata easily and conveniently[^3]
 
-<br>
+**Listening Experience**
+- ✅ Sing along with song lyrics[^1]
+- ✅ Support for synced lyrics
+- ✅ Last.FM scrobbling integration
+- ✅ Mini-player mode for distraction-free listening
 
-## How do I download Nora?
+**Personalization**
+- ✅ Keep favorite songs and artists close to you
+- ✅ Read your favorite artist's biography
+- ✅ Create playlists that meet your needs
+- ⏳ Personalized music shuffling[^2] (Upcoming)
 
-Go to **[Releases page](https://github.com/Sandakan/Nora/releases) > Assets > and choose the appropriate download** or [just click here to download the latest version of Nora](https://github.com/Sandakan/Nora/releases/latest).
-
-## App features
-
-It packs a horizon of features including,
-
-- [x] Organize your songs, artists, albums, and playlists with ease.
-- [x] Create playlists that meet your needs.
-- [x] Sing along with song lyrics[^1].
-- [x] Support for synced lyrics.
-- [x] Keep your favorite songs and artists close to you.
-- [x] Read your favorite artist's biography.
-- [ ] Personalized music shuffling[^2].(Upcoming)
-- [x] Change between Light and Dark themes with ease.
-- [x] A mini-player to help focus on what matters at the moment.
-- [x] Edit the metadata of your songs easily and conveniently [^3].
-- [x] Search through your library with the help of song filters.
-
-<br>
+**Customization**
+- ✅ Switch between Light and Dark themes with ease
 
 ![Latest Version Artwork](/resources/other/release%20artworks/whats-new-v3.1.0-stable.webp)
 
-Visit the [release notes](/changelog.md) to see what's new on the latest release.</p>
+Check out the [changelog](/changelog.md) to see what's new in the latest release.
 
-<br>
+## 📥 Download
 
-![Support for Online and Offline Lyrics Artwork](/resources/other/artwork%201.webp)
+Go to the **[Releases page](https://github.com/Sandakan/Nora/releases) > Assets > Choose your platform** or [download the latest version directly](https://github.com/Sandakan/Nora/releases/latest).
 
-![Switch between Dark and Light Modes Artwork](/resources/other/artwork%202.webp)
+## 📸 Gallery
+
+![Support for Online and Offline Lyrics](/resources/other/artwork%201.webp)
+
+![Switch between Dark and Light Modes](/resources/other/artwork%202.webp)
 
 ![Support for Last.FM Scrobbling](/resources/other/artwork%209.webp)
 
-![Organize your music library with ease Artwork](/resources/other/artwork%203.webp)
+![Organize your music library with ease](/resources/other/artwork%203.webp)
 
-![See how your favorite artists appear on songs and albums Artwork](/resources/other/artwork%204.webp)
+![See how your favorite artists appear on songs and albums](/resources/other/artwork%204.webp)
 
-![Keep your favorites closer to you Artwork](/resources/other/artwork%205.webp)
+![Keep your favorites closer to you](/resources/other/artwork%205.webp)
 
-![Search through your music library easily and efficiently Artwork](/resources/other/artwork%206.webp)
+![Search through your music library easily and efficiently](/resources/other/artwork%206.webp)
 
-![Edit song metadata and organize your library Artwork](/resources/other/artwork%207.webp)
+![Edit song metadata and organize your library](/resources/other/artwork%207.webp)
 
-![Listen with the mini player Artwork](/resources/other/artwork%208.webp)
+![Listen with the mini player](/resources/other/artwork%208.webp)
 
-<br/>
+## 💬 What People Say
 
-## User Feedback
+<div align="center">
 
-<br>
+> *"A sleek music player with a modern design, this solution seeks to provide users with a seamless experience when it comes to listening to their favorite local tunes."*  
+> — Robert Condorache, [Softpedia](https://www.softpedia.com/get/Multimedia/Audio/Audio-Players/Oto-Music-for-Desktop.shtml)
 
-<div align="center"> 
-  <div>
-    <h3><i>" A sleek music player with a modern design, this solution seeks to provide users with a seamless experience when it comes to listening to their favorite local tunes. "</i></h3>
-    <a href="https://www.softpedia.com/get/Multimedia/Audio/Audio-Players/Oto-Music-for-Desktop.shtml"><i>Robert Condorache &bull; Softpedia </i></a>
-  </div> 
+---
+
+> *"The application interface adopts rounded corners in a large area, the fonts and icons are round and cute, and the visual effect is very comfortable."*  
+> — [Apps Worth Watching in the Near Future • SSPAI](https://sspai.com/post/78669)
+
+---
+
+> *"Just found the most beautiful music player for Windows: Nora"*  
+> — [r/windowsapps • Reddit](https://www.reddit.com/r/windowsapps/comments/11xgg99/just_found_the_most_beautiful_music_player_for/)
+
 </div>
 
-<br>
+## 🛠 Build From Source
 
-<div align="center"> &bull; &bull; &bull; </div>
-
-<br>
-
-<div align="center"> 
-  <div>
-    <h3><i>" The application interface adopts rounded corners in a large area, the fonts and icons are round and cute, and the visual effect is very comfortable. "</i></h3>
-    <a href="https://sspai.com/post/78669"><i>Apps Worth Watching in the Near Future &bull; SSPAI</i></a>
-  </div> 
-</div>
-
-<br>
-
-<div align="center"> &bull; &bull; &bull; </div>
-
-<br>
-
-<div align="center"> 
-  <div>
-    <h3><i>" Just found the most beautiful music player for Windows: Nora "</i></h3>
-    <a href="https://www.reddit.com/r/windowsapps/comments/11xgg99/just_found_the_most_beautiful_music_player_for/"><i>r/windowapps &bull; Reddit</i></a>
-  </div> 
-</div>
-
-<br><br>
-
-## Build this project on your system
-
-<br/>
-
-Clone the project
+Clone the repository
 
 ```bash
-  git clone https://github.com/Sandakan/Nora
+git clone https://github.com/Sandakan/Nora
 ```
 
-Go to the project's folder
+Navigate to project folder
 
 ```bash
-  cd Nora
+cd Nora
 ```
 
 Install dependencies
 
 ```bash
-  npm install
+npm install
 ```
 
-Run
+Launch in development mode
 
 ```bash
-  npm start
+npm start
 ```
 
-<!-- <br>
-
-This project is built using [Electron React Boilerplate](https://github.com/electron-react-boilerplate/electron-react-boilerplate). -->
-
-<br>
-
-## Star History
+## 📊 Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=Sandakan/Nora&type=Date)](https://star-history.com/#Sandakan/Nora&Date)
 
-## Feedback
+## 🤝 Feedback & Contributing
 
-If you have any feedback about bugs, feature requests, etc. about the app, please let me know through the official [Nora Discord server](https://discord.gg/c5rGKnBs4y), or my [email](mailto:sandakannipunajith@gmail.com).
+Have feedback, bug reports, or feature requests? Reach out through:
+- [Discord Server](https://discord.gg/c5rGKnBs4y)
+- [Email](mailto:sandakannipunajith@gmail.com)
+- [GitHub Issues](https://github.com/Sandakan/Nora/issues)
 
-<br>
+Help translate Nora on [Crowdin](https://crowdin.com/project/nora)!
 
- <center>
-     Made with <span class="heart">&#10084;</span> by Sandakan Nipunajith.
-    <br>
-    Love, Sri Lanka.
- </center>
+---
 
-<br>
+<div align="center">
 
-- ##### Every song, artist, album, and song cover used in this demonstration is not owned by myself but owned by their respective owners. They were used for demonstration purposes only. I value all the copyrights of the owners of the above assets.
+Made with ❤️ by Sandakan Nipunajith  
+Love, Sri Lanka
 
-[^1]: The song lyrics use the [SongLyrics](https://www.npmjs.com/package/songlyrics) package and an implementation from the [MxLRC](https://github.com/fashni/MxLRC) package under the hood.
+*All songs, artists, albums, and cover art used in demonstrations are property of their respective owners and used for illustrative purposes only. All copyrights are respected.*
 
-[^2]: Personalized shuffles and playlists are generated by analyzing the user's listening patterns and the number of times each song gets played.
+</div>
 
-[^3]: Currently, the app only supports editing mp3 files due to some limitations of the dependencies.
+---
+
+[^1]: Song lyrics use the [SongLyrics](https://www.npmjs.com/package/songlyrics) package and an implementation from the [MxLRC](https://github.com/fashni/MxLRC) package.
+
+[^2]: Personalized shuffles and playlists are generated by analyzing listening patterns and play counts.
+
+[^3]: Currently, the app only supports editing MP3 files due to dependency limitations.

@@ -3,7 +3,6 @@ import { store } from '@renderer/store/store';
 import { folderSearchSchema } from '@renderer/utils/zod/folderSchema';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
-import { zodValidator } from '@tanstack/zod-adapter';
 import { lazy, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import storage from '@renderer/utils/localStorage';
@@ -17,7 +16,7 @@ import NoFoldersImage from '@assets/images/svg/Empty Inbox _Monochromatic.svg';
 import Img from '@renderer/components/Img';
 
 export const Route = createFileRoute('/main-player/folders/')({
-  validateSearch: zodValidator(folderSearchSchema),
+  validateSearch: folderSearchSchema,
   component: MusicFoldersPage
 });
 
@@ -243,3 +242,4 @@ function MusicFoldersPage() {
     </MainContainer>
   );
 }
+

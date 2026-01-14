@@ -48,7 +48,7 @@ export const resolveSongFilePath = (songPath: string, resetCache = true, sendRea
 };
 
 export const getSongArtworkPath = (
-  id: string,
+  id: number,
   isArtworkAvailable = true,
   resetCache = false,
   sendRealPath = false
@@ -303,7 +303,7 @@ export const parseGenreArtworks = (
 };
 
 export const getPlaylistArtworkPath = (
-  playlistId: string,
+  playlistId: number | 'History' | 'Favorites',
   isArtworkAvailable: boolean,
   resetCache = false
 ): ArtworkPaths => {

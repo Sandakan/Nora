@@ -25,26 +25,22 @@ import favoritesPlaylistCoverImage from '../../../assets/images/webp/favorites-p
 import historyPlaylistCoverImage from '../../../assets/images/webp/history-playlist-icon.webp';
 
 // TODO: Implement logic to fetch recently played songs from the backend or local storage.
-const fetchRecentlyPlayedSongs = async (
-  noOfRecentlyAddedSongCards: number
-): Promise<SongData[]> => [];
+const fetchRecentlyPlayedSongs = async (): Promise<SongData[]> => [];
 // TODO: Implement logic to fetch recent song artists from the backend or local storage.
-const fetchRecentSongArtists = async (
-  noOfRecentlyAddedArtistCards: number
-): Promise<Artist[]> => [];
-const fetchMostLovedSongs = async (noOfMostLovedSongCards: number): Promise<AudioInfo[]> => [];
+const fetchRecentSongArtists = async (): Promise<Artist[]> => [];
+const fetchMostLovedSongs = async (): Promise<AudioInfo[]> => [];
 
 const recentlyPlayedSongQueryOptions = queryOptions({
   queryKey: ['recentlyPlayedSongs'],
-  queryFn: () => fetchRecentlyPlayedSongs(30)
+  queryFn: () => fetchRecentlyPlayedSongs()
 });
 const recentSongArtistsQueryOptions = queryOptions({
   queryKey: ['recentSongArtists'],
-  queryFn: () => fetchRecentSongArtists(30)
+  queryFn: () => fetchRecentSongArtists()
 });
 const mostLovedSongsQueryOptions = queryOptions({
   queryKey: ['mostLovedSongs'],
-  queryFn: () => fetchMostLovedSongs(30)
+  queryFn: () => fetchMostLovedSongs()
 });
 
 export const Route = createFileRoute('/main-player/home/')({
