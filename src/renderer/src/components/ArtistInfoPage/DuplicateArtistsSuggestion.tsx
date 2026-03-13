@@ -50,7 +50,7 @@ const DuplicateArtistsSuggestion = (props: Props) => {
         return (
           <>
             <Button
-              className={`!text-font-color-highlight dark:!text-dark-font-color-highlight !m-0 !inline-flex !border-0 !p-0 ${
+              className={`text-font-color-highlight! dark:text-dark-font-color-highlight! m-0! inline-flex! border-0! p-0! ${
                 artistId !== artist.artistId ? 'hover:underline' : 'cursor-default!'
               }`}
               label={artist.name}
