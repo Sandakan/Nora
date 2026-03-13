@@ -7,10 +7,11 @@ import logger from '../logger';
 import copyDir from '../utils/copyDir';
 import { songCoversFolderPath } from './exportAppData';
 import { importDatabase } from '@main/db/db';
+import { type ExportedUserPreferences, importUserPreferences } from './userPreferencesExportImport';
 
 const requiredItemsForImport = ['nora.pglite.db.sql', 'song_covers'];
 
-const optionalItemsForImport = ['local_storage.json'];
+const optionalItemsForImport = ['local_storage.json', 'user_preferences.json'];
 
 const DEFAULT_EXPORT_DIALOG_OPTIONS: OpenDialogOptions = {
   title: `Select a Destination where you saved Nora's Exported App Data`,
@@ -29,29 +30,48 @@ const importRequiredData = async (importDir: string) => {
     // SONG COVERS
     await copyDir(path.join(importDir, 'song_covers'), songCoversFolderPath);
   } catch (error) {
-    logger.error('Failed to copy required data from import destination', { error, importDir });
+    logger.error('Failed to copy required data from import destination', {
+      error,
+      importDir
+    });
   }
 };
 const importOptionalData = async (
   entries: string[],
   importDir: string
-): Promise<LocalStorage | undefined> => {
+): Promise<{ localStorageData?: LocalStorage; userPreferences?: ExportedUserPreferences }> => {
   try {
+    const result: {
+      localStorageData?: LocalStorage;
+      userPreferences?: ExportedUserPreferences;
+    } = {};
+
     // LOCAL STORAGE DATA
-    if (entries.includes('localStorageData.json')) {
-      const localStorageDataString = await fs.readFile(
-        path.join(importDir, 'localStorageData.json'),
+    if (entries.includes('local_storage.json')) {
+      const localStorageDataString = await fs.readFile(path.join(importDir, 'local_storage.json'), {
+        encoding: 'utf-8'
+      });
+      result.localStorageData = JSON.parse(localStorageDataString);
+    }
+
+    // USER PREFERENCES DATA
+    if (entries.includes('user_preferences.json')) {
+      const userPreferencesString = await fs.readFile(
+        path.join(importDir, 'user_preferences.json'),
         {
           encoding: 'utf-8'
         }
       );
-      const localStorageData: LocalStorage = JSON.parse(localStorageDataString);
-      return localStorageData;
+      result.userPreferences = JSON.parse(userPreferencesString);
     }
-    return undefined;
+
+    return result;
   } catch (error) {
-    logger.error('Failed to copy optional data from import destination', { error, importDir });
-    return undefined;
+    logger.error('Failed to copy optional data from import destination', {
+      error,
+      importDir
+    });
+    return {};
   }
 };
 
@@ -82,18 +102,30 @@ const importAppData = async () => {
 
       if (doesRequiredItemsExist) {
         let localStorageData: LocalStorage | undefined;
+        let userPreferences: ExportedUserPreferences | undefined;
 
-        if (availableOptionalEntries.length > 0)
-          localStorageData = await importOptionalData(availableOptionalEntries, importDir);
+        if (availableOptionalEntries.length > 0) {
+          const optionalData = await importOptionalData(availableOptionalEntries, importDir);
+          localStorageData = optionalData.localStorageData;
+          userPreferences = optionalData.userPreferences;
+        }
 
         await importRequiredData(importDir);
+
+        // Import user preferences if available
+        if (userPreferences) {
+          await importUserPreferences(userPreferences);
+          logger.info('Imported user preferences from backup');
+        }
 
         logger.info('Successfully imported app data.');
         sendMessageToRenderer({ messageCode: 'APPDATA_IMPORT_SUCCESS' });
 
         if (localStorageData) {
           logger.info('Successfully imported app data. Restarting app in 5 seconds');
-          sendMessageToRenderer({ messageCode: 'APPDATA_IMPORT_SUCCESS_WITH_PENDING_RESTART' });
+          sendMessageToRenderer({
+            messageCode: 'APPDATA_IMPORT_SUCCESS_WITH_PENDING_RESTART'
+          });
           setTimeout(restartFunc, 5000);
           return localStorageData;
         }
@@ -102,7 +134,9 @@ const importAppData = async () => {
       logger.error('Failed to import app data. Missing required files in the selected folder.', {
         missingEntries
       });
-      return sendMessageToRenderer({ messageCode: 'APPDATA_IMPORT_FAILED_DUE_TO_MISSING_FILES' });
+      return sendMessageToRenderer({
+        messageCode: 'APPDATA_IMPORT_FAILED_DUE_TO_MISSING_FILES'
+      });
     }
     return logger.debug('User cancelled the prompt to select the import data.');
   } catch (error) {
@@ -112,4 +146,3 @@ const importAppData = async () => {
 };
 
 export default importAppData;
-

@@ -1,13 +1,13 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import storage from '../../utils/localStorage';
 
 import Button from '../Button';
 import Checkbox from '../Checkbox';
 import splitFeaturingArtists from '../../utils/splitFeaturingArtists';
 import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store/store';
+import { useUserPreferences } from '../../hooks/useUserPreferences';
 
 type Props = {
   songTitle?: string;
@@ -21,6 +21,7 @@ const featArtistsRegex = /\(? ?feat.? (?<featArtists>[^\n\t()]+)\)?/gm;
 const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
   const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
   const currentSongData = useStore(store, (state) => state.currentSongData);
+  const { ignoredFeaturingArtists, addIgnoredFeaturingArtistMutation } = useUserPreferences();
 
   const { addNewNotifications, updateCurrentSongData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
@@ -32,10 +33,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
   const [isMessageVisible, setIsMessageVisible] = useState(true);
   const [separatedFeatArtistsNames, setSeparatedFeatArtistsNames] = useState<string[]>([]);
 
-  const ignoredSongs = useMemo(
-    () => storage.ignoredSongsWithFeatArtists.getIgnoredSongsWithFeatArtists(),
-    []
-  );
+  const ignoredSongs = useMemo(() => ignoredFeaturingArtists || [], [ignoredFeaturingArtists]);
 
   useEffect(() => {
     if (isIgnored === false && ignoredSongs.length > 0 && songId)
@@ -145,7 +143,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
 
   const ignoreSuggestion = useCallback(() => {
     if (!songId) return;
-    storage.ignoredSongsWithFeatArtists.setIgnoredSongsWithFeatArtists([songId]);
+    addIgnoredFeaturingArtistMutation.mutate({ songIds: [songId] });
 
     setIsIgnored(true);
     addNewNotifications([

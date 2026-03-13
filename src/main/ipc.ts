@@ -1,17 +1,17 @@
-import { BrowserWindow, app, ipcMain, powerMonitor, shell } from 'electron';
+import { app, BrowserWindow, ipcMain, powerMonitor, shell } from 'electron';
 import {
-  IS_DEVELOPMENT,
+  allowScreenSleeping,
   changePlayerType,
   getFolderLocation,
   getImagefileLocation,
   getRendererLogs,
+  IS_DEVELOPMENT,
   resetApp,
   restartApp,
   restartRenderer,
   revealSongInFileExplorer,
   sendMessageToRenderer,
   stopScreenSleeping,
-  allowScreenSleeping,
   toggleAudioPlayingState,
   toggleAutoLaunch,
   toggleMiniPlayerAlwaysOnTop,
@@ -64,8 +64,8 @@ import getMusicFolderData from './core/getMusicFolderData';
 import blacklistSongs from './core/blacklistSongs';
 import search from './search';
 import {
-  searchSongMetadataResultsInInternet,
-  fetchSongMetadataFromInternet
+  fetchSongMetadataFromInternet,
+  searchSongMetadataResultsInInternet
 } from './utils/fetchSongMetadataFromInternet';
 import deleteSongsFromSystem from './core/deleteSongsFromSystem';
 import removeMusicFolder from './core/removeMusicFolder';
@@ -89,6 +89,18 @@ import resetLyrics from './utils/resetLyrics';
 import logger, { logFilePath } from './logger';
 import { getListeningData } from './core/getListeningData';
 import { getUserSettings, saveUserSettings } from './db/queries/settings';
+import { getUserKeyboardShortcuts, saveUserKeyboardShortcuts } from './db/queries/userPreferences';
+import { getUserEqualizerPreset, saveUserEqualizerPreset } from './db/queries/userPreferences';
+import {
+  addIgnoredArtist,
+  addIgnoredDuplicate,
+  addIgnoredFeaturingArtist,
+  getIgnoredArtists,
+  getIgnoredDuplicateMetadata,
+  getIgnoredFeaturingArtists,
+  removeIgnoredArtist,
+  removeIgnoredFeaturingArtist
+} from './db/queries/ignoredItems';
 import { getQueueInfo } from './utils/getQueueInfo';
 import { getDatabaseMetrics } from './db/queries/other';
 import { getAllHistorySongs } from './core/getAllHistorySongs';
@@ -189,6 +201,65 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     // );
     ipcMain.handle('app/saveUserSettings', (_, settings: Partial<UserSettings>) =>
       saveUserSettings(settings)
+    );
+
+    // User Keyboard Shortcuts Handlers
+    ipcMain.handle('app/getUserKeyboardShortcuts', async () => {
+      const shortcuts = await getUserKeyboardShortcuts();
+      return shortcuts.shortcuts;
+    });
+
+    ipcMain.handle('app/saveUserKeyboardShortcuts', (_, shortcuts: Record<string, string>) =>
+      saveUserKeyboardShortcuts(shortcuts)
+    );
+
+    // User Equalizer Preset Handlers
+    ipcMain.handle('app/getUserEqualizerPreset', async () => {
+      const preset = await getUserEqualizerPreset();
+      return preset;
+    });
+
+    ipcMain.handle(
+      'app/saveUserEqualizerPreset',
+      (
+        _,
+        presetData: {
+          presetName?: string;
+          frequencyBands?: number[];
+          isEnabled?: boolean;
+        }
+      ) => saveUserEqualizerPreset(presetData)
+    );
+
+    // Ignored Items Handlers
+    ipcMain.handle('app/getIgnoredArtists', async () => {
+      const ignored = await getIgnoredArtists();
+      return ignored.map((item) => item.artistId);
+    });
+
+    ipcMain.handle('app/addIgnoredArtist', (_, artistId: number) => addIgnoredArtist(artistId));
+
+    ipcMain.handle('app/removeIgnoredArtist', (_, artistId: number) =>
+      removeIgnoredArtist(artistId)
+    );
+
+    ipcMain.handle('app/getIgnoredFeaturingArtists', async () => {
+      const ignored = await getIgnoredFeaturingArtists();
+      return ignored.map((item) => item.artistId);
+    });
+
+    ipcMain.handle('app/addIgnoredFeaturingArtist', (_, artistId: number) =>
+      addIgnoredFeaturingArtist(artistId)
+    );
+
+    ipcMain.handle('app/removeIgnoredFeaturingArtist', (_, artistId: number) =>
+      removeIgnoredFeaturingArtist(artistId)
+    );
+
+    ipcMain.handle('app/getIgnoredDuplicateMetadata', () => getIgnoredDuplicateMetadata());
+
+    ipcMain.handle('app/addIgnoredDuplicate', (_, duplicateGroupId: string, songId: number) =>
+      addIgnoredDuplicate(duplicateGroupId, songId)
     );
 
     ipcMain.handle('app/getStorageUsage', () => getStorageUsage());
@@ -318,13 +389,8 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
 
     ipcMain.handle(
       'app/getPlaylistData',
-      (
-        _,
-        playlistIds?: string[],
-        sortType?: AlbumSortTypes,
-        start?: number,
-        end?: number,
-      ) => sendPlaylistData(playlistIds, sortType, start, end)
+      (_, playlistIds?: string[], sortType?: AlbumSortTypes, start?: number, end?: number) =>
+        sendPlaylistData(playlistIds, sortType, start, end)
     );
 
     ipcMain.handle('app/getArtistDuplicates', (_, artistName: string) =>

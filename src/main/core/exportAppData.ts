@@ -1,12 +1,13 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { type OpenDialogOptions, app } from 'electron';
+import { app, type OpenDialogOptions } from 'electron';
 
 import { sendMessageToRenderer, showOpenDialog } from '../main';
 import logger from '../logger';
 import copyDir from '../utils/copyDir';
 import makeDir from '../utils/makeDir';
 import { exportDatabase } from '@main/db/db';
+import { exportUserPreferences } from './userPreferencesExportImport';
 
 const DEFAULT_EXPORT_DIALOG_OPTIONS: OpenDialogOptions = {
   title: 'Select a Destination to Export App Data',
@@ -33,12 +34,18 @@ in these config files.
 const exportAppData = async (localStorageData: string) => {
   const destinations = await showOpenDialog(DEFAULT_EXPORT_DIALOG_OPTIONS);
   const dbDump = await exportDatabase();
+  const userPreferences = await exportUserPreferences();
 
   const operations = [
     // SONG DATA
     {
       filename: 'nora.pglite.db.sql',
       dataString: dbDump
+    },
+    // USER PREFERENCES (keyboard shortcuts, equalizer, ignored items)
+    {
+      filename: 'user_preferences.json',
+      dataString: JSON.stringify(userPreferences, null, 2)
     },
     // LOCAL STORAGE DATA
     {
@@ -65,17 +72,18 @@ const exportAppData = async (localStorageData: string) => {
           : path.join(destinations[0], 'Nora exports');
       const { exist } = await makeDir(destination);
 
-      if (exist)
+      if (exist) {
         logger.debug(`'Nora exports' folder already exists. Will re-write contents of the folder.`);
+      }
 
       for (let i = 0; i < operations.length; i++) {
         const operation = operations[i];
 
-        if (operation?.directory)
+        if (operation?.directory) {
           await copyDir(operation.directory, path.join(destination, 'song_covers'));
-        else if (operation?.dataString)
+        } else if (operation?.dataString) {
           await fs.writeFile(path.join(destination, operation.filename), operation.dataString);
-        else throw new Error('Invalid operation');
+        } else throw new Error('Invalid operation');
 
         logger.debug('Exporting app data. Please wait');
         sendMessageToRenderer({

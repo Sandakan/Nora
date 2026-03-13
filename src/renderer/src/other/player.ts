@@ -1,4 +1,3 @@
-import { EventEmitter } from 'events';
 import { dispatch, store } from '../store/store';
 import storage from '../utils/localStorage';
 import { equalizerBandHertzData } from './equalizerData';
@@ -6,12 +5,35 @@ import PlayerQueue from './playerQueue';
 
 const AUDIO_FADE_DURATION = 250;
 
+type PlayerEventType =
+  | 'timeUpdate'
+  | 'durationChange'
+  | 'play'
+  | 'pause'
+  | 'error'
+  | 'seeking'
+  | 'seeked'
+  | 'repeatOne'
+  | 'repeatAll'
+  | 'playbackComplete'
+  | 'songLoaded'
+  | 'loadError'
+  | 'recordListening'
+  | 'repeatSong'
+  | 'repeatModeChange'
+  | 'queueChange'
+  | 'queueMetadataChange';
+
+type PlayerEventCallback<T = unknown> = (data: T) => void;
+
 /**
  * AudioPlayer class that manages audio playback with integrated queue management.
- * Extends EventEmitter to provide event-based architecture for player state changes.
+ * Provides event-based architecture for player state changes.
  * Owns a PlayerQueue instance and automatically reacts to queue position changes.
  */
-class AudioPlayer extends EventEmitter {
+class AudioPlayer {
+  private listeners: Map<PlayerEventType, Set<PlayerEventCallback<unknown>>>;
+
   audio: HTMLAudioElement;
   queue: PlayerQueue;
   currentVolume: number;
@@ -26,7 +48,7 @@ class AudioPlayer extends EventEmitter {
   private pendingAutoPlay: boolean = false;
 
   constructor(queue: PlayerQueue) {
-    super();
+    this.listeners = new Map();
 
     this.audio = new Audio();
     this.queue = queue;
@@ -169,7 +191,10 @@ class AudioPlayer extends EventEmitter {
     }
 
     try {
-      console.log('[AudioPlayer.loadSong]', { songId: songData.songId, options });
+      console.log('[AudioPlayer.loadSong]', {
+        songId: songData.songId,
+        options
+      });
 
       // Update store with current song data if requested
       if (options?.updateStore !== false) {
@@ -206,7 +231,9 @@ class AudioPlayer extends EventEmitter {
       }
 
       // Dispatch custom track change event
-      const trackChangeEvent = new CustomEvent('player/trackchange', { detail: songData.songId });
+      const trackChangeEvent = new CustomEvent('player/trackchange', {
+        detail: songData.songId
+      });
       this.audio.dispatchEvent(trackChangeEvent);
 
       this.emit('songLoaded', songData);
@@ -237,6 +264,48 @@ class AudioPlayer extends EventEmitter {
     this.audio.pause();
     this.audio.src = '';
     this.currentContext.close();
+  }
+
+  /**
+   * Subscribe to an event.
+   * @param eventType - The type of event to listen for
+   * @param callback - Function to call when event is emitted
+   */
+  on<T = unknown>(eventType: PlayerEventType, callback: PlayerEventCallback<T>): void {
+    if (!this.listeners.has(eventType)) {
+      this.listeners.set(eventType, new Set());
+    }
+    this.listeners.get(eventType)?.add(callback as PlayerEventCallback<unknown>);
+  }
+
+  /**
+   * Remove an event listener.
+   * @param eventType - The type of event
+   * @param callback - The callback to remove
+   */
+  off<T = unknown>(eventType: PlayerEventType, callback: PlayerEventCallback<T>): void {
+    this.listeners.get(eventType)?.delete(callback as PlayerEventCallback<unknown>);
+  }
+
+  /**
+   * Emit an event to all listeners.
+   * @param eventType - The type of event to emit
+   * @param data - The data to pass to listeners
+   */
+  protected emit<T = unknown>(eventType: PlayerEventType, data?: T): void {
+    const callbacks = this.listeners.get(eventType);
+    if (callbacks) {
+      callbacks.forEach((callback) => {
+        callback(data);
+      });
+    }
+  }
+
+  /**
+   * Remove all listeners for all events.
+   */
+  removeAllListeners(): void {
+    this.listeners.clear();
   }
 
   private fadeOutAudio(): Promise<void> {
@@ -307,34 +376,22 @@ class AudioPlayer extends EventEmitter {
   }
 
   // ? PLAYER RELATED STORE UPDATES HANDLING
-  private updateEqualizerPreset(equalizerPreset: LocalStorage['equalizerPreset']) {
-    if (equalizerPreset) {
-      const filters = equalizerPreset;
-      for (const filter of Object.entries(filters)) {
-        const filterName = filter[0] as EqualizerBandFilters;
-        const gainValue: number = filter[1];
-
-        const equalizerFilter = this.equalizerBands.get(filterName);
-        if (equalizerFilter) equalizerFilter.gain.value = gainValue;
-      }
-    }
-  }
-
   private updatePlayerVolume(volume: PlayerVolume) {
     this.volume = volume.value / 100;
     this.audio.muted = volume.isMuted;
   }
 
   private updatePlaybackRate(playbackRate: number) {
-    if (this.audio.playbackRate !== playbackRate) this.audio.playbackRate = playbackRate;
+    if (this.audio.playbackRate !== playbackRate) {
+      this.audio.playbackRate = playbackRate;
+    }
   }
 
   private subscribeToStoreEvents() {
     const unsubscribeFunction = store.subscribe(() => {
       if (store) {
-        const { localStorage, player } = store.state;
+        const { player } = store.state;
 
-        this.updateEqualizerPreset(localStorage.equalizerPreset);
         this.updatePlayerVolume(player.volume);
         this.updatePlaybackRate(player.playbackRate);
         this.syncRepeatModeFromStore(player.isRepeating);
@@ -468,7 +525,9 @@ class AudioPlayer extends EventEmitter {
     if (this.queue.hasNext) {
       this.pendingAutoPlay = true; // Auto-play next song on manual skip
       this.queue.moveToNext();
-      console.log('[AudioPlayer.skipForward.moved]', { position: this.queue.position });
+      console.log('[AudioPlayer.skipForward.moved]', {
+        position: this.queue.position
+      });
     } else if (this.repeatMode === 'all' && this.queue.length > 0) {
       this.pendingAutoPlay = true; // Auto-play when restarting queue
       this.queue.moveToStart();

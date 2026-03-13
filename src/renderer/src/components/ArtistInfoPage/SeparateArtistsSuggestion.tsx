@@ -1,13 +1,13 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import storage from '../../utils/localStorage';
 
 import Button from '../Button';
 import splitFeaturingArtists from '../../utils/splitFeaturingArtists';
 import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store/store';
 import { useNavigate } from '@tanstack/react-router';
+import { useUserPreferences } from '../../hooks/useUserPreferences';
 
 type Props = {
   name?: string;
@@ -19,6 +19,7 @@ const SeparateArtistsSuggestion = (props: Props) => {
 
   const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
   const currentSongData = useStore(store, (state) => state.currentSongData);
+  const { ignoredArtists, addIgnoredArtistMutation } = useUserPreferences();
 
   const { addNewNotifications, updateCurrentSongData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
@@ -28,14 +29,9 @@ const SeparateArtistsSuggestion = (props: Props) => {
   const [isIgnored, setIsIgnored] = useState(false);
   const [isMessageVisible, setIsMessageVisible] = useState(true);
 
-  const ignoredArtists = useMemo(
-    () => storage.ignoredSeparateArtists.getIgnoredSeparateArtists(),
-    []
-  );
-
   useEffect(() => {
-    if (ignoredArtists.length > 0 && artistId !== undefined)
-      setIsIgnored(ignoredArtists.includes(artistId));
+    if ((ignoredArtists?.length || 0) > 0 && artistId !== undefined)
+      setIsIgnored(ignoredArtists?.includes(artistId) || false);
   }, [artistId, ignoredArtists]);
 
   const separatedArtistsNames = useMemo(() => {
@@ -182,8 +178,7 @@ const SeparateArtistsSuggestion = (props: Props) => {
                   iconClassName="material-icons-round-outlined"
                   label="Ignore"
                   clickHandler={() => {
-                    if (artistId !== undefined)
-                      storage.ignoredSeparateArtists.setIgnoredSeparateArtists([artistId]);
+                    if (artistId !== undefined) addIgnoredArtistMutation.mutate({ artistId });
                     setIsIgnored(true);
                     addNewNotifications([
                       {

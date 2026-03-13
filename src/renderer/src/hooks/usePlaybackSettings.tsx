@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { dispatch, store } from '../store/store';
 import storage from '../utils/localStorage';
 import toggleSongIsFavorite from '../other/toggleSongIsFavorite';
+import { useUserPreferences } from './useUserPreferences';
 
 /**
  * Hook for managing playback settings (repeat, volume, mute, position, favorites, equalizer).
@@ -32,6 +33,8 @@ import toggleSongIsFavorite from '../other/toggleSongIsFavorite';
  * ```
  */
 export function usePlaybackSettings(player: HTMLAudioElement) {
+  const { saveEqualizerPreset } = useUserPreferences();
+
   const toggleRepeat = useCallback((newState?: RepeatTypes) => {
     const repeatState =
       newState ||
@@ -96,9 +99,12 @@ export function usePlaybackSettings(player: HTMLAudioElement) {
     []
   );
 
-  const updateEqualizerOptions = useCallback((options: Equalizer) => {
-    storage.equalizerPreset.setEqualizerPreset(options);
-  }, []);
+  const updateEqualizerOptions = useCallback(
+    (options: Equalizer) => {
+      saveEqualizerPreset(options);
+    },
+    [saveEqualizerPreset]
+  );
 
   return {
     toggleRepeat,

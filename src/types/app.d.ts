@@ -287,39 +287,39 @@ declare global {
   // node-id3 synchronisedLyrics types.
   type UnsynchronisedLyrics =
     | {
-      language: string;
-      text: string;
-    }
+        language: string;
+        text: string;
+      }
     | undefined;
 
   type SynchronisedLyrics =
     | Array<{
-      /**
-       * 3 letter ISO 639-2 language code, for example: eng
-       * @see {@link https://id3.org/ISO%20639-2 ISO 639-2}
-       */
-      language: string;
-      /**
-       * Absolute time unit:
-       * {@link TagConstants.TimeStampFormat}
-       */
-      timeStampFormat: number;
-      /**
-       * {@link TagConstants.SynchronisedLyrics.ContentType}
-       */
-      contentType: number;
-      /**
-       * Content descriptor
-       */
-      shortText?: string;
-      synchronisedText: Array<{
-        text: string;
         /**
-         * Absolute time in unit according to `timeStampFormat`.
+         * 3 letter ISO 639-2 language code, for example: eng
+         * @see {@link https://id3.org/ISO%20639-2 ISO 639-2}
          */
-        timeStamp: number;
-      }>;
-    }>
+        language: string;
+        /**
+         * Absolute time unit:
+         * {@link TagConstants.TimeStampFormat}
+         */
+        timeStampFormat: number;
+        /**
+         * {@link TagConstants.SynchronisedLyrics.ContentType}
+         */
+        contentType: number;
+        /**
+         * Content descriptor
+         */
+        shortText?: string;
+        synchronisedText: Array<{
+          text: string;
+          /**
+           * Absolute time in unit according to `timeStampFormat`.
+           */
+          timeStamp: number;
+        }>;
+      }>
     | undefined;
 
   interface LyricsMetadataFromShortText {
@@ -448,7 +448,7 @@ declare global {
     lastFmSessionKey: string | null;
   }
 
-  interface UserData extends UserSettings { }
+  interface UserData extends UserSettings {}
 
   type LanguageCodes = NoInfer<keyof typeof resources>;
 
@@ -602,8 +602,7 @@ declare global {
     preset: Equalizer;
   }[];
 
-  interface EqualizerPresetDropdownOptions
-    extends DropdownOption<EqualierPresetDropdownOptionValues> {
+  interface EqualizerPresetDropdownOptions extends DropdownOption<EqualierPresetDropdownOptionValues> {
     preset?: Equalizer;
   }
 
@@ -658,13 +657,25 @@ declare global {
   type QueueEventCallback<T = unknown> = (data: T) => void;
 
   interface QueueEventData {
-    positionChange: { oldPosition: number; newPosition: number; currentSongId: number | null };
+    positionChange: {
+      oldPosition: number;
+      newPosition: number;
+      currentSongId: number | null;
+    };
     queueChange: { queue: number[]; length: number };
     songAdded: { songId: number; position: number };
     songRemoved: { songId: number; position: number };
     queueCleared: Record<string, never>;
-    queueReplaced: { oldQueue: number[]; newQueue: number[]; newPosition: number };
-    shuffled: { originalQueue: number[]; shuffledQueue: number[]; positions: number[] };
+    queueReplaced: {
+      oldQueue: number[];
+      newQueue: number[];
+      newPosition: number;
+    };
+    shuffled: {
+      originalQueue: number[];
+      shuffledQueue: number[];
+      positions: number[];
+    };
     restored: { restoredQueue: number[] };
     metadataChange: { queueId?: string; queueType?: QueueTypes };
   }
@@ -680,12 +691,9 @@ declare global {
     preferences: Preferences;
     playback: Playback;
     queue: PlayerQueueJson;
-    ignoredSeparateArtists: number[];
-    ignoredSongsWithFeatArtists: number[];
-    ignoredDuplicates: IgnoredDuplicates;
     sortingStates: SortingStates;
-    equalizerPreset: Equalizer;
     lyricsEditorSettings: LyricsEditorSettings;
+    equalizerPreset: Equalizer;
     keyboardShortcuts: ShortcutCategoryList;
   }
 

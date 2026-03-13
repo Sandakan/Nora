@@ -412,13 +412,6 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
     playbackRate: 1.0
   },
   queue: { position: 0, songIds: [] },
-  ignoredSeparateArtists: [],
-  ignoredSongsWithFeatArtists: [],
-  ignoredDuplicates: {
-    albums: [],
-    artists: [],
-    genres: []
-  },
   sortingStates: {
     albumsPage: 'aToZ',
     artistsPage: 'aToZ',

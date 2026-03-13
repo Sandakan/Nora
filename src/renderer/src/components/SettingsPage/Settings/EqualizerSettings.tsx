@@ -8,8 +8,6 @@ import { equalizerBandHertzData, equalizerPresetsData } from '../../../other/equ
 import i18n from '../../../i18n';
 
 import EqualierBand from './EqualierBand';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store/store';
 import { LOCAL_STORAGE_DEFAULT_TEMPLATE } from '@renderer/other/appReducer';
 
 const presets: EqualizerPresetDropdownOptions[] = equalizerPresetsData.map((presetData) => {
@@ -55,15 +53,10 @@ const getPresetName = (equalizer: Equalizer): string => {
 };
 
 const EqualizerSettings = () => {
-  const equalizerOptions = useStore(store, (state) => state.localStorage.equalizerPreset);
-
   const { updateEqualizerOptions } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const [content, dispatch] = useReducer(
-    reducer,
-    equalizerOptions || LOCAL_STORAGE_DEFAULT_TEMPLATE.equalizerPreset
-  );
+  const [content, dispatch] = useReducer(reducer, LOCAL_STORAGE_DEFAULT_TEMPLATE.equalizerPreset);
 
   const [selectedPreset, setSelectedPreset] = useState<string>('flat');
 

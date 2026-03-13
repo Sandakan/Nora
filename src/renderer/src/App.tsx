@@ -29,6 +29,7 @@ import { usePlaybackErrors } from './hooks/usePlaybackErrors';
 import { usePlaybackSettings } from './hooks/usePlaybackSettings';
 import { usePlayerControl } from './hooks/usePlayerControl';
 import { usePlayerNavigation } from './hooks/usePlayerNavigation';
+import { useUserPreferences } from './hooks/useUserPreferences';
 
 // ? MAIN APP COMPONENTS
 import ErrorBoundary from './components/ErrorBoundary';
@@ -101,6 +102,10 @@ export default function App() {
   // Context menu hook handles right-click menu state and visibility
   // Note: Global click listener is now handled automatically inside the hook
   const { updateContextMenuData } = useContextMenu();
+
+  // ? INITIALIZE USER PREFERENCES
+  // User preferences hook loads keyboard shortcuts, equalizer preset, and ignored items from database
+  useUserPreferences();
 
   // ? INITIALIZE KEYBOARD SHORTCUTS
   // Keyboard shortcuts hook handles all keyboard shortcuts and their actions
@@ -264,42 +269,8 @@ export default function App() {
     windowManagement
   });
 
-  const appUpdateContextValues = useMemo<AppUpdateContextType>(
-    () => {
-      const contextValue: AppUpdateContextType = {
-        updateCurrentSongData,
-        updateContextMenuData,
-        changePromptMenuData,
-        changeUpNextSongData,
-        updatePromptMenuHistoryIndex,
-        playSong,
-        addNewNotifications,
-        updateNotifications,
-        createQueue,
-        changeQueueCurrentSongIndex,
-        updateCurrentSongPlaybackState,
-        updatePlayerType,
-        handleSkipBackwardClick,
-        handleSkipForwardClick,
-        updateSongPosition,
-        updateVolume,
-        toggleMutedState,
-        toggleRepeat,
-        toggleShuffling,
-        toggleQueueShuffle,
-        toggleIsFavorite,
-        toggleSongPlayback,
-        updateQueueData,
-        clearAudioPlayerData,
-        updateBodyBackgroundImage,
-        updateMultipleSelections,
-        toggleMultipleSelections,
-        updateAppUpdatesState,
-        updateEqualizerOptions
-      };
-      return contextValue;
-    },
-    [
+  const appUpdateContextValues = useMemo<AppUpdateContextType>(() => {
+    const contextValue: AppUpdateContextType = {
       updateCurrentSongData,
       updateContextMenuData,
       changePromptMenuData,
@@ -329,8 +300,39 @@ export default function App() {
       toggleMultipleSelections,
       updateAppUpdatesState,
       updateEqualizerOptions
-    ]
-  );
+    };
+    return contextValue;
+  }, [
+    updateCurrentSongData,
+    updateContextMenuData,
+    changePromptMenuData,
+    changeUpNextSongData,
+    updatePromptMenuHistoryIndex,
+    playSong,
+    addNewNotifications,
+    updateNotifications,
+    createQueue,
+    changeQueueCurrentSongIndex,
+    updateCurrentSongPlaybackState,
+    updatePlayerType,
+    handleSkipBackwardClick,
+    handleSkipForwardClick,
+    updateSongPosition,
+    updateVolume,
+    toggleMutedState,
+    toggleRepeat,
+    toggleShuffling,
+    toggleQueueShuffle,
+    toggleIsFavorite,
+    toggleSongPlayback,
+    updateQueueData,
+    clearAudioPlayerData,
+    updateBodyBackgroundImage,
+    updateMultipleSelections,
+    toggleMultipleSelections,
+    updateAppUpdatesState,
+    updateEqualizerOptions
+  ]);
 
   return (
     <ErrorBoundary>
