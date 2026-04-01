@@ -1,11 +1,11 @@
+import { store } from '@renderer/store/store';
+import { linkOptions } from '@tanstack/react-router';
+import { useStore } from '@tanstack/react-store';
 import { memo, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import ErrorBoundary from '../ErrorBoundary';
 import SideBarItem from './SideBarItem';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store/store';
-import { linkOptions } from '@tanstack/react-router';
 
 const Sidebar = memo(() => {
   const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);

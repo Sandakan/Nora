@@ -1,10 +1,9 @@
+import { SpecialPlaylists } from '@common/playlists.enum';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-
 import Button from '../Button';
-import { SpecialPlaylists } from '@common/playlists.enum';
 
 interface ConfirmDeletePlaylistProp {
   playlistIds: number[];

@@ -1,10 +1,9 @@
 import { type ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import packageFile from '../../../../package.json';
 import Button from './Button';
 import Hyperlink from './Hyperlink';
-
-import packageFile from '../../../../package.json';
 
 interface ErrorPromptProps {
   reason: string;

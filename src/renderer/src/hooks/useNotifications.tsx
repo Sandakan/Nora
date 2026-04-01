@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useTransition } from 'react';
+
+import parseNotificationFromMain from '../other/parseNotificationFromMain';
 import { dispatch, store } from '../store/store';
 import throttle from '../utils/throttle';
-import parseNotificationFromMain from '../other/parseNotificationFromMain';
 
 export interface UseNotificationsOptions {
   maxNotifications?: number;
@@ -17,26 +18,28 @@ export interface UseNotificationsReturn {
 /**
  * Hook for managing application notifications.
  *
- * Provides functions to add and update notifications in the notification panel.
- * Automatically handles notification limits, deduplication, and main process messages.
+ * Provides functions to add and update notifications in the notification panel. Automatically
+ * handles notification limits, deduplication, and main process messages.
  *
  * @example
- * ```tsx
- * function MyComponent() {
- *   const { addNewNotifications } = useNotifications();
+ *   ```tsx
+ *   function MyComponent() {
+ *     const { addNewNotifications } = useNotifications();
  *
- *   const showSuccess = () => {
- *     addNewNotifications([{
- *       id: 'success',
- *       content: 'Operation completed!',
- *       iconName: 'check_circle',
- *       iconClassName: 'material-icons-round-outlined'
- *     }]);
- *   };
+ *     const showSuccess = () => {
+ *       addNewNotifications([
+ *         {
+ *           id: 'success',
+ *           content: 'Operation completed!',
+ *           iconName: 'check_circle',
+ *           iconClassName: 'material-icons-round-outlined'
+ *         }
+ *       ]);
+ *     };
  *
- *   return <button onClick={showSuccess}>Show Success</button>;
- * }
- * ```
+ *     return <button onClick={showSuccess}>Show Success</button>;
+ *   }
+ *   ```
  *
  * @param options - Configuration options
  * @param options.maxNotifications - Maximum number of notifications to keep (default: 4)

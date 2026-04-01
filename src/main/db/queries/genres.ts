@@ -1,6 +1,6 @@
 import { db } from '@db/db';
-import { and, asc, desc, eq, inArray, type SQL } from 'drizzle-orm';
 import { genres, genresSongs } from '@db/schema';
+import { and, asc, desc, eq, inArray, type SQL } from 'drizzle-orm';
 
 export const isGenreWithIdAvailable = async (genreId: number, trx: DB | DBTransaction = db) => {
   const data = await trx.select({}).from(genres).where(eq(genres.id, genreId));
@@ -91,9 +91,9 @@ export const linkSongToGenre = async (
 };
 
 /**
- * Unlinks a song from a genre by deleting the relationship in the genresSongs table.
- * This does NOT delete the genre or song themselves - only the relationship between them.
- * 
+ * Unlinks a song from a genre by deleting the relationship in the genresSongs table. This does NOT
+ * delete the genre or song themselves - only the relationship between them.
+ *
  * @param genreId - The ID of the genre
  * @param songId - The ID of the song
  * @param trx - Database transaction instance (defaults to main db connection)
@@ -151,14 +151,17 @@ export const getGenreSongIds = async (genreId: number, trx: DB | DBTransaction =
 
 /**
  * Deletes a genre from the database.
- * 
+ *
  * **Cascade Behavior:**
- * - All entries in `genresSongs` linking this genre to songs are automatically deleted (ON DELETE CASCADE)
- * - All entries in `artworksGenres` linking this genre to artworks are automatically deleted (ON DELETE CASCADE)
- * 
- * **Important:** This function should only be called after verifying the genre has no remaining songs.
- * Use `getGenreSongIds()` to check before deletion to prevent data inconsistency.
- * 
+ *
+ * - All entries in `genresSongs` linking this genre to songs are automatically deleted (ON DELETE
+ *   CASCADE)
+ * - All entries in `artworksGenres` linking this genre to artworks are automatically deleted (ON
+ *   DELETE CASCADE)
+ *
+ * **Important:** This function should only be called after verifying the genre has no remaining
+ * songs. Use `getGenreSongIds()` to check before deletion to prevent data inconsistency.
+ *
  * @param genreId - The ID of the genre to delete
  * @param trx - Database transaction instance (defaults to main db connection)
  * @returns Promise that resolves when the genre is deleted

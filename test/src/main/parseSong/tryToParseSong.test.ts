@@ -1,4 +1,5 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
+
 import { tryToParseSong } from '../../../../src/main/parseSong/parseSong';
 import {
   createMockSongMetadata,
@@ -80,23 +81,22 @@ vi.mock('../../../../src/main/parseSong/manageAlbumArtistOfParsedSong', () => ({
 
 describe('tryToParseSong', () => {
   let pathsQueue: Set<string>;
-  
+
   beforeEach(async () => {
     vi.clearAllMocks();
     vi.clearAllTimers();
-    
+
     // Import and clear the pathsQueue
     const module = await import('../../../../src/main/parseSong/parseSong');
     // Access the internal pathsQueue to clear it
     // Note: This requires exporting pathsQueue or using a test helper
     // For now, we'll work around it by using fresh paths
-    
+
     // Setup default successful mocks
     const fs = await import('fs/promises');
     const taglib = await import('node-taglib-sharp');
-    const { isSongWithPathAvailable, saveSong } = await import(
-      '../../../../src/main/db/queries/songs'
-    );
+    const { isSongWithPathAvailable, saveSong } =
+      await import('../../../../src/main/db/queries/songs');
     const { storeArtworks } = await import('../../../../src/main/other/artworks');
     const { linkArtworksToSong } = await import('../../../../src/main/db/queries/artworks');
     const manageAlbumsOfParsedSong = (
@@ -119,9 +119,7 @@ describe('tryToParseSong', () => {
     vi.mocked(storeArtworks).mockResolvedValue(createMockArtworkData() as any);
     vi.mocked(linkArtworksToSong).mockResolvedValue([] as any);
     vi.mocked(manageAlbumsOfParsedSong).mockResolvedValue(createMockAlbumManagerResult() as any);
-    vi.mocked(manageArtistsOfParsedSong).mockResolvedValue(
-      createMockArtistManagerResult() as any
-    );
+    vi.mocked(manageArtistsOfParsedSong).mockResolvedValue(createMockArtistManagerResult() as any);
     vi.mocked(manageGenresOfParsedSong).mockResolvedValue(createMockGenreManagerResult() as any);
     vi.mocked(manageAlbumArtistOfParsedSong).mockResolvedValue({
       newAlbumArtists: [],
@@ -140,7 +138,7 @@ describe('tryToParseSong', () => {
 
       // First call - should proceed
       const promise1 = tryToParseSong(songPath);
-      
+
       // Second call immediately - should be blocked
       const promise2 = tryToParseSong(songPath);
 
@@ -166,7 +164,7 @@ describe('tryToParseSong', () => {
 
       // Second call after first completes - will parse again since mock still returns false
       await tryToParseSong(songPath);
-      
+
       // Should parse again since isSongWithPathAvailable still returns false in mocks
       expect(saveSong).toHaveBeenCalledTimes(2);
     });
@@ -215,7 +213,7 @@ describe('tryToParseSong', () => {
       vi.advanceTimersByTime(1500);
 
       expect(generatePalettes).toHaveBeenCalled();
-      
+
       vi.useRealTimers();
     });
 
@@ -266,11 +264,13 @@ describe('tryToParseSong', () => {
           await vi.advanceTimersByTimeAsync(5000);
         }
       }
-      
+
       // Verify retry attempts were logged
-      const retryLogs = vi.mocked(logger.debug).mock.calls.filter(
-        call => typeof call[0] === 'string' && call[0].includes('Retrying in 5 seconds')
-      );
+      const retryLogs = vi
+        .mocked(logger.debug)
+        .mock.calls.filter(
+          (call) => typeof call[0] === 'string' && call[0].includes('Retrying in 5 seconds')
+        );
       expect(retryLogs.length).toBeGreaterThanOrEqual(1);
 
       vi.useRealTimers();
@@ -409,7 +409,7 @@ describe('tryToParseSong', () => {
       }
 
       // Path should be removed from queue (implicitly tested by not blocking next call)
-      
+
       vi.useRealTimers();
     });
   });

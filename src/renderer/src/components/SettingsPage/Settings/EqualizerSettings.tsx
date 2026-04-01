@@ -1,14 +1,14 @@
+import { LOCAL_STORAGE_DEFAULT_TEMPLATE } from '@renderer/other/appReducer';
 import { type ReactNode, useContext, useEffect, useMemo, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
+import i18n from '../../../i18n';
+import { equalizerBandHertzData, equalizerPresetsData } from '../../../other/equalizerData';
+import { isDataChanged } from '../../../utils/hasDataChanged';
 import Button from '../../Button';
 import Dropdown from '../../Dropdown';
-import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
-import { isDataChanged } from '../../../utils/hasDataChanged';
-import { equalizerBandHertzData, equalizerPresetsData } from '../../../other/equalizerData';
-import i18n from '../../../i18n';
-
 import EqualierBand from './EqualierBand';
-import { LOCAL_STORAGE_DEFAULT_TEMPLATE } from '@renderer/other/appReducer';
 
 const presets: EqualizerPresetDropdownOptions[] = equalizerPresetsData.map((presetData) => {
   return {

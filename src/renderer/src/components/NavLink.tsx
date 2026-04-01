@@ -12,12 +12,12 @@ const NavLinkComponent = forwardRef<HTMLAnchorElement, Props>((props, ref) => (
 const CreatedLinkComponent = createLink(NavLinkComponent);
 
 /**
- * A NavLink component that wraps a Link component from @tanstack/react-router.
- * It applies styling to make it look like a navigation link.
- * @param props Props to pass to the underlying Link component.
- * @returns A NavLink component that wraps a Link component.
+ * A NavLink component that wraps a Link component from @tanstack/react-router. It applies styling
+ * to make it look like a navigation link.
  *
- * Use `[&.active]` in tailwind to style the active link.
+ * @param props Props to pass to the underlying Link component.
+ * @returns A NavLink component that wraps a Link component. Use `[&.active]` in tailwind to style
+ *   the active link.
  */
 const NavLink: LinkComponent<typeof NavLinkComponent> = (props) => {
   return <CreatedLinkComponent preload={'intent'} {...props} />;

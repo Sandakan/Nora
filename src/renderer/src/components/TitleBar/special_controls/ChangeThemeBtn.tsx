@@ -1,10 +1,10 @@
+import { settingsQuery } from '@renderer/queries/settings';
+import { store } from '@renderer/store/store';
+import { useSuspenseQuery } from '@tanstack/react-query';
+import { useStore } from '@tanstack/react-store';
 import { useTranslation } from 'react-i18next';
 
 import Button from '../../Button';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store/store';
-import { useSuspenseQuery } from '@tanstack/react-query';
-import { settingsQuery } from '@renderer/queries/settings';
 
 const ChangeThemeBtn = () => {
   const {

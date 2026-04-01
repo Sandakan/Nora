@@ -1,12 +1,11 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { type SelectableFolderStructure } from './AddMusicFoldersPrompt';
-
-import Img from '../Img';
-import Button from '../Button';
-import Checkbox from '../Checkbox';
 
 import FolderImg from '../../assets/images/webp/empty-folder.webp';
+import Button from '../Button';
+import Checkbox from '../Checkbox';
+import Img from '../Img';
+import { type SelectableFolderStructure } from './AddMusicFoldersPrompt';
 
 interface Props {
   structure: SelectableFolderStructure;

@@ -1,10 +1,10 @@
 import logger from '@main/logger';
-import { db } from './db';
-// import { artworks, artworksPlaylists, playlists } from './schema';
-
 // import favoritesPlaylistCoverImage from '../../renderer/src/assets/images/webp/favorites-playlist-icon.webp?asset';
 // import historyPlaylistCoverImage from '../../renderer/src/assets/images/webp/history-playlist-icon.webp?asset';
 import { eq } from 'drizzle-orm';
+// import { artworks, artworksPlaylists, playlists } from './schema';
+
+import { db } from './db';
 import { userEqualizerPreset, userKeyboardShortcuts, userSettings } from './schema';
 
 const isSettingsTableSeeded = async () => {

@@ -1,12 +1,13 @@
 import path from 'path';
-import { dataUpdateEvent, sendMessageToRenderer } from './main';
-import logger from './logger';
-import { unlinkSongFromArtist } from './db/queries/artists';
-import { unlinkSongFromAlbum } from './db/queries/albums';
-import { unlinkSongFromGenre } from './db/queries/genres';
-import { deleteArtworks, getArtworkIdsOfSong } from './db/queries/artworks';
+
 import { db } from './db/db';
+import { unlinkSongFromAlbum } from './db/queries/albums';
+import { unlinkSongFromArtist } from './db/queries/artists';
+import { deleteArtworks, getArtworkIdsOfSong } from './db/queries/artworks';
+import { unlinkSongFromGenre } from './db/queries/genres';
 import { getSongByPath, removeSongById } from './db/queries/songs';
+import logger from './logger';
+import { dataUpdateEvent, sendMessageToRenderer } from './main';
 import { convertToSongData } from './utils/convert';
 
 export const removeDeletedArtistDataOfSong = async (song: SavableSongData, trx: DBTransaction) => {

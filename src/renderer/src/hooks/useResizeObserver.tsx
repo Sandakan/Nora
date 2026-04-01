@@ -1,4 +1,5 @@
 import { type MutableRefObject, useLayoutEffect, useRef, useState } from 'react';
+
 import debounce from '../utils/debounce';
 
 export default function useResizeObserver(

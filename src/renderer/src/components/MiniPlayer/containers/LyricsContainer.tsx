@@ -1,12 +1,12 @@
+import { store } from '@renderer/store/store';
+import { useStore } from '@tanstack/react-store';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import i18n from '../../../i18n';
 
-import LyricLine from '../../LyricsPage/LyricLine';
 import useSkipLyricsLines from '../../../hooks/useSkipLyricsLines';
+import i18n from '../../../i18n';
+import LyricLine from '../../LyricsPage/LyricLine';
 import LyricsMetadata from '../../LyricsPage/LyricsMetadata';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store/store';
 
 type Props = { isLyricsVisible: boolean };
 

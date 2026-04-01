@@ -1,8 +1,9 @@
 import { contextBridge, ipcRenderer, webUtils } from 'electron';
+
+import type { LastFMAlbumInfo } from '../types/last_fm_album_info_api';
 // const { contextBridge, ipcRenderer } = require('electron');
 import type { LastFMTrackInfoApi } from '../types/last_fm_api';
 import type { SimilarTracksOutput } from '../types/last_fm_similar_tracks_api';
-import type { LastFMAlbumInfo } from '../types/last_fm_album_info_api';
 
 const properties = {
   isInDevelopment: process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true',

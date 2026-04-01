@@ -1,15 +1,14 @@
+import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react';
+import { store } from '@renderer/store/store';
+import { useStore } from '@tanstack/react-store';
 import { Suspense, useCallback, useContext, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react';
 
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-
 import Button from '../Button';
 import MainContainer from '../MainContainer';
-import PromptMenuNavigationControlsContainer from './PromptMenuNavigationControlsContainer';
 import SuspenseLoader from '../SuspenseLoader';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store/store';
+import PromptMenuNavigationControlsContainer from './PromptMenuNavigationControlsContainer';
 
 const PromptMenu = () => {
   const promptMenuData = useStore(store, (state) => state.promptMenuData);
@@ -119,4 +118,3 @@ const PromptMenu = () => {
 };
 
 export default PromptMenu;
-

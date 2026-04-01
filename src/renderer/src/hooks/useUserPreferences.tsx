@@ -1,10 +1,10 @@
-import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient } from '@renderer/index';
 import { userPreferencesQuery, userPreferencesMutation } from '@renderer/queries/userPreferences';
+import { useQuery, useMutation } from '@tanstack/react-query';
 
 /**
- * Hook for managing user preferences from the database
- * Includes keyboard shortcuts, equalizer presets, and ignored items
+ * Hook for managing user preferences from the database Includes keyboard shortcuts, equalizer
+ * presets, and ignored items
  */
 export function useUserPreferences() {
   // Load keyboard shortcuts

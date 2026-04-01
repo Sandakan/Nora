@@ -1,9 +1,10 @@
+import { store } from '@renderer/store/store';
+import { useStore } from '@tanstack/react-store';
+
+import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
 import Genre from '../../GenresPage/Genre';
 import SecondaryContainer from '../../SecondaryContainer';
-import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
 import VirtualizedGrid from '../../VirtualizedGrid';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store/store';
 
 type Props = { genreData: Genre[] };
 

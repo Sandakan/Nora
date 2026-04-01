@@ -1,14 +1,15 @@
 import path from 'path';
+
+import { getSongIdFromSongPath } from '@main/db/queries/songs';
 import { File } from 'node-taglib-sharp';
+
 import { appPreferences } from '../../../package.json';
-import { createTempArtwork } from '../other/artworks';
+import songCoverImage from '../../renderer/src/assets/images/webp/song_cover_default.webp?asset';
 import { DEFAULT_FILE_URL } from '../filesystem';
 import logger from '../logger';
 import { sendMessageToRenderer, addToSongsOutsideLibraryData } from '../main';
+import { createTempArtwork } from '../other/artworks';
 import sendAudioData, { parseArtworkDataForAudioPlayerData } from './sendAudioData';
-
-import songCoverImage from '../../renderer/src/assets/images/webp/song_cover_default.webp?asset';
-import { getSongIdFromSongPath } from '@main/db/queries/songs';
 
 const sendAudioDataFromPath = async (songPath: string): Promise<AudioPlayerData> => {
   logger.debug(`Parsing song data from path`, { songPath });

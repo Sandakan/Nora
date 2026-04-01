@@ -1,4 +1,5 @@
 import type Conf from 'conf';
+
 import { BLACKLIST_TEMPLATE, PLAYLIST_DATA_TEMPLATE } from './filesystem';
 import logger from './logger';
 

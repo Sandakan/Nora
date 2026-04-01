@@ -1,10 +1,9 @@
 import { useTranslation } from 'react-i18next';
 
+import DefaultSongArtwork from '../../../assets/images/webp/song_cover_default.webp';
 import Button from '../../Button';
 import Img from '../../Img';
 import SongAlbumInputResult from './SongAlbumInputResult';
-
-import DefaultSongArtwork from '../../../assets/images/webp/song_cover_default.webp';
 
 type Props = {
   songAlbum?: SongTagsAlbumData;

@@ -1,14 +1,14 @@
 import type { SaveDialogOptions } from 'electron';
 import sharp from 'sharp';
 
+import { removeDefaultAppProtocolFromFilePath } from '../fs/resolveFilePaths';
 import logger from '../logger';
 import { sendMessageToRenderer, showSaveDialog } from '../main';
-import isPathAWebURL from '../utils/isPathAWebUrl';
 import {
   fetchArtworkBufferFromURL,
   generateLocalArtworkBuffer
 } from '../updateSong/updateSongId3Tags';
-import { removeDefaultAppProtocolFromFilePath } from '../fs/resolveFilePaths';
+import isPathAWebURL from '../utils/isPathAWebUrl';
 
 const getSaveOptions = (saveName?: string) => {
   const saveOptions: SaveDialogOptions = {

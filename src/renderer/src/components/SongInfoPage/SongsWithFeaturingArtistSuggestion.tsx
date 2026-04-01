@@ -1,13 +1,13 @@
+import { store } from '@renderer/store/store';
+import { useStore } from '@tanstack/react-store';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import { useUserPreferences } from '../../hooks/useUserPreferences';
+import splitFeaturingArtists from '../../utils/splitFeaturingArtists';
 import Button from '../Button';
 import Checkbox from '../Checkbox';
-import splitFeaturingArtists from '../../utils/splitFeaturingArtists';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store/store';
-import { useUserPreferences } from '../../hooks/useUserPreferences';
 
 type Props = {
   songTitle?: string;

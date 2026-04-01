@@ -1,12 +1,13 @@
 import fs from 'fs/promises';
 import path from 'path';
+
+import { importDatabase } from '@main/db/db';
 import type { OpenDialogOptions } from 'electron';
 
-import { restartApp, sendMessageToRenderer, showOpenDialog } from '../main';
 import logger from '../logger';
+import { restartApp, sendMessageToRenderer, showOpenDialog } from '../main';
 import copyDir from '../utils/copyDir';
 import { songCoversFolderPath } from './exportAppData';
-import { importDatabase } from '@main/db/db';
 import { type ExportedUserPreferences, importUserPreferences } from './userPreferencesExportImport';
 
 const requiredItemsForImport = ['nora.pglite.db.sql', 'song_covers'];

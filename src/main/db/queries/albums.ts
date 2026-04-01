@@ -1,6 +1,6 @@
 import { db } from '@db/db';
-import { and, asc, desc, eq, inArray, type SQL } from 'drizzle-orm';
 import { albumsArtists, albums, albumsSongs } from '@db/schema';
+import { and, asc, desc, eq, inArray, type SQL } from 'drizzle-orm';
 
 export const isAlbumWithIdAvailable = async (albumId: number, trx: DB | DBTransaction = db) => {
   const data = await trx.select({}).from(albums).where(eq(albums.id, albumId));
@@ -120,9 +120,9 @@ export const linkSongToAlbum = async (
 };
 
 /**
- * Unlinks a song from an album by deleting the relationship in the albumsSongs table.
- * This does NOT delete the album or song themselves - only the relationship between them.
- * 
+ * Unlinks a song from an album by deleting the relationship in the albumsSongs table. This does NOT
+ * delete the album or song themselves - only the relationship between them.
+ *
  * @param albumId - The ID of the album
  * @param songId - The ID of the song
  * @param trx - Database transaction instance (defaults to main db connection)
@@ -180,15 +180,19 @@ export const getAlbumSongIds = async (albumId: number, trx: DB | DBTransaction =
 
 /**
  * Deletes an album from the database.
- * 
+ *
  * **Cascade Behavior:**
- * - All entries in `albumsSongs` linking this album to songs are automatically deleted (ON DELETE CASCADE)
- * - All entries in `albumsArtists` linking this album to artists are automatically deleted (ON DELETE CASCADE)
- * - All entries in `albumsArtworks` linking this album to artworks are automatically deleted (ON DELETE CASCADE)
- * 
- * **Important:** This function should only be called after verifying the album has no remaining songs.
- * Use `getAlbumSongIds()` to check before deletion to prevent data inconsistency.
- * 
+ *
+ * - All entries in `albumsSongs` linking this album to songs are automatically deleted (ON DELETE
+ *   CASCADE)
+ * - All entries in `albumsArtists` linking this album to artists are automatically deleted (ON DELETE
+ *   CASCADE)
+ * - All entries in `albumsArtworks` linking this album to artworks are automatically deleted (ON
+ *   DELETE CASCADE)
+ *
+ * **Important:** This function should only be called after verifying the album has no remaining
+ * songs. Use `getAlbumSongIds()` to check before deletion to prevent data inconsistency.
+ *
  * @param albumId - The ID of the album to delete
  * @param trx - Database transaction instance (defaults to main db connection)
  * @returns Promise that resolves when the album is deleted

@@ -1,9 +1,7 @@
-import { vi, expect } from 'vitest';
 import type { Picture } from 'node-taglib-sharp';
+import { vi, expect } from 'vitest';
 
-/**
- * Mock song metadata factory for node-taglib-sharp File objects
- */
+/** Mock song metadata factory for node-taglib-sharp File objects */
 export function createMockSongMetadata(overrides: Partial<MockSongMetadata> = {}): MockFileObject {
   const defaults: MockSongMetadata = {
     title: 'Test Song',
@@ -44,9 +42,7 @@ export function createMockSongMetadata(overrides: Partial<MockSongMetadata> = {}
   };
 }
 
-/**
- * Create mock picture data for embedded artwork
- */
+/** Create mock picture data for embedded artwork */
 export function createMockPicture(size: 'small' | 'large' = 'small'): Picture {
   const dataSize = size === 'large' ? 10000 : 100;
   const mockData = new Uint8Array(dataSize).fill(255);
@@ -61,9 +57,7 @@ export function createMockPicture(size: 'small' | 'large' = 'small'): Picture {
   } as unknown as Picture;
 }
 
-/**
- * Create mock file stats
- */
+/** Create mock file stats */
 export function createMockFileStats(overrides: Partial<MockFileStats> = {}) {
   return {
     birthtime: new Date('2023-01-01T00:00:00Z'),
@@ -72,9 +66,7 @@ export function createMockFileStats(overrides: Partial<MockFileStats> = {}) {
   };
 }
 
-/**
- * Create mock database transaction
- */
+/** Create mock database transaction */
 export function createMockTransaction() {
   return {
     insert: vi.fn(() => ({
@@ -100,9 +92,7 @@ export function createMockTransaction() {
   };
 }
 
-/**
- * Assertion helpers for common test scenarios
- */
+/** Assertion helpers for common test scenarios */
 export function expectDataUpdateEventCalled(
   mockFn: ReturnType<typeof vi.fn>,
   dataType: string,
@@ -137,9 +127,7 @@ export function expectMessageSentToRenderer(
   );
 }
 
-/**
- * Mock artwork data structure (2 items: full + optimized)
- */
+/** Mock artwork data structure (2 items: full + optimized) */
 export function createMockArtworkData() {
   return [
     {
@@ -159,9 +147,7 @@ export function createMockArtworkData() {
   ];
 }
 
-/**
- * Mock song data from database
- */
+/** Mock song data from database */
 export function createMockSongData(overrides: Partial<MockSongData> = {}): MockSongData {
   return {
     id: 1,
@@ -184,9 +170,7 @@ export function createMockSongData(overrides: Partial<MockSongData> = {}): MockS
   };
 }
 
-/**
- * Mock album/artist/genre manager results
- */
+/** Mock album/artist/genre manager results */
 export function createMockAlbumManagerResult(overrides: Partial<MockAlbumResult> = {}) {
   return {
     relevantAlbum: overrides.relevantAlbum || { id: 1, title: 'Test Album' },

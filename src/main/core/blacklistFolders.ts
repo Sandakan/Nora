@@ -1,6 +1,7 @@
+import { addFoldersToBlacklist, getFoldersByPaths } from '@main/db/queries/folders';
+
 import logger from '../logger';
 import { dataUpdateEvent } from '../main';
-import { addFoldersToBlacklist, getFoldersByPaths } from '@main/db/queries/folders';
 
 const blacklistFolders = async (folderPaths: string[]) => {
   const folders = await getFoldersByPaths(folderPaths);

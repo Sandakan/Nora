@@ -1,12 +1,12 @@
-import localStorageMigrationData from '../other/localStorageMigrations';
-
-import { version } from '../../../../package.json';
-import log from './log';
-import addMissingPropsToAnObject from './addMissingPropsToAnObject';
-import isLatestVersion from './isLatestVersion';
-import { dispatch, store } from '@renderer/store/store';
 import { LOCAL_STORAGE_DEFAULT_TEMPLATE } from '@renderer/other/appReducer';
 import PlayerQueue from '@renderer/other/playerQueue';
+import { dispatch, store } from '@renderer/store/store';
+
+import { version } from '../../../../package.json';
+import localStorageMigrationData from '../other/localStorageMigrations';
+import addMissingPropsToAnObject from './addMissingPropsToAnObject';
+import isLatestVersion from './isLatestVersion';
+import log from './log';
 
 // import isLatestVersion from './isLatestVersion';
 
@@ -264,9 +264,7 @@ const setQueue = (queue: PlayerQueue | PlayerQueueJson) => {
 
 const getQueue = () => getAllItems().queue;
 
-/**
- * @deprecated Use PlayerQueue.moveToPosition() instead
- */
+/** @deprecated Use PlayerQueue.moveToPosition() instead */
 const setCurrentSongIndex = (index: number | null) => setItem('queue', 'position', index ?? 0);
 
 // SORTING STATES

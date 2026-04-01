@@ -1,14 +1,15 @@
 import path from 'path';
+
 import NodeID3 from 'node-id3';
 
+import { appPreferences } from '../../package.json';
 import convertParsedLyricsToNodeID3Format from './core/convertParsedLyricsToNodeID3Format';
 import { updateCachedLyrics } from './core/getSongLyrics';
-import { removeDefaultAppProtocolFromFilePath } from './fs/resolveFilePaths';
-import { appPreferences } from '../../package.json';
-import { dataUpdateEvent, sendMessageToRenderer } from './main';
 import saveLyricsToLRCFile from './core/saveLyricsToLrcFile';
-import logger from './logger';
 import { getUserSettings } from './db/queries/settings';
+import { removeDefaultAppProtocolFromFilePath } from './fs/resolveFilePaths';
+import logger from './logger';
+import { dataUpdateEvent, sendMessageToRenderer } from './main';
 
 const { metadataEditingSupportedExtensions } = appPreferences;
 

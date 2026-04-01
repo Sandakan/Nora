@@ -1,4 +1,72 @@
 import { app, BrowserWindow, ipcMain, powerMonitor, shell } from 'electron';
+
+import addArtworkToAPlaylist from './core/addArtworkToAPlaylist';
+import addSongsFromFolderStructures from './core/addMusicFolder';
+import addNewPlaylist from './core/addNewPlaylist';
+import addSongsToPlaylist from './core/addSongsToPlaylist';
+import blacklistFolders from './core/blacklistFolders';
+import blacklistSongs from './core/blacklistSongs';
+import changeAppTheme from './core/changeAppTheme';
+import checkForNewSongs from './core/checkForNewSongs';
+import checkForStartUpSongs from './core/checkForStartUpSongs';
+import clearSearchHistoryResults from './core/clearSeachHistoryResults';
+import clearSongHistory from './core/clearSongHistory';
+import deleteSongsFromSystem from './core/deleteSongsFromSystem';
+import exportAppData from './core/exportAppData';
+import exportPlaylist from './core/exportPlaylist';
+import fetchAlbumData from './core/fetchAlbumData';
+import fetchArtistData from './core/fetchArtistData';
+import fetchSongInfoFromLastFM from './core/fetchSongInfoFromLastFM';
+import { getAllFavoriteSongs } from './core/getAllFavoriteSongs';
+import { getAllHistorySongs } from './core/getAllHistorySongs';
+import getAllSongs from './core/getAllSongs';
+import getArtistInfoFromNet from './core/getArtistInfoFromNet';
+import getArtworksForMultipleArtworksCover from './core/getArtworksForMultipleArtworksCover';
+import { getArtistDuplicates } from './core/getDuplicates';
+import { getFolderStructures } from './core/getFolderStructures';
+import getGenresInfo from './core/getGenresInfo';
+import { getListeningData } from './core/getListeningData';
+import getMusicFolderData from './core/getMusicFolderData';
+import getSongInfo from './core/getSongInfo';
+import getSongLyrics from './core/getSongLyrics';
+import getStorageUsage from './core/getStorageUsage';
+import importAppData from './core/importAppData';
+import importPlaylist from './core/importPlaylist';
+import removeMusicFolder from './core/removeMusicFolder';
+import removePlaylists from './core/removePlaylists';
+import removeSongFromPlaylist from './core/removeSongFromPlaylist';
+import renameAPlaylist from './core/renameAPlaylist';
+import { resolveArtistDuplicates } from './core/resolveDuplicates';
+import resolveFeaturingArtists from './core/resolveFeaturingArtists';
+import { resolveSeparateArtists } from './core/resolveSeparateArtists';
+import restoreBlacklistedFolders from './core/restoreBlacklistedFolder';
+import restoreBlacklistedSongs from './core/restoreBlacklistedSongs';
+import saveArtworkToSystem from './core/saveArtworkToSystem';
+import sendAudioData from './core/sendAudioData';
+import sendAudioDataFromPath from './core/sendAudioDataFromPath';
+import sendPlaylistData from './core/sendPlaylistData';
+import sendSongID3Tags from './core/sendSongMetadata';
+import toggleBlacklistFolders from './core/toggleBlacklistFolders';
+import toggleLikeArtists from './core/toggleLikeArtists';
+import toggleLikeSongs from './core/toggleLikeSongs';
+import updateSongListeningData from './core/updateSongListeningData';
+import {
+  addIgnoredArtist,
+  addIgnoredDuplicate,
+  addIgnoredFeaturingArtist,
+  getIgnoredArtists,
+  getIgnoredDuplicateMetadata,
+  getIgnoredFeaturingArtists,
+  removeIgnoredArtist,
+  removeIgnoredFeaturingArtist
+} from './db/queries/ignoredItems';
+import { getDatabaseMetrics } from './db/queries/other';
+import { getUserSettings, saveUserSettings } from './db/queries/settings';
+import { getUserKeyboardShortcuts, saveUserKeyboardShortcuts } from './db/queries/userPreferences';
+import { getUserEqualizerPreset, saveUserEqualizerPreset } from './db/queries/userPreferences';
+import { getBlacklistData } from './filesystem';
+import { removeDefaultAppProtocolFromFilePath } from './fs/resolveFilePaths';
+import logger, { logFilePath } from './logger';
 import {
   allowScreenSleeping,
   changePlayerType,
@@ -17,94 +85,27 @@ import {
   toggleMiniPlayerAlwaysOnTop,
   toggleOnBatteryPower
 } from './main';
-import getArtworksForMultipleArtworksCover from './core/getArtworksForMultipleArtworksCover';
-import toggleBlacklistFolders from './core/toggleBlacklistFolders';
-import scrobbleSong from './other/lastFm/scrobbleSong';
-import getSimilarTracks from './other/lastFm/getSimilarTracks';
-import sendNowPlayingSongDataToLastFM from './other/lastFm/sendNowPlayingSongDataToLastFM';
-import getAlbumInfoFromLastFM from './other/lastFm/getAlbumInfoFromLastFM';
-import renameAPlaylist from './core/renameAPlaylist';
-import { removeDefaultAppProtocolFromFilePath } from './fs/resolveFilePaths';
-import blacklistFolders from './core/blacklistFolders';
-import restoreBlacklistedFolders from './core/restoreBlacklistedFolder';
-import getStorageUsage from './core/getStorageUsage';
+import { setDiscordRpcActivity } from './other/discordRPC';
 import { generatePalettes } from './other/generatePalette';
-import { getFolderStructures } from './core/getFolderStructures';
-import { getArtistDuplicates } from './core/getDuplicates';
-import { resolveArtistDuplicates } from './core/resolveDuplicates';
-import addArtworkToAPlaylist from './core/addArtworkToAPlaylist';
-import { resolveSeparateArtists } from './core/resolveSeparateArtists';
-import resolveFeaturingArtists from './core/resolveFeaturingArtists';
-import saveArtworkToSystem from './core/saveArtworkToSystem';
-import exportAppData from './core/exportAppData';
-import importAppData from './core/importAppData';
-import exportPlaylist from './core/exportPlaylist';
-import importPlaylist from './core/importPlaylist';
+import getAlbumInfoFromLastFM from './other/lastFm/getAlbumInfoFromLastFM';
+import getSimilarTracks from './other/lastFm/getSimilarTracks';
+import scrobbleSong from './other/lastFm/scrobbleSong';
+import sendNowPlayingSongDataToLastFM from './other/lastFm/sendNowPlayingSongDataToLastFM';
 import reParseSong from './parseSong/reParseSong';
-import { compare } from './utils/safeStorage';
-import sendAudioData from './core/sendAudioData';
-import toggleLikeSongs from './core/toggleLikeSongs';
-import sendSongID3Tags from './core/sendSongMetadata';
-import removeSongFromPlaylist from './core/removeSongFromPlaylist';
-import addSongsToPlaylist from './core/addSongsToPlaylist';
-import removePlaylists from './core/removePlaylists';
-import addNewPlaylist from './core/addNewPlaylist';
-import getAllSongs from './core/getAllSongs';
-import toggleLikeArtists from './core/toggleLikeArtists';
-import fetchSongInfoFromLastFM from './core/fetchSongInfoFromLastFM';
-import clearSongHistory from './core/clearSongHistory';
-import clearSearchHistoryResults from './core/clearSeachHistoryResults';
-import getSongInfo from './core/getSongInfo';
-import updateSongListeningData from './core/updateSongListeningData';
-import getGenresInfo from './core/getGenresInfo';
-import sendPlaylistData from './core/sendPlaylistData';
-import fetchAlbumData from './core/fetchAlbumData';
-import fetchArtistData from './core/fetchArtistData';
-import getMusicFolderData from './core/getMusicFolderData';
-import blacklistSongs from './core/blacklistSongs';
+import saveLyricsToSong from './saveLyricsToSong';
 import search from './search';
+import updateSongId3Tags, { isMetadataUpdatesPending } from './updateSong/updateSongId3Tags';
+import convertLyricsToPinyin from './utils/convertToPinyin';
+import convertLyricsToRomaja from './utils/convertToRomaja';
 import {
   fetchSongMetadataFromInternet,
   searchSongMetadataResultsInInternet
 } from './utils/fetchSongMetadataFromInternet';
-import deleteSongsFromSystem from './core/deleteSongsFromSystem';
-import removeMusicFolder from './core/removeMusicFolder';
-import restoreBlacklistedSongs from './core/restoreBlacklistedSongs';
-import updateSongId3Tags, { isMetadataUpdatesPending } from './updateSong/updateSongId3Tags';
-import addSongsFromFolderStructures from './core/addMusicFolder';
-import getArtistInfoFromNet from './core/getArtistInfoFromNet';
-import getSongLyrics from './core/getSongLyrics';
-import sendAudioDataFromPath from './core/sendAudioDataFromPath';
-import saveLyricsToSong from './saveLyricsToSong';
-import { getBlacklistData } from './filesystem';
-import changeAppTheme from './core/changeAppTheme';
-import checkForStartUpSongs from './core/checkForStartUpSongs';
-import checkForNewSongs from './core/checkForNewSongs';
-import getTranslatedLyrics from './utils/getTranslatedLyrics';
-import { setDiscordRpcActivity } from './other/discordRPC';
-import romanizeLyrics from './utils/romanizeLyrics';
-import convertLyricsToPinyin from './utils/convertToPinyin';
-import convertLyricsToRomaja from './utils/convertToRomaja';
-import resetLyrics from './utils/resetLyrics';
-import logger, { logFilePath } from './logger';
-import { getListeningData } from './core/getListeningData';
-import { getUserSettings, saveUserSettings } from './db/queries/settings';
-import { getUserKeyboardShortcuts, saveUserKeyboardShortcuts } from './db/queries/userPreferences';
-import { getUserEqualizerPreset, saveUserEqualizerPreset } from './db/queries/userPreferences';
-import {
-  addIgnoredArtist,
-  addIgnoredDuplicate,
-  addIgnoredFeaturingArtist,
-  getIgnoredArtists,
-  getIgnoredDuplicateMetadata,
-  getIgnoredFeaturingArtists,
-  removeIgnoredArtist,
-  removeIgnoredFeaturingArtist
-} from './db/queries/ignoredItems';
 import { getQueueInfo } from './utils/getQueueInfo';
-import { getDatabaseMetrics } from './db/queries/other';
-import { getAllHistorySongs } from './core/getAllHistorySongs';
-import { getAllFavoriteSongs } from './core/getAllFavoriteSongs';
+import getTranslatedLyrics from './utils/getTranslatedLyrics';
+import resetLyrics from './utils/resetLyrics';
+import romanizeLyrics from './utils/romanizeLyrics';
+import { compare } from './utils/safeStorage';
 
 export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSignal) {
   if (mainWindow) {

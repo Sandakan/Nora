@@ -1,12 +1,13 @@
 import fs from 'fs/promises';
 import path from 'path';
+
+import { exportDatabase } from '@main/db/db';
 import { app, type OpenDialogOptions } from 'electron';
 
-import { sendMessageToRenderer, showOpenDialog } from '../main';
 import logger from '../logger';
+import { sendMessageToRenderer, showOpenDialog } from '../main';
 import copyDir from '../utils/copyDir';
 import makeDir from '../utils/makeDir';
-import { exportDatabase } from '@main/db/db';
 import { exportUserPreferences } from './userPreferencesExportImport';
 
 const DEFAULT_EXPORT_DIALOG_OPTIONS: OpenDialogOptions = {

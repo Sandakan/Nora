@@ -1,22 +1,22 @@
 import fs from 'fs/promises';
 import path from 'path';
+
+import { db } from '@main/db/db';
+import { deleteArtworks, saveArtworks } from '@main/db/queries/artworks';
+import type { artworks } from '@main/db/schema';
 import { app } from 'electron';
 import fsExtra from 'fs-extra';
 import sharp from 'sharp';
 
-import { DEFAULT_ARTWORK_SAVE_LOCATION, DEFAULT_FILE_URL } from '../filesystem';
-import logger from '../logger';
-import { removeDefaultAppProtocolFromFilePath } from '../fs/resolveFilePaths';
-import { generateRandomId } from '../utils/randomId';
-import { isAnErrorWithCode } from '../utils/isAnErrorWithCode';
-// import { timeEnd, timeStart } from '../utils/measureTimeUsage';
-
 import albumCoverImage from '../../renderer/src/assets/images/webp/album_cover_default.webp?asset';
-import songCoverImage from '../../renderer/src/assets/images/webp/song_cover_default.webp?asset';
 import playlistCoverImage from '../../renderer/src/assets/images/webp/playlist_cover_default.webp?asset';
-import { deleteArtworks, saveArtworks } from '@main/db/queries/artworks';
-import { db } from '@main/db/db';
-import type { artworks } from '@main/db/schema';
+// import { timeEnd, timeStart } from '../utils/measureTimeUsage';
+import songCoverImage from '../../renderer/src/assets/images/webp/song_cover_default.webp?asset';
+import { DEFAULT_ARTWORK_SAVE_LOCATION, DEFAULT_FILE_URL } from '../filesystem';
+import { removeDefaultAppProtocolFromFilePath } from '../fs/resolveFilePaths';
+import logger from '../logger';
+import { isAnErrorWithCode } from '../utils/isAnErrorWithCode';
+import { generateRandomId } from '../utils/randomId';
 
 const createArtworks = async (
   id: string,
@@ -178,10 +178,12 @@ export const removeArtwork = async (artworkPaths: ArtworkPaths, type: QueueTypes
 
 /**
  * Removes artworks from the database and deletes their corresponding files from the filesystem.
- * Make sure to unlink any associations (e.g., songs, albums) before calling this function due to foreign key constraints having `ON DELETE CASCADE`, which may lead to unintended deletions.
+ * Make sure to unlink any associations (e.g., songs, albums) before calling this function due to
+ * foreign key constraints having `ON DELETE CASCADE`, which may lead to unintended deletions.
  *
  * @param artworkIds - Array of artwork IDs to be removed.
- * @param trx - Optional database transaction or connection to use. Defaults to the main database connection.
+ * @param trx - Optional database transaction or connection to use. Defaults to the main database
+ *   connection.
  * @returns A promise that resolves when all specified artworks have been removed.
  * @throws Throws an error if the removal process fails.
  */

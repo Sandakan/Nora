@@ -1,33 +1,34 @@
 import fs from 'fs/promises';
 import path from 'path';
+
+import { db } from '@main/db/db';
+import { linkArtworksToSong } from '@main/db/queries/artworks';
+import { getSongByPath, updateSongByPath } from '@main/db/queries/songs';
+import type { songs } from '@main/db/schema';
+import { convertToSongData } from '@main/utils/convert';
 import { File } from 'node-taglib-sharp';
 
-import { removeArtwork, storeArtworks } from '../other/artworks';
 import { removeDefaultAppProtocolFromFilePath } from '../fs/resolveFilePaths';
+import logger from '../logger';
+import { dataUpdateEvent, sendMessageToRenderer } from '../main';
+import { removeArtwork, storeArtworks } from '../other/artworks';
+import { generatePalettes } from '../other/generatePalette';
 import {
   removeDeletedAlbumDataOfSong,
   removeDeletedArtistDataOfSong,
   removeDeletedArtworkDataOfSong,
   removeDeletedGenreDataOfSong
 } from '../removeSongsFromLibrary';
-import { dataUpdateEvent, sendMessageToRenderer } from '../main';
-import logger from '../logger';
+import manageAlbumArtistOfParsedSong from './manageAlbumArtistOfParsedSong';
+import manageAlbumsOfParsedSong from './manageAlbumsOfParsedSong';
+import manageArtistsOfParsedSong from './manageArtistsOfParsedSong';
+import manageGenresOfParsedSong from './manageGenresOfParsedSong';
 import {
   getAlbumInfoFromSong,
   getArtistNamesFromSong,
   getGenreInfoFromSong,
   getSongDurationFromSong
 } from './parseSong';
-import manageAlbumsOfParsedSong from './manageAlbumsOfParsedSong';
-import manageArtistsOfParsedSong from './manageArtistsOfParsedSong';
-import manageGenresOfParsedSong from './manageGenresOfParsedSong';
-import { generatePalettes } from '../other/generatePalette';
-import manageAlbumArtistOfParsedSong from './manageAlbumArtistOfParsedSong';
-import { getSongByPath, updateSongByPath } from '@main/db/queries/songs';
-import { convertToSongData } from '@main/utils/convert';
-import { db } from '@main/db/db';
-import { linkArtworksToSong } from '@main/db/queries/artworks';
-import type { songs } from '@main/db/schema';
 
 const reParseSong = async (filePath: string) => {
   const songPath = removeDefaultAppProtocolFromFilePath(filePath);

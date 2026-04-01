@@ -1,11 +1,12 @@
+import { store } from '@renderer/store/store';
+import { useStore } from '@tanstack/react-store';
 import { useContext, useMemo } from 'react';
+
 import { AppUpdateContext } from '../contexts/AppUpdateContext';
 import Checkbox from './Checkbox';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store/store';
 
 type Props = {
-  id:  number;
+  id: number;
   selectionType: QueueTypes;
   className?: string;
 };

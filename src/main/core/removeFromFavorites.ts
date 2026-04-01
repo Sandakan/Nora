@@ -1,4 +1,5 @@
 import { updateSongFavoriteStatuses } from '@main/db/queries/songs';
+
 import logger from '../logger';
 
 const removeFromFavorites = async (

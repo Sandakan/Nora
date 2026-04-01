@@ -1,12 +1,13 @@
+import { store } from '@renderer/store/store';
+import { useNavigate } from '@tanstack/react-router';
+import { useStore } from '@tanstack/react-store';
 import { useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import Button from '../../Button';
 import SecondaryContainer from '../../SecondaryContainer';
 import Song from '../../SongsPage/Song';
-import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store/store';
-import { useNavigate } from '@tanstack/react-router';
 
 type Props = {
   songs: SongData[];

@@ -1,11 +1,6 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": [
-    "typescript",
-    "jsx-a11y",
-    "react",
-    "promise"
-  ],
+  "plugins": ["typescript", "jsx-a11y", "react", "promise"],
   "categories": {
     "correctness": "off"
   },
@@ -128,9 +123,7 @@
       "error",
       {
         "tags": [],
-        "roles": [
-          "tabpanel"
-        ],
+        "roles": ["tabpanel"],
         "allowExpressionValues": true
       }
     ],
@@ -139,14 +132,7 @@
       "error",
       {
         "allowExpressionValues": true,
-        "handlers": [
-          "onClick",
-          "onMouseDown",
-          "onMouseUp",
-          "onKeyPress",
-          "onKeyDown",
-          "onKeyUp"
-        ]
+        "handlers": ["onClick", "onMouseDown", "onMouseUp", "onKeyPress", "onKeyDown", "onKeyUp"]
       }
     ],
     "jsx-a11y/role-has-required-aria-props": "error",
@@ -170,9 +156,7 @@
     "no-empty-function": [
       "error",
       {
-        "allow": [
-          "arrowFunctions"
-        ]
+        "allow": ["arrowFunctions"]
       }
     ],
     "react/rules-of-hooks": "error",
@@ -208,12 +192,7 @@
   },
   "overrides": [
     {
-      "files": [
-        "**/*.ts",
-        "**/*.tsx",
-        "**/*.mts",
-        "**/*.cts"
-      ],
+      "files": ["**/*.ts", "**/*.tsx", "**/*.mts", "**/*.cts"],
       "rules": {
         "constructor-super": "off",
         "no-class-assign": "off",
@@ -236,9 +215,7 @@
       }
     },
     {
-      "files": [
-        "**/**/*.{js,ts,jsx,tsx}"
-      ],
+      "files": ["**/**/*.{js,ts,jsx,tsx}"],
       "rules": {
         "import/namespace": "error",
         "import/default": "error",
@@ -250,17 +227,10 @@
         "es2018": true,
         "es2022": true
       },
-      "plugins": [
-        "import"
-      ]
+      "plugins": ["import"]
     },
     {
-      "files": [
-        "**/*.ts",
-        "**/*.tsx",
-        "**/*.mts",
-        "**/*.cts"
-      ],
+      "files": ["**/*.ts", "**/*.tsx", "**/*.mts", "**/*.cts"],
       "rules": {
         "constructor-super": "off",
         "no-class-assign": "off",

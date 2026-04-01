@@ -1,6 +1,7 @@
+import { getPlaylistById, updatePlaylistName } from '@main/db/queries/playlists';
+
 import logger from '../logger';
 import { sendMessageToRenderer } from '../main';
-import { getPlaylistById, updatePlaylistName } from '@main/db/queries/playlists';
 
 export default async (playlistId: number, newName: string) => {
   try {

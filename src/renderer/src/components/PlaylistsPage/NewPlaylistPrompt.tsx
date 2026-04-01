@@ -4,12 +4,10 @@
 import { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import PlaylistDefaultCover from '../../assets/images/webp/playlist_cover_default.webp';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-
 import Button from '../Button';
 import Img from '../Img';
-
-import PlaylistDefaultCover from '../../assets/images/webp/playlist_cover_default.webp';
 
 interface NewPlaylistPromptProp {
   updatePlaylists: (_updatedPlaylist: Playlist[]) => void;

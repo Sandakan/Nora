@@ -1,20 +1,18 @@
+import { useStore } from '@tanstack/react-store';
 import { memo } from 'react';
-import { getVersionInfoFromString } from '../../utils/isLatestVersion';
 
 import { version } from '../../../../../package.json';
-
+import LightModeLogo from '../../assets/images/webp/logo_light_mode.webp';
+import { store } from '../../store/store';
+import { getVersionInfoFromString } from '../../utils/isLatestVersion';
 import Img from '../Img';
+import CurrentLocationContainer from './CurrentLocationContainer';
 import NetworkIndicator from './indicators/NetworkIndicator';
 import NewUpdateIndicator from './indicators/NewUpdateIndicator';
-import ChangeThemeBtn from './special_controls/ChangeThemeBtn';
 import NavigationControlsContainer from './NavigationControlsContainer';
-import WindowControlsContainer from './WindowControlsContainer';
-
-import LightModeLogo from '../../assets/images/webp/logo_light_mode.webp';
+import ChangeThemeBtn from './special_controls/ChangeThemeBtn';
 import GoToMainPlayerBtn from './special_controls/GoToMainPlayerBtn';
-import { useStore } from '@tanstack/react-store';
-import { store } from '../../store/store';
-import CurrentLocationContainer from './CurrentLocationContainer';
+import WindowControlsContainer from './WindowControlsContainer';
 
 const appReleasePhase = getVersionInfoFromString(version)?.releasePhase || 'stable';
 

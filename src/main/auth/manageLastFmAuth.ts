@@ -1,9 +1,10 @@
+import { saveUserSettings } from '@main/db/queries/settings';
+
 import type { LastFMSessionGetResponse } from '../../types/last_fm_api';
+import logger from '../logger';
+import { sendMessageToRenderer } from '../main';
 import hashText from '../utils/hashText';
 import { encrypt } from '../utils/safeStorage';
-import { sendMessageToRenderer } from '../main';
-import logger from '../logger';
-import { saveUserSettings } from '@main/db/queries/settings';
 
 const createLastFmAuthSignature = (token: string, apiKey: string) => {
   const LAST_FM_SHARED_SECRET = import.meta.env.MAIN_VITE_LAST_FM_SHARED_SECRET;

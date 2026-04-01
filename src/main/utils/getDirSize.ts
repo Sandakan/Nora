@@ -1,8 +1,9 @@
 import fs from 'fs/promises';
 import path from 'path';
+
+import logger from '../logger';
 import { isAnErrorWithCode } from './isAnErrorWithCode';
 import isPathADir from './isPathADir';
-import logger from '../logger';
 
 const getDirSize = async (dir: string) => {
   try {

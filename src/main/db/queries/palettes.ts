@@ -1,6 +1,7 @@
 import { db } from '@db/db';
-import { artworks, palettes, paletteSwatches } from '../schema';
 import { and, eq, lte, isNull } from 'drizzle-orm';
+
+import { artworks, palettes, paletteSwatches } from '../schema';
 
 export const getLowResArtworksWithoutPalettes = async (trx: DB | DBTransaction = db) => {
   const res = await trx

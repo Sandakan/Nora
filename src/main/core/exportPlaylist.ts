@@ -1,10 +1,11 @@
 import { writeFile } from 'fs/promises';
 import { basename } from 'path';
+
+import { getPlaylistWithSongPaths } from '@main/db/queries/playlists';
 import type { SaveDialogOptions } from 'electron';
 
 import logger from '../logger';
 import { sendMessageToRenderer, showSaveDialog } from '../main';
-import { getPlaylistWithSongPaths } from '@main/db/queries/playlists';
 
 const generateSaveDialogOptions = (playlistName: string) => {
   const saveOptions: SaveDialogOptions = {

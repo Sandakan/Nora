@@ -1,9 +1,8 @@
 // import { useEffect } from 'react';
 // import { router } from '@renderer/index';
 
-import Img from '../Img';
-
 import AppIcon from '../../assets/images/webp/logo_light_mode.webp';
+import Img from '../Img';
 
 // const contentLoadStart = window.performance.now();
 // const hidePreloader = () => router.navigate({ to: '/main-player/home', replace: true });

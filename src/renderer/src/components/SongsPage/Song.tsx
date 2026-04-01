@@ -1,3 +1,4 @@
+import { type DraggableProvided } from '@hello-pangea/dnd';
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import {
@@ -14,10 +15,7 @@ import {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { type DraggableProvided } from '@hello-pangea/dnd';
-
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-
 import Img from '../Img';
 import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
 
@@ -27,16 +25,16 @@ const DeleteSongsFromSystemConfrimPrompt = lazy(
   () => import('./DeleteSongsFromSystemConfrimPrompt')
 );
 
-import SongArtist from './SongArtist';
-import DefaultSongCover from '../../assets/images/webp/song_cover_default.webp';
-import Button from '../Button';
+import { useNavigate } from '@tanstack/react-router';
+import { useStore } from '@tanstack/react-store';
 
 import { appPreferences } from '../../../../../package.json';
-import { useStore } from '@tanstack/react-store';
-import { store } from '../../store/store';
-import NavLink from '../NavLink';
-import { useNavigate } from '@tanstack/react-router';
+import DefaultSongCover from '../../assets/images/webp/song_cover_default.webp';
 import { useQueueOperations } from '../../hooks/useQueueOperations';
+import { store } from '../../store/store';
+import Button from '../Button';
+import NavLink from '../NavLink';
+import SongArtist from './SongArtist';
 
 interface SongProp {
   songId: number;

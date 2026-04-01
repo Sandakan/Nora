@@ -1,4 +1,5 @@
 import path from 'path';
+
 import { getBlacklistData } from '../filesystem';
 
 export const isParentFolderBlacklisted = (folderPath: string) => {

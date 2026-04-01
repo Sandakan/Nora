@@ -1,4 +1,5 @@
 import { getSongArtworksBySongIds } from '@main/db/queries/songs';
+
 import { parseSongArtworks } from '../fs/resolveFilePaths';
 
 const getArtworksForMultipleArtworksCover = async (songIds: number[]) => {

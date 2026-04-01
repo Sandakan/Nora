@@ -1,8 +1,10 @@
 import { createReadStream, existsSync, statSync } from 'fs';
-import logger from './logger';
-import mime from 'mime';
-import { net } from 'electron';
 import { pathToFileURL } from 'url';
+
+import { net } from 'electron';
+import mime from 'mime';
+
+import logger from './logger';
 
 export const handleFileProtocol = async (req: GlobalRequest) => {
   try {

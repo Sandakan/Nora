@@ -1,4 +1,5 @@
 import { Trans, useTranslation } from 'react-i18next';
+
 import toCapitalCase from '../../utils/toCapitalCase';
 import Hyperlink from '../Hyperlink';
 

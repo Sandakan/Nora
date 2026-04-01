@@ -1,4 +1,5 @@
 import { describe, test, expect, vi } from 'vitest';
+
 import PlayerQueue from '../../../../../src/renderer/src/other/playerQueue';
 
 type QueueTypes = 'album' | 'playlist' | 'artist' | 'songs' | 'genre' | 'folder';

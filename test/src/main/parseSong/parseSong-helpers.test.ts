@@ -93,7 +93,7 @@ describe('parseSong Helper Functions', () => {
     });
 
     test('should handle artists with special characters', () => {
-      const result = getArtistNamesFromSong('AC/DC, Guns N\' Roses & Mötley Crüe');
+      const result = getArtistNamesFromSong("AC/DC, Guns N' Roses & Mötley Crüe");
       expect(result).toEqual(['AC/DC', "Guns N' Roses", 'Mötley Crüe']);
     });
 

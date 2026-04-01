@@ -1,4 +1,9 @@
+import detectChinese from '@neos21/detect-chinese';
+import Kuroshiro from '@sglkc/kuroshiro';
 import { TagConstants } from 'node-id3';
+import { pinyin } from 'pinyin-pro';
+import isHangul from 'romaja/src/hangul/isHangul.js';
+
 // import logger from '../main/logger';
 import isLyricsSynced, {
   EXTENDED_SYNCED_LYRICS_LINE_REGEX,
@@ -6,10 +11,6 @@ import isLyricsSynced, {
   SYNCED_LYRICS_REGEX,
   isAnExtendedSyncedLyricsLine
 } from './isLyricsSynced';
-import Kuroshiro from '@sglkc/kuroshiro';
-import detectChinese from '@neos21/detect-chinese';
-import { pinyin } from 'pinyin-pro';
-import isHangul from 'romaja/src/hangul/isHangul.js';
 
 export type SyncedLyricsInput = NonNullable<NodeID3Tags['synchronisedLyrics']>[number];
 

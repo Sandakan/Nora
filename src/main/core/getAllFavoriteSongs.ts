@@ -1,5 +1,6 @@
-import { convertToSongData } from '../utils/convert';
 import { getAllSongsInFavorite } from '@main/db/queries/songs';
+
+import { convertToSongData } from '../utils/convert';
 
 export const getAllFavoriteSongs = async (
   sortType?: SongSortTypes,

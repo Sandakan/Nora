@@ -1,19 +1,17 @@
 import { lazy, useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import isLyricsSynced from '../../../../common/isLyricsSynced';
-
-import Button from '../Button';
-import Img from '../Img';
-
 import DefaultSongImage from '../../assets/images/webp/song_cover_default.webp';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import {
   manageArtworks,
   manageAlbumData,
   manageArtistsData,
   manageGenresData
 } from '../../utils/manageMetadataResults';
+import Button from '../Button';
+import Img from '../Img';
 
 const CustomizeSelectedMetadataPrompt = lazy(() => import('./CustomizeSelectedMetadataPrompt'));
 

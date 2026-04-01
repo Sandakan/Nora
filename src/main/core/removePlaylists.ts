@@ -1,4 +1,5 @@
 import { deletePlaylists } from '@main/db/queries/playlists';
+
 import logger from '../logger';
 import { dataUpdateEvent } from '../main';
 

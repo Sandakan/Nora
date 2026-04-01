@@ -1,10 +1,9 @@
 import { useCallback } from 'react';
-import { dispatch, store } from '../store/store';
-import type PlayerQueue from '../other/playerQueue';
 
-/**
- * Dependencies required by the useQueueManagement hook.
- */
+import type PlayerQueue from '../other/playerQueue';
+import { dispatch, store } from '../store/store';
+
+/** Dependencies required by the useQueueManagement hook. */
 export interface QueueManagementDependencies {
   /** The PlayerQueue instance */
   playerQueue: PlayerQueue;
@@ -15,42 +14,38 @@ export interface QueueManagementDependencies {
 /**
  * Custom hook to manage the playback queue.
  *
- * This hook provides comprehensive queue management functionality including:
- * - Creating new queues with different types (songs, artists, albums, playlists, genres)
- * - Updating queue data (position, songs, shuffle state)
- * - Shuffling and unshuffling the queue
- * - Restoring original queue order from shuffle
- * - Syncing queue state with localStorage
- * - Managing shuffle state in the store
- * - Managing "up next" song data
+ * This hook provides comprehensive queue management functionality including: - Creating new queues
+ * with different types (songs, artists, albums, playlists, genres) - Updating queue data (position,
+ * songs, shuffle state) - Shuffling and unshuffling the queue - Restoring original queue order from
+ * shuffle - Syncing queue state with localStorage - Managing shuffle state in the store - Managing
+ * "up next" song data
  *
- * The hook integrates with the PlayerQueue class to provide a React-friendly
- * interface for queue operations and ensures state consistency across the app.
- *
- * @param dependencies - Object containing required dependencies
- *
- * @returns Object with queue management functions
+ * The hook integrates with the PlayerQueue class to provide a React-friendly interface for queue
+ * operations and ensures state consistency across the app.
  *
  * @example
- * ```tsx
- * function App() {
- *   const playerQueue = usePlayerQueue();
+ *   ```tsx
+ *   function App() {
+ *     const playerQueue = usePlayerQueue();
  *
- *   const { createQueue, toggleQueueShuffle, changeUpNextSongData } = useQueueManagement({
- *     playerQueue,
- *     playSong
- *   });
+ *     const { createQueue, toggleQueueShuffle, changeUpNextSongData } = useQueueManagement({
+ *       playerQueue,
+ *       playSong
+ *     });
  *
- *   // Create a new queue
- *   createQueue(songIds, 'songs', false, undefined, true);
+ *     // Create a new queue
+ *     createQueue(songIds, 'songs', false, undefined, true);
  *
- *   // Toggle shuffle
- *   toggleQueueShuffle();
+ *     // Toggle shuffle
+ *     toggleQueueShuffle();
  *
- *   // Update up next song
- *   changeUpNextSongData(nextSongData);
- * }
- * ```
+ *     // Update up next song
+ *     changeUpNextSongData(nextSongData);
+ *   }
+ *   ```
+ *
+ * @param dependencies - Object containing required dependencies
+ * @returns Object with queue management functions
  */
 export function useQueueManagement(dependencies: QueueManagementDependencies) {
   const { playerQueue, playSong } = dependencies;
@@ -67,12 +62,9 @@ export function useQueueManagement(dependencies: QueueManagementDependencies) {
   /**
    * Creates a new playback queue.
    *
-   * This function:
-   * 1. Replaces the current queue with new songs
-   * 2. Sets the queue type and ID (for context)
-   * 3. Optionally shuffles the queue
-   * 4. Syncs to localStorage
-   * 5. Optionally starts playback
+   * This function: 1. Replaces the current queue with new songs 2. Sets the queue type and ID (for
+   * context) 3. Optionally shuffles the queue 4. Syncs to localStorage 5. Optionally starts
+   * playback
    *
    * @param newQueue - Array of song IDs to add to the queue
    * @param queueType - Type of queue (songs, artists, albums, playlists, genres, folder, search)
@@ -116,13 +108,10 @@ export function useQueueManagement(dependencies: QueueManagementDependencies) {
   /**
    * Toggles shuffle on/off for the current queue.
    *
-   * When enabling shuffle:
-   * - Shuffles the queue while keeping the current song in place
-   * - Stores the original queue order for later restoration
+   * When enabling shuffle: - Shuffles the queue while keeping the current song in place - Stores
+   * the original queue order for later restoration
    *
-   * When disabling shuffle:
-   * - Restores the original queue order
-   * - Keeps the current song in place
+   * When disabling shuffle: - Restores the original queue order - Keeps the current song in place
    */
   const toggleQueueShuffle = useCallback(() => {
     const wasShuffling = store.state.player.isShuffling;
@@ -151,12 +140,9 @@ export function useQueueManagement(dependencies: QueueManagementDependencies) {
   /**
    * Updates the queue with new data.
    *
-   * This flexible function can:
-   * - Replace the entire queue with new songs
-   * - Change the current playback position
-   * - Toggle shuffle on/off
-   * - Restore from shuffle state
-   * - Start playback at a specific position
+   * This flexible function can: - Replace the entire queue with new songs - Change the current
+   * playback position - Toggle shuffle on/off - Restore from shuffle state - Start playback at a
+   * specific position
    *
    * @param currentSongIndex - The index to move to (optional)
    * @param newQueue - New array of song IDs (replaces current queue if provided)

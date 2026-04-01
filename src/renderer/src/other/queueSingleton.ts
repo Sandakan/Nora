@@ -1,15 +1,14 @@
-import PlayerQueue from './playerQueue';
 import { store } from '../store/store';
 import storage from '../utils/localStorage';
+import PlayerQueue from './playerQueue';
 
 // Module-level singleton - created once when module loads
 let queueInstance: PlayerQueue | null = null;
 let isSettingUpSync = false;
 
 /**
- * Initialize the singleton queue instance.
- * Called once when the app starts.
- * Loads queue from localStorage or creates empty queue.
+ * Initialize the singleton queue instance. Called once when the app starts. Loads queue from
+ * localStorage or creates empty queue.
  */
 export function initializeQueue(): PlayerQueue {
   if (queueInstance) {
@@ -28,10 +27,7 @@ export function initializeQueue(): PlayerQueue {
   return queueInstance;
 }
 
-/**
- * Get the singleton queue instance.
- * Auto-initializes on first access if not already initialized.
- */
+/** Get the singleton queue instance. Auto-initializes on first access if not already initialized. */
 export function getQueue(): PlayerQueue {
   if (!queueInstance) {
     // Auto-initialize on first access (defensive programming)
@@ -41,8 +37,8 @@ export function getQueue(): PlayerQueue {
 }
 
 /**
- * Set up bidirectional synchronization between queue and store.
- * Uses a flag to prevent infinite loops when syncing from store → queue.
+ * Set up bidirectional synchronization between queue and store. Uses a flag to prevent infinite
+ * loops when syncing from store → queue.
  */
 function setupQueueStoreSync(queue: PlayerQueue) {
   if (isSettingUpSync) return; // Prevent multiple setup calls
@@ -140,10 +136,7 @@ function setupQueueStoreSync(queue: PlayerQueue) {
   isSettingUpSync = false;
 }
 
-/**
- * For testing/debugging: Reset the queue singleton.
- * ⚠️ Should only be used in tests!
- */
+/** For testing/debugging: Reset the queue singleton. ⚠️ Should only be used in tests! */
 export function resetQueueForTesting() {
   if (queueInstance) {
     queueInstance.removeAllListeners();

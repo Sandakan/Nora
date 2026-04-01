@@ -1,5 +1,5 @@
-import os from 'os';
 import childProcess from 'node:child_process';
+import os from 'os';
 import path from 'path';
 
 import logger from '../logger';

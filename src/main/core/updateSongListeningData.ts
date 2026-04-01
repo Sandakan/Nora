@@ -1,4 +1,5 @@
 import { addSongPlayEvent, addSongSeekEvent, addSongSkipEvent } from '@main/db/queries/listens';
+
 import logger from '../logger';
 import { dataUpdateEvent } from '../main';
 

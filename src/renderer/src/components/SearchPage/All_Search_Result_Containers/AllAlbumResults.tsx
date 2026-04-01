@@ -1,9 +1,10 @@
-import { Album } from '../../AlbumsPage/Album';
-import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
-import SecondaryContainer from '../../SecondaryContainer';
-import VirtualizedGrid from '../../VirtualizedGrid';
 import { store } from '@renderer/store/store';
 import { useStore } from '@tanstack/react-store';
+
+import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
+import { Album } from '../../AlbumsPage/Album';
+import SecondaryContainer from '../../SecondaryContainer';
+import VirtualizedGrid from '../../VirtualizedGrid';
 
 type Props = { albumData: Album[] };
 

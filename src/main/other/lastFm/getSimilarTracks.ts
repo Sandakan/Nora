@@ -1,13 +1,14 @@
-import logger from '../../logger';
+import { getSongById, getSongsByNames } from '@main/db/queries/songs';
+import { convertToSongData } from '@main/utils/convert';
+
 import type {
   LastFMSimilarTracksAPI,
   ParsedSimilarTrack,
   SimilarTrack,
   SimilarTracksOutput
 } from '../../../types/last_fm_similar_tracks_api';
+import logger from '../../logger';
 import { checkIfConnectedToInternet } from '../../main';
-import { getSongById, getSongsByNames } from '@main/db/queries/songs';
-import { convertToSongData } from '@main/utils/convert';
 
 const sortSimilarTracks = (a: ParsedSimilarTrack, b: ParsedSimilarTrack) => {
   if (a.match > b.match) return -1;

@@ -5,7 +5,10 @@ interface AppNotificationConfig extends Partial<AppNotification> {
   trigger: [MessageCodes, ...MessageCodes[]];
   iconName?: string;
   iconClassName?: string;
-  /** `validate` runs after the trigger to check whether this notification is applicable by returning a boolean. */
+  /**
+   * `validate` runs after the trigger to check whether this notification is applicable by returning
+   * a boolean.
+   */
   validate?: (obj: {
     data?: Record<string, unknown>;
     message: string;

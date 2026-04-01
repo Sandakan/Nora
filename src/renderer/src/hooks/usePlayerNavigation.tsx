@@ -1,36 +1,37 @@
 import { useCallback } from 'react';
-import { store } from '../store/store';
-import type PlayerQueue from '../other/playerQueue';
+
 import type AudioPlayer from '../other/player';
+import type PlayerQueue from '../other/playerQueue';
+import { store } from '../store/store';
 
 /**
  * Hook for navigating through the playback queue.
  *
- * This hook provides functions for navigating backward/forward through the queue,
- * handling repeat modes, and changing the current song index. It integrates with
- * the PlayerQueue class and AudioPlayer's automatic song loading.
+ * This hook provides functions for navigating backward/forward through the queue, handling repeat
+ * modes, and changing the current song index. It integrates with the PlayerQueue class and
+ * AudioPlayer's automatic song loading.
  *
- * Note: Songs are automatically loaded by AudioPlayer when queue position changes.
- * This hook is being migrated to use AudioPlayer's skip methods directly.
+ * Note: Songs are automatically loaded by AudioPlayer when queue position changes. This hook is
+ * being migrated to use AudioPlayer's skip methods directly.
+ *
+ * @example
+ *   ```tsx
+ *   const {
+ *   handleSkipBackwardClick,
+ *   handleSkipForwardClick,
+ *   changeQueueCurrentSongIndex
+ *   } = usePlayerNavigation(player, playerQueue, toggleSongPlayback, recordListeningData);
+ *
+ *   // Use in UI or event handlers
+ *   <button onClick={handleSkipBackwardClick}>Previous</button>
+ *   <button onClick={() => handleSkipForwardClick('USER_SKIP')}>Next</button>
+ *   ```
  *
  * @param playerInstance - The AudioPlayer instance or HTMLAudioElement
  * @param playerQueue - The PlayerQueue instance for queue navigation
  * @param toggleSongPlayback - Function to toggle play/pause state
  * @param recordListeningData - Function to record listening session data
  * @returns Object containing navigation functions
- *
- * @example
- * ```tsx
- * const {
- *   handleSkipBackwardClick,
- *   handleSkipForwardClick,
- *   changeQueueCurrentSongIndex
- * } = usePlayerNavigation(player, playerQueue, toggleSongPlayback, recordListeningData);
- *
- * // Use in UI or event handlers
- * <button onClick={handleSkipBackwardClick}>Previous</button>
- * <button onClick={() => handleSkipForwardClick('USER_SKIP')}>Next</button>
- * ```
  */
 export function usePlayerNavigation(
   playerInstance: AudioPlayer | HTMLAudioElement,

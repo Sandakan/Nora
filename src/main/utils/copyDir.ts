@@ -1,9 +1,9 @@
-import path from 'path';
 import fs from 'fs/promises';
+import path from 'path';
 
 import logger from '../logger';
-import makeDir from './makeDir';
 import isPathADir from './isPathADir';
+import makeDir from './makeDir';
 
 async function copyDir(src: string, dest: string) {
   try {

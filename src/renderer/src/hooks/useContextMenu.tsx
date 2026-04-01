@@ -1,36 +1,35 @@
 import { useCallback, useEffect } from 'react';
+
 import { dispatch, store } from '../store/store';
 
-/**
- * Return type for the useContextMenu hook
- */
+/** Return type for the useContextMenu hook */
 export interface UseContextMenuReturn {
   /**
    * Update the context menu data (show/hide, position, menu items)
+   *
+   * @example
+   *   ```tsx
+   *   // Show context menu at cursor position
+   *   updateContextMenuData(
+   *     true,
+   *     [
+   *       { label: 'Play', handler: () => playSong() },
+   *       { label: 'Add to Queue', handler: () => addToQueue() }
+   *     ],
+   *     event.pageX,
+   *     event.pageY,
+   *     { songId: '123' }
+   *   );
+   *
+   *   // Hide context menu
+   *   updateContextMenuData(false);
+   *   ```
    *
    * @param isVisible - Whether the context menu should be visible
    * @param menuItems - Array of menu items to display (optional)
    * @param pageX - X coordinate for the menu position (optional)
    * @param pageY - Y coordinate for the menu position (optional)
    * @param contextMenuData - Additional data to pass to menu item handlers (optional)
-   *
-   * @example
-   * ```tsx
-   * // Show context menu at cursor position
-   * updateContextMenuData(
-   *   true,
-   *   [
-   *     { label: 'Play', handler: () => playSong() },
-   *     { label: 'Add to Queue', handler: () => addToQueue() }
-   *   ],
-   *   event.pageX,
-   *   event.pageY,
-   *   { songId: '123' }
-   * );
-   *
-   * // Hide context menu
-   * updateContextMenuData(false);
-   * ```
    */
   updateContextMenuData: (
     isVisible: boolean,
@@ -43,17 +42,16 @@ export interface UseContextMenuReturn {
   /**
    * Hide the context menu if it's currently visible
    *
-   * This is typically called when clicking outside the menu
-   * or when an action is performed.
+   * This is typically called when clicking outside the menu or when an action is performed.
    *
    * @example
-   * ```tsx
-   * // Add click listener to hide menu
-   * useEffect(() => {
-   *   window.addEventListener('click', handleContextMenuVisibilityUpdate);
-   *   return () => window.removeEventListener('click', handleContextMenuVisibilityUpdate);
-   * }, [handleContextMenuVisibilityUpdate]);
-   * ```
+   *   ```tsx
+   *   // Add click listener to hide menu
+   *   useEffect(() => {
+   *     window.addEventListener('click', handleContextMenuVisibilityUpdate);
+   *     return () => window.removeEventListener('click', handleContextMenuVisibilityUpdate);
+   *   }, [handleContextMenuVisibilityUpdate]);
+   *   ```
    */
   handleContextMenuVisibilityUpdate: () => void;
 }
@@ -61,42 +59,37 @@ export interface UseContextMenuReturn {
 /**
  * Hook for managing context menu state and visibility
  *
- * Provides functions to show/hide context menus, update menu items,
- * and manage menu position. The context menu is typically triggered
- * by right-clicking on elements like songs, playlists, or artists.
+ * Provides functions to show/hide context menus, update menu items, and manage menu position. The
+ * context menu is typically triggered by right-clicking on elements like songs, playlists, or
+ * artists.
  *
- * Automatically sets up a global click listener to close the menu
- * when clicking outside of it.
- *
- * @returns Object containing context menu management functions
+ * Automatically sets up a global click listener to close the menu when clicking outside of it.
  *
  * @example
- * ```tsx
- * function SongItem({ song }) {
- *   const { updateContextMenuData, handleContextMenuVisibilityUpdate } = useContextMenu();
+ *   ```tsx
+ *   function SongItem({ song }) {
+ *     const { updateContextMenuData, handleContextMenuVisibilityUpdate } = useContextMenu();
  *
- *   const handleRightClick = (e: React.MouseEvent) => {
- *     e.preventDefault();
- *     updateContextMenuData(
- *       true,
- *       [
- *         { label: 'Play', handler: () => playSong(song.id) },
- *         { label: 'Add to Queue', handler: () => addToQueue(song.id) },
- *         { label: 'Delete', handler: () => deleteSong(song.id) }
- *       ],
- *       e.pageX,
- *       e.pageY,
- *       { songId: song.id }
- *     );
- *   };
+ *     const handleRightClick = (e: React.MouseEvent) => {
+ *       e.preventDefault();
+ *       updateContextMenuData(
+ *         true,
+ *         [
+ *           { label: 'Play', handler: () => playSong(song.id) },
+ *           { label: 'Add to Queue', handler: () => addToQueue(song.id) },
+ *           { label: 'Delete', handler: () => deleteSong(song.id) }
+ *         ],
+ *         e.pageX,
+ *         e.pageY,
+ *         { songId: song.id }
+ *       );
+ *     };
  *
- *   return (
- *     <div onContextMenu={handleRightClick}>
- *       {song.title}
- *     </div>
- *   );
- * }
- * ```
+ *     return <div onContextMenu={handleRightClick}>{song.title}</div>;
+ *   }
+ *   ```
+ *
+ * @returns Object containing context menu management functions
  */
 export function useContextMenu(): UseContextMenuReturn {
   const updateContextMenuData = useCallback(

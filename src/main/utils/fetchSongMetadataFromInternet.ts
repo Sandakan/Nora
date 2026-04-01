@@ -1,12 +1,11 @@
 import type { AppleITunesMusicAPI } from '../../types/apple_itunes_music_api';
-import logger from '../logger';
-import type { LastFMHitCache, LastFMTrackInfoApi } from '../../types/last_fm_api';
-
-import type { GeniusLyricsAPI, GeniusSongMetadataResponse } from '../../types/genius_lyrics_api';
 import type { DeezerTrackDataAPI, DeezerTrackResultsAPI } from '../../types/deezer_api';
+import type { GeniusLyricsAPI, GeniusSongMetadataResponse } from '../../types/genius_lyrics_api';
+import type { LastFMHitCache, LastFMTrackInfoApi } from '../../types/last_fm_api';
 import type { MusixmatchHitCache, MusixmatchLyricsAPI } from '../../types/musixmatch_lyrics_api';
-import parseSongMetadataFromMusixmatchApiData from './parseSongMetadataFromMusixmatchApiData';
+import logger from '../logger';
 import { parseMusicmatchDataFromLyrics } from './fetchLyricsFromMusixmatch';
+import parseSongMetadataFromMusixmatchApiData from './parseSongMetadataFromMusixmatchApiData';
 
 const resultsController = new AbortController();
 const metadataController = new AbortController();

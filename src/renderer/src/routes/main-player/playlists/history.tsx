@@ -1,3 +1,4 @@
+import { SpecialPlaylists } from '@common/playlists.enum';
 import MainContainer from '@renderer/components/MainContainer';
 import PlaylistInfoAndImgContainer from '@renderer/components/PlaylistsInfoPage/PlaylistInfoAndImgContainer';
 import Song from '@renderer/components/SongsPage/Song';
@@ -14,8 +15,8 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 import { useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import historyPlaylistCoverImage from '../../../assets/images/webp/history-playlist-icon.webp';
-import { SpecialPlaylists } from '@common/playlists.enum';
 export const Route = createFileRoute('/main-player/playlists/history')({
   validateSearch: songSearchSchema,
   component: HistoryPlaylistInfoPage

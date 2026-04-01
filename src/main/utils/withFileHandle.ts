@@ -1,10 +1,11 @@
 import { File } from 'node-taglib-sharp';
+
 import logger from '../logger';
 
 /**
- * Utility wrapper for node-taglib-sharp File operations
- * Ensures proper file disposal even if errors occur
- * 
+ * Utility wrapper for node-taglib-sharp File operations Ensures proper file disposal even if errors
+ * occur
+ *
  * @param filePath Absolute path to the audio file
  * @param callback Function to execute with the file handle
  * @returns Result from the callback function
@@ -15,7 +16,7 @@ export async function withFileHandle<T>(
   callback: (file: File) => Promise<T> | T
 ): Promise<T> {
   let file: File | undefined;
-  
+
   try {
     file = File.createFromPath(filePath);
     const result = await callback(file);
@@ -34,16 +35,10 @@ export async function withFileHandle<T>(
   }
 }
 
-/**
- * Synchronous version of withFileHandle
- * Use when callback doesn't need async operations
- */
-export function withFileHandleSync<T>(
-  filePath: string,
-  callback: (file: File) => T
-): T {
+/** Synchronous version of withFileHandle Use when callback doesn't need async operations */
+export function withFileHandleSync<T>(filePath: string, callback: (file: File) => T): T {
   let file: File | undefined;
-  
+
   try {
     file = File.createFromPath(filePath);
     return callback(file);

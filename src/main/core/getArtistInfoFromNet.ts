@@ -1,16 +1,15 @@
+import { db } from '@main/db/db';
+import { getArtistById, getArtistsByName } from '@main/db/queries/artists';
+import { linkArtworksToArtist, saveArtworks } from '@main/db/queries/artworks';
 import { default as stringSimilarity, ReturnTypeEnums } from 'didyoumean2';
-
-import logger from '../logger';
-import generatePalette from '../other/generatePalette';
-import { checkIfConnectedToInternet, dataUpdateEvent } from '../main';
-import getArtistInfoFromLastFM from '../other/lastFm/getArtistInfoFromLastFM';
 
 import type { DeezerArtistInfo, DeezerArtistInfoApi } from '../../types/deezer_api';
 import type { SimilarArtist } from '../../types/last_fm_artist_info_api';
-import { getArtistById, getArtistsByName } from '@main/db/queries/artists';
+import logger from '../logger';
+import { checkIfConnectedToInternet, dataUpdateEvent } from '../main';
+import generatePalette from '../other/generatePalette';
+import getArtistInfoFromLastFM from '../other/lastFm/getArtistInfoFromLastFM';
 import { convertToArtist } from '../utils/convert';
-import { linkArtworksToArtist, saveArtworks } from '@main/db/queries/artworks';
-import { db } from '@main/db/db';
 
 const DEEZER_BASE_URL = 'https://api.deezer.com/';
 

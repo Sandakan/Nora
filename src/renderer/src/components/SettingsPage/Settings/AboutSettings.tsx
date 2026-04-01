@@ -1,29 +1,25 @@
+import { settingsQuery } from '@renderer/queries/settings';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { lazy, useContext, useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useSuspenseQuery } from '@tanstack/react-query';
-import { settingsQuery } from '@renderer/queries/settings';
 
+import appLicense from '../../../../../../LICENSE.txt?raw';
+import openSourceLicenses from '../../../../../../open_source_licenses.txt?raw';
+import { version, author, homepage, bugs, urls } from '../../../../../../package.json';
+import localReleaseNotes from '../../../../../../release-notes.json';
+import DiscordLightIcon from '../../../assets/images/svg/discord_dark_mode.svg';
+import DiscordDarkIcon from '../../../assets/images/svg/discord_light_mode.svg';
+import GithubLightIcon from '../../../assets/images/svg/github-white.svg';
+import GithubDarkIcon from '../../../assets/images/svg/github.svg';
+import AppIcon from '../../../assets/images/webp/logo_light_mode.webp';
+import SLFlag from '../../../assets/images/webp/sl-flag.webp';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
-
-import Img from '../../Img';
-import Hyperlink from '../../Hyperlink';
-import Button from '../../Button';
-import AppStats from './AppStats';
-
 import calculateElapsedTime from '../../../utils/calculateElapsedTime';
 import storage from '../../../utils/localStorage';
-
-import { version, author, homepage, bugs, urls } from '../../../../../../package.json';
-import openSourceLicenses from '../../../../../../open_source_licenses.txt?raw';
-import appLicense from '../../../../../../LICENSE.txt?raw';
-import localReleaseNotes from '../../../../../../release-notes.json';
-
-import AppIcon from '../../../assets/images/webp/logo_light_mode.webp';
-import GithubDarkIcon from '../../../assets/images/svg/github.svg';
-import GithubLightIcon from '../../../assets/images/svg/github-white.svg';
-import DiscordDarkIcon from '../../../assets/images/svg/discord_light_mode.svg';
-import DiscordLightIcon from '../../../assets/images/svg/discord_dark_mode.svg';
-import SLFlag from '../../../assets/images/webp/sl-flag.webp';
+import Button from '../../Button';
+import Hyperlink from '../../Hyperlink';
+import Img from '../../Img';
+import AppStats from './AppStats';
 
 const ReleaseNotesPrompt = lazy(() => import('../../ReleaseNotesPrompt/ReleaseNotesPrompt'));
 const ResetAppConfirmationPrompt = lazy(() => import('../ResetAppConfirmationPrompt'));

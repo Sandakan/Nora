@@ -18,7 +18,7 @@
       "windows": {
         "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron-vite.cmd"
       },
-      "runtimeArgs": [ "--sourcemap" ],
+      "runtimeArgs": ["--sourcemap"],
       "env": {
         "REMOTE_DEBUGGING_PORT": "9222"
       }
@@ -27,7 +27,7 @@
       "name": "Main - Attach",
       "port": 5858,
       "request": "attach",
-      "skipFiles": [ "<node_internals>/**", "**/node_modules/**" ],
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
       "type": "node",
       "timeout": 15000,
       "restart": {
@@ -35,24 +35,24 @@
         "maxAttempts": 10
       },
       "showAsyncStacks": true,
-      "resolveSourceMapLocations": [ "${workspaceFolder}/**", "!**/node_modules/**" ],
+      "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"],
       "sourceMaps": true,
       "smartStep": true,
       "pauseForSourceMap": true,
-      "outFiles": [ "${workspaceFolder}/out/**/*.js", "!**/node_modules/**" ]
-    },
+      "outFiles": ["${workspaceFolder}/out/**/*.js", "!**/node_modules/**"]
+    }
   ],
   "compounds": [
     {
       "name": "Attach All",
-      "configurations": [ "Renderer - Attach", "Main - Attach" ],
+      "configurations": ["Renderer - Attach", "Main - Attach"],
       "presentation": {
         "order": 1
       }
     },
     {
       "name": "Launch and Attach",
-      "configurations": [ "Main - Launch", "Renderer - Attach" ],
+      "configurations": ["Main - Launch", "Renderer - Attach"],
       "presentation": {
         "order": 2
       }

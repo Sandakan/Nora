@@ -1,12 +1,11 @@
-import path from 'path';
 import fs from 'fs/promises';
+import path from 'path';
 
 import sharp from 'sharp';
 
-import logger from '../logger';
-import { DEFAULT_ARTWORK_SAVE_LOCATION } from '../filesystem';
-
 import songCoverImage from '../../renderer/src/assets/images/webp/song_cover_default.webp?asset&asarUnpack';
+import { DEFAULT_ARTWORK_SAVE_LOCATION } from '../filesystem';
+import logger from '../logger';
 
 let defaultSongCoverImgBuffer: Buffer;
 

@@ -1,5 +1,5 @@
-import i18n from '../i18n';
 import roundTo from '../../../common/roundTo';
+import i18n from '../i18n';
 
 type ParsedByteSizes = {
   bytes: number;

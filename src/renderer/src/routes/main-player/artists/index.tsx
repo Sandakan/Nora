@@ -1,27 +1,26 @@
-import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
-import { store } from '@renderer/store/store';
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useStore } from '@tanstack/react-store';
-import { useContext, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import storage from '@renderer/utils/localStorage';
-import useSelectAllHandler from '@renderer/hooks/useSelectAllHandler';
-import MainContainer from '@renderer/components/MainContainer';
-import Button from '@renderer/components/Button';
-import Dropdown from '@renderer/components/Dropdown';
-import VirtualizedGrid from '@renderer/components/VirtualizedGrid';
-import { Artist } from '@renderer/components/ArtistPage/Artist';
-import { queryClient } from '@renderer/index';
-import { artistQuery } from '@renderer/queries/aritsts';
-
 import NoArtistImage from '@assets/images/svg/Sun_Monochromatic.svg';
-import { artistSearchSchema } from '@renderer/utils/zod/artistSchema';
+import { Artist } from '@renderer/components/ArtistPage/Artist';
 import {
   artistFilterOptions,
   artistSortOptions
 } from '@renderer/components/ArtistPage/ArtistOptions';
+import Button from '@renderer/components/Button';
+import Dropdown from '@renderer/components/Dropdown';
 import Img from '@renderer/components/Img';
+import MainContainer from '@renderer/components/MainContainer';
+import VirtualizedGrid from '@renderer/components/VirtualizedGrid';
+import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
+import useSelectAllHandler from '@renderer/hooks/useSelectAllHandler';
+import { queryClient } from '@renderer/index';
+import { artistQuery } from '@renderer/queries/aritsts';
+import { store } from '@renderer/store/store';
+import storage from '@renderer/utils/localStorage';
+import { artistSearchSchema } from '@renderer/utils/zod/artistSchema';
 import { useSuspenseQuery } from '@tanstack/react-query';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { useStore } from '@tanstack/react-store';
+import { useContext, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export const Route = createFileRoute('/main-player/artists/')({
   validateSearch: artistSearchSchema,
@@ -208,4 +207,3 @@ function ArtistPage() {
     </MainContainer>
   );
 }
-

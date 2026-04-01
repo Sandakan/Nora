@@ -1,12 +1,12 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
-import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-
-import Button from '../Button';
-import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store/store';
 import { useNavigate } from '@tanstack/react-router';
+import { useStore } from '@tanstack/react-store';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
+
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import { useUserPreferences } from '../../hooks/useUserPreferences';
+import Button from '../Button';
 
 type Props = {
   name: string;

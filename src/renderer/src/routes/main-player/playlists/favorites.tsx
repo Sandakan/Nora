@@ -14,8 +14,9 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 import { useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import favoritesPlaylistCoverImage from '../../../assets/images/webp/favorites-playlist-icon.webp';
+
 import { SpecialPlaylists } from '../../../../../common/playlists.enum';
+import favoritesPlaylistCoverImage from '../../../assets/images/webp/favorites-playlist-icon.webp';
 
 export const Route = createFileRoute('/main-player/playlists/favorites')({
   validateSearch: songSearchSchema,
@@ -248,4 +249,3 @@ function FavoritesPlaylistInfoPage() {
     </MainContainer>
   );
 }
-

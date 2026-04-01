@@ -1,23 +1,23 @@
+import NoAlbumsImage from '@assets/images/svg/Easter bunny_Monochromatic.svg';
 import { Album } from '@renderer/components/AlbumsPage/Album';
 import { albumSortOptions } from '@renderer/components/AlbumsPage/AlbumOptions';
+import Button from '@renderer/components/Button';
 import Dropdown from '@renderer/components/Dropdown';
 import Img from '@renderer/components/Img';
 import MainContainer from '@renderer/components/MainContainer';
 import VirtualizedGrid from '@renderer/components/VirtualizedGrid';
 import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
 import useSelectAllHandler from '@renderer/hooks/useSelectAllHandler';
+import { queryClient } from '@renderer/index';
+import { albumQuery } from '@renderer/queries/albums';
 import { store } from '@renderer/store/store';
+import storage from '@renderer/utils/localStorage';
 import { albumSearchSchema } from '@renderer/utils/zod/albumSchema';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 import { useContext, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import storage from '@renderer/utils/localStorage';
-import Button from '@renderer/components/Button';
-import NoAlbumsImage from '@assets/images/svg/Easter bunny_Monochromatic.svg';
-import { albumQuery } from '@renderer/queries/albums';
-import { queryClient } from '@renderer/index';
-import { useSuspenseQuery } from '@tanstack/react-query';
 
 export const Route = createFileRoute('/main-player/albums/')({
   validateSearch: albumSearchSchema,
@@ -188,4 +188,3 @@ function AlbumsPage() {
     </MainContainer>
   );
 }
-

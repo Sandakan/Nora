@@ -1,4 +1,5 @@
 import i18n from '@renderer/i18n';
+
 import type { SearchResultFilter } from './SearchResultsFilter';
 
 export const searchFilterTypes = [

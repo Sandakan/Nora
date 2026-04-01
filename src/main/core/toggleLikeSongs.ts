@@ -1,7 +1,8 @@
-import logger from '../logger';
-import { dataUpdateEvent } from '../main';
 import { db } from '@main/db/db';
 import { getSongFavoriteStatuses, updateSongFavoriteStatuses } from '@main/db/queries/songs';
+
+import logger from '../logger';
+import { dataUpdateEvent } from '../main';
 
 const toggleLikeSongs = async (songIds: number[], isLikeSong?: boolean) => {
   const songStatuses = await getSongFavoriteStatuses(songIds);

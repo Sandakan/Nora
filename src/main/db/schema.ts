@@ -1,3 +1,4 @@
+import { relations, type SQL, sql } from 'drizzle-orm';
 import {
   type AnyPgColumn,
   boolean,
@@ -13,7 +14,6 @@ import {
   timestamp,
   varchar
 } from 'drizzle-orm/pg-core';
-import { relations, type SQL, sql } from 'drizzle-orm';
 
 // ============================================================================
 // Data types

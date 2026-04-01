@@ -3,6 +3,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 import { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import DefaultArtistCover from '../../assets/images/webp/artist_cover_default.webp';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Button from '../Button';

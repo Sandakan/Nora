@@ -1,9 +1,8 @@
 import { useTranslation } from 'react-i18next';
 
+import DefaultSongArtwork from '../../assets/images/webp/song_cover_default.webp';
 import Button from '../Button';
 import Img from '../Img';
-
-import DefaultSongArtwork from '../../assets/images/webp/song_cover_default.webp';
 
 type Props = {
   artworkPath?: string;
@@ -43,7 +42,9 @@ const SongArtwork = (props: Props) => {
                 updateSongInfo((prevData) => ({
                   ...prevData,
                   artworkPath: res,
-                  albums: prevData.albums ? [{ ...prevData.albums[0], artworkPath: res }] : undefined
+                  albums: prevData.albums
+                    ? [{ ...prevData.albums[0], artworkPath: res }]
+                    : undefined
                 }))
               )
               .catch((err) => console.error(err))
@@ -60,7 +61,9 @@ const SongArtwork = (props: Props) => {
               updateSongInfo((prevData) => ({
                 ...prevData,
                 artworkPath: undefined,
-                albums: prevData.albums ? [{ ...prevData.albums[0], artworkPath: undefined }] : undefined
+                albums: prevData.albums
+                  ? [{ ...prevData.albums[0], artworkPath: undefined }]
+                  : undefined
               }))
             }
           />

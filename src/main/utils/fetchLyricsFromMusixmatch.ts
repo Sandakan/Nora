@@ -1,3 +1,5 @@
+import { repository, version } from '../../../package.json';
+import isLyricsSynced from '../../common/isLyricsSynced';
 import type {
   MusixmatchLyrics,
   MusixmatchLyricsAPI,
@@ -5,8 +7,6 @@ import type {
   MusixmatchLyricsMetadata
 } from '../../types/musixmatch_lyrics_api';
 import logger from '../logger';
-import isLyricsSynced from '../../common/isLyricsSynced';
-import { repository, version } from '../../../package.json';
 import parseSongMetadataFromMusixmatchApiData from './parseSongMetadataFromMusixmatchApiData';
 
 interface TrackInfo {

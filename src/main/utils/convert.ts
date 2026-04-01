@@ -14,8 +14,7 @@ import {
 } from '@main/fs/resolveFilePaths';
 
 export const convertToSongData = (song: GetAllSongsReturnType[number]): SongData => {
-  const artists =
-    song.artists?.map((a) => ({ artistId: a.artist.id, name: a.artist.name })) ?? [];
+  const artists = song.artists?.map((a) => ({ artistId: a.artist.id, name: a.artist.name })) ?? [];
 
   // Album (pick first if multiple)
   const albumObj = song.albums?.[0]?.album;
@@ -34,8 +33,7 @@ export const convertToSongData = (song: GetAllSongsReturnType[number]): SongData
     ? (albumObj.artists?.map((a) => ({ artistId: a.artist.id, name: a.artist.name })) ?? [])
     : [];
 
-  const genres =
-    song.genres?.map((g) => ({ genreId: g.genre.id, name: g.genre.name })) ?? [];
+  const genres = song.genres?.map((g) => ({ genreId: g.genre.id, name: g.genre.name })) ?? [];
 
   return {
     title: song.title,
@@ -81,8 +79,7 @@ export const convertToArtist = (artist: GetAllArtistsReturnType[number]) => {
 
 export const convertToAlbum = (album: GetAllAlbumsReturnType[number]) => {
   const artworks = album.artworks.map((a) => a.artwork);
-  const artists =
-    album.artists?.map((a) => ({ artistId: a.artist.id, name: a.artist.name })) ?? [];
+  const artists = album.artists?.map((a) => ({ artistId: a.artist.id, name: a.artist.name })) ?? [];
 
   return {
     albumId: album.id,

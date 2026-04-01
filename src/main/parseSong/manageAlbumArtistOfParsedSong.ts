@@ -1,5 +1,5 @@
-import { createArtist, getLinkedAlbumArtist, getArtistWithName } from '@main/db/queries/artists';
 import { linkArtistToAlbum } from '@main/db/queries/albums';
+import { createArtist, getLinkedAlbumArtist, getArtistWithName } from '@main/db/queries/artists';
 import type { artists } from '@main/db/schema';
 
 const manageAlbumArtistOfParsedSong = async (

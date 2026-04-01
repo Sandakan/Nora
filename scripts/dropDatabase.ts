@@ -1,6 +1,6 @@
 import 'dotenv/config';
-import * as readline from 'readline';
 import { existsSync, rmSync } from 'fs';
+import * as readline from 'readline';
 
 const DATABASE_PATH = process.env.DATABASE_PATH;
 

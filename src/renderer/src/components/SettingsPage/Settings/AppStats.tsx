@@ -1,9 +1,10 @@
+import SuspenseLoader from '@renderer/components/SuspenseLoader';
+import { otherQuery } from '@renderer/queries/other';
+import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { valueRounder } from '../../../utils/valueRounder';
-import { useQuery } from '@tanstack/react-query';
-import { otherQuery } from '@renderer/queries/other';
-import SuspenseLoader from '@renderer/components/SuspenseLoader';
 
 const AppStats = () => {
   const { t } = useTranslation();

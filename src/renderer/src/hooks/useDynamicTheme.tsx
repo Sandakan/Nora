@@ -1,9 +1,10 @@
-import { useCallback, useEffect } from 'react';
-import { useStore } from '@tanstack/react-store';
 import { useSuspenseQuery } from '@tanstack/react-query';
+import { useStore } from '@tanstack/react-store';
+import { useCallback, useEffect } from 'react';
+
+import { settingsQuery } from '../queries/settings';
 import { dispatch, store } from '../store/store';
 import storage from '../utils/localStorage';
-import { settingsQuery } from '../queries/settings';
 
 const manageBrightness = (
   values: [number, number, number],
@@ -65,22 +66,21 @@ export interface UseDynamicThemeReturn {
 /**
  * Hook for managing dynamic themes, background images, and dark mode.
  *
- * Provides functions to apply color palettes from song artwork and manage
- * background images. Automatically applies themes when enabled and when
- * song palette data is available. Also manages dark mode by toggling the
- * 'dark' class on document.body based on user preferences.
+ * Provides functions to apply color palettes from song artwork and manage background images.
+ * Automatically applies themes when enabled and when song palette data is available. Also manages
+ * dark mode by toggling the 'dark' class on document.body based on user preferences.
  *
  * @example
- * ```tsx
- * function ThemeManager() {
- *   const { setDynamicThemesFromSongPalette } = useDynamicTheme();
+ *   ```tsx
+ *   function ThemeManager() {
+ *     const { setDynamicThemesFromSongPalette } = useDynamicTheme();
  *
- *   const applyTheme = (palette) => {
- *     const resetStyles = setDynamicThemesFromSongPalette(palette);
- *     // Later: resetStyles() to remove custom theme
- *   };
- * }
- * ```
+ *     const applyTheme = (palette) => {
+ *       const resetStyles = setDynamicThemesFromSongPalette(palette);
+ *       // Later: resetStyles() to remove custom theme
+ *     };
+ *   }
+ *   ```
  *
  * @returns Theme management functions
  */

@@ -1,4 +1,5 @@
 import i18n from '@renderer/i18n';
+
 import type { DropdownOption } from '../Dropdown';
 
 export const artistSortTypes = [

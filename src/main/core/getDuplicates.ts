@@ -1,5 +1,5 @@
-import { getArtistArtworkPath } from '../fs/resolveFilePaths';
 import { getArtistsData } from '../filesystem';
+import { getArtistArtworkPath } from '../fs/resolveFilePaths';
 
 const withoutAccents = (str: string) => {
   const noAccents = str

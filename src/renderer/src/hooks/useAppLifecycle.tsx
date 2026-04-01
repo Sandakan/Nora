@@ -1,47 +1,31 @@
-import { useEffect } from 'react';
-import { dispatch, store } from '../store/store';
 import PlayerQueue from '@renderer/other/playerQueue';
-import storage from '../utils/localStorage';
+import { useEffect } from 'react';
 
 import type AudioPlayer from '../other/player';
+import { dispatch, store } from '../store/store';
+import storage from '../utils/localStorage';
 
-/**
- * Dependencies required by the app lifecycle hook
- */
+/** Dependencies required by the app lifecycle hook */
 export interface AppLifecycleDependencies {
-  /**
-   * AudioPlayer instance or HTMLAudioElement for playback control
-   */
+  /** AudioPlayer instance or HTMLAudioElement for playback control */
   audio: AudioPlayer | HTMLAudioElement;
 
-  /**
-   * PlayerQueue instance for queue management
-   */
+  /** PlayerQueue instance for queue management */
   playerQueue: PlayerQueue;
 
-  /**
-   * Toggle shuffle mode
-   */
+  /** Toggle shuffle mode */
   toggleShuffling: (isShuffling?: boolean) => void;
 
-  /**
-   * Toggle repeat mode
-   */
+  /** Toggle repeat mode */
   toggleRepeat: (newState?: RepeatTypes) => void;
 
-  /**
-   * Play a song from unknown source (file path)
-   */
+  /** Play a song from unknown source (file path) */
   playSongFromUnknownSource: (audioPlayerData: AudioPlayerData, isStartPlay?: boolean) => void;
 
-  /**
-   * Play a song by ID
-   */
+  /** Play a song by ID */
   playSong: (songId: number, isStartPlay?: boolean, playAsCurrentSongIndex?: boolean) => void;
 
-  /**
-   * Create a new queue
-   */
+  /** Create a new queue */
   createQueue: (
     newQueue: number[],
     queueType: QueueTypes,
@@ -50,39 +34,25 @@ export interface AppLifecycleDependencies {
     startPlaying?: boolean
   ) => void;
 
-  /**
-   * Change up next song data
-   */
+  /** Change up next song data */
   changeUpNextSongData: (upNextSongData?: AudioPlayerData) => void;
 
-  /**
-   * Manage playback errors
-   */
+  /** Manage playback errors */
   managePlaybackErrors: (error: unknown) => void;
 
-  /**
-   * Toggle song playback (play/pause)
-   */
+  /** Toggle song playback (play/pause) */
   toggleSongPlayback: (startPlay?: boolean) => void;
 
-  /**
-   * Skip backward to previous song
-   */
+  /** Skip backward to previous song */
   handleSkipBackwardClick: () => void;
 
-  /**
-   * Skip forward to next song
-   */
+  /** Skip forward to next song */
   handleSkipForwardClick: (reason?: SongSkipReason) => void;
 
-  /**
-   * Ref to control auto-play after song loads
-   */
+  /** Ref to control auto-play after song loads */
   refStartPlay: React.MutableRefObject<boolean>;
 
-  /**
-   * Window management functions
-   */
+  /** Window management functions */
   windowManagement: {
     addSongTitleToTitleBar: () => void;
     resetTitleBarInfo: () => void;
@@ -92,42 +62,38 @@ export interface AppLifecycleDependencies {
 /**
  * Hook for managing app lifecycle events
  *
- * Handles application startup initialization including:
- * - LocalStorage synchronization
- * - Default page navigation
- * - Restore playback state (shuffle, repeat)
- * - Resume playing previous song or startup songs
- * - Initialize queue from localStorage or create new queue
- * - Player event listeners (error, play, pause, canplay, ended)
- * - IPC control listeners (playback controls, file associations)
- * - Title bar updates based on playback state
+ * Handles application startup initialization including: - LocalStorage synchronization - Default
+ * page navigation - Restore playback state (shuffle, repeat) - Resume playing previous song or
+ * startup songs - Initialize queue from localStorage or create new queue - Player event listeners
+ * (error, play, pause, canplay, ended) - IPC control listeners (playback controls, file
+ * associations) - Title bar updates based on playback state
  *
  * This hook automatically sets up all lifecycle listeners and cleanup.
  *
- * @param dependencies - Object containing all required callback functions
- *
  * @example
- * ```tsx
- * function App() {
- *   const { createQueue } = useQueueManagement();
- *   const { managePlaybackErrors } = usePlaybackErrors();
- *   const { toggleSongPlayback, refStartPlay } = usePlayerControl();
- *   const windowManagement = useWindowManagement();
- *   // ... other hooks
+ *   ```tsx
+ *   function App() {
+ *     const { createQueue } = useQueueManagement();
+ *     const { managePlaybackErrors } = usePlaybackErrors();
+ *     const { toggleSongPlayback, refStartPlay } = usePlayerControl();
+ *     const windowManagement = useWindowManagement();
+ *     // ... other hooks
  *
- *   useAppLifecycle({
- *     playSong,
- *     createQueue,
- *     managePlaybackErrors,
- *     toggleSongPlayback,
- *     refStartPlay,
- *     windowManagement,
- *     // ... other dependencies
- *   });
+ *     useAppLifecycle({
+ *       playSong,
+ *       createQueue,
+ *       managePlaybackErrors,
+ *       toggleSongPlayback,
+ *       refStartPlay,
+ *       windowManagement
+ *       // ... other dependencies
+ *     });
  *
- *   return <div>...</div>;
- * }
- * ```
+ *     return <div>...</div>;
+ *   }
+ *   ```
+ *
+ * @param dependencies - Object containing all required callback functions
  */
 export function useAppLifecycle(dependencies: AppLifecycleDependencies): void {
   const {

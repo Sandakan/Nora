@@ -3,18 +3,16 @@
 import { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-
 import isLyricsSynced from '../../../../common/isLyricsSynced';
-
-import Button from '../Button';
-import Checkbox from '../Checkbox';
-import Img from '../Img';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import {
   manageAlbumData,
   manageArtistsData,
   manageGenresData
 } from '../../utils/manageMetadataResults';
+import Button from '../Button';
+import Checkbox from '../Checkbox';
+import Img from '../Img';
 
 interface SongMetadataResultProp {
   title: string;

@@ -1,10 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { store } from '../store/store';
 
-/**
- * Dependencies required by the useMediaSession hook.
- */
+/** Dependencies required by the useMediaSession hook. */
 export interface MediaSessionDependencies {
   /** Function to toggle song playback (play/pause) */
   toggleSongPlayback: (startPlay?: boolean) => void;
@@ -19,34 +18,30 @@ export interface MediaSessionDependencies {
 /**
  * Custom hook to manage the Media Session API integration.
  *
- * This hook automatically updates the browser's media session metadata
- * (title, artist, album, artwork) and sets up media control handlers
- * (play, pause, skip, seek) that integrate with OS-level media controls
- * and browser media notifications.
+ * This hook automatically updates the browser's media session metadata (title, artist, album,
+ * artwork) and sets up media control handlers (play, pause, skip, seek) that integrate with
+ * OS-level media controls and browser media notifications.
  *
- * Features:
- * - Updates media metadata when songs change
- * - Handles artwork (both Uint8Array and base64 formats)
- * - Sets up playback state tracking
- * - Configures media control action handlers
- * - Automatically cleans up on unmount
+ * Features: - Updates media metadata when songs change - Handles artwork (both Uint8Array and
+ * base64 formats) - Sets up playback state tracking - Configures media control action handlers -
+ * Automatically cleans up on unmount
+ *
+ * @example
+ *   ```tsx
+ *   function App() {
+ *     const player = useAudioPlayer();
+ *
+ *     useMediaSession(player, {
+ *       toggleSongPlayback,
+ *       handleSkipBackwardClick,
+ *       handleSkipForwardClick,
+ *       updateSongPosition
+ *     });
+ *   }
+ *   ```
  *
  * @param player - The HTML audio player element
  * @param dependencies - Object containing required callback functions
- *
- * @example
- * ```tsx
- * function App() {
- *   const player = useAudioPlayer();
- *
- *   useMediaSession(player, {
- *     toggleSongPlayback,
- *     handleSkipBackwardClick,
- *     handleSkipForwardClick,
- *     updateSongPosition
- *   });
- * }
- * ```
  */
 export function useMediaSession(player: HTMLAudioElement, dependencies: MediaSessionDependencies) {
   const { t } = useTranslation();

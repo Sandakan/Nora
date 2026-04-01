@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import calculateTimeFromSeconds from '../../utils/calculateTimeFromSeconds';
 
+import calculateTimeFromSeconds from '../../utils/calculateTimeFromSeconds';
 import Img from '../Img';
 
 type Props = {

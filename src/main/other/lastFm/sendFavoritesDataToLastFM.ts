@@ -1,13 +1,14 @@
-import logger from '../../logger';
-import hashText from '../../utils/hashText';
+import { getUserSettings } from '@main/db/queries/settings';
+
 import type {
   AuthData,
   LastFMLoveUnlovePostResponse,
   LoveParams
 } from '../../../types/last_fm_api';
+import logger from '../../logger';
 import { checkIfConnectedToInternet } from '../../main';
+import hashText from '../../utils/hashText';
 import getLastFmAuthData from './getLastFMAuthData';
-import { getUserSettings } from '@main/db/queries/settings';
 
 type Method = 'track.love' | 'track.unlove';
 

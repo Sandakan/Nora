@@ -1,5 +1,7 @@
-import path, { join } from 'path';
 import os from 'os';
+import path, { join } from 'path';
+
+import { getSongById } from '@main/db/queries/songs';
 import {
   app,
   BrowserWindow,
@@ -23,32 +25,28 @@ import {
 } from 'electron';
 
 import { version, appPreferences } from '../../package.json';
-import { savePendingMetadataUpdates } from './updateSong/updateSongId3Tags';
-import addWatchersToFolders from './fs/addWatchersToFolders';
-
-import addWatchersToParentFolders from './fs/addWatchersToParentFolders';
-import manageTaskbarPlaybackButtonControls from './core/manageTaskbarPlaybackButtonControls';
-import checkForStartUpSongs from './core/checkForStartUpSongs';
-import checkForNewSongs from './core/checkForNewSongs';
-import changeAppTheme from './core/changeAppTheme';
-import { savePendingSongLyrics } from './saveLyricsToSong';
-import { closeAllAbortControllers, saveAbortController } from './fs/controlAbortControllers';
-import resetAppData from './resetAppData';
-import { clearTempArtworkFolder } from './other/artworks';
-
-import manageLastFmAuth from './auth/manageLastFmAuth';
-import { initializeIPC } from './ipc';
-import checkForUpdates from './update';
-import { clearDiscordRpcActivity } from './other/discordRPC';
-
 import noraAppIcon from '../../resources/logo_light_mode.png?asset';
-import logger from './logger';
 import roundTo from '../common/roundTo';
+import manageLastFmAuth from './auth/manageLastFmAuth';
+import changeAppTheme from './core/changeAppTheme';
+import checkForNewSongs from './core/checkForNewSongs';
+import checkForStartUpSongs from './core/checkForStartUpSongs';
+import manageTaskbarPlaybackButtonControls from './core/manageTaskbarPlaybackButtonControls';
 // import { fileURLToPath, pathToFileURL } from 'url';
 import { closeDatabaseInstance } from './db/db';
-import { handleFileProtocol } from './handleFileProtocol';
-import { getSongById } from '@main/db/queries/songs';
 import { getUserSettings, saveUserSettings } from './db/queries/settings';
+import addWatchersToFolders from './fs/addWatchersToFolders';
+import addWatchersToParentFolders from './fs/addWatchersToParentFolders';
+import { closeAllAbortControllers, saveAbortController } from './fs/controlAbortControllers';
+import { handleFileProtocol } from './handleFileProtocol';
+import { initializeIPC } from './ipc';
+import logger from './logger';
+import { clearTempArtworkFolder } from './other/artworks';
+import { clearDiscordRpcActivity } from './other/discordRPC';
+import resetAppData from './resetAppData';
+import { savePendingSongLyrics } from './saveLyricsToSong';
+import checkForUpdates from './update';
+import { savePendingMetadataUpdates } from './updateSong/updateSongId3Tags';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -146,9 +144,8 @@ function launchExtensionBackgroundWorkers(session = electronSession.defaultSessi
 
 const installExtensions = async () => {
   try {
-    const { default: installExtension, REACT_DEVELOPER_TOOLS } = await import(
-      'electron-devtools-installer'
-    );
+    const { default: installExtension, REACT_DEVELOPER_TOOLS } =
+      await import('electron-devtools-installer');
     const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
 
     const ext = await installExtension(REACT_DEVELOPER_TOOLS, {
@@ -832,4 +829,3 @@ export function stopScreenSleeping() {
   powerSaveBlockerId = powerSaveBlocker.start('prevent-display-sleep');
   logger.debug('Screen sleeping prevented.', { powerSaveBlockerId });
 }
-

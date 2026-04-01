@@ -1,11 +1,12 @@
-import { getCachedLyrics, updateCachedLyrics } from '../core/getSongLyrics';
-import logger from '../logger';
-import { sendMessageToRenderer } from '../main';
-import { getLrcLyricsMetadata } from '../core/saveLyricsToLrcFile';
+import isHangul from 'romaja/src/hangul/isHangul.js';
+import { romanize } from 'romaja/src/romanize.js';
+
 import { version } from '../../../package.json';
 import { INSTRUMENTAL_LYRIC_IDENTIFIER } from '../../common/parseLyrics';
-import { romanize } from 'romaja/src/romanize.js';
-import isHangul from 'romaja/src/hangul/isHangul.js';
+import { getCachedLyrics, updateCachedLyrics } from '../core/getSongLyrics';
+import { getLrcLyricsMetadata } from '../core/saveLyricsToLrcFile';
+import logger from '../logger';
+import { sendMessageToRenderer } from '../main';
 
 const hasConvertibleCharacter = (str: string) => {
   if (!str) return false;
