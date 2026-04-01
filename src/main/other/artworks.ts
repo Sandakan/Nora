@@ -208,7 +208,7 @@ export const removeSongArtworkFromUnknownSource = async (artworkPath: string) =>
   try {
     await fs.unlink(removeDefaultAppProtocolFromFilePath(artworkPath));
     return true;
-  } catch (error) {
+  } catch  {
     logger.error('Failed to remove artwork of a song from an unknown source.', { artworkPath });
     throw new Error('Error occurred when removing artwork of a song from an unknown source.');
   }

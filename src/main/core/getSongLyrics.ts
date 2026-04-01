@@ -82,7 +82,7 @@ const readFileData = async (path?: string) => {
     });
 
     return data;
-  } catch (error) {
+  } catch  {
     return undefined;
   }
 };

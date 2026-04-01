@@ -18,7 +18,7 @@ const getDirSize = async (dir: string) => {
           const { size } = await fs.stat(filepath);
           return size;
         }
-      } catch (error) {
+      } catch  {
         logger.error('Failed to calculate dir size of a directory.');
       }
       return 0;

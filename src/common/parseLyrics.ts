@@ -161,7 +161,7 @@ const getExtendedSyncedLineInfo = (
       return extendedSyncLines;
     }
     return line;
-  } catch (error) {
+  } catch  {
     return line;
   }
 };

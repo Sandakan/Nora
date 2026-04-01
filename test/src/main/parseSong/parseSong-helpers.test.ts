@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeEach, vi } from 'vitest';
+import { describe, test, expect, vi } from 'vitest';
 
 // Import helper functions directly to avoid database initialization
 // These are pure functions that don't need mocking
