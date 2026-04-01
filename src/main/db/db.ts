@@ -21,9 +21,9 @@ logger.debug(`Migrations folder: ${migrationsFolder}`);
 
 mkdirSync(DB_PATH, { recursive: true });
 
-const pgliteInstance = await PGlite.create(DB_PATH, { debug: 5, extensions: { pg_trgm, citext } });
+const pgliteInstance = await PGlite.create(DB_PATH, { debug: 1, extensions: { pg_trgm, citext } });
 pgliteInstance.onNotification((notification) => {
-  logger.info('Database notification:', { notification });
+	logger.info('Database notification:', { notification });
 });
 
 // Initialize extension types
@@ -32,48 +32,48 @@ await pgliteInstance.exec('CREATE EXTENSION IF NOT EXISTS pg_trgm;');
 
 // Initialize Drizzle ORM
 export const db = drizzle(pgliteInstance, {
-  schema
+	schema,
 });
 
 export const closeDatabaseInstance = async () => {
-  if (pgliteInstance.closed) return logger.debug('Database instance already closed.');
+	if (pgliteInstance.closed) return logger.debug('Database instance already closed.');
 
-  await pgliteInstance.close();
-  logger.debug('Database instance closed.');
+	await pgliteInstance.close();
+	logger.debug('Database instance closed.');
 };
 
 await migrate(db, { migrationsFolder });
 await seedDatabase();
 
 export const nukeDatabase = async () => {
-  try {
-    logger.debug('Performing complete database reset...');
+	try {
+		logger.debug('Performing complete database reset...');
 
-    // Drop everything - public schema AND drizzle schema
-    await db.execute('DROP SCHEMA IF EXISTS public CASCADE;');
-    await db.execute('DROP SCHEMA IF EXISTS drizzle CASCADE;');
+		// Drop everything - public schema AND drizzle schema
+		await db.execute('DROP SCHEMA IF EXISTS public CASCADE;');
+		await db.execute('DROP SCHEMA IF EXISTS drizzle CASCADE;');
 
-    // Recreate public schema
-    await db.execute('CREATE SCHEMA public;');
-    await db.execute('GRANT ALL ON SCHEMA public TO public;');
+		// Recreate public schema
+		await db.execute('CREATE SCHEMA public;');
+		await db.execute('GRANT ALL ON SCHEMA public TO public;');
 
-    logger.debug('Database completely reset');
-  } catch (error) {
-    logger.error('Failed to reset database:', { error });
-    throw error;
-  }
+		logger.debug('Database completely reset');
+	} catch (error) {
+		logger.error('Failed to reset database:', { error });
+		throw error;
+	}
 };
 
 export const exportDatabase = async () => {
-  // TODO: Temporary solution until https://github.com/electric-sql/pglite/issues/606 is resolved
-  const newPgliteInstance = await pgliteInstance.clone();
+	// TODO: Temporary solution until https://github.com/electric-sql/pglite/issues/606 is resolved
+	const newPgliteInstance = await pgliteInstance.clone();
 
-  const dump = await pgDump({ pg: newPgliteInstance as PGlite });
-  const dumpText = await dump.text();
+	const dump = await pgDump({ pg: newPgliteInstance as PGlite });
+	const dumpText = await dump.text();
 
-  await newPgliteInstance.close();
+	await newPgliteInstance.close();
 
-  return dumpText;
+	return dumpText;
 };
 
 /**
@@ -87,8 +87,8 @@ export const exportDatabase = async () => {
  * @returns A promise that resolves to true when the import is successful.
  */
 export const importDatabase = async (query: string) => {
-  await pgliteInstance.exec(query);
+	await pgliteInstance.exec(query);
 
-  logger.info('Database imported successfully.');
-  return true;
+	logger.info('Database imported successfully.');
+	return true;
 };
