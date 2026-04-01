@@ -1,5 +1,6 @@
-import logger from '../logger';
 import { getAllSongs } from '@main/db/queries/songs';
+
+import logger from '../logger';
 import { convertToSongData } from '../utils/convert';
 
 const getSongInfo = async (

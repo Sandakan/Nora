@@ -6,17 +6,18 @@ import NoLyrics from '@renderer/components/LyricsPage/NoLyrics';
 import MainContainer from '@renderer/components/MainContainer';
 import useNetworkConnectivity from '@renderer/hooks/useNetworkConnectivity';
 import useSkipLyricsLines from '@renderer/hooks/useSkipLyricsLines';
+import { queryClient } from '@renderer/index';
+import { lyricsQuery } from '@renderer/queries/lyrics';
+import { updateRouteState } from '@renderer/store/routeStateStore';
 import { store } from '@renderer/store/store';
+import { lyricsSchema } from '@renderer/utils/zod/lyricsSchema';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { appPreferences } from '../../../../../../package.json';
-import { lyricsSchema } from '@renderer/utils/zod/lyricsSchema';
-import { updateRouteState } from '@renderer/store/routeStateStore';
-import { lyricsQuery } from '@renderer/queries/lyrics';
-import { queryClient } from '@renderer/index';
-import { useMutation, useQuery } from '@tanstack/react-query';
 
 const { metadataEditingSupportedExtensions } = appPreferences;
 

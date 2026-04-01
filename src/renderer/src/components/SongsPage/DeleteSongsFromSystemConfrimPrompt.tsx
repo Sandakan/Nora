@@ -1,12 +1,11 @@
+import { useStore } from '@tanstack/react-store';
 import { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-
+import { store } from '../../store/store';
 import Button from '../Button';
 import Checkbox from '../Checkbox';
-import { useStore } from '@tanstack/react-store';
-import { store } from '../../store/store';
 
 const DeleteSongFromSystemConfirmPrompt = (props: { songIds: number[] }) => {
   const currentSongData = useStore(store, (state) => state.currentSongData);

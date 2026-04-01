@@ -1,7 +1,9 @@
+import { basename } from 'path';
+
 import { and, eq, inArray, isNull } from 'drizzle-orm';
+
 import { db } from '../db';
 import { musicFolders } from '../schema';
-import { basename } from 'path';
 
 export const getAllFolders = async (trx: DB | DBTransaction = db) => {
   return trx.select().from(musicFolders);

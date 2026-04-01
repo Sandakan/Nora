@@ -1,10 +1,10 @@
-import hashText from '../../utils/hashText';
 import type {
   AuthData,
   LoveParams,
   ScrobbleParams,
   updateNowPlayingParams
 } from '../../../types/last_fm_api';
+import hashText from '../../utils/hashText';
 
 type LastFMApi = (
   | { method: 'track.scrobble'; params: ScrobbleParams }

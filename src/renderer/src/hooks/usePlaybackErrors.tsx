@@ -1,5 +1,6 @@
 import { lazy, useCallback, useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+
 import log from '../utils/log';
 
 const ErrorPrompt = lazy(() => import('../components/ErrorPrompt'));
@@ -7,21 +8,23 @@ const ErrorPrompt = lazy(() => import('../components/ErrorPrompt'));
 /**
  * Hook for managing playback errors and retry logic.
  *
- * This hook handles audio player errors, tracks repetitive error counts,
- * and provides error recovery mechanisms. It displays error prompts when
- * errors exceed threshold limits.
+ * This hook handles audio player errors, tracks repetitive error counts, and provides error
+ * recovery mechanisms. It displays error prompts when errors exceed threshold limits.
+ *
+ * @example
+ *   ```tsx
+ *   const { managePlaybackErrors, resetErrorCount } = usePlaybackErrors(
+ *     player,
+ *     changePromptMenuData
+ *   );
+ *
+ *   // Use in error handler
+ *   player.addEventListener('error', (err) => managePlaybackErrors(err));
+ *   ```
  *
  * @param player - The HTMLAudioElement instance
  * @param changePromptMenuData - Function to show error prompts to user
  * @returns Object containing error management functions
- *
- * @example
- * ```tsx
- * const { managePlaybackErrors, resetErrorCount } = usePlaybackErrors(player, changePromptMenuData);
- *
- * // Use in error handler
- * player.addEventListener('error', (err) => managePlaybackErrors(err));
- * ```
  */
 export function usePlaybackErrors(
   player: HTMLAudioElement,

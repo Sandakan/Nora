@@ -3,7 +3,6 @@ import { Trans, useTranslation } from 'react-i18next';
 
 // import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-
 import Button from '../Button';
 import Checkbox from '../Checkbox';
 

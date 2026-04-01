@@ -1,47 +1,47 @@
 // ? BASE IMPORTS
 import { lazy, useCallback, useEffect, useMemo, useRef } from 'react';
+
 import './assets/styles/styles.css';
 import 'material-symbols/rounded.css';
-
+// ? MAIN APP COMPONENTS
+import ErrorBoundary from './components/ErrorBoundary';
 // ? CONTEXTS
 import { AppUpdateContext, type AppUpdateContextType } from './contexts/AppUpdateContext';
-import { initializeQueue } from './other/queueSingleton';
 // import { SongPositionContext } from './contexts/SongPositionContext';
-
+import { useAppLifecycle } from './hooks/useAppLifecycle';
+import { useAppUpdates } from './hooks/useAppUpdates';
+import { useAudioPlayer } from './hooks/useAudioPlayer';
+import { useContextMenu } from './hooks/useContextMenu';
+import { useDataSync } from './hooks/useDataSync';
+import { useDiscordRpc } from './hooks/useDiscordRpc';
+import { useDynamicTheme } from './hooks/useDynamicTheme';
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+import { useListeningData } from './hooks/useListeningData';
+import { useMediaSession } from './hooks/useMediaSession';
+import { useMultiSelection } from './hooks/useMultiSelection';
 // ? HOOKS
 import useNetworkConnectivity from './hooks/useNetworkConnectivity';
-import { useAudioPlayer } from './hooks/useAudioPlayer';
-import { useWindowManagement } from './hooks/useWindowManagement';
 import { useNotifications } from './hooks/useNotifications';
-import { useDynamicTheme } from './hooks/useDynamicTheme';
-import { useMultiSelection } from './hooks/useMultiSelection';
-import { usePromptMenu } from './hooks/usePromptMenu';
-import { useContextMenu } from './hooks/useContextMenu';
-import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
-import { useAppLifecycle } from './hooks/useAppLifecycle';
-import { useDataSync } from './hooks/useDataSync';
-import { useMediaSession } from './hooks/useMediaSession';
-import { useDiscordRpc } from './hooks/useDiscordRpc';
-import { useAppUpdates } from './hooks/useAppUpdates';
-import { useListeningData } from './hooks/useListeningData';
-import { useQueueManagement } from './hooks/useQueueManagement';
 import { usePlaybackErrors } from './hooks/usePlaybackErrors';
 import { usePlaybackSettings } from './hooks/usePlaybackSettings';
 import { usePlayerControl } from './hooks/usePlayerControl';
 import { usePlayerNavigation } from './hooks/usePlayerNavigation';
-
-// ? MAIN APP COMPONENTS
-import ErrorBoundary from './components/ErrorBoundary';
+import { usePromptMenu } from './hooks/usePromptMenu';
+import { useQueueManagement } from './hooks/useQueueManagement';
+import { useUserPreferences } from './hooks/useUserPreferences';
+import { useWindowManagement } from './hooks/useWindowManagement';
+import { initializeQueue } from './other/queueSingleton';
 
 // ? PROMPTS
 const SongUnplayableErrorPrompt = lazy(() => import('./components/SongUnplayableErrorPrompt'));
 
 // ? SCREENS
 
-// ? UTILS
-import { dispatch, store } from './store/store';
 // import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { Outlet } from '@tanstack/react-router';
+
+// ? UTILS
+import { dispatch, store } from './store/store';
 
 // ? / / / / / / /  PLAYER DEFAULT OPTIONS / / / / / / / / / / / / / /
 // player.addEventListener('player/trackchange', (e) => {
@@ -101,6 +101,10 @@ export default function App() {
   // Context menu hook handles right-click menu state and visibility
   // Note: Global click listener is now handled automatically inside the hook
   const { updateContextMenuData } = useContextMenu();
+
+  // ? INITIALIZE USER PREFERENCES
+  // User preferences hook loads keyboard shortcuts, equalizer preset, and ignored items from database
+  useUserPreferences();
 
   // ? INITIALIZE KEYBOARD SHORTCUTS
   // Keyboard shortcuts hook handles all keyboard shortcuts and their actions
@@ -264,42 +268,8 @@ export default function App() {
     windowManagement
   });
 
-  const appUpdateContextValues = useMemo<AppUpdateContextType>(
-    () => {
-      const contextValue: AppUpdateContextType = {
-        updateCurrentSongData,
-        updateContextMenuData,
-        changePromptMenuData,
-        changeUpNextSongData,
-        updatePromptMenuHistoryIndex,
-        playSong,
-        addNewNotifications,
-        updateNotifications,
-        createQueue,
-        changeQueueCurrentSongIndex,
-        updateCurrentSongPlaybackState,
-        updatePlayerType,
-        handleSkipBackwardClick,
-        handleSkipForwardClick,
-        updateSongPosition,
-        updateVolume,
-        toggleMutedState,
-        toggleRepeat,
-        toggleShuffling,
-        toggleQueueShuffle,
-        toggleIsFavorite,
-        toggleSongPlayback,
-        updateQueueData,
-        clearAudioPlayerData,
-        updateBodyBackgroundImage,
-        updateMultipleSelections,
-        toggleMultipleSelections,
-        updateAppUpdatesState,
-        updateEqualizerOptions
-      };
-      return contextValue;
-    },
-    [
+  const appUpdateContextValues = useMemo<AppUpdateContextType>(() => {
+    const contextValue: AppUpdateContextType = {
       updateCurrentSongData,
       updateContextMenuData,
       changePromptMenuData,
@@ -329,8 +299,39 @@ export default function App() {
       toggleMultipleSelections,
       updateAppUpdatesState,
       updateEqualizerOptions
-    ]
-  );
+    };
+    return contextValue;
+  }, [
+    updateCurrentSongData,
+    updateContextMenuData,
+    changePromptMenuData,
+    changeUpNextSongData,
+    updatePromptMenuHistoryIndex,
+    playSong,
+    addNewNotifications,
+    updateNotifications,
+    createQueue,
+    changeQueueCurrentSongIndex,
+    updateCurrentSongPlaybackState,
+    updatePlayerType,
+    handleSkipBackwardClick,
+    handleSkipForwardClick,
+    updateSongPosition,
+    updateVolume,
+    toggleMutedState,
+    toggleRepeat,
+    toggleShuffling,
+    toggleQueueShuffle,
+    toggleIsFavorite,
+    toggleSongPlayback,
+    updateQueueData,
+    clearAudioPlayerData,
+    updateBodyBackgroundImage,
+    updateMultipleSelections,
+    toggleMultipleSelections,
+    updateAppUpdatesState,
+    updateEqualizerOptions
+  ]);
 
   return (
     <ErrorBoundary>

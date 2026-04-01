@@ -1,4 +1,5 @@
 import { type MutableRefObject, useCallback, useLayoutEffect, useRef, useState } from 'react';
+
 import debounce from '../utils/debounce';
 
 const defaultOptions = {

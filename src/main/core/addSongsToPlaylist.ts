@@ -1,6 +1,7 @@
-import { sendMessageToRenderer } from '../main';
-import logger from '../logger';
 import { getPlaylistById, linkSongsWithPlaylist } from '@main/db/queries/playlists';
+
+import logger from '../logger';
+import { sendMessageToRenderer } from '../main';
 
 const addSongsToPlaylist = async (playlistId: number, songIds: number[]) => {
   logger.debug(`Requested to add songs to a playlist.`, {
@@ -21,10 +22,7 @@ const addSongsToPlaylist = async (playlistId: number, songIds: number[]) => {
       if (!isSongIdInPlaylist) addedIds.push(songId);
       else existingIds.push(songId);
     }
-    await linkSongsWithPlaylist(
-      addedIds,
-      playlist.id
-    );
+    await linkSongsWithPlaylist(addedIds, playlist.id);
 
     logger.debug(`Successfully added ${addedIds.length} songs to the playlist.`, {
       addedIds,

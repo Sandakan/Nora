@@ -1,12 +1,12 @@
-import localStorageMigrationData from '../other/localStorageMigrations';
-
-import { version } from '../../../../package.json';
-import log from './log';
-import addMissingPropsToAnObject from './addMissingPropsToAnObject';
-import isLatestVersion from './isLatestVersion';
-import { dispatch, store } from '@renderer/store/store';
 import { LOCAL_STORAGE_DEFAULT_TEMPLATE } from '@renderer/other/appReducer';
 import PlayerQueue from '@renderer/other/playerQueue';
+import { dispatch, store } from '@renderer/store/store';
+
+import { version } from '../../../../package.json';
+import localStorageMigrationData from '../other/localStorageMigrations';
+import addMissingPropsToAnObject from './addMissingPropsToAnObject';
+import isLatestVersion from './isLatestVersion';
+import log from './log';
 
 // import isLatestVersion from './isLatestVersion';
 
@@ -17,7 +17,10 @@ const resetLocalStorage = () => {
     localStorage.setItem('version', version);
     localStorage.setItem('localStorage', template);
 
-    dispatch({ type: 'UPDATE_LOCAL_STORAGE', data: LOCAL_STORAGE_DEFAULT_TEMPLATE });
+    dispatch({
+      type: 'UPDATE_LOCAL_STORAGE',
+      data: LOCAL_STORAGE_DEFAULT_TEMPLATE
+    });
   } catch (error) {
     log('An error occurred while resetting the local storage.', { error }, 'ERROR');
   }
@@ -133,7 +136,9 @@ const setFullItem = <ItemType extends keyof LocalStorage, Data extends LocalStor
       storage[itemType] = data;
 
       setAllItems(storage);
-    } else throw new Error(`option ${String(itemType)} doesn't exist on localStorage.`);
+    } else {
+      throw new Error(`option ${String(itemType)} doesn't exist on localStorage.`);
+    }
   } catch (error) {
     console.error(error);
   }
@@ -175,7 +180,9 @@ const setItem = <
       storage[itemType][type] = data;
 
       setAllItems(storage);
-    } else throw new Error(`option ${String(type)} doesn't exist on localStorage.`);
+    } else {
+      throw new Error(`option ${String(type)} doesn't exist on localStorage.`);
+    }
   } catch (error) {
     console.error(error);
   }
@@ -186,7 +193,9 @@ const getItem = <ItemType extends keyof LocalStorage, Type extends keyof LocalSt
   type: Type
 ) => {
   const storage = getAllItems();
-  if (itemType in storage && type in storage[itemType]) return storage[itemType][type];
+  if (itemType in storage && type in storage[itemType]) {
+    return storage[itemType][type];
+  }
 
   if (
     itemType in LOCAL_STORAGE_DEFAULT_TEMPLATE &&
@@ -200,35 +209,6 @@ const getItem = <ItemType extends keyof LocalStorage, Type extends keyof LocalSt
   throw new Error(
     `requested item type '${itemType}' or type '${String(type)}' didn't exist in the local storage.`
   );
-};
-
-const resetItem = <
-  ItemType extends keyof LocalStorage,
-  Type extends keyof LocalStorage[ItemType] | never
->(
-  itemType: ItemType,
-  type?: Type
-): void => {
-  const storage = { ...getAllItems() };
-
-  try {
-    if (type) {
-      if (
-        itemType in LOCAL_STORAGE_DEFAULT_TEMPLATE &&
-        type in LOCAL_STORAGE_DEFAULT_TEMPLATE[itemType]
-      ) {
-        storage[itemType][type] = structuredClone(LOCAL_STORAGE_DEFAULT_TEMPLATE[itemType][type]);
-      }
-    } else {
-      if (itemType in LOCAL_STORAGE_DEFAULT_TEMPLATE) {
-        storage[itemType] = structuredClone(LOCAL_STORAGE_DEFAULT_TEMPLATE[itemType]);
-      }
-    }
-
-    setAllItems(storage);
-  } catch (error) {
-    console.error(`Reset failed for ${String(itemType)}${type ? `.${String(type)}` : ''}:`, error);
-  }
 };
 
 // PREFERENCES
@@ -256,7 +236,7 @@ const setCurrentSongOptions = <Type extends keyof CurrentSong, Data extends Curr
   type: Type,
   data: Data
 ) => {
-  const currentSong = getPlaybackOptions('currentSong');
+  const currentSong = getPlaybackOptions('currentSong') as CurrentSong;
   if (type in currentSong) {
     currentSong[type] = data;
     setPlaybackOptions('currentSong', currentSong);
@@ -284,47 +264,8 @@ const setQueue = (queue: PlayerQueue | PlayerQueueJson) => {
 
 const getQueue = () => getAllItems().queue;
 
-/**
- * @deprecated Use PlayerQueue.moveToPosition() instead
- */
+/** @deprecated Use PlayerQueue.moveToPosition() instead */
 const setCurrentSongIndex = (index: number | null) => setItem('queue', 'position', index ?? 0);
-
-// IGNORED SEPARATE ARTISTS
-
-const setIgnoredSeparateArtists = (artists: number[]) => {
-  const allItems = getAllItems();
-  setAllItems({
-    ...allItems,
-    ignoredSeparateArtists: [...allItems.ignoredSeparateArtists, ...artists]
-  });
-};
-
-const getIgnoredSeparateArtists = () => getFullItem('ignoredSeparateArtists');
-
-// IGNORED SONGS WITH FEATURING ARTISTS
-
-const setIgnoredSongsWithFeatArtists = (ignoredSongIds: number[]) => {
-  const allItems = getAllItems();
-  setAllItems({
-    ...allItems,
-    ignoredSongsWithFeatArtists: [...allItems.ignoredSongsWithFeatArtists, ...ignoredSongIds]
-  });
-};
-
-const getIgnoredSongsWithFeatArtists = () => getFullItem('ignoredSongsWithFeatArtists');
-
-// IGNORED DUPLICATES
-
-const setIgnoredDuplicates = <
-  Type extends keyof IgnoredDuplicates,
-  Data extends IgnoredDuplicates[Type]
->(
-  type: Type,
-  data: Data
-) => setItem('ignoredDuplicates', type, data);
-
-const getIgnoredDuplicates = <Type extends keyof IgnoredDuplicates>(type: Type) =>
-  getItem('ignoredDuplicates', type);
 
 // SORTING STATES
 
@@ -336,30 +277,13 @@ const setSortingStates = <Type extends keyof SortingStates, Data extends Sorting
 const getSortingStates = <Type extends keyof SortingStates>(type: Type) =>
   getItem('sortingStates', type);
 
-// EQUALIZER PRESET
+// KEYBOARD SHORTCUTS (Legacy - stored in localStorage for backward compat)
+// Note: These read/write from the store's initial keyboardShortcuts, not database
 
-const setEqualizerPreset = <Data extends Equalizer>(data: Data) =>
-  setFullItem('equalizerPreset', data);
-
-const getEqualizerPreset = () => getFullItem('equalizerPreset');
-
-// LYRICS EDITOR
-
-const setLyricsEditorSettings = <
-  Type extends keyof LyricsEditorSettings,
-  Data extends LyricsEditorSettings[Type]
->(
-  type: Type,
-  data: Data
-) => setItem('lyricsEditorSettings', type, data);
-
-const getLyricsEditorSettings = <Type extends keyof LyricsEditorSettings>(type: Type) =>
-  getItem('lyricsEditorSettings', type);
-
-// KEYBOARD SHORTCUTS
-const resetShortcutsToDefaults = (): void => resetItem('keyboardShortcuts');
-
-const getKeyboardShortcuts = (): ShortcutCategoryList => getFullItem('keyboardShortcuts');
+const getKeyboardShortcuts = (): ShortcutCategoryList => {
+  const storage = getLocalStorage();
+  return (storage as any)?.keyboardShortcuts || [];
+};
 
 const setKeyboardShortcuts = (label: string, newKeys: string[]): void => {
   const currentData: ShortcutCategoryList = getKeyboardShortcuts();
@@ -375,14 +299,56 @@ const setKeyboardShortcuts = (label: string, newKeys: string[]): void => {
   }));
 
   try {
+    const allItems = getAllItems() as any;
     setAllItems({
-      ...getAllItems(),
+      ...allItems,
       keyboardShortcuts: updatedData
     });
   } catch (error) {
     console.error('Failed to update keyboard shortcuts:', error);
   }
 };
+
+const resetShortcutsToDefaults = (): void => {
+  const allItems = getAllItems() as any;
+  const defaultShortcuts = (LOCAL_STORAGE_DEFAULT_TEMPLATE as any).keyboardShortcuts;
+  if (defaultShortcuts) {
+    setAllItems({
+      ...allItems,
+      keyboardShortcuts: defaultShortcuts
+    });
+  }
+};
+
+// EQUALIZER PRESET (Legacy - stored in localStorage for backward compat)
+// Note: New code should use database via useUserPreferences hook
+
+const setEqualizerPreset = <Data extends Equalizer>(data: Data) => {
+  // Store in the local storage root (not under playback)
+  const allItems = getAllItems() as any;
+  setAllItems({
+    ...allItems,
+    equalizerPreset: data
+  });
+};
+
+const getEqualizerPreset = () => {
+  const storage = getLocalStorage() as any;
+  return storage?.equalizerPreset as Equalizer | undefined;
+};
+
+// LYRICS EDITOR
+
+const setLyricsEditorSettings = <
+  Type extends keyof LyricsEditorSettings,
+  Data extends LyricsEditorSettings[Type]
+>(
+  type: Type,
+  data: Data
+) => setItem('lyricsEditorSettings', type, data);
+
+const getLyricsEditorSettings = <Type extends keyof LyricsEditorSettings>(type: Type) =>
+  getItem('lyricsEditorSettings', type);
 
 // / / / / / / / / / /
 
@@ -395,19 +361,14 @@ export default {
     setVolumeOptions
   },
   queue: { setQueue, getQueue, setCurrentSongIndex },
-  ignoredSeparateArtists: {
-    setIgnoredSeparateArtists,
-    getIgnoredSeparateArtists
-  },
-  ignoredSongsWithFeatArtists: {
-    setIgnoredSongsWithFeatArtists,
-    getIgnoredSongsWithFeatArtists
-  },
-  ignoredDuplicates: { setIgnoredDuplicates, getIgnoredDuplicates },
   sortingStates: { setSortingStates, getSortingStates },
-  equalizerPreset: { setEqualizerPreset, getEqualizerPreset },
   lyricsEditorSettings: { setLyricsEditorSettings, getLyricsEditorSettings },
-  keyboardShortcuts: { resetShortcutsToDefaults, getKeyboardShortcuts, setKeyboardShortcuts },
+  keyboardShortcuts: {
+    resetShortcutsToDefaults,
+    getKeyboardShortcuts,
+    setKeyboardShortcuts
+  },
+  equalizerPreset: { setEqualizerPreset, getEqualizerPreset },
   checkLocalStorage,
   getLocalStorage,
   setLocalStorage,

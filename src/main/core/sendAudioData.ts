@@ -1,3 +1,8 @@
+import { addSongToPlayHistory } from '@main/db/queries/history';
+import { getPlayableSongById } from '@main/db/queries/songs';
+import { setDiscordRpcActivity } from '@main/other/discordRPC';
+import sharp from 'sharp';
+
 import {
   parseArtistOnlineArtworks,
   parseSongArtworks,
@@ -6,11 +11,7 @@ import {
 } from '../fs/resolveFilePaths';
 import logger from '../logger';
 import { IS_DEVELOPMENT, setCurrentSongPath } from '../main';
-import { getPlayableSongById } from '@main/db/queries/songs';
 import { parsePaletteFromArtworks } from './getAllSongs';
-import { setDiscordRpcActivity } from '@main/other/discordRPC';
-import { addSongToPlayHistory } from '@main/db/queries/history';
-import sharp from 'sharp';
 
 export const parseArtworkDataForAudioPlayerData = (artworkData?: Buffer | Uint8Array) => {
   if (artworkData === undefined) return undefined;
@@ -64,7 +65,7 @@ const getArtworkBuffer = async (artworkPath: string) => {
     const buffer = await sharp(realPath).toBuffer();
 
     return buffer;
-  } catch (error) {
+  } catch  {
     // Failed to get artwork buffer most probably becuase the artwork path is a packaged path
     return undefined;
   }

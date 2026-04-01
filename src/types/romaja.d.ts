@@ -3,6 +3,7 @@
 declare module 'romaja/src/romanize.js' {
   /**
    * Transforms a given string by replacing each Hangul character-containing substring with romaja.
+   *
    * @param {string} text - The text to be romanized.
    * @param {Object} [options] - Optional settings for romanization.
    * @param {boolean} [options.ruby] - Whether to include ruby annotations.
@@ -12,6 +13,7 @@ declare module 'romaja/src/romanize.js' {
 
   /**
    * Transform a Hangul encoded string to Roman equivalent.
+   *
    * @param {string} word - The word to be romanized.
    * @param {Object} options - Optional settings for romanization.
    * @param {string} [options.method] - The romanization method to use.

@@ -1,13 +1,12 @@
+import { queryClient } from '@renderer/index';
+import { settingsQuery } from '@renderer/queries/settings';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import LastFMIcon from '../../../assets/images/webp/last-fm-logo.webp';
 import Button from '../../Button';
 import Checkbox from '../../Checkbox';
-
-import LastFMIcon from '../../../assets/images/webp/last-fm-logo.webp';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { settingsQuery } from '@renderer/queries/settings';
-import { queryClient } from '@renderer/index';
 
 const AccountsSettings = () => {
   const { data: userSettings } = useQuery(settingsQuery.all);

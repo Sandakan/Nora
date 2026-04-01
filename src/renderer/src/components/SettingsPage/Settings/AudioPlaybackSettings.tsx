@@ -1,13 +1,13 @@
+import { store } from '@renderer/store/store';
+import { useStore } from '@tanstack/react-store';
 import { useEffect, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
-import Dropdown, { type DropdownOption } from '../../Dropdown';
-import storage from '../../../utils/localStorage';
 
+import i18n from '../../../i18n';
+import storage from '../../../utils/localStorage';
 import Button from '../../Button';
 import Checkbox from '../../Checkbox';
-import i18n from '../../../i18n';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store/store';
+import Dropdown, { type DropdownOption } from '../../Dropdown';
 
 const second = i18n.t('settingsPage.second');
 const seconds = i18n.t('settingsPage.second_other');

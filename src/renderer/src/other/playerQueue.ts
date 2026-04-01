@@ -1,4 +1,4 @@
-/* 
+/*
     Represents a queue of songs to be played in the music player.
 */
 class PlayerQueue {
@@ -69,6 +69,7 @@ class PlayerQueue {
 
   /**
    * Emits an event to all registered listeners
+   *
    * @param eventType - The type of event to emit
    * @param data - The data to pass to the listeners
    */
@@ -87,6 +88,7 @@ class PlayerQueue {
 
   /**
    * Registers a callback for a specific queue event
+   *
    * @param eventType - The type of event to listen for
    * @param callback - The callback function to execute when the event occurs
    * @returns A function to unregister the listener
@@ -113,6 +115,7 @@ class PlayerQueue {
 
   /**
    * Removes a specific callback for an event type
+   *
    * @param eventType - The type of event
    * @param callback - The callback to remove
    */
@@ -131,6 +134,7 @@ class PlayerQueue {
 
   /**
    * Removes all listeners for a specific event type or all events
+   *
    * @param eventType - Optional event type to clear. If not provided, clears all listeners
    */
   removeAllListeners(eventType?: QueueEventType): void {
@@ -143,7 +147,8 @@ class PlayerQueue {
 
   /**
    * Moves to the next song in the queue
-   * @returns true if moved successfully, false if at the end
+   *
+   * @returns True if moved successfully, false if at the end
    */
   moveToNext(): boolean {
     if (this.hasNext) {
@@ -168,7 +173,8 @@ class PlayerQueue {
 
   /**
    * Moves to the previous song in the queue
-   * @returns true if moved successfully, false if at the start
+   *
+   * @returns True if moved successfully, false if at the start
    */
   moveToPrevious(): boolean {
     if (this.hasPrevious) {
@@ -191,9 +197,7 @@ class PlayerQueue {
     return false;
   }
 
-  /**
-   * Moves to the first song in the queue
-   */
+  /** Moves to the first song in the queue */
   moveToStart(): void {
     const oldPosition = this.position;
     this.position = 0;
@@ -212,9 +216,7 @@ class PlayerQueue {
     }
   }
 
-  /**
-   * Moves to the last song in the queue
-   */
+  /** Moves to the last song in the queue */
   moveToEnd(): void {
     const oldPosition = this.position;
     if (this.songIds.length > 0) {
@@ -231,8 +233,9 @@ class PlayerQueue {
 
   /**
    * Moves to a specific position in the queue
+   *
    * @param position - The target position (0-indexed)
-   * @returns true if position is valid and moved successfully
+   * @returns True if position is valid and moved successfully
    */
   moveToPosition(position: number): boolean {
     if (position >= 0 && position < this.songIds.length) {
@@ -261,6 +264,7 @@ class PlayerQueue {
 
   /**
    * Adds song IDs to the next position in the queue
+   *
    * @param songIds - Array of song IDs to add
    */
   addSongIdsToNext(songIds: number[]): void {
@@ -283,6 +287,7 @@ class PlayerQueue {
 
   /**
    * Adds song IDs to the end of the queue
+   *
    * @param songIds - Array of song IDs to add
    */
   addSongIdsToEnd(songIds: number[]): void {
@@ -305,6 +310,7 @@ class PlayerQueue {
 
   /**
    * Adds a single song ID to the next position
+   *
    * @param songId - Song ID to add
    */
   addSongIdToNext(songId: number): void {
@@ -315,6 +321,7 @@ class PlayerQueue {
 
   /**
    * Adds a single song ID to the end of the queue
+   *
    * @param songId - Song ID to add
    */
   addSongIdToEnd(songId: number): void {
@@ -326,8 +333,9 @@ class PlayerQueue {
 
   /**
    * Removes a song from the queue by ID
+   *
    * @param songId - Song ID to remove
-   * @returns true if removed successfully, false if not found
+   * @returns True if removed successfully, false if not found
    */
   removeSongId(songId: number): boolean {
     const index = this.songIds.indexOf(songId);
@@ -371,8 +379,9 @@ class PlayerQueue {
 
   /**
    * Removes a song from the queue by position
+   *
    * @param position - Position to remove (0-indexed)
-   * @returns the removed song ID, or null if position is invalid
+   * @returns The removed song ID, or null if position is invalid
    */
   removeSongAtPosition(position: number): number | null {
     if (position >= 0 && position < this.songIds.length) {
@@ -402,9 +411,7 @@ class PlayerQueue {
     return null;
   }
 
-  /**
-   * Clears all songs from the queue
-   */
+  /** Clears all songs from the queue */
   clear(): void {
     console.log('[PlayerQueue.clear]', {
       queueLengthBefore: this.songIds.length,
@@ -431,6 +438,7 @@ class PlayerQueue {
 
   /**
    * Replaces the entire queue with new song IDs
+   *
    * @param songIds - New array of song IDs
    * @param newPosition - Optional new position (defaults to 0)
    * @param clearShuffleHistory - Whether to clear shuffle history (defaults to true)
@@ -485,7 +493,8 @@ class PlayerQueue {
 
   /**
    * Shuffles the queue randomly, keeping the current song at the start
-   * @returns object containing the shuffled queue and position mapping
+   *
+   * @returns Object containing the shuffled queue and position mapping
    */
   shuffle(): { shuffledQueue: number[]; positions: number[] } {
     console.log('[PlayerQueue.shuffle]', {
@@ -541,6 +550,7 @@ class PlayerQueue {
 
   /**
    * Restores the queue from a position mapping
+   *
    * @param positionMapping - Array of positions to restore the original order
    * @param currentSongId - Optional current song ID to maintain after restore
    */
@@ -582,8 +592,9 @@ class PlayerQueue {
 
   /**
    * Restores the queue from the stored shuffle positions (if available)
+   *
    * @param currentSongId - Optional current song ID to maintain after restore
-   * @returns true if restored successfully, false if no shuffle history exists
+   * @returns True if restored successfully, false if no shuffle history exists
    */
   restoreFromShuffle(currentSongId?: number): boolean {
     if (!this.queueBeforeShuffle || this.queueBeforeShuffle.length === 0) {
@@ -596,7 +607,8 @@ class PlayerQueue {
 
   /**
    * Checks if the queue has shuffle history available for restoration
-   * @returns true if queue can be restored from shuffle
+   *
+   * @returns True if queue can be restored from shuffle
    */
   canRestoreFromShuffle(): boolean {
     return (
@@ -606,15 +618,14 @@ class PlayerQueue {
     );
   }
 
-  /**
-   * Clears the shuffle history without restoring the queue
-   */
+  /** Clears the shuffle history without restoring the queue */
   clearShuffleHistory(): void {
     this.queueBeforeShuffle = undefined;
   }
 
   /**
    * Sets the queue metadata
+   *
    * @param queueId - Optional queue identifier
    * @param queueType - Optional queue type
    */
@@ -625,7 +636,8 @@ class PlayerQueue {
 
   /**
    * Gets the queue metadata
-   * @returns object containing queueId and queueType
+   *
+   * @returns Object containing queueId and queueType
    */
   getMetadata(): PlayerQueueMetadata {
     return this.metadata || {};
@@ -633,8 +645,9 @@ class PlayerQueue {
 
   /**
    * Gets a song ID at a specific position
+   *
    * @param position - Position to get (0-indexed)
-   * @returns the song ID at the position, or null if invalid
+   * @returns The song ID at the position, or null if invalid
    */
   getSongIdAtPosition(position: number): number | null {
     return this.songIds[position] || null;
@@ -642,8 +655,9 @@ class PlayerQueue {
 
   /**
    * Gets the position of a song ID in the queue
+   *
    * @param songId - Song ID to find
-   * @returns the position (0-indexed), or -1 if not found
+   * @returns The position (0-indexed), or -1 if not found
    */
   getPositionOfSongId(songId: number): number {
     return this.songIds.indexOf(songId);
@@ -651,8 +665,9 @@ class PlayerQueue {
 
   /**
    * Checks if a song ID exists in the queue
+   *
    * @param songId - Song ID to check
-   * @returns true if the song is in the queue
+   * @returns True if the song is in the queue
    */
   hasSongId(songId: number): boolean {
     return this.songIds.includes(songId);
@@ -660,7 +675,8 @@ class PlayerQueue {
 
   /**
    * Gets a copy of all song IDs in the queue
-   * @returns array of all song IDs
+   *
+   * @returns Array of all song IDs
    */
   getAllSongIds(): number[] {
     return [...this.songIds];
@@ -668,7 +684,8 @@ class PlayerQueue {
 
   /**
    * Gets remaining song IDs after the current position
-   * @returns array of song IDs after current position
+   *
+   * @returns Array of song IDs after current position
    */
   getRemainingSongIds(): number[] {
     return this.songIds.slice(this.position + 1);
@@ -676,7 +693,8 @@ class PlayerQueue {
 
   /**
    * Gets previous song IDs before the current position
-   * @returns array of song IDs before current position
+   *
+   * @returns Array of song IDs before current position
    */
   getPreviousSongIds(): number[] {
     return this.songIds.slice(0, this.position);
@@ -684,7 +702,8 @@ class PlayerQueue {
 
   /**
    * Creates a clone of the queue
-   * @returns a new PlayerQueue instance with the same data
+   *
+   * @returns A new PlayerQueue instance with the same data
    */
   clone(): PlayerQueue {
     return new PlayerQueue(
@@ -697,7 +716,8 @@ class PlayerQueue {
 
   /**
    * Converts the queue to a JSON-serializable object
-   * @returns object representation of the queue
+   *
+   * @returns Object representation of the queue
    */
   toJSON(): PlayerQueueJson {
     return {
@@ -710,8 +730,9 @@ class PlayerQueue {
 
   /**
    * Creates a PlayerQueue instance from a JSON object
+   *
    * @param json - JSON object representation of a queue
-   * @returns a new PlayerQueue instance
+   * @returns A new PlayerQueue instance
    */
   static fromJSON(json: {
     songIds: number[];

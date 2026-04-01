@@ -1,10 +1,11 @@
+import { settingsQuery } from '@renderer/queries/settings';
+import { useQuery } from '@tanstack/react-query';
 import { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import Dropdown from '../../Dropdown';
+
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import i18n, { supportedLanguagesDropdownOptions } from '../../../i18n';
-import { useQuery } from '@tanstack/react-query';
-import { settingsQuery } from '@renderer/queries/settings';
+import Dropdown from '../../Dropdown';
 
 const LanguageSettings = () => {
   const { t } = useTranslation();

@@ -1,4 +1,5 @@
 import { Client } from 'discord-rpc';
+
 import logger from '../logger';
 
 const ActivityType = {

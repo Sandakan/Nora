@@ -1,18 +1,18 @@
+import { mkdirSync } from 'fs';
+import path from 'path';
+
+import * as schema from '@db/schema';
+import { PGlite } from '@electric-sql/pglite';
+import { pgDump } from '@electric-sql/pglite-tools/pg_dump';
+import { citext } from '@electric-sql/pglite/contrib/citext';
+// PostgreSQL Database extensions
+import { pg_trgm } from '@electric-sql/pglite/contrib/pg_trgm';
+import logger from '@main/logger';
 import { drizzle } from 'drizzle-orm/pglite';
 import { migrate } from 'drizzle-orm/pglite/migrator';
 import { app } from 'electron';
-import path from 'path';
-import { mkdirSync } from 'fs';
 
-import * as schema from '@db/schema';
-import logger from '@main/logger';
-import { pgDump } from '@electric-sql/pglite-tools/pg_dump';
-import { PGlite } from '@electric-sql/pglite';
 import { seedDatabase } from './seed';
-
-// PostgreSQL Database extensions
-import { pg_trgm } from '@electric-sql/pglite/contrib/pg_trgm';
-import { citext } from '@electric-sql/pglite/contrib/citext';
 
 const DB_NAME = 'nora.pglite.db';
 export const DB_PATH = app.getPath('userData') + '/' + DB_NAME;
@@ -79,9 +79,9 @@ export const exportDatabase = async () => {
 /**
  * Imports a database by executing the provided SQL query after resetting the database file.
  *
- * This function closes the current database instance, deletes the database file,
- * reinitializes the database, and executes the given SQL query.
- * Useful for restoring or reinitializing the database from a dump or migration.
+ * This function closes the current database instance, deletes the database file, reinitializes the
+ * database, and executes the given SQL query. Useful for restoring or reinitializing the database
+ * from a dump or migration.
  *
  * @param query - The SQL query or migration to execute after reset.
  * @returns A promise that resolves to true when the import is successful.

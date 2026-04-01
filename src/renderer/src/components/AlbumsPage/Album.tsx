@@ -1,15 +1,16 @@
-import { useCallback, useContext, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
-import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import Img from '../Img';
-import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
-import SongArtist from '../SongsPage/SongArtist';
-import DefaultAlbumCover from '../../assets/images/webp/album_cover_default.webp';
-import Button from '../Button';
-import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store/store';
 import { useNavigate } from '@tanstack/react-router';
+import { useStore } from '@tanstack/react-store';
+import { useCallback, useContext, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import DefaultAlbumCover from '../../assets/images/webp/album_cover_default.webp';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import Button from '../Button';
+import Img from '../Img';
+import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
 import NavLink from '../NavLink';
+import SongArtist from '../SongsPage/SongArtist';
 
 interface AlbumProp extends Album {
   index: number;

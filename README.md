@@ -33,23 +33,27 @@ Nora reimagines desktop music playback with thoughtful design and powerful featu
 ## ✨ Features
 
 **Library Management**
+
 - ✅ Organize songs, artists, albums, and playlists with ease
 - ✅ Advanced search with smart song filters
 - ✅ Edit song metadata easily and conveniently[^3]
 
 **Listening Experience**
+
 - ✅ Sing along with song lyrics[^1]
 - ✅ Support for synced lyrics
 - ✅ Last.FM scrobbling integration
 - ✅ Mini-player mode for distraction-free listening
 
 **Personalization**
+
 - ✅ Keep favorite songs and artists close to you
 - ✅ Read your favorite artist's biography
 - ✅ Create playlists that meet your needs
 - ⏳ Personalized music shuffling[^2] (Upcoming)
 
 **Customization**
+
 - ✅ Switch between Light and Dark themes with ease
 
 ![Latest Version Artwork](/resources/other/release%20artworks/whats-new-v3.1.0-stable.webp)
@@ -84,17 +88,17 @@ Go to the **[Releases page](https://github.com/Sandakan/Nora/releases) > Assets 
 
 <div align="center">
 
-> *"A sleek music player with a modern design, this solution seeks to provide users with a seamless experience when it comes to listening to their favorite local tunes."*  
+> _"A sleek music player with a modern design, this solution seeks to provide users with a seamless experience when it comes to listening to their favorite local tunes."_  
 > — Robert Condorache, [Softpedia](https://www.softpedia.com/get/Multimedia/Audio/Audio-Players/Oto-Music-for-Desktop.shtml)
 
 ---
 
-> *"The application interface adopts rounded corners in a large area, the fonts and icons are round and cute, and the visual effect is very comfortable."*  
+> _"The application interface adopts rounded corners in a large area, the fonts and icons are round and cute, and the visual effect is very comfortable."_  
 > — [Apps Worth Watching in the Near Future • SSPAI](https://sspai.com/post/78669)
 
 ---
 
-> *"Just found the most beautiful music player for Windows: Nora"*  
+> _"Just found the most beautiful music player for Windows: Nora"_  
 > — [r/windowsapps • Reddit](https://www.reddit.com/r/windowsapps/comments/11xgg99/just_found_the_most_beautiful_music_player_for/)
 
 </div>
@@ -132,6 +136,7 @@ npm start
 ## 🤝 Feedback & Contributing
 
 Have feedback, bug reports, or feature requests? Reach out through:
+
 - [Discord Server](https://discord.gg/c5rGKnBs4y)
 - [Email](mailto:sandakannipunajith@gmail.com)
 - [GitHub Issues](https://github.com/Sandakan/Nora/issues)
@@ -145,7 +150,7 @@ Help translate Nora on [Crowdin](https://crowdin.com/project/nora)!
 Made with ❤️ by Sandakan Nipunajith  
 Love, Sri Lanka
 
-*All songs, artists, albums, and cover art used in demonstrations are property of their respective owners and used for illustrative purposes only. All copyrights are respected.*
+_All songs, artists, albums, and cover art used in demonstrations are property of their respective owners and used for illustrative purposes only. All copyrights are respected._
 
 </div>
 

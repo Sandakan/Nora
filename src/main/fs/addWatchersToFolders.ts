@@ -1,15 +1,17 @@
-import path from 'path';
-import fs from 'fs/promises';
 import fsSync, { type WatchEventType } from 'fs';
+import fs from 'fs/promises';
+import path from 'path';
+
+import { getAllFolderStructures } from '@main/db/queries/folders';
+
 import { supportedMusicExtensions } from '../filesystem';
 import logger from '../logger';
-import checkFolderForUnknownModifications from './checkFolderForUnknownContentModifications';
-import checkFolderForContentModifications from './checkFolderForContentModifications';
 import { dirExistsSync } from '../utils/dirExists';
+import checkFolderForContentModifications from './checkFolderForContentModifications';
+import checkFolderForUnknownModifications from './checkFolderForUnknownContentModifications';
 import checkForFolderModifications from './checkForFolderModifications';
 import { saveAbortController } from './controlAbortControllers';
 import { saveFolderStructures } from './parseFolderStructuresForSongPaths';
-import { getAllFolderStructures } from '@main/db/queries/folders';
 
 const checkForFolderUpdates = async (folder: FolderStructure) => {
   try {

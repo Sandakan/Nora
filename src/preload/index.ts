@@ -1,8 +1,9 @@
 import { contextBridge, ipcRenderer, webUtils } from 'electron';
+
+import type { LastFMAlbumInfo } from '../types/last_fm_album_info_api';
 // const { contextBridge, ipcRenderer } = require('electron');
 import type { LastFMTrackInfoApi } from '../types/last_fm_api';
 import type { SimilarTracksOutput } from '../types/last_fm_similar_tracks_api';
-import type { LastFMAlbumInfo } from '../types/last_fm_album_info_api';
 
 const properties = {
   isInDevelopment: process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true',
@@ -315,7 +316,9 @@ const settings = {
     ipcRenderer.invoke('app/saveUserSettings', settings),
 
   updateDiscordRpcState: (enableDiscordRpc: boolean): Promise<void> =>
-    ipcRenderer.invoke('app/saveUserSettings', { enableDiscordRPC: enableDiscordRpc }),
+    ipcRenderer.invoke('app/saveUserSettings', {
+      enableDiscordRPC: enableDiscordRpc
+    }),
   updateSongScrobblingToLastFMState: (enableScrobbling: boolean): Promise<void> =>
     ipcRenderer.invoke('app/saveUserSettings', {
       sendSongScrobblingDataToLastFM: enableScrobbling
@@ -333,9 +336,13 @@ const settings = {
       saveLyricsInLrcFilesForSupportedSongs: enableSave
     }),
   updateCustomLrcFilesSaveLocation: (location: string): Promise<void> =>
-    ipcRenderer.invoke('app/saveUserSettings', { customLrcFilesSaveLocation: location }),
+    ipcRenderer.invoke('app/saveUserSettings', {
+      customLrcFilesSaveLocation: location
+    }),
   updateOpenWindowAsHiddenOnSystemStart: (enable: boolean): Promise<void> =>
-    ipcRenderer.invoke('app/saveUserSettings', { openWindowAsHiddenOnSystemStart: enable }),
+    ipcRenderer.invoke('app/saveUserSettings', {
+      openWindowAsHiddenOnSystemStart: enable
+    }),
   updateHideWindowOnCloseState: (enable: boolean): Promise<void> =>
     ipcRenderer.invoke('app/saveUserSettings', { hideWindowOnClose: enable }),
   updateSaveVerboseLogs: (enable: boolean): Promise<void> =>
@@ -509,7 +516,41 @@ const settingsHelpers = {
   importAppData: (): Promise<void | LocalStorage> => ipcRenderer.invoke('app/importAppData'),
   compareEncryptedData: (): Promise<boolean> => ipcRenderer.invoke('app/compareEncryptedData'),
   loginToLastFmInBrowser: () => ipcRenderer.send('app/loginToLastFmInBrowser'),
-  getFolderLocation: (): Promise<string> => ipcRenderer.invoke('app/getFolderLocation')
+  getFolderLocation: (): Promise<string> => ipcRenderer.invoke('app/getFolderLocation'),
+
+  // User Keyboard Shortcuts
+  getUserKeyboardShortcuts: (): Promise<Record<string, string>> =>
+    ipcRenderer.invoke('app/getUserKeyboardShortcuts'),
+  saveUserKeyboardShortcuts: (shortcuts: Record<string, string>): Promise<void> =>
+    ipcRenderer.invoke('app/saveUserKeyboardShortcuts', shortcuts),
+
+  // User Equalizer Preset
+  getUserEqualizerPreset: (): Promise<{ frequencyBands: number[] }> =>
+    ipcRenderer.invoke('app/getUserEqualizerPreset'),
+  saveUserEqualizerPreset: (presetData: {
+    presetName?: string;
+    frequencyBands?: number[];
+    isEnabled?: boolean;
+  }): Promise<void> => ipcRenderer.invoke('app/saveUserEqualizerPreset', presetData),
+
+  // Ignored Items
+  getIgnoredArtists: (): Promise<number[]> => ipcRenderer.invoke('app/getIgnoredArtists'),
+  addIgnoredArtist: (artistId: number): Promise<void> =>
+    ipcRenderer.invoke('app/addIgnoredArtist', artistId),
+  removeIgnoredArtist: (artistId: number): Promise<void> =>
+    ipcRenderer.invoke('app/removeIgnoredArtist', artistId),
+
+  getIgnoredFeaturingArtists: (): Promise<number[]> =>
+    ipcRenderer.invoke('app/getIgnoredFeaturingArtists'),
+  addIgnoredFeaturingArtist: (artistId: number): Promise<void> =>
+    ipcRenderer.invoke('app/addIgnoredFeaturingArtist', artistId),
+  removeIgnoredFeaturingArtist: (artistId: number): Promise<void> =>
+    ipcRenderer.invoke('app/removeIgnoredFeaturingArtist', artistId),
+
+  getIgnoredDuplicateMetadata: (): Promise<Array<{ duplicateGroupId: string; songId: number }>> =>
+    ipcRenderer.invoke('app/getIgnoredDuplicateMetadata'),
+  addIgnoredDuplicate: (duplicateGroupId: string, songId: number): Promise<void> =>
+    ipcRenderer.invoke('app/addIgnoredDuplicate', duplicateGroupId, songId)
 };
 
 // $ APP RESTART OR RESET
@@ -587,4 +628,3 @@ export const api = {
 };
 
 contextBridge.exposeInMainWorld('api', api);
-

@@ -1,10 +1,11 @@
-import { storeArtworks } from '../other/artworks';
-import { dataUpdateEvent } from '../main';
+import { db } from '@main/db/db';
+import { linkArtworkToPlaylist } from '@main/db/queries/artworks';
+import { generateLocalArtworkBuffer } from '@main/updateSong/updateSongId3Tags';
+
 import { resetArtworkCache } from '../fs/resolveFilePaths';
 import logger from '../logger';
-import { generateLocalArtworkBuffer } from '@main/updateSong/updateSongId3Tags';
-import { linkArtworkToPlaylist } from '@main/db/queries/artworks';
-import { db } from '@main/db/db';
+import { dataUpdateEvent } from '../main';
+import { storeArtworks } from '../other/artworks';
 
 // const removePreviousArtwork = async (playlistId: string) => {
 //   const artworkPaths = getPlaylistArtworkPath(playlistId, true);

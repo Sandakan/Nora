@@ -1,14 +1,15 @@
+import type { db } from '@main/db/db';
+import type { GetAllSongListeningDataReturnType } from '@main/db/queries/listens';
 import NodeID3 from 'node-id3';
 import { ReactElement, ReactNode } from 'react';
+import { resources } from 'src/renderer/src/i18n';
+
+import { api } from '../preload';
 import { ButtonProps } from '../renderer/src/components/Button';
 import { DropdownOption } from '../renderer/src/components/Dropdown';
 import { songSortTypes } from '../renderer/src/components/SongsPage/SongOptions';
-import { api } from '../preload';
 import { LastFMSessionData } from './last_fm_api';
 import { SimilarArtist, Tag } from './last_fm_artist_info_api';
-import { resources } from 'src/renderer/src/i18n';
-import type { db } from '@main/db/db';
-import type { GetAllSongListeningDataReturnType } from '@main/db/queries/listens';
 
 declare global {
   interface Window {
@@ -287,39 +288,31 @@ declare global {
   // node-id3 synchronisedLyrics types.
   type UnsynchronisedLyrics =
     | {
-      language: string;
-      text: string;
-    }
+        language: string;
+        text: string;
+      }
     | undefined;
 
   type SynchronisedLyrics =
     | Array<{
-      /**
-       * 3 letter ISO 639-2 language code, for example: eng
-       * @see {@link https://id3.org/ISO%20639-2 ISO 639-2}
-       */
-      language: string;
-      /**
-       * Absolute time unit:
-       * {@link TagConstants.TimeStampFormat}
-       */
-      timeStampFormat: number;
-      /**
-       * {@link TagConstants.SynchronisedLyrics.ContentType}
-       */
-      contentType: number;
-      /**
-       * Content descriptor
-       */
-      shortText?: string;
-      synchronisedText: Array<{
-        text: string;
         /**
-         * Absolute time in unit according to `timeStampFormat`.
+         * 3 letter ISO 639-2 language code, for example: eng
+         *
+         * @see {@link https://id3.org/ISO%20639-2 ISO 639-2}
          */
-        timeStamp: number;
-      }>;
-    }>
+        language: string;
+        /** Absolute time unit: {@link TagConstants.TimeStampFormat} */
+        timeStampFormat: number;
+        /** {@link TagConstants.SynchronisedLyrics.ContentType} */
+        contentType: number;
+        /** Content descriptor */
+        shortText?: string;
+        synchronisedText: Array<{
+          text: string;
+          /** Absolute time in unit according to `timeStampFormat`. */
+          timeStamp: number;
+        }>;
+      }>
     | undefined;
 
   interface LyricsMetadataFromShortText {
@@ -448,7 +441,7 @@ declare global {
     lastFmSessionKey: string | null;
   }
 
-  interface UserData extends UserSettings { }
+  interface UserData extends UserSettings {}
 
   type LanguageCodes = NoInfer<keyof typeof resources>;
 
@@ -602,8 +595,7 @@ declare global {
     preset: Equalizer;
   }[];
 
-  interface EqualizerPresetDropdownOptions
-    extends DropdownOption<EqualierPresetDropdownOptionValues> {
+  interface EqualizerPresetDropdownOptions extends DropdownOption<EqualierPresetDropdownOptionValues> {
     preset?: Equalizer;
   }
 
@@ -658,13 +650,25 @@ declare global {
   type QueueEventCallback<T = unknown> = (data: T) => void;
 
   interface QueueEventData {
-    positionChange: { oldPosition: number; newPosition: number; currentSongId: number | null };
+    positionChange: {
+      oldPosition: number;
+      newPosition: number;
+      currentSongId: number | null;
+    };
     queueChange: { queue: number[]; length: number };
     songAdded: { songId: number; position: number };
     songRemoved: { songId: number; position: number };
     queueCleared: Record<string, never>;
-    queueReplaced: { oldQueue: number[]; newQueue: number[]; newPosition: number };
-    shuffled: { originalQueue: number[]; shuffledQueue: number[]; positions: number[] };
+    queueReplaced: {
+      oldQueue: number[];
+      newQueue: number[];
+      newPosition: number;
+    };
+    shuffled: {
+      originalQueue: number[];
+      shuffledQueue: number[];
+      positions: number[];
+    };
     restored: { restoredQueue: number[] };
     metadataChange: { queueId?: string; queueType?: QueueTypes };
   }
@@ -680,12 +684,9 @@ declare global {
     preferences: Preferences;
     playback: Playback;
     queue: PlayerQueueJson;
-    ignoredSeparateArtists: number[];
-    ignoredSongsWithFeatArtists: number[];
-    ignoredDuplicates: IgnoredDuplicates;
     sortingStates: SortingStates;
-    equalizerPreset: Equalizer;
     lyricsEditorSettings: LyricsEditorSettings;
+    equalizerPreset: Equalizer;
     keyboardShortcuts: ShortcutCategoryList;
   }
 
@@ -694,7 +695,7 @@ declare global {
   interface SavablePlaylist {
     playlistId: number;
     name: string;
-    /** song ids of the songs in the playlist */
+    /** Song ids of the songs in the playlist */
     songs: number[];
     createdDate: Date;
     isArtworkAvailable: boolean;

@@ -1,13 +1,13 @@
+import { settingsQuery } from '@renderer/queries/settings';
+import { useQuery } from '@tanstack/react-query';
 import { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import isLyricsSynced, { isLyricsEnhancedSynced } from '../../../../../common/isLyricsSynced';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
+import useNetworkConnectivity from '../../../hooks/useNetworkConnectivity';
 import Button from '../../Button';
 import Hyperlink from '../../Hyperlink';
-import useNetworkConnectivity from '../../../hooks/useNetworkConnectivity';
-import isLyricsSynced, { isLyricsEnhancedSynced } from '../../../../../common/isLyricsSynced';
-import { useQuery } from '@tanstack/react-query';
-import { settingsQuery } from '@renderer/queries/settings';
 
 type CurrentLyricsTYpe = 'synced' | 'unsynced';
 

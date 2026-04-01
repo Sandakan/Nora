@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import SongAdditionalInfoItem from './SongAdditionalInfoItem';
+
 import Button from '../Button';
+import SongAdditionalInfoItem from './SongAdditionalInfoItem';
 
 type Props = { songInfo: SongData; songDurationStr: string };
 

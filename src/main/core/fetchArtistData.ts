@@ -1,4 +1,5 @@
 import { getAllArtists } from '@main/db/queries/artists';
+
 import logger from '../logger';
 import { convertToArtist } from '../utils/convert';
 

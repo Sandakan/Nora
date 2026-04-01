@@ -1,13 +1,14 @@
 import { readFile } from 'fs/promises';
 import path from 'path';
+
+import { getPlaylistByName, linkSongsWithPlaylist } from '@main/db/queries/playlists';
+import { getSongsInPathList } from '@main/db/queries/songs';
 import type { OpenDialogOptions } from 'electron';
 
-import { sendMessageToRenderer, showOpenDialog } from '../main';
-import logger from '../logger';
 import { appPreferences } from '../../../package.json';
+import logger from '../logger';
+import { sendMessageToRenderer, showOpenDialog } from '../main';
 import addNewPlaylist from './addNewPlaylist';
-import { getSongsInPathList } from '@main/db/queries/songs';
-import { getPlaylistByName, linkSongsWithPlaylist } from '@main/db/queries/playlists';
 
 const DEFAULT_EXPORT_DIALOG_OPTIONS: OpenDialogOptions = {
   title: `Select a Destination where your M3U8 file is`,

@@ -1,6 +1,3 @@
-import { getArtistArtworkPath } from '../fs/resolveFilePaths';
-import logger from '../logger';
-import updateSongId3Tags from '../updateSong/updateSongId3Tags';
 import {
   getAlbumsData,
   getArtistsData,
@@ -9,6 +6,9 @@ import {
   setArtistsData,
   setSongsData
 } from '../filesystem';
+import { getArtistArtworkPath } from '../fs/resolveFilePaths';
+import logger from '../logger';
+import updateSongId3Tags from '../updateSong/updateSongId3Tags';
 import { getSelectedArtist } from './resolveDuplicates';
 import sendSongID3Tags from './sendSongMetadata';
 

@@ -1,34 +1,32 @@
 #!/usr/bin/env tsx
 /**
- * colorize-logs.ts
- * Simple NDJSON log colorizer and tailer for Nora logs.
+ * Colorize-logs.ts Simple NDJSON log colorizer and tailer for Nora logs.
  *
  * Features:
- *  - Parses newline-delimited JSON (NDJSON) log files.
- *  - Colorizes output by log level (error/warn/info/debug/verbose).
- *  - Prints a short header per entry and pretty-prints `data` as indented JSON.
- *  - If --path is not provided, searches the current working directory for log files
- *    (*.log, *.ndjson, *.txt). If multiple files are found, prompts the user to select one
- *    (the latest file is selected by default).
- *  - If no files are found in CWD, falls back to %APPDATA%/nora/logs or LOG_PATH from .env.
  *
- * Usage:
- *   node ./scripts/colorize-logs.ts [--path <file>] [--no-follow] [--levels info,debug] [--depth N] [--use-env-log-path] [--show-latest]
- * Examples:
- *   node ./scripts/colorize-logs.ts                                    # tails latest log (CWD first, then appdata)
- *   node ./scripts/colorize-logs.ts --path ./app.log --no-follow
- *   node ./scripts/colorize-logs.ts --levels info,debug
- *   node ./scripts/colorize-logs.ts --use-env-log-path --no-follow     # use LOG_PATH from .env file
- *   node ./scripts/colorize-logs.ts --use-env-log-path --show-latest   # show latest log without file selection
+ * - Parses newline-delimited JSON (NDJSON) log files.
+ * - Colorizes output by log level (error/warn/info/debug/verbose).
+ * - Prints a short header per entry and pretty-prints `data` as indented JSON.
+ * - If --path is not provided, searches the current working directory for log files (*.log, *.ndjson,
+ *   *.txt). If multiple files are found, prompts the user to select one (the latest file is
+ *   selected by default).
+ * - If no files are found in CWD, falls back to %APPDATA%/nora/logs or LOG_PATH from .env.
  *
- * Created: 2025-12-09T14:41:55.216Z
- * Migrated to TypeScript: 2025-12-09
+ * Usage: node ./scripts/colorize-logs.ts [--path <file>] [--no-follow] [--levels info,debug]
+ * [--depth N] [--use-env-log-path] [--show-latest] Examples: node ./scripts/colorize-logs.ts #
+ * tails latest log (CWD first, then appdata) node ./scripts/colorize-logs.ts --path ./app.log
+ * --no-follow node ./scripts/colorize-logs.ts --levels info,debug node ./scripts/colorize-logs.ts
+ * --use-env-log-path --no-follow # use LOG_PATH from .env file node ./scripts/colorize-logs.ts
+ * --use-env-log-path --show-latest # show latest log without file selection
+ *
+ * Created: 2025-12-09T14:41:55.216Z Migrated to TypeScript: 2025-12-09
  */
 
 import 'dotenv/config';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as readline from 'node:readline';
+
 import c from 'yoctocolors';
 
 // Detect color support by testing if colors actually work
@@ -48,16 +46,9 @@ function safeColor(colorFn: (text: string) => string, fallback: string) {
 
 // Safe color functions
 const safeRed = safeColor(c.red, '[RED]');
-const safeGreen = safeColor(c.green, '[GREEN]');
 const safeBlue = safeColor(c.blue, '[BLUE]');
 const safeYellow = safeColor(c.yellow, '[YELLOW]');
 const safeDim = safeColor(c.dim, '');
-const safeBold = safeColor(c.bold, '**');
-const safeBgRed = safeColor(c.bgRed, '[ERROR]');
-const safeBgYellow = safeColor(c.bgYellow, '[WARN]');
-const safeBgBlue = safeColor(c.bgBlue, '[INFO]');
-const safeBgCyan = safeColor(c.bgCyan, '[DEBUG]');
-const safeBgGray = safeColor(c.bgGray, '[VERBOSE]');
 
 // Types
 type LogLevel = 'error' | 'warn' | 'warning' | 'info' | 'debug' | 'verbose';
@@ -83,24 +74,6 @@ const DEFAULT_LOG_DIR = path.join(APPDATA, 'nora', 'logs');
 const LOG_FILE_PATTERN = /\.(log|ndjson|txt)$/i;
 const TAIL_LINE_COUNT = 100;
 const POLL_INTERVAL_MS = 1000;
-const DEFAULT_DEPTH = 3;
-
-// Additional styling using safe color functions
-const styles = {
-	bold: safeBold,
-	dim: safeDim,
-	brightGreen: safeGreen,
-	brightBlue: safeBlue,
-	brightCyan: safeColor(c.cyan, '[CYAN]'),
-	brightYellow: safeYellow,
-	brightRed: safeRed,
-	brightMagenta: safeColor(c.magenta, '[MAGENTA]'),
-	bgGreen: safeColor(c.bgGreen, '[SUCCESS]'),
-	bgBlue: safeBgBlue,
-	bgCyan: safeBgCyan,
-	bgRed: safeBgRed,
-	bgYellow: safeBgYellow,
-};
 
 // CLI argument parsing
 const argv = process.argv.slice(2);
@@ -116,9 +89,6 @@ const noFollow = argv.includes('--no-follow') || argv.includes('-n');
 const levelsArg = getArg('--levels') || getArg('-l');
 const useEnvLogPath = argv.includes('--use-env-log-path');
 const showLatest = argv.includes('--show-latest');
-const depth =
-	parseInt(getArg('--depth') || getArg('-d') || String(DEFAULT_DEPTH), 10) ||
-	DEFAULT_DEPTH;
 const levelFilter: string[] = levelsArg
 	? levelsArg
 			.split(',')
@@ -128,7 +98,7 @@ const levelFilter: string[] = levelsArg
 
 function printUsage(): void {
 	console.log(
-		'Usage: node ./scripts/colorize-logs.ts [--path <file>] [--no-follow] [--levels info,debug] [--depth N] [--use-env-log-path] [--show-latest]'
+		'Usage: node ./scripts/colorize-logs.ts [--path <file>] [--no-follow] [--levels info,debug] [--depth N] [--use-env-log-path] [--show-latest]',
 	);
 	process.exit(0);
 }
@@ -156,7 +126,7 @@ function findLogFilesInDir(dir: string): LogFile[] {
 				};
 			})
 			.sort((a, b) => b.mtime - a.mtime);
-	} catch (error) {
+	} catch {
 		return [];
 	}
 }
@@ -186,10 +156,7 @@ function getFileMetadata(file: LogFile): string {
 	return `${safeColor(c.cyan, '[CYAN]')('Lines:')} ${lines} ${safeDim('|')} ${safeColor(c.cyan, '[CYAN]')('Size:')} ${sizeKB}KB ${safeDim('|')} ${safeColor(c.cyan, '[CYAN]')('Modified:')} ${mtime} ${safeDim('|')} ${safeColor(c.cyan, '[CYAN]')('Created:')} ${birthtime}`;
 }
 
-async function promptUserToSelect(
-	files: LogFile[],
-	dir: string
-): Promise<string | null> {
+async function promptUserToSelect(files: LogFile[], dir: string): Promise<string | null> {
 	if (!files || files.length === 0) return null;
 
 	console.log(`\n${c.bold(c.blue('📂 Found ' + files.length + ' log file(s) in:'))} ${c.cyan(dir)}\n`);
@@ -201,7 +168,7 @@ async function promptUserToSelect(
 	});
 
 	const answer = await askQuestion(
-		`\n${c.blue('Select file')} ${c.dim('[' + c.green('1') + ']')} (press ${c.green('Enter')} for default): `
+		`\n${c.blue('Select file')} ${c.dim('[' + c.green('1') + ']')} (press ${c.green('Enter')} for default): `,
 	);
 	let choice = 1;
 
@@ -230,7 +197,7 @@ async function pickFileInteractive(): Promise<string | null> {
 		console.log(`${c.cyan('✓ Using LOG_PATH from .env:')} ${c.bold(process.env.LOG_PATH)}`);
 		const envLogDir = process.env.LOG_PATH;
 		const envFiles = findLogFilesInDir(envLogDir);
-		
+
 		if (envFiles.length === 0) {
 			console.error(`${c.red('✗ No log files found in')} ${envLogDir}`);
 			return null;
@@ -253,7 +220,7 @@ async function pickFileInteractive(): Promise<string | null> {
 	console.log(`${c.blue('🔍 Searching for logs in current directory:')} ${c.bold(process.cwd())}`);
 	const cwd = process.cwd();
 	const cwdFiles = findLogFilesInDir(cwd);
-	
+
 	if (cwdFiles.length > 0) {
 		if (showLatest) {
 			const latestFile = cwdFiles[0];
@@ -269,7 +236,7 @@ async function pickFileInteractive(): Promise<string | null> {
 	// 4) Fallback to default appdata log directory
 	console.log(`${c.blue('🔍 Searching for logs in default directory:')} ${c.bold(DEFAULT_LOG_DIR)}`);
 	const appFiles = findLogFilesInDir(DEFAULT_LOG_DIR);
-	
+
 	if (appFiles.length > 0) {
 		if (showLatest) {
 			const latestFile = appFiles[0];
@@ -285,27 +252,6 @@ async function pickFileInteractive(): Promise<string | null> {
 	return null;
 }
 
-// Colorization
-function colorForLevel(level?: string) {
-	if (!level) return (text: string) => text;
-
-	switch (level.toLowerCase()) {
-		case 'error':
-			return safeRed;
-		case 'warn':
-		case 'warning':
-			return safeYellow;
-		case 'info':
-			return safeGreen;
-		case 'debug':
-			return safeDim;
-		case 'verbose':
-			return safeColor(c.cyan, '[CYAN]');
-		default:
-			return (text: string) => text;
-	}
-}
-
 function highlightJSON(json: string): string {
 	let highlighted = json;
 
@@ -314,14 +260,14 @@ function highlightJSON(json: string): string {
 
 	// Apply key coloring (quoted strings followed by colon) - need to escape the dim colons
 	highlighted = highlighted.replace(/"([^"\\]|\\.)*"\s*:/g, (match) => {
-        const key = match.match(/"([^"\\]|\\.)*"/)?.[0] || '';
-        return safeRed(key) + safeDim(':');
-    });
+		const key = match.match(/"([^"\\]|\\.)*"/)?.[0] || '';
+		return safeRed(key) + safeDim(':');
+	});
 
 	// Apply string value coloring (quoted strings not preceded by opening quote + colon pattern)
 	highlighted = highlighted.replace(/:\s*"([^"\\]|\\.)*"/g, (match) => {
 		const colonPart = match.match(/^:\s*/)?.[0] || ': ';
-		const stringPart = match.substring(colonPart.length);
+		match.substring(colonPart.length);
 		return safeDim(':');
 	});
 
@@ -349,7 +295,7 @@ function processLine(line: string): void {
 	let obj: LogEntry | null = null;
 	try {
 		obj = JSON.parse(line) as LogEntry;
-	} catch (error) {
+	} catch {
 		console.log(c.magenta(line));
 		return;
 	}
@@ -369,7 +315,7 @@ function processLine(line: string): void {
 
 	// Color-coded level badges
 	let levelBadge = '';
-	
+
 	switch (level.toLowerCase()) {
 		case 'error':
 			levelBadge = c.bold(c.bgRed(c.white(' ERROR ')));
@@ -446,7 +392,7 @@ async function main(): Promise<void> {
 	let lastSize = (() => {
 		try {
 			return fs.statSync(filePath).size;
-		} catch (error) {
+		} catch {
 			return 0;
 		}
 	})();

@@ -1,7 +1,6 @@
 import { Trans, useTranslation } from 'react-i18next';
 
 import storage from '../../utils/localStorage';
-
 import Button from '../Button';
 
 const ClearLocalStoragePrompt = () => {

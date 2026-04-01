@@ -1,15 +1,16 @@
+import { resolve } from 'path';
+
 import tailwindcss from '@tailwindcss/vite';
 import { tanstackRouter } from '@tanstack/router-plugin/vite';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'electron-vite';
-import { resolve } from 'path';
 
 export default defineConfig({
   main: {
     build: {
       sourcemap: true,
       minify: true,
-      rollupOptions: { input: '/src/main/main.ts', external: ['sharp'] },
+      rollupOptions: { input: '/src/main/main.ts', external: ['sharp'] }
     },
     resolve: {
       alias: {
@@ -19,7 +20,6 @@ export default defineConfig({
     }
   },
   preload: {
-
     build: {
       sourcemap: true,
       minify: true,

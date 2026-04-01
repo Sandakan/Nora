@@ -1,18 +1,19 @@
-import path from 'path';
 import { readFile } from 'fs/promises';
+import path from 'path';
+
+import { getUserSettings } from '@main/db/queries/settings';
 import NodeID3 from 'node-id3';
 import songlyrics from 'songlyrics';
 
-import { removeDefaultAppProtocolFromFilePath } from '../fs/resolveFilePaths';
-import logger from '../logger';
-import { checkIfConnectedToInternet, sendMessageToRenderer } from '../main';
 // import fetchLyricsFromMusixmatch from '../utils/fetchLyricsFromMusixmatch';
 import { appPreferences } from '../../../package.json';
 import parseLyrics, { parseSyncedLyricsFromAudioDataSource } from '../../common/parseLyrics';
+import { removeDefaultAppProtocolFromFilePath } from '../fs/resolveFilePaths';
+import logger from '../logger';
+import { checkIfConnectedToInternet, sendMessageToRenderer } from '../main';
 import saveLyricsToSong from '../saveLyricsToSong';
 // import { decrypt } from '../utils/safeStorage';
 import fetchLyricsFromLrclib from '../utils/fetchLyricsFromLrclib';
-import { getUserSettings } from '@main/db/queries/settings';
 
 const { metadataEditingSupportedExtensions } = appPreferences;
 
@@ -81,7 +82,7 @@ const readFileData = async (path?: string) => {
     });
 
     return data;
-  } catch (error) {
+  } catch  {
     return undefined;
   }
 };

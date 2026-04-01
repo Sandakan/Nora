@@ -1,8 +1,10 @@
 import { createReadStream, existsSync, statSync } from 'fs';
-import logger from './logger';
-import mime from 'mime';
-import { net } from 'electron';
 import { pathToFileURL } from 'url';
+
+import { net } from 'electron';
+import mime from 'mime';
+
+import logger from './logger';
 
 export const handleFileProtocol = async (req: GlobalRequest) => {
   try {
@@ -62,7 +64,7 @@ export const handleFileProtocol = async (req: GlobalRequest) => {
           fileStream.on('end', () => {
             try {
               controller.close();
-            } catch (error) {
+            } catch  {
               // Stream might already be closed, ignore the error
             }
           });
@@ -70,7 +72,7 @@ export const handleFileProtocol = async (req: GlobalRequest) => {
           fileStream.on('error', (error) => {
             try {
               controller.error(error);
-            } catch (err) {
+            } catch  {
               // Stream might already be closed, ignore the error
             }
           });

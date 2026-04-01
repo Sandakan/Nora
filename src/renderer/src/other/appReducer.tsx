@@ -1,7 +1,8 @@
+import i18n from '@renderer/i18n';
 import storage from '@renderer/utils/localStorage';
 import { type ReactNode } from 'react';
+
 import { normalizedKeys } from './appShortcuts';
-import i18n from '@renderer/i18n';
 
 export interface AppReducer {
   localStorage: LocalStorage;
@@ -412,13 +413,6 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
     playbackRate: 1.0
   },
   queue: { position: 0, songIds: [] },
-  ignoredSeparateArtists: [],
-  ignoredSongsWithFeatArtists: [],
-  ignoredDuplicates: {
-    albums: [],
-    artists: [],
-    genres: []
-  },
   sortingStates: {
     albumsPage: 'aToZ',
     artistsPage: 'aToZ',

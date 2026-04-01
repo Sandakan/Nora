@@ -1,5 +1,5 @@
-import { describe, test, expect, vi } from 'vitest';
 import { TagConstants } from 'node-id3';
+import { describe, test, expect, vi } from 'vitest';
 
 vi.mock('../../../src/main/logger', () => ({
   default: {

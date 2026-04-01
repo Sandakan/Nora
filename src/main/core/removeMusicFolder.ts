@@ -1,10 +1,12 @@
 import path from 'path';
+
+import { getAllFolders } from '@main/db/queries/folders';
+import { getSongsInFolders } from '@main/db/queries/songs';
+
 import { saveAbortController } from '../fs/controlAbortControllers';
 import logger from '../logger';
 import { sendMessageToRenderer } from '../main';
 import removeSongsFromLibrary from '../removeSongsFromLibrary';
-import { getAllFolders } from '@main/db/queries/folders';
-import { getSongsInFolders } from '@main/db/queries/songs';
 
 const abortController = new AbortController();
 saveAbortController('removeMusicFolder', abortController);

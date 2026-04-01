@@ -1,49 +1,16 @@
-import path from 'path';
-import { readFile } from 'fs/promises';
 import { statSync } from 'fs';
-import sharp from 'sharp';
-import { ByteVector, Picture, PictureType } from 'node-taglib-sharp';
+import { readFile } from 'fs/promises';
+import path from 'path';
 
-import { DEFAULT_FILE_URL } from '../filesystem';
-import {
-  getArtistArtworkPath,
-  getSongArtworkPath,
-  removeDefaultAppProtocolFromFilePath
-} from '../fs/resolveFilePaths';
-import {
-  dataUpdateEvent,
-  getCurrentSongPath,
-  getSongsOutsideLibraryData,
-  sendMessageToRenderer,
-  updateSongsOutsideLibraryData
-} from '../main';
-import { createTempArtwork, storeArtworks } from '../other/artworks';
-import generatePalette from '../other/generatePalette';
-import { updateCachedLyrics } from '../core/getSongLyrics';
-import parseLyrics from '../../common/parseLyrics';
-import sendSongMetadata from '../core/sendSongMetadata';
-import { isSongBlacklisted } from '../utils/isBlacklisted';
-import isPathAWebURL from '../utils/isPathAWebUrl';
+import { ByteVector, Picture, PictureType } from 'node-taglib-sharp';
+import sharp from 'sharp';
 
 import { appPreferences } from '../../../package.json';
+import parseLyrics from '../../common/parseLyrics';
+import { updateCachedLyrics } from '../core/getSongLyrics';
 import saveLyricsToLRCFile from '../core/saveLyricsToLrcFile';
-import logger from '../logger';
-import { getUserSettings } from '../db/queries/settings';
-import {
-  updateSongModifiedAtByPath,
-  getSongByPath,
-  getSongById,
-  updateSongBasicFields
-} from '../db/queries/songs';
+import sendSongMetadata from '../core/sendSongMetadata';
 import { db } from '../db/db';
-import {
-  createArtist,
-  getArtistWithName,
-  linkSongToArtist,
-  unlinkSongFromArtist,
-  getArtistSongIds,
-  deleteArtist
-} from '../db/queries/artists';
 import {
   createAlbum,
   getAlbumWithTitle,
@@ -53,6 +20,15 @@ import {
   deleteAlbum
 } from '../db/queries/albums';
 import {
+  createArtist,
+  getArtistWithName,
+  linkSongToArtist,
+  unlinkSongFromArtist,
+  getArtistSongIds,
+  deleteArtist
+} from '../db/queries/artists';
+import { linkArtworksToSong } from '../db/queries/artworks';
+import {
   createGenre,
   linkSongToGenre,
   unlinkSongFromGenre,
@@ -60,7 +36,31 @@ import {
   getGenreSongIds,
   deleteGenre
 } from '../db/queries/genres';
-import { linkArtworksToSong } from '../db/queries/artworks';
+import { getUserSettings } from '../db/queries/settings';
+import {
+  updateSongModifiedAtByPath,
+  getSongByPath,
+  getSongById,
+  updateSongBasicFields
+} from '../db/queries/songs';
+import { DEFAULT_FILE_URL } from '../filesystem';
+import {
+  getArtistArtworkPath,
+  getSongArtworkPath,
+  removeDefaultAppProtocolFromFilePath
+} from '../fs/resolveFilePaths';
+import logger from '../logger';
+import {
+  dataUpdateEvent,
+  getCurrentSongPath,
+  getSongsOutsideLibraryData,
+  sendMessageToRenderer,
+  updateSongsOutsideLibraryData
+} from '../main';
+import { createTempArtwork, storeArtworks } from '../other/artworks';
+import generatePalette from '../other/generatePalette';
+import { isSongBlacklisted } from '../utils/isBlacklisted';
+import isPathAWebURL from '../utils/isPathAWebUrl';
 import { withFileHandle } from '../utils/withFileHandle';
 
 const { metadataEditingSupportedExtensions } = appPreferences;
@@ -654,10 +654,7 @@ const manageArtworkUpdatesOfSongsFromUnknownSource = async (
   return { artworkPath: undefined };
 };
 
-const manageLyricsUpdates = (
-  tags: SongTags,
-  prevSongData?: SavableSongData
-) => {
+const manageLyricsUpdates = (tags: SongTags, prevSongData?: SavableSongData) => {
   const parsedSyncedLyrics = tags.synchronizedLyrics
     ? parseLyrics(tags.synchronizedLyrics)
     : undefined;
@@ -744,7 +741,8 @@ const updateSongId3TagsOfUnknownSource = async (
       let artworkPicture: Picture | undefined;
       if (artworkPath) {
         const artworkPathWithoutProtocol = removeDefaultAppProtocolFromFilePath(artworkPath);
-        const artBuf = artworkBuffer || (await generateLocalArtworkBuffer(artworkPathWithoutProtocol));
+        const artBuf =
+          artworkBuffer || (await generateLocalArtworkBuffer(artworkPathWithoutProtocol));
         if (artBuf) {
           const pngBuffer = await sharp(artBuf).toFormat('png').toBuffer();
           artworkPicture = Picture.fromData(ByteVector.fromByteArray(new Uint8Array(pngBuffer)));
@@ -828,7 +826,11 @@ const updateSongId3Tags = async (
 
   if (!isKnownSource) {
     try {
-      const data = await updateSongId3TagsOfUnknownSource(songIdOrPath as string, tags, sendUpdatedData);
+      const data = await updateSongId3TagsOfUnknownSource(
+        songIdOrPath as string,
+        tags,
+        sendUpdatedData
+      );
       if (data) result.updatedData = data;
       result.success = true;
 
@@ -847,10 +849,11 @@ const updateSongId3Tags = async (
     logger.debug(`Started the song data updating process for song '${songIdOrPath}'`);
 
     // Get song data by ID or path
-    const song = typeof songIdOrPath === 'number' 
-      ? await getSongById(songIdOrPath)
-      : await getSongByPath(songIdOrPath);
-    
+    const song =
+      typeof songIdOrPath === 'number'
+        ? await getSongById(songIdOrPath)
+        : await getSongByPath(songIdOrPath);
+
     if (!song) {
       logger.error('Song not found in database', { songIdOrPath });
       throw new Error('Song not found in database');
@@ -881,7 +884,7 @@ const updateSongId3Tags = async (
       if (newArtworkPath) {
         const buffer = await generateArtworkBuffer(newArtworkPath);
         artworkBuffer = buffer || undefined;
-        
+
         if (artworkBuffer) {
           // Store artwork and generate palette
           await generatePalette(artworkBuffer);
@@ -895,10 +898,7 @@ const updateSongId3Tags = async (
             );
           }
 
-          artwork = await parseImgDataForNodeID3(
-            getSongArtworkPath(songId, true),
-            artworkBuffer
-          );
+          artwork = await parseImgDataForNodeID3(getSongArtworkPath(songId, true), artworkBuffer);
         }
       }
 
@@ -915,7 +915,7 @@ const updateSongId3Tags = async (
         // Create new artists
         for (const artistData of artistsWithoutIds) {
           const existingArtist = await getArtistWithName(artistData.name, trx);
-          
+
           if (existingArtist) {
             await linkSongToArtist(existingArtist.id, songId, trx);
           } else {
@@ -1122,14 +1122,15 @@ const updateSongId3Tags = async (
     if (sendUpdatedData) {
       // Fetch updated song data for response
       const updatedSong = await getSongByPath(song.path);
-      
+
       if (updatedSong) {
-        const songArtists = updatedSong.artists?.map((a) => ({
-          artistId: a.artist.id,
-          name: a.artist.name,
-          artworkPath: getArtistArtworkPath(undefined).artworkPath,
-          onlineArtworkPaths: undefined
-        })) || [];
+        const songArtists =
+          updatedSong.artists?.map((a) => ({
+            artistId: a.artist.id,
+            name: a.artist.name,
+            artworkPath: getArtistArtworkPath(undefined).artworkPath,
+            onlineArtworkPaths: undefined
+          })) || [];
 
         const data: AudioPlayerData = {
           songId: songId,

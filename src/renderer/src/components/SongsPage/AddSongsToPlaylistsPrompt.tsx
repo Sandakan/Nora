@@ -1,16 +1,15 @@
 /* eslint-disable promise/catch-or-return */
 
+import { SpecialPlaylists } from '@common/playlists.enum';
+import { playlistQuery } from '@renderer/queries/playlists';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-
-import Checkbox from '../Checkbox';
 import Button from '../Button';
+import Checkbox from '../Checkbox';
 import Img from '../Img';
-import { useSuspenseQuery } from '@tanstack/react-query';
-import { playlistQuery } from '@renderer/queries/playlists';
-import { SpecialPlaylists } from '@common/playlists.enum';
 
 interface AddSongsToPlaylistProp {
   songIds: number[];

@@ -1,3 +1,4 @@
+import { SpecialPlaylists } from '@common/playlists.enum';
 import MainContainer from '@renderer/components/MainContainer';
 import PlaylistInfoAndImgContainer from '@renderer/components/PlaylistsInfoPage/PlaylistInfoAndImgContainer';
 import Song from '@renderer/components/SongsPage/Song';
@@ -16,7 +17,6 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 import { lazy, useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { SpecialPlaylists } from '@common/playlists.enum';
 
 const SensitiveActionConfirmPrompt = lazy(
   () => import('@renderer/components/SensitiveActionConfirmPrompt')

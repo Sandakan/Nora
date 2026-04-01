@@ -1,12 +1,12 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
-import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import storage from '../../utils/localStorage';
-
-import Button from '../Button';
-import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store/store';
 import { useNavigate } from '@tanstack/react-router';
+import { useStore } from '@tanstack/react-store';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
+
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import { useUserPreferences } from '../../hooks/useUserPreferences';
+import Button from '../Button';
 
 type Props = {
   name: string;
@@ -16,6 +16,7 @@ type Props = {
 const DuplicateArtistsSuggestion = (props: Props) => {
   const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
   const currentSongData = useStore(store, (state) => state.currentSongData);
+  const { ignoredDuplicateMetadata, addIgnoredDuplicateMutation } = useUserPreferences();
 
   const { addNewNotifications, updateCurrentSongData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
@@ -27,14 +28,11 @@ const DuplicateArtistsSuggestion = (props: Props) => {
   const [duplicateArtists, setDuplicateArtists] = useState<Artist[]>([]);
   const [isMessageVisible, setIsMessageVisible] = useState(true);
 
-  const ignoredDuplicateArtists = useMemo(
-    () => storage.ignoredDuplicates.getIgnoredDuplicates('artists'),
-    []
-  );
-
   useEffect(() => {
+    const duplicateGroupId = `artists_${artistId}`;
     const isIgnored =
-      ignoredDuplicateArtists.length > 0 && ignoredDuplicateArtists.some((x) => x === artistId);
+      (ignoredDuplicateMetadata?.length || 0) > 0 &&
+      ignoredDuplicateMetadata?.some((x) => x.duplicateGroupId === duplicateGroupId);
 
     if (isIgnored) setIsVisible(false);
 
@@ -44,7 +42,7 @@ const DuplicateArtistsSuggestion = (props: Props) => {
         .then((res) => setDuplicateArtists(res))
         .catch((err) => console.error(err));
     }
-  }, [ignoredDuplicateArtists, name]);
+  }, [ignoredDuplicateMetadata, name, artistId]);
 
   const duplicateArtistComponents = useMemo(() => {
     if (duplicateArtists.length > 0) {
@@ -52,7 +50,7 @@ const DuplicateArtistsSuggestion = (props: Props) => {
         return (
           <>
             <Button
-              className={`!text-font-color-highlight dark:!text-dark-font-color-highlight !m-0 !inline-flex !border-0 !p-0 ${
+              className={`text-font-color-highlight! dark:text-dark-font-color-highlight! m-0! inline-flex! border-0! p-0! ${
                 artistId !== artist.artistId ? 'hover:underline' : 'cursor-default!'
               }`}
               label={artist.name}
@@ -195,7 +193,7 @@ const DuplicateArtistsSuggestion = (props: Props) => {
                   iconClassName="material-icons-round-outlined"
                   label={t('common.ignore')}
                   clickHandler={() => {
-                    storage.ignoredDuplicates.setIgnoredDuplicates('artists', [artistId]);
+                    addIgnoredDuplicateMutation.mutate({ type: 'artists', itemId: artistId });
                     setIsVisible(true);
                     addNewNotifications([
                       {

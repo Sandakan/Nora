@@ -1,8 +1,9 @@
+import { Outlet } from '@tanstack/react-router';
+
+import ErrorBoundary from './ErrorBoundary';
 // import Body from './Body';
 import NotificationPanel from './NotificationPanel/NotificationPanel';
 import Sidebar from './Sidebar/Sidebar';
-import ErrorBoundary from './ErrorBoundary';
-import { Outlet } from '@tanstack/react-router';
 
 const BodyAndSideBarContainer = () => {
   return (

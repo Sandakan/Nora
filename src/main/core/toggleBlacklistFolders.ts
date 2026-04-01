@@ -1,5 +1,5 @@
-import logger from '../logger';
 import { getBlacklistData, setBlacklist } from '../filesystem';
+import logger from '../logger';
 import { dataUpdateEvent } from '../main';
 
 interface toggleBlacklistFoldersReturnValue {

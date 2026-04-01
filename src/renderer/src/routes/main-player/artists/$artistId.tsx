@@ -12,17 +12,17 @@ import TitleContainer from '@renderer/components/TitleContainer';
 import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
 import useResizeObserver from '@renderer/hooks/useResizeObserver';
 import useSelectAllHandler from '@renderer/hooks/useSelectAllHandler';
+import { queryClient } from '@renderer/index';
+import { albumQuery } from '@renderer/queries/albums';
+import { artistQuery } from '@renderer/queries/aritsts';
+import { songQuery } from '@renderer/queries/songs';
 import { store } from '@renderer/store/store';
 import calculateTimeFromSeconds from '@renderer/utils/calculateTimeFromSeconds';
+import { useSuspenseQuery, useMutation, useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 import { useCallback, useContext, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { queryClient } from '@renderer/index';
-import { artistQuery } from '@renderer/queries/aritsts';
-import { useSuspenseQuery, useMutation, useQuery } from '@tanstack/react-query';
-import { songQuery } from '@renderer/queries/songs';
-import { albumQuery } from '@renderer/queries/albums';
 
 export const Route = createFileRoute('/main-player/artists/$artistId')({
   component: ArtistInfoPage,

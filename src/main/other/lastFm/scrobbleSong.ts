@@ -1,11 +1,12 @@
-import logger from '../../logger';
+import { getUserSettings } from '@main/db/queries/settings';
+import { getSongById } from '@main/db/queries/songs';
+import { convertToSongData } from '@main/utils/convert';
+
 import type { LastFMScrobblePostResponse, ScrobbleParams } from '../../../types/last_fm_api';
+import logger from '../../logger';
 import { checkIfConnectedToInternet } from '../../main';
 import generateApiRequestBodyForLastFMPostRequests from './generateApiRequestBodyForLastFMPostRequests';
 import getLastFmAuthData from './getLastFMAuthData';
-import { getSongById } from '@main/db/queries/songs';
-import { convertToSongData } from '@main/utils/convert';
-import { getUserSettings } from '@main/db/queries/settings';
 
 const scrobbleSong = async (songId: number, startTimeInSecs: number) => {
   try {

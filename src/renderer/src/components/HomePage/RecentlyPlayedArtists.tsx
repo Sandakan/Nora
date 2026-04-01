@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import useSelectAllHandler from '../../hooks/useSelectAllHandler';
 
+import useSelectAllHandler from '../../hooks/useSelectAllHandler';
 import { Artist } from '../ArtistPage/Artist';
 import SecondaryContainer from '../SecondaryContainer';
 

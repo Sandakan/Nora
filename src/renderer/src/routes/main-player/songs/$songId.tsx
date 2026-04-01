@@ -294,7 +294,7 @@ function SongInfoPage() {
             {songInfo.album && (
               <NavLink
                 to="/main-player/albums/$albumId"
-                params={{ albumId: String(songInfo.album?.albumId!) }}
+                params={{ albumId: String(songInfo.album.albumId) }}
                 className={`info-type-2 mr-0! mb-5 w-fit! truncate border-0! p-0! ${
                   songInfo.album && 'hover:underline'
                 } ${bodyBackgroundImage && 'text-white!'}`}

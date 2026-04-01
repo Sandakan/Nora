@@ -1,8 +1,9 @@
+import { useNavigate } from '@tanstack/react-router';
 import { type CSSProperties, useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import NavLink from '../NavLink';
-import { useNavigate } from '@tanstack/react-router';
 
 interface SongArtistProp {
   artistId: number;

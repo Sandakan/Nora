@@ -1,5 +1,7 @@
-import { checkIfConnectedToInternet } from '../../main';
-import logger from '../../logger';
+import { getAlbumById } from '@main/db/queries/albums';
+import { getSongsByNames } from '@main/db/queries/songs';
+import { convertToAlbum, convertToSongData } from '@main/utils/convert';
+
 import type {
   LastFMAlbumInfoAPI,
   AlbumInfo,
@@ -7,9 +9,8 @@ import type {
   LastFMAlbumInfo,
   Tag
 } from '../../../types/last_fm_album_info_api';
-import { getSongsByNames } from '@main/db/queries/songs';
-import { getAlbumById } from '@main/db/queries/albums';
-import { convertToAlbum, convertToSongData } from '@main/utils/convert';
+import logger from '../../logger';
+import { checkIfConnectedToInternet } from '../../main';
 
 const sortTracks = (a: ParsedAlbumTrack, b: ParsedAlbumTrack) => {
   if (a.rank > b.rank) return 1;

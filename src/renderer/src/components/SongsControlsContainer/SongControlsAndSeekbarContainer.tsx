@@ -2,6 +2,7 @@ import { store } from '@renderer/store/store';
 import { useStore } from '@tanstack/react-store';
 import { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Button from '../Button';
 import NavLink from '../NavLink';

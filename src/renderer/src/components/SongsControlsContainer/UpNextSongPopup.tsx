@@ -1,11 +1,11 @@
+import { useNavigate } from '@tanstack/react-router';
+import { useStore } from '@tanstack/react-store';
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import Button from '../Button';
-import { useStore } from '@tanstack/react-store';
 import { store } from '../../store/store';
-import { useNavigate } from '@tanstack/react-router';
+import Button from '../Button';
 
 type Props = {
   onPopupAppears: (isVisible: boolean) => void;

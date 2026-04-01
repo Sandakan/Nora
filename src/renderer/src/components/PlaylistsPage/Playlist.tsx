@@ -1,18 +1,17 @@
+import { SpecialPlaylists } from '@common/playlists.enum';
+import { store } from '@renderer/store/store';
+import { useNavigate } from '@tanstack/react-router';
+import { useStore } from '@tanstack/react-store';
 import { lazy, useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-
-import Img from '../Img';
-import Button from '../Button';
-import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
 import DefaultPlaylistCover from '../../assets/images/webp/playlist_cover_default.webp';
-import MultipleArtworksCover from './MultipleArtworksCover';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store/store';
-import { useNavigate } from '@tanstack/react-router';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import Button from '../Button';
+import Img from '../Img';
+import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
 import NavLink from '../NavLink';
-import { SpecialPlaylists } from '@common/playlists.enum';
+import MultipleArtworksCover from './MultipleArtworksCover';
 
 const ConfirmDeletePlaylistsPrompt = lazy(() => import('./ConfirmDeletePlaylistsPrompt'));
 const RenamePlaylistPrompt = lazy(() => import('./RenamePlaylistPrompt'));

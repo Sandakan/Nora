@@ -4,8 +4,8 @@ import {
   getAlbumWithTitle
   // getLinkedAlbumSong
 } from '@main/db/queries/albums';
-import type { albums } from '@main/db/schema';
 import { linkArtworksToAlbum } from '@main/db/queries/artworks';
+import type { albums } from '@main/db/schema';
 
 const manageAlbumsOfParsedSong = async (
   data: {

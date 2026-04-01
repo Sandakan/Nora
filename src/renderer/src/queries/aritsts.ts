@@ -29,7 +29,6 @@ export const artistQuery = createQueryKeys('artists', {
     };
   },
   single: (data: { artistId: number }) => {
-
     return {
       queryKey: [data.artistId],
       queryFn: () => window.api.artistsData.getArtistData([data.artistId])

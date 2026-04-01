@@ -1,6 +1,5 @@
-import Img from '../../Img';
-
 import DefaultAlbumArtwork from '../../../assets/images/webp/album_cover_default.webp';
+import Img from '../../Img';
 
 type Props = {
   albumData: SongTagsAlbumData;

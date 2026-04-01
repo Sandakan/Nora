@@ -1,9 +1,10 @@
-import { Playlist } from '../../PlaylistsPage/Playlist';
+import { store } from '@renderer/store/store';
+import { useStore } from '@tanstack/react-store';
+
 import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
+import { Playlist } from '../../PlaylistsPage/Playlist';
 import SecondaryContainer from '../../SecondaryContainer';
 import VirtualizedGrid from '../../VirtualizedGrid';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store/store';
 
 type Props = { playlistData: Playlist[] };
 const MIN_ITEM_WIDTH = 175;

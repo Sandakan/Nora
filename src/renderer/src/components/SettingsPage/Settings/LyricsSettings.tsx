@@ -1,15 +1,14 @@
+import { queryClient } from '@renderer/index';
+import { settingsQuery } from '@renderer/queries/settings';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import storage from '../../../utils/localStorage';
 
+import i18n from '../../../i18n';
+import storage from '../../../utils/localStorage';
 import Button from '../../Button';
 import Checkbox from '../../Checkbox';
 import Dropdown, { type DropdownOption } from '../../Dropdown';
-
-import i18n from '../../../i18n';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { settingsQuery } from '@renderer/queries/settings';
-import { queryClient } from '@renderer/index';
 
 const automaticallySaveLyricsOptions: DropdownOption<AutomaticallySaveLyricsTypes>[] = [
   {

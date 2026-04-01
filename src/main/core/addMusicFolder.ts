@@ -1,11 +1,12 @@
 import path from 'path';
-import logger from '../logger';
+
 import parseFolderStructuresForSongPaths, {
   doesFolderExistInFolderStructure
 } from '../fs/parseFolderStructuresForSongPaths';
-import { tryToParseSong } from '../parseSong/parseSong';
+import logger from '../logger';
 import { dataUpdateEvent, sendMessageToRenderer } from '../main';
 import { generatePalettes } from '../other/generatePalette';
+import { tryToParseSong } from '../parseSong/parseSong';
 import { timeEnd, timeStart } from '../utils/measureTimeUsage';
 
 const removeAlreadyAvailableStructures = async (structures: FolderStructure[]) => {

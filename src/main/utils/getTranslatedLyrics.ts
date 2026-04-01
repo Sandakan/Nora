@@ -1,5 +1,6 @@
 import { translate } from '@vitalets/google-translate-api';
 import type { RawResponse } from '@vitalets/google-translate-api/dist/cjs/types';
+
 import { version } from '../../../package.json';
 import parseLyrics, { INSTRUMENTAL_LYRIC_IDENTIFIER } from '../../common/parseLyrics';
 import { getCachedLyrics, updateCachedLyrics } from '../core/getSongLyrics';

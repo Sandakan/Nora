@@ -1,11 +1,11 @@
+import { useSuspenseQuery } from '@tanstack/react-query';
+import { useStore } from '@tanstack/react-store';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSuspenseQuery } from '@tanstack/react-query';
 
-import Button from '../Button';
-import { useStore } from '@tanstack/react-store';
-import { store } from '../../store/store';
 import { settingsQuery } from '../../queries/settings';
+import { store } from '../../store/store';
+import Button from '../Button';
 
 const WindowControlsContainer = () => {
   const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);

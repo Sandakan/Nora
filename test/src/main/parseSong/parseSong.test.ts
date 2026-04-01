@@ -1,5 +1,7 @@
+
+
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
-import path from 'path';
+
 import { parseSong } from '../../../../src/main/parseSong/parseSong';
 import {
   createMockSongMetadata,
@@ -88,9 +90,8 @@ describe('parseSong', () => {
     // Setup default successful mocks
     const fs = await import('fs/promises');
     const taglib = await import('node-taglib-sharp');
-    const { isSongWithPathAvailable, saveSong } = await import(
-      '../../../../src/main/db/queries/songs'
-    );
+    const { isSongWithPathAvailable, saveSong } =
+      await import('../../../../src/main/db/queries/songs');
     const { storeArtworks } = await import('../../../../src/main/other/artworks');
     const { linkArtworksToSong } = await import('../../../../src/main/db/queries/artworks');
     const manageAlbumsOfParsedSong = (
@@ -113,9 +114,7 @@ describe('parseSong', () => {
     vi.mocked(storeArtworks).mockResolvedValue(createMockArtworkData() as any);
     vi.mocked(linkArtworksToSong).mockResolvedValue([] as any);
     vi.mocked(manageAlbumsOfParsedSong).mockResolvedValue(createMockAlbumManagerResult() as any);
-    vi.mocked(manageArtistsOfParsedSong).mockResolvedValue(
-      createMockArtistManagerResult() as any
-    );
+    vi.mocked(manageArtistsOfParsedSong).mockResolvedValue(createMockArtistManagerResult() as any);
     vi.mocked(manageGenresOfParsedSong).mockResolvedValue(createMockGenreManagerResult() as any);
     vi.mocked(manageAlbumArtistOfParsedSong).mockResolvedValue({
       newAlbumArtists: [],
@@ -221,7 +220,7 @@ describe('parseSong', () => {
       await parseSong(songPath);
 
       const { dataUpdateEvent } = await import('../../../../src/main/main');
-      
+
       expectDataUpdateEventCalledWith(dataUpdateEvent, 'songs/newSong', [1]);
       expectDataUpdateEventCalledWith(dataUpdateEvent, 'artists/newArtist', [1]);
       expectDataUpdateEventCalledWith(dataUpdateEvent, 'albums/newAlbum', [1]);
@@ -729,7 +728,7 @@ describe('parseSong', () => {
 
       const { saveSong } = await import('../../../../src/main/db/queries/songs');
       const savedCall = vi.mocked(saveSong).mock.calls[0][0];
-      
+
       expect(savedCall.fileCreatedAt).toBeInstanceOf(Date);
       expect(savedCall.fileCreatedAt.getTime()).toBeGreaterThanOrEqual(beforeParse.getTime());
       expect(savedCall.fileCreatedAt.getTime()).toBeLessThanOrEqual(afterParse.getTime());

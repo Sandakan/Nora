@@ -1,14 +1,15 @@
+import { store } from '@renderer/store/store';
+import { useNavigate } from '@tanstack/react-router';
+import { useStore } from '@tanstack/react-store';
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import { lazy, useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Button from '../Button';
-import VolumeSlider from '../VolumeSlider';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store/store';
 import NavLink from '../NavLink';
-import { useNavigate } from '@tanstack/react-router';
+import VolumeSlider from '../VolumeSlider';
 
 const AppShortcutsPrompt = lazy(() => import('../SettingsPage/AppShortcutsPrompt'));
 

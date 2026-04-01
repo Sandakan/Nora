@@ -1,6 +1,7 @@
-import { useCallback, useContext } from 'react';
-import { AppUpdateContext } from '../contexts/AppUpdateContext';
 import { useStore } from '@tanstack/react-store';
+import { useCallback, useContext } from 'react';
+
+import { AppUpdateContext } from '../contexts/AppUpdateContext';
 import { store } from '../store/store';
 
 const slice = (arr: number[], start: number, end: number) => {

@@ -1,29 +1,25 @@
+import { store } from '@renderer/store/store';
+import { useStore } from '@tanstack/react-store';
 /* eslint-disable promise/catch-or-return */
 import { lazy, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { appPreferences } from '../../../../../package.json';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-
 import useNetworkConnectivity from '../../hooks/useNetworkConnectivity';
-
+import hasDataChanged, { isDataChanged } from '../../utils/hasDataChanged';
 import Button from '../Button';
 import MainContainer from '../MainContainer';
-import SongArtwork from './SongArtwork';
-
-import SongNameInput from './input_containers/SongNameInput';
-import SongYearInput from './input_containers/SongYearInput';
-import SongArtistsInput from './input_containers/SongArtistsInput';
-import SongAlbumInput from './input_containers/SongAlbumInput';
-import SongGenresInput from './input_containers/SongGenresInput';
-import SongComposerInput from './input_containers/SongComposerInput';
-import SongLyricsEditorInput from './input_containers/SongLyricsEditorInput';
-import SongTrackNumberInput from './input_containers/SongTrackNumberInput';
 import SongAlbumArtistsInput from './input_containers/SongAlbumArtistInput';
-
-import hasDataChanged, { isDataChanged } from '../../utils/hasDataChanged';
-import { appPreferences } from '../../../../../package.json';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store/store';
+import SongAlbumInput from './input_containers/SongAlbumInput';
+import SongArtistsInput from './input_containers/SongArtistsInput';
+import SongComposerInput from './input_containers/SongComposerInput';
+import SongGenresInput from './input_containers/SongGenresInput';
+import SongLyricsEditorInput from './input_containers/SongLyricsEditorInput';
+import SongNameInput from './input_containers/SongNameInput';
+import SongTrackNumberInput from './input_containers/SongTrackNumberInput';
+import SongYearInput from './input_containers/SongYearInput';
+import SongArtwork from './SongArtwork';
 
 const SongMetadataResultsSelectPage = lazy(() => import('./SongMetadataResultsSelectPrompt'));
 const ResetTagsToDefaultPrompt = lazy(() => import('./ResetTagsToDefaultPrompt'));

@@ -4,11 +4,10 @@ import { lazy, useCallback, useContext, useEffect, useMemo, useState } from 'rea
 import { useTranslation } from 'react-i18next';
 
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-
+import Button from '../Button';
 import Img from '../Img';
 import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
 import SongArtist from './SongArtist';
-import Button from '../Button';
 
 const AddSongsToPlaylistsPrompt = lazy(() => import('./AddSongsToPlaylistsPrompt'));
 const BlacklistSongConfrimPrompt = lazy(() => import('./BlacklistSongConfirmPrompt'));
@@ -16,10 +15,11 @@ const DeleteSongsFromSystemConfrimPrompt = lazy(
   () => import('./DeleteSongsFromSystemConfrimPrompt')
 );
 
-import DefaultSongCover from '../../assets/images/webp/song_cover_default.webp';
-import { useStore } from '@tanstack/react-store';
-import { store } from '../../store/store';
 import { useNavigate } from '@tanstack/react-router';
+import { useStore } from '@tanstack/react-store';
+
+import DefaultSongCover from '../../assets/images/webp/song_cover_default.webp';
+import { store } from '../../store/store';
 import NavLink from '../NavLink';
 
 interface SongCardProp {

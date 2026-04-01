@@ -1,16 +1,15 @@
+import { store } from '@renderer/store/store';
+import { useNavigate } from '@tanstack/react-router';
+import { useStore } from '@tanstack/react-store';
 import { lazy, useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-
-import Img from '../Img';
-import SongArtist from '../SongsPage/SongArtist';
 
 import DefaultSongCover from '../../assets/images/webp/song_cover_default.webp';
-import UpNextSongPopup from './UpNextSongPopup';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store/store';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import Img from '../Img';
 import NavLink from '../NavLink';
-import { useNavigate } from '@tanstack/react-router';
+import SongArtist from '../SongsPage/SongArtist';
+import UpNextSongPopup from './UpNextSongPopup';
 
 const AddSongsToPlaylistsPrompt = lazy(() => import('../SongsPage/AddSongsToPlaylistsPrompt'));
 const BlacklistSongConfrimPrompt = lazy(() => import('../SongsPage/BlacklistSongConfirmPrompt'));

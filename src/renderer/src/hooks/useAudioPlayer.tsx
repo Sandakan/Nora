@@ -1,7 +1,8 @@
+import roundTo from '@common/roundTo';
 import { useEffect } from 'react';
+
 import AudioPlayer from '../other/player';
 import { getQueue } from '../other/queueSingleton';
-import roundTo from '@common/roundTo';
 
 const LOW_RESPONSE_DURATION = 100;
 const DURATION = 1000;
@@ -10,9 +11,9 @@ const DURATION = 1000;
 let playerInstance: AudioPlayer | null = null;
 
 /**
- * Custom hook to get the singleton AudioPlayer instance.
- * The player instance integrates with PlayerQueue for automatic song loading.
- * Persists across component re-renders.
+ * Custom hook to get the singleton AudioPlayer instance. The player instance integrates with
+ * PlayerQueue for automatic song loading. Persists across component re-renders.
+ *
  * @returns The AudioPlayer instance with integrated queue
  */
 export function useAudioPlayer() {

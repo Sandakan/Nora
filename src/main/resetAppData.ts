@@ -1,8 +1,10 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { app } from 'electron';
-import logger from './logger';
+
 import { nukeDatabase } from '@main/db/db';
+import { app } from 'electron';
+
+import logger from './logger';
 
 const resourcePaths = ['listening_data.json', 'song_covers'];
 const userDataPath = app.getPath('userData');

@@ -1,4 +1,3 @@
-import updateSongId3Tags from '../updateSong/updateSongId3Tags';
 import {
   getAlbumsData,
   getArtistsData,
@@ -6,6 +5,7 @@ import {
   setAlbumsData,
   setSongsData
 } from '../filesystem';
+import updateSongId3Tags from '../updateSong/updateSongId3Tags';
 import sendSongID3Tags from './sendSongMetadata';
 
 export const getSelectedArtist = (artistIdOrName: string | number) => {

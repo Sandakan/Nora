@@ -1,6 +1,5 @@
-import Img from '../../Img';
-
 import DefaultArtistArtwork from '../../../assets/images/webp/artist_cover_default.webp';
+import Img from '../../Img';
 
 type Props = {
   artistData: {

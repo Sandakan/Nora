@@ -1,16 +1,17 @@
+import { store } from '@renderer/store/store';
+import { useStore } from '@tanstack/react-store';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+
 import DefaultSongCover from '../../assets/images/webp/song_cover_default.webp';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Button from '../Button';
 import Img from '../Img';
-import UpNextSongPopup from '../SongsControlsContainer/UpNextSongPopup';
-import LyricsContainer from './containers/LyricsContainer';
 import SeekBarSlider from '../SeekBarSlider';
-import TitleBarContainer from './containers/TitleBarContainer';
+import UpNextSongPopup from '../SongsControlsContainer/UpNextSongPopup';
 import VolumeSlider from '../VolumeSlider';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store/store';
+import LyricsContainer from './containers/LyricsContainer';
+import TitleBarContainer from './containers/TitleBarContainer';
 
 type MiniPlayerProps = {
   className?: string;

@@ -1,14 +1,15 @@
-import { useCallback, useContext, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
-import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import UnAvailableTrack from './UnAvailableTrack';
-import TitleContainer from '../TitleContainer';
-import Song from '../SongsPage/Song';
-import { useStore } from '@tanstack/react-store';
+import { songQuery } from '@renderer/queries/songs';
 import { store } from '@renderer/store/store';
 import { useSuspenseQuery } from '@tanstack/react-query';
-import { songQuery } from '@renderer/queries/songs';
+import { useStore } from '@tanstack/react-store';
+import { useCallback, useContext, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import type { SimilarTracksOutput } from '../../../../types/last_fm_similar_tracks_api';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import Song from '../SongsPage/Song';
+import TitleContainer from '../TitleContainer';
+import UnAvailableTrack from './UnAvailableTrack';
 
 type Props = { songId: number };
 

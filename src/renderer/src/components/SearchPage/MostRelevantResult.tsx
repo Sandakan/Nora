@@ -1,12 +1,12 @@
+import { useNavigate } from '@tanstack/react-router';
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import { useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
-import Img from '../Img';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Button from '../Button';
-import { useNavigate } from '@tanstack/react-router';
+import Img from '../Img';
 
 export interface MostRelevantResultProp {
   resultType: 'artist' | 'song' | 'album' | 'playlist' | 'genre';

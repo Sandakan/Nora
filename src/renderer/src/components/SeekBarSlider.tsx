@@ -1,3 +1,5 @@
+import { store } from '@renderer/store/store';
+import { useStore } from '@tanstack/react-store';
 import {
   type CSSProperties,
   type ChangeEvent,
@@ -8,11 +10,10 @@ import {
   useRef,
   useState
 } from 'react';
+
 import { AppUpdateContext } from '../contexts/AppUpdateContext';
 import calculateTime from '../utils/calculateTime';
 import debounce from '../utils/debounce';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store/store';
 
 type Props = {
   id: string;

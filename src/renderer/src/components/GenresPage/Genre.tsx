@@ -1,13 +1,14 @@
+import { store } from '@renderer/store/store';
+import { useNavigate } from '@tanstack/react-router';
+import { useStore } from '@tanstack/react-store';
 import { useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import Img from '../Img';
+
 import DefaultGenreCover from '../../assets/images/webp/genre-cover-default.webp';
-import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Button from '../Button';
-import { store } from '@renderer/store/store';
-import { useStore } from '@tanstack/react-store';
-import { useNavigate } from '@tanstack/react-router';
+import Img from '../Img';
+import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
 import NavLink from '../NavLink';
 
 interface GenreProp {

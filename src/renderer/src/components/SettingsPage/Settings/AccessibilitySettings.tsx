@@ -1,8 +1,9 @@
+import { store } from '@renderer/store/store';
+import { useStore } from '@tanstack/react-store';
 import { useTranslation } from 'react-i18next';
+
 import storage from '../../../utils/localStorage';
 import Checkbox from '../../Checkbox';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store/store';
 
 const AccessibilitySettings = () => {
   const preferences = useStore(store, (state) => state.localStorage.preferences);

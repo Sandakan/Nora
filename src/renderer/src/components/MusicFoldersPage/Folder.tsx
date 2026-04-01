@@ -2,15 +2,15 @@ import { lazy, useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-
-import Img from '../Img';
 import Button from '../Button';
+import Img from '../Img';
 
 const RemoveFolderConfirmationPrompt = lazy(() => import('./RemoveFolderConfirmationPrompt'));
 const BlacklistFolderConfrimPrompt = lazy(() => import('./BlacklistFolderConfirmPrompt'));
 
-import FolderImg from '../../assets/images/webp/empty-folder.webp';
 import { useNavigate } from '@tanstack/react-router';
+
+import FolderImg from '../../assets/images/webp/empty-folder.webp';
 
 type FolderProps = {
   folderPath: string;
@@ -23,13 +23,17 @@ type FolderProps = {
 };
 
 const Folder = (props: FolderProps) => {
-  const {
-    updateContextMenuData,
-    changePromptMenuData
-  } = useContext(AppUpdateContext);
+  const { updateContextMenuData, changePromptMenuData } = useContext(AppUpdateContext);
 
-  const { folderPath, songIds, index, isBlacklisted = true, className, subFolders, selectAllHandler } =
-    props;
+  const {
+    folderPath,
+    songIds,
+    index,
+    isBlacklisted = true,
+    className,
+    subFolders,
+    selectAllHandler
+  } = props;
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -104,14 +108,8 @@ const Folder = (props: FolderProps) => {
         handlerFunction: null
       },
       {
-        label: t(
-          isBlacklisted
-            ? 'song.deblacklist'
-            : 'folder.blacklistFolder'
-        ),
-        iconName: isBlacklisted
-            ? 'settings_backup_restore'
-            : 'block',
+        label: t(isBlacklisted ? 'song.deblacklist' : 'folder.blacklistFolder'),
+        iconName: isBlacklisted ? 'settings_backup_restore' : 'block',
         handlerFunction: () => {
           if (isBlacklisted)
             window.api.folderData
@@ -140,14 +138,7 @@ const Folder = (props: FolderProps) => {
         isDisabled: false
       }
     ];
-  }, [
-    changePromptMenuData,
-    folderName,
-    folderPath,
-    isBlacklisted,
-    openMusicFolderInfoPage,
-    t
-  ]);
+  }, [changePromptMenuData, folderName, folderPath, isBlacklisted, openMusicFolderInfoPage, t]);
 
   const contextMenuItemData = useMemo(
     (): ContextMenuAdditionalData => ({
@@ -160,12 +151,7 @@ const Folder = (props: FolderProps) => {
           ? t('common.subFolderWithCount', { count: subFolders!.length })
           : undefined
     }),
-    [
-      folderName,
-      noOfSongs,
-      subFolders?.length,
-      t
-    ]
+    [folderName, noOfSongs, subFolders?.length, t]
   );
 
   return (

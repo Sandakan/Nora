@@ -38,7 +38,8 @@ export const playlistQuery = createQueryKeys('playlists', {
     const stringIds = data.songIds.map(String);
     return {
       queryKey: ['songArtworks', `songIds=${stringIds.join(',')}`],
-      queryFn: () => window.api.playlistsData.getArtworksForMultipleArtworksCover(stringIds.map(Number))
+      queryFn: () =>
+        window.api.playlistsData.getArtworksForMultipleArtworksCover(stringIds.map(Number))
     };
   }
 });

@@ -1,4 +1,5 @@
 import { TagConstants } from 'node-id3';
+
 import logger from '../logger';
 
 const convertParsedLyricsToNodeID3Format = (

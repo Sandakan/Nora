@@ -1,12 +1,13 @@
-import { type ReactNode, useContext, useEffect, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import Img from '../../Img';
-import SecondaryContainer from '../../SecondaryContainer';
-import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
-import { MostRelevantResult } from '../MostRelevantResult';
-import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store/store';
 import { useNavigate } from '@tanstack/react-router';
+import { useStore } from '@tanstack/react-store';
+import { type ReactNode, useContext, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
+import Img from '../../Img';
+import SecondaryContainer from '../../SecondaryContainer';
+import { MostRelevantResult } from '../MostRelevantResult';
 
 type Props = { searchResults: SearchResult };
 

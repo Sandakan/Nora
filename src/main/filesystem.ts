@@ -1,10 +1,13 @@
 import fs from 'fs/promises';
 import path from 'path';
+
 import { app } from 'electron';
 import Store from 'electron-store';
+
+import { appPreferences, version } from '../../package.json';
+import { SpecialPlaylists } from '../common/playlists.enum';
 import logger from './logger';
 import { dataUpdateEvent } from './main';
-import { appPreferences, version } from '../../package.json';
 import {
   albumMigrations,
   artistMigrations,
@@ -16,7 +19,7 @@ import {
 } from './migrations';
 import { DEFAULT_SONG_PALETTE } from './other/generatePalette';
 import isPathADir from './utils/isPathADir';
-import { SpecialPlaylists } from '../common/playlists.enum';
+
 import '@db/db';
 
 export const DEFAULT_ARTWORK_SAVE_LOCATION = path.join(app.getPath('userData'), 'song_covers');

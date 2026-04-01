@@ -1,14 +1,13 @@
+import { queryClient } from '@renderer/index';
+import { searchQuery } from '@renderer/queries/search';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import SearchSomethingImage from '../../assets/images/svg/Flying kite_Monochromatic.svg';
 import Button from '../Button';
 import Img from '../Img';
 import RecentSearchResult from './RecentSearchResult';
-
-import SearchSomethingImage from '../../assets/images/svg/Flying kite_Monochromatic.svg';
-import { useSuspenseQuery } from '@tanstack/react-query';
-import { queryClient } from '@renderer/index';
-import { searchQuery } from '@renderer/queries/search';
 
 type Props = {
   searchInput: string;

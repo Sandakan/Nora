@@ -1,36 +1,31 @@
 import { useCallback, useRef } from 'react';
+
 import ListeningDataSession from '../other/listeningDataSession';
 
 /**
  * Custom hook to manage listening data recording sessions.
  *
- * This hook handles the recording of user listening data for analytics
- * and statistics purposes. It tracks:
- * - Song playback duration
- * - Pause/play events
- * - Seek positions
- * - Whether the song is from a known source
- * - Song repetitions
+ * This hook handles the recording of user listening data for analytics and statistics purposes. It
+ * tracks: - Song playback duration - Pause/play events - Seek positions - Whether the song is from
+ * a known source - Song repetitions
  *
- * Each listening session is tracked independently, and sessions are
- * automatically managed when songs change or repeat. The hook ensures
- * only one session is active at a time and properly cleans up when
- * songs change.
- *
- * @param player - The HTML audio player element
- *
- * @returns Object with the recordListeningData function
+ * Each listening session is tracked independently, and sessions are automatically managed when
+ * songs change or repeat. The hook ensures only one session is active at a time and properly cleans
+ * up when songs change.
  *
  * @example
- * ```tsx
- * function App() {
- *   const player = useAudioPlayer();
- *   const { recordListeningData } = useListeningData(player);
+ *   ```tsx
+ *   function App() {
+ *     const player = useAudioPlayer();
+ *     const { recordListeningData } = useListeningData(player);
  *
- *   // Start recording when playing a song
- *   recordListeningData(songId, duration, false, true);
- * }
- * ```
+ *     // Start recording when playing a song
+ *     recordListeningData(songId, duration, false, true);
+ *   }
+ *   ```
+ *
+ * @param player - The HTML audio player element
+ * @returns Object with the recordListeningData function
  */
 export function useListeningData(player: HTMLAudioElement) {
   // Track the current listening session
@@ -39,10 +34,9 @@ export function useListeningData(player: HTMLAudioElement) {
   /**
    * Records listening data for a song.
    *
-   * Creates a new listening session to track how the user listens to a song.
-   * If a session already exists for a different song, it stops the previous
-   * session before starting a new one. For repeated songs, creates a new
-   * session instance.
+   * Creates a new listening session to track how the user listens to a song. If a session already
+   * exists for a different song, it stops the previous session before starting a new one. For
+   * repeated songs, creates a new session instance.
    *
    * @param songId - The unique identifier of the song
    * @param duration - The total duration of the song in seconds

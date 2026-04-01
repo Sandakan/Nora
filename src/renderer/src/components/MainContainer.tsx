@@ -11,6 +11,7 @@ import {
   type UIEvent,
   forwardRef
 } from 'react';
+
 import ErrorBoundary from './ErrorBoundary';
 
 interface MainContainerProp {

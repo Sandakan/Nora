@@ -1,7 +1,8 @@
+import { db } from '@main/db/db';
 import { getArtistFavoriteStatus, updateArtistFavoriteStatus } from '@main/db/queries/artists';
+
 import logger from '../logger';
 import { dataUpdateEvent } from '../main';
-import { db } from '@main/db/db';
 
 // const dislikeArtist = (artist: SavableArtist) => {
 //   artist.isAFavorite = false;

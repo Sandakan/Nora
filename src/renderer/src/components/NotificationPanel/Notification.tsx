@@ -1,3 +1,5 @@
+import { store } from '@renderer/store/store';
+import { useStore } from '@tanstack/react-store';
 import {
   useCallback,
   useContext,
@@ -6,10 +8,9 @@ import {
   useRef,
   type CSSProperties
 } from 'react';
+
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Button from '../Button';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store/store';
 
 const Notification = (props: AppNotification) => {
   const {

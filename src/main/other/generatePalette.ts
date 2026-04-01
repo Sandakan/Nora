@@ -1,13 +1,14 @@
+import { swatchTypeEnum } from '@db/schema';
+import { db } from '@main/db/db';
+import { createArtworkPalette, getLowResArtworksWithoutPalettes } from '@main/db/queries/palettes';
+import generateCoverBuffer from '@main/parseSong/generateCoverBuffer';
 import { Vibrant } from 'node-vibrant/node';
-import { timeEnd, timeStart } from '../utils/measureTimeUsage';
+
+import roundTo from '../../common/roundTo';
 import logger from '../logger';
 import { dataUpdateEvent, sendMessageToRenderer } from '../main';
-import roundTo from '../../common/roundTo';
+import { timeEnd, timeStart } from '../utils/measureTimeUsage';
 import { generateRandomId } from '../utils/randomId';
-import { createArtworkPalette, getLowResArtworksWithoutPalettes } from '@main/db/queries/palettes';
-import { db } from '@main/db/db';
-import { swatchTypeEnum } from '@db/schema';
-import generateCoverBuffer from '@main/parseSong/generateCoverBuffer';
 
 export const DEFAULT_SONG_PALETTE: PaletteData = {
   paletteId: 'DEFAULT_PALETTE',

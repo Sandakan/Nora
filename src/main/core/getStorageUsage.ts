@@ -1,10 +1,11 @@
 import path from 'path';
+
+import { DB_PATH } from '@main/db/db';
 import { app } from 'electron';
 
-import getRootSize from '../utils/getRootSize';
-import getDirSize from '../utils/getDirSize';
 import logger from '../logger';
-import { DB_PATH } from '@main/db/db';
+import getDirSize from '../utils/getDirSize';
+import getRootSize from '../utils/getRootSize';
 
 const getAppDataStorageMetrics = async (): Promise<AppDataStorageMetrics> => {
   const appDataPath = app.getPath('userData');

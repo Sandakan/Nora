@@ -1,4 +1,5 @@
 import { getAllAlbums } from '@main/db/queries/albums';
+
 import logger from '../logger';
 import { convertToAlbum } from '../utils/convert';
 

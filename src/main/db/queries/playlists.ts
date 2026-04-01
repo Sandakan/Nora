@@ -1,7 +1,8 @@
-import { and, asc, desc, eq, inArray, type SQL } from 'drizzle-orm';
 import { db } from '@db/db';
-import { playlistsSongs, playlists } from '../schema';
 import { timeEnd, timeStart } from '@main/utils/measureTimeUsage';
+import { and, asc, desc, eq, inArray, type SQL } from 'drizzle-orm';
+
+import { playlistsSongs, playlists } from '../schema';
 
 export type GetAllPlaylistsReturnType = Awaited<ReturnType<typeof getAllPlaylists>>;
 const defaultGetAllPlaylistsOptions = {

@@ -88,6 +88,7 @@ The main process is the heart of Nora's Electron application, handling system-le
 ### Main Process Entry Point (`src/main/main.ts`)
 
 **Responsibilities**:
+
 - Window lifecycle management (create, resize, position, state)
 - Player type switching (normal, mini, full-screen)
 - System integration (tray, taskbar, global shortcuts)
@@ -99,16 +100,18 @@ The main process is the heart of Nora's Electron application, handling system-le
 - Auto-launch configuration
 
 **Key Variables** (module-level state):
+
 ```typescript
-export let mainWindow: BrowserWindow;  // Main window instance
-let tray: Tray;                         // System tray icon
-let playerType: PlayerTypes;            // 'normal' | 'mini' | 'full'
-let isAudioPlaying: boolean;            // Playback state for taskbar buttons
-let currentSongPath: string;            // For lyrics/metadata persistence
-let powerSaveBlockerId: number | null;  // Prevent display sleep during playback
+export let mainWindow: BrowserWindow; // Main window instance
+let tray: Tray; // System tray icon
+let playerType: PlayerTypes; // 'normal' | 'mini' | 'full'
+let isAudioPlaying: boolean; // Playback state for taskbar buttons
+let currentSongPath: string; // For lyrics/metadata persistence
+let powerSaveBlockerId: number | null; // Prevent display sleep during playback
 ```
 
 **Window Size Constants**:
+
 ```typescript
 // Normal window
 MAIN_WINDOW_DEFAULT_SIZE_X = 1280
@@ -122,6 +125,7 @@ MINI_PLAYER_ASPECT_RATIO = 17/10
 ```
 
 **Critical Functions**:
+
 - `createWindow()`: Initialize BrowserWindow with preload script, frame settings, visual effects
 - `manageWindowFinishLoad()`: Restore window position/size from settings, show window
 - `handleBeforeQuit()`: Cleanup operations (save lyrics, metadata, close watchers, clear temp files)
@@ -129,6 +133,7 @@ MINI_PLAYER_ASPECT_RATIO = 17/10
 - `dataUpdateEvent(dataType, data, message)`: Debounced event aggregation for library updates
 
 **System Integration**:
+
 - **Single Instance**: Uses `app.requestSingleInstanceLock()` to prevent multiple instances
 - **Custom Protocol**: Registers `nora://` for file associations and auth callbacks (Last.fm)
 - **Tray Menu**: Show/hide app, exit option
@@ -196,12 +201,13 @@ MINI_PLAYER_ASPECT_RATIO = 17/10
     - `app/openLogFile`, `app/openInBrowser`, `app/openDevTools`
 
 **Handler Pattern**:
+
 ```typescript
 // Async operations (return data)
 ipcMain.handle('app/getSong', (_, id: string) => sendAudioData(id));
 
 // Fire-and-forget (no return)
-ipcMain.on('app/player/songPlaybackStateChange', (_, isPlaying: boolean) => 
+ipcMain.on('app/player/songPlaybackStateChange', (_, isPlaying: boolean) =>
   toggleAudioPlayingState(isPlaying)
 );
 
@@ -216,6 +222,7 @@ ipcMain.handle('app/deleteSongsFromSystem', (_, paths: string[], isPermanent: bo
 **Technology**: Drizzle ORM with PGlite (local PostgreSQL in WASM)
 
 **Structure**:
+
 ```
 db/
 ├── db.ts              # Database initialization, migrations, seeding
@@ -239,10 +246,11 @@ db/
 ```
 
 **Database Initialization** (`db.ts`):
+
 ```typescript
 // PGlite with extensions
 const pgliteInstance = await PGlite.create(DB_PATH, {
-  extensions: { pg_trgm, citext }  // Full-text search, case-insensitive text
+  extensions: { pg_trgm, citext } // Full-text search, case-insensitive text
 });
 
 // Drizzle ORM instance
@@ -250,7 +258,7 @@ export const db = drizzle(pgliteInstance, { schema });
 
 // Run migrations automatically on startup
 await migrate(db, { migrationsFolder });
-await seedDatabase();  // Insert default settings if needed
+await seedDatabase(); // Insert default settings if needed
 
 // Graceful shutdown
 export const closeDatabaseInstance = async () => {
@@ -259,6 +267,7 @@ export const closeDatabaseInstance = async () => {
 ```
 
 **Query Pattern** (example from `songs.ts`):
+
 ```typescript
 import { db } from '../db';
 import { songs, artists } from '../schema';
@@ -270,15 +279,15 @@ export async function getSongById(id: number) {
 
 export async function getAllSongs(sortType?: SongSortTypes, filterType?: SongFilterTypes) {
   let query = db.select().from(songs);
-  
+
   if (filterType === 'favorites') {
     query = query.where(eq(songs.isFavorite, true));
   }
-  
+
   if (sortType === 'aToZ') {
     query = query.orderBy(asc(songs.title));
   }
-  
+
   return await query;
 }
 ```
@@ -336,6 +345,7 @@ export async function getAllSongs(sortType?: SongSortTypes, filterType?: SongFil
    - `getStorageUsage.ts`: Disk usage stats
 
 **Pattern** (typical core function):
+
 ```typescript
 // src/main/core/toggleLikeSongs.ts
 import { db } from '@main/db/db';
@@ -343,23 +353,21 @@ import { songs } from '@main/db/schema';
 import { dataUpdateEvent } from '@main/main';
 import logger from '@main/logger';
 
-export default async function toggleLikeSongs(
-  songIds: string[],
-  isLikeSong?: boolean
-) {
+export default async function toggleLikeSongs(songIds: string[], isLikeSong?: boolean) {
   try {
     const songIdsNum = songIds.map(Number);
-    
+
     // Update database
-    await db.update(songs)
+    await db
+      .update(songs)
       .set({ isFavorite: isLikeSong ?? true })
       .where(inArray(songs.id, songIdsNum));
-    
+
     // Notify renderer of data change
     dataUpdateEvent('songs/favoriteStatus', songIds);
-    
+
     logger.info(`Toggled like status for ${songIds.length} songs`, { songIds, isLikeSong });
-    
+
     return { success: true };
   } catch (error) {
     logger.error('Failed to toggle like songs', { songIds, error });
@@ -373,6 +381,7 @@ export default async function toggleLikeSongs(
 **Purpose**: Real-time library synchronization when files change.
 
 **Key Files**:
+
 - `addWatchersToFolders.ts`: Watch music folders for song additions/removals
 - `addWatchersToParentFolders.ts`: Watch parent directories for folder renames
 - `checkFolderForContentModifications.ts`: Detect new/deleted songs
@@ -381,6 +390,7 @@ export default async function toggleLikeSongs(
 - `resolveFilePaths.ts`: Path normalization (handle `nora://` protocol)
 
 **Watcher Pattern**:
+
 ```typescript
 // Uses Node.js fs.watch() with recursive option
 const watcher = fs.watch(folderPath, { recursive: true }, (eventType, filename) => {
@@ -423,6 +433,7 @@ abortController.signal.addEventListener('abort', () => watcher.close());
 **Purpose**: Extract metadata from audio files.
 
 **Process**:
+
 1. Read file with `music-metadata` library
 2. Extract tags (title, artist, album, year, genre, etc.)
 3. Extract embedded artwork
@@ -442,6 +453,7 @@ abortController.signal.addEventListener('abort', () => watcher.close());
 **Log File Location**: `app.getPath('userData')/logs/app.log`
 
 **Pattern**:
+
 ```typescript
 import logger from '@main/logger';
 
@@ -456,14 +468,15 @@ logger.debug('Database query executed', { query, duration });
 
 ```typescript
 // main.ts
-export let mainWindow: BrowserWindow;  // Exported for access in other modules
-let playerType: PlayerTypes;            // Private module state
-let currentSongPath: string;            // Persisted for cleanup operations
+export let mainWindow: BrowserWindow; // Exported for access in other modules
+let playerType: PlayerTypes; // Private module state
+let currentSongPath: string; // Persisted for cleanup operations
 ```
 
 **State Persistence**: User settings stored in database via `saveUserSettings()` (not localStorage).
 
 **State Synchronization**: Main process notifies renderer via:
+
 - `mainWindow.webContents.send(channel, data)` for events
 - `dataUpdateEvent()` for debounced library updates
 - IPC responses for request/reply patterns
@@ -500,24 +513,24 @@ export function useAudioPlayer() {
     }, 100);
     return () => clearInterval(interval);
   }, []);
-  
+
   return player; // Return instance directly (not wrapped in ref)
 }
 
 // ❌ BAD: Ref-based singletons with intervals lead to stale closure issues
 export function useAudioPlayer() {
   const playerRef = useRef<AudioPlayer>();
-  
+
   useEffect(() => {
     playerRef.current = new AudioPlayer(); // Ref assigned after effect creation
-    
+
     const interval = setInterval(() => {
       // playerRef.current may be null/stale when closure was created
       if (!playerRef.current?.paused) dispatchCurrentSongTime();
     }, 100);
     return () => clearInterval(interval);
   }, []);
-  
+
   return playerRef.current; // Timing issues: ref not ready yet
 }
 ```
@@ -548,12 +561,14 @@ store.subscribe((state) => {
 ```
 
 **Pattern**:
+
 - Centralized store with reducer pattern (similar to Redux)
 - `dispatch()` for all state updates
 - Automatic localStorage persistence via subscription
 - Access state in components: `store.state` or hooks: `useStore(store, (state) => state.propertyName)`
 
 **Common Dispatch Actions**:
+
 ```typescript
 dispatch({ type: 'UPDATE_CURRENT_SONG_DATA', data: songData });
 dispatch({ type: 'UPDATE_PLAYER_STATE', data: { isPlaying: true } });
@@ -569,18 +584,18 @@ Exposes `window.api` to renderer process with categorized namespaces:
 
 ```typescript
 // Main categories
-window.api.properties          // App properties (isInDevelopment, commandLineArgs)
-window.api.windowControls      // Window management (minimize, maximize, close, etc.)
-window.api.playerControls      // Playback control (play/pause, skip, like, etc.)
-window.api.audioLibraryControls // Library operations (getSong, getAllSongs, etc.)
-window.api.theme               // Theme management (changeAppTheme, listenForSystemThemeChanges)
-window.api.dataUpdates         // Real-time library updates (onSongDataUpdates, etc.)
-window.api.quitEvent           // App lifecycle (beforeQuitEvent, etc.)
-window.api.folderData          // Folder operations (addMusicFolders, etc.)
-window.api.playlistControls    // Playlist CRUD operations
-window.api.lyricsData          // Lyrics fetching and management
-window.api.settingsHelpers     // Settings utilities (networkStatusChange, etc.)
-window.api.unknownSource       // External file associations
+window.api.properties; // App properties (isInDevelopment, commandLineArgs)
+window.api.windowControls; // Window management (minimize, maximize, close, etc.)
+window.api.playerControls; // Playback control (play/pause, skip, like, etc.)
+window.api.audioLibraryControls; // Library operations (getSong, getAllSongs, etc.)
+window.api.theme; // Theme management (changeAppTheme, listenForSystemThemeChanges)
+window.api.dataUpdates; // Real-time library updates (onSongDataUpdates, etc.)
+window.api.quitEvent; // App lifecycle (beforeQuitEvent, etc.)
+window.api.folderData; // Folder operations (addMusicFolders, etc.)
+window.api.playlistControls; // Playlist CRUD operations
+window.api.lyricsData; // Lyrics fetching and management
+window.api.settingsHelpers; // Settings utilities (networkStatusChange, etc.)
+window.api.unknownSource; // External file associations
 ```
 
 **Patterns**:
@@ -588,11 +603,14 @@ window.api.unknownSource       // External file associations
 1. **Invoke (async)**: `await window.api.audioLibraryControls.getSong(songId)`
 2. **Send (fire-and-forget)**: `window.api.playerControls.songPlaybackStateChange(true)`
 3. **Event listeners (with cleanup)**:
+
    ```typescript
    useEffect(() => {
-     const handleEvent = (e: unknown) => { /* handler */ };
+     const handleEvent = (e: unknown) => {
+       /* handler */
+     };
      window.api.playerControls.toggleSongPlayback(handleEvent);
-     
+
      return () => {
        window.api.playerControls.removeTogglePlaybackStateEvent(handleEvent);
      };
@@ -600,6 +618,7 @@ window.api.unknownSource       // External file associations
    ```
 
 **Main Process** (`src/main/ipc.ts`):
+
 - Registers all IPC handlers using `ipcMain.handle()` (async) and `ipcMain.on()` (sync)
 - Handlers call business logic in `src/main/core/` or `src/main/db/`
 
@@ -636,7 +655,7 @@ export const settingsQuery = createQueryKeyStore({
     },
     theme: {
       queryKey: ['settings', 'theme'],
-      queryFn: () => window.api.settingsHelpers.getUserSettings().then(s => s.theme)
+      queryFn: () => window.api.settingsHelpers.getUserSettings().then((s) => s.theme)
     }
   }
 });
@@ -667,11 +686,12 @@ const { data: userSettings } = useSuspenseQuery(settingsQuery.all);
 4. Dark mode detection from settings: `userSettings.isDarkMode`
 
 **Dark Mode Management**:
+
 ```typescript
 // useDynamicTheme.tsx
 useEffect(() => {
   const { data: userSettings } = useSuspenseQuery(settingsQuery.all);
-  
+
   if (userSettings.isDarkMode) {
     document.body.classList.add('dark');
   } else {
@@ -803,9 +823,11 @@ npm run husky-test          # Run before commits (Prettier + tests)
 
 ```tsx
 useEffect(() => {
-  const handler = (e: unknown) => { /* ... */ };
+  const handler = (e: unknown) => {
+    /* ... */
+  };
   window.api.playerControls.toggleSongPlayback(handler);
-  
+
   return () => {
     window.api.playerControls.removeTogglePlaybackStateEvent(handler);
   };
@@ -843,11 +865,9 @@ Follow the language-agnostic style guide in `coding_style_guide.instructions.md`
 - **Descriptive Names**: Use clear, context-rich names (avoid `data`, `user`, `info`, `temp`)
   - ✅ `authenticatedUser`, `songMetadata`, `playlistQueue`
   - ❌ `user`, `data`, `list`
-  
 - **Functions**: Start with verbs
   - ✅ `calculateDuration()`, `fetchSongData()`, `validatePlaylist()`
   - ❌ `duration()`, `song()`, `playlist()`
-  
 - **Constants**: `UPPERCASE_WITH_UNDERSCORES`
   - ✅ `MAX_QUEUE_SIZE`, `DEFAULT_VOLUME`
 
@@ -864,13 +884,13 @@ function playSong(songId: string) {
     console.error('No song ID provided');
     return;
   }
-  
+
   const song = await getSongById(songId);
   if (!song) {
     console.error('Song not found');
     return;
   }
-  
+
   // Main logic here (flat, readable)
   player.loadSong(song);
   player.play();
@@ -879,7 +899,7 @@ function playSong(songId: string) {
 // ❌ BAD: Nested conditionals
 function playSong(songId: string) {
   if (songId) {
-    getSongById(songId).then(song => {
+    getSongById(songId).then((song) => {
       if (song) {
         player.loadSong(song);
         player.play();
@@ -918,57 +938,57 @@ import AudioPlayer from '../other/player';
 
 **Renderer Process**:
 
-| File | Purpose | Why Important |
-|------|---------|---------------|
-| `src/renderer/src/App.tsx` | Main app component | Central integration point for all hooks, currently ~365 lines (down from 2,013) |
-| `src/renderer/src/store/store.ts` | Global state management | All state updates go through `dispatch()` |
-| `src/renderer/src/hooks/useAppLifecycle.tsx` | App initialization | Event listener setup, lifecycle management (~355 lines) |
-| `src/renderer/src/other/appReducer.tsx` | State reducer logic | Defines all state update actions |
+| File                                         | Purpose                 | Why Important                                                                   |
+| -------------------------------------------- | ----------------------- | ------------------------------------------------------------------------------- |
+| `src/renderer/src/App.tsx`                   | Main app component      | Central integration point for all hooks, currently ~365 lines (down from 2,013) |
+| `src/renderer/src/store/store.ts`            | Global state management | All state updates go through `dispatch()`                                       |
+| `src/renderer/src/hooks/useAppLifecycle.tsx` | App initialization      | Event listener setup, lifecycle management (~355 lines)                         |
+| `src/renderer/src/other/appReducer.tsx`      | State reducer logic     | Defines all state update actions                                                |
 
 **Main Process**:
 
-| File | Purpose | Why Important |
-|------|---------|---------------|
-| `src/main/main.ts` | Electron entry point | Window initialization, app lifecycle, system integration (835 lines) |
-| `src/main/ipc.ts` | IPC handler registration | Maps all IPC calls to main process logic, 100+ handlers |
-| `src/main/db/db.ts` | Database initialization | PGlite setup, migrations, Drizzle ORM instance |
-| `src/main/db/schema.ts` | Database schema | All table definitions (songs, artists, albums, playlists, etc.) |
-| `src/main/db/queries/songs.ts` | Song CRUD operations | Most frequently used database queries |
-| `src/main/db/queries/settings.ts` | User settings | Get/save app preferences (stored in DB, not localStorage) |
-| `src/main/logger.ts` | Logging infrastructure | Winston logger configuration for debugging |
+| File                              | Purpose                  | Why Important                                                        |
+| --------------------------------- | ------------------------ | -------------------------------------------------------------------- |
+| `src/main/main.ts`                | Electron entry point     | Window initialization, app lifecycle, system integration (835 lines) |
+| `src/main/ipc.ts`                 | IPC handler registration | Maps all IPC calls to main process logic, 100+ handlers              |
+| `src/main/db/db.ts`               | Database initialization  | PGlite setup, migrations, Drizzle ORM instance                       |
+| `src/main/db/schema.ts`           | Database schema          | All table definitions (songs, artists, albums, playlists, etc.)      |
+| `src/main/db/queries/songs.ts`    | Song CRUD operations     | Most frequently used database queries                                |
+| `src/main/db/queries/settings.ts` | User settings            | Get/save app preferences (stored in DB, not localStorage)            |
+| `src/main/logger.ts`              | Logging infrastructure   | Winston logger configuration for debugging                           |
 
 **IPC Bridge**:
 
-| File | Purpose | Why Important |
-|------|---------|---------------|
+| File                   | Purpose    | Why Important                                                         |
+| ---------------------- | ---------- | --------------------------------------------------------------------- |
 | `src/preload/index.ts` | IPC bridge | Defines entire `window.api` interface exposed to renderer (583 lines) |
 
 **Configuration**:
 
-| File | Purpose | Why Important |
-|------|---------|---------------|
-| `package.json` | Dependencies & scripts | Build commands, supported file extensions, npm scripts |
-| `electron.vite.config.ts` | Build configuration | Main + preload + renderer process bundling |
-| `drizzle.config.ts` | Database ORM config | Migration paths, schema location |
+| File                      | Purpose                | Why Important                                          |
+| ------------------------- | ---------------------- | ------------------------------------------------------ |
+| `package.json`            | Dependencies & scripts | Build commands, supported file extensions, npm scripts |
+| `electron.vite.config.ts` | Build configuration    | Main + preload + renderer process bundling             |
+| `drizzle.config.ts`       | Database ORM config    | Migration paths, schema location                       |
 
 ### Singleton Services (Module-Level)
 
-| File | Service | Pattern |
-|------|---------|---------|
-| `src/renderer/src/other/player.ts` | `AudioPlayer` class | Module-level instance in `useAudioPlayer.tsx` |
+| File                                    | Service             | Pattern                                                           |
+| --------------------------------------- | ------------------- | ----------------------------------------------------------------- |
+| `src/renderer/src/other/player.ts`      | `AudioPlayer` class | Module-level instance in `useAudioPlayer.tsx`                     |
 | `src/renderer/src/other/playerQueue.ts` | `PlayerQueue` class | Ref-based in `usePlayerQueue.tsx` (initialized from localStorage) |
 
 ### Configuration Files
 
-| File | Purpose |
-|------|---------|
-| `electron.vite.config.ts` | Build configuration (main + preload + renderer) |
-| `tailwind.config.js` | Tailwind CSS customization |
+| File                                | Purpose                                                                |
+| ----------------------------------- | ---------------------------------------------------------------------- |
+| `electron.vite.config.ts`           | Build configuration (main + preload + renderer)                        |
+| `tailwind.config.js`                | Tailwind CSS customization                                             |
 | `tsconfig.json` / `tsconfig.*.json` | TypeScript compiler options (multiple configs for different processes) |
-| `drizzle.config.ts` | Drizzle ORM database configuration |
-| `vitest.config.ts` | Vitest testing configuration |
-| `electron-builder.yml` | Electron installer configuration |
-| `tsr.config.json` | TanStack Router configuration |
+| `drizzle.config.ts`                 | Drizzle ORM database configuration                                     |
+| `vitest.config.ts`                  | Vitest testing configuration                                           |
+| `electron-builder.yml`              | Electron installer configuration                                       |
+| `tsr.config.json`                   | TanStack Router configuration                                          |
 
 ---
 
@@ -1039,6 +1059,7 @@ When making changes:
 **Refactoring Progress**: App.tsx reduced from 2,013 lines to 365 lines (81.9% reduction).
 
 **Remaining Work**:
+
 - Phase 5.1: Remove deprecated page navigation (~90 lines) - blocked on TanStack Router migration
 - Phase 13: Final cleanup (~15-20 lines) - polish and remove commented code
 
