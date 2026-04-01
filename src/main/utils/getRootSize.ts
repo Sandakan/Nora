@@ -9,7 +9,7 @@ const winRootRegex = /^(?<name>\w+:) {0,}(?<size>\d+) {0,}(?<freeSpace>\d+) {0,}
 
 // uses the command > df -h
 const linuxRootRegex =
-  /^(?<name>[\w\/-]+) *(?<size>[\d.]+)(?<sizeType>[A-Z]?) *(?<used>[\d.]+)(?<usedType>[A-Z]?) *(?<avail>[\d.]+)(?<availType>[A-Z]?) *(?<useInPercent>[\d.]+)% *(?<mountedOn>[\w\/-]+)$/gm;
+  /^(?<name>[\w/-]+) *(?<size>[\d.]+)(?<sizeType>[A-Z]?) *(?<used>[\d.]+)(?<usedType>[A-Z]?) *(?<avail>[\d.]+)(?<availType>[A-Z]?) *(?<useInPercent>[\d.]+)% *(?<mountedOn>[\w/-]+)$/gm;
 
 type DataType = 'B' | 'M' | 'G' | 'T';
 const convertToBytes = (val: number, dataType: DataType = 'B') => {

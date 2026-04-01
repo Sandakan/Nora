@@ -86,7 +86,7 @@ const getSecondsFromLyricsLine = (lyric: string) => {
 };
 
 const getSecondsFromExtendedTimeStamp = (text: string) => {
-  const extendedReplaceRegex = /[<>\[\]]/gm;
+  const extendedReplaceRegex = /[<>[\]]/gm;
 
   const [sec, ms] = text.replaceAll(extendedReplaceRegex, '').split(':');
   extendedReplaceRegex.lastIndex = 0;
