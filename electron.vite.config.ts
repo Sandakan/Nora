@@ -9,20 +9,21 @@ export default defineConfig({
 	main: {
 		build: {
 			sourcemap: true,
-			minify: true,
+			minify: false,
 			rollupOptions: { input: '/src/main/main.ts', external: ['sharp'] },
 		},
 		resolve: {
 			alias: {
 				'@db': resolve(import.meta.dirname, './src/main/db'),
 				'@main': resolve(import.meta.dirname, './src/main'),
+				'@common': resolve(import.meta.dirname, './src/common'),
 			},
 		},
 	},
 	preload: {
 		build: {
 			sourcemap: true,
-			minify: true,
+			minify: false,
 			rollupOptions: { output: { format: 'cjs', entryFileNames: '[name].mjs' } },
 		},
 	},

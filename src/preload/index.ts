@@ -467,7 +467,8 @@ const playlistsData = {
     ipcRenderer.invoke('app/getArtworksForMultipleArtworksCover', songIds),
   exportPlaylist: (playlistId: number): Promise<void> =>
     ipcRenderer.invoke('app/exportPlaylist', playlistId),
-  importPlaylist: (): Promise<void> => ipcRenderer.invoke('app/importPlaylist')
+  importPlaylist: (targetPlaylistId?: number): Promise<void> =>
+    ipcRenderer.invoke('app/importPlaylist', targetPlaylistId)
 };
 
 const queue = {
