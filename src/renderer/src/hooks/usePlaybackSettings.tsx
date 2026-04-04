@@ -27,7 +27,7 @@ import { useUserPreferences } from './useUserPreferences';
  *   <button onClick={() => toggleRepeat()}>Repeat</button>
  *   <input onChange={(e) => updateVolume(e.target.value)} />
  *   updateEqualizerOptions({ preset: 'rock', bands: [...] });
- *   ```
+ *   ```;
  *
  * @param player - The HTMLAudioElement instance
  * @returns Object containing playback setting functions

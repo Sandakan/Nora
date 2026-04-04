@@ -46,7 +46,7 @@ export interface UseWindowManagementOptions {
  *   </div>
  *   );
  *   }
- *   ```
+ *   ```;
  *
  * @param appRef - Reference to the main app container element
  * @param options - Configuration options for window management

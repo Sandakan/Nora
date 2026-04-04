@@ -30,7 +30,7 @@ import { songQuery } from '../queries/songs';
  *
  *     return <div>...</div>;
  *   }
- *   ```
+ *   ```;
  */
 export function useDataSync(): void {
   useEffect(() => {

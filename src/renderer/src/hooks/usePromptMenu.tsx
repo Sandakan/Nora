@@ -17,7 +17,7 @@ export interface UsePromptMenuReturn {
    *
    *   // Clear all prompts
    *   changePromptMenuData(false, null);
-   *   ```
+   *   ```;
    *
    * @param isVisible - Whether the prompt menu should be visible
    * @param prompt - The prompt content to display (ReactNode) or null to clear all prompts
@@ -42,7 +42,7 @@ export interface UsePromptMenuReturn {
    *
    *   // Return to first prompt
    *   updatePromptMenuHistoryIndex('home');
-   *   ```
+   *   ```;
    *
    * @param type - The type of navigation:
    *
@@ -86,7 +86,7 @@ export interface UsePromptMenuReturn {
  *       </div>
  *     );
  *   }
- *   ```
+ *   ```;
  *
  * @returns Object containing prompt menu management functions
  */

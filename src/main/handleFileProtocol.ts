@@ -64,7 +64,7 @@ export const handleFileProtocol = async (req: GlobalRequest) => {
           fileStream.on('end', () => {
             try {
               controller.close();
-            } catch  {
+            } catch {
               // Stream might already be closed, ignore the error
             }
           });
@@ -72,7 +72,7 @@ export const handleFileProtocol = async (req: GlobalRequest) => {
           fileStream.on('error', (error) => {
             try {
               controller.error(error);
-            } catch  {
+            } catch {
               // Stream might already be closed, ignore the error
             }
           });

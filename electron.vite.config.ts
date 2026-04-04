@@ -6,54 +6,54 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'electron-vite';
 
 export default defineConfig({
-	main: {
-		build: {
-			sourcemap: true,
-			minify: false,
-			rollupOptions: { input: '/src/main/main.ts', external: ['sharp'] },
-		},
-		resolve: {
-			alias: {
-				'@db': resolve(import.meta.dirname, './src/main/db'),
-				'@main': resolve(import.meta.dirname, './src/main'),
-				'@common': resolve(import.meta.dirname, './src/common'),
-			},
-		},
-	},
-	preload: {
-		build: {
-			sourcemap: true,
-			minify: false,
-			rollupOptions: { output: { format: 'cjs', entryFileNames: '[name].mjs' } },
-		},
-	},
-	renderer: {
-		build: {
-			minify: true,
-			sourcemap: true,
-		},
-		resolve: {
-			alias: {
-				'@renderer': resolve(import.meta.dirname, './src/renderer/src'),
-				'@types': resolve(import.meta.dirname, './src/@types'),
-				'@common': resolve(import.meta.dirname, './src/common'),
-				'@assets': resolve(import.meta.dirname, './src/renderer/src/assets'),
-			},
-		},
-		plugins: [
-			tanstackRouter({
-				target: 'react',
-				routesDirectory: 'src/routes',
-				generatedRouteTree: 'src/routeTree.gen.ts',
-				autoCodeSplitting: true,
-			}),
-			react({
-				// TODO: Using babel plugin breaks the tanstack-virtual package.
-				babel: {
-					plugins: ['babel-plugin-react-compiler'],
-				},
-			}),
-			tailwindcss(),
-		],
-	},
+  main: {
+    build: {
+      sourcemap: true,
+      minify: false,
+      rollupOptions: { input: '/src/main/main.ts', external: ['sharp'] }
+    },
+    resolve: {
+      alias: {
+        '@db': resolve(import.meta.dirname, './src/main/db'),
+        '@main': resolve(import.meta.dirname, './src/main'),
+        '@common': resolve(import.meta.dirname, './src/common')
+      }
+    }
+  },
+  preload: {
+    build: {
+      sourcemap: true,
+      minify: false,
+      rollupOptions: { output: { format: 'cjs', entryFileNames: '[name].mjs' } }
+    }
+  },
+  renderer: {
+    build: {
+      minify: true,
+      sourcemap: true
+    },
+    resolve: {
+      alias: {
+        '@renderer': resolve(import.meta.dirname, './src/renderer/src'),
+        '@types': resolve(import.meta.dirname, './src/@types'),
+        '@common': resolve(import.meta.dirname, './src/common'),
+        '@assets': resolve(import.meta.dirname, './src/renderer/src/assets')
+      }
+    },
+    plugins: [
+      tanstackRouter({
+        target: 'react',
+        routesDirectory: 'src/routes',
+        generatedRouteTree: 'src/routeTree.gen.ts',
+        autoCodeSplitting: true
+      }),
+      react({
+        // TODO: Using babel plugin breaks the tanstack-virtual package.
+        babel: {
+          plugins: ['babel-plugin-react-compiler']
+        }
+      }),
+      tailwindcss()
+    ]
+  }
 });

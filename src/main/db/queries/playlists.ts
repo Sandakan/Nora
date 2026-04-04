@@ -1,252 +1,270 @@
+import { SpecialPlaylists } from '@common/playlists.enum';
 import { db } from '@db/db';
 import { timeEnd, timeStart } from '@main/utils/measureTimeUsage';
 import { and, asc, desc, eq, inArray, type SQL } from 'drizzle-orm';
 
 import { playlistsSongs, playlists, songs, playHistory } from '../schema';
-import { SpecialPlaylists } from '@common/playlists.enum';
 
 export type GetAllPlaylistsReturnType = Awaited<ReturnType<typeof getAllPlaylists>>;
 const defaultGetAllPlaylistsOptions = {
-	playlistIds: [] as number[],
-	start: 0,
-	end: 0,
-	sortType: 'aToZ' as PlaylistSortTypes,
+  playlistIds: [] as number[],
+  start: 0,
+  end: 0,
+  sortType: 'aToZ' as PlaylistSortTypes
 };
 export type GetAllPlaylistsOptions = Partial<typeof defaultGetAllPlaylistsOptions>;
 
-export const getAllPlaylists = async (options: GetAllPlaylistsOptions, trx: DB | DBTransaction = db) => {
-	const { playlistIds = [], start = 0, end = 0, sortType = 'aToZ' } = options;
+export const getAllPlaylists = async (
+  options: GetAllPlaylistsOptions,
+  trx: DB | DBTransaction = db
+) => {
+  const { playlistIds = [], start = 0, end = 0, sortType = 'aToZ' } = options;
 
-	const limit = end - start === 0 ? undefined : end - start;
+  const limit = end - start === 0 ? undefined : end - start;
 
-	const data = await trx.query.playlists.findMany({
-		where: (s) => {
-			const filters: SQL[] = [];
+  const data = await trx.query.playlists.findMany({
+    where: (s) => {
+      const filters: SQL[] = [];
 
-			// Filter by playlist IDs
-			if (playlistIds && playlistIds.length > 0) {
-				filters.push(inArray(s.id, playlistIds));
-			}
+      // Filter by playlist IDs
+      if (playlistIds && playlistIds.length > 0) {
+        filters.push(inArray(s.id, playlistIds));
+      }
 
-			return and(...filters);
-		},
-		with: {
-			songs: { with: { song: { columns: { id: true } } } },
-			artworks: {
-				with: {
-					artwork: {
-						with: {
-							palette: {
-								columns: { id: true },
-								with: {
-									swatches: {},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-		orderBy: (playlists) => {
-			if (sortType === 'aToZ') return [asc(playlists.name)];
-			if (sortType === 'zToA') return [desc(playlists.name)];
+      return and(...filters);
+    },
+    with: {
+      songs: { with: { song: { columns: { id: true } } } },
+      artworks: {
+        with: {
+          artwork: {
+            with: {
+              palette: {
+                columns: { id: true },
+                with: {
+                  swatches: {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    orderBy: (playlists) => {
+      if (sortType === 'aToZ') return [asc(playlists.name)];
+      if (sortType === 'zToA') return [desc(playlists.name)];
 
-			return [];
-		},
-		limit,
-		offset: start,
-	});
+      return [];
+    },
+    limit,
+    offset: start
+  });
 
-	return {
-		data,
-		sortType,
-		start,
-		end,
-	};
+  return {
+    data,
+    sortType,
+    start,
+    end
+  };
 };
 
 export const getPlaylistById = async (id: number, trx: DB | DBTransaction = db) => {
-	const data = await trx.query.playlists.findFirst({
-		where: eq(playlists.id, id),
-		with: {
-			songs: { with: { song: { columns: { id: true } } } },
-			artworks: {
-				with: {
-					artwork: {
-						with: {
-							palette: {
-								columns: { id: true },
-								with: {
-									swatches: {},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-	});
+  const data = await trx.query.playlists.findFirst({
+    where: eq(playlists.id, id),
+    with: {
+      songs: { with: { song: { columns: { id: true } } } },
+      artworks: {
+        with: {
+          artwork: {
+            with: {
+              palette: {
+                columns: { id: true },
+                with: {
+                  swatches: {}
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  });
 
-	return data;
+  return data;
 };
 
 export const getPlaylistByName = async (name: string, trx: DB | DBTransaction = db) => {
-	const data = await trx.query.playlists.findFirst({
-		where: eq(playlists.name, name),
-		with: {
-			songs: { with: { song: { columns: { id: true } } } },
-			artworks: {
-				with: {
-					artwork: {
-						with: {
-							palette: {
-								columns: { id: true },
-								with: {
-									swatches: {},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-	});
+  const data = await trx.query.playlists.findFirst({
+    where: eq(playlists.name, name),
+    with: {
+      songs: { with: { song: { columns: { id: true } } } },
+      artworks: {
+        with: {
+          artwork: {
+            with: {
+              palette: {
+                columns: { id: true },
+                with: {
+                  swatches: {}
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  });
 
-	return data;
+  return data;
 };
 
 export const getFavoritesPlaylist = async (trx: DB | DBTransaction = db) => {
-	const timer = timeStart();
-	const data = await trx.query.playlists.findFirst({
-		where: (s) => eq(s.name, 'Favorites'),
-		with: {
-			songs: { with: { song: { columns: { id: true } } } },
-			artworks: {
-				with: {
-					artwork: {
-						with: {
-							palette: {
-								columns: { id: true },
-								with: {
-									swatches: {},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-	});
-	timeEnd(timer, 'Time taken to fetch favorites playlist');
+  const timer = timeStart();
+  const data = await trx.query.playlists.findFirst({
+    where: (s) => eq(s.name, 'Favorites'),
+    with: {
+      songs: { with: { song: { columns: { id: true } } } },
+      artworks: {
+        with: {
+          artwork: {
+            with: {
+              palette: {
+                columns: { id: true },
+                with: {
+                  swatches: {}
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  });
+  timeEnd(timer, 'Time taken to fetch favorites playlist');
 
-	return data;
+  return data;
 };
 
 export const getHistoryPlaylist = async (trx: DB | DBTransaction = db) => {
-	const timer = timeStart();
-	const data = await trx.query.playlists.findFirst({
-		where: (s) => eq(s.name, 'History'),
-		with: {
-			songs: { with: { song: { columns: { id: true } } } },
-			artworks: {
-				with: {
-					artwork: {
-						with: {
-							palette: {
-								columns: { id: true },
-								with: {
-									swatches: {},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-	});
-	timeEnd(timer, 'Time taken to fetch history playlist');
+  const timer = timeStart();
+  const data = await trx.query.playlists.findFirst({
+    where: (s) => eq(s.name, 'History'),
+    with: {
+      songs: { with: { song: { columns: { id: true } } } },
+      artworks: {
+        with: {
+          artwork: {
+            with: {
+              palette: {
+                columns: { id: true },
+                with: {
+                  swatches: {}
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  });
+  timeEnd(timer, 'Time taken to fetch history playlist');
 
-	return data;
+  return data;
 };
 
-export const linkSongsWithPlaylist = async (songIds: number[], playlistId: number, trx: DB | DBTransaction = db) => {
-	const records = songIds.map((songId) => ({
-		playlistId: playlistId,
-		songId: songId,
-	}));
+export const linkSongsWithPlaylist = async (
+  songIds: number[],
+  playlistId: number,
+  trx: DB | DBTransaction = db
+) => {
+  const records = songIds.map((songId) => ({
+    playlistId: playlistId,
+    songId: songId
+  }));
 
-	await trx.insert(playlistsSongs).values(records);
+  await trx.insert(playlistsSongs).values(records);
 };
 
-export const unlinkSongsFromPlaylist = async (songIds: number[], playlistId: number, trx: DB | DBTransaction = db) => {
-	await trx
-		.delete(playlistsSongs)
-		.where(and(inArray(playlistsSongs.songId, songIds), eq(playlistsSongs.playlistId, playlistId)));
+export const unlinkSongsFromPlaylist = async (
+  songIds: number[],
+  playlistId: number,
+  trx: DB | DBTransaction = db
+) => {
+  await trx
+    .delete(playlistsSongs)
+    .where(and(inArray(playlistsSongs.songId, songIds), eq(playlistsSongs.playlistId, playlistId)));
 };
 
-export const getPlaylistWithSongPaths = async (playlistId: number, trx: DB | DBTransaction = db) => {
-	const playlist = await trx.query.playlists.findFirst({
-		where: eq(playlists.id, playlistId),
-		with: {
-			songs: { with: { song: { columns: { path: true } } } },
-		},
-	});
+export const getPlaylistWithSongPaths = async (
+  playlistId: number,
+  trx: DB | DBTransaction = db
+) => {
+  const playlist = await trx.query.playlists.findFirst({
+    where: eq(playlists.id, playlistId),
+    with: {
+      songs: { with: { song: { columns: { path: true } } } }
+    }
+  });
 
-	return playlist;
+  return playlist;
 };
 
 export const getFavoritesPlaylistWithSongPaths = async (trx: DB | DBTransaction = db) => {
-	const timer = timeStart();
-	const favoriteSongs = await trx
-		.select({
-			path: songs.path,
-		})
-		.from(songs)
-		.where(eq(songs.isFavorite, true));
+  const timer = timeStart();
+  const favoriteSongs = await trx
+    .select({
+      path: songs.path
+    })
+    .from(songs)
+    .where(eq(songs.isFavorite, true));
 
-	timeEnd(timer, 'Time taken to fetch favorites playlist with song paths');
+  timeEnd(timer, 'Time taken to fetch favorites playlist with song paths');
 
-	return {
-		id: SpecialPlaylists.Favorites,
-		name: 'Favorites',
-		songs: favoriteSongs.map((song) => ({
-			song,
-		})),
-	};
+  return {
+    id: SpecialPlaylists.Favorites,
+    name: 'Favorites',
+    songs: favoriteSongs.map((song) => ({
+      song
+    }))
+  };
 };
 
 export const getHistoryPlaylistWithSongPaths = async (trx: DB | DBTransaction = db) => {
-	const timer = timeStart();
-	const historySongs = await trx
-		.select({
-			path: songs.path,
-		})
-		.from(playHistory)
-		.innerJoin(songs, eq(playHistory.songId, songs.id))
-		.orderBy(desc(playHistory.createdAt));
+  const timer = timeStart();
+  const historySongs = await trx
+    .select({
+      path: songs.path
+    })
+    .from(playHistory)
+    .innerJoin(songs, eq(playHistory.songId, songs.id))
+    .orderBy(desc(playHistory.createdAt));
 
-	timeEnd(timer, 'Time taken to fetch history playlist with song paths');
+  timeEnd(timer, 'Time taken to fetch history playlist with song paths');
 
-	return {
-		id: SpecialPlaylists.History,
-		name: 'History',
-		songs: historySongs.map((record) => ({
-			song: { path: record.path },
-		})),
-	};
+  return {
+    id: SpecialPlaylists.History,
+    name: 'History',
+    songs: historySongs.map((record) => ({
+      song: { path: record.path }
+    }))
+  };
 };
 
 export const createPlaylist = async (name: string, trx: DB | DBTransaction = db) => {
-	const [newPlaylist] = await trx.insert(playlists).values({ name }).returning();
+  const [newPlaylist] = await trx.insert(playlists).values({ name }).returning();
 
-	return newPlaylist;
+  return newPlaylist;
 };
 
-export const updatePlaylistName = async (playlistId: number, newName: string, trx: DB | DBTransaction = db) => {
-	return await trx.update(playlists).set({ name: newName }).where(eq(playlists.id, playlistId));
+export const updatePlaylistName = async (
+  playlistId: number,
+  newName: string,
+  trx: DB | DBTransaction = db
+) => {
+  return await trx.update(playlists).set({ name: newName }).where(eq(playlists.id, playlistId));
 };
 
 export const deletePlaylists = async (playlistIds: number[], trx: DB | DBTransaction = db) => {
-	const data = await trx.delete(playlists).where(inArray(playlists.id, playlistIds));
-	return data.affectedRows || 0;
+  const data = await trx.delete(playlists).where(inArray(playlists.id, playlistIds));
+  return data.affectedRows || 0;
 };

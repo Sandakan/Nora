@@ -39,7 +39,7 @@ export interface UseNotificationsReturn {
  *
  *     return <button onClick={showSuccess}>Show Success</button>;
  *   }
- *   ```
+ *   ```;
  *
  * @param options - Configuration options
  * @param options.maxNotifications - Maximum number of notifications to keep (default: 4)

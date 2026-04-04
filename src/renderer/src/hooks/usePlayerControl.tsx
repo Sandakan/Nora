@@ -32,7 +32,7 @@ const SongUnplayableErrorPrompt = lazy(() => import('../components/SongUnplayabl
  *   <button onClick={() => toggleSongPlayback()}>Play/Pause</button>
  *   playSong('song-id-123');
  *   updateCurrentSongPlaybackState(true);
- *   ```
+ *   ```;
  *
  * @param player - The HTMLAudioElement instance
  * @param playerQueue - The PlayerQueue instance for queue management

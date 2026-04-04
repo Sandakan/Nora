@@ -22,7 +22,7 @@ import ListeningDataSession from '../other/listeningDataSession';
  *     // Start recording when playing a song
  *     recordListeningData(songId, duration, false, true);
  *   }
- *   ```
+ *   ```;
  *
  * @param player - The HTML audio player element
  * @returns Object with the recordListeningData function

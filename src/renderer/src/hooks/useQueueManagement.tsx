@@ -42,7 +42,7 @@ export interface QueueManagementDependencies {
  *     // Update up next song
  *     changeUpNextSongData(nextSongData);
  *   }
- *   ```
+ *   ```;
  *
  * @param dependencies - Object containing required dependencies
  * @returns Object with queue management functions

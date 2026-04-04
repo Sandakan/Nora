@@ -80,7 +80,7 @@ export interface KeyboardShortcutDependencies {
  *
  *     return <div>...</div>;
  *   }
- *   ```
+ *   ```;
  *
  * @param dependencies - Object containing all required callback functions
  */

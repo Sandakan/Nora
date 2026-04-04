@@ -20,7 +20,7 @@ const ErrorPrompt = lazy(() => import('../components/ErrorPrompt'));
  *
  *   // Use in error handler
  *   player.addEventListener('error', (err) => managePlaybackErrors(err));
- *   ```
+ *   ```;
  *
  * @param player - The HTMLAudioElement instance
  * @param changePromptMenuData - Function to show error prompts to user

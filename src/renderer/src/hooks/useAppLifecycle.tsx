@@ -91,7 +91,7 @@ export interface AppLifecycleDependencies {
  *
  *     return <div>...</div>;
  *   }
- *   ```
+ *   ```;
  *
  * @param dependencies - Object containing all required callback functions
  */

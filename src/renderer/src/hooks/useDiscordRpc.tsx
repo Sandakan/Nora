@@ -22,7 +22,7 @@ import { store } from '../store/store';
  *
  *     useDiscordRpc(player);
  *   }
- *   ```
+ *   ```;
  *
  * @param player - The HTML audio player element
  */

@@ -23,7 +23,7 @@ export interface UseContextMenuReturn {
    *
    *   // Hide context menu
    *   updateContextMenuData(false);
-   *   ```
+   *   ```;
    *
    * @param isVisible - Whether the context menu should be visible
    * @param menuItems - Array of menu items to display (optional)
@@ -51,7 +51,7 @@ export interface UseContextMenuReturn {
    *     window.addEventListener('click', handleContextMenuVisibilityUpdate);
    *     return () => window.removeEventListener('click', handleContextMenuVisibilityUpdate);
    *   }, [handleContextMenuVisibilityUpdate]);
-   *   ```
+   *   ```;
    */
   handleContextMenuVisibilityUpdate: () => void;
 }
@@ -87,7 +87,7 @@ export interface UseContextMenuReturn {
  *
  *     return <div onContextMenu={handleRightClick}>{song.title}</div>;
  *   }
- *   ```
+ *   ```;
  *
  * @returns Object containing context menu management functions
  */

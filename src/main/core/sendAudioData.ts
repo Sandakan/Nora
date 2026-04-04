@@ -65,7 +65,7 @@ const getArtworkBuffer = async (artworkPath: string) => {
     const buffer = await sharp(realPath).toBuffer();
 
     return buffer;
-  } catch  {
+  } catch {
     // Failed to get artwork buffer most probably becuase the artwork path is a packaged path
     return undefined;
   }

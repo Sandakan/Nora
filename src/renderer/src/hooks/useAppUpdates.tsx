@@ -56,7 +56,7 @@ export interface AppUpdatesDependencies {
  *     // Manually trigger update check
  *     checkForAppUpdates();
  *   }
- *   ```
+ *   ```;
  *
  * @param dependencies - Object containing required callback functions and state
  * @returns Object with update management functions

@@ -1,5 +1,13 @@
 import { LOCAL_STORAGE_DEFAULT_TEMPLATE } from '@renderer/other/appReducer';
-import { type ReactNode, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import {
+  type ReactNode,
+  useContext,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState
+} from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
@@ -12,177 +20,185 @@ import Dropdown from '../../Dropdown';
 import EqualierBand from './EqualierBand';
 
 const presets: EqualizerPresetDropdownOptions[] = equalizerPresetsData.map((presetData) => {
-	return {
-		label: i18n.t(`equalizerPresets.${presetData.title}`),
-		value: presetData.title,
-		preset: presetData.preset,
-	};
+  return {
+    label: i18n.t(`equalizerPresets.${presetData.title}`),
+    value: presetData.title,
+    preset: presetData.preset
+  };
 });
 
 const equalizerPresets: EqualizerPresetDropdownOptions[] = [
-	{
-		label: i18n.t('equalizerPresets.custom'),
-		value: 'custom',
-		isDisabled: true,
-	},
-	...presets,
+  {
+    label: i18n.t('equalizerPresets.custom'),
+    value: 'custom',
+    isDisabled: true
+  },
+  ...presets
 ];
 
 const equalizerBandKeys: (keyof Equalizer)[] = [
-	'thirtyTwoHertzFilter',
-	'sixtyFourHertzFilter',
-	'hundredTwentyFiveHertzFilter',
-	'twoHundredFiftyHertzFilter',
-	'fiveHundredHertzFilter',
-	'thousandHertzFilter',
-	'twoThousandHertzFilter',
-	'fourThousandHertzFilter',
-	'eightThousandHertzFilter',
-	'sixteenThousandHertzFilter',
+  'thirtyTwoHertzFilter',
+  'sixtyFourHertzFilter',
+  'hundredTwentyFiveHertzFilter',
+  'twoHundredFiftyHertzFilter',
+  'fiveHundredHertzFilter',
+  'thousandHertzFilter',
+  'twoThousandHertzFilter',
+  'fourThousandHertzFilter',
+  'eightThousandHertzFilter',
+  'sixteenThousandHertzFilter'
 ];
 
 type Action = { type: undefined; data: Equalizer } | { type: keyof Equalizer; data: number };
 
 function reducer(state: Equalizer, action: Action): Equalizer {
-	if (action.type === undefined) return action.data;
-	if (action.type in state && typeof action.data === 'number') {
-		return {
-			...state,
-			[action.type]: action.data,
-		};
-	}
-	return state;
+  if (action.type === undefined) return action.data;
+  if (action.type in state && typeof action.data === 'number') {
+    return {
+      ...state,
+      [action.type]: action.data
+    };
+  }
+  return state;
 }
 
 const getPresetName = (equalizer: Equalizer): string => {
-	for (const presetData of equalizerPresets) {
-		if (presetData.preset) {
-			const { preset, value } = presetData;
+  for (const presetData of equalizerPresets) {
+    if (presetData.preset) {
+      const { preset, value } = presetData;
 
-			const isTheSamePresets = !isDataChanged(preset, equalizer);
-			if (isTheSamePresets) return value;
-		}
-	}
-	return 'custom';
+      const isTheSamePresets = !isDataChanged(preset, equalizer);
+      if (isTheSamePresets) return value;
+    }
+  }
+  return 'custom';
 };
 
 const EqualizerSettings = () => {
-	const { updateEqualizerOptions } = useContext(AppUpdateContext);
-	const { equalizerPreset } = useUserPreferences();
-	const { t } = useTranslation();
+  const { updateEqualizerOptions } = useContext(AppUpdateContext);
+  const { equalizerPreset } = useUserPreferences();
+  const { t } = useTranslation();
 
-	const [content, dispatch] = useReducer(reducer, LOCAL_STORAGE_DEFAULT_TEMPLATE.equalizerPreset);
+  const [content, dispatch] = useReducer(reducer, LOCAL_STORAGE_DEFAULT_TEMPLATE.equalizerPreset);
 
-	const [selectedPreset, setSelectedPreset] = useState<string>('flat');
-	const hasHydratedFromDatabaseRef = useRef(false);
-	const shouldSkipNextSaveRef = useRef(true);
+  const [selectedPreset, setSelectedPreset] = useState<string>('flat');
+  const hasHydratedFromDatabaseRef = useRef(false);
+  const shouldSkipNextSaveRef = useRef(true);
 
-	const isTheDefaultPreset = useMemo(() => selectedPreset === 'flat', [selectedPreset]);
+  const isTheDefaultPreset = useMemo(() => selectedPreset === 'flat', [selectedPreset]);
 
-	useEffect(() => {
-		const bands = equalizerPreset?.frequencyBands;
+  useEffect(() => {
+    const bands = equalizerPreset?.frequencyBands;
 
-		if (hasHydratedFromDatabaseRef.current || !bands || bands.length !== equalizerBandKeys.length) {
-			return;
-		}
+    if (hasHydratedFromDatabaseRef.current || !bands || bands.length !== equalizerBandKeys.length) {
+      return;
+    }
 
-		const hydratedEqualizer = { ...LOCAL_STORAGE_DEFAULT_TEMPLATE.equalizerPreset };
+    const hydratedEqualizer = { ...LOCAL_STORAGE_DEFAULT_TEMPLATE.equalizerPreset };
 
-		equalizerBandKeys.forEach((key, index) => {
-			hydratedEqualizer[key] = bands[index] ?? 0;
-		});
+    equalizerBandKeys.forEach((key, index) => {
+      hydratedEqualizer[key] = bands[index] ?? 0;
+    });
 
-		hasHydratedFromDatabaseRef.current = true;
-		shouldSkipNextSaveRef.current = true;
-		dispatch({ type: undefined, data: hydratedEqualizer });
-	}, [equalizerPreset]);
+    hasHydratedFromDatabaseRef.current = true;
+    shouldSkipNextSaveRef.current = true;
+    dispatch({ type: undefined, data: hydratedEqualizer });
+  }, [equalizerPreset]);
 
-	useEffect(() => {
-		setSelectedPreset(getPresetName(content));
+  useEffect(() => {
+    setSelectedPreset(getPresetName(content));
 
-		if (shouldSkipNextSaveRef.current) {
-			shouldSkipNextSaveRef.current = false;
-			return;
-		}
+    if (shouldSkipNextSaveRef.current) {
+      shouldSkipNextSaveRef.current = false;
+      return;
+    }
 
-		// Avoid overwriting DB with template defaults before we hydrate with DB values.
-		if (!hasHydratedFromDatabaseRef.current) {
-			return;
-		}
+    // Avoid overwriting DB with template defaults before we hydrate with DB values.
+    if (!hasHydratedFromDatabaseRef.current) {
+      return;
+    }
 
-		updateEqualizerOptions(content);
-	}, [content, updateEqualizerOptions]);
+    updateEqualizerOptions(content);
+  }, [content, updateEqualizerOptions]);
 
-	const equalizerBands = useMemo(() => {
-		const bands: ReactNode[] = [];
+  const equalizerBands = useMemo(() => {
+    const bands: ReactNode[] = [];
 
-		for (const [filterName, filterValue] of Object.entries(content)) {
-			const equalizerFilterName = filterName as keyof Equalizer;
-			const filterHertzValue = (equalizerBandHertzData as Record<string, number>)[equalizerFilterName];
+    for (const [filterName, filterValue] of Object.entries(content)) {
+      const equalizerFilterName = filterName as keyof Equalizer;
+      const filterHertzValue = (equalizerBandHertzData as Record<string, number>)[
+        equalizerFilterName
+      ];
 
-			if (filterHertzValue) {
-				bands.push(
-					<EqualierBand
-						key={equalizerFilterName}
-						value={filterValue}
-						hertzValue={filterHertzValue}
-						onChange={(val) => {
-							dispatch({ type: equalizerFilterName, data: val });
-						}}
-					/>,
-				);
-			}
-		}
-		return bands;
-	}, [content]);
+      if (filterHertzValue) {
+        bands.push(
+          <EqualierBand
+            key={equalizerFilterName}
+            value={filterValue}
+            hertzValue={filterHertzValue}
+            onChange={(val) => {
+              dispatch({ type: equalizerFilterName, data: val });
+            }}
+          />
+        );
+      }
+    }
+    return bands;
+  }, [content]);
 
-	return (
-		<li className="main-container equalizer-settings-container mb-12" id="equalizer-settings-container">
-			<div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center text-2xl font-medium">
-				<span className="material-icons-round-outlined mr-2">graphic_eq</span>
-				{t('settingsPage.equalizer')}
-			</div>
-			<div className="pl-6">
-				<div className="flex items-center justify-between">
-					<Dropdown
-						name="EqualizerPresetsDropdown"
-						options={equalizerPresets}
-						value={selectedPreset}
-						onChange={(e) => {
-							const presetValue = e.currentTarget.value as EqualierPresetDropdownOptionValues;
+  return (
+    <li
+      className="main-container equalizer-settings-container mb-12"
+      id="equalizer-settings-container"
+    >
+      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center text-2xl font-medium">
+        <span className="material-icons-round-outlined mr-2">graphic_eq</span>
+        {t('settingsPage.equalizer')}
+      </div>
+      <div className="pl-6">
+        <div className="flex items-center justify-between">
+          <Dropdown
+            name="EqualizerPresetsDropdown"
+            options={equalizerPresets}
+            value={selectedPreset}
+            onChange={(e) => {
+              const presetValue = e.currentTarget.value as EqualierPresetDropdownOptionValues;
 
-							for (const preset of equalizerPresets) {
-								if (preset.value === presetValue && preset.preset) {
-									dispatch({ type: undefined, data: preset.preset });
-								}
-							}
-						}}
-					/>
-					<Button
-						label={t('settingsPage.reset')}
-						iconName="restart_alt"
-						isDisabled={isTheDefaultPreset}
-						clickHandler={() => {
-							const defaultPreset = equalizerPresets[1].preset;
-							if (defaultPreset) {
-								dispatch({ type: undefined, data: defaultPreset });
-							}
-						}}
-					/>
-				</div>
+              for (const preset of equalizerPresets) {
+                if (preset.value === presetValue && preset.preset) {
+                  dispatch({ type: undefined, data: preset.preset });
+                }
+              }
+            }}
+          />
+          <Button
+            label={t('settingsPage.reset')}
+            iconName="restart_alt"
+            isDisabled={isTheDefaultPreset}
+            clickHandler={() => {
+              const defaultPreset = equalizerPresets[1].preset;
+              if (defaultPreset) {
+                dispatch({ type: undefined, data: defaultPreset });
+              }
+            }}
+          />
+        </div>
 
-				<div id="equalizer" className="equalizer relative mx-auto mt-4 flex max-w-6xl items-center justify-around px-8">
-					<span className="zero-line bg-background-color-2 dark:bg-dark-background-color-2 absolute mb-8 ml-12 h-0.5! w-[85%]! opacity-75" />
-					<div className="section flex h-full! flex-col px-2 py-4 text-xs opacity-80">
-						<span className="mb-20">+12dB</span>
-						<span className="">0dB</span>
-						<span className="mt-20 mb-8">-12dB</span>
-					</div>
-					{equalizerBands}
-				</div>
-			</div>
-		</li>
-	);
+        <div
+          id="equalizer"
+          className="equalizer relative mx-auto mt-4 flex max-w-6xl items-center justify-around px-8"
+        >
+          <span className="zero-line bg-background-color-2 dark:bg-dark-background-color-2 absolute mb-8 ml-12 h-0.5! w-[85%]! opacity-75" />
+          <div className="section flex h-full! flex-col px-2 py-4 text-xs opacity-80">
+            <span className="mb-20">+12dB</span>
+            <span className="">0dB</span>
+            <span className="mt-20 mb-8">-12dB</span>
+          </div>
+          {equalizerBands}
+        </div>
+      </div>
+    </li>
+  );
 };
 
 export default EqualizerSettings;

@@ -31,7 +31,7 @@ export interface UseMultiSelectionReturn {
  *       toggleMultipleSelections(true, 'SONGS');
  *     };
  *   }
- *   ```
+ *   ```;
  *
  * @returns Multi-selection management functions
  */

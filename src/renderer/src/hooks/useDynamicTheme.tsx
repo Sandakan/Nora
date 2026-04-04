@@ -80,7 +80,7 @@ export interface UseDynamicThemeReturn {
  *       // Later: resetStyles() to remove custom theme
  *     };
  *   }
- *   ```
+ *   ```;
  *
  * @returns Theme management functions
  */

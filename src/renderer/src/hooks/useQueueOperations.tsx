@@ -24,7 +24,7 @@ import { getQueue } from '../other/queueSingleton';
  *
  *     return <button onClick={handlePlayNext}>Play Next</button>;
  *   }
- *   ```
+ *   ```;
  */
 export function useQueueOperations() {
   // Get singleton queue directly - no need for hook dependency
