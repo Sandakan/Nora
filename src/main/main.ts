@@ -59,6 +59,9 @@ const MAIN_WINDOW_ASPECT_RATIO = 0;
 
 const MAIN_WINDOW_DEFAULT_SIZE_X = 1280;
 const MAIN_WINDOW_DEFAULT_SIZE_Y = 720;
+const MAIN_WINDOW_DEFAULT_ZOOM_FACTOR = 0.9;
+const MAIN_WINDOW_MIN_ZOOM_FACTOR = 0.5;
+const MAIN_WINDOW_MAX_ZOOM_FACTOR = 3;
 
 const MINI_PLAYER_MIN_SIZE_X = 270;
 const MINI_PLAYER_MIN_SIZE_Y = 200;
@@ -92,6 +95,7 @@ let isAudioPlaying = false;
 let isOnBatteryPower = false;
 let currentSongPath: string;
 let powerSaveBlockerId: number | null;
+let currentWindowZoomFactor = MAIN_WINDOW_DEFAULT_ZOOM_FACTOR;
 
 // / / / / / / INITIALIZATION / / / / / / /
 
@@ -166,6 +170,54 @@ export const getBackgroundColor = async () => {
   return '#FFFFFF';
 };
 
+const normalizeZoomFactor = (zoomFactor?: number | null) => {
+  if (typeof zoomFactor !== 'number' || !Number.isFinite(zoomFactor)) {
+    return MAIN_WINDOW_DEFAULT_ZOOM_FACTOR;
+  }
+
+  return Math.min(Math.max(zoomFactor, MAIN_WINDOW_MIN_ZOOM_FACTOR), MAIN_WINDOW_MAX_ZOOM_FACTOR);
+};
+
+const applyWindowZoomFactor = (zoomFactor: number, reason: string) => {
+  const normalizedZoomFactor = normalizeZoomFactor(zoomFactor);
+  const existingZoomFactor = mainWindow.webContents.getZoomFactor();
+
+  currentWindowZoomFactor = normalizedZoomFactor;
+
+  if (Math.abs(existingZoomFactor - normalizedZoomFactor) > 0.001) {
+    mainWindow.webContents.setZoomFactor(normalizedZoomFactor);
+    logger.debug('Applied renderer zoom factor.', {
+      reason,
+      previousZoomFactor: existingZoomFactor,
+      nextZoomFactor: normalizedZoomFactor
+    });
+  }
+};
+
+const persistWindowZoomFactor = async (zoomFactor: number) => {
+  try {
+    await saveUserSettings({ zoomFactor });
+  } catch (error) {
+    logger.error('Failed to persist renderer zoom factor.', { zoomFactor, error });
+  }
+};
+
+const handleZoomFactorChanged = async () => {
+  const zoomFactor = normalizeZoomFactor(mainWindow.webContents.getZoomFactor());
+
+  if (Math.abs(zoomFactor - currentWindowZoomFactor) <= 0.001) {
+    return;
+  }
+
+  currentWindowZoomFactor = zoomFactor;
+  logger.debug('Persisting updated renderer zoom factor.', { zoomFactor });
+  await persistWindowZoomFactor(zoomFactor);
+};
+
+const restoreWindowZoomOnFocus = () => {
+  applyWindowZoomFactor(currentWindowZoomFactor, 'window-focus');
+};
+
 const createWindow = async () => {
   if (IS_DEVELOPMENT) await installExtensions();
 
@@ -176,7 +228,7 @@ const createWindow = async () => {
     minWidth: 700,
     title: 'Nora',
     webPreferences: {
-      zoomFactor: 0.9,
+      zoomFactor: currentWindowZoomFactor,
       preload: path.resolve(import.meta.dirname, '../preload/index.mjs')
     },
     visualEffectState: 'followWindow',
@@ -227,7 +279,9 @@ protocol.registerSchemesAsPrivileged([
 app
   .whenReady()
   .then(async () => {
-    const { windowState } = await getUserSettings();
+    const { windowState, zoomFactor } = await getUserSettings();
+
+    currentWindowZoomFactor = normalizeZoomFactor(zoomFactor);
 
     if (BrowserWindow.getAllWindows().length === 0) await createWindow();
 
@@ -300,6 +354,14 @@ app
     mainWindow.webContents.addListener('zoom-changed', (_, dir) =>
       logger.debug(`Renderer zoomed ${dir}. ${mainWindow.webContents.getZoomLevel()}`)
     );
+    // oxlint-disable-next-line promise/no-nesting
+    mainWindow.webContents
+      .setVisualZoomLevelLimits(1, 1)
+      .catch((error) => logger.error('Failed to set visual zoom limits.', { error }));
+    mainWindow.on('focus', restoreWindowZoomOnFocus);
+    mainWindow.webContents.on('zoom-changed', () => {
+      void handleZoomFactorChanged();
+    });
 
     // ? / / / / / / / / /  IPC RENDERER EVENTS  / / / / / / / / / / / /
     if (mainWindow) {
@@ -346,6 +408,8 @@ async function manageWindowFinishLoad() {
       true
     );
   }
+
+  applyWindowZoomFactor(currentWindowZoomFactor, 'window-finish-load');
 
   mainWindow.show();
   manageWindowPositionInMonitor();

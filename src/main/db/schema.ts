@@ -4,6 +4,7 @@ import {
   boolean,
   customType,
   decimal,
+  doublePrecision,
   index,
   integer,
   json,
@@ -447,6 +448,7 @@ export const userSettings = pgTable(
     mainWindowHeight: integer('main_window_height'),
     miniPlayerWidth: integer('mini_player_width'),
     miniPlayerHeight: integer('mini_player_height'),
+    zoomFactor: doublePrecision('zoom_factor').notNull().default(0.9),
 
     // Window state
     windowState: varchar('window_state', { length: 20 }).notNull().default('normal'),

@@ -434,6 +434,7 @@ declare global {
     mainWindowHeight: number | null;
     miniPlayerWidth: number | null;
     miniPlayerHeight: number | null;
+    zoomFactor: number;
     windowState: string;
     recentSearches: string[];
     customLrcFilesSaveLocation: string | null;

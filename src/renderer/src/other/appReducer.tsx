@@ -626,6 +626,7 @@ export const USER_DATA_TEMPLATE: UserData = {
   miniPlayerY: null,
   miniPlayerWidth: null,
   miniPlayerHeight: null,
+  zoomFactor: 0.9,
   recentSearches: [],
   windowState: 'normal'
 };
