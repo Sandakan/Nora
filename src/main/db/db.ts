@@ -65,15 +65,20 @@ export const nukeDatabase = async () => {
 };
 
 export const exportDatabase = async () => {
-  // TODO: Temporary solution until https://github.com/electric-sql/pglite/issues/606 is resolved
-  const newPgliteInstance = await pgliteInstance.clone();
+  const initialSearchPath = (
+    await pgliteInstance.query<{ search_path: string }>('SHOW SEARCH_PATH;')
+  ).rows[0].search_path;
 
-  const dump = await pgDump({ pg: newPgliteInstance as PGlite });
-  const dumpText = await dump.text();
+  logger.debug('Current database search_path:', { initialSearchPath });
 
-  await newPgliteInstance.close();
+  const clonedPg = await pgliteInstance.clone();
 
-  return dumpText;
+  const dump = await pgDump({ pg: clonedPg as PGlite });
+
+  const [, dumpTextPromise] = await Promise.allSettled([clonedPg.close(), dump.text()]);
+
+  const sql = dumpTextPromise.status === 'fulfilled' ? dumpTextPromise.value : '';
+  return sql;
 };
 
 /**
