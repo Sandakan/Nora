@@ -7,7 +7,8 @@
 
 ## 🎯 Project Overview
 
-**Nora** is an elegant, feature-rich music player built with Electron and React, inspired by Oto Music (Android). It emphasizes simplicity, beautiful design, and essential music management features that default music apps often lack.
+**Nora** is an elegant, feature-rich music player built with Electron and React, inspired by Oto Music (Android). It
+emphasizes simplicity, beautiful design, and essential music management features that default music apps often lack.
 
 ### Core Technologies
 
@@ -83,7 +84,8 @@ nora/
 
 ## 🖥️ Main Process Architecture (Electron)
 
-The main process is the heart of Nora's Electron application, handling system-level operations, database management, file system watching, and IPC communication.
+The main process is the heart of Nora's Electron application, handling system-level operations, database management,
+file system watching, and IPC communication.
 
 ### Main Process Entry Point (`src/main/main.ts`)
 
@@ -207,13 +209,11 @@ MINI_PLAYER_ASPECT_RATIO = 17/10
 ipcMain.handle('app/getSong', (_, id: string) => sendAudioData(id));
 
 // Fire-and-forget (no return)
-ipcMain.on('app/player/songPlaybackStateChange', (_, isPlaying: boolean) =>
-  toggleAudioPlayingState(isPlaying)
-);
+ipcMain.on('app/player/songPlaybackStateChange', (_, isPlaying: boolean) => toggleAudioPlayingState(isPlaying));
 
 // With abort signal (cancellable long operations)
 ipcMain.handle('app/deleteSongsFromSystem', (_, paths: string[], isPermanent: boolean) =>
-  deleteSongsFromSystem(paths, abortSignal, isPermanent)
+	deleteSongsFromSystem(paths, abortSignal, isPermanent),
 );
 ```
 
@@ -250,7 +250,7 @@ db/
 ```typescript
 // PGlite with extensions
 const pgliteInstance = await PGlite.create(DB_PATH, {
-  extensions: { pg_trgm, citext } // Full-text search, case-insensitive text
+	extensions: { pg_trgm, citext }, // Full-text search, case-insensitive text
 });
 
 // Drizzle ORM instance
@@ -262,7 +262,7 @@ await seedDatabase(); // Insert default settings if needed
 
 // Graceful shutdown
 export const closeDatabaseInstance = async () => {
-  await pgliteInstance.close();
+	await pgliteInstance.close();
 };
 ```
 
@@ -273,22 +273,22 @@ import { db } from '../db';
 import { songs, artists } from '../schema';
 
 export async function getSongById(id: number) {
-  const [song] = await db.select().from(songs).where(eq(songs.id, id)).limit(1);
-  return song;
+	const [song] = await db.select().from(songs).where(eq(songs.id, id)).limit(1);
+	return song;
 }
 
 export async function getAllSongs(sortType?: SongSortTypes, filterType?: SongFilterTypes) {
-  let query = db.select().from(songs);
+	let query = db.select().from(songs);
 
-  if (filterType === 'favorites') {
-    query = query.where(eq(songs.isFavorite, true));
-  }
+	if (filterType === 'favorites') {
+		query = query.where(eq(songs.isFavorite, true));
+	}
 
-  if (sortType === 'aToZ') {
-    query = query.orderBy(asc(songs.title));
-  }
+	if (sortType === 'aToZ') {
+		query = query.orderBy(asc(songs.title));
+	}
 
-  return await query;
+	return await query;
 }
 ```
 
@@ -354,25 +354,25 @@ import { dataUpdateEvent } from '@main/main';
 import logger from '@main/logger';
 
 export default async function toggleLikeSongs(songIds: string[], isLikeSong?: boolean) {
-  try {
-    const songIdsNum = songIds.map(Number);
+	try {
+		const songIdsNum = songIds.map(Number);
 
-    // Update database
-    await db
-      .update(songs)
-      .set({ isFavorite: isLikeSong ?? true })
-      .where(inArray(songs.id, songIdsNum));
+		// Update database
+		await db
+			.update(songs)
+			.set({ isFavorite: isLikeSong ?? true })
+			.where(inArray(songs.id, songIdsNum));
 
-    // Notify renderer of data change
-    dataUpdateEvent('songs/favoriteStatus', songIds);
+		// Notify renderer of data change
+		dataUpdateEvent('songs/favoriteStatus', songIds);
 
-    logger.info(`Toggled like status for ${songIds.length} songs`, { songIds, isLikeSong });
+		logger.info(`Toggled like status for ${songIds.length} songs`, { songIds, isLikeSong });
 
-    return { success: true };
-  } catch (error) {
-    logger.error('Failed to toggle like songs', { songIds, error });
-    throw error;
-  }
+		return { success: true };
+	} catch (error) {
+		logger.error('Failed to toggle like songs', { songIds, error });
+		throw error;
+	}
 }
 ```
 
@@ -394,10 +394,10 @@ export default async function toggleLikeSongs(songIds: string[], isLikeSong?: bo
 ```typescript
 // Uses Node.js fs.watch() with recursive option
 const watcher = fs.watch(folderPath, { recursive: true }, (eventType, filename) => {
-  if (eventType === 'rename') {
-    // Song added or deleted
-    checkFolderForContentModifications(folderPath);
-  }
+	if (eventType === 'rename') {
+		// Song added or deleted
+		checkFolderForContentModifications(folderPath);
+	}
 });
 
 // Cleanup on app quit
@@ -464,7 +464,8 @@ logger.debug('Database query executed', { query, duration });
 
 ### Main Process State Management
 
-**Key Insight**: Unlike the renderer (which uses TanStack Store), the main process uses **module-level variables** for state:
+**Key Insight**: Unlike the renderer (which uses TanStack Store), the main process uses **module-level variables** for
+state:
 
 ```typescript
 // main.ts
@@ -487,7 +488,8 @@ let currentSongPath: string; // Persisted for cleanup operations
 
 ### 1. Custom Hook Architecture
 
-**Philosophy**: App.tsx has been refactored from 2,013 lines to 365 lines (~82% reduction) by extracting logic into focused, reusable hooks.
+**Philosophy**: App.tsx has been refactored from 2,013 lines to 365 lines (~82% reduction) by extracting logic into
+focused, reusable hooks.
 
 **Hook Categories**:
 
@@ -506,36 +508,38 @@ let currentSongPath: string; // Persisted for cleanup operations
 const player = new AudioPlayer();
 
 export function useAudioPlayer() {
-  useEffect(() => {
-    const interval = setInterval(() => {
-      // player is always the same instance, no stale closures
-      if (!player.paused) dispatchCurrentSongTime();
-    }, 100);
-    return () => clearInterval(interval);
-  }, []);
+	useEffect(() => {
+		const interval = setInterval(() => {
+			// player is always the same instance, no stale closures
+			if (!player.paused) dispatchCurrentSongTime();
+		}, 100);
+		return () => clearInterval(interval);
+	}, []);
 
-  return player; // Return instance directly (not wrapped in ref)
+	return player; // Return instance directly (not wrapped in ref)
 }
 
 // ❌ BAD: Ref-based singletons with intervals lead to stale closure issues
 export function useAudioPlayer() {
-  const playerRef = useRef<AudioPlayer>();
+	const playerRef = useRef<AudioPlayer>();
 
-  useEffect(() => {
-    playerRef.current = new AudioPlayer(); // Ref assigned after effect creation
+	useEffect(() => {
+		playerRef.current = new AudioPlayer(); // Ref assigned after effect creation
 
-    const interval = setInterval(() => {
-      // playerRef.current may be null/stale when closure was created
-      if (!playerRef.current?.paused) dispatchCurrentSongTime();
-    }, 100);
-    return () => clearInterval(interval);
-  }, []);
+		const interval = setInterval(() => {
+			// playerRef.current may be null/stale when closure was created
+			if (!playerRef.current?.paused) dispatchCurrentSongTime();
+		}, 100);
+		return () => clearInterval(interval);
+	}, []);
 
-  return playerRef.current; // Timing issues: ref not ready yet
+	return playerRef.current; // Timing issues: ref not ready yet
 }
 ```
 
-**Key Insight**: For singleton services (AudioPlayer, PlayerQueue) that are accessed by intervals, timers, or event handlers, use **module-level initialization** (before the hook function), NOT refs. Refs inside hooks with intervals can capture stale/null references due to closure timing.
+**Key Insight**: For singleton services (AudioPlayer, PlayerQueue) that are accessed by intervals, timers, or event
+handlers, use **module-level initialization** (before the hook function), NOT refs. Refs inside hooks with intervals can
+capture stale/null references due to closure timing.
 
 ### 2. State Management
 
@@ -549,14 +553,14 @@ import storage from '../utils/localStorage';
 export const store = new Store(DEFAULT_REDUCER_DATA);
 
 export const dispatch = (options: AppReducerStateActions) => {
-  store.setState((state) => {
-    return appReducer(state, options);
-  });
+	store.setState((state) => {
+		return appReducer(state, options);
+	});
 };
 
 // Automatically sync state to localStorage
 store.subscribe((state) => {
-  storage.setLocalStorage(state.currentVal.localStorage);
+	storage.setLocalStorage(state.currentVal.localStorage);
 });
 ```
 
@@ -606,14 +610,14 @@ window.api.unknownSource; // External file associations
 
    ```typescript
    useEffect(() => {
-     const handleEvent = (e: unknown) => {
-       /* handler */
-     };
-     window.api.playerControls.toggleSongPlayback(handleEvent);
+   	const handleEvent = (e: unknown) => {
+   		/* handler */
+   	};
+   	window.api.playerControls.toggleSongPlayback(handleEvent);
 
-     return () => {
-       window.api.playerControls.removeTogglePlaybackStateEvent(handleEvent);
-     };
+   	return () => {
+   		window.api.playerControls.removeTogglePlaybackStateEvent(handleEvent);
+   	};
    }, [dependencies]);
    ```
 
@@ -629,7 +633,7 @@ window.api.unknownSource; // External file associations
 ```typescript
 // Player position updates (dispatched by useAudioPlayer every 100ms)
 const playerPositionChange = new CustomEvent('player/positionChange', {
-  detail: roundTo(player.currentTime || 0, 2)
+	detail: roundTo(player.currentTime || 0, 2),
 });
 document.dispatchEvent(playerPositionChange);
 
@@ -638,33 +642,103 @@ this.emit('queueChange', this.queue);
 this.emit('positionChange', this.currentSongIndex);
 ```
 
-**Pattern**: Use event emitters (PlayerQueue) and CustomEvents (document-level) for real-time updates without tight coupling.
+**Pattern**: Use event emitters (PlayerQueue) and CustomEvents (document-level) for real-time updates without tight
+coupling.
 
 ### 5. Data Fetching with TanStack Query
 
-**Query Keys Factory** (`@lukemorales/query-key-factory`):
+All data fetching follows a **centralized query key** pattern using `@lukemorales/query-key-factory`. Every query is
+defined in `src/renderer/src/queries/` with the same IPC request structure.
+
+#### Query Module Organization
+
+| Module         | Queries                                                                                                | Purpose                                    |
+| -------------- | ------------------------------------------------------------------------------------------------------ | ------------------------------------------ |
+| `songs.ts`     | `all()`, `allSongInfo()`, `singleSongInfo()`, `favorites()`, `history()`, `queue()`, `similarTracks()` | Song catalog and playlist-specific queries |
+| `aritsts.ts`   | `all()`, `single()`, `fetchOnlineInfo()`                                                               | Artist data and online metadata            |
+| `albums.ts`    | `all()`, `single()`                                                                                    | Album queries                              |
+| `playlists.ts` | `all()`, `single()`, `songArtworks()`                                                                  | Playlist data and artwork                  |
+| `home.ts`      | `recentlyPlayedSongs()`, `recentSongArtists()`, `mostLovedSongs()`                                     | Home page metrics                          |
+| `genres.ts`    | `all()`, `single()`                                                                                    | Genre queries                              |
+| `listens.ts`   | `single()`                                                                                             | Song listening data                        |
+| `search.ts`    | `recentResults()`, `query()`                                                                           | Search queries and history                 |
+| `settings.ts`  | Settings/user preferences with mutations                                                               | User configuration                         |
+| `other.ts`     | `databaseMetrics()`                                                                                    | App-level metrics                          |
+
+#### Query Keys Factory Pattern
 
 ```typescript
-import { createQueryKeyStore } from '@lukemorales/query-key-factory';
+import { createQueryKeys } from '@lukemorales/query-key-factory';
 
-export const settingsQuery = createQueryKeyStore({
-  settings: {
-    all: {
-      queryKey: ['settings', 'all'],
-      queryFn: () => window.api.settingsHelpers.getUserSettings()
-    },
-    theme: {
-      queryKey: ['settings', 'theme'],
-      queryFn: () => window.api.settingsHelpers.getUserSettings().then((s) => s.theme)
-    }
-  }
+// Simple query (no parameters)
+export const homeQuery = createQueryKeys('home', {
+	recentlyPlayedSongs: {
+		queryKey: null,
+		queryFn: async (): Promise<SongData[]> => {
+			try {
+				const { data: playlists } = await window.api.playlistsData.getPlaylistData([SpecialPlaylists.History]);
+				const historyPlaylist = playlists[0];
+				if (!historyPlaylist?.songs.length) return [];
+
+				const songs = await window.api.audioLibraryControls.getSongInfo(
+					historyPlaylist.songs,
+					undefined,
+					undefined,
+					35,
+					true,
+				);
+				return Array.isArray(songs) ? songs : [];
+			} catch (error) {
+				console.error(error);
+				return [];
+			}
+		},
+	},
 });
 
-// Usage in components
-const { data: userSettings } = useSuspenseQuery(settingsQuery.all);
+// Parameterized query
+export const songQuery = createQueryKeys('songs', {
+	all: (data: { sortType: SongSortTypes; filterType?: SongFilterTypes; start?: number; end?: number }) => {
+		const { sortType = 'addedOrder', start = 0, end = 0 } = data;
+		return {
+			queryKey: [`sortType=${sortType}`, `start=${start}`, `end=${end}`, `limit=${end - start}`],
+			queryFn: () => window.api.audioLibraryControls.getAllSongs(sortType, undefined, { start, end }),
+		};
+	},
+});
 ```
 
-**Pattern**: Centralized query key management for type-safe, cacheable data fetching.
+#### Usage Patterns
+
+**Route Loader (Pre-fetching)**:
+
+```typescript
+export const Route = createFileRoute('/main-player/home/')({
+	component: HomePage,
+	loader: async () => {
+		await queryClient.ensureQueryData(songQuery.all({ sortType: 'dateAddedDescending', start: 0, end: 30 }));
+		await queryClient.ensureQueryData(homeQuery.recentlyPlayedSongs);
+	},
+});
+```
+
+**Component (Suspense)**:
+
+```typescript
+const { data: recentlyPlayedSongs } = useSuspenseQuery(homeQuery.recentlyPlayedSongs);
+const { data: latestSongs } = useSuspenseQuery(songQuery.all({ sortType: 'dateAddedDescending', start: 0, end: 30 }));
+```
+
+#### Best Practices
+
+- **Keep queries pure**: All error handling inside queryFn; return safe defaults (empty arrays, null)
+- **Centralize all queries**: Define in `src/renderer/src/queries/*.ts`, never inline in components
+- **Array stability**: Sort array parameters before joining in cache keys: `songIds=${[...songIds].sort().join(',')}`
+- **Type-safe defaults**: Return `Promise<SongData[]>` (empty array) instead of throwing
+- **Pre-fetch in loaders**: Use `queryClient.ensureQueryData()` in route loaders for better UX
+- **Invalidate after mutations**: Call `queryClient.invalidateQueries()` to refresh stale data
+
+For detailed patterns, file structure, and debugging tips, see the TanStack Query Patterns skill.
 
 ---
 
@@ -690,13 +764,13 @@ const { data: userSettings } = useSuspenseQuery(settingsQuery.all);
 ```typescript
 // useDynamicTheme.tsx
 useEffect(() => {
-  const { data: userSettings } = useSuspenseQuery(settingsQuery.all);
+	const { data: userSettings } = useSuspenseQuery(settingsQuery.all);
 
-  if (userSettings.isDarkMode) {
-    document.body.classList.add('dark');
-  } else {
-    document.body.classList.remove('dark');
-  }
+	if (userSettings.isDarkMode) {
+		document.body.classList.add('dark');
+	} else {
+		document.body.classList.remove('dark');
+	}
 }, [userSettings.isDarkMode]);
 ```
 
@@ -729,12 +803,12 @@ import { describe, test, expect } from 'vitest';
 import { parseLyrics } from '@common/parseLyrics';
 
 describe('parseLyrics', () => {
-  test('should parse synced lyrics', () => {
-    const input = '[00:12.00]Line 1\n[00:15.00]Line 2';
-    const result = parseLyrics(input);
-    expect(result.isSynced).toBe(true);
-    expect(result.lyrics).toHaveLength(2);
-  });
+	test('should parse synced lyrics', () => {
+		const input = '[00:12.00]Line 1\n[00:15.00]Line 2';
+		const result = parseLyrics(input);
+		expect(result.isSynced).toBe(true);
+		expect(result.lyrics).toHaveLength(2);
+	});
 });
 ```
 
@@ -746,11 +820,11 @@ import { vi } from 'vitest';
 
 // Module mocking
 vi.mock('../../../src/main/logger', () => ({
-  default: {
-    info: vi.fn((...data) => console.log(...data)),
-    error: vi.fn((...data) => console.error(...data)),
-    warn: vi.fn((...data) => console.warn(...data))
-  }
+	default: {
+		info: vi.fn((...data) => console.log(...data)),
+		error: vi.fn((...data) => console.error(...data)),
+		warn: vi.fn((...data) => console.warn(...data)),
+	},
 }));
 
 // Spy on console methods
@@ -823,14 +897,14 @@ npm run husky-test          # Run before commits (Prettier + tests)
 
 ```tsx
 useEffect(() => {
-  const handler = (e: unknown) => {
-    /* ... */
-  };
-  window.api.playerControls.toggleSongPlayback(handler);
+	const handler = (e: unknown) => {
+		/* ... */
+	};
+	window.api.playerControls.toggleSongPlayback(handler);
 
-  return () => {
-    window.api.playerControls.removeTogglePlaybackStateEvent(handler);
-  };
+	return () => {
+		window.api.playerControls.removeTogglePlaybackStateEvent(handler);
+	};
 }, [dependencies]);
 ```
 
@@ -838,19 +912,23 @@ useEffect(() => {
 
 **Problem**: localStorage updates may not be immediately available after dispatch.
 
-**Solution**: Store subscription in `store.ts` ensures automatic persistence. For immediate reads, use `storage.getLocalStorage()` directly.
+**Solution**: Store subscription in `store.ts` ensures automatic persistence. For immediate reads, use
+`storage.getLocalStorage()` directly.
 
 ### 4. Dark Mode Not Updating
 
 **Problem**: Dark mode class not applied to `document.body`.
 
-**Solution**: Ensure `useDynamicTheme` is called in App.tsx and uses `useSuspenseQuery(settingsQuery.all)` for reactive updates.
+**Solution**: Ensure `useDynamicTheme` is called in App.tsx and uses `useSuspenseQuery(settingsQuery.all)` for reactive
+updates.
 
 ### 5. TanStack Router Migration (In Progress)
 
-**Status**: Custom page navigation (`changeCurrentActivePage`, `updatePageHistoryIndex`) is deprecated but still present in App.tsx (~90 lines).
+**Status**: Custom page navigation (`changeCurrentActivePage`, `updatePageHistoryIndex`) is deprecated but still present
+in App.tsx (~90 lines).
 
-**Action Required**: Do not add new dependencies on these functions. Use TanStack Router's `<Link>`, `useNavigate()`, and `useRouter()` instead.
+**Action Required**: Do not add new dependencies on these functions. Use TanStack Router's `<Link>`, `useNavigate()`,
+and `useRouter()` instead.
 
 **Cleanup Planned**: These functions will be removed once all pages migrate to TanStack Router routes.
 
@@ -880,36 +958,36 @@ Follow the language-agnostic style guide in `coding_style_guide.instructions.md`
 ```tsx
 // ✅ GOOD: Guard clauses flatten logic
 function playSong(songId: string) {
-  if (!songId) {
-    console.error('No song ID provided');
-    return;
-  }
+	if (!songId) {
+		console.error('No song ID provided');
+		return;
+	}
 
-  const song = await getSongById(songId);
-  if (!song) {
-    console.error('Song not found');
-    return;
-  }
+	const song = await getSongById(songId);
+	if (!song) {
+		console.error('Song not found');
+		return;
+	}
 
-  // Main logic here (flat, readable)
-  player.loadSong(song);
-  player.play();
+	// Main logic here (flat, readable)
+	player.loadSong(song);
+	player.play();
 }
 
 // ❌ BAD: Nested conditionals
 function playSong(songId: string) {
-  if (songId) {
-    getSongById(songId).then((song) => {
-      if (song) {
-        player.loadSong(song);
-        player.play();
-      } else {
-        console.error('Song not found');
-      }
-    });
-  } else {
-    console.error('No song ID provided');
-  }
+	if (songId) {
+		getSongById(songId).then((song) => {
+			if (song) {
+				player.loadSong(song);
+				player.play();
+			} else {
+				console.error('Song not found');
+			}
+		});
+	} else {
+		console.error('No song ID provided');
+	}
 }
 ```
 
@@ -1009,15 +1087,22 @@ import AudioPlayer from '../other/player';
 2. **Follow module-level singleton pattern** for services with intervals/timers
 3. **Add IPC methods** in `src/preload/index.ts` and `src/main/ipc.ts` if main process access is needed
 4. **Update state via `dispatch()`** for UI updates
-5. **Use TanStack Query** for data fetching (not custom fetch hooks)
+5. **For data fetching**:
+   - Create a new query module in `src/renderer/src/queries/` using `createQueryKeys`
+   - Define all related queries in one factory
+   - Use `useSuspenseQuery()` in components, not custom fetch hooks
+   - Pre-fetch in route loaders with `queryClient.ensureQueryData()`
 6. **Add cleanup functions** for all event listeners
+
+For detailed TanStack Query patterns, see the **TanStack Query Patterns skill**.
 
 ### When Refactoring
 
 1. **Check `REFACTORING_APP_ANALYSIS.md`** (if exists) for ongoing refactoring plans
 2. **Maintain single responsibility** for each hook/component
 3. **Extract reusable logic** into utility functions in `src/renderer/src/utils/` or `src/common/`
-4. **Test incrementally** after each change (use `npm test`)
+4. **Consolidate query modules** if similar data fetches can be grouped (e.g., artist + album queries in `artists.ts`)
+5. **Test incrementally** after each change (use `npm test`)
 
 ### When Fixing Bugs
 
@@ -1026,6 +1111,7 @@ import AudioPlayer from '../other/player';
 3. **Verify localStorage sync** for state persistence issues
 4. **Check IPC handler existence** in `src/main/ipc.ts` for "method not found" errors
 5. **Validate hook dependencies** in `useEffect` arrays
+6. **Inspect query cache** for stale data issues: use React Query DevTools or `queryClient.getQueryData()`
 
 ---
 
@@ -1037,6 +1123,12 @@ import AudioPlayer from '../other/player';
 - **TanStack Router**: https://tanstack.com/router/latest
 - **Tailwind CSS v4**: https://tailwindcss.com/docs
 - **Drizzle ORM**: https://orm.drizzle.team/docs
+
+### Agent Skills
+
+- **TanStack Query Patterns** (`.agents/skills/tanstack-query-patterns/SKILL.md`): Comprehensive guide for creating and
+  consuming queries following Nora conventions (query module organization, file structure, error handling, cache
+  invalidation, debugging)
 
 ---
 
@@ -1067,4 +1159,5 @@ When making changes:
 
 ---
 
-_This document is maintained to help AI coding agents be immediately productive in the Nora codebase. Update as architectural patterns evolve._
+_This document is maintained to help AI coding agents be immediately productive in the Nora codebase. Update as
+architectural patterns evolve._

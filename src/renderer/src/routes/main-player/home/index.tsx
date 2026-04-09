@@ -13,10 +13,11 @@ import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
 import useResizeObserver from '@renderer/hooks/useResizeObserver';
 import { queryClient } from '@renderer/index';
 import { artistQuery } from '@renderer/queries/aritsts';
+import { homeQuery } from '@renderer/queries/home';
 import { songQuery } from '@renderer/queries/songs';
 import storage from '@renderer/utils/localStorage';
 // import DataFetchingImage from '../../../assets/images/svg/Umbrella_Monochromatic.svg';
-import { queryOptions, useSuspenseQuery } from '@tanstack/react-query';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { lazy, useCallback, useContext, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -24,34 +25,15 @@ import { useTranslation } from 'react-i18next';
 import favoritesPlaylistCoverImage from '../../../assets/images/webp/favorites-playlist-icon.webp';
 import historyPlaylistCoverImage from '../../../assets/images/webp/history-playlist-icon.webp';
 
-// TODO: Implement logic to fetch recently played songs from the backend or local storage.
-const fetchRecentlyPlayedSongs = async (): Promise<SongData[]> => [];
-// TODO: Implement logic to fetch recent song artists from the backend or local storage.
-const fetchRecentSongArtists = async (): Promise<Artist[]> => [];
-const fetchMostLovedSongs = async (): Promise<AudioInfo[]> => [];
-
-const recentlyPlayedSongQueryOptions = queryOptions({
-  queryKey: ['recentlyPlayedSongs'],
-  queryFn: () => fetchRecentlyPlayedSongs()
-});
-const recentSongArtistsQueryOptions = queryOptions({
-  queryKey: ['recentSongArtists'],
-  queryFn: () => fetchRecentSongArtists()
-});
-const mostLovedSongsQueryOptions = queryOptions({
-  queryKey: ['mostLovedSongs'],
-  queryFn: () => fetchMostLovedSongs()
-});
-
 export const Route = createFileRoute('/main-player/home/')({
   component: HomePage,
   loader: async () => {
     await queryClient.ensureQueryData(
       songQuery.all({ sortType: 'dateAddedDescending', start: 0, end: 30 })
     );
-    await queryClient.ensureQueryData(recentlyPlayedSongQueryOptions);
-    await queryClient.ensureQueryData(recentSongArtistsQueryOptions);
-    await queryClient.ensureQueryData(mostLovedSongsQueryOptions);
+    await queryClient.ensureQueryData(homeQuery.recentlyPlayedSongs);
+    await queryClient.ensureQueryData(homeQuery.recentSongArtists);
+    await queryClient.ensureQueryData(homeQuery.mostLovedSongs);
     await queryClient.ensureQueryData(
       artistQuery.all({
         sortType: 'mostLovedDescending',
@@ -76,11 +58,11 @@ function HomePage() {
   const {
     data: { data: latestSongs }
   } = useSuspenseQuery(songQuery.all({ sortType: 'dateAddedDescending', start: 0, end: 30 }));
-  const { data: recentlyPlayedSongs } = useSuspenseQuery(recentlyPlayedSongQueryOptions);
+  const { data: recentlyPlayedSongs } = useSuspenseQuery(homeQuery.recentlyPlayedSongs);
 
-  const { data: recentSongArtists } = useSuspenseQuery(recentSongArtistsQueryOptions);
+  const { data: recentSongArtists } = useSuspenseQuery(homeQuery.recentSongArtists);
 
-  const { data: mostLovedSongs } = useSuspenseQuery(mostLovedSongsQueryOptions);
+  const { data: mostLovedSongs } = useSuspenseQuery(homeQuery.mostLovedSongs);
 
   const {
     data: { data: mostLovedArtists }
@@ -284,14 +266,16 @@ function HomePage() {
               iconName: 'notifications_active',
               handlerFunction: () => {
                 const duration = Math.random() * 10000;
+                const value = roundTo(Math.random(), 2);
                 addNewNotifications([
                   {
                     id: duration.toString(),
                     duration: 5 * 60 * 1000,
                     // duration,
-                    content: `This is a notification with a number ${roundTo(Math.random(), 2)}`,
+                    content: `This is a notification with a number ${value}`,
                     iconName: 'notifications_active',
-                    type: 'WITH_PROGRESS_BAR'
+                    type: 'WITH_PROGRESS_BAR',
+                    progressBarData: { total: 1, value: value }
                   }
                 ]);
               }
