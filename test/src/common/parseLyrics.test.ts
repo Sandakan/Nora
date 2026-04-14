@@ -1,4 +1,3 @@
-import { TagConstants } from 'node-id3';
 import { describe, test, expect, vi } from 'vitest';
 
 vi.mock('../../../src/main/logger', () => ({
@@ -12,6 +11,8 @@ vi.mock('../../../src/main/logger', () => ({
 }));
 
 import parseLyrics, {
+  SYNCHRONISED_LYRICS_CONTENT_TYPE_LYRICS,
+  SYNCHRONISED_LYRICS_TIME_STAMP_FORMAT_MILLISECONDS,
   SyncedLyricsInput,
   parseSyncedLyricsFromAudioDataSource
 } from '../../../src/common/parseLyrics';
@@ -23,8 +24,8 @@ import parseLyrics, {
 
 const syncedLyricsFromSongMetadata: SyncedLyricsInput = {
   language: 'ENG',
-  timeStampFormat: TagConstants.TimeStampFormat.MILLISECONDS,
-  contentType: TagConstants.SynchronisedLyrics.ContentType.LYRICS,
+  timeStampFormat: SYNCHRONISED_LYRICS_TIME_STAMP_FORMAT_MILLISECONDS,
+  contentType: SYNCHRONISED_LYRICS_CONTENT_TYPE_LYRICS,
   shortText: undefined,
   synchronisedText: [
     {

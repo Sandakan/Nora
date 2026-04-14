@@ -1,3 +1,5 @@
+import type { Subscription } from '@tanstack/react-store';
+
 import { dispatch, store } from '../store/store';
 import storage from '../utils/localStorage';
 import { equalizerBandHertzData } from './equalizerData';
@@ -42,7 +44,7 @@ class AudioPlayer {
   equalizerBands: Map<EqualizerBandFilters, BiquadFilterNode>;
   gainNode: GainNode;
 
-  unsubscribeFunc: () => void;
+  unsubscribeFunc: Subscription;
 
   private repeatMode: 'off' | 'one' | 'all' = 'off';
   private pendingAutoPlay: boolean = false;
@@ -253,7 +255,7 @@ class AudioPlayer {
 
   /** Cleans up resources and event listeners. Should be called when player is no longer needed. */
   destroy() {
-    if (this.unsubscribeFunc) this.unsubscribeFunc();
+    if (this.unsubscribeFunc) this.unsubscribeFunc.unsubscribe();
     this.queue.removeAllListeners();
     this.removeAllListeners();
     this.audio.pause();

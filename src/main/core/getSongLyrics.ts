@@ -2,18 +2,18 @@ import { readFile } from 'fs/promises';
 import path from 'path';
 
 import { getUserSettings } from '@main/db/queries/settings';
-import NodeID3 from 'node-id3';
 import songlyrics from 'songlyrics';
 
 // import fetchLyricsFromMusixmatch from '../utils/fetchLyricsFromMusixmatch';
 import { appPreferences } from '../../../package.json';
-import parseLyrics, { parseSyncedLyricsFromAudioDataSource } from '../../common/parseLyrics';
+import parseLyrics from '../../common/parseLyrics';
 import { removeDefaultAppProtocolFromFilePath } from '../fs/resolveFilePaths';
 import logger from '../logger';
 import { checkIfConnectedToInternet, sendMessageToRenderer } from '../main';
 import saveLyricsToSong from '../saveLyricsToSong';
 // import { decrypt } from '../utils/safeStorage';
 import fetchLyricsFromLrclib from '../utils/fetchLyricsFromLrclib';
+import { withFileHandle } from '../utils/withFileHandle';
 
 const { metadataEditingSupportedExtensions } = appPreferences;
 
@@ -28,38 +28,16 @@ export const updateCachedLyrics = async (
   if (lyrics) cachedLyrics = lyrics;
 };
 
-export const parseLyricsFromID3Format = (
-  synchronisedLyrics: NodeID3.Tags['synchronisedLyrics'],
-  unsynchronisedLyrics: NodeID3.Tags['unsynchronisedLyrics']
-) => {
-  if (Array.isArray(synchronisedLyrics) && synchronisedLyrics.length > 0) {
-    const reversedForLatestLyricsStore = synchronisedLyrics.reverse();
-
-    for (const syncedLyricsData of reversedForLatestLyricsStore) {
-      if (syncedLyricsData.synchronisedText.length > 0) {
-        const parsedSyncedLyrics = parseSyncedLyricsFromAudioDataSource(syncedLyricsData);
-
-        if (parsedSyncedLyrics) return parsedSyncedLyrics;
-      }
-    }
-  }
-
-  if (unsynchronisedLyrics?.text) {
-    const parsedLyrics = parseLyrics(unsynchronisedLyrics.text);
-    if (parsedLyrics) return parsedLyrics;
-  }
-  return undefined;
-};
-
-const fetchLyricsFromAudioSource = (songPath: string) => {
+const fetchLyricsFromAudioSource = async (songPath: string) => {
   try {
     const songExt = path.extname(songPath).replace('.', '');
     const isSupported = metadataEditingSupportedExtensions.includes(songExt);
 
     if (isSupported) {
-      const songData = NodeID3.read(songPath);
-      const { unsynchronisedLyrics, synchronisedLyrics } = songData;
-      return parseLyricsFromID3Format(synchronisedLyrics, unsynchronisedLyrics);
+      const storedLyrics = await withFileHandle(songPath, (file) => file.tag.lyrics);
+      if (storedLyrics) return parseLyrics(storedLyrics);
+
+      return undefined;
     }
     logger.warn(`Nora doesn't support reading lyrics metadata from songs in ${songExt} format.`, {
       songPath,
@@ -281,7 +259,7 @@ const fetchOfflineLyrics = async (songPath: string) => {
     return lrcFileLyrics;
   }
 
-  const audioSourceLyrics = fetchLyricsFromAudioSource(songPath);
+  const audioSourceLyrics = await fetchLyricsFromAudioSource(songPath);
   if (audioSourceLyrics) {
     logger.debug('Serving audio source lyrics.');
     return audioSourceLyrics;

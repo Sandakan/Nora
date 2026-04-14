@@ -1,6 +1,5 @@
 import type { db } from '@main/db/db';
 import type { GetAllSongListeningDataReturnType } from '@main/db/queries/listens';
-import NodeID3 from 'node-id3';
 import { ReactElement, ReactNode } from 'react';
 import { resources } from 'src/renderer/src/i18n';
 
@@ -285,7 +284,7 @@ declare global {
     duration: number;
   }
 
-  // node-id3 synchronisedLyrics types.
+  // Lyrics frame types used by in-song metadata.
   type UnsynchronisedLyrics =
     | {
         language: string;
@@ -301,9 +300,9 @@ declare global {
          * @see {@link https://id3.org/ISO%20639-2 ISO 639-2}
          */
         language: string;
-        /** Absolute time unit: {@link TagConstants.TimeStampFormat} */
+        /** Absolute time unit used by the stored synced lyrics format. */
         timeStampFormat: number;
-        /** {@link TagConstants.SynchronisedLyrics.ContentType} */
+        /** Content type for the stored synced lyrics format. */
         contentType: number;
         /** Content descriptor */
         shortText?: string;
@@ -1244,7 +1243,9 @@ declare global {
     artworkPath?: string;
   }
 
-  interface NodeID3Tags extends NodeID3.Tags {
+  interface NodeID3Tags {
+    synchronisedLyrics?: SynchronisedLyrics;
+    unsynchronisedLyrics?: UnsynchronisedLyrics;
     image: string;
   }
 

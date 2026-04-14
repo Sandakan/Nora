@@ -1,6 +1,5 @@
 import detectChinese from '@neos21/detect-chinese';
 import Kuroshiro from '@sglkc/kuroshiro';
-import { TagConstants } from 'node-id3';
 import { pinyin } from 'pinyin-pro';
 import isHangul from 'romaja/src/hangul/isHangul.js';
 
@@ -12,7 +11,10 @@ import isLyricsSynced, {
   isAnExtendedSyncedLyricsLine
 } from './isLyricsSynced';
 
-export type SyncedLyricsInput = NonNullable<NodeID3Tags['synchronisedLyrics']>[number];
+export type SyncedLyricsInput = NonNullable<SynchronisedLyrics>[number];
+
+export const SYNCHRONISED_LYRICS_TIME_STAMP_FORMAT_MILLISECONDS = 2;
+export const SYNCHRONISED_LYRICS_CONTENT_TYPE_LYRICS = 1;
 
 export const INSTRUMENTAL_LYRIC_IDENTIFIER = '♪';
 const TITLE_MATCH_REGEX = /^\[ti:(?<title>.+)\]$/gm;
@@ -416,7 +418,7 @@ export const parseSyncedLyricsFromAudioDataSource = (
 ): LyricsData | undefined => {
   const { timeStampFormat, synchronisedText, shortText } = input;
 
-  if (timeStampFormat === TagConstants.TimeStampFormat.MILLISECONDS) {
+  if (timeStampFormat === SYNCHRONISED_LYRICS_TIME_STAMP_FORMAT_MILLISECONDS) {
     const metadata = parseMetadataFromShortText(shortText);
 
     const lyrics: LyricLine[] = synchronisedText.map((line, index, arr) => {

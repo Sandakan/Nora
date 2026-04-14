@@ -47,12 +47,8 @@ export default defineConfig({
         generatedRouteTree: 'src/routeTree.gen.ts',
         autoCodeSplitting: true
       }),
-      react({
-        // TODO: Using babel plugin breaks the tanstack-virtual package.
-        babel: {
-          plugins: ['babel-plugin-react-compiler']
-        }
-      }),
+      react(),
+      // babel({ presets: [reactCompilerPreset()] }),
       tailwindcss()
     ]
   }
