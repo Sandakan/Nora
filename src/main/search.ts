@@ -1,4 +1,3 @@
-import logger from './logger';
 import {
   searchAlbumsByName,
   searchArtistsByName,
@@ -7,16 +6,17 @@ import {
   searchPlaylistsByName,
   searchSongsByName
 } from './db/queries/search';
-import { timeEnd, timeStart } from './utils/measureTimeUsage';
+import { getUserSettings, saveUserSettings } from './db/queries/settings';
+import logger from './logger';
+import { dataUpdateEvent } from './main';
 import {
   convertToAlbum,
   convertToArtist,
   convertToGenre,
   convertToPlaylist,
   convertToSongData
-} from '../common/convert';
-import { getUserSettings, saveUserSettings } from './db/queries/settings';
-import { dataUpdateEvent } from './main';
+} from './utils/convert';
+import { timeEnd, timeStart } from './utils/measureTimeUsage';
 
 let recentSearchesTimeoutId: NodeJS.Timeout;
 const search = async (

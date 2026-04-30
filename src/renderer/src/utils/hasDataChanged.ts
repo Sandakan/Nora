@@ -20,9 +20,12 @@ const hasArrayChanged = (oldArr: unknown[], newArr: unknown[]) => {
   return isArrayDataChanged;
 };
 
-/** Returns an object containing the properties of the input objects and and a boolean as a value stating whether those properties have changed or not.
- *@param oldObj Old object to be compared to
- *@param newObj New object to be compared to
+/**
+ * Returns an object containing the properties of the input objects and and a boolean as a value
+ * stating whether those properties have changed or not.
+ *
+ * @param oldObj Old object to be compared to
+ * @param newObj New object to be compared to
  */
 
 type ModifiedData = { isModified: boolean; prev: unknown; current: unknown };

@@ -1,7 +1,9 @@
+import { basename } from 'path';
+
 import { and, eq, inArray, isNull } from 'drizzle-orm';
+
 import { db } from '../db';
 import { musicFolders } from '../schema';
-import { basename } from 'path';
 
 export const getAllFolders = async (trx: DB | DBTransaction = db) => {
   return trx.select().from(musicFolders);
@@ -168,7 +170,7 @@ const getMusicFolder = async (
         fileCreatedDate: folder.folderCreatedAt!,
         lastParsedDate: folder.lastParsedAt!
       },
-      songIds: folder.songs.map((song) => song.id.toString()),
+      songIds: folder.songs.map((song) => song.id),
       isBlacklisted: folder.isBlacklisted,
       subFolders
     });
@@ -198,7 +200,7 @@ export const getAllMusicFolders = async (trx: DB | DBTransaction = db): Promise<
             fileCreatedDate: folder.folderCreatedAt!,
             lastParsedDate: folder.lastParsedAt!
           },
-          songIds: folder.songs.map((song) => song.id.toString()),
+          songIds: folder.songs.map((song) => song.id),
           isBlacklisted: folder.isBlacklisted,
           subFolders: await getMusicFolder(folder.id, trx)
         }) satisfies MusicFolder

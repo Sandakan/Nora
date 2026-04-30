@@ -1,13 +1,13 @@
 import { BrowserWindow, nativeImage, nativeTheme } from 'electron';
 
-import skipBackLightIconPath from '../../../resources/taskbar buttons/baseline_skip_previous_white_24dp.png?asset';
+import playDarkIconPath from '../../../resources/taskbar buttons/baseline_play_arrow_black_24dp.png?asset';
 import playLightIconPath from '../../../resources/taskbar buttons/baseline_play_arrow_white_24dp.png?asset';
-import pauseLightIconPath from '../../../resources/taskbar buttons/outline_pause_white_24dp.png?asset';
+import skipForwardDarkIconPath from '../../../resources/taskbar buttons/baseline_skip_next_black_24dp.png?asset';
 import skipForwardLightIconPath from '../../../resources/taskbar buttons/baseline_skip_next_white_24dp.png?asset';
 import skipBackDarkIconPath from '../../../resources/taskbar buttons/baseline_skip_previous_black_24dp.png?asset';
-import playDarkIconPath from '../../../resources/taskbar buttons/baseline_play_arrow_black_24dp.png?asset';
+import skipBackLightIconPath from '../../../resources/taskbar buttons/baseline_skip_previous_white_24dp.png?asset';
 import pauseDarkIconPath from '../../../resources/taskbar buttons/outline_pause_black_24dp.png?asset';
-import skipForwardDarkIconPath from '../../../resources/taskbar buttons/baseline_skip_next_black_24dp.png?asset';
+import pauseLightIconPath from '../../../resources/taskbar buttons/outline_pause_white_24dp.png?asset';
 import logger from '../logger';
 
 const skipBackLightIcon = nativeImage.createFromPath(skipBackLightIconPath);

@@ -1,5 +1,5 @@
-import logger from '../logger';
 import { getBlacklistData, setBlacklist } from '../filesystem';
+import logger from '../logger';
 import { dataUpdateEvent } from '../main';
 
 interface toggleBlacklistFoldersReturnValue {
@@ -53,7 +53,7 @@ const toggleBlacklistFolders = async (folderPaths: string[], isBlacklistFolder?:
   }
 
   setBlacklist(blacklist);
-  dataUpdateEvent('blacklist/folderBlacklist', [...result.blacklists, ...result.whitelists]);
+  dataUpdateEvent('blacklist/folderBlacklist');
   return result;
 };
 

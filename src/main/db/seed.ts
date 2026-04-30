@@ -1,14 +1,24 @@
 import logger from '@main/logger';
-import { db } from './db';
-// import { artworks, artworksPlaylists, playlists } from './schema';
-
 // import favoritesPlaylistCoverImage from '../../renderer/src/assets/images/webp/favorites-playlist-icon.webp?asset';
 // import historyPlaylistCoverImage from '../../renderer/src/assets/images/webp/history-playlist-icon.webp?asset';
 import { eq } from 'drizzle-orm';
-import { userSettings } from './schema';
+// import { artworks, artworksPlaylists, playlists } from './schema';
+
+import { db } from './db';
+import { userEqualizerPreset, userKeyboardShortcuts, userSettings } from './schema';
 
 const isSettingsTableSeeded = async () => {
   const x = await db.$count(userSettings, eq(userSettings.id, 1));
+  return x > 0;
+};
+
+const isKeyboardShortcutsSeeded = async () => {
+  const x = await db.$count(userKeyboardShortcuts);
+  return x > 0;
+};
+
+const isEqualizerPresetSeeded = async () => {
+  const x = await db.$count(userEqualizerPreset);
   return x > 0;
 };
 
@@ -22,6 +32,28 @@ export const seedDatabase = async () => {
       logger.info('Seeded user_settings table with default values.');
     } else {
       logger.info('user_settings table already seeded. Skipping seeding process.');
+    }
+
+    // # Seed the user_keyboard_shortcuts table
+    const isShortcutsSeeded = await isKeyboardShortcutsSeeded();
+    if (!isShortcutsSeeded) {
+      await db.insert(userKeyboardShortcuts).values({ shortcuts: {} });
+      logger.info('Seeded user_keyboard_shortcuts table with default values.');
+    } else {
+      logger.info('user_keyboard_shortcuts table already seeded. Skipping seeding process.');
+    }
+
+    // # Seed the user_equalizer_preset table
+    const isEqualizerSeeded = await isEqualizerPresetSeeded();
+    if (!isEqualizerSeeded) {
+      await db.insert(userEqualizerPreset).values({
+        presetName: 'Default',
+        frequencyBands: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        isEnabled: false
+      });
+      logger.info('Seeded user_equalizer_preset table with default values.');
+    } else {
+      logger.info('user_equalizer_preset table already seeded. Skipping seeding process.');
     }
 
     // # Seed the playlists table

@@ -2,13 +2,11 @@ import { useContext, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-
+import storage from '../../utils/localStorage';
 import Button from '../Button';
 import Checkbox from '../Checkbox';
 
-import storage from '../../utils/localStorage';
-
-const BlacklistSongConfrimPrompt = (props: { songIds: string[]; title?: string }) => {
+const BlacklistSongConfirmPrompt = (props: { songIds: number[]; title?: string }) => {
   const { addNewNotifications, changePromptMenuData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
@@ -98,4 +96,4 @@ const BlacklistSongConfrimPrompt = (props: { songIds: string[]; title?: string }
   );
 };
 
-export default BlacklistSongConfrimPrompt;
+export default BlacklistSongConfirmPrompt;

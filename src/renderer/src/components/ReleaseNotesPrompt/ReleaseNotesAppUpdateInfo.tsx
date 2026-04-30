@@ -1,4 +1,5 @@
 import { Trans, useTranslation } from 'react-i18next';
+
 import { repository } from '../../../../../package.json';
 import Hyperlink from '../Hyperlink';
 

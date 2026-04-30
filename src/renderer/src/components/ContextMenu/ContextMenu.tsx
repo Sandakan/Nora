@@ -1,9 +1,10 @@
+import { store } from '@renderer/store/store';
+import { useStore } from '@tanstack/react-store';
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import { memo, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
-import ContextMenuItem from './ContextMenuItem';
+
 import ContextMenuDataItem from './ContextMenuDataItem';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store/store';
+import ContextMenuItem from './ContextMenuItem';
 
 const ContextMenu = memo(() => {
   const contextMenuData = useStore(store, (state) => state.contextMenuData);

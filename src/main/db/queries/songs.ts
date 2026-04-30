@@ -14,6 +14,24 @@ export const saveSong = async (data: typeof songs.$inferInsert, trx: DB | DBTran
   return res[0];
 };
 
+export const updateSongBasicFields = async (
+  songId: number,
+  data: Partial<Pick<typeof songs.$inferInsert, 'title' | 'year' | 'trackNumber'>>,
+  trx: DB | DBTransaction = db
+) => {
+  const res = await trx
+    .update(songs)
+    .set({
+      title: data.title,
+      year: data.year || null,
+      trackNumber: data.trackNumber || null
+    })
+    .where(eq(songs.id, songId))
+    .returning();
+
+  return res[0];
+};
+
 export const getSongsRelativeToFolder = async (
   folderPathOrId: string | number,
   options = {
@@ -672,7 +690,7 @@ export const getSongIdFromSongPath = async (path: string, trx: DB | DBTransactio
   return song?.id ?? null;
 };
 
-export const getSongByIdForSongID3Tags = async (songId: number, trx: DB | DBTransaction = db) => {
+export const getSongByIdForSongMetadata = async (songId: number, trx: DB | DBTransaction = db) => {
   const song = await trx.query.songs.findFirst({
     where: eq(songs.id, songId),
     with: {

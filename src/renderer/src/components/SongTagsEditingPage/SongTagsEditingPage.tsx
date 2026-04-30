@@ -1,29 +1,25 @@
+import { store } from '@renderer/store/store';
+import { useStore } from '@tanstack/react-store';
 /* eslint-disable promise/catch-or-return */
 import { lazy, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { appPreferences } from '../../../../../package.json';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-
 import useNetworkConnectivity from '../../hooks/useNetworkConnectivity';
-
+import hasDataChanged, { isDataChanged } from '../../utils/hasDataChanged';
 import Button from '../Button';
 import MainContainer from '../MainContainer';
-import SongArtwork from './SongArtwork';
-
-import SongNameInput from './input_containers/SongNameInput';
-import SongYearInput from './input_containers/SongYearInput';
-import SongArtistsInput from './input_containers/SongArtistsInput';
-import SongAlbumInput from './input_containers/SongAlbumInput';
-import SongGenresInput from './input_containers/SongGenresInput';
-import SongComposerInput from './input_containers/SongComposerInput';
-import SongLyricsEditorInput from './input_containers/SongLyricsEditorInput';
-import SongTrackNumberInput from './input_containers/SongTrackNumberInput';
 import SongAlbumArtistsInput from './input_containers/SongAlbumArtistInput';
-
-import hasDataChanged, { isDataChanged } from '../../utils/hasDataChanged';
-import { appPreferences } from '../../../../../package.json';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store/store';
+import SongAlbumInput from './input_containers/SongAlbumInput';
+import SongArtistsInput from './input_containers/SongArtistsInput';
+import SongComposerInput from './input_containers/SongComposerInput';
+import SongGenresInput from './input_containers/SongGenresInput';
+import SongLyricsEditorInput from './input_containers/SongLyricsEditorInput';
+import SongNameInput from './input_containers/SongNameInput';
+import SongTrackNumberInput from './input_containers/SongTrackNumberInput';
+import SongYearInput from './input_containers/SongYearInput';
+import SongArtwork from './SongArtwork';
 
 const SongMetadataResultsSelectPage = lazy(() => import('./SongMetadataResultsSelectPrompt'));
 const ResetTagsToDefaultPrompt = lazy(() => import('./ResetTagsToDefaultPrompt'));
@@ -35,7 +31,7 @@ export interface MetadataKeywords {
 }
 
 type ArtistResult = {
-  artistId?: string;
+  artistId?: number;
   name: string;
   artworkPath?: string;
   onlineArtworkPaths?: OnlineArtistArtworks;
@@ -43,13 +39,13 @@ type ArtistResult = {
 
 type AlbumResult = {
   title: string;
-  albumId?: string;
+  albumId?: number;
   noOfSongs?: number;
   artists?: string[];
   artworkPath?: string;
 };
 
-type GenreResult = { genreId?: string; name: string; artworkPath?: string };
+type GenreResult = { genreId?: number; name: string; artworkPath?: string };
 
 const { metadataEditingSupportedExtensions } = appPreferences;
 
@@ -86,7 +82,7 @@ function SongTagsEditingPage() {
 
   const { songId, songPath, isKnownSource } = useMemo(
     () => ({
-      songId: currentlyActivePage.data?.songId as string,
+      songId: currentlyActivePage.data?.songId as number,
       songPath: currentlyActivePage.data?.songPath as string,
       isKnownSource: (currentlyActivePage.data?.isKnownSource as boolean) ?? true
     }),
@@ -104,7 +100,7 @@ function SongTagsEditingPage() {
   const getSongId3Tags = useCallback(() => {
     if (songId)
       window.api.songUpdates
-        .getSongId3Tags(isKnownSource ? songId : songPath, isKnownSource)
+        .getSongId3Tags(isKnownSource ? String(songId) : songPath, isKnownSource)
         .then((res) => {
           if (res) {
             console.log(res);
@@ -282,7 +278,7 @@ function SongTagsEditingPage() {
     console.log(songInfo);
     window.api.songUpdates
       .updateSongId3Tags(
-        isKnownSource ? songId : songPath,
+        isKnownSource ? String(songId) : songPath,
         songInfo,
         songId === currentSongData.songId,
         isKnownSource
@@ -305,7 +301,7 @@ function SongTagsEditingPage() {
           //   },
           // ]);
           return window.api.songUpdates.getSongId3Tags(
-            isKnownSource ? songId : songPath,
+            isKnownSource ? String(songId) : songPath,
             isKnownSource
           );
         }
@@ -417,7 +413,7 @@ function SongTagsEditingPage() {
                     ? songInfo.artists.map((x) => x.name).join(', ')
                     : t('common.unknownArtist')}
                 </div>
-                <div className="song-album">{songInfo.album?.title}</div>
+                <div className="song-album">{songInfo.albums?.[0]?.title}</div>
                 <Button
                   label={t('songTagsEditingPage.searchMetadataOnInternet')}
                   iconName="download"
@@ -444,7 +440,7 @@ function SongTagsEditingPage() {
               <SongAlbumArtistsInput
                 artistResults={albumArtistResults}
                 albumArtistKeyword={albumArtistKeyword}
-                songAlbum={songInfo.album}
+                songAlbum={songInfo.albums?.[0]}
                 songAlbumArtists={songInfo.albumArtists}
                 updateAlbumArtistKeyword={updateAlbumArtistKeyword}
                 updateSongInfo={updateSongInfo}
@@ -455,7 +451,7 @@ function SongTagsEditingPage() {
                 albumResults={albumResults}
                 updateAlbumKeyword={updateAlbumKeyword}
                 updateSongInfo={updateSongInfo}
-                songAlbum={songInfo.album}
+                songAlbum={songInfo.albums?.[0]}
               />
               {/* SONG GENRES */}
               <SongGenresInput
@@ -479,7 +475,7 @@ function SongTagsEditingPage() {
                 songId={songId}
                 songArtists={songInfo.artists}
                 songPath={songPath}
-                album={songInfo.album?.title}
+                album={songInfo.albums?.[0]?.title}
                 duration={songInfo.duration}
                 synchronizedLyrics={songInfo.synchronizedLyrics}
                 unsynchronizedLyrics={songInfo.unsynchronizedLyrics}

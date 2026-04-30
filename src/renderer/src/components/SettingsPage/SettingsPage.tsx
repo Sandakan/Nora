@@ -1,20 +1,20 @@
 import { useTranslation } from 'react-i18next';
 
 import MainContainer from '../MainContainer';
+import AboutSettings from './Settings/AboutSettings';
+import AccessibilitySettings from './Settings/AccessibilitySettings';
+import AccountsSettings from './Settings/AccountsSettings';
+import AdvancedSettings from './Settings/AdvancedSettings';
 import AppearanceSettings from './Settings/AppearanceSettings';
 import AudioPlaybackSettings from './Settings/AudioPlaybackSettings';
-import LyricsSettings from './Settings/LyricsSettings';
 import DefaultPageSettings from './Settings/DefaultPageSettings';
-import PreferencesSettings from './Settings/PreferencesSettings';
-import AccessibilitySettings from './Settings/AccessibilitySettings';
-import StartupSettings from './Settings/StartupSettings';
-import AboutSettings from './Settings/AboutSettings';
 // import StorageSettings from './Settings/StorageSettings';
 import EqualizerSettings from './Settings/EqualizerSettings';
-import PerformanceSettings from './Settings/PerformanceSettings';
-import AdvancedSettings from './Settings/AdvancedSettings';
-import AccountsSettings from './Settings/AccountsSettings';
 import LanguageSettings from './Settings/LanguageSettings';
+import LyricsSettings from './Settings/LyricsSettings';
+import PerformanceSettings from './Settings/PerformanceSettings';
+import PreferencesSettings from './Settings/PreferencesSettings';
+import StartupSettings from './Settings/StartupSettings';
 import StorageSettings from './Settings/StorageSettings';
 
 const SettingsPage = () => {

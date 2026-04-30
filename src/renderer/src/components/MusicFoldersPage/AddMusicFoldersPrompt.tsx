@@ -2,9 +2,8 @@ import { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-
-import SelectableFolder from './SelectableFolder';
 import Button from '../Button';
+import SelectableFolder from './SelectableFolder';
 
 export interface SelectableFolderStructure extends FolderStructure {
   isSelected?: boolean;

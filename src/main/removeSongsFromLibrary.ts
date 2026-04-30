@@ -1,16 +1,17 @@
 import path from 'path';
-import { dataUpdateEvent, sendMessageToRenderer } from './main';
-import logger from './logger';
-import { unlinkSongFromArtist } from './db/queries/artists';
-import { unlinkSongFromAlbum } from './db/queries/albums';
-import { unlinkSongFromGenre } from './db/queries/genres';
-import { deleteArtworks, getArtworkIdsOfSong } from './db/queries/artworks';
+
 import { db } from './db/db';
+import { unlinkSongFromAlbum } from './db/queries/albums';
+import { unlinkSongFromArtist } from './db/queries/artists';
+import { deleteArtworks, getArtworkIdsOfSong } from './db/queries/artworks';
+import { unlinkSongFromGenre } from './db/queries/genres';
 import { getSongByPath, removeSongById } from './db/queries/songs';
-import { convertToSongData } from '../common/convert';
+import logger from './logger';
+import { dataUpdateEvent, sendMessageToRenderer } from './main';
+import { convertToSongData } from './utils/convert';
 
 export const removeDeletedArtistDataOfSong = async (song: SavableSongData, trx: DBTransaction) => {
-  let isArtistRemoved = false;
+  const isArtistRemoved = false;
 
   if (Array.isArray(song.artists) && song.artists.length > 0) {
     for (let i = 0; i < song.artists.length; i += 1) {
@@ -25,7 +26,7 @@ export const removeDeletedArtistDataOfSong = async (song: SavableSongData, trx: 
 };
 
 export const removeDeletedAlbumDataOfSong = async (song: SavableSongData, trx: DBTransaction) => {
-  let isAlbumRemoved = false;
+  const isAlbumRemoved = false;
 
   const albumId = song.album?.albumId;
   if (albumId == null) return { isAlbumRemoved };
@@ -66,7 +67,7 @@ export const removeDeletedAlbumDataOfSong = async (song: SavableSongData, trx: D
 // };
 
 export const removeDeletedGenreDataOfSong = async (song: SavableSongData, trx: DBTransaction) => {
-  let isGenreRemoved = false;
+  const isGenreRemoved = false;
   if (Array.isArray(song.genres) && song.genres.length > 0) {
     for (let i = 0; i < song.genres.length; i += 1) {
       const songGenre = song.genres[i];

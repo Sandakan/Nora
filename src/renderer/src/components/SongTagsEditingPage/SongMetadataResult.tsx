@@ -1,19 +1,17 @@
 import { lazy, useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import isLyricsSynced from '../../../../common/isLyricsSynced';
-
-import Button from '../Button';
-import Img from '../Img';
-
 import DefaultSongImage from '../../assets/images/webp/song_cover_default.webp';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import {
   manageArtworks,
   manageAlbumData,
   manageArtistsData,
   manageGenresData
 } from '../../utils/manageMetadataResults';
+import Button from '../Button';
+import Img from '../Img';
 
 const CustomizeSelectedMetadataPrompt = lazy(() => import('./CustomizeSelectedMetadataPrompt'));
 
@@ -36,9 +34,13 @@ function SongMetadataResult(props: SongMetadataResultProp) {
     props;
 
   const addToMetadata = useCallback(async () => {
-    const albumData = album ? await window.api.albumsData.getAlbumData([album]) : [];
+    const albumData = album
+      ? await window.api.albumsData.getAlbumData([album]).then((res) => res.data)
+      : [];
     const artistData = await window.api.artistsData.getArtistData(artists).then((res) => res.data);
-    const genreData = genres ? await window.api.genresData.getGenresData(genres) : [];
+    const genreData = genres
+      ? await window.api.genresData.getGenresData(genres).then((res) => res.data)
+      : [];
 
     updateSongInfo((prevData): SongTags => {
       changePromptMenuData(false, undefined, '');
@@ -54,7 +56,9 @@ function SongMetadataResult(props: SongMetadataResultProp) {
         unsynchronizedLyrics:
           lyrics && !isLyricsSynchronised ? lyrics : prevData.unsynchronizedLyrics,
         artworkPath,
-        album: manageAlbumData(albumData, album, artworkPath),
+        albums: [manageAlbumData(albumData, album, artworkPath)].filter(
+          (x): x is SongTagsAlbumData => x !== undefined
+        ),
         artists: manageArtistsData(artistData, artists),
         genres: manageGenresData(genreData, genres)
       };

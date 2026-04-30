@@ -1,10 +1,11 @@
 import { lazy, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import type AudioPlayer from '../other/player';
+import type PlayerQueue from '../other/playerQueue';
 import { dispatch, store } from '../store/store';
 import storage from '../utils/localStorage';
 import log from '../utils/log';
-import type PlayerQueue from '../other/playerQueue';
-import type AudioPlayer from '../other/player';
 
 const ErrorPrompt = lazy(() => import('../components/ErrorPrompt'));
 const SongUnplayableErrorPrompt = lazy(() => import('../components/SongUnplayableErrorPrompt'));
@@ -12,10 +13,26 @@ const SongUnplayableErrorPrompt = lazy(() => import('../components/SongUnplayabl
 /**
  * Hook for controlling audio playback.
  *
- * This hook manages the core player control functionality including play/pause,
- * loading songs, playing from unknown sources, clearing player data, updating
- * song data, and managing playback state. It handles player state management,
- * error handling, and IPC communication.
+ * This hook manages the core player control functionality including play/pause, loading songs,
+ * playing from unknown sources, clearing player data, updating song data, and managing playback
+ * state. It handles player state management, error handling, and IPC communication.
+ *
+ * @example
+ *   ```tsx
+ *   const {
+ *   toggleSongPlayback,
+ *   playSong,
+ *   playSongFromUnknownSource,
+ *   updateCurrentSongData,
+ *   clearAudioPlayerData,
+ *   updateCurrentSongPlaybackState
+ *   } = usePlayerControl(player, playerQueue, recordListeningData, managePlaybackErrors, ...);
+ *
+ *   // Use in UI or event handlers
+ *   <button onClick={() => toggleSongPlayback()}>Play/Pause</button>
+ *   playSong('song-id-123');
+ *   updateCurrentSongPlaybackState(true);
+ *   ```;
  *
  * @param player - The HTMLAudioElement instance
  * @param playerQueue - The PlayerQueue instance for queue management
@@ -24,29 +41,12 @@ const SongUnplayableErrorPrompt = lazy(() => import('../components/SongUnplayabl
  * @param changePromptMenuData - Function to show prompts/dialogs
  * @param addNewNotifications - Function to add toast notifications
  * @returns Object containing player control functions
- *
- * @example
- * ```tsx
- * const {
- *   toggleSongPlayback,
- *   playSong,
- *   playSongFromUnknownSource,
- *   updateCurrentSongData,
- *   clearAudioPlayerData,
- *   updateCurrentSongPlaybackState
- * } = usePlayerControl(player, playerQueue, recordListeningData, managePlaybackErrors, ...);
- *
- * // Use in UI or event handlers
- * <button onClick={() => toggleSongPlayback()}>Play/Pause</button>
- * playSong('song-id-123');
- * updateCurrentSongPlaybackState(true);
- * ```
  */
 export function usePlayerControl(
   playerInstance: AudioPlayer | HTMLAudioElement,
   playerQueue: PlayerQueue,
   recordListeningData: (
-    songId: string,
+    songId: number,
     songDuration: number,
     repetition?: boolean,
     isKnownSource?: boolean
@@ -120,10 +120,10 @@ export function usePlayerControl(
   );
 
   const playSong = useCallback(
-    (songId: string, isStartPlay = true, playAsCurrentSongIndex = false) => {
+    (songId: number, isStartPlay = true, playAsCurrentSongIndex = false) => {
       console.log('[playSong]', { songId, isStartPlay, playAsCurrentSongIndex });
 
-      if (typeof songId === 'string') {
+      if (typeof songId === 'number') {
         // Use AudioPlayer's playSongById if available (preferred path)
         if (audioPlayer) {
           return audioPlayer.playSongById(songId, {

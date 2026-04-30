@@ -1,17 +1,17 @@
+import { useNavigate } from '@tanstack/react-router';
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import { useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
-import Img from '../Img';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Button from '../Button';
-import { useNavigate } from '@tanstack/react-router';
+import Img from '../Img';
 
 export interface MostRelevantResultProp {
   resultType: 'artist' | 'song' | 'album' | 'playlist' | 'genre';
   title: string;
-  id: string;
+  id: number;
   infoType1?: string;
   infoType2?: string;
   artworkPaths: ArtworkPaths;
@@ -36,22 +36,26 @@ export const MostRelevantResult = (props: MostRelevantResultProp) => {
   } = props;
 
   const goToSongInfoPage = useCallback(
-    (songId: string) => navigate({ to: '/main-player/songs/$songId', params: { songId } }),
+    (songId: number) =>
+      navigate({ to: '/main-player/songs/$songId', params: { songId: String(songId) } }),
     [navigate]
   );
 
   const goToArtistInfoPage = useCallback(
-    (artistId: string) => navigate({ to: '/main-player/artists/$artistId', params: { artistId } }),
+    (artistId: number) =>
+      navigate({ to: '/main-player/artists/$artistId', params: { artistId: String(artistId) } }),
     [navigate]
   );
 
   const goToAlbumInfoPage = useCallback(
-    (albumId: string) => navigate({ to: '/main-player/albums/$albumId', params: { albumId } }),
+    (albumId: number) =>
+      navigate({ to: '/main-player/albums/$albumId', params: { albumId: String(albumId) } }),
     [navigate]
   );
 
   const goToGenreInfoPage = useCallback(
-    (genreId: string) => navigate({ to: '/main-player/genres/$genreId', params: { genreId } }),
+    (genreId: number) =>
+      navigate({ to: '/main-player/genres/$genreId', params: { genreId: String(genreId) } }),
     [navigate]
   );
 

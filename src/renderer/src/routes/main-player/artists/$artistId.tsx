@@ -12,29 +12,31 @@ import TitleContainer from '@renderer/components/TitleContainer';
 import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
 import useResizeObserver from '@renderer/hooks/useResizeObserver';
 import useSelectAllHandler from '@renderer/hooks/useSelectAllHandler';
+import { queryClient } from '@renderer/index';
+import { albumQuery } from '@renderer/queries/albums';
+import { artistQuery } from '@renderer/queries/aritsts';
+import { songQuery } from '@renderer/queries/songs';
 import { store } from '@renderer/store/store';
 import calculateTimeFromSeconds from '@renderer/utils/calculateTimeFromSeconds';
+import { useSuspenseQuery, useMutation, useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 import { useCallback, useContext, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { queryClient } from '@renderer/index';
-import { artistQuery } from '@renderer/queries/aritsts';
-import { useSuspenseQuery, useMutation, useQuery } from '@tanstack/react-query';
-import { songQuery } from '@renderer/queries/songs';
-import { albumQuery } from '@renderer/queries/albums';
 
 export const Route = createFileRoute('/main-player/artists/$artistId')({
   component: ArtistInfoPage,
   loader: async (route) => {
-    const artistId = route.params.artistId;
+    const artistId = Number(route.params.artistId);
 
     await queryClient.ensureQueryData(artistQuery.single({ artistId }));
   }
 });
 
 function ArtistInfoPage() {
-  const { artistId } = Route.useParams();
+  const { artistId } = Route.useParams({
+    select: (params) => ({ artistId: Number(params.artistId) })
+  });
 
   const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
   const isMultipleSelectionEnabled = useStore(
@@ -228,7 +230,7 @@ function ArtistInfoPage() {
   const selectAllHandlerForSongs = useSelectAllHandler(songs, 'songs', 'songId');
 
   const handleSongPlayBtnClick = useCallback(
-    (currSongId: string) => {
+    (currSongId: number) => {
       const queueSongIds = songs.filter((song) => !song.isBlacklisted).map((song) => song.songId);
       createQueue(queueSongIds, 'artist', false, artistData?.artistId, false);
       playSong(currSongId, true);

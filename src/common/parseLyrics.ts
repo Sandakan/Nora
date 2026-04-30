@@ -1,4 +1,8 @@
-import { TagConstants } from 'node-id3';
+import detectChinese from '@neos21/detect-chinese';
+import Kuroshiro from '@sglkc/kuroshiro';
+import { pinyin } from 'pinyin-pro';
+import isHangul from 'romaja/src/hangul/isHangul.js';
+
 // import logger from '../main/logger';
 import isLyricsSynced, {
   EXTENDED_SYNCED_LYRICS_LINE_REGEX,
@@ -6,12 +10,11 @@ import isLyricsSynced, {
   SYNCED_LYRICS_REGEX,
   isAnExtendedSyncedLyricsLine
 } from './isLyricsSynced';
-import Kuroshiro from '@sglkc/kuroshiro';
-import detectChinese from '@neos21/detect-chinese';
-import { pinyin } from 'pinyin-pro';
-import isHangul from 'romaja/src/hangul/isHangul.js';
 
-export type SyncedLyricsInput = NonNullable<NodeID3Tags['synchronisedLyrics']>[number];
+export type SyncedLyricsInput = NonNullable<SynchronisedLyrics>[number];
+
+export const SYNCHRONISED_LYRICS_TIME_STAMP_FORMAT_MILLISECONDS = 2;
+export const SYNCHRONISED_LYRICS_CONTENT_TYPE_LYRICS = 1;
 
 export const INSTRUMENTAL_LYRIC_IDENTIFIER = '♪';
 const TITLE_MATCH_REGEX = /^\[ti:(?<title>.+)\]$/gm;
@@ -86,7 +89,7 @@ const getSecondsFromLyricsLine = (lyric: string) => {
 };
 
 const getSecondsFromExtendedTimeStamp = (text: string) => {
-  const extendedReplaceRegex = /[<>\[\]]/gm;
+  const extendedReplaceRegex = /[<>[\]]/gm;
 
   const [sec, ms] = text.replaceAll(extendedReplaceRegex, '').split(':');
   extendedReplaceRegex.lastIndex = 0;
@@ -160,7 +163,7 @@ const getExtendedSyncedLineInfo = (
       return extendedSyncLines;
     }
     return line;
-  } catch (error) {
+  } catch {
     return line;
   }
 };
@@ -415,7 +418,7 @@ export const parseSyncedLyricsFromAudioDataSource = (
 ): LyricsData | undefined => {
   const { timeStampFormat, synchronisedText, shortText } = input;
 
-  if (timeStampFormat === TagConstants.TimeStampFormat.MILLISECONDS) {
+  if (timeStampFormat === SYNCHRONISED_LYRICS_TIME_STAMP_FORMAT_MILLISECONDS) {
     const metadata = parseMetadataFromShortText(shortText);
 
     const lyrics: LyricLine[] = synchronisedText.map((line, index, arr) => {

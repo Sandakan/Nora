@@ -1,98 +1,115 @@
-import { BrowserWindow, app, ipcMain, powerMonitor, shell } from 'electron';
+import { app, BrowserWindow, ipcMain, powerMonitor, shell } from 'electron';
+
+import addArtworkToAPlaylist from './core/addArtworkToAPlaylist';
+import addSongsFromFolderStructures from './core/addMusicFolder';
+import addNewPlaylist from './core/addNewPlaylist';
+import addSongsToPlaylist from './core/addSongsToPlaylist';
+import blacklistFolders from './core/blacklistFolders';
+import blacklistSongs from './core/blacklistSongs';
+import changeAppTheme from './core/changeAppTheme';
+import checkForNewSongs from './core/checkForNewSongs';
+import checkForStartUpSongs from './core/checkForStartUpSongs';
+import clearSearchHistoryResults from './core/clearSeachHistoryResults';
+import clearSongHistory from './core/clearSongHistory';
+import deleteSongsFromSystem from './core/deleteSongsFromSystem';
+import exportAppData from './core/exportAppData';
+import exportPlaylist from './core/exportPlaylist';
+import fetchAlbumData from './core/fetchAlbumData';
+import fetchArtistData from './core/fetchArtistData';
+import fetchSongInfoFromLastFM from './core/fetchSongInfoFromLastFM';
+import { getAllFavoriteSongs } from './core/getAllFavoriteSongs';
+import { getAllHistorySongs } from './core/getAllHistorySongs';
+import getAllSongs from './core/getAllSongs';
+import getArtistInfoFromNet from './core/getArtistInfoFromNet';
+import getArtworksForMultipleArtworksCover from './core/getArtworksForMultipleArtworksCover';
+import { getArtistDuplicates } from './core/getDuplicates';
+import { getFolderStructures } from './core/getFolderStructures';
+import getGenresInfo from './core/getGenresInfo';
+import { getListeningData } from './core/getListeningData';
+import getMusicFolderData from './core/getMusicFolderData';
+import getSongInfo from './core/getSongInfo';
+import getSongLyrics from './core/getSongLyrics';
+import getStorageUsage from './core/getStorageUsage';
+import importAppData from './core/importAppData';
+import importPlaylist from './core/importPlaylist';
+import removeMusicFolder from './core/removeMusicFolder';
+import removePlaylists from './core/removePlaylists';
+import removeSongFromPlaylist from './core/removeSongFromPlaylist';
+import renameAPlaylist from './core/renameAPlaylist';
+import { resolveArtistDuplicates } from './core/resolveDuplicates';
+import resolveFeaturingArtists from './core/resolveFeaturingArtists';
+import { resolveSeparateArtists } from './core/resolveSeparateArtists';
+import restoreBlacklistedFolders from './core/restoreBlacklistedFolder';
+import restoreBlacklistedSongs from './core/restoreBlacklistedSongs';
+import saveArtworkToSystem from './core/saveArtworkToSystem';
+import sendAudioData from './core/sendAudioData';
+import sendAudioDataFromPath from './core/sendAudioDataFromPath';
+import sendPlaylistData from './core/sendPlaylistData';
+import sendSongID3Tags from './core/sendSongMetadata';
+import toggleBlacklistFolders from './core/toggleBlacklistFolders';
+import toggleLikeArtists from './core/toggleLikeArtists';
+import toggleLikeSongs from './core/toggleLikeSongs';
+import updateSongListeningData from './core/updateSongListeningData';
 import {
-  IS_DEVELOPMENT,
+  addIgnoredArtist,
+  addIgnoredDuplicate,
+  addIgnoredFeaturingArtist,
+  getIgnoredArtists,
+  getIgnoredDuplicateMetadata,
+  getIgnoredFeaturingArtists,
+  removeIgnoredArtist,
+  removeIgnoredFeaturingArtist
+} from './db/queries/ignoredItems';
+import { getDatabaseMetrics } from './db/queries/other';
+import { getUserSettings, saveUserSettings } from './db/queries/settings';
+import {
+  getUserKeyboardShortcuts,
+  saveUserKeyboardShortcuts,
+  getUserEqualizerPreset,
+  saveUserEqualizerPreset
+} from './db/queries/userPreferences';
+import { getBlacklistData } from './filesystem';
+import { removeDefaultAppProtocolFromFilePath } from './fs/resolveFilePaths';
+import logger, { logFilePath } from './logger';
+import {
+  allowScreenSleeping,
   changePlayerType,
   getFolderLocation,
   getImagefileLocation,
   getRendererLogs,
+  IS_DEVELOPMENT,
   resetApp,
   restartApp,
   restartRenderer,
   revealSongInFileExplorer,
   sendMessageToRenderer,
   stopScreenSleeping,
-  allowScreenSleeping,
   toggleAudioPlayingState,
   toggleAutoLaunch,
   toggleMiniPlayerAlwaysOnTop,
   toggleOnBatteryPower
 } from './main';
-import getArtworksForMultipleArtworksCover from './core/getArtworksForMultipleArtworksCover';
-import toggleBlacklistFolders from './core/toggleBlacklistFolders';
-import scrobbleSong from './other/lastFm/scrobbleSong';
-import getSimilarTracks from './other/lastFm/getSimilarTracks';
-import sendNowPlayingSongDataToLastFM from './other/lastFm/sendNowPlayingSongDataToLastFM';
-import getAlbumInfoFromLastFM from './other/lastFm/getAlbumInfoFromLastFM';
-import renameAPlaylist from './core/renameAPlaylist';
-import { removeDefaultAppProtocolFromFilePath } from './fs/resolveFilePaths';
-import blacklistFolders from './core/blacklistFolders';
-import restoreBlacklistedFolders from './core/restoreBlacklistedFolder';
-import getStorageUsage from './core/getStorageUsage';
-import { generatePalettes } from './other/generatePalette';
-import { getFolderStructures } from './core/getFolderStructures';
-import { getArtistDuplicates } from './core/getDuplicates';
-import { resolveArtistDuplicates } from './core/resolveDuplicates';
-import addArtworkToAPlaylist from './core/addArtworkToAPlaylist';
-import { resolveSeparateArtists } from './core/resolveSeparateArtists';
-import resolveFeaturingArtists from './core/resolveFeaturingArtists';
-import saveArtworkToSystem from './core/saveArtworkToSystem';
-import exportAppData from './core/exportAppData';
-import importAppData from './core/importAppData';
-import exportPlaylist from './core/exportPlaylist';
-import importPlaylist from './core/importPlaylist';
-import reParseSong from './parseSong/reParseSong';
-import { compare } from './utils/safeStorage';
-import sendAudioData from './core/sendAudioData';
-import toggleLikeSongs from './core/toggleLikeSongs';
-import sendSongID3Tags from './core/sendSongId3Tags';
-import removeSongFromPlaylist from './core/removeSongFromPlaylist';
-import addSongsToPlaylist from './core/addSongsToPlaylist';
-import removePlaylists from './core/removePlaylists';
-import addNewPlaylist from './core/addNewPlaylist';
-import getAllSongs from './core/getAllSongs';
-import toggleLikeArtists from './core/toggleLikeArtists';
-import fetchSongInfoFromLastFM from './core/fetchSongInfoFromLastFM';
-import clearSongHistory from './core/clearSongHistory';
-import clearSearchHistoryResults from './core/clearSeachHistoryResults';
-import getSongInfo from './core/getSongInfo';
-import updateSongListeningData from './core/updateSongListeningData';
-import getGenresInfo from './core/getGenresInfo';
-import sendPlaylistData from './core/sendPlaylistData';
-import fetchAlbumData from './core/fetchAlbumData';
-import fetchArtistData from './core/fetchArtistData';
-import getMusicFolderData from './core/getMusicFolderData';
-import blacklistSongs from './core/blacklistSongs';
-import search from './search';
-import {
-  searchSongMetadataResultsInInternet,
-  fetchSongMetadataFromInternet
-} from './utils/fetchSongMetadataFromInternet';
-import deleteSongsFromSystem from './core/deleteSongsFromSystem';
-import removeMusicFolder from './core/removeMusicFolder';
-import restoreBlacklistedSongs from './core/restoreBlacklistedSongs';
-import updateSongId3Tags, { isMetadataUpdatesPending } from './updateSongId3Tags';
-import addSongsFromFolderStructures from './core/addMusicFolder';
-import getArtistInfoFromNet from './core/getArtistInfoFromNet';
-import getSongLyrics from './core/getSongLyrics';
-import sendAudioDataFromPath from './core/sendAudioDataFromPath';
-import saveLyricsToSong from './saveLyricsToSong';
-import { getBlacklistData } from './filesystem';
-import changeAppTheme from './core/changeAppTheme';
-import checkForStartUpSongs from './core/checkForStartUpSongs';
-import checkForNewSongs from './core/checkForNewSongs';
-import getTranslatedLyrics from './utils/getTranslatedLyrics';
 import { setDiscordRpcActivity } from './other/discordRPC';
-import romanizeLyrics from './utils/romanizeLyrics';
+import { generatePalettes } from './other/generatePalette';
+import getAlbumInfoFromLastFM from './other/lastFm/getAlbumInfoFromLastFM';
+import getSimilarTracks from './other/lastFm/getSimilarTracks';
+import scrobbleSong from './other/lastFm/scrobbleSong';
+import sendNowPlayingSongDataToLastFM from './other/lastFm/sendNowPlayingSongDataToLastFM';
+import reParseSong from './parseSong/reParseSong';
+import saveLyricsToSong from './saveLyricsToSong';
+import search from './search';
+import updateSongId3Tags, { isMetadataUpdatesPending } from './updateSong/updateSongId3Tags';
 import convertLyricsToPinyin from './utils/convertToPinyin';
 import convertLyricsToRomaja from './utils/convertToRomaja';
-import resetLyrics from './utils/resetLyrics';
-import logger, { logFilePath } from './logger';
-import { getListeningData } from './core/getListeningData';
-import { getUserSettings, saveUserSettings } from './db/queries/settings';
+import {
+  fetchSongMetadataFromInternet,
+  searchSongMetadataResultsInInternet
+} from './utils/fetchSongMetadataFromInternet';
 import { getQueueInfo } from './utils/getQueueInfo';
-import { getDatabaseMetrics } from './db/queries/other';
-import { getAllHistorySongs } from './core/getAllHistorySongs';
-import { getAllFavoriteSongs } from './core/getAllFavoriteSongs';
+import getTranslatedLyrics from './utils/getTranslatedLyrics';
+import resetLyrics from './utils/resetLyrics';
+import romanizeLyrics from './utils/romanizeLyrics';
+import { compare } from './utils/safeStorage';
 
 export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSignal) {
   if (mainWindow) {
@@ -148,17 +165,17 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       addSongsFromFolderStructures(structures)
     );
 
-    ipcMain.handle('app/getSong', (_, id: string) => sendAudioData(id));
+    ipcMain.handle('app/getSong', (_, id: number) => sendAudioData(id));
 
     ipcMain.handle('app/getSongFromUnknownSource', (_, songPath: string) =>
       sendAudioDataFromPath(songPath)
     );
 
-    ipcMain.handle('app/toggleLikeSongs', (_, songIds: string[], likeSong?: boolean) =>
+    ipcMain.handle('app/toggleLikeSongs', (_, songIds: number[], likeSong?: boolean) =>
       toggleLikeSongs(songIds, likeSong)
     );
 
-    ipcMain.handle('app/toggleLikeArtists', (_, artistIds: string[], likeArtist?: boolean) =>
+    ipcMain.handle('app/toggleLikeArtists', (_, artistIds: number[], likeArtist?: boolean) =>
       toggleLikeArtists(artistIds, likeArtist)
     );
 
@@ -189,6 +206,65 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     // );
     ipcMain.handle('app/saveUserSettings', (_, settings: Partial<UserSettings>) =>
       saveUserSettings(settings)
+    );
+
+    // User Keyboard Shortcuts Handlers
+    ipcMain.handle('app/getUserKeyboardShortcuts', async () => {
+      const shortcuts = await getUserKeyboardShortcuts();
+      return shortcuts.shortcuts;
+    });
+
+    ipcMain.handle('app/saveUserKeyboardShortcuts', (_, shortcuts: Record<string, string>) =>
+      saveUserKeyboardShortcuts(shortcuts)
+    );
+
+    // User Equalizer Preset Handlers
+    ipcMain.handle('app/getUserEqualizerPreset', async () => {
+      const preset = await getUserEqualizerPreset();
+      return preset;
+    });
+
+    ipcMain.handle(
+      'app/saveUserEqualizerPreset',
+      (
+        _,
+        presetData: {
+          presetName?: string;
+          frequencyBands?: number[];
+          isEnabled?: boolean;
+        }
+      ) => saveUserEqualizerPreset(presetData)
+    );
+
+    // Ignored Items Handlers
+    ipcMain.handle('app/getIgnoredArtists', async () => {
+      const ignored = await getIgnoredArtists();
+      return ignored.map((item) => item.artistId);
+    });
+
+    ipcMain.handle('app/addIgnoredArtist', (_, artistId: number) => addIgnoredArtist(artistId));
+
+    ipcMain.handle('app/removeIgnoredArtist', (_, artistId: number) =>
+      removeIgnoredArtist(artistId)
+    );
+
+    ipcMain.handle('app/getIgnoredFeaturingArtists', async () => {
+      const ignored = await getIgnoredFeaturingArtists();
+      return ignored.map((item) => item.artistId);
+    });
+
+    ipcMain.handle('app/addIgnoredFeaturingArtist', (_, artistId: number) =>
+      addIgnoredFeaturingArtist(artistId)
+    );
+
+    ipcMain.handle('app/removeIgnoredFeaturingArtist', (_, artistId: number) =>
+      removeIgnoredFeaturingArtist(artistId)
+    );
+
+    ipcMain.handle('app/getIgnoredDuplicateMetadata', () => getIgnoredDuplicateMetadata());
+
+    ipcMain.handle('app/addIgnoredDuplicate', (_, duplicateGroupId: string, songId: number) =>
+      addIgnoredDuplicate(duplicateGroupId, songId)
     );
 
     ipcMain.handle('app/getStorageUsage', () => getStorageUsage());
@@ -239,7 +315,7 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       'app/getSongInfo',
       (
         _,
-        songIds: string[],
+        songIds: number[],
         sortType?: SongSortTypes,
         filterType?: SongFilterTypes,
         limit?: number,
@@ -247,31 +323,31 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       ) => getSongInfo(songIds, sortType, filterType, limit, preserveIdOrder)
     );
 
-    ipcMain.handle('app/getSimilarTracksForASong', (_, songId: string) => getSimilarTracks(songId));
+    ipcMain.handle('app/getSimilarTracksForASong', (_, songId: number) => getSimilarTracks(songId));
 
-    ipcMain.handle('app/getAlbumInfoFromLastFM', (_, albumId: string) =>
+    ipcMain.handle('app/getAlbumInfoFromLastFM', (_, albumId: number) =>
       getAlbumInfoFromLastFM(albumId)
     );
 
-    ipcMain.handle('app/getSongListeningData', (_, songIds: string[]) => getListeningData(songIds));
+    ipcMain.handle('app/getSongListeningData', (_, songIds: number[]) => getListeningData(songIds));
 
     ipcMain.handle(
       'app/updateSongListeningData',
-      (_: unknown, songId: string, dataType: ListeningDataEvents, value: number) =>
+      (_: unknown, songId: number, dataType: ListeningDataEvents, value: number) =>
         updateSongListeningData(songId, dataType, value)
     );
 
     ipcMain.handle('app/generatePalettes', generatePalettes);
 
-    ipcMain.handle('app/scrobbleSong', (_, songId: string, startTimeInSecs: number) =>
+    ipcMain.handle('app/scrobbleSong', (_, songId: number, startTimeInSecs: number) =>
       scrobbleSong(songId, startTimeInSecs)
     );
 
-    ipcMain.handle('app/sendNowPlayingSongDataToLastFM', (_, songId: string) =>
+    ipcMain.handle('app/sendNowPlayingSongDataToLastFM', (_, songId: number) =>
       sendNowPlayingSongDataToLastFM(songId)
     );
 
-    ipcMain.handle('app/getArtistArtworks', (_, artistId: string) =>
+    ipcMain.handle('app/getArtistArtworks', (_, artistId: number) =>
       getArtistInfoFromNet(artistId)
     );
 
@@ -318,14 +394,8 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
 
     ipcMain.handle(
       'app/getPlaylistData',
-      (
-        _,
-        playlistIds?: string[],
-        sortType?: AlbumSortTypes,
-        start?: number,
-        end?: number,
-        onlyMutablePlaylists = false
-      ) => sendPlaylistData(playlistIds, sortType, start, end, onlyMutablePlaylists)
+      (_, playlistIds?: string[], sortType?: AlbumSortTypes, start?: number, end?: number) =>
+        sendPlaylistData(playlistIds, sortType, start, end)
     );
 
     ipcMain.handle('app/getArtistDuplicates', (_, artistName: string) =>
@@ -334,19 +404,19 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
 
     ipcMain.handle(
       'app/resolveArtistDuplicates',
-      (_, selectedArtistId: string, duplicateIds: string[]) =>
+      (_, selectedArtistId: number, duplicateIds: number[]) =>
         resolveArtistDuplicates(selectedArtistId, duplicateIds)
     );
 
     ipcMain.handle(
       'app/resolveSeparateArtists',
-      (_, separateArtistId: string, separateArtistNames: string[]) =>
+      (_, separateArtistId: number, separateArtistNames: string[]) =>
         resolveSeparateArtists(separateArtistId, separateArtistNames)
     );
 
     ipcMain.handle(
       'app/resolveFeaturingArtists',
-      (_, songId: string, featArtistNames: string[], removeFeatInfoInTitle?: boolean) =>
+      (_, songId: number, featArtistNames: string[], removeFeatInfoInTitle?: boolean) =>
         resolveFeaturingArtists(songId, featArtistNames, removeFeatInfoInTitle)
     );
 
@@ -360,23 +430,23 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
         addNewPlaylist(playlistName, songIds, artworkPath)
     );
 
-    ipcMain.handle('app/removePlaylists', (_, playlistIds: string[]) =>
+    ipcMain.handle('app/removePlaylists', (_, playlistIds: number[]) =>
       removePlaylists(playlistIds)
     );
 
-    ipcMain.handle('app/addSongsToPlaylist', (_, playlistId: string, songIds: string[]) =>
+    ipcMain.handle('app/addSongsToPlaylist', (_, playlistId: number, songIds: number[]) =>
       addSongsToPlaylist(playlistId, songIds)
     );
 
-    ipcMain.handle('app/removeSongFromPlaylist', (_, playlistId: string, songId: string) =>
+    ipcMain.handle('app/removeSongFromPlaylist', (_, playlistId: number, songId: number) =>
       removeSongFromPlaylist(playlistId, songId)
     );
 
-    ipcMain.handle('app/addArtworkToAPlaylist', (_, playlistId: string, artworkPath: string) =>
+    ipcMain.handle('app/addArtworkToAPlaylist', (_, playlistId: number, artworkPath: string) =>
       addArtworkToAPlaylist(playlistId, artworkPath)
     );
 
-    ipcMain.handle('app/renameAPlaylist', (_, playlistId: string, newName: string) =>
+    ipcMain.handle('app/renameAPlaylist', (_, playlistId: number, newName: string) =>
       renameAPlaylist(playlistId, newName)
     );
 
@@ -395,9 +465,9 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
 
     ipcMain.handle('app/getBlacklistData', getBlacklistData);
 
-    ipcMain.handle('app/blacklistSongs', (_, songIds: string[]) => blacklistSongs(songIds));
+    ipcMain.handle('app/blacklistSongs', (_, songIds: number[]) => blacklistSongs(songIds));
 
-    ipcMain.handle('app/restoreBlacklistedSongs', (_, songIds: string[]) =>
+    ipcMain.handle('app/restoreBlacklistedSongs', (_, songIds: number[]) =>
       restoreBlacklistedSongs(songIds)
     );
 
@@ -411,7 +481,7 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
 
     ipcMain.handle('app/getFolderLocation', getFolderLocation);
 
-    ipcMain.handle('app/getSongId3Tags', (_, songId: string, isKnownSource = true) =>
+    ipcMain.handle('app/getSongId3Tags', (_, songId: number, isKnownSource = true) =>
       sendSongID3Tags(songId, isKnownSource)
     );
 
@@ -427,7 +497,7 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
 
     ipcMain.on('app/openLogFile', () => shell.openPath(logFilePath));
 
-    ipcMain.on('app/revealSongInFileExplorer', (_, songId: string) =>
+    ipcMain.on('app/revealSongInFileExplorer', (_, songId: number) =>
       revealSongInFileExplorer(songId)
     );
 
@@ -435,8 +505,8 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       shell.showItemInFolder(folderPath)
     );
 
-    ipcMain.on('app/saveArtworkToSystem', (_, songId: string, saveName?: string) =>
-      saveArtworkToSystem(songId, saveName)
+    ipcMain.on('app/saveArtworkToSystem', (_, artworkPath: string, saveName?: string) =>
+      saveArtworkToSystem(artworkPath, saveName)
     );
 
     ipcMain.on('app/openInBrowser', (_, url: string) => shell.openExternal(url));
@@ -451,11 +521,13 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       exportAppData(localStorageData)
     );
 
-    ipcMain.handle('app/exportPlaylist', (_, playlistId: string) => exportPlaylist(playlistId));
+    ipcMain.handle('app/exportPlaylist', (_, playlistId: number) => exportPlaylist(playlistId));
 
     ipcMain.handle('app/importAppData', importAppData);
 
-    ipcMain.handle('app/importPlaylist', importPlaylist);
+    ipcMain.handle('app/importPlaylist', (_, targetPlaylistId?: number) =>
+      importPlaylist(targetPlaylistId)
+    );
 
     ipcMain.handle(
       'app/getRendererLogs',
@@ -518,7 +590,7 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       // isConnectedToInternet = isConnected;
     });
 
-    ipcMain.handle('app/getArtworksForMultipleArtworksCover', (_, songIds: string[]) =>
+    ipcMain.handle('app/getArtworksForMultipleArtworksCover', (_, songIds: number[]) =>
       getArtworksForMultipleArtworksCover(songIds)
     );
 

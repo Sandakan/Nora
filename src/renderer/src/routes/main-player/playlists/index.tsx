@@ -1,32 +1,31 @@
+import NoPlaylistsImage from '@assets/images/svg/Empty Inbox _Monochromatic.svg';
 import Button from '@renderer/components/Button';
 import Dropdown from '@renderer/components/Dropdown';
+import Img from '@renderer/components/Img';
 import MainContainer from '@renderer/components/MainContainer';
+import NavLink from '@renderer/components/NavLink';
 import { Playlist } from '@renderer/components/PlaylistsPage/Playlist';
+import { playlistSortOptions } from '@renderer/components/PlaylistsPage/PlaylistOptions';
+import SecondaryContainer from '@renderer/components/SecondaryContainer';
 import VirtualizedGrid from '@renderer/components/VirtualizedGrid';
 import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
 import useSelectAllHandler from '@renderer/hooks/useSelectAllHandler';
+import { queryClient } from '@renderer/index';
+import { playlistQuery } from '@renderer/queries/playlists';
 import { store } from '@renderer/store/store';
+import storage from '@renderer/utils/localStorage';
+import { playlistSearchSchema } from '@renderer/utils/zod/playlistSchema';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 import { lazy, useCallback, useContext, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import storage from '@renderer/utils/localStorage';
-import { queryClient } from '@renderer/index';
-import { playlistQuery } from '@renderer/queries/playlists';
-import { zodValidator } from '@tanstack/zod-adapter';
-import { playlistSearchSchema } from '@renderer/utils/zod/playlistSchema';
-import { playlistSortOptions } from '@renderer/components/PlaylistsPage/PlaylistOptions';
-import { useSuspenseQuery } from '@tanstack/react-query';
-import Img from '@renderer/components/Img';
-import NoPlaylistsImage from '@assets/images/svg/Empty Inbox _Monochromatic.svg';
-import SecondaryContainer from '@renderer/components/SecondaryContainer';
-import NavLink from '@renderer/components/NavLink';
 
 import favoritesPlaylistCoverImage from '../../../assets/images/webp/favorites-playlist-icon.webp';
 import historyPlaylistCoverImage from '../../../assets/images/webp/history-playlist-icon.webp';
 
 export const Route = createFileRoute('/main-player/playlists/')({
-  validateSearch: zodValidator(playlistSearchSchema),
+  validateSearch: playlistSearchSchema,
   component: PlaylistsPage,
   loaderDeps: ({ search }) => ({
     sortingOrder: search.sortingOrder

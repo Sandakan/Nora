@@ -1,5 +1,7 @@
-import { checkIfConnectedToInternet } from '../../main';
-import logger from '../../logger';
+import { getAlbumById } from '@main/db/queries/albums';
+import { getSongsByNames } from '@main/db/queries/songs';
+import { convertToAlbum, convertToSongData } from '@main/utils/convert';
+
 import type {
   LastFMAlbumInfoAPI,
   AlbumInfo,
@@ -7,9 +9,8 @@ import type {
   LastFMAlbumInfo,
   Tag
 } from '../../../types/last_fm_album_info_api';
-import { getSongsByNames } from '@main/db/queries/songs';
-import { getAlbumById } from '@main/db/queries/albums';
-import { convertToAlbum, convertToSongData } from '../../../common/convert';
+import logger from '../../logger';
+import { checkIfConnectedToInternet } from '../../main';
 
 const sortTracks = (a: ParsedAlbumTrack, b: ParsedAlbumTrack) => {
   if (a.rank > b.rank) return 1;
@@ -52,7 +53,7 @@ const parseAlbumInfoFromLastFM = async (
       if (matchedSong) {
         const songData = convertToSongData(matchedSong);
 
-        if (albumSongIds.includes(matchedSong.id.toString())) {
+        if (albumSongIds.includes(matchedSong.id)) {
           availableTracksLinkedToAlbum.push({
             title: songData.title,
             artists: songData.artists?.map((artist) => artist.name),
@@ -111,7 +112,7 @@ const parseAlbumInfoFromLastFM = async (
   };
 };
 
-const getAlbumInfoFromLastFM = async (albumId: string): Promise<LastFMAlbumInfo | undefined> => {
+const getAlbumInfoFromLastFM = async (albumId: number): Promise<LastFMAlbumInfo | undefined> => {
   try {
     const LAST_FM_API_KEY = import.meta.env.MAIN_VITE_LAST_FM_API_KEY;
     if (!LAST_FM_API_KEY) throw new Error('LastFM api key not found.');

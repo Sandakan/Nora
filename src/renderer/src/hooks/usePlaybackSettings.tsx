@@ -1,37 +1,40 @@
 import { useCallback } from 'react';
+
+import toggleSongIsFavorite from '../other/toggleSongIsFavorite';
 import { dispatch, store } from '../store/store';
 import storage from '../utils/localStorage';
-import toggleSongIsFavorite from '../other/toggleSongIsFavorite';
+import { useUserPreferences } from './useUserPreferences';
 
 /**
  * Hook for managing playback settings (repeat, volume, mute, position, favorites, equalizer).
  *
- * This hook provides functions to control various playback settings including
- * repeat modes, volume control, mute state, song position seeking, favorite
- * song toggling, and equalizer presets. All settings are persisted to localStorage
- * where appropriate.
- *
- * @param player - The HTMLAudioElement instance
- * @returns Object containing playback setting functions
+ * This hook provides functions to control various playback settings including repeat modes, volume
+ * control, mute state, song position seeking, favorite song toggling, and equalizer presets. All
+ * settings are persisted to localStorage where appropriate.
  *
  * @example
- * ```tsx
- * const {
+ *   ```tsx
+ *   const {
  *   toggleRepeat,
  *   toggleMutedState,
  *   updateVolume,
  *   updateSongPosition,
  *   toggleIsFavorite,
  *   updateEqualizerOptions
- * } = usePlaybackSettings(player);
+ *   } = usePlaybackSettings(player);
  *
- * // Use in UI controls
- * <button onClick={() => toggleRepeat()}>Repeat</button>
- * <input onChange={(e) => updateVolume(e.target.value)} />
- * updateEqualizerOptions({ preset: 'rock', bands: [...] });
- * ```
+ *   // Use in UI controls
+ *   <button onClick={() => toggleRepeat()}>Repeat</button>
+ *   <input onChange={(e) => updateVolume(e.target.value)} />
+ *   updateEqualizerOptions({ preset: 'rock', bands: [...] });
+ *   ```;
+ *
+ * @param player - The HTMLAudioElement instance
+ * @returns Object containing playback setting functions
  */
 export function usePlaybackSettings(player: HTMLAudioElement) {
+  const { saveEqualizerPreset } = useUserPreferences();
+
   const toggleRepeat = useCallback((newState?: RepeatTypes) => {
     const repeatState =
       newState ||
@@ -96,9 +99,12 @@ export function usePlaybackSettings(player: HTMLAudioElement) {
     []
   );
 
-  const updateEqualizerOptions = useCallback((options: Equalizer) => {
-    storage.equalizerPreset.setEqualizerPreset(options);
-  }, []);
+  const updateEqualizerOptions = useCallback(
+    (options: Equalizer) => {
+      saveEqualizerPreset(options);
+    },
+    [saveEqualizerPreset]
+  );
 
   return {
     toggleRepeat,

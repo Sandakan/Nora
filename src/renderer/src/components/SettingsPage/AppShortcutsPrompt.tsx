@@ -1,10 +1,11 @@
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import ShortcutButton from './ShortcutButton';
-import SensitiveActionConfirmPrompt from '../SensitiveActionConfirmPrompt';
-import Button from '../Button';
+
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import storage from '../../utils/localStorage';
+import Button from '../Button';
+import SensitiveActionConfirmPrompt from '../SensitiveActionConfirmPrompt';
+import ShortcutButton from './ShortcutButton';
 
 const AppShortcutsPrompt = () => {
   const { t } = useTranslation();

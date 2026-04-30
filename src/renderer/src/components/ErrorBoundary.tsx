@@ -1,7 +1,8 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import log from '../utils/log';
+
 import BugImg from '../assets/images/svg/Bug Fixed_Monochromatic.svg';
+import log from '../utils/log';
 import Button from './Button';
 
 const { isInDevelopment } = window.api.properties;

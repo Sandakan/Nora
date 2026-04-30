@@ -1,13 +1,14 @@
+import { store } from '@renderer/store/store';
+import { useNavigate } from '@tanstack/react-router';
+import { useStore } from '@tanstack/react-store';
 import { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
+import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
 import Button from '../../Button';
 import Genre from '../../GenresPage/Genre';
 import SecondaryContainer from '../../SecondaryContainer';
-import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
-import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store/store';
-import { useNavigate } from '@tanstack/react-router';
 
 type Props = {
   genres: Genre[];

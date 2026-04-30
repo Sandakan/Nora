@@ -19,5 +19,5 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run Jest tests
+      - name: Run Tests
         run: npm run test

@@ -1,12 +1,14 @@
-import path from 'path';
 import fsSync from 'fs';
+import path from 'path';
+
+import { db } from '@main/db/db';
+import { getAllFolderStructures, saveAllFolderStructures } from '@main/db/queries/folders';
+
 import { supportedMusicExtensions } from '../filesystem';
 import logger from '../logger';
-import { closeAbortController } from './controlAbortControllers';
-import addWatchersToFolders from './addWatchersToFolders';
 import { sendMessageToRenderer } from '../main';
-import { getAllFolderStructures, saveAllFolderStructures } from '@main/db/queries/folders';
-import { db } from '@main/db/db';
+import addWatchersToFolders from './addWatchersToFolders';
+import { closeAbortController } from './controlAbortControllers';
 
 export const getAllFoldersFromFolderStructures = (folderStructures: FolderStructure[]) => {
   const folderData: MusicFolderData[] = [];

@@ -1,5 +1,6 @@
-import { decrypt } from '../../utils/safeStorage';
 import { getUserSettings } from '@main/db/queries/settings';
+
+import { decrypt } from '../../utils/safeStorage';
 
 const getLastFmAuthData = async () => {
   const { lastFmSessionKey: encryptedSessionKey } = await getUserSettings();

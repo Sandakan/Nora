@@ -1,4 +1,5 @@
 import { clearFullSongHistory } from '@main/db/queries/history';
+
 import logger from '../logger';
 
 const clearSongHistory = async () => {

@@ -1,10 +1,11 @@
-import logger from '../logger';
-import { sendMessageToRenderer } from '../main';
 import { getPlaylistById, updatePlaylistName } from '@main/db/queries/playlists';
 
-export default async (playlistId: string, newName: string) => {
+import logger from '../logger';
+import { sendMessageToRenderer } from '../main';
+
+export default async (playlistId: number, newName: string) => {
   try {
-    const playlist = await getPlaylistById(Number(playlistId));
+    const playlist = await getPlaylistById(playlistId);
 
     if (playlist) {
       await updatePlaylistName(playlist.id, newName);

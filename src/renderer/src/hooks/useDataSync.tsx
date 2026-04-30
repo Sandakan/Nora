@@ -1,39 +1,36 @@
-import { useEffect } from 'react';
-import { queryClient } from '..';
-import { songQuery } from '../queries/songs';
-import { artistQuery } from '../queries/aritsts';
-import { albumQuery } from '../queries/albums';
-import { playlistQuery } from '../queries/playlists';
-import { genreQuery } from '../queries/genres';
-import { searchQuery } from '../queries/search';
 import { settingsQuery } from '@renderer/queries/settings';
+import { useEffect } from 'react';
+
+import { queryClient } from '..';
+import { albumQuery } from '../queries/albums';
+import { artistQuery } from '../queries/aritsts';
+import { genreQuery } from '../queries/genres';
+import { playlistQuery } from '../queries/playlists';
+import { searchQuery } from '../queries/search';
+import { songQuery } from '../queries/songs';
 
 /**
  * Hook for synchronizing data updates from the main process
  *
- * Listens to IPC data update events from the main process and
- * invalidates relevant React Query caches to keep the UI in sync
- * with backend changes.
+ * Listens to IPC data update events from the main process and invalidates relevant React Query
+ * caches to keep the UI in sync with backend changes.
  *
- * Handles the following data types:
- * - Songs (new, updated, deleted, artworks, palette, likes)
- * - Artists (new, updated, deleted, artworks, likes)
- * - Albums (new, updated, deleted)
- * - Playlists (new, updated, deleted, songs added/removed)
- * - Genres (new, updated, deleted)
- * - Settings (preferences, theme, window state, etc.)
+ * Handles the following data types: - Songs (new, updated, deleted, artworks, palette, likes) -
+ * Artists (new, updated, deleted, artworks, likes) - Albums (new, updated, deleted) - Playlists
+ * (new, updated, deleted, songs added/removed) - Genres (new, updated, deleted) - Settings
+ * (preferences, theme, window state, etc.)
  *
  * This hook automatically sets up IPC listeners and cleanup.
  *
  * @example
- * ```tsx
- * function App() {
- *   // Set up data synchronization
- *   useDataSync();
+ *   ```tsx
+ *   function App() {
+ *     // Set up data synchronization
+ *     useDataSync();
  *
- *   return <div>...</div>;
- * }
- * ```
+ *     return <div>...</div>;
+ *   }
+ *   ```;
  */
 export function useDataSync(): void {
   useEffect(() => {

@@ -1,13 +1,13 @@
-import { lazy, useContext } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
-import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-
-import Button from '../Button';
-import ShortcutButton from '../SettingsPage/ShortcutButton';
-import Checkbox from '../Checkbox';
-import storage from '../../../src/utils/localStorage';
 import { store } from '@renderer/store/store';
 import { useStore } from '@tanstack/react-store';
+import { lazy, useContext } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
+
+import storage from '../../../src/utils/localStorage';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import Button from '../Button';
+import Checkbox from '../Checkbox';
+import ShortcutButton from '../SettingsPage/ShortcutButton';
 
 const AppShortcutsPrompt = lazy(() => import('../SettingsPage/AppShortcutsPrompt'));
 

@@ -1,30 +1,29 @@
+import { resolve } from 'path';
+
 import tailwindcss from '@tailwindcss/vite';
 import { tanstackRouter } from '@tanstack/router-plugin/vite';
 import react from '@vitejs/plugin-react';
-import { defineConfig, externalizeDepsPlugin } from 'electron-vite';
-import { resolve } from 'path';
+import { defineConfig } from 'electron-vite';
 
 export default defineConfig({
   main: {
     build: {
       sourcemap: true,
-      minify: true,
+      minify: false,
       rollupOptions: { input: '/src/main/main.ts', external: ['sharp'] }
     },
-    plugins: [externalizeDepsPlugin()],
     resolve: {
       alias: {
         '@db': resolve(import.meta.dirname, './src/main/db'),
-        '@main': resolve(import.meta.dirname, './src/main')
+        '@main': resolve(import.meta.dirname, './src/main'),
+        '@common': resolve(import.meta.dirname, './src/common')
       }
     }
   },
   preload: {
-    plugins: [externalizeDepsPlugin()],
-
     build: {
       sourcemap: true,
-      minify: true,
+      minify: false,
       rollupOptions: { output: { format: 'cjs', entryFileNames: '[name].mjs' } }
     }
   },
@@ -44,16 +43,12 @@ export default defineConfig({
     plugins: [
       tanstackRouter({
         target: 'react',
-        routesDirectory: 'src/renderer/src/routes',
-        generatedRouteTree: 'src/renderer/src/routeTree.gen.ts',
+        routesDirectory: 'src/routes',
+        generatedRouteTree: 'src/routeTree.gen.ts',
         autoCodeSplitting: true
       }),
-      react({
-        // TODO: Using babel plugin breaks the tanstack-virtual package.
-        babel: {
-          plugins: ['babel-plugin-react-compiler']
-        }
-      }),
+      react(),
+      // babel({ presets: [reactCompilerPreset()] }),
       tailwindcss()
     ]
   }

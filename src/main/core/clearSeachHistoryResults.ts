@@ -1,4 +1,5 @@
 import { getUserSettings, saveUserSettings } from '@main/db/queries/settings';
+
 import logger from '../logger';
 import { dataUpdateEvent } from '../main';
 

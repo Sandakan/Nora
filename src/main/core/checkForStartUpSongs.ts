@@ -1,7 +1,8 @@
-import path from 'path';
 import { statSync } from 'fs';
-import logger from '../logger';
+import path from 'path';
+
 import { appPreferences } from '../../../package.json';
+import logger from '../logger';
 import sendAudioDataFromPath from './sendAudioDataFromPath';
 
 let songsOnStartUp: string[] = [];

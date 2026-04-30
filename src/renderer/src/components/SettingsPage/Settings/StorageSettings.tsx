@@ -1,10 +1,11 @@
+import { settingsQuery } from '@renderer/queries/settings';
+import { useQuery } from '@tanstack/react-query';
 import { useMemo, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
-import Button from '../../Button';
+
 import calculateElapsedTime from '../../../utils/calculateElapsedTime';
 import parseByteSizes from '../../../utils/parseByteSizes';
-import { useQuery } from '@tanstack/react-query';
-import { settingsQuery } from '@renderer/queries/settings';
+import Button from '../../Button';
 
 const StorageSettings = () => {
   const { t } = useTranslation();

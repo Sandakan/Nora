@@ -1,3 +1,4 @@
+import { SpecialPlaylists } from '@common/playlists.enum';
 import roundTo from '@common/roundTo';
 import Button from '@renderer/components/Button';
 import MostLovedArtists from '@renderer/components/HomePage/MostLovedArtists';
@@ -5,47 +6,24 @@ import MostLovedSongs from '@renderer/components/HomePage/MostLovedSongs';
 import RecentlyAddedSongs from '@renderer/components/HomePage/RecentlyAddedSongs';
 import RecentlyPlayedArtists from '@renderer/components/HomePage/RecentlyPlayedArtists';
 import RecentlyPlayedSongs from '@renderer/components/HomePage/RecentlyPlayedSongs';
+import SpecialPlaylistCard from '@renderer/components/HomePage/SpecialPlaylistCard';
 import MainContainer from '@renderer/components/MainContainer';
+import SecondaryContainer from '@renderer/components/SecondaryContainer';
 import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
 import useResizeObserver from '@renderer/hooks/useResizeObserver';
+import { queryClient } from '@renderer/index';
+import { artistQuery } from '@renderer/queries/aritsts';
+import { homeQuery } from '@renderer/queries/home';
+import { songQuery } from '@renderer/queries/songs';
 import storage from '@renderer/utils/localStorage';
+// import DataFetchingImage from '../../../assets/images/svg/Umbrella_Monochromatic.svg';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { lazy, useCallback, useContext, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-// import DataFetchingImage from '../../../assets/images/svg/Umbrella_Monochromatic.svg';
-import { queryOptions, useSuspenseQuery } from '@tanstack/react-query';
-import { queryClient } from '@renderer/index';
-import { songQuery } from '@renderer/queries/songs';
-import { artistQuery } from '@renderer/queries/aritsts';
-import NavLink from '@renderer/components/NavLink';
-import SecondaryContainer from '@renderer/components/SecondaryContainer';
-import Img from '@renderer/components/Img';
 
 import favoritesPlaylistCoverImage from '../../../assets/images/webp/favorites-playlist-icon.webp';
 import historyPlaylistCoverImage from '../../../assets/images/webp/history-playlist-icon.webp';
-
-// TODO: Implement logic to fetch recently played songs from the backend or local storage.
-const fetchRecentlyPlayedSongs = async (
-  noOfRecentlyAddedSongCards: number
-): Promise<SongData[]> => [];
-// TODO: Implement logic to fetch recent song artists from the backend or local storage.
-const fetchRecentSongArtists = async (
-  noOfRecentlyAddedArtistCards: number
-): Promise<Artist[]> => [];
-const fetchMostLovedSongs = async (noOfMostLovedSongCards: number): Promise<AudioInfo[]> => [];
-
-const recentlyPlayedSongQueryOptions = queryOptions({
-  queryKey: ['recentlyPlayedSongs'],
-  queryFn: () => fetchRecentlyPlayedSongs(30)
-});
-const recentSongArtistsQueryOptions = queryOptions({
-  queryKey: ['recentSongArtists'],
-  queryFn: () => fetchRecentSongArtists(30)
-});
-const mostLovedSongsQueryOptions = queryOptions({
-  queryKey: ['mostLovedSongs'],
-  queryFn: () => fetchMostLovedSongs(30)
-});
 
 export const Route = createFileRoute('/main-player/home/')({
   component: HomePage,
@@ -53,9 +31,9 @@ export const Route = createFileRoute('/main-player/home/')({
     await queryClient.ensureQueryData(
       songQuery.all({ sortType: 'dateAddedDescending', start: 0, end: 30 })
     );
-    await queryClient.ensureQueryData(recentlyPlayedSongQueryOptions);
-    await queryClient.ensureQueryData(recentSongArtistsQueryOptions);
-    await queryClient.ensureQueryData(mostLovedSongsQueryOptions);
+    await queryClient.ensureQueryData(homeQuery.recentlyPlayedSongs);
+    await queryClient.ensureQueryData(homeQuery.recentSongArtists);
+    await queryClient.ensureQueryData(homeQuery.mostLovedSongs);
     await queryClient.ensureQueryData(
       artistQuery.all({
         sortType: 'mostLovedDescending',
@@ -80,11 +58,11 @@ function HomePage() {
   const {
     data: { data: latestSongs }
   } = useSuspenseQuery(songQuery.all({ sortType: 'dateAddedDescending', start: 0, end: 30 }));
-  const { data: recentlyPlayedSongs } = useSuspenseQuery(recentlyPlayedSongQueryOptions);
+  const { data: recentlyPlayedSongs } = useSuspenseQuery(homeQuery.recentlyPlayedSongs);
 
-  const { data: recentSongArtists } = useSuspenseQuery(recentSongArtistsQueryOptions);
+  const { data: recentSongArtists } = useSuspenseQuery(homeQuery.recentSongArtists);
 
-  const { data: mostLovedSongs } = useSuspenseQuery(mostLovedSongsQueryOptions);
+  const { data: mostLovedSongs } = useSuspenseQuery(homeQuery.mostLovedSongs);
 
   const {
     data: { data: mostLovedArtists }
@@ -288,14 +266,16 @@ function HomePage() {
               iconName: 'notifications_active',
               handlerFunction: () => {
                 const duration = Math.random() * 10000;
+                const value = roundTo(Math.random(), 2);
                 addNewNotifications([
                   {
                     id: duration.toString(),
                     duration: 5 * 60 * 1000,
                     // duration,
-                    content: `This is a notification with a number ${roundTo(Math.random(), 2)}`,
+                    content: `This is a notification with a number ${value}`,
                     iconName: 'notifications_active',
-                    type: 'WITH_PROGRESS_BAR'
+                    type: 'WITH_PROGRESS_BAR',
+                    progressBarData: { total: 1, value: value }
                   }
                 ]);
               }
@@ -322,26 +302,18 @@ function HomePage() {
             {t('homePage.favoritesAndRecaps')}
           </div>
           <div className="flex gap-4">
-            <NavLink
+            <SpecialPlaylistCard
+              playlistId={SpecialPlaylists.Favorites}
+              label="Favorites"
               to="/main-player/playlists/favorites"
-              className="bg-background-color-2/70 hover:bg-background-color-2! dark:bg-dark-background-color-2/70 dark:hover:bg-dark-background-color-2! text-font-color dark:text-dark-font-color flex h-24 min-w-60 items-center gap-4 rounded-xl px-4 py-4"
-            >
-              <Img
-                src={favoritesPlaylistCoverImage}
-                className="aspect-square h-full w-auto rounded-lg"
-              />
-              <span className="text-xl">Favorites</span>
-            </NavLink>
-            <NavLink
+              artworkPath={favoritesPlaylistCoverImage}
+            />
+            <SpecialPlaylistCard
+              playlistId={SpecialPlaylists.History}
+              label="History"
               to="/main-player/playlists/history"
-              className="bg-background-color-2/70 hover:bg-background-color-2! dark:bg-dark-background-color-2/70 dark:hover:bg-dark-background-color-2! text-font-color dark:text-dark-font-color flex h-24 min-w-60 items-center gap-4 rounded-xl px-4 py-4"
-            >
-              <Img
-                src={historyPlaylistCoverImage}
-                className="aspect-square h-full w-auto rounded-lg"
-              />
-              <span className="text-xl">History</span>
-            </NavLink>
+              artworkPath={historyPlaylistCoverImage}
+            />
           </div>
         </SecondaryContainer>
         {recentlyAddedSongsContainerRef.current && (

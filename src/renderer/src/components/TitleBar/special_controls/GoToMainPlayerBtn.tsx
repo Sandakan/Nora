@@ -1,10 +1,10 @@
+import { store } from '@renderer/store/store';
+import { useStore } from '@tanstack/react-store';
 import { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import Button from '../../Button';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store/store';
+import Button from '../../Button';
 
 const GoToMainPlayerBtn = () => {
   const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);

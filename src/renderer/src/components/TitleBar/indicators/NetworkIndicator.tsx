@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+
 import useNetworkConnectivity from '../../../hooks/useNetworkConnectivity';
 
 const NetworkIndicator = () => {

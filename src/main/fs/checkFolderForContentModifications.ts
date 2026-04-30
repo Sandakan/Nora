@@ -1,12 +1,14 @@
-import path from 'path';
 import fs from 'fs/promises';
+import path from 'path';
+
+import { getFolderFromPath } from '@main/db/queries/folders';
+import { isSongWithPathAvailable } from '@main/db/queries/songs';
+
+import { supportedMusicExtensions } from '../filesystem';
 import logger from '../logger';
 import { sendMessageToRenderer } from '../main';
 import { tryToParseSong } from '../parseSong/parseSong';
-import { supportedMusicExtensions } from '../filesystem';
 import removeSongsFromLibrary from '../removeSongsFromLibrary';
-import { getFolderFromPath } from '@main/db/queries/folders';
-import { isSongWithPathAvailable } from '@main/db/queries/songs';
 
 const getFolderDirs = async (folderPath: string) => {
   try {

@@ -1,11 +1,12 @@
+import { useNavigate } from '@tanstack/react-router';
 import { type CSSProperties, useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import NavLink from '../NavLink';
-import { useNavigate } from '@tanstack/react-router';
 
 interface SongArtistProp {
-  artistId: string;
+  artistId: number;
   name: string;
   isFromKnownSource?: boolean;
   className?: string;
@@ -20,15 +21,16 @@ function SongArtist(props: SongArtistProp) {
   const { artistId, name, className = '', isFromKnownSource = true, style } = props;
 
   const showArtistInfoPage = useCallback(
-    () => navigate({ to: '/main-player/artists/$artistId', params: { artistId } }),
+    () =>
+      navigate({ to: '/main-player/artists/$artistId', params: { artistId: String(artistId) } }),
     [artistId, navigate]
   );
 
   return (
     <NavLink
       to="/main-player/artists/$artistId"
-      params={{ artistId }}
-      className={`text-xs font-normal -outline-offset-1 focus-visible:!outline ${
+      params={{ artistId: String(artistId) }}
+      className={`text-xs font-normal -outline-offset-1 focus-visible:outline! ${
         isFromKnownSource && 'hover:underline'
       } ${className}`}
       disabled={!isFromKnownSource}

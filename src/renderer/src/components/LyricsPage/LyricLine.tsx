@@ -5,6 +5,7 @@ import { store } from '@renderer/store/store';
 import { useStore } from '@tanstack/react-store';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import roundTo from '../../../../common/roundTo';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import EnhancedSyncedLyricWord from '../LyricsEditingPage/EnhancedSyncedLyricWord';

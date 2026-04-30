@@ -1,8 +1,9 @@
+import { store } from '@renderer/store/store';
+import { useStore } from '@tanstack/react-store';
 import { useMemo } from 'react';
+
 import Notification from './Notification';
 import NotificationClearAllButton from './NotificationClearAllButton';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store/store';
 
 const NotificationPanel = () => {
   const notificationPanelData = useStore(store, (state) => state.notificationPanelData);

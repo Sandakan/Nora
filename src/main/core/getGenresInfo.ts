@@ -1,5 +1,6 @@
 import { getAllGenres } from '@main/db/queries/genres';
-import { convertToGenre } from '../../common/convert';
+
+import { convertToGenre } from '../utils/convert';
 
 const getGenresInfo = async (
   genreNamesOrIds: string[] = [],

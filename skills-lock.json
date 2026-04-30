@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "skills": {
+    "migrate-oxfmt": {
+      "source": "oxc-project/oxc",
+      "sourceType": "github",
+      "computedHash": "b3ae0d11b61d07471cf466ba0386490a9f7ed5c1186d4956a58ac55a4b6be6ad"
+    },
+    "migrate-oxlint": {
+      "source": "oxc-project/oxc",
+      "sourceType": "github",
+      "computedHash": "1f852a179bed024d1a65c73d345436ab28399f586e34fdcfd9602ed2c73d1fdc"
+    }
+  }
+}

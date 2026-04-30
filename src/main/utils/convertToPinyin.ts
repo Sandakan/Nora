@@ -1,11 +1,12 @@
-import { getCachedLyrics, updateCachedLyrics } from '../core/getSongLyrics';
-import logger from '../logger';
-import { sendMessageToRenderer } from '../main';
-import { getLrcLyricsMetadata } from '../core/saveLyricsToLrcFile';
+import detectChinese from '@neos21/detect-chinese';
+import { pinyin } from 'pinyin-pro';
+
 import { version } from '../../../package.json';
 import { INSTRUMENTAL_LYRIC_IDENTIFIER } from '../../common/parseLyrics';
-import { pinyin } from 'pinyin-pro';
-import detectChinese from '@neos21/detect-chinese';
+import { getCachedLyrics, updateCachedLyrics } from '../core/getSongLyrics';
+import { getLrcLyricsMetadata } from '../core/saveLyricsToLrcFile';
+import logger from '../logger';
+import { sendMessageToRenderer } from '../main';
 
 const hasConvertibleCharacter = async (str: string) => {
   if (!str) return false;

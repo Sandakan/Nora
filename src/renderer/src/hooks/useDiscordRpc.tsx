@@ -1,35 +1,30 @@
 import { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { store } from '../store/store';
 
 /**
  * Custom hook to manage Discord Rich Presence integration.
  *
- * This hook automatically updates Discord Rich Presence activity
- * with the currently playing song information, including:
- * - Song title and artists
- * - Playback timestamps (start/end times)
- * - Artist artwork (if available)
- * - Nora logo as large image
- * - Button link to Nora's GitHub repository
+ * This hook automatically updates Discord Rich Presence activity with the currently playing song
+ * information, including: - Song title and artists - Playback timestamps (start/end times) - Artist
+ * artwork (if available) - Nora logo as large image - Button link to Nora's GitHub repository
  *
- * The activity is updated on:
- * - Play event (starts activity timer)
- * - Pause event (clears activity timer)
- * - Seek event (updates timestamps)
+ * The activity is updated on: - Play event (starts activity timer) - Pause event (clears activity
+ * timer) - Seek event (updates timestamps)
  *
  * Text is automatically truncated to Discord's 128 character limit.
  *
- * @param player - The HTML audio player element
- *
  * @example
- * ```tsx
- * function App() {
- *   const player = useAudioPlayer();
+ *   ```tsx
+ *   function App() {
+ *     const player = useAudioPlayer();
  *
- *   useDiscordRpc(player);
- * }
- * ```
+ *     useDiscordRpc(player);
+ *   }
+ *   ```;
+ *
+ * @param player - The HTML audio player element
  */
 export function useDiscordRpc(player: HTMLAudioElement) {
   const { t } = useTranslation();

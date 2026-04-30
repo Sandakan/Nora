@@ -2,6 +2,7 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 
 import { useContext } from 'react';
+
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
 const ContextMenuItem = (props: ContextMenuItem) => {

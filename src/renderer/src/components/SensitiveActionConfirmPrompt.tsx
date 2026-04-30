@@ -1,6 +1,6 @@
 import { type ReactNode, useContext } from 'react';
-import { AppUpdateContext } from '../contexts/AppUpdateContext';
 
+import { AppUpdateContext } from '../contexts/AppUpdateContext';
 import Button, { type ButtonProps } from './Button';
 
 interface SensitiveActionConfrimPromptProp {

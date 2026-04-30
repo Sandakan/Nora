@@ -1,19 +1,20 @@
+import { relations, type SQL, sql } from 'drizzle-orm';
 import {
-  pgTable,
-  pgEnum,
-  varchar,
-  integer,
-  timestamp,
-  decimal,
-  text,
-  primaryKey,
-  index,
   type AnyPgColumn,
-  json,
   boolean,
-  customType
+  customType,
+  decimal,
+  doublePrecision,
+  index,
+  integer,
+  json,
+  pgEnum,
+  pgTable,
+  primaryKey,
+  text,
+  timestamp,
+  varchar
 } from 'drizzle-orm/pg-core';
-import { relations, sql, type SQL } from 'drizzle-orm';
 
 // ============================================================================
 // Data types
@@ -85,7 +86,9 @@ export const musicFolders = pgTable(
       onDelete: 'set null',
       onUpdate: 'cascade'
     }),
-    isBlacklistedUpdatedAt: timestamp('is_blacklisted_updated_at', { withTimezone: false })
+    isBlacklistedUpdatedAt: timestamp('is_blacklisted_updated_at', {
+      withTimezone: false
+    })
       .notNull()
       .defaultNow(),
     /*   When the folder itself was created on the file system */
@@ -131,10 +134,14 @@ export const songs = pgTable(
       onUpdate: 'cascade'
     }),
     isBlacklisted: boolean('is_blacklisted').notNull().default(false),
-    isBlacklistedUpdatedAt: timestamp('is_blacklisted_updated_at', { withTimezone: false })
+    isBlacklistedUpdatedAt: timestamp('is_blacklisted_updated_at', {
+      withTimezone: false
+    })
       .notNull()
       .defaultNow(),
-    isFavoriteUpdatedAt: timestamp('is_favorite_updated_at', { withTimezone: false })
+    isFavoriteUpdatedAt: timestamp('is_favorite_updated_at', {
+      withTimezone: false
+    })
       .notNull()
       .defaultNow(),
     fileCreatedAt: timestamp('file_created_at', { withTimezone: false }).notNull(),
@@ -199,7 +206,10 @@ export const palettes = pgTable(
     id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
     artworkId: integer('artwork_id')
       .notNull()
-      .references(() => artworks.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+      .references(() => artworks.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade'
+      }),
     createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
@@ -219,7 +229,10 @@ export const paletteSwatches = pgTable(
     swatchType: swatchTypeEnum('swatch_type').notNull().default('VIBRANT'),
     paletteId: integer('palette_id')
       .notNull()
-      .references(() => palettes.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+      .references(() => palettes.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade'
+      }),
     createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
@@ -306,7 +319,10 @@ export const playEvents = pgTable(
   'play_events',
   {
     id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
-    playbackPercentage: decimal('playback_percentage', { precision: 5, scale: 1 }).notNull(),
+    playbackPercentage: decimal('playback_percentage', {
+      precision: 5,
+      scale: 1
+    }).notNull(),
     songId: integer('song_id')
       .notNull()
       .references(() => songs.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
@@ -432,6 +448,7 @@ export const userSettings = pgTable(
     mainWindowHeight: integer('main_window_height'),
     miniPlayerWidth: integer('mini_player_width'),
     miniPlayerHeight: integer('mini_player_height'),
+    zoomFactor: doublePrecision('zoom_factor').notNull().default(0.8),
 
     // Window state
     windowState: varchar('window_state', { length: 20 }).notNull().default('normal'),
@@ -458,6 +475,80 @@ export const userSettings = pgTable(
 );
 
 // ============================================================================
+// User Preferences Tables (Migrated from localStorage)
+// ============================================================================
+export const userKeyboardShortcuts = pgTable('user_keyboard_shortcuts', {
+  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+  shortcuts: json('shortcuts').$type<Record<string, string>>().notNull().default({}),
+  createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
+});
+
+export const userEqualizerPreset = pgTable(
+  'user_equalizer_preset',
+  {
+    id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+    presetName: varchar('preset_name', { length: 255 }).notNull().default('Default'),
+    frequencyBands: json('frequency_bands').$type<number[]>().notNull().default([]),
+    isEnabled: boolean('is_enabled').notNull().default(false),
+    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
+  },
+  (t) => [index('idx_user_equalizer_preset_created_at').on(t.createdAt.desc())]
+);
+
+export const ignoredArtists = pgTable(
+  'ignored_artists',
+  {
+    id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+    artistId: integer('artist_id')
+      .notNull()
+      .unique()
+      .references(() => artists.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade'
+      }),
+    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
+  },
+  (t) => [index('idx_ignored_artists_artist_id').on(t.artistId)]
+);
+
+export const ignoredFeaturingArtists = pgTable(
+  'ignored_featuring_artists',
+  {
+    id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+    artistId: integer('artist_id')
+      .notNull()
+      .unique()
+      .references(() => artists.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade'
+      }),
+    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
+  },
+  (t) => [index('idx_ignored_featuring_artists_artist_id').on(t.artistId)]
+);
+
+export const ignoredDuplicateMetadata = pgTable(
+  'ignored_duplicate_metadata',
+  {
+    id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+    duplicateGroupId: varchar('duplicate_group_id', { length: 255 }).notNull(),
+    songId: integer('song_id')
+      .notNull()
+      .references(() => songs.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
+  },
+  (t) => [
+    index('idx_ignored_duplicate_metadata_group').on(t.duplicateGroupId),
+    index('idx_ignored_duplicate_metadata_song').on(t.songId)
+  ]
+);
+
+// ============================================================================
 // Many-to-Many Junction Tables
 // ============================================================================
 export const artworksSongs = pgTable(
@@ -468,7 +559,10 @@ export const artworksSongs = pgTable(
       .references(() => songs.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
     artworkId: integer('artwork_id')
       .notNull()
-      .references(() => artworks.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+      .references(() => artworks.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade'
+      }),
     createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
@@ -485,10 +579,16 @@ export const artistsArtworks = pgTable(
   {
     artistId: integer('artist_id')
       .notNull()
-      .references(() => artists.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+      .references(() => artists.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade'
+      }),
     artworkId: integer('artwork_id')
       .notNull()
-      .references(() => artworks.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+      .references(() => artworks.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade'
+      }),
     createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
@@ -505,10 +605,16 @@ export const albumsArtworks = pgTable(
   {
     albumId: integer('album_id')
       .notNull()
-      .references(() => albums.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+      .references(() => albums.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade'
+      }),
     artworkId: integer('artwork_id')
       .notNull()
-      .references(() => artworks.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+      .references(() => artworks.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade'
+      }),
     createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
@@ -528,7 +634,10 @@ export const artistsSongs = pgTable(
       .references(() => songs.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
     artistId: integer('artist_id')
       .notNull()
-      .references(() => artists.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+      .references(() => artists.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade'
+      }),
     createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
@@ -545,7 +654,10 @@ export const albumsSongs = pgTable(
   {
     albumId: integer('album_id')
       .notNull()
-      .references(() => albums.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+      .references(() => albums.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade'
+      }),
     songId: integer('song_id')
       .notNull()
       .references(() => songs.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
@@ -565,7 +677,10 @@ export const genresSongs = pgTable(
   {
     genreId: integer('genre_id')
       .notNull()
-      .references(() => genres.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+      .references(() => genres.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade'
+      }),
     songId: integer('song_id')
       .notNull()
       .references(() => songs.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
@@ -585,10 +700,16 @@ export const artworksGenres = pgTable(
   {
     genreId: integer('genre_id')
       .notNull()
-      .references(() => genres.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+      .references(() => genres.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade'
+      }),
     artworkId: integer('artwork_id')
       .notNull()
-      .references(() => artworks.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+      .references(() => artworks.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade'
+      }),
     createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
@@ -605,7 +726,10 @@ export const playlistsSongs = pgTable(
   {
     playlistId: integer('playlist_id')
       .notNull()
-      .references(() => playlists.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+      .references(() => playlists.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade'
+      }),
     songId: integer('song_id')
       .notNull()
       .references(() => songs.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
@@ -625,10 +749,16 @@ export const artworksPlaylists = pgTable(
   {
     playlistId: integer('playlist_id')
       .notNull()
-      .references(() => playlists.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+      .references(() => playlists.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade'
+      }),
     artworkId: integer('artwork_id')
       .notNull()
-      .references(() => artworks.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+      .references(() => artworks.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade'
+      }),
     createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
@@ -645,10 +775,16 @@ export const albumsArtists = pgTable(
   {
     albumId: integer('album_id')
       .notNull()
-      .references(() => albums.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+      .references(() => albums.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade'
+      }),
     artistId: integer('artist_id')
       .notNull()
-      .references(() => artists.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+      .references(() => artists.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade'
+      }),
     createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
@@ -663,6 +799,32 @@ export const albumsArtists = pgTable(
 // ============================================================================
 // Relations
 // ============================================================================
+
+// User Preferences Relations
+export const userKeyboardShortcutsRelations = relations(userKeyboardShortcuts, () => ({}));
+
+export const userEqualizerPresetRelations = relations(userEqualizerPreset, () => ({}));
+
+export const ignoredArtistsRelations = relations(ignoredArtists, ({ one }) => ({
+  artist: one(artists, {
+    fields: [ignoredArtists.artistId],
+    references: [artists.id]
+  })
+}));
+
+export const ignoredFeaturingArtistsRelations = relations(ignoredFeaturingArtists, ({ one }) => ({
+  artist: one(artists, {
+    fields: [ignoredFeaturingArtists.artistId],
+    references: [artists.id]
+  })
+}));
+
+export const ignoredDuplicateMetadataRelations = relations(ignoredDuplicateMetadata, ({ one }) => ({
+  song: one(songs, {
+    fields: [ignoredDuplicateMetadata.songId],
+    references: [songs.id]
+  })
+}));
 
 // Main Table Relations
 export const albumsRelations = relations(albums, ({ many }) => ({

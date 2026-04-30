@@ -1,9 +1,10 @@
+import { store } from '@renderer/store/store';
+import { useStore } from '@tanstack/react-store';
+
 import ErrorBoundary from '../ErrorBoundary';
 import CurrentlyPlayingSongInfoContainer from './CurrentlyPlayingSongInfoContainer';
 import OtherSongControlsContainer from './OtherSongControlsContainer';
 import SongControlsAndSeekbarContainer from './SongControlsAndSeekbarContainer';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store/store';
 
 const SongControlsContainer = () => {
   const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);

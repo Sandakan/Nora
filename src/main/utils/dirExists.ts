@@ -1,4 +1,5 @@
 import { accessSync, constants } from 'fs';
+
 import { isAnErrorWithCode } from './isAnErrorWithCode';
 
 export const dirExistsSync = (dir: string, mode = constants.F_OK) => {

@@ -1,13 +1,14 @@
+import { store } from '@renderer/store/store';
+import { useNavigate } from '@tanstack/react-router';
+import { useStore } from '@tanstack/react-store';
 import { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
+import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
 import { Album } from '../../AlbumsPage/Album';
 import Button from '../../Button';
 import SecondaryContainer from '../../SecondaryContainer';
-import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
-import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
-import { store } from '@renderer/store/store';
-import { useStore } from '@tanstack/react-store';
-import { useNavigate } from '@tanstack/react-router';
 
 type Props = {
   albums: Album[];

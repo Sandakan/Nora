@@ -1,8 +1,7 @@
 import { useTranslation } from 'react-i18next';
 
-import calculateElapsedTime from '../../utils/calculateElapsedTime';
-
 import { version as appVersion } from '../../../../../package.json';
+import calculateElapsedTime from '../../utils/calculateElapsedTime';
 import VersionNote, { type VersionNoteProps } from './VersionNote';
 
 interface VersionProp {

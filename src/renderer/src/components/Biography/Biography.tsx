@@ -1,10 +1,11 @@
+import { store } from '@renderer/store/store';
+import { useStore } from '@tanstack/react-store';
 import { useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+
+import type { Tag } from '../../../../types/last_fm_artist_info_api';
 import Hyperlink from '../Hyperlink';
 import HashTag from './HashTag';
-import type { Tag } from '../../../../types/last_fm_artist_info_api';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store/store';
 
 type Props = {
   bioUserName?: string;

@@ -8,9 +8,10 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { useStore } from '@tanstack/react-store';
 import { type KeyboardEvent, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import HomeImgDark from '../../../assets/images/webp/home-skeleton-dark.webp';
-import HomeImgLight from '../../../assets/images/webp/home-skeleton-light.webp';
 import HomeImgLightDark from '../../../assets/images/webp/home-skeleton-light-dark.webp';
+import HomeImgLight from '../../../assets/images/webp/home-skeleton-light.webp';
 import storage from '../../../utils/localStorage';
 import Checkbox from '../../Checkbox';
 import Img from '../../Img';
