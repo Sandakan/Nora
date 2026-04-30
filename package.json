@@ -120,7 +120,7 @@
 		"renderer:generate-routes": "tsr generate",
 		"renderer:watch-routes": "tsr watch",
 		"preversion": "npm test",
-		"version": "npm run build"
+		"version": "npm install && npm run build"
 	},
 	"dependencies": {
 		"@electric-sql/pglite": "^0.4.4",
