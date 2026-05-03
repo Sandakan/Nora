@@ -126,6 +126,33 @@ describe('resolveFilePaths', () => {
     expect(output).not.toContain('?ts=');
   });
 
+  test('removeDefaultAppProtocolFromFilePath returns windows-style path without leading slash', () => {
+    const output = removeDefaultAppProtocolFromFilePath(
+      'nora://localfiles/C:/Music/Song.flac?ts=1234',
+      'win32'
+    );
+
+    expect(output).toBe('C:/Music/Song.flac');
+  });
+
+  test('removeDefaultAppProtocolFromFilePath returns leading slash on linux paths', () => {
+    const output = removeDefaultAppProtocolFromFilePath(
+      'nora://localfiles/home/ada/music/song.flac?ts=1234',
+      'linux'
+    );
+
+    expect(output).toBe('/home/ada/music/song.flac');
+  });
+
+  test('removeDefaultAppProtocolFromFilePath returns leading slash on macos paths', () => {
+    const output = removeDefaultAppProtocolFromFilePath(
+      'nora://localfiles/Users/ada/Music/song.flac?ts=1234',
+      'darwin'
+    );
+
+    expect(output).toBe('/Users/ada/Music/song.flac');
+  });
+
   test('addDefaultAppProtocolToFilePath prefixes nora localfiles path', () => {
     const output = addDefaultAppProtocolToFilePath('C:/Music/Song.flac');
 

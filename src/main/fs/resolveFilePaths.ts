@@ -357,13 +357,16 @@ export const parsePlaylistArtworks = (
   };
 };
 
-export const removeDefaultAppProtocolFromFilePath = (filePath: string) => {
+export const removeDefaultAppProtocolFromFilePath = (
+  filePath: string,
+  currentPlatform: NodeJS.Platform = platform
+) => {
   const strippedPath = filePath.replaceAll(
     /nora:[/\\]{1,2}localfiles[/\\]{1,2}|\?[\w+=\w+&?]+$/gm,
     ''
   );
 
-  if (platform === 'linux' || platform === 'darwin') return `/${strippedPath}`;
+  if (currentPlatform === 'linux' || currentPlatform === 'darwin') return `/${strippedPath}`;
   return strippedPath;
 };
 
