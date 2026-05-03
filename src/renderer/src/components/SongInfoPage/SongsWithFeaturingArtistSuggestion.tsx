@@ -1,17 +1,17 @@
+import { store } from '@renderer/store/store';
+import { useStore } from '@tanstack/react-store';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import storage from '../../utils/localStorage';
 
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import { useUserPreferences } from '../../hooks/useUserPreferences';
+import splitFeaturingArtists from '../../utils/splitFeaturingArtists';
 import Button from '../Button';
 import Checkbox from '../Checkbox';
-import splitFeaturingArtists from '../../utils/splitFeaturingArtists';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store/store';
 
 type Props = {
   songTitle?: string;
-  songId?: string;
+  songId?: number;
   artistNames: string[];
   path: string;
   updateSongInfo: (callback: (prevData: SongData) => SongData) => void;
@@ -21,27 +21,27 @@ const featArtistsRegex = /\(? ?feat.? (?<featArtists>[^\n\t()]+)\)?/gm;
 const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
   const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
   const currentSongData = useStore(store, (state) => state.currentSongData);
+  const { ignoredFeaturingArtists, addIgnoredFeaturingArtistMutation } = useUserPreferences();
 
   const { addNewNotifications, updateCurrentSongData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const { songTitle = '', songId = '', artistNames, path, updateSongInfo } = props;
+  const { songTitle = '', songId, artistNames, updateSongInfo } = props;
 
   const [isIgnored, setIsIgnored] = useState(false);
   const [isRemovingFeatInfoFromTitle, setIsRemovingFeatInfoFromTitle] = useState(true);
   const [isMessageVisible, setIsMessageVisible] = useState(true);
   const [separatedFeatArtistsNames, setSeparatedFeatArtistsNames] = useState<string[]>([]);
 
-  const ignoredSongs = useMemo(
-    () => storage.ignoredSongsWithFeatArtists.getIgnoredSongsWithFeatArtists(),
-    []
-  );
+  const ignoredSongs = useMemo(() => ignoredFeaturingArtists || [], [ignoredFeaturingArtists]);
 
   useEffect(() => {
-    if (isIgnored === false && ignoredSongs.length > 0) setIsIgnored(ignoredSongs.includes(songId));
+    if (isIgnored === false && ignoredSongs.length > 0 && songId)
+      setIsIgnored(ignoredSongs.includes(songId));
   }, [songId, ignoredSongs, songTitle, isIgnored]);
 
   useEffect(() => {
+    if (!songTitle) return;
     const featArtistsExec = featArtistsRegex.exec(songTitle);
     featArtistsRegex.lastIndex = 0;
 
@@ -84,6 +84,8 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
 
   const addFeatArtistsToSong = useCallback(
     (setIsDisabled: (_state: boolean) => void, setIsPending: (_state: boolean) => void) => {
+      if (!songId) return;
+
       setIsDisabled(true);
       setIsPending(true);
 
@@ -140,7 +142,8 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
   );
 
   const ignoreSuggestion = useCallback(() => {
-    storage.ignoredSongsWithFeatArtists.setIgnoredSongsWithFeatArtists([songId]);
+    if (!songId) return;
+    addIgnoredFeaturingArtistMutation.mutate({ songIds: [songId] });
 
     setIsIgnored(true);
     addNewNotifications([

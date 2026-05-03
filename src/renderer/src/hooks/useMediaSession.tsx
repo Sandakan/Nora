@@ -1,10 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { store } from '../store/store';
 
-/**
- * Dependencies required by the useMediaSession hook.
- */
+/** Dependencies required by the useMediaSession hook. */
 export interface MediaSessionDependencies {
   /** Function to toggle song playback (play/pause) */
   toggleSongPlayback: (startPlay?: boolean) => void;
@@ -19,34 +18,30 @@ export interface MediaSessionDependencies {
 /**
  * Custom hook to manage the Media Session API integration.
  *
- * This hook automatically updates the browser's media session metadata
- * (title, artist, album, artwork) and sets up media control handlers
- * (play, pause, skip, seek) that integrate with OS-level media controls
- * and browser media notifications.
+ * This hook automatically updates the browser's media session metadata (title, artist, album,
+ * artwork) and sets up media control handlers (play, pause, skip, seek) that integrate with
+ * OS-level media controls and browser media notifications.
  *
- * Features:
- * - Updates media metadata when songs change
- * - Handles artwork (both Uint8Array and base64 formats)
- * - Sets up playback state tracking
- * - Configures media control action handlers
- * - Automatically cleans up on unmount
+ * Features: - Updates media metadata when songs change - Handles artwork (both Uint8Array and
+ * base64 formats) - Sets up playback state tracking - Configures media control action handlers -
+ * Automatically cleans up on unmount
+ *
+ * @example
+ *   ```tsx
+ *   function App() {
+ *     const player = useAudioPlayer();
+ *
+ *     useMediaSession(player, {
+ *       toggleSongPlayback,
+ *       handleSkipBackwardClick,
+ *       handleSkipForwardClick,
+ *       updateSongPosition
+ *     });
+ *   }
+ *   ```;
  *
  * @param player - The HTML audio player element
  * @param dependencies - Object containing required callback functions
- *
- * @example
- * ```tsx
- * function App() {
- *   const player = useAudioPlayer();
- *
- *   useMediaSession(player, {
- *     toggleSongPlayback,
- *     handleSkipBackwardClick,
- *     handleSkipForwardClick,
- *     updateSongPosition
- *   });
- * }
- * ```
  */
 export function useMediaSession(player: HTMLAudioElement, dependencies: MediaSessionDependencies) {
   const { t } = useTranslation();
@@ -61,6 +56,39 @@ export function useMediaSession(player: HTMLAudioElement, dependencies: MediaSes
   const artworkPathRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
+    if (typeof navigator === 'undefined' || !('mediaSession' in navigator)) {
+      return;
+    }
+
+    const mediaSession = navigator.mediaSession;
+
+    const safeSetPositionState = () => {
+      if (
+        Number.isFinite(player.duration) &&
+        player.duration > 0 &&
+        Number.isFinite(player.currentTime)
+      ) {
+        mediaSession.setPositionState({
+          duration: player.duration,
+          playbackRate: player.playbackRate,
+          position: player.currentTime
+        });
+      } else {
+        mediaSession.setPositionState(undefined);
+      }
+    };
+
+    const safeSetActionHandler = (
+      action: MediaSessionAction,
+      handler: MediaSessionActionHandler | null
+    ) => {
+      try {
+        mediaSession.setActionHandler(action, handler);
+      } catch {
+        // Some platforms throw for unsupported Media Session actions.
+      }
+    };
+
     const updateMediaSessionMetaData = () => {
       const currentSong = store.state.currentSongData;
 
@@ -86,65 +114,73 @@ export function useMediaSession(player: HTMLAudioElement, dependencies: MediaSes
       }
       artworkPathRef.current = artworkPath;
 
+      const artwork = artworkPath
+        ? [
+            {
+              src: artworkPath,
+              sizes: '1000x1000',
+              type: 'image/webp'
+            }
+          ]
+        : [];
+
       // Update metadata
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title: currentSong.title,
-        artist: Array.isArray(currentSong.artists)
-          ? currentSong.artists.map((artist) => artist.name).join(', ')
-          : t('common.unknownArtist'),
-        album: currentSong.album
-          ? currentSong.album.name || t('common.unknownAlbum')
-          : t('common.unknownAlbum'),
-        artwork: [
-          {
-            src: artworkPath,
-            sizes: '1000x1000',
-            type: 'image/webp'
-          }
-        ]
-      });
+      if (typeof MediaMetadata !== 'undefined') {
+        mediaSession.metadata = new MediaMetadata({
+          title: currentSong.title,
+          artist: Array.isArray(currentSong.artists)
+            ? currentSong.artists.map((artist) => artist.name).join(', ')
+            : t('common.unknownArtist'),
+          album: currentSong.album
+            ? currentSong.album.name || t('common.unknownAlbum')
+            : t('common.unknownAlbum'),
+          artwork
+        });
+      }
 
       // Update position state
-      navigator.mediaSession.setPositionState({
-        duration: player.duration,
-        playbackRate: player.playbackRate,
-        position: player.currentTime
-      });
+      safeSetPositionState();
 
       // Set up action handlers
-      navigator.mediaSession.setActionHandler('pause', () => toggleSongPlayback(false));
-      navigator.mediaSession.setActionHandler('play', () => toggleSongPlayback(true));
-      navigator.mediaSession.setActionHandler('previoustrack', handleSkipBackwardClick);
-      navigator.mediaSession.setActionHandler('nexttrack', () =>
-        handleSkipForwardClick('PLAYER_SKIP')
-      );
+      safeSetActionHandler('pause', () => toggleSongPlayback(false));
+      safeSetActionHandler('play', () => toggleSongPlayback(true));
+      safeSetActionHandler('previoustrack', handleSkipBackwardClick);
+      safeSetActionHandler('nexttrack', () => handleSkipForwardClick('PLAYER_SKIP'));
 
       // Seek handlers
-      navigator.mediaSession.setActionHandler('seekbackward', () => {
+      safeSetActionHandler('seekbackward', () => {
         const newPosition = Math.max(0, player.currentTime - 10);
         updateSongPosition(newPosition);
       });
 
-      navigator.mediaSession.setActionHandler('seekforward', () => {
+      safeSetActionHandler('seekforward', () => {
         const newPosition = Math.min(player.duration, player.currentTime + 10);
         updateSongPosition(newPosition);
       });
 
-      navigator.mediaSession.setActionHandler('seekto', (details) => {
+      safeSetActionHandler('seekto', (details) => {
         if (details.seekTime !== undefined) {
           updateSongPosition(details.seekTime);
         }
       });
 
       // Update playback state
-      navigator.mediaSession.playbackState = store.state.player.isCurrentSongPlaying
-        ? 'playing'
-        : 'paused';
+      mediaSession.playbackState = store.state.player.isCurrentSongPlaying ? 'playing' : 'paused';
     };
+
+    const storeSubscription = store.subscribe(() => {
+      updateMediaSessionMetaData();
+    });
+
+    // Register metadata + handlers immediately so media keys are available without requiring
+    // a play/pause round-trip first.
+    updateMediaSessionMetaData();
 
     // Listen to player events
     player.addEventListener('play', updateMediaSessionMetaData);
     player.addEventListener('pause', updateMediaSessionMetaData);
+    player.addEventListener('loadedmetadata', updateMediaSessionMetaData);
+    player.addEventListener('timeupdate', safeSetPositionState);
 
     // Cleanup
     return () => {
@@ -155,22 +191,26 @@ export function useMediaSession(player: HTMLAudioElement, dependencies: MediaSes
       }
 
       // Clear media session
-      navigator.mediaSession.metadata = null;
-      navigator.mediaSession.playbackState = 'none';
-      navigator.mediaSession.setPositionState(undefined);
+      mediaSession.metadata = null;
+      mediaSession.playbackState = 'none';
+      mediaSession.setPositionState(undefined);
 
       // Remove action handlers
-      navigator.mediaSession.setActionHandler('play', null);
-      navigator.mediaSession.setActionHandler('pause', null);
-      navigator.mediaSession.setActionHandler('seekbackward', null);
-      navigator.mediaSession.setActionHandler('seekforward', null);
-      navigator.mediaSession.setActionHandler('previoustrack', null);
-      navigator.mediaSession.setActionHandler('nexttrack', null);
-      navigator.mediaSession.setActionHandler('seekto', null);
+      safeSetActionHandler('play', null);
+      safeSetActionHandler('pause', null);
+      safeSetActionHandler('seekbackward', null);
+      safeSetActionHandler('seekforward', null);
+      safeSetActionHandler('previoustrack', null);
+      safeSetActionHandler('nexttrack', null);
+      safeSetActionHandler('seekto', null);
 
       // Remove event listeners
       player.removeEventListener('play', updateMediaSessionMetaData);
       player.removeEventListener('pause', updateMediaSessionMetaData);
+      player.removeEventListener('loadedmetadata', updateMediaSessionMetaData);
+      player.removeEventListener('timeupdate', safeSetPositionState);
+
+      storeSubscription.unsubscribe();
     };
   }, [
     handleSkipBackwardClick,

@@ -8,8 +8,8 @@
 
 // https://i.scdn.co/image/ ab6761670000 ecd483b611804e9de647b18110be
 
-import logger from '../logger';
 import type { SpotifyEmbedApi } from '../../types/spotify_embed_api';
+import logger from '../logger';
 
 const SPOTIFY_EMBED_BASE_URL =
   'https://open.spotify.com/oembed?url=https://open.spotify.com/track/';

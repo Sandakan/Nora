@@ -1,15 +1,14 @@
+import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react';
+import { store } from '@renderer/store/store';
+import { useStore } from '@tanstack/react-store';
 import { Suspense, useCallback, useContext, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react';
 
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-
 import Button from '../Button';
 import MainContainer from '../MainContainer';
-import PromptMenuNavigationControlsContainer from './PromptMenuNavigationControlsContainer';
 import SuspenseLoader from '../SuspenseLoader';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store/store';
+import PromptMenuNavigationControlsContainer from './PromptMenuNavigationControlsContainer';
 
 const PromptMenu = () => {
   const promptMenuData = useStore(store, (state) => state.promptMenuData);
@@ -55,7 +54,7 @@ const PromptMenu = () => {
             <DialogPanel
               ref={promptMenuRef}
               transition
-              className="bg-background-color-1 dark:bg-dark-background-color-1 relative h-fit max-h-[80%] min-h-[300px] w-[80%] max-w-[90%] min-w-[800px] transform overflow-hidden overflow-y-auto rounded-2xl text-left shadow-xl transition-all data-closed:scale-95 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8 sm:w-full sm:max-w-lg"
+              className="bg-background-color-1 dark:bg-dark-background-color-1 relative h-fit max-h-[80%] min-h-75 w-[80%] max-w-[90%] min-w-[800px] transform overflow-hidden overflow-y-auto rounded-2xl text-left shadow-xl transition-all data-closed:scale-95 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8 sm:w-full sm:max-w-lg"
             >
               <div className="my-4 flex w-full items-center justify-between px-6">
                 <PromptMenuNavigationControlsContainer />
@@ -119,4 +118,3 @@ const PromptMenu = () => {
 };
 
 export default PromptMenu;
-

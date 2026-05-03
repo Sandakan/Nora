@@ -1,7 +1,8 @@
-import { type ReactElement, lazy, useCallback, useContext } from 'react';
-import { AppUpdateContext } from '../contexts/AppUpdateContext';
-import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store/store';
+import { useStore } from '@tanstack/react-store';
+import { type ReactElement, lazy, useCallback, useContext } from 'react';
+
+import { AppUpdateContext } from '../contexts/AppUpdateContext';
 
 const OpenLinkConfirmPrompt = lazy(() => import('./OpenLinkConfirmPrompt'));
 

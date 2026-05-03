@@ -6,24 +6,26 @@ import TitleContainer from '@renderer/components/TitleContainer';
 import VirtualizedList from '@renderer/components/VirtualizedList';
 import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
 import useSelectAllHandler from '@renderer/hooks/useSelectAllHandler';
+import { queryClient } from '@renderer/index';
 import { songQuery } from '@renderer/queries/songs';
 import { store } from '@renderer/store/store';
 import { songSearchSchema } from '@renderer/utils/zod/songSchema';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
-import { zodValidator } from '@tanstack/zod-adapter';
 import { useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { SpecialPlaylists } from '../../../../../common/playlists.enum';
 import favoritesPlaylistCoverImage from '../../../assets/images/webp/favorites-playlist-icon.webp';
 
 export const Route = createFileRoute('/main-player/playlists/favorites')({
-  validateSearch: zodValidator(songSearchSchema),
+  validateSearch: songSearchSchema,
   component: FavoritesPlaylistInfoPage
 });
 
 const playlistData: Playlist = {
-  playlistId: 'favorites',
+  playlistId: SpecialPlaylists.Favorites, // Special ID for Favorites playlist
   name: 'Favorites',
   artworkPaths: {
     artworkPath: favoritesPlaylistCoverImage,
@@ -58,7 +60,7 @@ function FavoritesPlaylistInfoPage() {
   const selectAllHandler = useSelectAllHandler(favoriteSongs, 'songs', 'songId');
 
   const handleSongPlayBtnClick = useCallback(
-    (currSongId: string) => {
+    (currSongId: number) => {
       const queueSongIds = favoriteSongs
         .filter((song) => !song.isBlacklisted)
         .map((song) => song.songId);
@@ -100,7 +102,7 @@ function FavoritesPlaylistInfoPage() {
     const validSongIds = favoriteSongs
       .filter((song) => !song.isBlacklisted)
       .map((song) => song.songId);
-    updateQueueData(undefined, [...queue.queue, ...validSongIds]);
+    updateQueueData(undefined, [...queue.songIds, ...validSongIds]);
     addNewNotifications([
       {
         id: `addedToQueue`,
@@ -110,7 +112,7 @@ function FavoritesPlaylistInfoPage() {
         })
       }
     ]);
-  }, [addNewNotifications, favoriteSongs, queue.queue, t, updateQueueData]);
+  }, [addNewNotifications, favoriteSongs, queue.songIds, t, updateQueueData]);
 
   const shuffleAndPlaySongs = useCallback(
     () =>
@@ -136,6 +138,17 @@ function FavoritesPlaylistInfoPage() {
     [createQueue, favoriteSongs]
   );
 
+  const importSongsToFavorites = useCallback(() => {
+    window.api.playlistsData
+      .importPlaylist(SpecialPlaylists.Favorites)
+      .then(() => {
+        queryClient.invalidateQueries({
+          queryKey: songQuery.favorites({ sortType: sortingOrder }).queryKey
+        });
+      })
+      .catch((err) => console.error(err));
+  }, [sortingOrder]);
+
   return (
     <MainContainer
       className="main-container playlist-info-page-container h-full! px-8 pr-0! pb-0!"
@@ -151,6 +164,11 @@ function FavoritesPlaylistInfoPage() {
         title={t('playlistsPage.favorites')}
         className="pr-4"
         buttons={[
+          {
+            label: t('playlist.importSongs'),
+            iconName: 'download',
+            clickHandler: importSongsToFavorites
+          },
           // {
           //   label: t('settingsPage.clearHistory'),
           //   iconName: 'clear',
@@ -248,4 +266,3 @@ function FavoritesPlaylistInfoPage() {
     </MainContainer>
   );
 }
-

@@ -1,8 +1,9 @@
-import { useTranslation } from 'react-i18next';
-import Checkbox from '../../Checkbox';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { settingsQuery } from '@renderer/queries/settings';
 import { queryClient } from '@renderer/index';
+import { settingsQuery } from '@renderer/queries/settings';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
+
+import Checkbox from '../../Checkbox';
 
 const AdvancedSettings = () => {
   const { data: userSettings } = useQuery(settingsQuery.all);

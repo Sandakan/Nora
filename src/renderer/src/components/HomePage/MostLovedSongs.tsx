@@ -1,13 +1,12 @@
+import { useNavigate } from '@tanstack/react-router';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import useSelectAllHandler from '../../hooks/useSelectAllHandler';
-
-import SecondaryContainer from '../SecondaryContainer';
-import SongCard from '../SongsPage/SongCard';
 
 import DefaultSongCover from '../../assets/images/webp/song_cover_default.webp';
+import useSelectAllHandler from '../../hooks/useSelectAllHandler';
 import Button from '../Button';
-import { useNavigate } from '@tanstack/react-router';
+import SecondaryContainer from '../SecondaryContainer';
+import SongCard from '../SongsPage/SongCard';
 
 type Props = { mostLovedSongs: AudioInfo[]; noOfVisibleSongs: number };
 

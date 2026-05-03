@@ -1,10 +1,16 @@
 import { writeFile } from 'fs/promises';
 import { basename } from 'path';
+
+import { SpecialPlaylists } from '@common/playlists.enum';
+import {
+  getPlaylistWithSongPaths,
+  getFavoritesPlaylistWithSongPaths,
+  getHistoryPlaylistWithSongPaths
+} from '@main/db/queries/playlists';
 import type { SaveDialogOptions } from 'electron';
 
 import logger from '../logger';
 import { sendMessageToRenderer, showSaveDialog } from '../main';
-import { getPlaylistWithSongPaths } from '@main/db/queries/playlists';
 
 const generateSaveDialogOptions = (playlistName: string) => {
   const saveOptions: SaveDialogOptions = {
@@ -60,8 +66,17 @@ const createM3u8FileForPlaylist = async (
   }
 };
 
-const exportPlaylist = async (playlistId: string) => {
-  const playlist = await getPlaylistWithSongPaths(Number(playlistId));
+const exportPlaylist = async (playlistId: number) => {
+  let playlist;
+
+  // Handle special playlists
+  if (playlistId === SpecialPlaylists.Favorites) {
+    playlist = await getFavoritesPlaylistWithSongPaths();
+  } else if (playlistId === SpecialPlaylists.History) {
+    playlist = await getHistoryPlaylistWithSongPaths();
+  } else {
+    playlist = await getPlaylistWithSongPaths(playlistId);
+  }
 
   if (playlist == null)
     return logger.warn("Failed to export playlist because requested playlist didn't exist", {

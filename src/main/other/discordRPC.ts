@@ -1,4 +1,5 @@
 import { getUserSettings } from '@main/db/queries/settings';
+
 import logger from '../logger';
 import { Initialize, setDiscordRPC } from './discord';
 

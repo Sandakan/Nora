@@ -1,12 +1,11 @@
+import { store } from '@renderer/store/store';
+import { useStore } from '@tanstack/react-store';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import storage from '../../utils/localStorage';
 import debounce from '../../utils/debounce';
-
+import storage from '../../utils/localStorage';
 import Checkbox from '../Checkbox';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store/store';
 
 const LyricsEditorSettingsPrompt = () => {
   const lyricsEditorSettings = useStore(store, (state) => state.localStorage.lyricsEditorSettings);

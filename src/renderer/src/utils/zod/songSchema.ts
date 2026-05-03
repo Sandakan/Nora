@@ -1,6 +1,7 @@
-import { z } from 'zod';
-import { baseInfoPageSearchParamsSchema } from './baseInfoPageSearchParamsSchema';
 import { songFilterTypes, songSortTypes } from '@renderer/components/SongsPage/SongOptions';
+import { z } from 'zod';
+
+import { baseInfoPageSearchParamsSchema } from './baseInfoPageSearchParamsSchema';
 
 export const songSearchSchema = baseInfoPageSearchParamsSchema.extend({
   sortingOrder: z.enum(songSortTypes).optional(),

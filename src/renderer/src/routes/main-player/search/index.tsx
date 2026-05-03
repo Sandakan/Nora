@@ -1,31 +1,29 @@
 import Button from '@renderer/components/Button';
 import MainContainer from '@renderer/components/MainContainer';
+import NoSearchResultsContainer from '@renderer/components/SearchPage/NoSearchResultsContainer';
+import AlbumSearchResultsContainer from '@renderer/components/SearchPage/Result_Containers/AlbumSearchResultsContainer';
+import ArtistsSearchResultsContainer from '@renderer/components/SearchPage/Result_Containers/ArtistsSearchResultsContainer';
+import GenreSearchResultsContainer from '@renderer/components/SearchPage/Result_Containers/GenreSearchResultsContainer';
+import MostRelevantSearchResultsContainer from '@renderer/components/SearchPage/Result_Containers/MostRelevantSearchResultsContainer';
+import PlaylistSearchResultsContainer from '@renderer/components/SearchPage/Result_Containers/PlaylistSearchResultsContainer';
+import SongSearchResultsContainer from '@renderer/components/SearchPage/Result_Containers/SongSearchResultsContainer';
 import { searchFilter } from '@renderer/components/SearchPage/SearchOptions';
 import SearchResultsFilter from '@renderer/components/SearchPage/SearchResultsFilter';
+import SearchStartPlaceholder from '@renderer/components/SearchPage/SearchStartPlaceholder';
 import useResizeObserver from '@renderer/hooks/useResizeObserver';
+import { searchQuery } from '@renderer/queries/search';
 import { store } from '@renderer/store/store';
+import storage from '@renderer/utils/localStorage';
 import { searchPageSchema } from '@renderer/utils/zod/searchPageSchema';
+import { useThrottledCallback } from '@tanstack/react-pacer';
+import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
-import { zodValidator } from '@tanstack/zod-adapter';
 import { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import storage from '@renderer/utils/localStorage';
-import { useThrottledCallback } from '@tanstack/react-pacer';
-
-import GenreSearchResultsContainer from '@renderer/components/SearchPage/Result_Containers/GenreSearchResultsContainer';
-import PlaylistSearchResultsContainer from '@renderer/components/SearchPage/Result_Containers/PlaylistSearchResultsContainer';
-import AlbumSearchResultsContainer from '@renderer/components/SearchPage/Result_Containers/AlbumSearchResultsContainer';
-import SongSearchResultsContainer from '@renderer/components/SearchPage/Result_Containers/SongSearchResultsContainer';
-import MostRelevantSearchResultsContainer from '@renderer/components/SearchPage/Result_Containers/MostRelevantSearchResultsContainer';
-import ArtistsSearchResultsContainer from '@renderer/components/SearchPage/Result_Containers/ArtistsSearchResultsContainer';
-import NoSearchResultsContainer from '@renderer/components/SearchPage/NoSearchResultsContainer';
-import SearchStartPlaceholder from '@renderer/components/SearchPage/SearchStartPlaceholder';
-import { searchQuery } from '@renderer/queries/search';
-import { useQuery } from '@tanstack/react-query';
 
 export const Route = createFileRoute('/main-player/search/')({
-  validateSearch: zodValidator(searchPageSchema),
+  validateSearch: searchPageSchema,
   component: SearchPage
   // loaderDeps: ({ search }) => ({ search }),
   // loader: ({ deps }) => {
@@ -125,7 +123,7 @@ function SearchPage() {
         <div className="search-input-container appear-from-bottom mb-4 flex items-center">
           <div className="search-bar-container bg-background-color-2 dark:bg-dark-background-color-2 flex w-1/2 max-w-xl min-w-[25rem] items-center rounded-3xl px-2 py-1">
             <Button
-              className={`!my-1 !mr-2 !ml-1 !rounded-3xl border-none !px-4 !py-2 shadow-sm outline-offset-1 focus-visible:!outline ${
+              className={`my-1! mr-2! ml-1! rounded-3xl! border-none px-4! py-2! shadow-sm outline-offset-1 focus-visible:outline! ${
                 isSimilaritySearchEnabled
                   ? 'bg-background-color-3 dark:bg-dark-background-color-3 text-black!'
                   : 'bg-background-color-1/50 text-font-color-highlight! hover:bg-background-color-1 focus-visible:bg-background-color-1 dark:bg-dark-background-color-1/50 dark:text-dark-font-color-highlight! dark:hover:bg-dark-background-color-1 dark:focus-visible:bg-dark-background-color-1'

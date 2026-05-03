@@ -1,9 +1,10 @@
-import { Artist } from '../../ArtistPage/Artist';
+import { store } from '@renderer/store/store';
+import { useStore } from '@tanstack/react-store';
+
 import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
+import { Artist } from '../../ArtistPage/Artist';
 import SecondaryContainer from '../../SecondaryContainer';
 import VirtualizedGrid from '../../VirtualizedGrid';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store/store';
 
 type Props = { artistData: Artist[] };
 

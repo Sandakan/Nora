@@ -1,10 +1,12 @@
 import fsSync, { type WatchEventType } from 'fs';
 import path from 'path';
+
+import { getAllFolderStructures } from '@main/db/queries/folders';
+
 import logger from '../logger';
-import getParentFolderPaths from './getParentFolderPaths';
 import checkForFolderModifications from './checkForFolderModifications';
 import { saveAbortController } from './controlAbortControllers';
-import { getAllFolderStructures } from '@main/db/queries/folders';
+import getParentFolderPaths from './getParentFolderPaths';
 
 const fileNameRegex = /^.{1,}\.\w{1,}$/;
 

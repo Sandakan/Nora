@@ -2,14 +2,12 @@
 import { useCallback, useContext, useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { appPreferences } from '../../../../../package.json';
+import isLyricsSynced from '../../../../common/isLyricsSynced';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import calculateTime from '../../utils/calculateTime';
-import isLyricsSynced from '../../../../common/isLyricsSynced';
-
 import Button from '../Button';
 import Hyperlink from '../Hyperlink';
-
-import { appPreferences } from '../../../../../package.json';
 
 const { metadataEditingSupportedExtensions } = appPreferences;
 

@@ -5,7 +5,10 @@ interface AppNotificationConfig extends Partial<AppNotification> {
   trigger: [MessageCodes, ...MessageCodes[]];
   iconName?: string;
   iconClassName?: string;
-  /** `validate` runs after the trigger to check whether this notification is applicable by returning a boolean. */
+  /**
+   * `validate` runs after the trigger to check whether this notification is applicable by returning
+   * a boolean.
+   */
   validate?: (obj: {
     data?: Record<string, unknown>;
     message: string;
@@ -248,8 +251,10 @@ const parseNotificationFromMain = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const messageKey: any = `backend.${messageCode}`;
 
+  const translateMessage = i18n.t as (key: string, options?: Record<string, unknown>) => string;
+
   const message = i18n.exists(messageKey)
-    ? (i18n.t(messageKey, data) as string | undefined) || messageCode
+    ? translateMessage(messageKey, data) || messageCode
     : messageCode;
 
   const notificationData: AppNotification = {

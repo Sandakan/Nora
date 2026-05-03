@@ -1,10 +1,9 @@
-import Img from '../../Img';
-
 import DefaultArtistArtwork from '../../../assets/images/webp/artist_cover_default.webp';
+import Img from '../../Img';
 
 type Props = {
   artistData: {
-    artistId?: string | undefined;
+    artistId?: number | undefined;
     name: string;
     artworkPath?: string | undefined;
     onlineArtworkPaths?: OnlineArtistArtworks | undefined;

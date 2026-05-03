@@ -1,5 +1,6 @@
 import { type DragEvent, type RefObject, useCallback, useEffect } from 'react';
 import { lazy } from 'react';
+
 import { appPreferences } from '../../../../package.json';
 import { store } from '../store/store';
 
@@ -16,18 +17,12 @@ export interface UseWindowManagementOptions {
 /**
  * Hook for managing window-related interactions and behaviors.
  *
- * This hook provides functions for:
- * - Window blur/focus state management
- * - Fullscreen state management
- * - Drag-and-drop file handling
- * - Title bar updates with current song information
- *
- * @param appRef - Reference to the main app container element
- * @param options - Configuration options for window management
+ * This hook provides functions for: - Window blur/focus state management - Fullscreen state
+ * management - Drag-and-drop file handling - Title bar updates with current song information
  *
  * @example
- * ```tsx
- * function App() {
+ *   ```tsx
+ *   function App() {
  *   const appRef = useRef<HTMLDivElement>(null);
  *
  *   // Define handlers first
@@ -36,23 +31,25 @@ export interface UseWindowManagementOptions {
  *
  *   // Then use the hook
  *   const windowMgmt = useWindowManagement(appRef, {
- *     changePromptMenuData,
- *     fetchSongFromUnknownSource
+ *   changePromptMenuData,
+ *   fetchSongFromUnknownSource
  *   });
  *
  *   return (
- *     <div
- *       ref={appRef}
- *       onDragEnter={windowMgmt.addSongDropPlaceholder}
- *       onDragLeave={windowMgmt.removeSongDropPlaceholder}
- *       onDrop={windowMgmt.onSongDrop}
- *     >
- *       {children}
- *     </div>
+ *   <div
+ *   ref={appRef}
+ *   onDragEnter={windowMgmt.addSongDropPlaceholder}
+ *   onDragLeave={windowMgmt.removeSongDropPlaceholder}
+ *   onDrop={windowMgmt.onSongDrop}
+ *   >
+ *   {children}
+ *   </div>
  *   );
- * }
- * ```
+ *   }
+ *   ```;
  *
+ * @param appRef - Reference to the main app container element
+ * @param options - Configuration options for window management
  * @returns Window management functions and event handlers
  */
 export function useWindowManagement(
@@ -153,8 +150,8 @@ export function useWindowManagement(
   );
 
   /**
-   * Updates the browser/window title bar with current song information.
-   * Displays song title and artist names if available.
+   * Updates the browser/window title bar with current song information. Displays song title and
+   * artist names if available.
    */
   const addSongTitleToTitleBar = useCallback(() => {
     if (store.state.currentSongData.title && store.state.currentSongData.artists)
@@ -164,16 +161,14 @@ export function useWindowManagement(
       }`;
   }, []);
 
-  /**
-   * Resets the browser/window title bar to the default "Nora" title.
-   */
+  /** Resets the browser/window title bar to the default "Nora" title. */
   const resetTitleBarInfo = useCallback(() => {
     document.title = `Nora`;
   }, []);
 
   /**
-   * Sets up event listeners for window state changes (blur, focus, fullscreen).
-   * Automatically cleans up listeners on unmount.
+   * Sets up event listeners for window state changes (blur, focus, fullscreen). Automatically
+   * cleans up listeners on unmount.
    */
   useEffect(() => {
     // Setup window state listeners

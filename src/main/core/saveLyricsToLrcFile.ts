@@ -1,7 +1,8 @@
-import path from 'path';
 import fs from 'fs/promises';
+import path from 'path';
 
-import logger from '../logger';
+import { getUserSettings } from '@main/db/queries/settings';
+
 import { version } from '../../../package.json';
 import {
   getAlbumFromLyricsString,
@@ -12,7 +13,7 @@ import {
   getOffsetFromLyricsString,
   getTitleFromLyricsString
 } from '../../common/parseLyrics';
-import { getUserSettings } from '@main/db/queries/settings';
+import logger from '../logger';
 
 export const getLrcLyricsMetadata = (songLyrics: SongLyrics) => {
   const { unparsedLyrics } = songLyrics.lyrics;

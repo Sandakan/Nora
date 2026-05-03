@@ -1,17 +1,17 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
-import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import storage from '../../utils/localStorage';
-
-import Button from '../Button';
-import splitFeaturingArtists from '../../utils/splitFeaturingArtists';
-import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store/store';
 import { useNavigate } from '@tanstack/react-router';
+import { useStore } from '@tanstack/react-store';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
+
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import { useUserPreferences } from '../../hooks/useUserPreferences';
+import splitFeaturingArtists from '../../utils/splitFeaturingArtists';
+import Button from '../Button';
 
 type Props = {
   name?: string;
-  artistId?: string;
+  artistId?: number;
 };
 
 const SeparateArtistsSuggestion = (props: Props) => {
@@ -19,22 +19,19 @@ const SeparateArtistsSuggestion = (props: Props) => {
 
   const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
   const currentSongData = useStore(store, (state) => state.currentSongData);
+  const { ignoredArtists, addIgnoredArtistMutation } = useUserPreferences();
 
   const { addNewNotifications, updateCurrentSongData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const { name = '', artistId = '' } = props;
+  const { name = '', artistId } = props;
 
   const [isIgnored, setIsIgnored] = useState(false);
   const [isMessageVisible, setIsMessageVisible] = useState(true);
 
-  const ignoredArtists = useMemo(
-    () => storage.ignoredSeparateArtists.getIgnoredSeparateArtists(),
-    []
-  );
-
   useEffect(() => {
-    if (ignoredArtists.length > 0) setIsIgnored(ignoredArtists.includes(artistId));
+    if ((ignoredArtists?.length || 0) > 0 && artistId !== undefined)
+      setIsIgnored(ignoredArtists?.includes(artistId) || false);
   }, [artistId, ignoredArtists]);
 
   const separatedArtistsNames = useMemo(() => {
@@ -74,6 +71,8 @@ const SeparateArtistsSuggestion = (props: Props) => {
     (setIsDisabled: (_state: boolean) => void, setIsPending: (_state: boolean) => void) => {
       setIsDisabled(true);
       setIsPending(true);
+
+      if (artistId === undefined) return;
 
       window.api.suggestions
         .resolveSeparateArtists(artistId, separatedArtistsNames)
@@ -179,7 +178,7 @@ const SeparateArtistsSuggestion = (props: Props) => {
                   iconClassName="material-icons-round-outlined"
                   label="Ignore"
                   clickHandler={() => {
-                    storage.ignoredSeparateArtists.setIgnoredSeparateArtists([artistId]);
+                    if (artistId !== undefined) addIgnoredArtistMutation.mutate({ artistId });
                     setIsIgnored(true);
                     addNewNotifications([
                       {

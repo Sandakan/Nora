@@ -1,23 +1,22 @@
+import NoFoldersImage from '@assets/images/svg/Empty Inbox _Monochromatic.svg';
+import Button from '@renderer/components/Button';
+import Dropdown from '@renderer/components/Dropdown';
+import Img from '@renderer/components/Img';
+import MainContainer from '@renderer/components/MainContainer';
+import Folder from '@renderer/components/MusicFoldersPage/Folder';
+import { folderDropdownOptions } from '@renderer/components/MusicFoldersPage/folderOptions';
 import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
+import useSelectAllHandler from '@renderer/hooks/useSelectAllHandler';
 import { store } from '@renderer/store/store';
+import storage from '@renderer/utils/localStorage';
 import { folderSearchSchema } from '@renderer/utils/zod/folderSchema';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
-import { zodValidator } from '@tanstack/zod-adapter';
 import { lazy, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import storage from '@renderer/utils/localStorage';
-import useSelectAllHandler from '@renderer/hooks/useSelectAllHandler';
-import Folder from '@renderer/components/MusicFoldersPage/Folder';
-import MainContainer from '@renderer/components/MainContainer';
-import Button from '@renderer/components/Button';
-import Dropdown from '@renderer/components/Dropdown';
-import { folderDropdownOptions } from '@renderer/components/MusicFoldersPage/folderOptions';
-import NoFoldersImage from '@assets/images/svg/Empty Inbox _Monochromatic.svg';
-import Img from '@renderer/components/Img';
 
 export const Route = createFileRoute('/main-player/folders/')({
-  validateSearch: zodValidator(folderSearchSchema),
+  validateSearch: folderSearchSchema,
   component: MusicFoldersPage
 });
 

@@ -1,17 +1,16 @@
 // import path from 'path';
 import { join as joinPath } from 'node:path/posix';
-
 import { platform } from 'process';
 
-import { DEFAULT_ARTWORK_SAVE_LOCATION, DEFAULT_FILE_URL } from '../filesystem';
 import { artworks as artworksSchema } from '@db/schema';
 
 import albumCoverImage from '../../renderer/src/assets/images/webp/album_cover_default.webp?asset';
-import songCoverImage from '../../renderer/src/assets/images/webp/song_cover_default.webp?asset';
 import artistCoverImage from '../../renderer/src/assets/images/webp/artist_cover_default.webp?asset';
-import playlistCoverImage from '../../renderer/src/assets/images/webp/playlist_cover_default.webp?asset';
 import favoritesPlaylistCoverImage from '../../renderer/src/assets/images/webp/favorites-playlist-icon.webp?asset';
 import historyPlaylistCoverImage from '../../renderer/src/assets/images/webp/history-playlist-icon.webp?asset';
+import playlistCoverImage from '../../renderer/src/assets/images/webp/playlist_cover_default.webp?asset';
+import songCoverImage from '../../renderer/src/assets/images/webp/song_cover_default.webp?asset';
+import { DEFAULT_ARTWORK_SAVE_LOCATION, DEFAULT_FILE_URL } from '../filesystem';
 
 let timestamps = {
   songs: Date.now(),
@@ -48,7 +47,7 @@ export const resolveSongFilePath = (songPath: string, resetCache = true, sendRea
 };
 
 export const getSongArtworkPath = (
-  id: string,
+  id: number,
   isArtworkAvailable = true,
   resetCache = false,
   sendRealPath = false
@@ -303,7 +302,7 @@ export const parseGenreArtworks = (
 };
 
 export const getPlaylistArtworkPath = (
-  playlistId: string,
+  playlistId: number | 'History' | 'Favorites',
   isArtworkAvailable: boolean,
   resetCache = false
 ): ArtworkPaths => {
@@ -371,4 +370,3 @@ export const removeDefaultAppProtocolFromFilePath = (filePath: string) => {
 export const addDefaultAppProtocolToFilePath = (filePath: string) => {
   return joinPath('nora://localfiles/', filePath);
 };
-

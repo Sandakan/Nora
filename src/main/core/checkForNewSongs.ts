@@ -1,6 +1,7 @@
+import { getAllFolders } from '@main/db/queries/folders';
+
 import checkFolderForUnknownModifications from '../fs/checkFolderForUnknownContentModifications';
 import logger from '../logger';
-import { getAllFolders } from '@main/db/queries/folders';
 
 const checkForNewSongs = async () => {
   const folders = await getAllFolders();

@@ -1,24 +1,25 @@
+import { store } from '@renderer/store/store';
+import { useNavigate } from '@tanstack/react-router';
+import { useStore } from '@tanstack/react-store';
 import { useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import Img from '../Img';
+
 import DefaultGenreCover from '../../assets/images/webp/genre-cover-default.webp';
-import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Button from '../Button';
-import { store } from '@renderer/store/store';
-import { useStore } from '@tanstack/react-store';
-import { useNavigate } from '@tanstack/react-router';
+import Img from '../Img';
+import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
 import NavLink from '../NavLink';
 
 interface GenreProp {
   index: number;
-  genreId: string;
+  genreId: number;
   title: string;
-  songIds: string[];
+  songIds: number[];
   artworkPaths: ArtworkPaths;
   paletteData?: PaletteData;
   className?: string;
-  selectAllHandler?: (_upToId?: string) => void;
+  selectAllHandler?: (_upToId?: number) => void;
 }
 
 const Genre = (props: GenreProp) => {
@@ -45,7 +46,7 @@ const Genre = (props: GenreProp) => {
     () =>
       navigate({
         to: '/main-player/genres/$genreId',
-        params: { genreId }
+        params: { genreId: String(genreId) }
       }),
     [genreId, navigate]
   );
@@ -136,10 +137,10 @@ const Genre = (props: GenreProp) => {
       })
       .then((songs) => {
         if (Array.isArray(songs)) {
-          queue.queue.push(
+          queue.songIds.push(
             ...songs.filter((song) => !song.isBlacklisted).map((song) => song.songId)
           );
-          updateQueueData(undefined, queue.queue);
+          updateQueueData(undefined, queue.songIds);
           addNewNotifications([
             {
               id: 'newSongsToQueue',
@@ -153,7 +154,7 @@ const Genre = (props: GenreProp) => {
         return undefined;
       })
       .catch((err) => console.error(err));
-  }, [addNewNotifications, multipleSelectionsData, queue.queue, t, updateQueueData]);
+  }, [addNewNotifications, multipleSelectionsData, queue.songIds, t, updateQueueData]);
 
   const isAMultipleSelection = useMemo(() => {
     if (!multipleSelectionsData.isEnabled) return false;
@@ -197,8 +198,8 @@ const Genre = (props: GenreProp) => {
         handlerFunction: () => {
           if (isMultipleSelectionsEnabled) addToQueueForMultipleSelections();
           else {
-            queue.queue.push(...songIds);
-            updateQueueData(undefined, queue.queue);
+            queue.songIds.push(...songIds);
+            updateQueueData(undefined, queue.songIds);
             addNewNotifications([
               {
                 id: 'newSongsToQueue',
@@ -255,7 +256,7 @@ const Genre = (props: GenreProp) => {
     playGenreSongs,
     toggleMultipleSelections,
     addToQueueForMultipleSelections,
-    queue.queue,
+    queue,
     songIds,
     updateQueueData,
     addNewNotifications,
@@ -295,7 +296,7 @@ const Genre = (props: GenreProp) => {
   return (
     <NavLink
       to="/main-player/genres/$genreId"
-      params={{ genreId }}
+      params={{ genreId: String(genreId) }}
       preload={isMultipleSelectionEnabled ? false : undefined}
       className={`genre group bg-background-color-2/70 hover:bg-background-color-2! dark:bg-dark-background-color-2/70 dark:hover:bg-dark-background-color-2! text-background-color-2 dark:text-dark-background-color-2 relative mr-10 mb-6 flex h-36 w-72 cursor-pointer items-center gap-4 overflow-hidden rounded-2xl p-4 backdrop-blur-md transition-[border,border-color] ${className} ${
         isMultipleSelectionEnabled &&

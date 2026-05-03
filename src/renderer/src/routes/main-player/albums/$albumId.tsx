@@ -15,20 +15,21 @@ import { songSearchSchema } from '@renderer/utils/zod/songSchema';
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
-import { zodValidator } from '@tanstack/zod-adapter';
 import { useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
 export const Route = createFileRoute('/main-player/albums/$albumId')({
-  validateSearch: zodValidator(songSearchSchema),
+  validateSearch: songSearchSchema,
   component: AlbumInfoPage,
   loader: async ({ params }) => {
-    await queryClient.ensureQueryData(albumQuery.single({ albumId: params.albumId }));
+    await queryClient.ensureQueryData(albumQuery.single({ albumId: Number(params.albumId) }));
   }
 });
 
 function AlbumInfoPage() {
-  const { albumId } = Route.useParams();
+  const { albumId } = Route.useParams({
+    select: (params) => ({ albumId: Number(params.albumId) })
+  });
   const { scrollTopOffset, sortingOrder = 'trackNoDescending' } = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
 
@@ -58,7 +59,7 @@ function AlbumInfoPage() {
   const selectAllHandler = useSelectAllHandler(albumSongs, 'songs', 'songId');
 
   const handleSongPlayBtnClick = useCallback(
-    (currSongId: string) => {
+    (currSongId: number) => {
       const queueSongIds = albumSongs
         .filter((song) => !song.isBlacklisted)
         .map((song) => song.songId);
@@ -102,13 +103,13 @@ function AlbumInfoPage() {
             clickHandler: () => {
               updateQueueData(
                 undefined,
-                [...queue.queue, ...albumSongs.map((song) => song.songId)],
+                [...queue.songIds, ...albumSongs.map((song) => song.songId)],
                 false,
                 false
               );
               addNewNotifications([
                 {
-                  id: albumData.albumId,
+                  id: String(albumData.albumId),
                   duration: 5000,
                   content: t('notifications.addedToQueue', {
                     count: albumSongs.length

@@ -5,9 +5,7 @@
   "sdk": "org.freedesktop.Sdk",
   "base": "org.electronjs.Electron2.BaseApp",
   "base-version": "24.08",
-  "sdk-extensions": [
-    "org.freedesktop.Sdk.Extension.node22"
-  ],
+  "sdk-extensions": ["org.freedesktop.Sdk.Extension.node22"],
   "command": "run.sh",
   "separate-locales": false,
   "finish-args": [
@@ -60,10 +58,7 @@
         {
           "type": "script",
           "dest-filename": "run.sh",
-          "commands": [
-            "cd /",
-            "zypak-wrapper.sh /app/main/Nora --ozone-platform-hint=auto \"$@\""
-          ]
+          "commands": ["cd /", "zypak-wrapper.sh /app/main/Nora --ozone-platform-hint=auto \"$@\""]
         }
       ]
     }

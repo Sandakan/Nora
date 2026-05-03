@@ -1,12 +1,12 @@
+import { store } from '@renderer/store/store';
+import { useStore } from '@tanstack/react-store';
 import { useCallback, useContext } from 'react';
+
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
-
-import Song from '../../SongsPage/Song';
 import SecondaryContainer from '../../SecondaryContainer';
+import Song from '../../SongsPage/Song';
 import VirtualizedList from '../../VirtualizedList';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store/store';
 
 type Props = { songData: SongData[]; scrollTopOffset?: number };
 
@@ -23,7 +23,7 @@ const AllSongResults = (prop: Props) => {
   const selectAllHandler = useSelectAllHandler(songData, 'songs', 'songId');
 
   const handleSongPlayBtnClick = useCallback(
-    (currSongId: string) => {
+    (currSongId: number) => {
       const queueSongIds = songData
         .filter((song) => !song.isBlacklisted)
         .map((song) => song.songId);

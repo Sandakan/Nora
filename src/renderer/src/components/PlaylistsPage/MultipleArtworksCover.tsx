@@ -1,16 +1,15 @@
-import { useMemo } from 'react';
-
-import Img from '../Img';
-
-import DefaultImgCover from '../../assets/images/webp/song_cover_default.webp';
-import { useStore } from '@tanstack/react-store';
+import { playlistQuery } from '@renderer/queries/playlists';
 import { store } from '@renderer/store/store';
 import { useQuery } from '@tanstack/react-query';
-import { playlistQuery } from '@renderer/queries/playlists';
+import { useStore } from '@tanstack/react-store';
+import { useMemo } from 'react';
+
+import DefaultImgCover from '../../assets/images/webp/song_cover_default.webp';
+import Img from '../Img';
 
 type Props = {
   className?: string;
-  songIds: string[];
+  songIds: number[];
   imgClassName?: string;
   holderClassName?: string;
   type?: number;

@@ -7,14 +7,14 @@ import SongArtistInputResult from './SongArtistInputResult';
 
 type Props = {
   songArtists?: {
-    artistId?: string | undefined;
+    artistId?: number | undefined;
     name: string;
     artworkPath?: string | undefined;
     onlineArtworkPaths?: OnlineArtistArtworks | undefined;
   }[];
   artistKeyword: string;
   artistResults: {
-    artistId?: string;
+    artistId?: number;
     name: string;
     artworkPath?: string;
     onlineArtworkPaths?: OnlineArtistArtworks;
@@ -41,7 +41,7 @@ const SongArtistsInput = (props: Props) => {
   }, [artistResults, updateArtistKeyword, updateSongInfo]);
 
   return (
-    <div className="tag-input flex max-w-2xl min-w-[10rem] flex-col">
+    <div className="tag-input flex max-w-2xl min-w-40 flex-col">
       <label htmlFor="song-artists-id3-tag">{t('songTagsEditingPage.songArtists')}</label>
       <div className="border-background-color-2 dark:border-dark-background-color-2 mt-2 w-[90%] rounded-xl border-2 p-2">
         <div className="artists-container flex flex-wrap p-2 empty:py-2 empty:after:h-full empty:after:w-full empty:after:text-center empty:after:text-[#ccc] empty:after:content-['No_artists_selected_for_this_song.'] dark:empty:after:text-[#ccc]">
@@ -53,7 +53,7 @@ const SongArtistsInput = (props: Props) => {
               >
                 <Button
                   iconName="close"
-                  className="material-icons-round mr-2 border-0! p-[.125rem]! opacity-0 outline-offset-1 transition-[visibility,opacity] group-focus-within:opacity-100 group-hover:opacity-100 focus-visible:outline!"
+                  className="material-icons-round mr-2 border-0! p-0.5! opacity-0 outline-offset-1 transition-[visibility,opacity] group-focus-within:opacity-100 group-hover:opacity-100 focus-visible:outline!"
                   iconClassName="leading-none dark:text-font-color-black!"
                   clickHandler={() => {
                     updateSongInfo((prevData) => {

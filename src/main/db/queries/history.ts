@@ -1,6 +1,7 @@
 import { db } from '@db/db';
-import { playHistory } from '../schema';
 import { asc, desc, eq } from 'drizzle-orm';
+
+import { playHistory } from '../schema';
 
 export const addSongToPlayHistory = async (songId: number, trx: DB | DBTransaction = db) => {
   const data = await trx.insert(playHistory).values({ songId });

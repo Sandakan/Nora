@@ -1,4 +1,4 @@
-/** @type {import("tailwindcss").Config} */
+/** @type {import('tailwindcss').Config} */
 
 // import * as colors from 'tailwindcss/colors';
 import plugin from 'tailwindcss/plugin';

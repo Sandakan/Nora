@@ -1,22 +1,21 @@
+import Button from '@renderer/components/Button';
+import Dropdown from '@renderer/components/Dropdown';
+import MainContainer from '@renderer/components/MainContainer';
+import Song from '@renderer/components/SongsPage/Song';
+import { songFilterOptions, songSortOptions } from '@renderer/components/SongsPage/SongOptions';
+import VirtualizedList from '@renderer/components/VirtualizedList';
 import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
+import useSelectAllHandler from '@renderer/hooks/useSelectAllHandler';
 import { store } from '@renderer/store/store';
+import storage from '@renderer/utils/localStorage';
+import { songSearchSchema } from '@renderer/utils/zod/songSchema';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import storage from '@renderer/utils/localStorage';
-import useSelectAllHandler from '@renderer/hooks/useSelectAllHandler';
-import MainContainer from '@renderer/components/MainContainer';
-import Button from '@renderer/components/Button';
-import Dropdown from '@renderer/components/Dropdown';
-import { songFilterOptions, songSortOptions } from '@renderer/components/SongsPage/SongOptions';
-import VirtualizedList from '@renderer/components/VirtualizedList';
-import Song from '@renderer/components/SongsPage/Song';
-import { songSearchSchema } from '@renderer/utils/zod/songSchema';
-import { zodValidator } from '@tanstack/zod-adapter';
 
 export const Route = createFileRoute('/main-player/folders/$folderPath')({
-  validateSearch: zodValidator(songSearchSchema),
+  validateSearch: songSearchSchema,
   component: MusicFolderInfoPage
 });
 function MusicFolderInfoPage() {
@@ -114,7 +113,7 @@ function MusicFolderInfoPage() {
   const selectAllHandler = useSelectAllHandler(folderSongs, 'songs', 'songId');
 
   const handleSongPlayBtnClick = useCallback(
-    (currSongId?: string, shuffleQueue = false, startPlaying = false) => {
+    (currSongId?: number, shuffleQueue = false, startPlaying = false) => {
       const queueSongIds = folderSongs
         .filter((song) => !song.isBlacklisted)
         .map((song) => song.songId);

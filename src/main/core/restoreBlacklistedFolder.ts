@@ -1,8 +1,8 @@
 import path from 'path';
 
-import { dataUpdateEvent, sendMessageToRenderer } from '../main';
 import { getBlacklistData, setBlacklist } from '../filesystem';
 import logger from '../logger';
+import { dataUpdateEvent, sendMessageToRenderer } from '../main';
 import { isParentFolderBlacklisted } from '../utils/isBlacklisted';
 
 const restoreBlacklistedFolders = async (blacklistedFolderPaths: string[]) => {

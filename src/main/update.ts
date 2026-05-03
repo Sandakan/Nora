@@ -1,7 +1,7 @@
-/* eslint-disable promise/catch-or-return */
-import electronUpdater from 'electron-updater';
 // import logger from './logger';
 import { dialog } from 'electron';
+/* eslint-disable promise/catch-or-return */
+import electronUpdater from 'electron-updater';
 // import { IS_DEVELOPMENT } from './main';
 
 // export default async function checkForUpdates() {
@@ -62,4 +62,3 @@ electronUpdater.autoUpdater.on('update-downloaded', () => {
 export default function checkForUpdates() {
   electronUpdater.autoUpdater.checkForUpdates();
 }
-

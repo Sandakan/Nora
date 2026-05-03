@@ -1,10 +1,9 @@
 import { useContext } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import Button from './Button';
-import { AppUpdateContext } from '../contexts/AppUpdateContext';
-
 import { appPreferences } from '../../../../package.json';
+import { AppUpdateContext } from '../contexts/AppUpdateContext';
+import Button from './Button';
 
 type Props = { filePath: string };
 const { supportedMusicExtensions } = appPreferences;

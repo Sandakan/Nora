@@ -11,20 +11,20 @@
   "compilerOptions": {
     "composite": true,
     "jsx": "react-jsx",
-    "baseUrl": ".",
     "resolveJsonModule": true,
     "module": "ES2022",
     "moduleResolution": "bundler",
     "sourceMap": true,
     "paths": {
+      "*": [ "./*" ],
       "@renderer/*": [
-        "src/renderer/src/*"
+        "./src/renderer/src/*"
       ],
       "@common/*": [
-        "src/common/*"
+        "./src/common/*"
       ],
       "@assets/*": [
-        "src/renderer/src/assets/*"
+        "./src/renderer/src/assets/*"
       ]
     },
     "types": [ "vite/client" ],

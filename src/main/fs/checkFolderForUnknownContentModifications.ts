@@ -1,13 +1,15 @@
-import path from 'path';
 import fs from 'fs/promises';
+import path from 'path';
+
+import { getFolderFromPath } from '@main/db/queries/folders';
+import { getSongsRelativeToFolder } from '@main/db/queries/songs';
+
 import { supportedMusicExtensions } from '../filesystem';
 import logger from '../logger';
-import removeSongsFromLibrary from '../removeSongsFromLibrary';
-import { tryToParseSong } from '../parseSong/parseSong';
-import { saveAbortController } from './controlAbortControllers';
 import { generatePalettes } from '../other/generatePalette';
-import { getSongsRelativeToFolder } from '@main/db/queries/songs';
-import { getFolderFromPath } from '@main/db/queries/folders';
+import { tryToParseSong } from '../parseSong/parseSong';
+import removeSongsFromLibrary from '../removeSongsFromLibrary';
+import { saveAbortController } from './controlAbortControllers';
 
 const abortController = new AbortController();
 saveAbortController('checkFolderForUnknownContentModifications', abortController);

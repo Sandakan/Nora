@@ -1,4 +1,24 @@
+import { Draggable, Droppable, DragDropContext, type DropResult } from '@hello-pangea/dnd';
+// import DefaultSongCover from '@renderer/assets/images/webp/song_cover_default.webp';
+// import DefaultPlaylistCover from '@renderer/assets/images/webp/playlist_cover_default.webp';
+// import FolderImg from '@renderer/assets/images/webp/empty-folder.webp';
+import NoSongsImage from '@renderer/assets/images/svg/Sun_Monochromatic.svg';
+import Button from '@renderer/components/Button';
+import Img from '@renderer/components/Img';
+import MainContainer from '@renderer/components/MainContainer';
+import Song from '@renderer/components/SongsPage/Song';
+import VirtualizedList from '@renderer/components/VirtualizedList';
+import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
+import useSelectAllHandler from '@renderer/hooks/useSelectAllHandler';
+import { queryClient } from '@renderer/index';
+import { queueQuery } from '@renderer/queries/queue';
+import { songQuery } from '@renderer/queries/songs';
+import { store } from '@renderer/store/store';
+import calculateTimeFromSeconds from '@renderer/utils/calculateTimeFromSeconds';
+import { baseInfoPageSearchParamsSchema } from '@renderer/utils/zod/baseInfoPageSearchParamsSchema';
+import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
+import { useStore } from '@tanstack/react-store';
 import {
   useCallback,
   useContext,
@@ -9,34 +29,11 @@ import {
   type ReactNode
 } from 'react';
 import { useTranslation } from 'react-i18next';
-
-import { Draggable, Droppable, DragDropContext, type DropResult } from '@hello-pangea/dnd';
-
-// import DefaultSongCover from '@renderer/assets/images/webp/song_cover_default.webp';
-// import DefaultPlaylistCover from '@renderer/assets/images/webp/playlist_cover_default.webp';
-// import FolderImg from '@renderer/assets/images/webp/empty-folder.webp';
-import NoSongsImage from '@renderer/assets/images/svg/Sun_Monochromatic.svg';
 import { type VirtuosoHandle } from 'react-virtuoso';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store/store';
-import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
-import useSelectAllHandler from '@renderer/hooks/useSelectAllHandler';
-import calculateTimeFromSeconds from '@renderer/utils/calculateTimeFromSeconds';
-import MainContainer from '@renderer/components/MainContainer';
-import Button from '@renderer/components/Button';
-import Img from '@renderer/components/Img';
-import Song from '@renderer/components/SongsPage/Song';
-import VirtualizedList from '@renderer/components/VirtualizedList';
-import { useQuery } from '@tanstack/react-query';
-import { songQuery } from '@renderer/queries/songs';
-import { queryClient } from '@renderer/index';
-import { queueQuery } from '@renderer/queries/queue';
-import { baseInfoPageSearchParamsSchema } from '@renderer/utils/zod/baseInfoPageSearchParamsSchema';
-import { zodValidator } from '@tanstack/zod-adapter';
 
 export const Route = createFileRoute('/main-player/queue/')({
   component: RouteComponent,
-  validateSearch: zodValidator(baseInfoPageSearchParamsSchema)
+  validateSearch: baseInfoPageSearchParamsSchema
 });
 
 function RouteComponent() {
@@ -364,7 +361,11 @@ function RouteComponent() {
                       }}
                       itemContent={(index, song) => {
                         return (
-                          <Draggable draggableId={song.songId} index={index} key={song.songId}>
+                          <Draggable
+                            draggableId={String(song.songId)}
+                            index={index}
+                            key={song.songId}
+                          >
                             {(provided) => {
                               const { multipleSelections: songIds } = multipleSelectionsData;
                               const isMultipleSelectionsEnabled =

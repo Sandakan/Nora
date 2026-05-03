@@ -1,3 +1,4 @@
+import { type DraggableProvided } from '@hello-pangea/dnd';
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import {
@@ -14,10 +15,7 @@ import {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { type DraggableProvided } from '@hello-pangea/dnd';
-
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-
 import Img from '../Img';
 import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
 
@@ -27,23 +25,23 @@ const DeleteSongsFromSystemConfrimPrompt = lazy(
   () => import('./DeleteSongsFromSystemConfrimPrompt')
 );
 
-import SongArtist from './SongArtist';
-import DefaultSongCover from '../../assets/images/webp/song_cover_default.webp';
-import Button from '../Button';
+import { useNavigate } from '@tanstack/react-router';
+import { useStore } from '@tanstack/react-store';
 
 import { appPreferences } from '../../../../../package.json';
-import { useStore } from '@tanstack/react-store';
-import { store } from '../../store/store';
-import NavLink from '../NavLink';
-import { useNavigate } from '@tanstack/react-router';
+import DefaultSongCover from '../../assets/images/webp/song_cover_default.webp';
 import { useQueueOperations } from '../../hooks/useQueueOperations';
+import { store } from '../../store/store';
+import Button from '../Button';
+import NavLink from '../NavLink';
+import SongArtist from './SongArtist';
 
 interface SongProp {
-  songId: string;
+  songId: number;
   artworkPaths: ArtworkPaths;
   title: string;
-  artists?: { name: string; artistId: string }[];
-  album?: { name: string; albumId: string };
+  artists?: { name: string; artistId: number }[];
+  album?: { name: string; albumId: number };
   duration: number;
   year?: number;
   path: string;
@@ -54,11 +52,11 @@ interface SongProp {
   isIndexingSongs: boolean;
   isAFavorite: boolean;
   className?: string;
-  onPlayClick?: (currSongId: string) => void;
+  onPlayClick?: (currSongId: number) => void;
   style?: CSSProperties;
   isDraggable?: boolean;
   provided?: DraggableProvided;
-  selectAllHandler?: (_upToId?: string) => void;
+  selectAllHandler?: (_upToId?: number) => void;
 }
 
 const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => {
@@ -199,7 +197,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
   }, [artists, currentSongData.songId, isAMultipleSelection, songId]);
 
   const goToSongInfoPage = useCallback(
-    () => navigate({ to: '/main-player/songs/$songId', params: { songId } }),
+    () => navigate({ to: '/main-player/songs/$songId', params: { songId: String(songId) } }),
     [navigate, songId]
   );
 
@@ -386,7 +384,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
           album &&
           navigate({
             to: '/main-player/albums/$albumId',
-            params: { albumId: album.albumId }
+            params: { albumId: String(album.albumId) }
           }),
         isDisabled: !album
       },
@@ -521,7 +519,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
       data-index={index}
       {...provided?.draggableProps}
       {...provided?.dragHandleProps}
-      className={`${songId} group relative mr-4 mb-2 flex h-[3.25rem] w-[98%] overflow-hidden rounded-lg p-[0.2rem] px-2 -outline-offset-2 transition-[background,color,opacity] ease-in-out focus-visible:!outline ${
+      className={`${songId} group relative mr-4 mb-2 flex h-13 w-[98%] overflow-hidden rounded-lg p-[0.2rem] px-2 -outline-offset-2 transition-[background,color,opacity] ease-in-out focus-visible:outline! ${
         currentSongData.songId === songId || isAMultipleSelection
           ? bodyBackgroundImage
             ? `bg-background-color-3/70 text-font-color-black dark:bg-dark-background-color-3/70 shadow-lg backdrop-blur-md`
@@ -566,12 +564,12 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
           <div
             className={`relative mr-2 flex h-full items-center justify-center ${
               index < 10
-                ? 'min-w-[1.75rem]'
+                ? 'min-w-7'
                 : index < 100
-                  ? 'min-w-[2.5rem]'
+                  ? 'min-w-10'
                   : index < 1000
-                    ? 'min-w-[3rem]'
-                    : 'min-w-[3.75rem]'
+                    ? 'min-w-12'
+                    : 'min-w-15'
             }`}
             title={t('notifications.songBlacklisted', { title })}
           >
@@ -588,12 +586,12 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
           <div
             className={`bg-background-color-1 text-font-color-highlight group-even:bg-background-color-2/75 group-hover:bg-background-color-1 dark:bg-dark-background-color-1 dark:text-dark-background-color-3 dark:group-even:bg-dark-background-color-2/50 dark:group-hover:bg-dark-background-color-1 relative mx-1 flex items-center justify-center rounded-2xl px-3 py-1 text-center ${
               index < 10
-                ? 'min-w-[1.75rem]'
+                ? 'min-w-7'
                 : index < 100
-                  ? 'min-w-[2.5rem]'
+                  ? 'min-w-10'
                   : index < 1000
-                    ? 'min-w-[3rem]'
-                    : 'min-w-[3.75rem]'
+                    ? 'min-w-12'
+                    : 'min-w-15'
             }`}
           >
             <span className="min-w-2 text-sm leading-tight font-medium">
@@ -611,7 +609,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
           <div className="play-btn-container absolute top-1/2 left-1/2 z-10 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center">
             <Button
               className="m-0! rounded-none! border-0! bg-transparent p-0! outline-offset-1 transition-colors! hover:bg-transparent focus-visible:outline! dark:bg-transparent dark:hover:bg-transparent"
-              iconClassName={`!text-3xl text-font-color-white/0 !leading-none ${
+              iconClassName={`text-3xl! text-font-color-white/0 leading-none! ${
                 currentSongData.songId === songId && 'text-font-color-white/100'
               } group-focus-within:text-font-color-white/100 group-hover:text-font-color-white/100 ${
                 isSongPlaying && 'text-font-color-white/75!'
@@ -632,14 +630,14 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
         </div>
       </div>
       <div
-        className={`song-info-container text-font-color-black dark:text-font-color-white grid grow grid-cols-[35%_2fr_1fr_minmax(4rem,5rem)_minmax(4.5rem,6.5rem)] items-center gap-3 sm:grid-cols-[45%_1fr_minmax(4.5rem,6rem)] sm:gap-2 lg:grid-cols-[40%_1fr_minmax(4rem,5rem)_minmax(4.5rem,6.5rem)] lg:!gap-0 ${
+        className={`song-info-container text-font-color-black dark:text-font-color-white grid grow grid-cols-[35%_2fr_1fr_minmax(4rem,5rem)_minmax(4.5rem,6.5rem)] items-center gap-3 sm:grid-cols-[45%_1fr_minmax(4.5rem,6rem)] sm:gap-2 lg:grid-cols-[40%_1fr_minmax(4rem,5rem)_minmax(4.5rem,6.5rem)] lg:gap-0! ${
           (currentSongData.songId === songId || isAMultipleSelection) &&
           'dark:text-font-color-black!'
         }`}
       >
         <NavLink
           to="/main-player/songs/$songId"
-          params={{ songId }}
+          params={{ songId: String(songId) }}
           title={title}
           className="song-title truncate text-base font-normal outline-offset-1 transition-none focus-visible:outline!"
           disabled={isMultipleSelectionEnabled}
@@ -653,7 +651,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
           {album?.name ? (
             <NavLink
               to="/main-player/albums/$albumId"
-              params={{ albumId: album?.albumId }}
+              params={{ albumId: String(album?.albumId) }}
               disabled={album?.albumId === undefined || isMultipleSelectionEnabled}
               className="cursor-pointer -outline-offset-1 hover:underline focus-visible:outline!"
               title={album.name}
@@ -675,7 +673,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
             iconName="favorite"
             iconClassName={`${
               isAFavorite ? 'material-icons-round' : 'material-icons-round-outlined'
-            } !leading-none !text-xl !font-light md:hidden ${
+            } leading-none! text-xl! font-light! md:hidden ${
               isAFavorite
                 ? currentSongData.songId === songId || isAMultipleSelection
                   ? 'text-font-color-black! dark:text-font-color-black!'

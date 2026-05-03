@@ -1,5 +1,6 @@
 import { type MakeDirectoryOptions, type Mode, type PathLike, mkdirSync } from 'fs';
 import { mkdir } from 'fs/promises';
+
 import { isAnErrorWithCode } from './isAnErrorWithCode';
 
 type MkDirOptions =

@@ -1,4 +1,5 @@
 import path from 'path';
+
 import { app } from 'electron';
 import winston from 'winston';
 // import { sendMessageToRenderer } from './main';

@@ -1,27 +1,26 @@
+import NoSongsImage from '@assets/images/svg/Summer landscape_Monochromatic.svg';
+import Button from '@renderer/components/Button';
+import Dropdown from '@renderer/components/Dropdown';
+import Genre from '@renderer/components/GenresPage/Genre';
+import { genreSortOptions } from '@renderer/components/GenresPage/genreOptions';
+import Img from '@renderer/components/Img';
+import MainContainer from '@renderer/components/MainContainer';
+import VirtualizedGrid from '@renderer/components/VirtualizedGrid';
 import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
+import useSelectAllHandler from '@renderer/hooks/useSelectAllHandler';
+import { queryClient } from '@renderer/index';
+import { genreQuery } from '@renderer/queries/genres';
 import { store } from '@renderer/store/store';
+import storage from '@renderer/utils/localStorage';
+import { genreSearchSchema } from '@renderer/utils/zod/genreSchema';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 import { useContext, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import storage from '@renderer/utils/localStorage';
-import useSelectAllHandler from '@renderer/hooks/useSelectAllHandler';
-import MainContainer from '@renderer/components/MainContainer';
-import Button from '@renderer/components/Button';
-import Dropdown from '@renderer/components/Dropdown';
-import VirtualizedGrid from '@renderer/components/VirtualizedGrid';
-import Genre from '@renderer/components/GenresPage/Genre';
-import NoSongsImage from '@assets/images/svg/Summer landscape_Monochromatic.svg';
-import Img from '@renderer/components/Img';
-import { genreSortOptions } from '@renderer/components/GenresPage/genreOptions';
-import { zodValidator } from '@tanstack/zod-adapter';
-import { genreSearchSchema } from '@renderer/utils/zod/genreSchema';
-import { queryClient } from '@renderer/index';
-import { genreQuery } from '@renderer/queries/genres';
-import { useSuspenseQuery } from '@tanstack/react-query';
 
 export const Route = createFileRoute('/main-player/genres/')({
-  validateSearch: zodValidator(genreSearchSchema),
+  validateSearch: genreSearchSchema,
   component: GenresPage,
   loaderDeps: ({ search }) => ({
     sortingOrder: search.sortingOrder

@@ -1,78 +1,52 @@
-import { useCallback, useEffect, type ReactNode } from 'react';
-import { useNavigate } from '@tanstack/react-router';
-import { useTranslation } from 'react-i18next';
-import { lazy } from 'react';
-import storage from '../utils/localStorage';
-
-import { useAudioPlayer } from './useAudioPlayer';
-import { normalizedKeys } from '@renderer/other/appShortcuts';
 import i18n from '@renderer/i18n';
+import { normalizedKeys } from '@renderer/other/appShortcuts';
 import { store } from '@renderer/store/store';
+import { useNavigate } from '@tanstack/react-router';
+import { useCallback, useEffect, type ReactNode } from 'react';
+import { lazy } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import storage from '../utils/localStorage';
+import { useAudioPlayer } from './useAudioPlayer';
 
 const AppShortcutsPrompt = lazy(() => import('../components/SettingsPage/AppShortcutsPrompt'));
 
-/**
- * Dependencies required by the keyboard shortcuts hook
- */
+/** Dependencies required by the keyboard shortcuts hook */
 export interface KeyboardShortcutDependencies {
-  /**
-   * Toggle song playback (play/pause)
-   */
+  /** Toggle song playback (play/pause) */
   toggleSongPlayback: () => void;
 
-  /**
-   * Toggle muted state
-   */
+  /** Toggle muted state */
   toggleMutedState: (isMute?: boolean) => void;
 
-  /**
-   * Skip to next song
-   */
+  /** Skip to next song */
   handleSkipForwardClick: () => void;
 
-  /**
-   * Skip to previous song
-   */
+  /** Skip to previous song */
   handleSkipBackwardClick: () => void;
 
-  /**
-   * Update volume
-   */
+  /** Update volume */
   updateVolume: (volume: number) => void;
 
-  /**
-   * Toggle shuffle mode
-   */
+  /** Toggle shuffle mode */
   toggleShuffling: () => void;
 
-  /**
-   * Toggle repeat mode
-   */
+  /** Toggle repeat mode */
   toggleRepeat: () => void;
 
-  /**
-   * Toggle favorite status of current song
-   */
+  /** Toggle favorite status of current song */
   toggleIsFavorite: () => void;
 
-  /**
-   * Add new notifications
-   */
+  /** Add new notifications */
   addNewNotifications: (notifications: AppNotification[]) => void;
 
-  /**
-   * Update player type (mini/normal)
-   */
+  /** Update player type (mini/normal) */
   updatePlayerType: (type: PlayerTypes) => void;
 
-  /**
-   * Toggle multiple selections mode
-   */
+  /** Toggle multiple selections mode */
   toggleMultipleSelections: (isEnabled?: boolean) => void;
 
-  /**
-   * Change prompt menu data (show/hide prompts)
-   */
+  /** Change prompt menu data (show/hide prompts) */
   changePromptMenuData: (
     isVisible?: boolean,
     prompt?: ReactNode | null,
@@ -83,33 +57,32 @@ export interface KeyboardShortcutDependencies {
 /**
  * Hook for managing keyboard shortcuts
  *
- * Automatically sets up event listeners for keyboard shortcuts and
- * handles all shortcut actions including playback control, navigation,
- * volume control, and more.
+ * Automatically sets up event listeners for keyboard shortcuts and handles all shortcut actions
+ * including playback control, navigation, volume control, and more.
  *
- * This hook does not return any values - it automatically manages
- * keyboard event listeners and cleanup.
- *
- * @param dependencies - Object containing all required callback functions
+ * This hook does not return any values - it automatically manages keyboard event listeners and
+ * cleanup.
  *
  * @example
- * ```tsx
- * function App() {
- *   const { toggleSongPlayback, handleSkipForwardClick } = usePlayerControl();
- *   const { updateVolume } = usePlaybackSettings();
- *   // ... other hooks
+ *   ```tsx
+ *   function App() {
+ *     const { toggleSongPlayback, handleSkipForwardClick } = usePlayerControl();
+ *     const { updateVolume } = usePlaybackSettings();
+ *     // ... other hooks
  *
- *   // Set up keyboard shortcuts
- *   useKeyboardShortcuts({
- *     toggleSongPlayback,
- *     handleSkipForwardClick,
- *     updateVolume,
- *     // ... other dependencies
- *   });
+ *     // Set up keyboard shortcuts
+ *     useKeyboardShortcuts({
+ *       toggleSongPlayback,
+ *       handleSkipForwardClick,
+ *       updateVolume
+ *       // ... other dependencies
+ *     });
  *
- *   return <div>...</div>;
- * }
- * ```
+ *     return <div>...</div>;
+ *   }
+ *   ```;
+ *
+ * @param dependencies - Object containing all required callback functions
  */
 export function useKeyboardShortcuts(dependencies: KeyboardShortcutDependencies): void {
   const navigate = useNavigate();

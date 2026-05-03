@@ -1,8 +1,10 @@
 import path from 'path';
-import removeMusicFolder from '../core/removeMusicFolder';
-import { dirExistsSync } from '../utils/dirExists';
-import logger from '../logger';
+
 import { getAllFolders } from '@main/db/queries/folders';
+
+import removeMusicFolder from '../core/removeMusicFolder';
+import logger from '../logger';
+import { dirExistsSync } from '../utils/dirExists';
 
 const checkForFolderModifications = async (folderName: string) => {
   const musicFolders = await getAllFolders();

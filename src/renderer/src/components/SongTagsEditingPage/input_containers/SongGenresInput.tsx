@@ -6,11 +6,11 @@ import Button from '../../Button';
 
 type Props = {
   songGenres?: {
-    genreId?: string | undefined;
+    genreId?: number | undefined;
     name: string;
     artworkPath?: string | undefined;
   }[];
-  genreResults: { genreId?: string; name: string; artworkPath?: string }[];
+  genreResults: { genreId?: number; name: string; artworkPath?: string }[];
   genreKeyword: string;
   updateSongInfo: (_callback: (_prevSongInfo: SongTags) => SongTags) => void;
   updateGenreKeyword: (_keyword: string) => void;
@@ -21,7 +21,7 @@ const SongGenresInput = (props: Props) => {
   const { songGenres, genreResults, genreKeyword, updateSongInfo, updateGenreKeyword } = props;
 
   return (
-    <div className="tag-input flex max-w-2xl min-w-[10rem] flex-col">
+    <div className="tag-input flex max-w-2xl min-w-40 flex-col">
       <label htmlFor="song-genres-id3-tag">{t('common.genre_other')}</label>
       <div className="border-background-color-2 dark:border-dark-background-color-2 mt-2 w-[90%] rounded-xl border-2 p-2">
         <div className="genres-container flex flex-wrap p-2 empty:py-2 empty:after:h-full empty:after:w-full empty:after:text-center empty:after:text-[#ccc] empty:after:content-['No_genres_selected_for_this_song.'] dark:empty:after:text-[#ccc]">
@@ -33,7 +33,7 @@ const SongGenresInput = (props: Props) => {
               >
                 <Button
                   iconName="close"
-                  className="material-icons-round mr-[.375rem]! border-0! p-[.125rem]! outline-offset-1 transition-[visibility,opacity] focus-visible:outline!"
+                  className="material-icons-round mr-1.5! border-0! p-0.5! outline-offset-1 transition-[visibility,opacity] focus-visible:outline!"
                   iconClassName="leading-none dark:text-font-color-black!"
                   clickHandler={() => {
                     updateSongInfo((prevData) => {
@@ -65,7 +65,7 @@ const SongGenresInput = (props: Props) => {
             {genreResults.map((x) => (
               <li
                 key={x.genreId ?? x.name}
-                className="border-background-color-2 hover:bg-background-color-2 dark:border-dark-background-color-2 dark:hover:bg-dark-background-color-2 box-content cursor-pointer border-b-[1px] py-2 pr-4 pl-6 font-light last:border-b-0 only:border-b-0"
+                className="border-background-color-2 hover:bg-background-color-2 dark:border-dark-background-color-2 dark:hover:bg-dark-background-color-2 box-content cursor-pointer border-b py-2 pr-4 pl-6 font-light last:border-b-0 only:border-b-0"
                 onClick={() => {
                   updateSongInfo((prevData) => {
                     const genres = prevData.genres?.filter((genre) => genre.name !== x.name) ?? [];

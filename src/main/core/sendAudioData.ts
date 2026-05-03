@@ -1,3 +1,8 @@
+import { addSongToPlayHistory } from '@main/db/queries/history';
+import { getPlayableSongById } from '@main/db/queries/songs';
+import { setDiscordRpcActivity } from '@main/other/discordRPC';
+import sharp from 'sharp';
+
 import {
   parseArtistOnlineArtworks,
   parseSongArtworks,
@@ -6,11 +11,7 @@ import {
 } from '../fs/resolveFilePaths';
 import logger from '../logger';
 import { IS_DEVELOPMENT, setCurrentSongPath } from '../main';
-import { getPlayableSongById } from '@main/db/queries/songs';
 import { parsePaletteFromArtworks } from './getAllSongs';
-import { setDiscordRpcActivity } from '@main/other/discordRPC';
-import { addSongToPlayHistory } from '@main/db/queries/history';
-import sharp from 'sharp';
 
 export const parseArtworkDataForAudioPlayerData = (artworkData?: Buffer | Uint8Array) => {
   if (artworkData === undefined) return undefined;
@@ -64,21 +65,21 @@ const getArtworkBuffer = async (artworkPath: string) => {
     const buffer = await sharp(realPath).toBuffer();
 
     return buffer;
-  } catch (error) {
+  } catch {
     // Failed to get artwork buffer most probably becuase the artwork path is a packaged path
     return undefined;
   }
 };
 
-const sendAudioData = async (songId: string): Promise<AudioPlayerData> => {
+const sendAudioData = async (songId: number): Promise<AudioPlayerData> => {
   logger.debug(`Fetching song data for song id -${songId}-`);
   try {
-    const song = await getPlayableSongById(Number(songId));
+    const song = await getPlayableSongById(songId);
 
     if (song) {
       const artists: AudioPlayerData['artists'] =
         song.artists?.map((a) => ({
-          artistId: String(a.artist.id),
+          artistId: a.artist.id,
           name: a.artist.name,
           onlineArtworkPaths: parseArtistOnlineArtworks(a.artist.artworks.map((aw) => aw.artwork))
         })) ?? [];
@@ -89,7 +90,7 @@ const sendAudioData = async (songId: string): Promise<AudioPlayerData> => {
       const artworkData = await getArtworkBuffer(songArtwork);
 
       const albumObj = song.albums?.[0]?.album;
-      const album = albumObj ? { albumId: String(albumObj.id), name: albumObj.title } : undefined;
+      const album = albumObj ? { albumId: albumObj.id, name: albumObj.title } : undefined;
       const isBlacklisted = song.isBlacklisted;
       const isAFavorite = song.isFavorite;
 
@@ -100,7 +101,7 @@ const sendAudioData = async (songId: string): Promise<AudioPlayerData> => {
         artwork: parseArtworkDataForAudioPlayerData(artworkData),
         artworkPath: songArtwork,
         path: resolveSongFilePath(song.path),
-        songId: String(song.id),
+        songId: song.id,
         isAFavorite,
         album,
         paletteData: parsePaletteFromArtworks(artworks),
@@ -108,7 +109,7 @@ const sendAudioData = async (songId: string): Promise<AudioPlayerData> => {
         isBlacklisted
       };
 
-      addSongToPlayHistory(Number(songId));
+      addSongToPlayHistory(songId);
 
       const now = Date.now();
       setDiscordRpcActivity({

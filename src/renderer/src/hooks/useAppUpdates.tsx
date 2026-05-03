@@ -1,18 +1,17 @@
 import { useCallback, useEffect } from 'react';
+import { lazy } from 'react';
+
 import { releaseNotes, version } from '../../../../package.json';
+import { store } from '../store/store';
 import isLatestVersion from '../utils/isLatestVersion';
 import storage from '../utils/localStorage';
 import log from '../utils/log';
-import { store } from '../store/store';
-import { lazy } from 'react';
 
 const ReleaseNotesPrompt = lazy(
   () => import('../components/ReleaseNotesPrompt/ReleaseNotesPrompt')
 );
 
-/**
- * Dependencies required by the useAppUpdates hook.
- */
+/** Dependencies required by the useAppUpdates hook. */
 export interface AppUpdatesDependencies {
   /** Function to show/hide prompt menu with content */
   changePromptMenuData: (
@@ -28,6 +27,7 @@ export interface AppUpdatesDependencies {
  * Custom hook to manage application update checking and notifications.
  *
  * This hook:
+ *
  * - Checks for app updates on startup (after 5 seconds)
  * - Periodically checks for updates (every 15 minutes)
  * - Fetches latest version info from remote changelog
@@ -38,28 +38,28 @@ export interface AppUpdatesDependencies {
  * - Handles network errors gracefully
  *
  * Update states:
+ *
  * - CHECKING: Currently checking for updates
  * - LATEST: App is up-to-date
  * - OLD: Update available
  * - ERROR: Failed to check for updates
  * - NO_NETWORK_CONNECTION: No internet connection
  *
- * @param dependencies - Object containing required callback functions and state
- *
- * @returns Object with update management functions
- *
  * @example
- * ```tsx
- * function App() {
- *   const { updateAppUpdatesState, checkForAppUpdates } = useAppUpdates({
- *     changePromptMenuData,
- *     isOnline
- *   });
+ *   ```tsx
+ *   function App() {
+ *     const { updateAppUpdatesState, checkForAppUpdates } = useAppUpdates({
+ *       changePromptMenuData,
+ *       isOnline
+ *     });
  *
- *   // Manually trigger update check
- *   checkForAppUpdates();
- * }
- * ```
+ *     // Manually trigger update check
+ *     checkForAppUpdates();
+ *   }
+ *   ```;
+ *
+ * @param dependencies - Object containing required callback functions and state
+ * @returns Object with update management functions
  */
 export function useAppUpdates(dependencies: AppUpdatesDependencies) {
   const { changePromptMenuData, isOnline } = dependencies;
@@ -81,12 +81,8 @@ export function useAppUpdates(dependencies: AppUpdatesDependencies) {
   /**
    * Checks for application updates by fetching the remote changelog.
    *
-   * Process:
-   * 1. Checks if online
-   * 2. Fetches remote changelog JSON
-   * 3. Compares versions
-   * 4. Updates app state
-   * 5. Shows release notes if update available and not ignored
+   * Process: 1. Checks if online 2. Fetches remote changelog JSON 3. Compares versions 4. Updates
+   * app state 5. Shows release notes if update available and not ignored
    */
   const checkForAppUpdates = useCallback(() => {
     if (navigator.onLine) {

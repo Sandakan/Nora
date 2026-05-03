@@ -1,20 +1,18 @@
+import { store } from '@renderer/store/store';
+import { useStore } from '@tanstack/react-store';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import useNetworkConnectivity from '../../hooks/useNetworkConnectivity';
-
-import isLatestVersion from '../../utils/isLatestVersion';
-import storage from '../../utils/localStorage';
-
-import Version from './Version';
-import Checkbox from '../Checkbox';
-import Img from '../Img';
 
 import { version, releaseNotes as currentReleaseNotes, urls } from '../../../../../package.json';
 import localReleseNotes from '../../../../../release-notes.json';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import useNetworkConnectivity from '../../hooks/useNetworkConnectivity';
+import isLatestVersion from '../../utils/isLatestVersion';
+import storage from '../../utils/localStorage';
+import Checkbox from '../Checkbox';
+import Img from '../Img';
 import ReleaseNotesAppUpdateInfo from './ReleaseNotesAppUpdateInfo';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store/store';
+import Version from './Version';
 
 const ReleaseNotesPrompt = () => {
   const appUpdatesState = useStore(store, (state) => state.appUpdatesState);
@@ -39,7 +37,7 @@ const ReleaseNotesPrompt = () => {
 
     // ! / / / / TO BE DEPRECATED CODE / / /
     // TODO: Will be deprectated in the next major release
-    /** @deprecated  */
+    /** @deprecated */
     if (releaseNotes.latestVersion) {
       latestVersion.artwork ||= releaseNotes.latestVersion.artwork;
       latestVersion.importantNotes ??= releaseNotes.latestVersion.importantNotes;

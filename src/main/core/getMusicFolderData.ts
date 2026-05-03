@@ -1,5 +1,6 @@
-import sortFolders from '../utils/sortFolders';
 import { getAllMusicFolders } from '@main/db/queries/folders';
+
+import sortFolders from '../utils/sortFolders';
 
 const selectStructure = (folderPath: string, folders: MusicFolder[]): MusicFolder | undefined => {
   for (const folder of folders) {

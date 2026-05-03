@@ -1,11 +1,11 @@
 import fs from 'fs/promises';
 import path from 'path';
 
-import logger from '../logger';
 import { getDirectories, supportedMusicExtensions } from '../filesystem';
+import { getAllFilePathsFromFolder } from '../fs/parseFolderStructuresForSongPaths';
+import logger from '../logger';
 import { showOpenDialog } from '../main';
 import getAllSettledPromises from '../utils/getAllSettledPromises';
-import { getAllFilePathsFromFolder } from '../fs/parseFolderStructuresForSongPaths';
 
 const getSongPathsInAFolder = (folderPath: string) => {
   const allFiles = getAllFilePathsFromFolder(folderPath);

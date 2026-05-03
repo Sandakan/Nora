@@ -18,6 +18,7 @@
     "mbid",
     "Motrix's",
     "nsis",
+    "oxlint",
     "phin",
     "pmmmwh",
     "pyong",
@@ -81,9 +82,10 @@
   },
   "editor.tokenColorCustomizations": {
     "comments": "#657bae",
-    "textMateRules": []
+    "textMateRules": [ ]
   },
   "editor.wordWrap": "off",
   "window.zoomLevel": -1,
-  "gutterpreview.imagePreviewMaxWidth": 0
+  "gutterpreview.imagePreviewMaxWidth": 0,
+  "editor.defaultFormatter": "oxc.oxc-vscode"
 }

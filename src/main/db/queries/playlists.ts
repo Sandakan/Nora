@@ -1,7 +1,9 @@
-import { and, asc, desc, eq, inArray, type SQL } from 'drizzle-orm';
+import { SpecialPlaylists } from '@common/playlists.enum';
 import { db } from '@db/db';
-import { playlistsSongs, playlists } from '../schema';
 import { timeEnd, timeStart } from '@main/utils/measureTimeUsage';
+import { and, asc, desc, eq, inArray, type SQL } from 'drizzle-orm';
+
+import { playlistsSongs, playlists, songs, playHistory } from '../schema';
 
 export type GetAllPlaylistsReturnType = Awaited<ReturnType<typeof getAllPlaylists>>;
 const defaultGetAllPlaylistsOptions = {
@@ -205,6 +207,47 @@ export const getPlaylistWithSongPaths = async (
   });
 
   return playlist;
+};
+
+export const getFavoritesPlaylistWithSongPaths = async (trx: DB | DBTransaction = db) => {
+  const timer = timeStart();
+  const favoriteSongs = await trx
+    .select({
+      path: songs.path
+    })
+    .from(songs)
+    .where(eq(songs.isFavorite, true));
+
+  timeEnd(timer, 'Time taken to fetch favorites playlist with song paths');
+
+  return {
+    id: SpecialPlaylists.Favorites,
+    name: 'Favorites',
+    songs: favoriteSongs.map((song) => ({
+      song
+    }))
+  };
+};
+
+export const getHistoryPlaylistWithSongPaths = async (trx: DB | DBTransaction = db) => {
+  const timer = timeStart();
+  const historySongs = await trx
+    .select({
+      path: songs.path
+    })
+    .from(playHistory)
+    .innerJoin(songs, eq(playHistory.songId, songs.id))
+    .orderBy(desc(playHistory.createdAt));
+
+  timeEnd(timer, 'Time taken to fetch history playlist with song paths');
+
+  return {
+    id: SpecialPlaylists.History,
+    name: 'History',
+    songs: historySongs.map((record) => ({
+      song: { path: record.path }
+    }))
+  };
 };
 
 export const createPlaylist = async (name: string, trx: DB | DBTransaction = db) => {

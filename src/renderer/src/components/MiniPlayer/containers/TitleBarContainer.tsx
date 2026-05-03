@@ -1,12 +1,13 @@
+import { queryClient } from '@renderer/index';
+import { settingsMutation, settingsQuery } from '@renderer/queries/settings';
+import { store } from '@renderer/store/store';
+import { useMutation, useSuspenseQuery } from '@tanstack/react-query';
+import { useStore } from '@tanstack/react-store';
 import { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import Button from '../../Button';
+
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
-import { store } from '@renderer/store/store';
-import { useStore } from '@tanstack/react-store';
-import { useMutation, useSuspenseQuery } from '@tanstack/react-query';
-import { settingsMutation, settingsQuery } from '@renderer/queries/settings';
-import { queryClient } from '@renderer/index';
+import Button from '../../Button';
 
 type Props = { isLyricsVisible: boolean };
 

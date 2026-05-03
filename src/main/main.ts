@@ -1,5 +1,7 @@
-import path, { join } from 'path';
 import os from 'os';
+import path, { join } from 'path';
+
+import { getSongById } from '@main/db/queries/songs';
 import {
   app,
   BrowserWindow,
@@ -23,32 +25,28 @@ import {
 } from 'electron';
 
 import { version, appPreferences } from '../../package.json';
-import { savePendingMetadataUpdates } from './updateSongId3Tags';
-import addWatchersToFolders from './fs/addWatchersToFolders';
-
-import addWatchersToParentFolders from './fs/addWatchersToParentFolders';
-import manageTaskbarPlaybackButtonControls from './core/manageTaskbarPlaybackButtonControls';
-import checkForStartUpSongs from './core/checkForStartUpSongs';
-import checkForNewSongs from './core/checkForNewSongs';
-import changeAppTheme from './core/changeAppTheme';
-import { savePendingSongLyrics } from './saveLyricsToSong';
-import { closeAllAbortControllers, saveAbortController } from './fs/controlAbortControllers';
-import resetAppData from './resetAppData';
-import { clearTempArtworkFolder } from './other/artworks';
-
-import manageLastFmAuth from './auth/manageLastFmAuth';
-import { initializeIPC } from './ipc';
-import checkForUpdates from './update';
-import { clearDiscordRpcActivity } from './other/discordRPC';
-
 import noraAppIcon from '../../resources/logo_light_mode.png?asset';
-import logger from './logger';
 import roundTo from '../common/roundTo';
+import manageLastFmAuth from './auth/manageLastFmAuth';
+import changeAppTheme from './core/changeAppTheme';
+import checkForNewSongs from './core/checkForNewSongs';
+import checkForStartUpSongs from './core/checkForStartUpSongs';
+import manageTaskbarPlaybackButtonControls from './core/manageTaskbarPlaybackButtonControls';
 // import { fileURLToPath, pathToFileURL } from 'url';
 import { closeDatabaseInstance } from './db/db';
-import { handleFileProtocol } from './handleFileProtocol';
-import { getSongById } from '@main/db/queries/songs';
 import { getUserSettings, saveUserSettings } from './db/queries/settings';
+import addWatchersToFolders from './fs/addWatchersToFolders';
+import addWatchersToParentFolders from './fs/addWatchersToParentFolders';
+import { closeAllAbortControllers, saveAbortController } from './fs/controlAbortControllers';
+import { handleFileProtocol } from './handleFileProtocol';
+import { initializeIPC } from './ipc';
+import logger from './logger';
+import { clearTempArtworkFolder } from './other/artworks';
+import { clearDiscordRpcActivity } from './other/discordRPC';
+import resetAppData from './resetAppData';
+import { savePendingSongLyrics } from './saveLyricsToSong';
+import checkForUpdates from './update';
+import { savePendingMetadataUpdates } from './updateSong/updateSongId3Tags';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -61,6 +59,9 @@ const MAIN_WINDOW_ASPECT_RATIO = 0;
 
 const MAIN_WINDOW_DEFAULT_SIZE_X = 1280;
 const MAIN_WINDOW_DEFAULT_SIZE_Y = 720;
+const MAIN_WINDOW_DEFAULT_ZOOM_FACTOR = 0.8;
+const MAIN_WINDOW_MIN_ZOOM_FACTOR = 0.5;
+const MAIN_WINDOW_MAX_ZOOM_FACTOR = 3;
 
 const MINI_PLAYER_MIN_SIZE_X = 270;
 const MINI_PLAYER_MIN_SIZE_Y = 200;
@@ -94,6 +95,7 @@ let isAudioPlaying = false;
 let isOnBatteryPower = false;
 let currentSongPath: string;
 let powerSaveBlockerId: number | null;
+let currentWindowZoomFactor = MAIN_WINDOW_DEFAULT_ZOOM_FACTOR;
 
 // / / / / / / INITIALIZATION / / / / / / /
 
@@ -146,9 +148,8 @@ function launchExtensionBackgroundWorkers(session = electronSession.defaultSessi
 
 const installExtensions = async () => {
   try {
-    const { default: installExtension, REACT_DEVELOPER_TOOLS } = await import(
-      'electron-devtools-installer'
-    );
+    const { default: installExtension, REACT_DEVELOPER_TOOLS } =
+      await import('electron-devtools-installer');
     const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
 
     const ext = await installExtension(REACT_DEVELOPER_TOOLS, {
@@ -169,6 +170,54 @@ export const getBackgroundColor = async () => {
   return '#FFFFFF';
 };
 
+const normalizeZoomFactor = (zoomFactor?: number | null) => {
+  if (typeof zoomFactor !== 'number' || !Number.isFinite(zoomFactor)) {
+    return MAIN_WINDOW_DEFAULT_ZOOM_FACTOR;
+  }
+
+  return Math.min(Math.max(zoomFactor, MAIN_WINDOW_MIN_ZOOM_FACTOR), MAIN_WINDOW_MAX_ZOOM_FACTOR);
+};
+
+const applyWindowZoomFactor = (zoomFactor: number, reason: string) => {
+  const normalizedZoomFactor = normalizeZoomFactor(zoomFactor);
+  const existingZoomFactor = mainWindow.webContents.getZoomFactor();
+
+  currentWindowZoomFactor = normalizedZoomFactor;
+
+  if (Math.abs(existingZoomFactor - normalizedZoomFactor) > 0.001) {
+    mainWindow.webContents.setZoomFactor(normalizedZoomFactor);
+    logger.debug('Applied renderer zoom factor.', {
+      reason,
+      previousZoomFactor: existingZoomFactor,
+      nextZoomFactor: normalizedZoomFactor
+    });
+  }
+};
+
+const persistWindowZoomFactor = async (zoomFactor: number) => {
+  try {
+    await saveUserSettings({ zoomFactor });
+  } catch (error) {
+    logger.error('Failed to persist renderer zoom factor.', { zoomFactor, error });
+  }
+};
+
+const handleZoomFactorChanged = async () => {
+  const zoomFactor = normalizeZoomFactor(mainWindow.webContents.getZoomFactor());
+
+  if (Math.abs(zoomFactor - currentWindowZoomFactor) <= 0.001) {
+    return;
+  }
+
+  currentWindowZoomFactor = zoomFactor;
+  logger.debug('Persisting updated renderer zoom factor.', { zoomFactor });
+  await persistWindowZoomFactor(zoomFactor);
+};
+
+const restoreWindowZoomOnFocus = () => {
+  applyWindowZoomFactor(currentWindowZoomFactor, 'window-focus');
+};
+
 const createWindow = async () => {
   if (IS_DEVELOPMENT) await installExtensions();
 
@@ -179,7 +228,7 @@ const createWindow = async () => {
     minWidth: 700,
     title: 'Nora',
     webPreferences: {
-      zoomFactor: 0.9,
+      zoomFactor: currentWindowZoomFactor,
       preload: path.resolve(import.meta.dirname, '../preload/index.mjs')
     },
     visualEffectState: 'followWindow',
@@ -230,7 +279,9 @@ protocol.registerSchemesAsPrivileged([
 app
   .whenReady()
   .then(async () => {
-    const { windowState } = await getUserSettings();
+    const { windowState, zoomFactor } = await getUserSettings();
+
+    currentWindowZoomFactor = normalizeZoomFactor(zoomFactor);
 
     if (BrowserWindow.getAllWindows().length === 0) await createWindow();
 
@@ -303,6 +354,14 @@ app
     mainWindow.webContents.addListener('zoom-changed', (_, dir) =>
       logger.debug(`Renderer zoomed ${dir}. ${mainWindow.webContents.getZoomLevel()}`)
     );
+    // oxlint-disable-next-line promise/no-nesting
+    mainWindow.webContents
+      .setVisualZoomLevelLimits(1, 1)
+      .catch((error) => logger.error('Failed to set visual zoom limits.', { error }));
+    mainWindow.on('focus', restoreWindowZoomOnFocus);
+    mainWindow.webContents.on('zoom-changed', () => {
+      void handleZoomFactorChanged();
+    });
 
     // ? / / / / / / / / /  IPC RENDERER EVENTS  / / / / / / / / / / / /
     if (mainWindow) {
@@ -349,6 +408,8 @@ async function manageWindowFinishLoad() {
       true
     );
   }
+
+  applyWindowZoomFactor(currentWindowZoomFactor, 'window-finish-load');
 
   mainWindow.show();
   manageWindowPositionInMonitor();
@@ -416,7 +477,7 @@ let dataUpdateEventTimeOutId: NodeJS.Timeout;
 let dataEventsCache: DataUpdateEvent[] = [];
 export function dataUpdateEvent(
   dataType: DataUpdateEventTypes,
-  data = [] as string[],
+  data = [] as number[],
   message?: string
 ) {
   if (dataUpdateEventTimeOutId) clearTimeout(dataUpdateEventTimeOutId);
@@ -429,7 +490,7 @@ export function dataUpdateEvent(
   }, 1000);
 }
 
-function addEventsToCache(dataType: DataUpdateEventTypes, data = [] as string[], message?: string) {
+function addEventsToCache(dataType: DataUpdateEventTypes, data = [] as number[], message?: string) {
   for (let i = 0; i < dataEventsCache.length; i += 1) {
     if (dataEventsCache[i].dataType === dataType) {
       if (data.length > 0 || message) {
@@ -593,8 +654,8 @@ export function restartApp(reason: string, noQuitEvents = false) {
   app.exit(0);
 }
 
-export async function revealSongInFileExplorer(songId: string) {
-  const song = await getSongById(Number(songId));
+export async function revealSongInFileExplorer(songId: number) {
+  const song = await getSongById(songId);
 
   if (song) return shell.showItemInFolder(song.path);
 
@@ -613,7 +674,7 @@ export const addToSongsOutsideLibraryData = (data: AudioPlayerData) =>
   songsOutsideLibraryData.push(data);
 
 export const updateSongsOutsideLibraryData = (
-  songidOrPath: string,
+  songidOrPath: string | number,
   data: AudioPlayerData
 ): void => {
   for (let i = 0; i < songsOutsideLibraryData.length; i += 1) {

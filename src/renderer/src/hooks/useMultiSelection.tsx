@@ -1,12 +1,13 @@
 import { useCallback } from 'react';
+
 import { dispatch, store } from '../store/store';
 
 export interface UseMultiSelectionReturn {
-  updateMultipleSelections: (id: string, selectionType: QueueTypes, type: 'add' | 'remove') => void;
+  updateMultipleSelections: (id: number, selectionType: QueueTypes, type: 'add' | 'remove') => void;
   toggleMultipleSelections: (
     isEnabled?: boolean,
     selectionType?: QueueTypes,
-    addSelections?: string[],
+    addSelections?: number[],
     replaceSelections?: boolean
   ) => void;
 }
@@ -14,30 +15,29 @@ export interface UseMultiSelectionReturn {
 /**
  * Hook for managing multiple selection state.
  *
- * Provides functions to add/remove individual selections and toggle the
- * multi-selection mode on/off. Used when selecting multiple songs, albums,
- * artists, etc. for batch operations.
+ * Provides functions to add/remove individual selections and toggle the multi-selection mode
+ * on/off. Used when selecting multiple songs, albums, artists, etc. for batch operations.
  *
  * @example
- * ```tsx
- * function ItemList() {
- *   const { updateMultipleSelections, toggleMultipleSelections } = useMultiSelection();
+ *   ```tsx
+ *   function ItemList() {
+ *     const { updateMultipleSelections, toggleMultipleSelections } = useMultiSelection();
  *
- *   const handleSelect = (id: string) => {
- *     updateMultipleSelections(id, 'SONGS', 'add');
- *   };
+ *     const handleSelect = (id: string) => {
+ *       updateMultipleSelections(id, 'SONGS', 'add');
+ *     };
  *
- *   const handleEnableMultiSelect = () => {
- *     toggleMultipleSelections(true, 'SONGS');
- *   };
- * }
- * ```
+ *     const handleEnableMultiSelect = () => {
+ *       toggleMultipleSelections(true, 'SONGS');
+ *     };
+ *   }
+ *   ```;
  *
  * @returns Multi-selection management functions
  */
 export function useMultiSelection(): UseMultiSelectionReturn {
   const updateMultipleSelections = useCallback(
-    (id: string, selectionType: QueueTypes, type: 'add' | 'remove') => {
+    (id: number, selectionType: QueueTypes, type: 'add' | 'remove') => {
       // Prevent changing selection type mid-selection
       if (
         store.state.multipleSelectionsData.selectionType &&
@@ -73,7 +73,7 @@ export function useMultiSelection(): UseMultiSelectionReturn {
     (
       isEnabled?: boolean,
       selectionType?: QueueTypes,
-      addSelections?: string[],
+      addSelections?: number[],
       replaceSelections = false
     ) => {
       const updatedSelectionData = store.state.multipleSelectionsData;

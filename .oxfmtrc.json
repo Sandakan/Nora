@@ -1,0 +1,22 @@
+{
+  "sortTailwindcss": {},
+  "singleQuote": true,
+  "semi": true,
+  "printWidth": 100,
+  "trailingComma": "none",
+  "endOfLine": "crlf",
+  "sortPackageJson": false,
+  "sortImports": true,
+  "ignorePatterns": [
+    "out",
+    "dist",
+    "pnpm-lock.yaml",
+    "LICENSE.md",
+    "tsconfig.json",
+    "tsconfig.*.json",
+    "**/thunder-tests",
+    "routeTree.gen.ts"
+  ],
+  "insertFinalNewline": true,
+  "jsdoc": true
+}

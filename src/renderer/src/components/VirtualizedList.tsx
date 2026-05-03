@@ -1,6 +1,6 @@
+import { useDebouncedCallback } from '@tanstack/react-pacer';
 import { type CSSProperties, type ReactNode, forwardRef } from 'react';
 import { Virtuoso, type Components, type ListRange, type VirtuosoHandle } from 'react-virtuoso';
-import { useDebouncedCallback } from '@tanstack/react-pacer';
 
 type Props<T extends object> = {
   data: T[];

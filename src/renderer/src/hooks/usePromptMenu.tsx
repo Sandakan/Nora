@@ -1,28 +1,27 @@
 import { useCallback, type ReactNode } from 'react';
+
 import { dispatch, store } from '../store/store';
 
-/**
- * Return type for the usePromptMenu hook
- */
+/** Return type for the usePromptMenu hook */
 export interface UsePromptMenuReturn {
   /**
    * Change the prompt menu data (show/hide prompts, navigate history)
    *
+   * @example
+   *   ```tsx
+   *   // Show a new prompt
+   *   changePromptMenuData(true, <MyPromptComponent />, 'custom-class');
+   *
+   *   // Hide current prompt
+   *   changePromptMenuData(false);
+   *
+   *   // Clear all prompts
+   *   changePromptMenuData(false, null);
+   *   ```;
+   *
    * @param isVisible - Whether the prompt menu should be visible
    * @param prompt - The prompt content to display (ReactNode) or null to clear all prompts
    * @param className - Optional CSS class name for the prompt
-   *
-   * @example
-   * ```tsx
-   * // Show a new prompt
-   * changePromptMenuData(true, <MyPromptComponent />, 'custom-class');
-   *
-   * // Hide current prompt
-   * changePromptMenuData(false);
-   *
-   * // Clear all prompts
-   * changePromptMenuData(false, null);
-   * ```
    */
   changePromptMenuData: (
     isVisible?: boolean,
@@ -33,22 +32,23 @@ export interface UsePromptMenuReturn {
   /**
    * Update the prompt menu history index (navigate back/forward in prompt history)
    *
+   * @example
+   *   ```tsx
+   *   // Go back to previous prompt
+   *   updatePromptMenuHistoryIndex('decrement');
+   *
+   *   // Go forward to next prompt
+   *   updatePromptMenuHistoryIndex('increment');
+   *
+   *   // Return to first prompt
+   *   updatePromptMenuHistoryIndex('home');
+   *   ```;
+   *
    * @param type - The type of navigation:
+   *
    *   - 'increment': Move forward in history
    *   - 'decrement': Move back in history
    *   - 'home': Return to the first prompt
-   *
-   * @example
-   * ```tsx
-   * // Go back to previous prompt
-   * updatePromptMenuHistoryIndex('decrement');
-   *
-   * // Go forward to next prompt
-   * updatePromptMenuHistoryIndex('increment');
-   *
-   * // Return to first prompt
-   * updatePromptMenuHistoryIndex('home');
-   * ```
    */
   updatePromptMenuHistoryIndex: (type: 'increment' | 'decrement' | 'home') => void;
 }
@@ -56,39 +56,39 @@ export interface UsePromptMenuReturn {
 /**
  * Hook for managing prompt menu state and navigation
  *
- * Provides functions to show/hide prompt menus, add prompts to history,
- * and navigate through prompt history (back/forward/home).
+ * Provides functions to show/hide prompt menus, add prompts to history, and navigate through prompt
+ * history (back/forward/home).
  *
- * The prompt menu is used for displaying modal dialogs, error messages,
- * confirmation prompts, and other overlay content.
- *
- * @returns Object containing prompt menu management functions
+ * The prompt menu is used for displaying modal dialogs, error messages, confirmation prompts, and
+ * other overlay content.
  *
  * @example
- * ```tsx
- * function MyComponent() {
- *   const { changePromptMenuData, updatePromptMenuHistoryIndex } = usePromptMenu();
+ *   ```tsx
+ *   function MyComponent() {
+ *     const { changePromptMenuData, updatePromptMenuHistoryIndex } = usePromptMenu();
  *
- *   const showError = () => {
- *     changePromptMenuData(
- *       true,
- *       <ErrorPrompt message="Something went wrong!" />,
- *       'error-prompt'
+ *     const showError = () => {
+ *       changePromptMenuData(
+ *         true,
+ *         <ErrorPrompt message="Something went wrong!" />,
+ *         'error-prompt'
+ *       );
+ *     };
+ *
+ *     const goBack = () => {
+ *       updatePromptMenuHistoryIndex('decrement');
+ *     };
+ *
+ *     return (
+ *       <div>
+ *         <button onClick={showError}>Show Error</button>
+ *         <button onClick={goBack}>Go Back</button>
+ *       </div>
  *     );
- *   };
+ *   }
+ *   ```;
  *
- *   const goBack = () => {
- *     updatePromptMenuHistoryIndex('decrement');
- *   };
- *
- *   return (
- *     <div>
- *       <button onClick={showError}>Show Error</button>
- *       <button onClick={goBack}>Go Back</button>
- *     </div>
- *   );
- * }
- * ```
+ * @returns Object containing prompt menu management functions
  */
 export function usePromptMenu(): UsePromptMenuReturn {
   const changePromptMenuData = useCallback(

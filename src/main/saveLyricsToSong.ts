@@ -1,21 +1,19 @@
 import path from 'path';
-import NodeID3 from 'node-id3';
 
-import convertParsedLyricsToNodeID3Format from './core/convertParsedLyricsToNodeID3Format';
-import { updateCachedLyrics } from './core/getSongLyrics';
-import { removeDefaultAppProtocolFromFilePath } from './fs/resolveFilePaths';
 import { appPreferences } from '../../package.json';
-import { dataUpdateEvent, sendMessageToRenderer } from './main';
+import { updateCachedLyrics } from './core/getSongLyrics';
 import saveLyricsToLRCFile from './core/saveLyricsToLrcFile';
-import logger from './logger';
 import { getUserSettings } from './db/queries/settings';
+import { removeDefaultAppProtocolFromFilePath } from './fs/resolveFilePaths';
+import logger from './logger';
+import { dataUpdateEvent, sendMessageToRenderer } from './main';
+import { withFileHandle } from './utils/withFileHandle';
 
 const { metadataEditingSupportedExtensions } = appPreferences;
 
 type PendingSongLyrics = {
   title: string;
-  synchronisedLyrics: SynchronisedLyrics;
-  unsynchronisedLyrics: UnsynchronisedLyrics;
+  lyrics: string;
 };
 
 const pendingSongLyrics = new Map<string, PendingSongLyrics>();
@@ -27,30 +25,20 @@ const saveLyricsToSong = async (songPathWithProtocol: string, songLyrics: SongLy
   if (songLyrics && songLyrics.lyrics.parsedLyrics.length > 0) {
     const pathExt = path.extname(songPath).replace(/\W/, '');
     const isASupportedFormat = metadataEditingSupportedExtensions.includes(pathExt);
+    const lyricsToSave = songLyrics.lyrics.unparsedLyrics;
+    const shouldSaveLrcFile =
+      !isASupportedFormat || saveLyricsInLrcFilesForSupportedSongs || songLyrics.lyrics.isSynced;
 
-    if (!isASupportedFormat || saveLyricsInLrcFilesForSupportedSongs)
-      saveLyricsToLRCFile(songPath, songLyrics);
+    if (shouldSaveLrcFile) saveLyricsToLRCFile(songPath, songLyrics);
 
     if (isASupportedFormat) {
-      const prevTags = await NodeID3.Promise.read(songPath);
-
-      const { isSynced } = songLyrics.lyrics;
-      const unsynchronisedLyrics: UnsynchronisedLyrics = !isSynced
-        ? {
-            language: 'ENG',
-            text: songLyrics.lyrics.unparsedLyrics
-          }
-        : prevTags.unsynchronisedLyrics;
-
-      const synchronisedLyrics = isSynced
-        ? convertParsedLyricsToNodeID3Format(songLyrics.lyrics)
-        : prevTags.synchronisedLyrics;
-
       try {
+        if (typeof lyricsToSave !== 'string' || lyricsToSave.length === 0)
+          throw new Error('No lyrics content available to save to the audio file.');
+
         const updatingTags = {
           title: songLyrics.title,
-          unsynchronisedLyrics,
-          synchronisedLyrics: synchronisedLyrics || []
+          lyrics: lyricsToSave
         };
         // Kept to be saved later
         pendingSongLyrics.set(songPath, updatingTags);
@@ -93,7 +81,7 @@ const saveLyricsToSong = async (songPathWithProtocol: string, songLyrics: SongLy
 
 export const isLyricsSavePending = (songPath: string) => pendingSongLyrics.has(songPath);
 
-export const savePendingSongLyrics = (currentSongPath = '', forceSave = false) => {
+export const savePendingSongLyrics = async (currentSongPath = '', forceSave = false) => {
   if (pendingSongLyrics.size === 0) return logger.info('No pending song lyrics found.');
 
   logger.info(`Started saving pending song lyrics.`, {
@@ -107,7 +95,10 @@ export const savePendingSongLyrics = (currentSongPath = '', forceSave = false) =
 
     if (forceSave || !isACurrentlyPlayingSong) {
       try {
-        NodeID3.update(updatingTags, songPath);
+        await withFileHandle(songPath, async (file) => {
+          file.tag.lyrics = updatingTags.lyrics;
+          file.save();
+        });
 
         logger.info(`Successfully saved pending lyrics of '${updatingTags.title}'.`, { songPath });
         sendMessageToRenderer({
