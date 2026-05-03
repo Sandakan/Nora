@@ -6,7 +6,6 @@ import { File } from 'node-taglib-sharp';
 import { appPreferences } from '../../../package.json';
 import songCoverImage from '../../renderer/src/assets/images/webp/song_cover_default.webp?asset';
 import { DEFAULT_FILE_URL } from '../filesystem';
-import { resolveSongFilePath } from '../fs/resolveFilePaths';
 import logger from '../logger';
 import { sendMessageToRenderer, addToSongsOutsideLibraryData } from '../main';
 import { createTempArtwork } from '../other/artworks';
@@ -55,7 +54,7 @@ const sendAudioDataFromPath = async (songPath: string): Promise<AudioPlayerData>
           duration: (file.properties.durationMilliseconds ?? 0) / 1000,
           artwork: parseArtworkDataForAudioPlayerData(artworkData),
           artworkPath: tempArtworkPath,
-          path: resolveSongFilePath(songPath),
+          path: path.join(DEFAULT_FILE_URL, songPath),
           songId: Math.floor(Math.random() * 1000000),
           isAFavorite: false,
           isKnownSource: false,

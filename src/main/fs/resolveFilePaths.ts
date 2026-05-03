@@ -1,7 +1,6 @@
 // import path from 'path';
 import { join as joinPath } from 'node:path/posix';
 import { platform } from 'process';
-import { pathToFileURL } from 'url';
 
 import { artworks as artworksSchema } from '@db/schema';
 
@@ -40,27 +39,11 @@ export const resetArtworkCache = (type: keyof typeof timestamps | 'all') => {
 export const resolveSongFilePath = (songPath: string, resetCache = true, sendRealPath = false) => {
   if (resetCache) resetArtworkCache('songs');
 
-  if (sendRealPath) return songPath;
+  const FILE_URL = sendRealPath ? '' : DEFAULT_FILE_URL;
+  const timestampStr = sendRealPath ? '' : `?ts=${timestamps.songs}`;
 
-  try {
-    const url = new URL(DEFAULT_FILE_URL);
-    // Normalize Windows backslashes to forward slashes so the URL pathname is predictable
-    let normalized = songPath.replace(/\\/g, '/');
-    if (!normalized.startsWith('/')) normalized = `/${normalized}`;
-    // Encode each path segment to ensure characters like ?, # are preserved as part of pathname
-    const encodedSegments = normalized
-      .split('/')
-      .map((s) => encodeURIComponent(s))
-      .join('/');
-    url.pathname = encodedSegments;
-    url.searchParams.set('ts', String(timestamps.songs));
-    return url.toString();
-  } catch (error) {
-    // Fallback to file URL if anything goes wrong
-    const songUrl = new URL(pathToFileURL(songPath).toString());
-    songUrl.searchParams.set('ts', String(timestamps.songs));
-    return songUrl.toString();
-  }
+  const resolvedFilePath = joinPath(FILE_URL, songPath) + timestampStr;
+  return resolvedFilePath;
 };
 
 export const getSongArtworkPath = (
@@ -71,24 +54,18 @@ export const getSongArtworkPath = (
 ): ArtworkPaths => {
   if (resetCache) resetArtworkCache('songArtworks');
 
+  const FILE_URL = sendRealPath ? '' : DEFAULT_FILE_URL;
   const timestampStr = sendRealPath ? '' : `?ts=${timestamps.songArtworks}`;
 
   if (isArtworkAvailable) {
-    const artworkRel = `${DEFAULT_ARTWORK_SAVE_LOCATION}/${id}.webp`;
-    const optimizedRel = `${DEFAULT_ARTWORK_SAVE_LOCATION}/${id}-optimized.webp`;
     return {
       isDefaultArtwork: !isArtworkAvailable,
-      artworkPath: sendRealPath
-        ? artworkRel
-        : addDefaultAppProtocolToFilePath(artworkRel) + timestampStr,
-      optimizedArtworkPath: sendRealPath
-        ? optimizedRel
-        : addDefaultAppProtocolToFilePath(optimizedRel) + timestampStr
+      artworkPath: joinPath(FILE_URL, DEFAULT_ARTWORK_SAVE_LOCATION, `${id}.webp`) + timestampStr,
+      optimizedArtworkPath:
+        joinPath(FILE_URL, DEFAULT_ARTWORK_SAVE_LOCATION, `${id}-optimized.webp`) + timestampStr
     };
   }
-  const defaultPath = sendRealPath
-    ? songCoverImage
-    : addDefaultAppProtocolToFilePath(songCoverImage) + timestampStr;
+  const defaultPath = joinPath(FILE_URL, songCoverImage) + timestampStr;
   return {
     isDefaultArtwork: isArtworkAvailable,
     artworkPath: defaultPath,
@@ -102,6 +79,8 @@ export const parseSongArtworks = (
   sendRealPath = false
 ): ArtworkPaths => {
   if (resetCache) resetArtworkCache('songArtworks');
+
+  const FILE_URL = sendRealPath ? '' : DEFAULT_FILE_URL;
   const timestampStr = sendRealPath ? '' : `?ts=${timestamps.songArtworks}`;
   const isArtworkAvailable = artworks.length > 0;
 
@@ -112,19 +91,13 @@ export const parseSongArtworks = (
     if (highResImage && lowResImage) {
       return {
         isDefaultArtwork: !isArtworkAvailable,
-        artworkPath: sendRealPath
-          ? highResImage.path
-          : addDefaultAppProtocolToFilePath(highResImage.path) + timestampStr,
-        optimizedArtworkPath: sendRealPath
-          ? lowResImage.path
-          : addDefaultAppProtocolToFilePath(lowResImage.path) + timestampStr
+        artworkPath: joinPath(FILE_URL, highResImage.path) + timestampStr,
+        optimizedArtworkPath: joinPath(FILE_URL, lowResImage.path) + timestampStr
       };
     }
   }
 
-  const defaultPath = sendRealPath
-    ? songCoverImage
-    : addDefaultAppProtocolToFilePath(songCoverImage) + timestampStr;
+  const defaultPath = joinPath(FILE_URL, songCoverImage) + timestampStr;
   return {
     isDefaultArtwork: true,
     artworkPath: defaultPath,
@@ -141,11 +114,12 @@ export const getArtistArtworkPath = (artworkName?: string, resetCache = false): 
     return {
       isDefaultArtwork: !artworkName,
       artworkPath:
-        addDefaultAppProtocolToFilePath(`${DEFAULT_ARTWORK_SAVE_LOCATION}/${artworkName}`) +
-        timestampStr,
+        joinPath(DEFAULT_FILE_URL, DEFAULT_ARTWORK_SAVE_LOCATION, `${artworkName}`) + timestampStr,
       optimizedArtworkPath:
-        addDefaultAppProtocolToFilePath(
-          `${DEFAULT_ARTWORK_SAVE_LOCATION}/${artworkName.replace(/\.webp^/, '-optimized.webp')}`
+        joinPath(
+          DEFAULT_FILE_URL,
+          DEFAULT_ARTWORK_SAVE_LOCATION,
+          `${artworkName.replace(/\.webp^/, '-optimized.webp')}`
         ) + timestampStr
     };
   }
@@ -163,6 +137,8 @@ export const parseArtistArtworks = (
   sendRealPath = false
 ): ArtworkPaths => {
   if (resetCache) resetArtworkCache('artistArtworks');
+
+  const FILE_URL = sendRealPath ? '' : DEFAULT_FILE_URL;
   const timestampStr = sendRealPath ? '' : `?ts=${timestamps.artistArtworks}`;
   const isArtworkAvailable = artworks.length > 0;
 
@@ -172,19 +148,13 @@ export const parseArtistArtworks = (
     if (highResImage) {
       return {
         isDefaultArtwork: !isArtworkAvailable,
-        artworkPath: sendRealPath
-          ? highResImage.path
-          : addDefaultAppProtocolToFilePath(highResImage.path) + timestampStr,
-        optimizedArtworkPath: sendRealPath
-          ? highResImage.path
-          : addDefaultAppProtocolToFilePath(highResImage.path) + timestampStr
+        artworkPath: joinPath(FILE_URL, highResImage.path) + timestampStr,
+        optimizedArtworkPath: joinPath(FILE_URL, highResImage.path) + timestampStr
       };
     }
   }
 
-  const defaultPath = sendRealPath
-    ? artistCoverImage
-    : addDefaultAppProtocolToFilePath(artistCoverImage) + timestampStr;
+  const defaultPath = joinPath(FILE_URL, artistCoverImage) + timestampStr;
   return {
     isDefaultArtwork: true,
     artworkPath: defaultPath,
@@ -226,11 +196,12 @@ export const getAlbumArtworkPath = (artworkName?: string, resetCache = false): A
     return {
       isDefaultArtwork: !artworkName,
       artworkPath:
-        addDefaultAppProtocolToFilePath(`${DEFAULT_ARTWORK_SAVE_LOCATION}/${artworkName}`) +
-        timestampStr,
+        joinPath(DEFAULT_FILE_URL, DEFAULT_ARTWORK_SAVE_LOCATION, `${artworkName}`) + timestampStr,
       optimizedArtworkPath:
-        addDefaultAppProtocolToFilePath(
-          `${DEFAULT_ARTWORK_SAVE_LOCATION}/${artworkName.replace(/\.webp^/, '-optimized.webp')}`
+        joinPath(
+          DEFAULT_FILE_URL,
+          DEFAULT_ARTWORK_SAVE_LOCATION,
+          `${artworkName.replace(/\.webp^/, '-optimized.webp')}`
         ) + timestampStr
     };
   }
@@ -248,6 +219,8 @@ export const parseAlbumArtworks = (
   sendRealPath = false
 ): ArtworkPaths => {
   if (resetCache) resetArtworkCache('albumArtworks');
+
+  const FILE_URL = sendRealPath ? '' : DEFAULT_FILE_URL;
   const timestampStr = sendRealPath ? '' : `?ts=${timestamps.albumArtworks}`;
   const isArtworkAvailable = artworks.length > 0;
 
@@ -257,19 +230,13 @@ export const parseAlbumArtworks = (
     if (highResImage) {
       return {
         isDefaultArtwork: !isArtworkAvailable,
-        artworkPath: sendRealPath
-          ? highResImage.path
-          : addDefaultAppProtocolToFilePath(highResImage.path) + timestampStr,
-        optimizedArtworkPath: sendRealPath
-          ? highResImage.path
-          : addDefaultAppProtocolToFilePath(highResImage.path) + timestampStr
+        artworkPath: joinPath(FILE_URL, highResImage.path) + timestampStr,
+        optimizedArtworkPath: joinPath(FILE_URL, highResImage.path) + timestampStr
       };
     }
   }
 
-  const defaultPath = sendRealPath
-    ? albumCoverImage
-    : addDefaultAppProtocolToFilePath(albumCoverImage) + timestampStr;
+  const defaultPath = joinPath(FILE_URL, albumCoverImage) + timestampStr;
   return {
     isDefaultArtwork: true,
     artworkPath: defaultPath,
@@ -286,11 +253,12 @@ export const getGenreArtworkPath = (artworkName?: string, resetCache = false): A
     return {
       isDefaultArtwork: !artworkName,
       artworkPath:
-        addDefaultAppProtocolToFilePath(`${DEFAULT_ARTWORK_SAVE_LOCATION}/${artworkName}`) +
-        timestampStr,
+        joinPath(DEFAULT_FILE_URL, DEFAULT_ARTWORK_SAVE_LOCATION, `${artworkName}`) + timestampStr,
       optimizedArtworkPath:
-        addDefaultAppProtocolToFilePath(
-          `${DEFAULT_ARTWORK_SAVE_LOCATION}/${artworkName.replace(/\.webp^/, '-optimized.webp')}`
+        joinPath(
+          DEFAULT_FILE_URL,
+          DEFAULT_ARTWORK_SAVE_LOCATION,
+          `${artworkName.replace(/\.webp^/, '-optimized.webp')}`
         ) + timestampStr
     };
   }
@@ -308,6 +276,8 @@ export const parseGenreArtworks = (
   sendRealPath = false
 ): ArtworkPaths => {
   if (resetCache) resetArtworkCache('genreArtworks');
+
+  const FILE_URL = sendRealPath ? '' : DEFAULT_FILE_URL;
   const timestampStr = sendRealPath ? '' : `?ts=${timestamps.genreArtworks}`;
   const isArtworkAvailable = artworks.length > 0;
 
@@ -317,19 +287,13 @@ export const parseGenreArtworks = (
     if (highResImage) {
       return {
         isDefaultArtwork: !isArtworkAvailable,
-        artworkPath: sendRealPath
-          ? highResImage.path
-          : addDefaultAppProtocolToFilePath(highResImage.path) + timestampStr,
-        optimizedArtworkPath: sendRealPath
-          ? highResImage.path
-          : addDefaultAppProtocolToFilePath(highResImage.path) + timestampStr
+        artworkPath: joinPath(FILE_URL, highResImage.path) + timestampStr,
+        optimizedArtworkPath: joinPath(FILE_URL, highResImage.path) + timestampStr
       };
     }
   }
 
-  const defaultPath = sendRealPath
-    ? songCoverImage
-    : addDefaultAppProtocolToFilePath(songCoverImage) + timestampStr;
+  const defaultPath = joinPath(FILE_URL, songCoverImage) + timestampStr;
   return {
     isDefaultArtwork: true,
     artworkPath: defaultPath,
@@ -345,15 +309,16 @@ export const getPlaylistArtworkPath = (
   if (resetCache) resetArtworkCache('playlistArtworks');
 
   const timestampStr = `?ts=${timestamps.playlistArtworks}`;
+
   const artworkPath =
     playlistId === 'History'
-      ? addDefaultAppProtocolToFilePath(historyPlaylistCoverImage) + timestampStr
+      ? joinPath(DEFAULT_FILE_URL, historyPlaylistCoverImage) + timestampStr
       : playlistId === 'Favorites'
-        ? addDefaultAppProtocolToFilePath(favoritesPlaylistCoverImage) + timestampStr
+        ? joinPath(DEFAULT_FILE_URL, favoritesPlaylistCoverImage) + timestampStr
         : isArtworkAvailable
-          ? addDefaultAppProtocolToFilePath(`${DEFAULT_ARTWORK_SAVE_LOCATION}/${playlistId}.webp`) +
+          ? joinPath(DEFAULT_FILE_URL, DEFAULT_ARTWORK_SAVE_LOCATION, `${playlistId}.webp`) +
             timestampStr
-          : addDefaultAppProtocolToFilePath(playlistCoverImage) + timestampStr;
+          : joinPath(DEFAULT_FILE_URL, playlistCoverImage) + timestampStr;
   return {
     isDefaultArtwork: !isArtworkAvailable,
     artworkPath,
@@ -367,6 +332,8 @@ export const parsePlaylistArtworks = (
   sendRealPath = false
 ): ArtworkPaths => {
   if (resetCache) resetArtworkCache('playlistArtworks');
+
+  const FILE_URL = sendRealPath ? '' : DEFAULT_FILE_URL;
   const timestampStr = sendRealPath ? '' : `?ts=${timestamps.playlistArtworks}`;
   const isArtworkAvailable = artworks.length > 0;
 
@@ -376,19 +343,13 @@ export const parsePlaylistArtworks = (
     if (highResImage) {
       return {
         isDefaultArtwork: !isArtworkAvailable,
-        artworkPath: sendRealPath
-          ? highResImage.path
-          : addDefaultAppProtocolToFilePath(highResImage.path) + timestampStr,
-        optimizedArtworkPath: sendRealPath
-          ? highResImage.path
-          : addDefaultAppProtocolToFilePath(highResImage.path) + timestampStr
+        artworkPath: joinPath(FILE_URL, highResImage.path) + timestampStr,
+        optimizedArtworkPath: joinPath(FILE_URL, highResImage.path) + timestampStr
       };
     }
   }
 
-  const defaultPath = sendRealPath
-    ? playlistCoverImage
-    : addDefaultAppProtocolToFilePath(playlistCoverImage) + timestampStr;
+  const defaultPath = joinPath(FILE_URL, playlistCoverImage) + timestampStr;
   return {
     isDefaultArtwork: true,
     artworkPath: defaultPath,
@@ -397,44 +358,15 @@ export const parsePlaylistArtworks = (
 };
 
 export const removeDefaultAppProtocolFromFilePath = (filePath: string) => {
-  try {
-    const u = new URL(filePath);
-    if (u.protocol === 'nora:') {
-      const decoded = decodeURIComponent(u.pathname);
-      // On linux/darwin keep leading slash (absolute POSIX path), on Windows strip leading slashes
-      if (platform === 'linux' || platform === 'darwin') return decoded;
-      return decoded.replace(/^\/+/, '');
-    }
-  } catch {
-    // fallthrough - not a full URL
-  }
-
-  // Fallback to previous regexp-based cleaning
   const strippedPath = filePath.replaceAll(
     /nora:[/\\]{1,2}localfiles[/\\]{1,2}|\?[\w+=\w+&?]+$/gm,
     ''
   );
+
   if (platform === 'linux' || platform === 'darwin') return `/${strippedPath}`;
   return strippedPath;
 };
 
 export const addDefaultAppProtocolToFilePath = (filePath: string) => {
-  try {
-    // If it's already a URL or absolute file URL, return as-is
-    const maybeUrl = new URL(filePath);
-    if (maybeUrl.protocol) return filePath;
-  } catch {
-    // not a full URL, continue
-  }
-
-  // Normalize and build nora:// URL safely
-  const url = new URL(DEFAULT_FILE_URL);
-  let normalized = filePath.replace(/\\/g, '/');
-  if (!normalized.startsWith('/')) normalized = `/${normalized}`;
-  const encodedSegments = normalized
-    .split('/')
-    .map((s) => encodeURIComponent(s))
-    .join('/');
-  url.pathname = encodedSegments;
-  return url.toString();
+  return joinPath('nora://localfiles/', filePath);
 };
