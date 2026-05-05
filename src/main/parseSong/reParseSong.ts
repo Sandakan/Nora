@@ -1,177 +1,157 @@
 import fs from 'fs/promises';
 import path from 'path';
-import * as musicMetaData from 'music-metadata';
 
+import { db } from '@main/db/db';
+import { linkArtworksToSong } from '@main/db/queries/artworks';
+import { getSongByPath, updateSongByPath } from '@main/db/queries/songs';
+import type { songs } from '@main/db/schema';
+import { convertToSongData } from '@main/utils/convert';
+import { File } from 'node-taglib-sharp';
+
+import { removeDefaultAppProtocolFromFilePath } from '../fs/resolveFilePaths';
+import logger from '../logger';
+import { dataUpdateEvent, sendMessageToRenderer } from '../main';
 import { removeArtwork, storeArtworks } from '../other/artworks';
-import { getSongArtworkPath, removeDefaultAppProtocolFromFilePath } from '../fs/resolveFilePaths';
+import { generatePalettes } from '../other/generatePalette';
 import {
   removeDeletedAlbumDataOfSong,
   removeDeletedArtistDataOfSong,
+  removeDeletedArtworkDataOfSong,
   removeDeletedGenreDataOfSong
 } from '../removeSongsFromLibrary';
-import {
-  getAlbumsData,
-  getArtistsData,
-  getGenresData,
-  getSongsData,
-  setAlbumsData,
-  setArtistsData,
-  setGenresData,
-  setSongsData
-} from '../filesystem';
-import { dataUpdateEvent, sendMessageToRenderer } from '../main';
-import logger from '../logger';
+import manageAlbumArtistOfParsedSong from './manageAlbumArtistOfParsedSong';
+import manageAlbumsOfParsedSong from './manageAlbumsOfParsedSong';
+import manageArtistsOfParsedSong from './manageArtistsOfParsedSong';
+import manageGenresOfParsedSong from './manageGenresOfParsedSong';
 import {
   getAlbumInfoFromSong,
   getArtistNamesFromSong,
   getGenreInfoFromSong,
   getSongDurationFromSong
 } from './parseSong';
-import manageAlbumsOfParsedSong from './manageAlbumsOfParsedSong';
-import manageArtistsOfParsedSong from './manageArtistsOfParsedSong';
-import manageGenresOfParsedSong from './manageGenresOfParsedSong';
-import { generatePalettes } from '../other/generatePalette';
-import manageAlbumArtistOfParsedSong from './manageAlbumArtistOfParsedSong';
 
 const reParseSong = async (filePath: string) => {
-  const songs = getSongsData();
-  const artists = getArtistsData();
-  const albums = getAlbumsData();
-  const genres = getGenresData();
-
   const songPath = removeDefaultAppProtocolFromFilePath(filePath);
+  const songData = await getSongByPath(songPath);
   try {
-    for (const song of songs) {
-      if (song.path === songPath) {
-        const { songId, isArtworkAvailable } = song;
-        const stats = await fs.stat(songPath);
-        const metadata = await musicMetaData.parseFile(songPath);
+    if (songData) {
+      const song = convertToSongData(songData);
+      const { songId, isArtworkAvailable, artworkPaths: oldArtworkPaths } = song;
+      const stats = await fs.stat(songPath);
 
-        if (metadata) {
-          if (isArtworkAvailable) {
-            const oldArtworkPaths = getSongArtworkPath(songId, true, true);
-            await removeArtwork(oldArtworkPaths);
-          }
+      const file = File.createFromPath(songPath);
+      const metadata = file.tag;
 
-          const songArtworkPaths = await storeArtworks(
-            songId,
-            'songs',
-            metadata.common?.picture?.at(0)?.data
-          );
+      const songTitle =
+        metadata.title || path.basename(songPath, path.extname(songPath)) || 'Unknown Title';
 
-          song.title =
-            metadata.common.title || path.basename(songPath).split('.')[0] || 'Unknown Title';
-          song.year = metadata.common?.year;
-          song.isArtworkAvailable = !songArtworkPaths.isDefaultArtwork;
-          song.sampleRate = metadata.format.sampleRate;
-          song.bitrate = metadata?.format?.bitrate;
-          song.noOfChannels = metadata?.format?.numberOfChannels;
-          song.trackNo = metadata?.common?.track?.no ?? undefined;
-          song.createdDate = stats ? stats.birthtime.getTime() : undefined;
-          song.modifiedDate = stats ? stats.mtime.getTime() : undefined;
-          song.duration = getSongDurationFromSong(metadata.format.duration);
-
-          const { updatedArtists: updatedArtistsFromDeletedData } = removeDeletedArtistDataOfSong(
-            artists,
-            song
-          );
-
-          const { updatedAlbums: updatedAlbumsFromDeletedData } = removeDeletedAlbumDataOfSong(
-            albums,
-            song
-          );
-
-          const { updatedGenres: updatedGenresFromDeletedData } = removeDeletedGenreDataOfSong(
-            genres,
-            song
-          );
-
-          song.artists = getArtistNamesFromSong(metadata.common.artist);
-          song.album = getAlbumInfoFromSong(metadata.common.album);
-          song.genres = getGenreInfoFromSong(metadata.common.genre);
-
-          const { updatedAlbums, relevantAlbum } = manageAlbumsOfParsedSong(
-            updatedAlbumsFromDeletedData,
-            song,
-            songArtworkPaths
-          );
-
-          if (song.album && relevantAlbum)
-            song.album = {
-              name: relevantAlbum.title,
-              albumId: relevantAlbum.albumId
-            };
-
-          const { updatedArtists: updatedSongArtists, relevantArtists } = manageArtistsOfParsedSong(
-            updatedArtistsFromDeletedData,
-            song,
-            songArtworkPaths
-          );
-
-          const { relevantAlbumArtists, updatedArtists } = manageAlbumArtistOfParsedSong(
-            updatedSongArtists,
-            song,
-            songArtworkPaths,
-            relevantAlbum
-          );
-
-          if (song.artists && relevantArtists.length > 0) {
-            song.artists = relevantArtists.map((artist) => ({
-              artistId: artist.artistId,
-              name: artist.name
-            }));
-          }
-
-          if (relevantAlbumArtists.length > 0) {
-            song.albumArtists = relevantAlbumArtists.map((albumArtist) => ({
-              artistId: albumArtist.artistId,
-              name: albumArtist.name
-            }));
-          }
-
-          if (relevantAlbum) {
-            const allRelevantArtists = relevantArtists.concat(relevantAlbumArtists);
-
-            for (const relevantArtist of allRelevantArtists) {
-              relevantAlbum.artists?.forEach((artist) => {
-                if (artist.name === relevantArtist.name && artist.artistId.length === 0)
-                  artist.artistId = relevantArtist.artistId;
-              });
-            }
-          }
-
-          const { updatedGenres, relevantGenres } = manageGenresOfParsedSong(
-            updatedGenresFromDeletedData,
-            song,
-            songArtworkPaths
-            // song.palette?.DarkVibrant
-          );
-
-          song.genres = relevantGenres.map((genre) => {
-            return { name: genre.name, genreId: genre.genreId };
-          });
-
-          logger.debug(`Song reparsed successfully.`, {
-            songPath: song?.path
-          });
-          sendMessageToRenderer({
-            messageCode: 'SONG_REPARSE_SUCCESS',
-            data: { title: song.title }
-          });
-
-          setSongsData(songs);
-          setArtistsData(updatedArtists);
-          setAlbumsData(updatedAlbums);
-          setGenresData(updatedGenres);
-
-          dataUpdateEvent('songs/updatedSong', [songId]);
-          dataUpdateEvent('artists/updatedArtist');
-          dataUpdateEvent('albums/updatedAlbum');
-          dataUpdateEvent('genres/updatedGenre');
-
-          setTimeout(() => generatePalettes(), 1000);
-          return song;
+      if (metadata) {
+        if (isArtworkAvailable && !oldArtworkPaths.isDefaultArtwork) {
+          await removeArtwork(oldArtworkPaths);
         }
+
+        const updatedSong: Partial<typeof songs.$inferInsert> = {
+          title: songTitle,
+          duration: getSongDurationFromSong(file.properties.durationMilliseconds / 1000).toFixed(2),
+          year: metadata.year || undefined,
+          path: songPath,
+          sampleRate: file.properties.audioSampleRate,
+          bitRate: file.properties.audioBitrate
+            ? Math.ceil(file.properties.audioBitrate)
+            : undefined,
+          noOfChannels: file.properties.audioChannels,
+          diskNumber: metadata.disc ?? undefined,
+          trackNumber: metadata.track ?? undefined,
+          fileCreatedAt: stats ? stats.birthtime : new Date(),
+          fileModifiedAt: stats ? stats.mtime : new Date()
+        };
+
+        const artistsData = getArtistNamesFromSong(metadata.performers.join(', '));
+        const albumArtistsData = getArtistNamesFromSong(metadata.albumArtists.join(', '));
+        const albumData = getAlbumInfoFromSong(metadata.album);
+        const genresData = getGenreInfoFromSong(metadata.genres);
+
+        await db.transaction(async (trx) => {
+          await removeDeletedArtistDataOfSong(song, trx);
+          await removeDeletedAlbumDataOfSong(song, trx);
+          await removeDeletedGenreDataOfSong(song, trx);
+          await removeDeletedArtworkDataOfSong(song, trx);
+
+          // No need to delete playlists, play events, seek events, or skip events as they will be the same even after re-parsing.
+
+          updateSongByPath(songPath, updatedSong, trx);
+
+          const artworkData = await storeArtworks(
+            'songs',
+            metadata.pictures?.at(0) ? metadata.pictures[0].data.toByteArray() : undefined,
+            trx
+          );
+
+          const linkedArtworks = await linkArtworksToSong(
+            artworkData.map((artwork) => ({ songId: songData.id, artworkId: artwork.id })),
+            trx
+          );
+
+          const { relevantAlbum, newAlbum } = await manageAlbumsOfParsedSong(
+            {
+              songId: songData.id,
+              artworkId: artworkData[0].id,
+              songYear: songData.year,
+              artists: artistsData,
+              albumArtists: albumArtistsData,
+              albumName: albumData
+            },
+            trx
+          );
+
+          const { newArtists, relevantArtists } = await manageArtistsOfParsedSong(
+            {
+              artworkId: artworkData[0].id,
+              songId: songData.id,
+              songArtists: artistsData
+            },
+            trx
+          );
+
+          const { newAlbumArtists, relevantAlbumArtists } = await manageAlbumArtistOfParsedSong(
+            { albumArtists: albumArtistsData, albumId: relevantAlbum?.id },
+            trx
+          );
+
+          const { newGenres, relevantGenres } = await manageGenresOfParsedSong(
+            { artworkId: artworkData[0].id, songId: songData.id, songGenres: genresData },
+            trx
+          );
+
+          return {
+            songData,
+            linkedArtworks,
+            relevantAlbum,
+            newAlbum,
+            newArtists,
+            relevantArtists,
+            newGenres,
+            relevantGenres,
+            relevantAlbumArtists,
+            newAlbumArtists
+          };
+        });
+
+        logger.debug(`Song reparsed successfully.`, {
+          songPath: song?.path
+        });
+        sendMessageToRenderer({
+          messageCode: 'SONG_REPARSE_SUCCESS',
+          data: { title: song.title }
+        });
+
+        dataUpdateEvent('songs/updatedSong', [songId]);
+        dataUpdateEvent('artists/updatedArtist');
+        dataUpdateEvent('albums/updatedAlbum');
+        dataUpdateEvent('genres/updatedGenre');
+
+        setTimeout(() => generatePalettes(), 1000);
+        return song;
       }
     }
     return undefined;

@@ -1,10 +1,9 @@
 import { useContext } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import Button from './Button';
-import { AppUpdateContext } from '../contexts/AppUpdateContext';
-
 import { appPreferences } from '../../../../package.json';
+import { AppUpdateContext } from '../contexts/AppUpdateContext';
+import Button from './Button';
 
 type Props = { filePath: string };
 const { supportedMusicExtensions } = appPreferences;
@@ -40,7 +39,7 @@ const UnsupportedFileMessagePrompt = (props: Props) => {
       <div className="buttons-container mt-12 flex justify-end">
         <Button
           label={t('common.ok')}
-          className="ok-btn w-[10rem] rounded-md !bg-background-color-3 !text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:!text-font-color-black dark:hover:border-background-color-3"
+          className="ok-btn bg-background-color-3! text-font-color-black! hover:border-background-color-3 dark:bg-dark-background-color-3! dark:text-font-color-black! dark:hover:border-background-color-3 w-[10rem] rounded-md"
           clickHandler={() => {
             changePromptMenuData(false);
           }}

@@ -1,10 +1,11 @@
 import path from 'path';
-import { dataUpdateEvent, sendMessageToRenderer } from '../main';
+
 import { getBlacklistData, setBlacklist } from '../filesystem';
 import logger from '../logger';
+import { dataUpdateEvent, sendMessageToRenderer } from '../main';
 import getSongInfo from './getSongInfo';
 
-const restoreBlacklistedSongs = async (blacklistedSongIds: string[]) => {
+const restoreBlacklistedSongs = async (blacklistedSongIds: number[]) => {
   const blacklist = getBlacklistData();
   const filteredIds = blacklistedSongIds.filter((id) => !blacklist.songBlacklist.includes(id));
   blacklist.songBlacklist = blacklist.songBlacklist.filter(

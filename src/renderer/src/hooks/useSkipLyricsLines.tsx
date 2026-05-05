@@ -1,4 +1,5 @@
 import { useCallback, useContext, useEffect } from 'react';
+
 import { AppUpdateContext } from '../contexts/AppUpdateContext';
 
 const useSkipLyricsLines = (lyrics?: SongLyrics | null) => {

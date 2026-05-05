@@ -1,36 +1,55 @@
-/**
- * @type {import('electron-vite').UserConfig}
- */
 import { resolve } from 'path';
-import { defineConfig, externalizeDepsPlugin, swcPlugin } from 'electron-vite';
-import react from '@vitejs/plugin-react-swc';
+
+import tailwindcss from '@tailwindcss/vite';
+import { tanstackRouter } from '@tanstack/router-plugin/vite';
+import react from '@vitejs/plugin-react';
+import { defineConfig } from 'electron-vite';
 
 export default defineConfig({
   main: {
     build: {
       sourcemap: true,
+      minify: false,
       rollupOptions: { input: '/src/main/main.ts', external: ['sharp'] }
     },
-    plugins: [externalizeDepsPlugin(), swcPlugin()]
+    resolve: {
+      alias: {
+        '@db': resolve(import.meta.dirname, './src/main/db'),
+        '@main': resolve(import.meta.dirname, './src/main'),
+        '@common': resolve(import.meta.dirname, './src/common')
+      }
+    }
   },
   preload: {
-    plugins: [externalizeDepsPlugin()],
-
     build: {
       sourcemap: true,
+      minify: false,
       rollupOptions: { output: { format: 'cjs', entryFileNames: '[name].mjs' } }
     }
   },
   renderer: {
     build: {
+      minify: true,
       sourcemap: true
     },
     resolve: {
       alias: {
         '@renderer': resolve(import.meta.dirname, './src/renderer/src'),
-        '@types': resolve(import.meta.dirname, './src/@types')
+        '@types': resolve(import.meta.dirname, './src/@types'),
+        '@common': resolve(import.meta.dirname, './src/common'),
+        '@assets': resolve(import.meta.dirname, './src/renderer/src/assets')
       }
     },
-    plugins: [react()]
+    plugins: [
+      tanstackRouter({
+        target: 'react',
+        routesDirectory: 'src/routes',
+        generatedRouteTree: 'src/routeTree.gen.ts',
+        autoCodeSplitting: true
+      }),
+      react(),
+      // babel({ presets: [reactCompilerPreset()] }),
+      tailwindcss()
+    ]
   }
 });

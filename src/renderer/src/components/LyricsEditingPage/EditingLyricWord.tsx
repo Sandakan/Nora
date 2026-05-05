@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from 'react';
-import { type LyricsLineData } from './LyricsEditingPage';
 
 type Props = {
   isPlaying: boolean;
@@ -44,7 +43,7 @@ const EditingLyricWord = (props: Props) => {
   return (
     <div
       className={`mr-3 flex flex-col items-start opacity-50 hover:opacity-100 ${
-        ((isPlaying && isWordInRange) || (!isPlaying && isWordActive)) && '!opacity-100'
+        ((isPlaying && isWordInRange) || (!isPlaying && isWordActive)) && 'opacity-100!'
       }`}
     >
       <span className="text-xs">{wordStart}</span>

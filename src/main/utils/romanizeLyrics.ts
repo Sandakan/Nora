@@ -1,12 +1,13 @@
-import { getCachedLyrics, updateCachedLyrics } from '../core/getSongLyrics';
-import logger from '../logger';
-import { sendMessageToRenderer } from '../main';
-import { getLrcLyricsMetadata } from '../core/saveLyricsToLrcFile';
-import { version } from '../../../package.json';
-import { INSTRUMENTAL_LYRIC_IDENTIFIER } from '../../common/parseLyrics';
 import Kuroshiro from '@sglkc/kuroshiro';
 import KuromojiAnalyzer from '@sglkc/kuroshiro-analyzer-kuromoji';
 import { toRomaji } from 'wanakana';
+
+import { version } from '../../../package.json';
+import { INSTRUMENTAL_LYRIC_IDENTIFIER } from '../../common/parseLyrics';
+import { getCachedLyrics, updateCachedLyrics } from '../core/getSongLyrics';
+import { getLrcLyricsMetadata } from '../core/saveLyricsToLrcFile';
+import logger from '../logger';
+import { sendMessageToRenderer } from '../main';
 
 const kuroshiro = new Kuroshiro();
 await kuroshiro.init(new KuromojiAnalyzer());

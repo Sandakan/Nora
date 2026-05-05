@@ -1,8 +1,9 @@
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import { type MouseEvent as ReactMouseEvent, memo, useRef } from 'react';
-import log from '../utils/log';
+
 import DefaultImage from '../assets/images/webp/song_cover_default.webp';
+import log from '../utils/log';
 
 interface ImgProperties {
   width: number;
@@ -27,7 +28,7 @@ type ImgProps = {
 };
 
 /* <picture
-  className={`outline-1 outline-offset-4 focus-visible:!outline ${className}`}
+  className={ outline-offset-4 focus-visible:outline! ${className}`}
   tabIndex={tabIndex}
 >
   <source srcSet={src} />
@@ -90,7 +91,7 @@ const Img = memo((props: ImgProps) => {
   } = props;
 
   const imgRef = useRef<HTMLImageElement>(null);
-  const imgPropsRef = useRef<ImgProperties>();
+  const imgPropsRef = useRef<ImgProperties>(null);
   const errorCountRef = useRef(0);
   const isFirstTimeRef = useRef(true);
 
@@ -100,10 +101,10 @@ const Img = memo((props: ImgProps) => {
       src={src || fallbackSrc}
       alt={alt}
       ref={imgRef}
-      className={`relative outline-1 outline-offset-4 focus-visible:!outline ${
+      className={`relative outline-offset-4 focus-visible:!outline ${
         enableImgFadeIns && isFirstTimeRef.current
           ? 'opacity-0 transition-opacity delay-[250ms]'
-          : '!opacity-100 !transition-none'
+          : 'opacity-100! transition-none!'
       } ${className}`}
       draggable={draggable}
       onError={(e) => {
@@ -135,7 +136,7 @@ const Img = memo((props: ImgProps) => {
         if (isFirstTimeRef.current) {
           isFirstTimeRef.current = false;
         }
-        e.currentTarget.classList.add('!opacity-100');
+        e.currentTarget.classList.add('opacity-100!');
         if (showImgPropsOnTooltip) {
           const img = new Image();
           img.onload = () => {

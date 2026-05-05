@@ -1,29 +1,25 @@
+import { store } from '@renderer/store/store';
+import { useStore } from '@tanstack/react-store';
 /* eslint-disable promise/catch-or-return */
 import { lazy, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { appPreferences } from '../../../../../package.json';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-
 import useNetworkConnectivity from '../../hooks/useNetworkConnectivity';
-
+import hasDataChanged, { isDataChanged } from '../../utils/hasDataChanged';
 import Button from '../Button';
 import MainContainer from '../MainContainer';
-import SongArtwork from './SongArtwork';
-
-import SongNameInput from './input_containers/SongNameInput';
-import SongYearInput from './input_containers/SongYearInput';
-import SongArtistsInput from './input_containers/SongArtistsInput';
-import SongAlbumInput from './input_containers/SongAlbumInput';
-import SongGenresInput from './input_containers/SongGenresInput';
-import SongComposerInput from './input_containers/SongComposerInput';
-import SongLyricsEditorInput from './input_containers/SongLyricsEditorInput';
-import SongTrackNumberInput from './input_containers/SongTrackNumberInput';
 import SongAlbumArtistsInput from './input_containers/SongAlbumArtistInput';
-
-import hasDataChanged, { isDataChanged } from '../../utils/hasDataChanged';
-import { appPreferences } from '../../../../../package.json';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import SongAlbumInput from './input_containers/SongAlbumInput';
+import SongArtistsInput from './input_containers/SongArtistsInput';
+import SongComposerInput from './input_containers/SongComposerInput';
+import SongGenresInput from './input_containers/SongGenresInput';
+import SongLyricsEditorInput from './input_containers/SongLyricsEditorInput';
+import SongNameInput from './input_containers/SongNameInput';
+import SongTrackNumberInput from './input_containers/SongTrackNumberInput';
+import SongYearInput from './input_containers/SongYearInput';
+import SongArtwork from './SongArtwork';
 
 const SongMetadataResultsSelectPage = lazy(() => import('./SongMetadataResultsSelectPrompt'));
 const ResetTagsToDefaultPrompt = lazy(() => import('./ResetTagsToDefaultPrompt'));
@@ -35,7 +31,7 @@ export interface MetadataKeywords {
 }
 
 type ArtistResult = {
-  artistId?: string;
+  artistId?: number;
   name: string;
   artworkPath?: string;
   onlineArtworkPaths?: OnlineArtistArtworks;
@@ -43,13 +39,13 @@ type ArtistResult = {
 
 type AlbumResult = {
   title: string;
-  albumId?: string;
+  albumId?: number;
   noOfSongs?: number;
   artists?: string[];
   artworkPath?: string;
 };
 
-type GenreResult = { genreId?: string; name: string; artworkPath?: string };
+type GenreResult = { genreId?: number; name: string; artworkPath?: string };
 
 const { metadataEditingSupportedExtensions } = appPreferences;
 
@@ -57,12 +53,8 @@ function SongTagsEditingPage() {
   const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
   const currentSongData = useStore(store, (state) => state.currentSongData);
 
-  const {
-    addNewNotifications,
-    changePromptMenuData,
-    updateCurrentSongData,
-    updatePageHistoryIndex
-  } = useContext(AppUpdateContext);
+  const { addNewNotifications, changePromptMenuData, updateCurrentSongData } =
+    useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { isOnline } = useNetworkConnectivity();
@@ -90,7 +82,7 @@ function SongTagsEditingPage() {
 
   const { songId, songPath, isKnownSource } = useMemo(
     () => ({
-      songId: currentlyActivePage.data?.songId as string,
+      songId: currentlyActivePage.data?.songId as number,
       songPath: currentlyActivePage.data?.songPath as string,
       isKnownSource: (currentlyActivePage.data?.isKnownSource as boolean) ?? true
     }),
@@ -108,7 +100,7 @@ function SongTagsEditingPage() {
   const getSongId3Tags = useCallback(() => {
     if (songId)
       window.api.songUpdates
-        .getSongId3Tags(isKnownSource ? songId : songPath, isKnownSource)
+        .getSongId3Tags(isKnownSource ? String(songId) : songPath, isKnownSource)
         .then((res) => {
           if (res) {
             console.log(res);
@@ -286,7 +278,7 @@ function SongTagsEditingPage() {
     console.log(songInfo);
     window.api.songUpdates
       .updateSongId3Tags(
-        isKnownSource ? songId : songPath,
+        isKnownSource ? String(songId) : songPath,
         songInfo,
         songId === currentSongData.songId,
         isKnownSource
@@ -309,7 +301,7 @@ function SongTagsEditingPage() {
           //   },
           // ]);
           return window.api.songUpdates.getSongId3Tags(
-            isKnownSource ? songId : songPath,
+            isKnownSource ? String(songId) : songPath,
             isKnownSource
           );
         }
@@ -341,7 +333,8 @@ function SongTagsEditingPage() {
   const resetDataToDefaults = () => {
     const data = hasDataChanged(defaultValues, songInfo);
     const entries = Object.entries(data);
-    if (!Object.values(data).every((x: boolean) => !x)) {
+
+    if (!Object.values(data).every((x) => !x.isModified)) {
       changePromptMenuData(
         true,
         <ResetTagsToDefaultPrompt
@@ -390,7 +383,7 @@ function SongTagsEditingPage() {
       <>
         {(songId || songPath) && isMetadataEditingSupported && (
           <>
-            <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+            <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-8 flex items-center pr-4 text-3xl font-medium">
               {t('songTagsEditingPage.songMetadataEditor')}{' '}
               {!isKnownSource && (
                 <span
@@ -401,14 +394,14 @@ function SongTagsEditingPage() {
                 </span>
               )}
             </div>
-            <div className="song-information-container bl-4 mb-12 flex text-font-color-black dark:text-font-color-white">
+            <div className="song-information-container bl-4 text-font-color-black dark:text-font-color-white mb-12 flex">
               <SongArtwork artworkPath={songInfo.artworkPath} updateSongInfo={updateSongInfo} />
               <div className="song-info-container flex w-[70%] flex-col justify-center">
                 <div className="song-title mb-2 text-4xl">
                   {songInfo.title || songNameFromPath}
                   {!isKnownSource && (
                     <span
-                      className="material-icons-round-outlined ml-6 cursor-help text-2xl text-font-color-highlight hover:underline dark:text-dark-font-color-highlight"
+                      className="material-icons-round-outlined text-font-color-highlight dark:text-dark-font-color-highlight ml-6 cursor-help text-2xl hover:underline"
                       title="You are editing a song outside the library."
                     >
                       error
@@ -420,7 +413,7 @@ function SongTagsEditingPage() {
                     ? songInfo.artists.map((x) => x.name).join(', ')
                     : t('common.unknownArtist')}
                 </div>
-                <div className="song-album">{songInfo.album?.title}</div>
+                <div className="song-album">{songInfo.albums?.[0]?.title}</div>
                 <Button
                   label={t('songTagsEditingPage.searchMetadataOnInternet')}
                   iconName="download"
@@ -432,7 +425,7 @@ function SongTagsEditingPage() {
                 />
               </div>
             </div>
-            <div className="inputs-container grid grid-flow-row grid-cols-2 content-around gap-8 text-font-color-black dark:text-font-color-white">
+            <div className="inputs-container text-font-color-black dark:text-font-color-white grid grid-flow-row grid-cols-2 content-around gap-8">
               <SongNameInput songTitle={songInfo.title} updateSongInfo={updateSongInfo} />
               <SongYearInput songYear={songInfo.releasedYear} updateSongInfo={updateSongInfo} />
               {/* ? SONG ARTSITS */}
@@ -447,7 +440,7 @@ function SongTagsEditingPage() {
               <SongAlbumArtistsInput
                 artistResults={albumArtistResults}
                 albumArtistKeyword={albumArtistKeyword}
-                songAlbum={songInfo.album}
+                songAlbum={songInfo.albums?.[0]}
                 songAlbumArtists={songInfo.albumArtists}
                 updateAlbumArtistKeyword={updateAlbumArtistKeyword}
                 updateSongInfo={updateSongInfo}
@@ -458,7 +451,7 @@ function SongTagsEditingPage() {
                 albumResults={albumResults}
                 updateAlbumKeyword={updateAlbumKeyword}
                 updateSongInfo={updateSongInfo}
-                songAlbum={songInfo.album}
+                songAlbum={songInfo.albums?.[0]}
               />
               {/* SONG GENRES */}
               <SongGenresInput
@@ -475,21 +468,21 @@ function SongTagsEditingPage() {
                 songTrackNumber={songInfo.trackNumber}
                 updateSongInfo={updateSongInfo}
               />
-              <hr className="horizontal-rule col-span-2 h-[0.1rem] w-[95%] border-0 bg-background-color-2 dark:bg-dark-background-color-2" />
+              <hr className="horizontal-rule bg-background-color-2 dark:bg-dark-background-color-2 col-span-2 h-[0.1rem] w-[95%] border-0" />
               {/* SONG LYRICS EDITOR */}
               <SongLyricsEditorInput
                 songTitle={songInfo.title}
                 songId={songId}
                 songArtists={songInfo.artists}
                 songPath={songPath}
-                album={songInfo.album?.title}
+                album={songInfo.albums?.[0]?.title}
                 duration={songInfo.duration}
                 synchronizedLyrics={songInfo.synchronizedLyrics}
                 unsynchronizedLyrics={songInfo.unsynchronizedLyrics}
                 isLyricsSavingPending={songInfo.isLyricsSavePending}
                 updateSongInfo={updateSongInfo}
               />
-              <hr className="horizontal-rule col-span-2 h-[0.1rem] w-[95%] border-0 bg-background-color-2 dark:bg-dark-background-color-2" />
+              <hr className="horizontal-rule bg-background-color-2 dark:bg-dark-background-color-2 col-span-2 h-[0.1rem] w-[95%] border-0" />
             </div>
 
             <div className="id3-control-buttons-container mt-4 flex p-4">
@@ -512,13 +505,13 @@ function SongTagsEditingPage() {
               />
             </div>
             {isEditingCurrentlyPlayingSong && areThereDataChanges && (
-              <p className="appear-from-bottom mb-2 ml-2 flex items-center text-sm font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+              <p className="appear-from-bottom text-font-color-highlight dark:text-dark-font-color-highlight mb-2 ml-2 flex items-center text-sm font-medium">
                 <span className="material-icons-round-outlined mr-2 text-xl">error</span>{' '}
                 {t('songTagsEditingPage.updateAddedToBeSavedLater')}
               </p>
             )}
             {isMetadataUpdatesPending && (
-              <p className="appear-from-bottom mb-2 ml-2 flex items-center text-sm font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+              <p className="appear-from-bottom text-font-color-highlight dark:text-dark-font-color-highlight mb-2 ml-2 flex items-center text-sm font-medium">
                 <span className="material-icons-round-outlined mr-2 text-xl">error</span>{' '}
                 {t('songTagsEditingPage.pendingUpdateAvailable')}
               </p>
@@ -527,7 +520,7 @@ function SongTagsEditingPage() {
         )}
 
         {!isMetadataEditingSupported && (
-          <div className="flex !h-full flex-col items-center justify-center dark:text-white/80">
+          <div className="flex h-full! flex-col items-center justify-center dark:text-white/80">
             <span className="material-icons-round-outlined text-6xl">campaign</span>
             <p className="mt-2 text-2xl">{t('songTagsEditingPage.saveTagsNotSupportedTitle')}</p>
             <p
@@ -542,12 +535,12 @@ function SongTagsEditingPage() {
                 P1: <p className="mt-2 px-8 font-light" />,
                 P2: <p className="px-8 font-light" />,
                 Format: (
-                  <span className="font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+                  <span className="text-font-color-highlight dark:text-dark-font-color-highlight font-medium">
                     {pathExt}
                   </span>
                 ),
                 SupportedFormat: (
-                  <span className="font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+                  <span className="text-font-color-highlight dark:text-dark-font-color-highlight font-medium">
                     mp3
                   </span>
                 )
@@ -558,7 +551,9 @@ function SongTagsEditingPage() {
               label={t('common.goBack')}
               iconName="arrow_back"
               className="mt-4"
-              clickHandler={() => updatePageHistoryIndex('decrement')}
+              clickHandler={() => {
+                // TODO: Implement page history back navigation.
+              }}
             />
           </div>
         )}

@@ -106,11 +106,11 @@ linux:
     - snap
     - deb
     - rpm
-    # - flatpak
+    # - dir
   category: AudioVideo
   synopsis: 'An elegant music player built using Electron and React. Inspired by Oto Music for Android by Piyush Mamidwar.'
 
-npmRebuild: true
+npmRebuild: false
 
 protocols:
   name: nora-protocol

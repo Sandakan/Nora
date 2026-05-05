@@ -1,12 +1,13 @@
-import { getUserData } from '../../filesystem';
-import logger from '../../logger';
-import hashText from '../../utils/hashText';
+import { getUserSettings } from '@main/db/queries/settings';
+
 import type {
   AuthData,
   LastFMLoveUnlovePostResponse,
   LoveParams
 } from '../../../types/last_fm_api';
+import logger from '../../logger';
 import { checkIfConnectedToInternet } from '../../main';
+import hashText from '../../utils/hashText';
 import getLastFmAuthData from './getLastFMAuthData';
 
 type Method = 'track.love' | 'track.unlove';
@@ -38,13 +39,11 @@ const generateApiResponseBody = (method: Method, authData: AuthData, params: Lov
 
 const sendFavoritesDataToLastFM = async (method: Method, title: string, artists: string[] = []) => {
   try {
-    const userData = getUserData();
+    const { sendSongFavoritesDataToLastFM: isSendingLoveEnabled } = await getUserSettings();
     const isConnectedToInternet = checkIfConnectedToInternet();
 
-    const isSendingLoveEnabled = userData.preferences.sendSongFavoritesDataToLastFM;
-
     if (isSendingLoveEnabled && isConnectedToInternet) {
-      const authData = getLastFmAuthData();
+      const authData = await getLastFmAuthData();
 
       const url = new URL('http://ws.audioscrobbler.com/2.0/');
       url.searchParams.set('format', 'json');

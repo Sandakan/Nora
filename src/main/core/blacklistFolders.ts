@@ -1,12 +1,16 @@
-import { getBlacklistData, setBlacklist } from '../filesystem';
+import { addFoldersToBlacklist, getFoldersByPaths } from '@main/db/queries/folders';
+
 import logger from '../logger';
 import { dataUpdateEvent } from '../main';
 
-const blacklistFolders = (folderPaths: string[]) => {
-  const blacklist = getBlacklistData();
+const blacklistFolders = async (folderPaths: string[]) => {
+  const folders = await getFoldersByPaths(folderPaths);
+  const selectWhitelistedFolders = folders.filter((folder) => !folder.isBlacklisted);
 
-  blacklist.folderBlacklist = Array.from(new Set([...blacklist.folderBlacklist, ...folderPaths]));
-  setBlacklist(blacklist);
+  if (selectWhitelistedFolders.length === 0) {
+    return logger.info('No new folder paths to blacklist.', { folderPaths });
+  }
+  await addFoldersToBlacklist(selectWhitelistedFolders.map((f) => f.id));
 
   dataUpdateEvent('blacklist/folderBlacklist');
   logger.info('Folder blacklist updated because a new songs got blacklisted.', { folderPaths });

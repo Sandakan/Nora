@@ -1,10 +1,12 @@
 import fsSync, { type WatchEventType } from 'fs';
 import path from 'path';
-import { getUserData } from '../filesystem';
+
+import { getAllFolderStructures } from '@main/db/queries/folders';
+
 import logger from '../logger';
-import getParentFolderPaths from './getParentFolderPaths';
 import checkForFolderModifications from './checkForFolderModifications';
 import { saveAbortController } from './controlAbortControllers';
+import getParentFolderPaths from './getParentFolderPaths';
 
 const fileNameRegex = /^.{1,}\.\w{1,}$/;
 
@@ -55,13 +57,13 @@ const addWatcherToParentFolder = (parentFolderPath: string) => {
 
 /* Parent folder watchers only watch for folder modifications (not file modifications) inside the parent folder. */
 const addWatchersToParentFolders = async () => {
-  const { musicFolders } = getUserData();
+  const musicFolders = await getAllFolderStructures();
 
   const musicFolderPaths = musicFolders.map((folder) => folder.path);
   const parentFolderPaths = getParentFolderPaths(musicFolderPaths);
   logger.debug(`${parentFolderPaths.length} parent folders of music folders found.`);
 
-  if (Array.isArray(parentFolderPaths) && parentFolderPaths.length > 0) {
+  if (parentFolderPaths.length > 0) {
     for (const parentFolderPath of parentFolderPaths) {
       try {
         addWatcherToParentFolder(parentFolderPath);

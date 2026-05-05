@@ -1,21 +1,23 @@
+import { store } from '@renderer/store/store';
+import { useNavigate } from '@tanstack/react-router';
+import { useStore } from '@tanstack/react-store';
 import { useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import Button from '../../Button';
 import SecondaryContainer from '../../SecondaryContainer';
 import Song from '../../SongsPage/Song';
-import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
 
 type Props = {
   songs: SongData[];
   searchInput: string;
   noOfVisibleSongs?: number;
-  isPredictiveSearchEnabled: boolean;
+  isSimilaritySearchEnabled: boolean;
 };
 
 const SongSearchResultsContainer = (props: Props) => {
-  const { searchInput, songs, noOfVisibleSongs = 5, isPredictiveSearchEnabled } = props;
+  const { searchInput, songs, noOfVisibleSongs = 5, isSimilaritySearchEnabled } = props;
   const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
   const isMultipleSelectionEnabled = useStore(
     store,
@@ -23,12 +25,12 @@ const SongSearchResultsContainer = (props: Props) => {
   );
   const preferences = useStore(store, (state) => state.localStorage.preferences);
 
-  const { toggleMultipleSelections, changeCurrentActivePage, createQueue, playSong } =
-    useContext(AppUpdateContext);
+  const { toggleMultipleSelections, createQueue, playSong } = useContext(AppUpdateContext);
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const handleSongPlayBtnClick = useCallback(
-    (currSongId: string) => {
+    (currSongId: number) => {
       const queueSongIds = songs.filter((song) => !song.isBlacklisted).map((song) => song.songId);
       createQueue(queueSongIds, 'songs', false, undefined, false);
       playSong(currSongId, true);
@@ -75,7 +77,7 @@ const SongSearchResultsContainer = (props: Props) => {
     >
       <>
         <div
-          className={`title-container mb-8 mt-1 flex items-center pr-4 text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight ${
+          className={`title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-8 flex items-center pr-4 text-2xl font-medium ${
             songResults.length > 0 ? 'visible opacity-100' : 'invisible opacity-0'
           }`}
         >
@@ -121,11 +123,9 @@ const SongSearchResultsContainer = (props: Props) => {
                 iconName="apps"
                 className="show-all-btn text-sm font-normal"
                 clickHandler={() =>
-                  changeCurrentActivePage('AllSearchResults', {
-                    searchQuery: searchInput,
-                    searchFilter: 'Songs' as SearchFilters,
-                    searchResults: songs,
-                    isPredictiveSearchEnabled
+                  navigate({
+                    to: '/main-player/search/all',
+                    search: { isSimilaritySearchEnabled, keyword: searchInput, filterBy: 'Songs' }
                   })
                 }
               />

@@ -1,9 +1,15 @@
 import { writeFile } from 'fs/promises';
 import { basename } from 'path';
+
+import { SpecialPlaylists } from '@common/playlists.enum';
+import {
+  getPlaylistWithSongPaths,
+  getFavoritesPlaylistWithSongPaths,
+  getHistoryPlaylistWithSongPaths
+} from '@main/db/queries/playlists';
 import type { SaveDialogOptions } from 'electron';
 
 import logger from '../logger';
-import { getPlaylistData, getSongsData } from '../filesystem';
 import { sendMessageToRenderer, showSaveDialog } from '../main';
 
 const generateSaveDialogOptions = (playlistName: string) => {
@@ -24,48 +30,70 @@ const generateSaveDialogOptions = (playlistName: string) => {
   return saveOptions;
 };
 
-const createM3u8FileForPlaylist = async (playlist: SavablePlaylist) => {
-  const songs = getSongsData();
-  const { name, songs: playlistSongIds, playlistId } = playlist;
-  const saveOptions = generateSaveDialogOptions(name);
+const createM3u8FileForPlaylist = async (
+  playlistId: number,
+  playlistName: string,
+  songPaths: string[]
+) => {
+  const saveOptions = generateSaveDialogOptions(playlistName);
 
   try {
     const destination = await showSaveDialog(saveOptions);
+
     if (destination) {
       const m3u8DataArr = ['#EXTM3U', `#${basename(destination)}`, ''];
 
-      for (const song of songs) {
-        if (playlistSongIds.includes(song.songId)) m3u8DataArr.push(song.path);
-      }
+      m3u8DataArr.push(...songPaths);
 
       const m3u8FileData = m3u8DataArr.join('\n');
 
       await writeFile(destination, m3u8FileData);
 
-      logger.debug(`Exported playlist successfully.`, { playlistId, name });
-      return sendMessageToRenderer({ messageCode: 'PLAYLIST_EXPORT_SUCCESS', data: { name } });
+      logger.debug(`Exported playlist successfully.`, { playlistId, playlistName });
+      return sendMessageToRenderer({
+        messageCode: 'PLAYLIST_EXPORT_SUCCESS',
+        data: { playlistName }
+      });
     }
     logger.warn(`Failed to export playlist because user didn't select a destination.`, {
-      name,
+      playlistName,
       playlistId
     });
     return sendMessageToRenderer({ messageCode: 'DESTINATION_NOT_SELECTED' });
   } catch (error) {
-    logger.debug(`Failed to export playlist.`, { error, name, playlistId });
-    return sendMessageToRenderer({ messageCode: 'PLAYLIST_EXPORT_FAILED', data: { name } });
+    logger.debug(`Failed to export playlist.`, { error, playlistName, playlistId });
+    return sendMessageToRenderer({ messageCode: 'PLAYLIST_EXPORT_FAILED', data: { playlistName } });
   }
 };
 
-const exportPlaylist = (playlistId: string) => {
-  const playlists = getPlaylistData();
+const exportPlaylist = async (playlistId: number) => {
+  let playlist;
 
-  for (const playlist of playlists) {
-    if (playlist.playlistId === playlistId) return createM3u8FileForPlaylist(playlist);
+  // Handle special playlists
+  if (playlistId === SpecialPlaylists.Favorites) {
+    playlist = await getFavoritesPlaylistWithSongPaths();
+  } else if (playlistId === SpecialPlaylists.History) {
+    playlist = await getHistoryPlaylistWithSongPaths();
+  } else {
+    playlist = await getPlaylistWithSongPaths(playlistId);
   }
 
-  return logger.warn("Failed to export playlist because requested playlist didn't exist.", {
-    playlistId
-  });
+  if (playlist == null)
+    return logger.warn("Failed to export playlist because requested playlist didn't exist", {
+      playlistId
+    });
+
+  if (playlist.songs.length === 0)
+    return logger.warn(
+      "Failed to export playlist because requested playlist didn't have any songs.",
+      {
+        playlistId
+      }
+    );
+
+  const songs = playlist.songs.map((s) => s.song.path);
+
+  return await createM3u8FileForPlaylist(playlist.id, playlist.name, songs);
 };
 
 export default exportPlaylist;

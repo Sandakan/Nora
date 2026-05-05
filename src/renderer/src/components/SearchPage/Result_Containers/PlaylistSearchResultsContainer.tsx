@@ -1,29 +1,32 @@
+import { store } from '@renderer/store/store';
+import { useNavigate } from '@tanstack/react-router';
+import { useStore } from '@tanstack/react-store';
 import { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
+import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
 import Button from '../../Button';
 import { Playlist } from '../../PlaylistsPage/Playlist';
 import SecondaryContainer from '../../SecondaryContainer';
-import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
-import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
 
 type Props = {
   playlists: Playlist[];
   searchInput: string;
   noOfVisiblePlaylists?: number;
-  isPredictiveSearchEnabled: boolean;
+  isSimilaritySearchEnabled: boolean;
 };
 
 const PlaylistSearchResultsContainer = (props: Props) => {
-  const { playlists, searchInput, noOfVisiblePlaylists = 4, isPredictiveSearchEnabled } = props;
+  const { playlists, searchInput, noOfVisiblePlaylists = 4, isSimilaritySearchEnabled } = props;
   const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
   const isMultipleSelectionEnabled = useStore(
     store,
     (state) => state.multipleSelectionsData.isEnabled
   );
-  const { toggleMultipleSelections, changeCurrentActivePage } = useContext(AppUpdateContext);
+  const { toggleMultipleSelections } = useContext(AppUpdateContext);
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const selectAllHandler = useSelectAllHandler(playlists, 'playlist', 'playlistId');
 
@@ -67,7 +70,7 @@ const PlaylistSearchResultsContainer = (props: Props) => {
       }}
     >
       <>
-        <div className="title-container mb-8 mt-1 flex items-center pr-4 text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+        <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-8 flex items-center pr-4 text-2xl font-medium">
           <div className="container flex">
             Playlists{' '}
             <div className="other-stats-container ml-12 flex items-center text-xs">
@@ -115,11 +118,13 @@ const PlaylistSearchResultsContainer = (props: Props) => {
                 iconName="apps"
                 className="show-all-btn text-sm font-normal"
                 clickHandler={() =>
-                  changeCurrentActivePage('AllSearchResults', {
-                    searchQuery: searchInput,
-                    searchFilter: 'Playlists' as SearchFilters,
-                    searchResults: playlists,
-                    isPredictiveSearchEnabled
+                  navigate({
+                    to: '/main-player/search/all',
+                    search: {
+                      keyword: searchInput,
+                      isSimilaritySearchEnabled,
+                      filterBy: 'Playlists'
+                    }
                   })
                 }
               />

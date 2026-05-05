@@ -1,38 +1,37 @@
+import { store } from '@renderer/store/store';
+import { useNavigate } from '@tanstack/react-router';
+import { useStore } from '@tanstack/react-store';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import storage from '../../utils/localStorage';
 
-import Button from '../Button';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import { useUserPreferences } from '../../hooks/useUserPreferences';
 import splitFeaturingArtists from '../../utils/splitFeaturingArtists';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import Button from '../Button';
 
 type Props = {
   name?: string;
-  artistId?: string;
+  artistId?: number;
 };
 
 const SeparateArtistsSuggestion = (props: Props) => {
+  const navigate = useNavigate();
+
   const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
   const currentSongData = useStore(store, (state) => state.currentSongData);
+  const { ignoredArtists, addIgnoredArtistMutation } = useUserPreferences();
 
-  const { addNewNotifications, changeCurrentActivePage, updateCurrentSongData } =
-    useContext(AppUpdateContext);
+  const { addNewNotifications, updateCurrentSongData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const { name = '', artistId = '' } = props;
+  const { name = '', artistId } = props;
 
   const [isIgnored, setIsIgnored] = useState(false);
   const [isMessageVisible, setIsMessageVisible] = useState(true);
 
-  const ignoredArtists = useMemo(
-    () => storage.ignoredSeparateArtists.getIgnoredSeparateArtists(),
-    []
-  );
-
   useEffect(() => {
-    if (ignoredArtists.length > 0) setIsIgnored(ignoredArtists.includes(artistId));
+    if ((ignoredArtists?.length || 0) > 0 && artistId !== undefined)
+      setIsIgnored(ignoredArtists?.includes(artistId) || false);
   }, [artistId, ignoredArtists]);
 
   const separatedArtistsNames = useMemo(() => {
@@ -73,6 +72,8 @@ const SeparateArtistsSuggestion = (props: Props) => {
       setIsDisabled(true);
       setIsPending(true);
 
+      if (artistId === undefined) return;
+
       window.api.suggestions
         .resolveSeparateArtists(artistId, separatedArtistsNames)
         .then((res) => {
@@ -83,7 +84,7 @@ const SeparateArtistsSuggestion = (props: Props) => {
             }));
           }
           setIsIgnored(true);
-          changeCurrentActivePage('Home');
+          navigate({ to: '/main-player/home' });
 
           return addNewNotifications([
             {
@@ -103,7 +104,6 @@ const SeparateArtistsSuggestion = (props: Props) => {
     [
       addNewNotifications,
       artistId,
-      changeCurrentActivePage,
       currentSongData.songId,
       separatedArtistsNames,
       t,
@@ -117,13 +117,13 @@ const SeparateArtistsSuggestion = (props: Props) => {
         <div
           className={`appear-from-bottom mx-auto mb-6 w-[90%] rounded-lg p-4 text-black shadow-md transition-[width,height] dark:text-white ${
             bodyBackgroundImage
-              ? 'bg-background-color-2/75 backdrop-blur-sm dark:bg-dark-background-color-2/75'
+              ? 'bg-background-color-2/75 dark:bg-dark-background-color-2/75 backdrop-blur-xs'
               : 'bg-background-color-2 dark:bg-dark-background-color-2'
           } `}
         >
           <label
             htmlFor="toggleSuggestionBox"
-            className="title-container flex cursor-pointer items-center justify-between font-medium text-font-color-highlight dark:text-dark-font-color-highlight"
+            className="title-container text-font-color-highlight dark:text-dark-font-color-highlight flex cursor-pointer items-center justify-between font-medium"
           >
             <div className="flex items-center">
               <span className="material-icons-round-outlined mr-2 text-2xl">help</span>{' '}
@@ -138,8 +138,8 @@ const SeparateArtistsSuggestion = (props: Props) => {
               </span>
               <Button
                 id="toggleSuggestionBox"
-                className="!m-0 !border-0 !p-0 outline-1 outline-offset-1 hover:bg-background-color-1/50 focus-visible:!outline hover:dark:bg-dark-background-color-1/50"
-                iconClassName="!leading-none !text-3xl"
+                className="hover:bg-background-color-1/50 dark:hover:bg-dark-background-color-1/50 m-0! border-0! p-0! outline-offset-1 focus-visible:outline!"
+                iconClassName="leading-none! text-3xl!"
                 iconName={isMessageVisible ? 'arrow_drop_up' : 'arrow_drop_down'}
                 tooltipLabel={`common.${isMessageVisible ? 'hideSuggestion' : 'showSuggestion'}`}
                 clickHandler={(e) => {
@@ -162,7 +162,7 @@ const SeparateArtistsSuggestion = (props: Props) => {
               />
               <div className="mt-3 flex items-center">
                 <Button
-                  className="!border-0 bg-background-color-1/50 !px-4 !py-2 outline-1 transition-colors hover:bg-background-color-1 hover:!text-font-color-highlight focus-visible:!outline dark:bg-dark-background-color-1/50 dark:hover:bg-dark-background-color-1 dark:hover:!text-dark-font-color-highlight"
+                  className="bg-background-color-1/50 hover:bg-background-color-1 hover:text-font-color-highlight! dark:bg-dark-background-color-1/50 dark:hover:bg-dark-background-color-1 dark:hover:text-dark-font-color-highlight! border-0! px-4! py-2! transition-colors focus-visible:outline!"
                   iconName="verified"
                   iconClassName="material-icons-round-outlined"
                   label={t('separateArtistsSuggestion.separateAsArtists', {
@@ -173,12 +173,12 @@ const SeparateArtistsSuggestion = (props: Props) => {
                   }
                 />
                 <Button
-                  className="!mr-0 !border-0 bg-background-color-1/50 !px-4 !py-2 outline-1 transition-colors hover:bg-background-color-1 hover:!text-font-color-highlight focus-visible:!outline dark:bg-dark-background-color-1/50 dark:hover:bg-dark-background-color-1 dark:hover:!text-dark-font-color-highlight"
+                  className="bg-background-color-1/50 hover:bg-background-color-1 hover:text-font-color-highlight! dark:bg-dark-background-color-1/50 dark:hover:bg-dark-background-color-1 dark:hover:text-dark-font-color-highlight! mr-0! border-0! px-4! py-2! transition-colors focus-visible:outline!"
                   iconName="do_not_disturb_on"
                   iconClassName="material-icons-round-outlined"
                   label="Ignore"
                   clickHandler={() => {
-                    storage.ignoredSeparateArtists.setIgnoredSeparateArtists([artistId]);
+                    if (artistId !== undefined) addIgnoredArtistMutation.mutate({ artistId });
                     setIsIgnored(true);
                     addNewNotifications([
                       {

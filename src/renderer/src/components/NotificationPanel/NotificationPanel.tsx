@@ -1,8 +1,9 @@
+import { store } from '@renderer/store/store';
+import { useStore } from '@tanstack/react-store';
 import { useMemo } from 'react';
+
 import Notification from './Notification';
 import NotificationClearAllButton from './NotificationClearAllButton';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
 
 const NotificationPanel = () => {
   const notificationPanelData = useStore(store, (state) => state.notificationPanelData);
@@ -47,7 +48,7 @@ const NotificationPanel = () => {
   return (
     <>
       {Array.isArray(notifications) && notifications.length > 0 && (
-        <div className="notifications-container absolute bottom-6 right-8 z-20 flex max-h-full flex-col-reverse items-end">
+        <div className="notifications-container absolute right-8 bottom-6 z-20 flex max-h-full flex-col-reverse items-end">
           {notifications.reverse()}
           {notifications.length > 0 && <NotificationClearAllButton />}
         </div>

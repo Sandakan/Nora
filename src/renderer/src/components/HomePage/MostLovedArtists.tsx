@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import useSelectAllHandler from '../../hooks/useSelectAllHandler';
 
+import useSelectAllHandler from '../../hooks/useSelectAllHandler';
 import { Artist } from '../ArtistPage/Artist';
 import SecondaryContainer from '../SecondaryContainer';
 
@@ -52,7 +52,7 @@ const MostLovedArtists = (props: Props) => {
           }}
         >
           <>
-            <div className="title-container mb-4 mt-1 text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+            <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 text-2xl font-medium">
               {t('homePage.mostLovedArtists')}
             </div>
             <div

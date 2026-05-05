@@ -2,53 +2,40 @@ import { lazy, useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-
-import Img from '../Img';
 import Button from '../Button';
+import Img from '../Img';
 
 const RemoveFolderConfirmationPrompt = lazy(() => import('./RemoveFolderConfirmationPrompt'));
-const MultipleSelectionCheckbox = lazy(() => import('../MultipleSelectionCheckbox'));
 const BlacklistFolderConfrimPrompt = lazy(() => import('./BlacklistFolderConfirmPrompt'));
 
+import { useNavigate } from '@tanstack/react-router';
+
 import FolderImg from '../../assets/images/webp/empty-folder.webp';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
 
 type FolderProps = {
   folderPath: string;
-  songIds: string[];
+  songIds: number[];
   subFolders?: MusicFolder[];
   isBlacklisted: boolean;
   className?: string;
   index: number;
-  selectAllHandler?: (_upToId?: string) => void;
+  selectAllHandler: (upToId?: number) => void;
 };
 
 const Folder = (props: FolderProps) => {
-  const isMultipleSelectionEnabled = useStore(
-    store,
-    (state) => state.multipleSelectionsData.isEnabled
-  );
-  const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
-
-  const {
-    changeCurrentActivePage,
-    updateContextMenuData,
-    changePromptMenuData,
-    updateMultipleSelections,
-    toggleMultipleSelections
-  } = useContext(AppUpdateContext);
+  const { updateContextMenuData, changePromptMenuData } = useContext(AppUpdateContext);
 
   const {
     folderPath,
     songIds,
     index,
     isBlacklisted = true,
-    selectAllHandler,
     className,
-    subFolders = []
+    subFolders,
+    selectAllHandler
   } = props;
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const { length: noOfSongs } = songIds;
 
@@ -74,58 +61,40 @@ const Folder = (props: FolderProps) => {
           subFolders={subFolder.subFolders}
           isBlacklisted={subFolder.isBlacklisted}
           songIds={subFolder.songIds}
-          className={`!w-full ${className}`}
+          selectAllHandler={selectAllHandler}
+          className={`w-full! ${className}`}
         />
       ));
     }
     return [];
-  }, [className, subFolders]);
+  }, [className, subFolders, selectAllHandler]);
 
   const isAMultipleSelection = useMemo(() => {
-    if (!multipleSelectionsData.isEnabled) return false;
-    if (multipleSelectionsData.selectionType !== 'folder') return false;
-    if (multipleSelectionsData.multipleSelections.length <= 0) return false;
-    if (multipleSelectionsData.multipleSelections.some((selectionId) => selectionId === folderPath))
-      return true;
+    // Folders don't support numeric-based multiple selections (no numeric IDs)
     return false;
-  }, [multipleSelectionsData, folderPath]);
+  }, []);
 
   const openMusicFolderInfoPage = useCallback(() => {
     if (folderPath) {
-      changeCurrentActivePage('MusicFolderInfo', {
-        folderPath
-      });
+      navigate({ to: '/main-player/folders/$folderPath', params: { folderPath } });
     }
-  }, [changeCurrentActivePage, folderPath]);
+  }, [folderPath, navigate]);
 
   const contextMenuItems = useMemo((): ContextMenuItem[] => {
-    const { multipleSelections: folderPaths } = multipleSelectionsData;
-    const isMultipleSelectionsEnabled =
-      multipleSelectionsData.selectionType === 'folder' &&
-      multipleSelectionsData.multipleSelections.length !== 1 &&
-      isAMultipleSelection;
-
     return [
       {
-        label: t(`common.${isMultipleSelectionEnabled ? 'unselect' : 'select'}`),
+        label: t('common.select'),
         iconName: 'checklist',
+        isDisabled: true, // Folders don't support numeric-based multiple selections
         handlerFunction: () => {
-          if (isMultipleSelectionEnabled) {
-            updateMultipleSelections(folderPath, 'folder', isAMultipleSelection ? 'remove' : 'add');
-          } else toggleMultipleSelections(!isAMultipleSelection, 'folder', [folderPath]);
+          // Selection not supported for folders (no numeric IDs)
         }
       },
-      // {
-      //   label: 'Select/Unselect All',
-      //   iconName: 'checklist',
-      //   isDisabled: !selectAllHandler,
-      //   handlerFunction: () => selectAllHandler && selectAllHandler(),
-      // },
       {
         label: t('common.info'),
         iconName: 'info',
         handlerFunction: openMusicFolderInfoPage,
-        isDisabled: isMultipleSelectionsEnabled
+        isDisabled: false
       },
       {
         label: t('song.showInFileExplorer'),
@@ -139,24 +108,10 @@ const Folder = (props: FolderProps) => {
         handlerFunction: null
       },
       {
-        label: t(
-          isMultipleSelectionEnabled
-            ? 'folder.toggleBlacklistFolder'
-            : isBlacklisted
-              ? 'song.deblacklist'
-              : 'folder.blacklistFolder'
-        ),
-        iconName: isMultipleSelectionEnabled
-          ? 'settings_backup_restore'
-          : isBlacklisted
-            ? 'settings_backup_restore'
-            : 'block',
+        label: t(isBlacklisted ? 'song.deblacklist' : 'folder.blacklistFolder'),
+        iconName: isBlacklisted ? 'settings_backup_restore' : 'block',
         handlerFunction: () => {
-          if (isMultipleSelectionEnabled) {
-            window.api.folderData
-              .toggleBlacklistedFolders(folderPaths)
-              .catch((err) => console.error(err));
-          } else if (isBlacklisted)
+          if (isBlacklisted)
             window.api.folderData
               .restoreBlacklistedFolders([folderPath])
               .catch((err) => console.error(err));
@@ -165,8 +120,6 @@ const Folder = (props: FolderProps) => {
               true,
               <BlacklistFolderConfrimPrompt folderName={folderName} folderPaths={[folderPath]} />
             );
-
-          toggleMultipleSelections(false, 'folder');
         }
       },
       {
@@ -182,79 +135,41 @@ const Folder = (props: FolderProps) => {
             />,
             'delete-folder-confirmation-prompt'
           ),
-        isDisabled: isMultipleSelectionEnabled
+        isDisabled: false
       }
     ];
-  }, [
-    changePromptMenuData,
-    folderName,
-    folderPath,
-    isAMultipleSelection,
-    isBlacklisted,
-    isMultipleSelectionEnabled,
-    multipleSelectionsData,
-    openMusicFolderInfoPage,
-    t,
-    toggleMultipleSelections,
-    updateMultipleSelections
-  ]);
+  }, [changePromptMenuData, folderName, folderPath, isBlacklisted, openMusicFolderInfoPage, t]);
 
   const contextMenuItemData = useMemo(
-    (): ContextMenuAdditionalData =>
-      isMultipleSelectionEnabled &&
-      multipleSelectionsData.selectionType === 'folder' &&
-      isAMultipleSelection
-        ? {
-            title: t('folder.selectedFolderCount', {
-              count: multipleSelectionsData.multipleSelections.length
-            }),
-            artworkClassName: '!w-6',
-            artworkPath: FolderImg
-          }
-        : {
-            title: folderName || 'Unknown Folder',
-            artworkPath: FolderImg,
-            artworkClassName: '!w-6',
-            subTitle: t('common.songWithCount', { count: noOfSongs }),
-            subTitle2:
-              subFolders.length > 0
-                ? t('common.subFolderWithCount', { count: subFolders.length })
-                : undefined
-          },
-    [
-      folderName,
-      isAMultipleSelection,
-      isMultipleSelectionEnabled,
-      multipleSelectionsData.multipleSelections.length,
-      multipleSelectionsData.selectionType,
-      noOfSongs,
-      subFolders.length,
-      t
-    ]
+    (): ContextMenuAdditionalData => ({
+      title: folderName || 'Unknown Folder',
+      artworkPath: FolderImg,
+      artworkClassName: 'w-6!',
+      subTitle: t('common.songWithCount', { count: noOfSongs }),
+      subTitle2:
+        (subFolders?.length ?? 0) > 0
+          ? t('common.subFolderWithCount', { count: subFolders!.length })
+          : undefined
+    }),
+    [folderName, noOfSongs, subFolders?.length, t]
   );
 
   return (
     <div className={`mb-2 flex w-full flex-col justify-between ${className}`}>
       <div
         role="button"
-        className={`group flex w-full cursor-pointer items-center justify-between rounded-md px-4 py-2 outline-1 -outline-offset-2 transition-colors focus-visible:!outline dark:text-font-color-white ${
+        className={`group dark:text-font-color-white flex w-full cursor-pointer items-center justify-between rounded-md px-4 py-2 -outline-offset-2 transition-colors focus-visible:!outline ${
           isAMultipleSelection
-            ? '!bg-background-color-3/90 !text-font-color-black dark:!bg-dark-background-color-3/90 dark:!text-font-color-black'
-            : 'hover:!bg-background-color-2 dark:hover:!bg-dark-background-color-2'
-        } ${isBlacklisted && '!opacity-50'} ${
+            ? 'bg-background-color-3/90! text-font-color-black! dark:bg-dark-background-color-3/90! dark:text-font-color-black!'
+            : 'hover:bg-background-color-2! dark:hover:bg-dark-background-color-2!'
+        } ${isBlacklisted && 'opacity-50!'} ${
           (index + 1) % 2 === 1
             ? 'bg-background-color-2/50 dark:bg-dark-background-color-2/40'
-            : '!bg-background-color-1 dark:!bg-dark-background-color-1'
+            : 'bg-background-color-1! dark:bg-dark-background-color-1!'
         }`}
         onClick={(e) => {
           e.stopPropagation();
-          if (e.getModifierState('Shift') === true && selectAllHandler)
-            selectAllHandler(folderPath);
-          else if (e.getModifierState('Control') === true && !isMultipleSelectionEnabled)
-            toggleMultipleSelections(!isAMultipleSelection, 'folder', [folderPath]);
-          else if (isMultipleSelectionEnabled && multipleSelectionsData.selectionType === 'folder')
-            updateMultipleSelections(folderPath, 'folder', isAMultipleSelection ? 'remove' : 'add');
-          else openMusicFolderInfoPage();
+          openMusicFolderInfoPage();
         }}
         onKeyDown={(e) => e.key === 'Enter' && openMusicFolderInfoPage()}
         tabIndex={0}
@@ -266,26 +181,20 @@ const Folder = (props: FolderProps) => {
         }
       >
         <div className="folder-img-and-info-container flex items-center">
-          {multipleSelectionsData.selectionType === 'folder' ? (
-            <div className="relative ml-1 mr-4 flex h-fit items-center rounded-lg bg-background-color-1 p-1 text-font-color-highlight dark:bg-dark-background-color-1 dark:text-dark-background-color-3">
-              <MultipleSelectionCheckbox id={folderPath} selectionType="folder" />
-            </div>
-          ) : (
-            <div className="relative ml-1 mr-4 h-fit rounded-2xl bg-background-color-1 px-3 text-font-color-highlight group-even:bg-background-color-2/75 group-hover:bg-background-color-1 dark:bg-dark-background-color-1 dark:text-dark-background-color-3 dark:group-even:bg-dark-background-color-2/50 dark:group-hover:bg-dark-background-color-1">
-              {index + 1}
-            </div>
-          )}
+          <div className="bg-background-color-1 text-font-color-highlight group-even:bg-background-color-2/75 group-hover:bg-background-color-1 dark:bg-dark-background-color-1 dark:text-dark-background-color-3 dark:group-even:bg-dark-background-color-2/50 dark:group-hover:bg-dark-background-color-1 relative mr-4 ml-1 h-fit rounded-2xl px-3">
+            {index + 1}
+          </div>
           <Img src={FolderImg} loading="eager" className="w-8 self-center" />
           <div className="folder-info ml-6 flex flex-col">
             <span className="folder-name" title={`${prevDir}\${folderName}`}>
               {folderName}
             </span>
             <div className="flex items-center opacity-75">
-              {subFolders.length > 0 && (
+              {(subFolders?.length ?? 0) > 0 && (
                 <>
                   <span className="no-of-sub-folders text-xs font-thin">
                     {t('common.subFolderWithCount', {
-                      count: subFolders.length
+                      count: subFolders!.length
                     })}
                   </span>
                   <span className="mx-1">&bull;</span>
@@ -310,10 +219,10 @@ const Folder = (props: FolderProps) => {
               block
             </span>
           )}
-          {subFolders.length > 0 && (
+          {(subFolders?.length ?? 0) > 0 && (
             <Button
-              className="ml-4 !rounded-full !border-none !p-1 group-hover:bg-background-color-1 dark:group-hover:bg-dark-background-color-1"
-              iconClassName="!text-2xl !leading-none"
+              className="group-hover:bg-background-color-1 dark:group-hover:bg-dark-background-color-1 ml-4 rounded-full! border-none! p-1!"
+              iconClassName="text-2xl! leading-none!"
               iconName={isSubFoldersVisible ? 'arrow_drop_up' : 'arrow_drop_down'}
               clickHandler={(e) => {
                 e.stopPropagation();
@@ -323,8 +232,8 @@ const Folder = (props: FolderProps) => {
           )}
         </div>
       </div>
-      {subFolders.length > 0 && isSubFoldersVisible && (
-        <div className="ml-4 mt-4 border-l-[3px] border-background-color-2 pl-4 dark:border-dark-background-color-2/50">
+      {(subFolders?.length ?? 0) > 0 && isSubFoldersVisible && (
+        <div className="border-background-color-2 dark:border-dark-background-color-2/50 mt-4 ml-4 border-l-[3px] pl-4">
           {subFoldersComponents}
         </div>
       )}

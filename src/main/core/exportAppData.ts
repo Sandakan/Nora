@@ -1,22 +1,14 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { type OpenDialogOptions, app } from 'electron';
 
-import {
-  getAlbumsData,
-  getArtistsData,
-  getGenresData,
-  getListeningData,
-  getPlaylistData,
-  getSongsData,
-  getBlacklistData,
-  getUserData,
-  getPaletteData
-} from '../filesystem';
-import { sendMessageToRenderer, showOpenDialog } from '../main';
+import { exportDatabase } from '@main/db/db';
+import { app, type OpenDialogOptions } from 'electron';
+
 import logger from '../logger';
+import { sendMessageToRenderer, showOpenDialog } from '../main';
 import copyDir from '../utils/copyDir';
 import makeDir from '../utils/makeDir';
+import { exportUserPreferences } from './userPreferencesExportImport';
 
 const DEFAULT_EXPORT_DIALOG_OPTIONS: OpenDialogOptions = {
   title: 'Select a Destination to Export App Data',
@@ -42,56 +34,23 @@ in these config files.
 
 const exportAppData = async (localStorageData: string) => {
   const destinations = await showOpenDialog(DEFAULT_EXPORT_DIALOG_OPTIONS);
+  const dbDump = await exportDatabase();
+  const userPreferences = await exportUserPreferences();
 
   const operations = [
     // SONG DATA
     {
-      filename: 'songs.json',
-      dataString: JSON.stringify({ songs: getSongsData() })
+      filename: 'nora.pglite.db.sql',
+      dataString: dbDump
     },
-    // PALETTE DATA
+    // USER PREFERENCES (keyboard shortcuts, equalizer, ignored items)
     {
-      filename: 'palettes.json',
-      dataString: JSON.stringify({ palettes: getPaletteData() })
-    },
-    // BLACKLIST DATA
-    {
-      filename: 'blacklist.json',
-      dataString: JSON.stringify({ blacklists: getBlacklistData() })
-    },
-    // ARTIST DATA
-    {
-      filename: 'artists.json',
-      dataString: JSON.stringify({ artists: getArtistsData() })
-    },
-    // PLAYLIST DATA
-    {
-      filename: 'playlists.json',
-      dataString: JSON.stringify({ playlists: getPlaylistData() })
-    },
-    // ALBUM DATA
-    {
-      filename: 'albums.json',
-      dataString: JSON.stringify({ albums: getAlbumsData() })
-    },
-    // GENRE DATA
-    {
-      filename: 'genres.json',
-      dataString: JSON.stringify({ genres: getGenresData() })
-    },
-    // USER DATA
-    {
-      filename: 'userData.json',
-      dataString: JSON.stringify({ userData: getUserData() })
-    },
-    // LISTENING DATA
-    {
-      filename: 'listening_data.json',
-      dataString: JSON.stringify({ listeningData: getListeningData() })
+      filename: 'user_preferences.json',
+      dataString: JSON.stringify(userPreferences, null, 2)
     },
     // LOCAL STORAGE DATA
     {
-      filename: 'localStorageData.json',
+      filename: 'local_storage.json',
       dataString: localStorageData
     },
     // WARNING MESSAGE
@@ -114,17 +73,18 @@ const exportAppData = async (localStorageData: string) => {
           : path.join(destinations[0], 'Nora exports');
       const { exist } = await makeDir(destination);
 
-      if (exist)
+      if (exist) {
         logger.debug(`'Nora exports' folder already exists. Will re-write contents of the folder.`);
+      }
 
       for (let i = 0; i < operations.length; i++) {
         const operation = operations[i];
 
-        if (operation?.directory)
+        if (operation?.directory) {
           await copyDir(operation.directory, path.join(destination, 'song_covers'));
-        else if (operation?.dataString)
+        } else if (operation?.dataString) {
           await fs.writeFile(path.join(destination, operation.filename), operation.dataString);
-        else throw new Error('Invalid operation');
+        } else throw new Error('Invalid operation');
 
         logger.debug('Exporting app data. Please wait');
         sendMessageToRenderer({

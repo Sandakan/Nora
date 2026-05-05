@@ -1,11 +1,14 @@
-import NodeID3 from 'node-id3';
+import type { db } from '@main/db/db';
+import type { GetAllSongListeningDataReturnType } from '@main/db/queries/listens';
 import { ReactElement, ReactNode } from 'react';
+import { resources } from 'src/renderer/src/i18n';
+
+import { api } from '../preload';
 import { ButtonProps } from '../renderer/src/components/Button';
 import { DropdownOption } from '../renderer/src/components/Dropdown';
-import { api } from '../preload';
+import { songSortTypes } from '../renderer/src/components/SongsPage/SongOptions';
 import { LastFMSessionData } from './last_fm_api';
 import { SimilarArtist, Tag } from './last_fm_artist_info_api';
-import { resources } from 'src/renderer/src/i18n';
 
 declare global {
   interface Window {
@@ -76,13 +79,13 @@ declare global {
   // ? Song data related types
 
   interface SavableSongData {
-    songId: string;
+    songId: number;
     title: string;
     duration: number;
-    artists?: { artistId: string; name: string }[];
-    album?: { albumId: string; name: string };
-    genres?: { genreId: string; name: string }[];
-    albumArtists?: { artistId: string; name: string }[];
+    artists?: { artistId: number; name: string }[];
+    album?: { albumId: number; name: string };
+    genres?: { genreId: number; name: string }[];
+    albumArtists?: { artistId: number; name: string }[];
     bitrate?: number;
     trackNo?: number;
     discNo?: number;
@@ -132,10 +135,10 @@ declare global {
   }
 
   interface AudioPlayerData {
-    songId: string;
+    songId: number;
     title: string;
     artists?: {
-      artistId: string;
+      artistId: number;
       name: string;
       artworkPath?: string;
       onlineArtworkPaths?: OnlineArtistArtworks;
@@ -145,7 +148,7 @@ declare global {
     artworkPath?: string;
     path: string;
     isAFavorite: boolean;
-    album?: { albumId: string; name: string };
+    album?: { albumId: number; name: string };
     paletteData?: PaletteData;
     isKnownSource: boolean;
     isBlacklisted: boolean;
@@ -153,12 +156,12 @@ declare global {
 
   interface AudioInfo {
     title: string;
-    artists?: { artistId: string; name: string }[];
-    album?: { albumId: string; name: string };
+    artists?: { artistId: number; name: string }[];
+    album?: { albumId: number; name: string };
     duration: number;
     artworkPaths: ArtworkPaths;
     path: string;
-    songId: string;
+    songId: number;
     addedDate: number;
     isAFavorite: boolean;
     year?: number;
@@ -171,51 +174,27 @@ declare global {
 
   interface PaginatedResult<DataType, SortType extends string> {
     data: DataType[];
-    sortType: SortType;
+    sortType?: SortType;
     start: number;
     end: number;
     total: number;
   }
 
   interface ToggleLikeSongReturnValue {
-    likes: string[];
-    dislikes: string[];
+    likes: number[];
+    dislikes: number[];
   }
 
   // ? Song listening data related types
 
   interface SongListeningData {
-    /** song id of the relevant song */
-    songId: string;
-    /** no of song skips.
-     * Incremented if the song is skipped less than 5 seconds */
-    skips?: number;
-    /** no of full listens.
-     * Incremented if the user has listened to more than 80% of the song. */
-    fullListens?: number;
-    /** no of playlists the song was added.
-     * Incremented if the user added the song to any playlist. */
-    inNoOfPlaylists?: number;
-    /** an array of listening records for each year. */
-    listens: YearlyListeningRate[];
-    /** an array of listening records for each year. */
-    seeks?: SongSeek[];
+    songId: number;
+    playEvents: { playbackPercentage: string; createdAt: Date }[];
+    skipEvents: { position: string; createdAt: Date }[];
+    seekEvents: { position: string; createdAt: Date }[];
   }
 
-  interface SongSeek {
-    position: number;
-    seeks: number;
-  }
-  interface YearlyListeningRate {
-    year: number;
-    /** [Date in milliseconds, No of listens in that day] [] */
-    listens: [number, number][];
-  }
-
-  interface ListeningDataTypes extends Omit<SongListeningData, 'listens'> {
-    listens: number;
-  }
-
+  type ListeningDataEvents = 'SKIP' | 'SEEK' | 'LISTEN';
   // ? Audio player and lyrics related types
 
   type RepeatTypes = 'false' | 'repeat' | 'repeat-1';
@@ -305,7 +284,7 @@ declare global {
     duration: number;
   }
 
-  // node-id3 synchronisedLyrics types.
+  // Lyrics frame types used by in-song metadata.
   type UnsynchronisedLyrics =
     | {
         language: string;
@@ -317,27 +296,19 @@ declare global {
     | Array<{
         /**
          * 3 letter ISO 639-2 language code, for example: eng
+         *
          * @see {@link https://id3.org/ISO%20639-2 ISO 639-2}
          */
         language: string;
-        /**
-         * Absolute time unit:
-         * {@link TagConstants.TimeStampFormat}
-         */
+        /** Absolute time unit used by the stored synced lyrics format. */
         timeStampFormat: number;
-        /**
-         * {@link TagConstants.SynchronisedLyrics.ContentType}
-         */
+        /** Content type for the stored synced lyrics format. */
         contentType: number;
-        /**
-         * Content descriptor
-         */
+        /** Content descriptor */
         shortText?: string;
         synchronisedText: Array<{
           text: string;
-          /**
-           * Absolute time in unit according to `timeStampFormat`.
-           */
+          /** Absolute time in unit according to `timeStampFormat`. */
           timeStamp: number;
         }>;
       }>
@@ -351,7 +322,7 @@ declare global {
 
   interface Queue {
     currentSongIndex: number | null;
-    queue: string[];
+    songIds: number[];
     queueBeforeShuffle?: number[];
     queueId?: string;
     queueType: QueueTypes;
@@ -363,10 +334,24 @@ declare global {
     path: string;
     artworkPath: string;
     duration: number;
-    songId: string;
+    songId: number;
   }
 
-  type QueueTypes = 'album' | 'playlist' | 'artist' | 'songs' | 'genre' | 'folder';
+  type QueueTypes =
+    | 'album'
+    | 'playlist'
+    | 'artist'
+    | 'songs'
+    | 'genre'
+    | 'folder'
+    | 'favorites'
+    | 'history';
+
+  interface QueueInfo {
+    artworkPath: string;
+    onlineArtworkPath?: string;
+    title: string;
+  }
 
   // ? User data related types
 
@@ -420,43 +405,43 @@ declare global {
     | 'NO_NETWORK_CONNECTION';
 
   interface Blacklist {
-    songBlacklist: string[];
+    songBlacklist: number[];
     folderBlacklist: string[];
   }
 
-  interface UserData {
-    language: LanguageCodes;
-    theme: AppThemeData;
-    musicFolders: FolderStructure[];
-    preferences: {
-      autoLaunchApp: boolean;
-      openWindowMaximizedOnStart: boolean;
-      openWindowAsHiddenOnSystemStart: boolean;
-      isMiniPlayerAlwaysOnTop: boolean;
-      isMusixmatchLyricsEnabled: boolean;
-      hideWindowOnClose: boolean;
-      sendSongScrobblingDataToLastFM: boolean;
-      sendSongFavoritesDataToLastFM: boolean;
-      sendNowPlayingSongDataToLastFM: boolean;
-      saveLyricsInLrcFilesForSupportedSongs: boolean;
-      enableDiscordRPC: boolean;
-      saveVerboseLogs: boolean;
-    };
-    windowPositions: {
-      mainWindow?: WindowCordinates;
-      miniPlayer?: WindowCordinates;
-    };
-    windowDiamensions: {
-      mainWindow?: WindowCordinates;
-      miniPlayer?: WindowCordinates;
-    };
-    windowState: WindowState;
+  interface UserSettings {
+    language: string;
+    isDarkMode: boolean;
+    useSystemTheme: boolean;
+    autoLaunchApp: boolean;
+    openWindowMaximizedOnStart: boolean;
+    openWindowAsHiddenOnSystemStart: boolean;
+    isMiniPlayerAlwaysOnTop: boolean;
+    isMusixmatchLyricsEnabled: boolean;
+    hideWindowOnClose: boolean;
+    sendSongScrobblingDataToLastFM: boolean;
+    sendSongFavoritesDataToLastFM: boolean;
+    sendNowPlayingSongDataToLastFM: boolean;
+    saveLyricsInLrcFilesForSupportedSongs: boolean;
+    enableDiscordRPC: boolean;
+    saveVerboseLogs: boolean;
+    mainWindowX: number | null;
+    mainWindowY: number | null;
+    miniPlayerX: number | null;
+    miniPlayerY: number | null;
+    mainWindowWidth: number | null;
+    mainWindowHeight: number | null;
+    miniPlayerWidth: number | null;
+    miniPlayerHeight: number | null;
+    zoomFactor: number;
+    windowState: string;
     recentSearches: string[];
-    customMusixmatchUserToken?: string;
-    lastFmSessionData?: LastFMSessionData;
-    storageMetrics?: StorageMetrics;
-    customLrcFilesSaveLocation?: string;
+    customLrcFilesSaveLocation: string | null;
+    lastFmSessionName: string | null;
+    lastFmSessionKey: string | null;
   }
+
+  interface UserData extends UserSettings {}
 
   type LanguageCodes = NoInfer<keyof typeof resources>;
 
@@ -486,10 +471,20 @@ declare global {
     noOfSongs?: number;
   }
 
+  interface SavedFolderStructure extends FolderStructure {
+    id: number;
+    subFolders: SavedFolderStructure[];
+  }
+
   interface MusicFolder extends FolderStructure {
-    songIds: string[];
+    songIds: number[];
     isBlacklisted: boolean;
     subFolders: MusicFolder[];
+  }
+
+  interface SavedMusicFolder extends MusicFolder {
+    id: number;
+    subFolders: SavedMusicFolder[];
   }
 
   // ? LocalStorage related types
@@ -509,7 +504,7 @@ declare global {
     enableArtworkFromSongCovers: boolean;
     shuffleArtworkFromSongCovers: boolean;
     removeAnimationsOnBatteryPower: boolean;
-    isPredictiveSearchEnabled: boolean;
+    isSimilaritySearchEnabled: boolean;
     lyricsAutomaticallySaveState: AutomaticallySaveLyricsTypes;
     showTrackNumberAsSongIndex: boolean;
     allowToPreventScreenSleeping: boolean;
@@ -519,7 +514,7 @@ declare global {
   }
 
   interface CurrentSong {
-    songId: string | null;
+    songId: number | null;
     stoppedPosition: number;
     playlistId?: string;
   }
@@ -600,15 +595,14 @@ declare global {
     preset: Equalizer;
   }[];
 
-  interface EqualizerPresetDropdownOptions
-    extends DropdownOption<EqualierPresetDropdownOptionValues> {
+  interface EqualizerPresetDropdownOptions extends DropdownOption<EqualierPresetDropdownOptionValues> {
     preset?: Equalizer;
   }
 
   interface IgnoredDuplicates {
-    artists: string[];
-    albums: string[];
-    genres: string[];
+    artists: number[];
+    albums: number[];
+    genres: number[];
   }
 
   interface SortingStates {
@@ -625,25 +619,84 @@ declare global {
     editNextAndCurrentStartAndEndTagsAutomatically: boolean;
   }
 
+  interface Shortcut {
+    label: string;
+    keys: string[];
+  }
+
+  interface ShortcutCategory {
+    shortcutCategoryTitle: string;
+    shortcuts: Shortcut[];
+  }
+
+  type ShortcutCategoryList = ShortcutCategory[];
+
+  interface PlayerQueueMetadata {
+    queueId?: string;
+    queueType?: QueueTypes;
+  }
+
+  type QueueEventType =
+    | 'positionChange'
+    | 'queueChange'
+    | 'songAdded'
+    | 'songRemoved'
+    | 'queueCleared'
+    | 'queueReplaced'
+    | 'shuffled'
+    | 'restored'
+    | 'metadataChange';
+
+  type QueueEventCallback<T = unknown> = (data: T) => void;
+
+  interface QueueEventData {
+    positionChange: {
+      oldPosition: number;
+      newPosition: number;
+      currentSongId: number | null;
+    };
+    queueChange: { queue: number[]; length: number };
+    songAdded: { songId: number; position: number };
+    songRemoved: { songId: number; position: number };
+    queueCleared: Record<string, never>;
+    queueReplaced: {
+      oldQueue: number[];
+      newQueue: number[];
+      newPosition: number;
+    };
+    shuffled: {
+      originalQueue: number[];
+      shuffledQueue: number[];
+      positions: number[];
+    };
+    restored: { restoredQueue: number[] };
+    metadataChange: { queueId?: string; queueType?: QueueTypes };
+  }
+
+  interface PlayerQueueJson {
+    songIds: number[];
+    position: number;
+    queueBeforeShuffle?: number[];
+    metadata?: PlayerQueueMetadata;
+  }
+
   interface LocalStorage {
     preferences: Preferences;
     playback: Playback;
-    queue: Queue;
-    ignoredSeparateArtists: string[];
-    ignoredSongsWithFeatArtists: string[];
-    ignoredDuplicates: IgnoredDuplicates;
+    queue: PlayerQueueJson;
     sortingStates: SortingStates;
-    equalizerPreset: Equalizer;
     lyricsEditorSettings: LyricsEditorSettings;
+    equalizerPreset: Equalizer;
+    keyboardShortcuts: ShortcutCategoryList;
   }
 
   // ? Playlists related types
 
   interface SavablePlaylist {
-    playlistId: 'Favorites' | 'History' | string;
+    playlistId: number;
     name: string;
-    /** song ids of the songs in the playlist */
-    songs: string[];
+    /** Song ids of the songs in the playlist */
+    songs: number[];
     createdDate: Date;
     isArtworkAvailable: boolean;
   }
@@ -655,11 +708,11 @@ declare global {
   // ? Genre related types
 
   interface SavableGenre {
-    genreId: string;
+    genreId: number;
     name: string;
     songs: {
       title: string;
-      songId: string;
+      songId: number;
     }[];
     artworkName?: string;
     paletteId?: string;
@@ -673,15 +726,15 @@ declare global {
   // ? Albums related types
 
   interface SavableAlbum {
-    albumId: string;
+    albumId: number;
     title: string;
     artists?: {
       name: string;
-      artistId: string;
+      artistId: number;
     }[];
     songs: {
       title: string;
-      songId: string;
+      songId: number;
     }[];
     year?: number;
     artworkName?: string;
@@ -694,14 +747,14 @@ declare global {
   // ? Artists related types
 
   interface SavableArtist {
-    artistId: string;
+    artistId: number;
     songs: {
       title: string;
-      songId: string;
+      songId: number;
     }[];
     albums?: {
       title: string;
-      albumId: string;
+      albumId: number;
     }[];
     name: string;
     isAFavorite: boolean;
@@ -747,14 +800,7 @@ declare global {
     tempArtworkCacheSize: number;
     totalArtworkCacheSize: number;
     logSize: number;
-    songDataSize: number;
-    artistDataSize: number;
-    albumDataSize: number;
-    genreDataSize: number;
-    playlistDataSize: number;
-    paletteDataSize: number;
-    userDataSize: number;
-    librarySize: number;
+    databaseSize: number;
     totalKnownItemsSize: number;
     otherSize: number;
   }
@@ -766,6 +812,14 @@ declare global {
     appDataSizes: AppDataStorageMetrics;
     totalSize: number;
     generatedDate: string;
+  }
+
+  interface DatabaseMetrics {
+    songCount: number;
+    artistCount: number;
+    albumCount: number;
+    genreCount: number;
+    playlistCount: number;
   }
 
   // ? Search related types
@@ -883,6 +937,7 @@ declare global {
     | 'PLAYLIST_EXPORT_SUCCESS'
     | 'PLAYLIST_IMPORT_SUCCESS'
     | 'PLAYLIST_RENAME_SUCCESS'
+    | 'PLAYLIST_RENAME_FAILED'
     | 'PLAYLIST_IMPORT_TO_EXISTING_PLAYLIST'
     | 'SONG_REPARSE_SUCCESS'
     | 'ADDED_SONGS_TO_PLAYLIST'
@@ -945,7 +1000,7 @@ declare global {
 
   interface MultipleSelectionData {
     isEnabled: boolean;
-    multipleSelections: string[];
+    multipleSelections: number[];
     selectionType?: QueueTypes;
   }
 
@@ -989,29 +1044,14 @@ declare global {
     | 'sortingStates.artistsPage'
     | 'sortingStates.genresPage';
 
-  type SongFilterTypes = 'notSelected' | 'blacklistedSongs' | 'whitelistedSongs';
-
-  type SongSortTypes =
-    | 'aToZ'
-    | 'zToA'
-    | 'addedOrder'
-    | 'dateAddedAscending'
-    | 'dateAddedDescending'
-    | 'releasedYearAscending'
-    | 'releasedYearDescending'
-    | 'trackNoAscending'
-    | 'trackNoDescending'
-    | 'artistNameAscending'
-    | 'artistNameDescending'
-    | 'allTimeMostListened'
-    | 'allTimeLeastListened'
-    | 'monthlyMostListened'
-    | 'monthlyLeastListened'
-    | 'artistNameDescending'
-    | 'albumNameAscending'
-    | 'albumNameDescending'
+  type SongFilterTypes =
+    | 'notSelected'
     | 'blacklistedSongs'
-    | 'whitelistedSongs';
+    | 'whitelistedSongs'
+    | 'favorites'
+    | 'nonFavorites';
+
+  type SongSortTypes = (typeof songSortTypes)[number];
 
   type ArtistFilterTypes = 'notSelected' | 'favorites';
 
@@ -1123,7 +1163,7 @@ declare global {
 
   interface DataUpdateEvent {
     dataType: DataUpdateEventTypes;
-    eventData: { data?: string[]; message?: string }[];
+    eventData: { data?: number[]; message?: string }[];
   }
 
   interface DetailAvailableEvent<DetailType> extends Event {
@@ -1159,27 +1199,33 @@ declare global {
   // ? SongTags related types
   type SongTagsAlbumData = {
     title: string;
-    albumId?: string;
+    albumId?: number;
     noOfSongs?: number;
     artists?: string[];
     artworkPath?: string;
   };
 
   type SongTagsArtistData = {
-    artistId?: string;
+    artistId?: number;
     name: string;
     artworkPath?: string;
     onlineArtworkPaths?: OnlineArtistArtworks;
+  };
+
+  type SongTagsGenreData = {
+    genreId?: number;
+    name: string;
+    artworkPath?: string;
   };
 
   interface SongTags {
     title: string;
     artists?: SongTagsArtistData[];
     albumArtists?: SongTagsArtistData[];
-    album?: SongTagsAlbumData;
+    albums?: SongTagsAlbumData[];
     trackNumber?: number;
     releasedYear?: number;
-    genres?: { genreId?: string; name: string; artworkPath?: string }[];
+    genres?: SongTagsGenreData[];
     composer?: string;
     synchronizedLyrics?: string;
     unsynchronizedLyrics?: string;
@@ -1191,13 +1237,15 @@ declare global {
 
   interface SongOutsideLibraryData {
     title: string;
-    songId: string;
+    songId: number;
     duration: number;
     path: string;
     artworkPath?: string;
   }
 
-  interface NodeID3Tags extends NodeID3.Tags {
+  interface NodeID3Tags {
+    synchronisedLyrics?: SynchronisedLyrics;
+    unsynchronisedLyrics?: UnsynchronisedLyrics;
     image: string;
   }
 
@@ -1266,4 +1314,41 @@ declare global {
     | 'favorites_artwork'
     | 'genre_artwork'
     | 'playlist_artwork';
+
+  interface SearchUrlParams {
+    scrollTopOffset?: number;
+  }
+
+  interface LyricData {
+    text: string | Omit<SyncedLyricsLineWord, 'unparsedText'>[];
+    start?: number;
+    end?: number;
+  }
+
+  interface LyricsLineData {
+    text: string;
+    start?: number;
+    end?: number;
+    unparsedText?: string;
+    isActive: boolean;
+  }
+
+  interface EditingLyricsLineData {
+    text: string | LyricsLineData[];
+    start?: number;
+    end?: number;
+  }
+  interface ExtendedEditingLyricsLineData extends EditingLyricsLineData {
+    index: number;
+    isActive: boolean;
+  }
+
+  type Routes = 'lyrics-editor';
+  type LyricsEditorRouteState = { songId: number; lyrics?: LyricData[] };
+  interface RouteStates {
+    'lyrics-editor': LyricsEditorRouteState;
+  }
+
+  type DB = typeof db;
+  type DBTransaction = Parameters<Parameters<DB['transaction']>[0]>[0];
 }

@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Terminal=false
+Icon=app.netlify.noramusic.Nora
+Type=Application
+Categories=Music;
+Exec="/app/bin/run.sh @@ %U @@"
+MimeType=audio/mpeg;audio/aac;
+Name=Nora
+GenericName=Nora
+Comment=An elegant music player inspired by Oto Music
+StartupNotify=true
+Keywords=Music;mp3;flac;ogg;song;audio;

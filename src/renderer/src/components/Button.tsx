@@ -84,9 +84,9 @@ const Button = memo((props: ButtonProps) => {
       type="button"
       id={id}
       className={twMerge(
-        `button group mr-4 flex cursor-pointer items-center justify-center rounded-3xl border-[3px] border-background-color-2 bg-background-color-2/25 px-4 py-2 text-sm text-font-color-black transition-[border,background,color] ease-in-out hover:border-background-color-3 hover:bg-background-color-2/50 focus-visible:!border-font-color-highlight-2 focus-visible:bg-background-color-2/50 dark:border-dark-background-color-2 dark:bg-dark-background-color-2/25 dark:text-font-color-white dark:hover:border-dark-background-color-3 dark:hover:bg-dark-background-color-2/50 dark:focus-visible:!border-dark-font-color-highlight-2 dark:focus-visible:bg-dark-background-color-2/50 ${
+        `button group border-background-color-2 bg-background-color-2/25 text-font-color-black hover:border-background-color-3 hover:bg-background-color-2/50 focus-visible:!border-font-color-highlight-2 focus-visible:bg-background-color-2/50 dark:border-dark-background-color-2 dark:bg-dark-background-color-2/25 dark:text-font-color-white dark:hover:border-dark-background-color-3 dark:hover:bg-dark-background-color-2/50 dark:focus-visible:!border-dark-font-color-highlight-2 dark:focus-visible:bg-dark-background-color-2/50 mr-4 flex cursor-pointer items-center justify-center rounded-3xl border-[3px] px-4 py-2 text-sm transition-[border,background,color] ease-in-out ${
           isButtonDisabled &&
-          `!cursor-not-allowed !border-font-color-dimmed/10 !text-opacity-50 !brightness-50 !transition-none dark:!border-font-color-dimmed/40`
+          `border-font-color-dimmed/10! text-opacity-50! dark:border-font-color-dimmed/40! cursor-not-allowed! brightness-50! transition-none!`
         } ${!isVisible && 'hidden'}`,
         className
       )}
@@ -103,7 +103,7 @@ const Button = memo((props: ButtonProps) => {
     >
       {isStatusPending && isButtonDisabled ? (
         <span
-          className={`material-icons-round icon relative flex h-4 w-4 items-center justify-center text-lg after:absolute after:mx-auto after:block after:h-4 after:w-4 after:animate-spin-ease after:items-center after:justify-center after:rounded-full after:border-2 after:border-[transparent] after:border-t-font-color-black after:content-[''] dark:after:border-t-font-color-white ${(!isStatusPending || label) && 'mr-2'} ${pendingClassName}`}
+          className={`material-icons-round icon after:animate-spin-ease after:border-t-font-color-black dark:after:border-t-font-color-white relative flex h-4 w-4 items-center justify-center text-lg after:absolute after:mx-auto after:block after:h-4 after:w-4 after:items-center after:justify-center after:rounded-full after:border-2 after:border-[transparent] after:content-[''] ${(!isStatusPending || label) && 'mr-2'} ${pendingClassName}`}
         >
           {isStatusPending ? '' : iconName}
         </span>

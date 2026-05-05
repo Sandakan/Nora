@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import Img from '../Img';
 
 import NoResultsImage from '../../assets/images/svg/Sad face_Monochromatic.svg';
+import Img from '../Img';
 import RecentSearchResult from './RecentSearchResult';
 
 type Props = {
@@ -57,7 +57,7 @@ const NoSearchResultsContainer = (props: Props) => {
               }
               alt="Flying kite"
             />
-            <div className="description text-xl text-font-color-black dark:text-font-color-white">
+            <div className="description text-font-color-black dark:text-font-color-white text-xl">
               {t('searchPage.noResults')}
             </div>
             <div className="recent-search-results-container mt-2 flex flex-wrap items-center justify-center px-[15%]">

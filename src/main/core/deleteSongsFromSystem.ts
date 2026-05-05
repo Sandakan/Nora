@@ -1,6 +1,8 @@
-import path from 'path';
 import fs from 'fs/promises';
+import path from 'path';
+
 import { shell } from 'electron';
+
 import { supportedMusicExtensions } from '../filesystem';
 import logger from '../logger';
 import removeSongsFromLibrary from '../removeSongsFromLibrary';

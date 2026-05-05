@@ -1,14 +1,17 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import type { SimilarTracksOutput } from 'src/types/last_fm_similar_tracks_api';
-import UnAvailableTrack from './UnAvailableTrack';
-import TitleContainer from '../TitleContainer';
-import Song from '../SongsPage/Song';
+import { songQuery } from '@renderer/queries/songs';
+import { store } from '@renderer/store/store';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { useCallback, useContext, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
-type Props = { songId: string };
+import type { SimilarTracksOutput } from '../../../../types/last_fm_similar_tracks_api';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import Song from '../SongsPage/Song';
+import TitleContainer from '../TitleContainer';
+import UnAvailableTrack from './UnAvailableTrack';
+
+type Props = { songId: number };
 
 const SimilarTracksContainer = (props: Props) => {
   const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
@@ -22,23 +25,15 @@ const SimilarTracksContainer = (props: Props) => {
 
   const { songId } = props;
 
-  const [similarTracks, setSimilarTracks] = useState<NonNullable<SimilarTracksOutput>>({
-    sortedAvailTracks: [],
-    sortedUnAvailTracks: []
+  const { data: similarTracks } = useSuspenseQuery({
+    ...songQuery.similarTracks({ songId }),
+    select: (data) => {
+      return data as NonNullable<SimilarTracksOutput>;
+    }
   });
 
-  useEffect(() => {
-    window.api.audioLibraryControls
-      .getSimilarTracksForASong(songId)
-      .then((res) => {
-        if (res) setSimilarTracks(res);
-        return undefined;
-      })
-      .catch((err) => console.log(err));
-  }, [songId]);
-
   const handleSongPlayBtnClick = useCallback(
-    (startSongId?: string) => {
+    (startSongId?: number) => {
       const songs = similarTracks.sortedAvailTracks.map((song) => song.songData!);
       const queueSongIds = songs.filter((song) => !song.isBlacklisted).map((song) => song.songId);
 
@@ -52,10 +47,10 @@ const SimilarTracksContainer = (props: Props) => {
     const songs = similarTracks.sortedAvailTracks.map((song) => song.songData!);
     const queueSongIds = songs.filter((song) => !song.isBlacklisted).map((song) => song.songId);
 
-    let currentSongIndex = queue.currentSongIndex ?? queue.queue.indexOf(currentSongData.songId);
-    const duplicateIds: string[] = [];
+    let currentSongIndex = queue.position ?? queue.songIds.indexOf(currentSongData.songId);
+    const duplicateIds: number[] = [];
 
-    const newQueue = queue.queue.filter((id) => {
+    const newQueue = queue.songIds.filter((id) => {
       const isADuplicate = queueSongIds.includes(id);
       if (isADuplicate) duplicateIds.push(id);
 
@@ -63,7 +58,7 @@ const SimilarTracksContainer = (props: Props) => {
     });
 
     for (const duplicateId of duplicateIds) {
-      const duplicateIdPosition = queue.queue.indexOf(duplicateId);
+      const duplicateIdPosition = queue.songIds.indexOf(duplicateId);
 
       if (
         duplicateIdPosition !== -1 &&
@@ -86,8 +81,8 @@ const SimilarTracksContainer = (props: Props) => {
     ]);
   }, [
     similarTracks.sortedAvailTracks,
-    queue.currentSongIndex,
-    queue.queue,
+    queue.position,
+    queue.songIds,
     currentSongData.songId,
     updateQueueData,
     addNewNotifications,
@@ -141,16 +136,16 @@ const SimilarTracksContainer = (props: Props) => {
                 label: t('common.play'),
                 clickHandler: () => handleSongPlayBtnClick(),
                 iconName: 'play_arrow',
-                className: '!bg-background-color-1/40 dark:!bg-dark-background-color-1/40'
+                className: 'bg-background-color-1/40! dark:bg-dark-background-color-1/40!'
               },
               {
                 label: t('common.playNextAll'),
                 clickHandler: addSongsToPlayNext,
                 iconName: 'shortcut',
-                className: '!bg-background-color-1/40 dark:!bg-dark-background-color-1/40'
+                className: 'bg-background-color-1/40! dark:bg-dark-background-color-1/40!'
               }
             ]}
-            titleClassName="!text-xl text-font-color-black !font-normal dark:text-font-color-white"
+            titleClassName="text-xl! text-font-color-black font-normal! dark:text-font-color-white"
             className={`title-container ${
               bodyBackgroundImage
                 ? 'text-font-color-white'
@@ -164,7 +159,7 @@ const SimilarTracksContainer = (props: Props) => {
         <>
           <TitleContainer
             title={t('songInfoPage.otherSimilarTracks')}
-            titleClassName="!text-xl text-font-color-black !font-normal dark:text-font-color-white"
+            titleClassName="text-xl! text-font-color-black font-normal! dark:text-font-color-white"
             className={`title-container ${
               bodyBackgroundImage
                 ? 'text-font-color-white'

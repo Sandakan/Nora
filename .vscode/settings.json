@@ -18,6 +18,7 @@
     "mbid",
     "Motrix's",
     "nsis",
+    "oxlint",
     "phin",
     "pmmmwh",
     "pyong",
@@ -55,9 +56,10 @@
     "npm-debug.log.*": true,
     "test/**/__snapshots__": true,
     "package-lock.json": true,
-    "*.{css,sass,scss}.d.ts": true
+    "*.{css,sass,scss}.d.ts": true,
+    "**/routeTree.gen.ts": true
   },
-  "cSpell.ignoreWords": ["asar", "edata", "prettierrc"],
+  "cSpell.ignoreWords": [ "asar", "edata", "prettierrc" ],
   "rpc.enabled": true,
   "docwriter.hotkey.windows": "Alt + .",
   "tailwindCSS.emmetCompletions": true,
@@ -70,13 +72,20 @@
   ],
   "json.schemas": [
     {
-      "fileMatch": ["../release-notes.json"],
+      "fileMatch": [ "../release-notes.json" ],
       "url": "../release-notes-schema.json"
     }
   ],
-  "editor.tokenColorCustomizations": {
-    "comments": "",
-    "textMateRules": []
+  "typescript.tsdk": "node_modules\\typescript\\lib",
+  "files.readonlyInclude": {
+    "**/routeTree.gen.ts": true
   },
-  "typescript.tsdk": "node_modules\\typescript\\lib"
+  "editor.tokenColorCustomizations": {
+    "comments": "#657bae",
+    "textMateRules": [ ]
+  },
+  "editor.wordWrap": "off",
+  "window.zoomLevel": -1,
+  "gutterpreview.imagePreviewMaxWidth": 0,
+  "editor.defaultFormatter": "oxc.oxc-vscode"
 }

@@ -1,34 +1,18 @@
 import fs from 'fs/promises';
 import path from 'path';
+
+import { importDatabase } from '@main/db/db';
 import type { OpenDialogOptions } from 'electron';
 
-import { restartApp, sendMessageToRenderer, showOpenDialog } from '../main';
 import logger from '../logger';
+import { restartApp, sendMessageToRenderer, showOpenDialog } from '../main';
 import copyDir from '../utils/copyDir';
 import { songCoversFolderPath } from './exportAppData';
-import {
-  setSongsData,
-  setArtistsData,
-  setPlaylistData,
-  setAlbumsData,
-  setGenresData,
-  setBlacklist,
-  saveListeningData,
-  saveUserData,
-  setPaletteData
-} from '../filesystem';
+import { type ExportedUserPreferences, importUserPreferences } from './userPreferencesExportImport';
 
-const requiredItemsForImport = [
-  'songs.json',
-  'artists.json',
-  'playlists.json',
-  'genres.json',
-  'albums.json',
-  'userData.json',
-  'song_covers'
-];
+const requiredItemsForImport = ['nora.pglite.db.sql', 'song_covers'];
 
-const optionalItemsForImport = ['localStorageData.json', 'blacklist.json', 'listening_data.json'];
+const optionalItemsForImport = ['local_storage.json', 'user_preferences.json'];
 
 const DEFAULT_EXPORT_DIALOG_OPTIONS: OpenDialogOptions = {
   title: `Select a Destination where you saved Nora's Exported App Data`,
@@ -38,101 +22,57 @@ const DEFAULT_EXPORT_DIALOG_OPTIONS: OpenDialogOptions = {
 
 const importRequiredData = async (importDir: string) => {
   try {
-    // SONG DATA
-    const songDataString = await fs.readFile(path.join(importDir, 'songs.json'), {
+    // DATABASE IMPORT
+    const dbQuery = await fs.readFile(path.join(importDir, 'nora.pglite.db.sql'), {
       encoding: 'utf-8'
     });
-    const songData: SavableSongData[] = JSON.parse(songDataString).songs;
-
-    // PALETTE DATA
-    const paletteDataString = await fs.readFile(path.join(importDir, 'palettes.json'), {
-      encoding: 'utf-8'
-    });
-    const paletteData: PaletteData[] = JSON.parse(paletteDataString).palettes;
-
-    // ARTIST DATA
-    const artistDataString = await fs.readFile(path.join(importDir, 'artists.json'), {
-      encoding: 'utf-8'
-    });
-    const artistData: SavableArtist[] = JSON.parse(artistDataString).artists;
-
-    // PLAYLIST DATA
-    const playlistDataString = await fs.readFile(path.join(importDir, 'playlists.json'), {
-      encoding: 'utf-8'
-    });
-    const playlistData: SavablePlaylist[] = JSON.parse(playlistDataString).playlists;
-
-    // ALBUM DATA
-    const albumDataString = await fs.readFile(path.join(importDir, 'albums.json'), {
-      encoding: 'utf-8'
-    });
-    const albumData: SavableAlbum[] = JSON.parse(albumDataString).albums;
-
-    // GENRE DATA
-    const genreDataString = await fs.readFile(path.join(importDir, 'genres.json'), {
-      encoding: 'utf-8'
-    });
-    const genreData: SavableGenre[] = JSON.parse(genreDataString).genres;
-
-    // USER DATA
-    const userDataString = await fs.readFile(path.join(importDir, 'userData.json'), {
-      encoding: 'utf-8'
-    });
-    const { userData } = JSON.parse(userDataString);
+    await importDatabase(dbQuery);
 
     // SONG COVERS
     await copyDir(path.join(importDir, 'song_covers'), songCoversFolderPath);
-
-    // SAVING IMPORTED DATA
-    setSongsData(songData);
-    setPaletteData(paletteData);
-    setArtistsData(artistData);
-    setPlaylistData(playlistData);
-    setAlbumsData(albumData);
-    setGenresData(genreData);
-    saveUserData(userData as UserData);
   } catch (error) {
-    logger.error('Failed to copy required data from import destination', { error, importDir });
+    logger.error('Failed to copy required data from import destination', {
+      error,
+      importDir
+    });
   }
 };
 const importOptionalData = async (
   entries: string[],
   importDir: string
-): Promise<LocalStorage | undefined> => {
+): Promise<{ localStorageData?: LocalStorage; userPreferences?: ExportedUserPreferences }> => {
   try {
-    // LISTENING DATA
-    if (entries.includes('listening_data.json')) {
-      const listeningDataString = await fs.readFile(path.join(importDir, 'listening_data.json'), {
-        encoding: 'utf-8'
-      });
-      const blacklistData: SongListeningData[] = JSON.parse(listeningDataString).listeningData;
-      saveListeningData(blacklistData);
-    }
-
-    // BLACKLIST DATA
-    if (entries.includes('blacklist.json')) {
-      const blacklistDataString = await fs.readFile(path.join(importDir, 'blacklist.json'), {
-        encoding: 'utf-8'
-      });
-      const blacklistData: Blacklist = JSON.parse(blacklistDataString).blacklists;
-      setBlacklist(blacklistData);
-    }
+    const result: {
+      localStorageData?: LocalStorage;
+      userPreferences?: ExportedUserPreferences;
+    } = {};
 
     // LOCAL STORAGE DATA
-    if (entries.includes('localStorageData.json')) {
-      const localStorageDataString = await fs.readFile(
-        path.join(importDir, 'localStorageData.json'),
+    if (entries.includes('local_storage.json')) {
+      const localStorageDataString = await fs.readFile(path.join(importDir, 'local_storage.json'), {
+        encoding: 'utf-8'
+      });
+      result.localStorageData = JSON.parse(localStorageDataString);
+    }
+
+    // USER PREFERENCES DATA
+    if (entries.includes('user_preferences.json')) {
+      const userPreferencesString = await fs.readFile(
+        path.join(importDir, 'user_preferences.json'),
         {
           encoding: 'utf-8'
         }
       );
-      const localStorageData: LocalStorage = JSON.parse(localStorageDataString);
-      return localStorageData;
+      result.userPreferences = JSON.parse(userPreferencesString);
     }
-    return undefined;
+
+    return result;
   } catch (error) {
-    logger.error('Failed to copy optional data from import destination', { error, importDir });
-    return undefined;
+    logger.error('Failed to copy optional data from import destination', {
+      error,
+      importDir
+    });
+    return {};
   }
 };
 
@@ -163,16 +103,30 @@ const importAppData = async () => {
 
       if (doesRequiredItemsExist) {
         let localStorageData: LocalStorage | undefined;
-        if (availableOptionalEntries.length > 0)
-          localStorageData = await importOptionalData(availableOptionalEntries, importDir);
+        let userPreferences: ExportedUserPreferences | undefined;
+
+        if (availableOptionalEntries.length > 0) {
+          const optionalData = await importOptionalData(availableOptionalEntries, importDir);
+          localStorageData = optionalData.localStorageData;
+          userPreferences = optionalData.userPreferences;
+        }
+
         await importRequiredData(importDir);
+
+        // Import user preferences if available
+        if (userPreferences) {
+          await importUserPreferences(userPreferences);
+          logger.info('Imported user preferences from backup');
+        }
 
         logger.info('Successfully imported app data.');
         sendMessageToRenderer({ messageCode: 'APPDATA_IMPORT_SUCCESS' });
 
         if (localStorageData) {
           logger.info('Successfully imported app data. Restarting app in 5 seconds');
-          sendMessageToRenderer({ messageCode: 'APPDATA_IMPORT_SUCCESS_WITH_PENDING_RESTART' });
+          sendMessageToRenderer({
+            messageCode: 'APPDATA_IMPORT_SUCCESS_WITH_PENDING_RESTART'
+          });
           setTimeout(restartFunc, 5000);
           return localStorageData;
         }
@@ -181,7 +135,9 @@ const importAppData = async () => {
       logger.error('Failed to import app data. Missing required files in the selected folder.', {
         missingEntries
       });
-      return sendMessageToRenderer({ messageCode: 'APPDATA_IMPORT_FAILED_DUE_TO_MISSING_FILES' });
+      return sendMessageToRenderer({
+        messageCode: 'APPDATA_IMPORT_FAILED_DUE_TO_MISSING_FILES'
+      });
     }
     return logger.debug('User cancelled the prompt to select the import data.');
   } catch (error) {

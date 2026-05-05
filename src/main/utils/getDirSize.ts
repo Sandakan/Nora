@@ -1,8 +1,9 @@
 import fs from 'fs/promises';
 import path from 'path';
+
+import logger from '../logger';
 import { isAnErrorWithCode } from './isAnErrorWithCode';
 import isPathADir from './isPathADir';
-import logger from '../logger';
 
 const getDirSize = async (dir: string) => {
   try {
@@ -17,7 +18,7 @@ const getDirSize = async (dir: string) => {
           const { size } = await fs.stat(filepath);
           return size;
         }
-      } catch (error) {
+      } catch {
         logger.error('Failed to calculate dir size of a directory.');
       }
       return 0;

@@ -1,16 +1,18 @@
 /* eslint-disable promise/catch-or-return */
 
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { SpecialPlaylists } from '@common/playlists.enum';
+import { playlistQuery } from '@renderer/queries/playlists';
+import { useSuspenseQuery } from '@tanstack/react-query';
+import { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-
-import Checkbox from '../Checkbox';
 import Button from '../Button';
+import Checkbox from '../Checkbox';
 import Img from '../Img';
 
 interface AddSongsToPlaylistProp {
-  songIds: string[];
+  songIds: number[];
   title?: string;
 }
 
@@ -27,10 +29,10 @@ const SelectablePlaylist = (props: SelectablePlaylistProp) => {
 
   return (
     <div
-      className={`playlist appear-from-bottom group ${playlistId} mb-6 mr-4 flex h-52 w-[9.5rem] flex-col justify-between rounded-xl p-4 text-font-color-black dark:text-font-color-white ${
+      className={`playlist appear-from-bottom group ${playlistId} text-font-color-black dark:text-font-color-white mr-4 mb-6 flex h-52 w-38 flex-col justify-between rounded-xl p-4 ${
         isChecked
-          ? 'bg-background-color-3 !text-font-color-black dark:bg-dark-background-color-3 dark:!text-font-color-black'
-          : 'hover:bg-background-color-2 hover:dark:bg-dark-background-color-2'
+          ? 'bg-background-color-3 text-font-color-black! dark:bg-dark-background-color-3 dark:text-font-color-black!'
+          : 'hover:bg-background-color-2 dark:hover:bg-dark-background-color-2'
       }`}
       onClick={() => playlistCheckedStateUpdateFunc(!isChecked)}
       onKeyDown={() => playlistCheckedStateUpdateFunc(!isChecked)}
@@ -39,10 +41,10 @@ const SelectablePlaylist = (props: SelectablePlaylistProp) => {
     >
       <div className="playlist-cover-and-checkbox-container relative h-[70%] overflow-hidden">
         <Checkbox
-          id={playlistId}
+          id={String(playlistId)}
           checkedStateUpdateFunction={playlistCheckedStateUpdateFunc}
           isChecked={isChecked}
-          className="absolute bottom-3 right-3"
+          className="absolute right-3 bottom-3"
         />
         <div className="playlist-cover-container h-full cursor-pointer overflow-hidden rounded-lg">
           <Img
@@ -55,7 +57,7 @@ const SelectablePlaylist = (props: SelectablePlaylistProp) => {
       </div>
       <div className="playlist-info-container">
         <div
-          className="title playlist-title w-full overflow-hidden overflow-ellipsis whitespace-nowrap text-xl"
+          className="title playlist-title w-full overflow-hidden text-xl text-ellipsis whitespace-nowrap"
           title={name}
         >
           {name}
@@ -68,41 +70,25 @@ const SelectablePlaylist = (props: SelectablePlaylistProp) => {
   );
 };
 
-interface SelectPlaylist extends Playlist {
-  isSelected: boolean;
-}
-
 const AddSongsToPlaylistsPrompt = (props: AddSongsToPlaylistProp) => {
   const { changePromptMenuData, addNewNotifications } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { songIds } = props;
-  const [playlists, setPlaylists] = useState([] as SelectPlaylist[]);
+  const { data: playlists } = useSuspenseQuery({
+    ...playlistQuery.all({ sortType: 'aToZ' }),
+    select: (data) => data.data
+  });
 
-  useEffect(() => {
-    window.api.playlistsData
-      .getPlaylistData([], undefined, true)
-      .then((res) => {
-        if (res.length > 0) {
-          setPlaylists(() =>
-            res.map((playlist) => {
-              return {
-                ...playlist,
-                isSelected:
-                  songIds.length === 1 && playlist.songs.some((id) => songIds.includes(id))
-              };
-            })
-          );
-        }
-        return undefined;
-      })
-      .catch((err) => console.error(err));
-  }, [songIds]);
+  const [selectedPlaylistIds, setSelectedPlaylistIds] = useState<number[]>([]);
 
   const addSongsToPlaylists = useCallback(() => {
-    const selectedPlaylists = playlists.filter((playlist) => playlist.isSelected);
-    const promises = selectedPlaylists.map(async (playlist) => {
-      if (playlist.playlistId === 'Favorites')
+    const selectedPlaylistsData = playlists.filter((playlist) =>
+      selectedPlaylistIds.includes(playlist.playlistId)
+    );
+    const promises = selectedPlaylistsData.map(async (playlist) => {
+      if (playlist.playlistId === SpecialPlaylists.Favorites)
+        // Special ID for Favorites playlist
         return window.api.playerControls
           .toggleLikeSongs(songIds, true)
           .catch((err) => console.error(err));
@@ -120,7 +106,7 @@ const AddSongsToPlaylistsPrompt = (props: AddSongsToPlaylistProp) => {
             iconName: 'playlist_add',
             content: t('addSongsToPlaylistsPrompt.songsAddedToPlaylists', {
               count: songIds.length,
-              playlistCount: selectedPlaylists.length
+              playlistCount: selectedPlaylistsData.length
             })
           }
         ]);
@@ -129,7 +115,7 @@ const AddSongsToPlaylistsPrompt = (props: AddSongsToPlaylistProp) => {
       .finally(() => {
         changePromptMenuData(false);
       });
-  }, [playlists, songIds, addNewNotifications, t, changePromptMenuData]);
+  }, [playlists, songIds, selectedPlaylistIds, addNewNotifications, t, changePromptMenuData]);
 
   const playlistComponents = useMemo(
     () =>
@@ -143,14 +129,13 @@ const AddSongsToPlaylistsPrompt = (props: AddSongsToPlaylistProp) => {
                 songs={playlist.songs}
                 artworkPaths={playlist.artworkPaths}
                 isArtworkAvailable={playlist.isArtworkAvailable}
-                isChecked={playlist.isSelected}
+                isChecked={selectedPlaylistIds.includes(playlist.playlistId)}
                 playlistCheckedStateUpdateFunc={(state) => {
-                  setPlaylists((prevData) => {
-                    return prevData.map((data) => {
-                      if (data.playlistId === playlist.playlistId)
-                        return { ...data, isSelected: state };
-                      return data;
-                    });
+                  setSelectedPlaylistIds((prevData) => {
+                    if (state) {
+                      return [...prevData, playlist.playlistId];
+                    }
+                    return prevData.filter((id) => id !== playlist.playlistId);
                   });
                 }}
                 key={playlist.playlistId}
@@ -158,17 +143,14 @@ const AddSongsToPlaylistsPrompt = (props: AddSongsToPlaylistProp) => {
             );
           })
         : [],
-    [playlists]
+    [playlists, selectedPlaylistIds]
   );
 
-  const noOfSelectedPlaylists = useMemo(
-    () => playlists.filter((playlist) => playlist.isSelected).length,
-    [playlists]
-  );
+  const noOfSelectedPlaylists = useMemo(() => selectedPlaylistIds.length, [playlists]);
 
   return (
     <>
-      <div className="title-container mb-4 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center pr-4 text-3xl font-medium">
         {t('addSongsToPlaylistsPrompt.selectPlaylistsToAdd', { count: songIds.length })}
       </div>
       {songIds.length > 1 && <p>&bull; {t('addSongsToPlaylistsPrompt.duplicationNotice')}</p>}
@@ -176,7 +158,7 @@ const AddSongsToPlaylistsPrompt = (props: AddSongsToPlaylistProp) => {
         <div className="playlists-container mt-4 flex h-full flex-wrap">{playlistComponents}</div>
       )}
       <div className="buttons-and-other-info-container flex items-center justify-end">
-        <span className="mr-12 text-font-color-highlight dark:text-dark-font-color-highlight">
+        <span className="text-font-color-highlight dark:text-dark-font-color-highlight mr-12">
           {t('common.selectionWithCount', { count: noOfSelectedPlaylists })}
         </span>
         <div className="buttons-container flex">
@@ -189,7 +171,7 @@ const AddSongsToPlaylistsPrompt = (props: AddSongsToPlaylistProp) => {
             label={t('song.addToPlaylists')}
             iconName="playlist_add"
             clickHandler={addSongsToPlaylists}
-            className="!bg-background-color-3 px-6 text-font-color-black dark:!bg-dark-background-color-3 dark:!text-font-color-black"
+            className="bg-background-color-3! text-font-color-black dark:bg-dark-background-color-3! dark:text-font-color-black! px-6"
           />
         </div>
       </div>

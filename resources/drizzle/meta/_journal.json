@@ -1,0 +1,27 @@
+{
+	"version": "7",
+	"dialect": "postgresql",
+	"entries": [
+		{
+			"idx": 0,
+			"version": "7",
+			"when": 1761368199897,
+			"tag": "0000_init",
+			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "7",
+			"when": 1768031138355,
+			"tag": "0001_add_user_preferences",
+			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "7",
+			"when": 1775380800000,
+			"tag": "0002_add_zoom_factor_to_user_settings",
+			"breakpoints": true
+		}
+	]
+}

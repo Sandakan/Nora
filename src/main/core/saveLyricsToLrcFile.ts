@@ -1,8 +1,8 @@
-import path from 'path';
 import fs from 'fs/promises';
+import path from 'path';
 
-import logger from '../logger';
-import { getUserData } from '../filesystem';
+import { getUserSettings } from '@main/db/queries/settings';
+
 import { version } from '../../../package.json';
 import {
   getAlbumFromLyricsString,
@@ -13,6 +13,7 @@ import {
   getOffsetFromLyricsString,
   getTitleFromLyricsString
 } from '../../common/parseLyrics';
+import logger from '../logger';
 
 export const getLrcLyricsMetadata = (songLyrics: SongLyrics) => {
   const { unparsedLyrics } = songLyrics.lyrics;
@@ -117,8 +118,8 @@ const convertLyricsToLrcFormat = (songLyrics: SongLyrics) => {
   return lyricsArr.join('\n');
 };
 
-const getLrcFileSaveDirectory = (songPathWithoutProtocol: string, lrcFileName: string) => {
-  const userData = getUserData();
+const getLrcFileSaveDirectory = async (songPathWithoutProtocol: string, lrcFileName: string) => {
+  const userData = await getUserSettings();
   const extensionDroppedLrcFileName = lrcFileName.replaceAll(path.extname(lrcFileName), '');
   let saveDirectory: string;
 
@@ -133,7 +134,7 @@ const getLrcFileSaveDirectory = (songPathWithoutProtocol: string, lrcFileName: s
 
 const saveLyricsToLRCFile = async (songPathWithoutProtocol: string, songLyrics: SongLyrics) => {
   const songFileName = path.basename(songPathWithoutProtocol);
-  const lrcFilePath = getLrcFileSaveDirectory(songPathWithoutProtocol, songFileName);
+  const lrcFilePath = await getLrcFileSaveDirectory(songPathWithoutProtocol, songFileName);
 
   const lrcFormattedLyrics = convertLyricsToLrcFormat(songLyrics);
 

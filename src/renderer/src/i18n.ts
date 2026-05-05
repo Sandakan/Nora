@@ -14,19 +14,19 @@ export const resources = {
 
 // export type LanguageCodes = keyof typeof resources;
 
-export const supportedLanguagesDropdownOptions: DropdownOption<LanguageCodes>[] = [
+export const supportedLanguagesDropdownOptions: DropdownOption<keyof typeof resources>[] = [
   { label: `English`, value: 'en' },
   { label: `Turkish`, value: 'tr' },
   { label: `Vietnamese`, value: 'vi' }
   // { label: `Francais`, value: 'fr' },
 ];
 
-const userData = await window.api.userData.getUserData();
+const { language } = await window.api.settings.getUserSettings();
 
 // eslint-disable-next-line import/no-named-as-default-member
 i18n.use(initReactI18next).init({
   resources,
-  lng: userData.language ?? 'en',
+  lng: language ?? 'en',
   fallbackLng: 'en',
   interpolation: { escapeValue: false } // React is safe from xss attacks
 });

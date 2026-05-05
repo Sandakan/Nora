@@ -5,9 +5,60 @@
 
   * This file previously had 3200+ lines.
 */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@config '../../../../../tailwind.config.js';
+
+/*
+  The default border color has changed to `currentColor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+}
+
+@theme {
+  --dialog-appear: dialogAppear 1s ease-out forwards;
+  --dialog-dissappear: dialogDisappear 1s ease-in forwards;
+
+  @keyframes dialogAppear {
+    from {
+      opacity: 0;
+      visibility: hidden;
+      transform: translate(-50%, -50%) scale(1.1);
+    }
+
+    to {
+      opacity: 1;
+      visibility: visible;
+      transform: translate(-50%, -50%) scale(1);
+    }
+  }
+
+  @keyframes dialogDisappear {
+    from {
+      opacity: 1;
+      visibility: visible;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    to {
+      opacity: 0;
+      visibility: hidden;
+      transform: translate(-50%, -50%) scale(1.1);
+    }
+  }
+}
 
 /* ? POPPINS FONT CONFIG */
 @font-face {
@@ -103,9 +154,6 @@ html {
 }
 
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
   font-family: 'Poppins', 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif;
 }
 
@@ -181,7 +229,7 @@ body,
   background-color: var(--background-color-1);
 }
 
-body,
+/* body,
 body * {
   transition:
     color var(--transition-duration-0_2s) linear,
@@ -198,7 +246,7 @@ body * {
   -o-transition:
     color var(--transition-duration-0_2s) linear,
     background-color var(--transition-duration-0_2s) linear;
-}
+} */
 
 /* ? APP DARK THEME STYLES */
 .App.dark,
@@ -235,7 +283,7 @@ body * {
   -webkit-user-select: none;
 }
 
-:is(.previousPageBtn, .forwardPageBtn, .goToHomePageBtn).available,
+:is(.previousPageBtn, .forwardPageBtn, .goToHomePageBtn).app-region-no-drag,
 .mini-player-title-bar .special-controls-container,
 .special-controls-and-indicators-container :is(.indicators-container, .special-controls-container),
 .window-controls-container :is(.minimize-btn, .maximize-btn, .close-btn),
@@ -452,34 +500,6 @@ input[type='checkbox']:checked ~ .checkmark .icon {
 @keyframes loading {
   50% {
     transform: translateX(var(--loading-bar-width));
-  }
-}
-
-@keyframes dialogAppear {
-  from {
-    opacity: 0;
-    visibility: hidden;
-    transform: translate(-50%, -50%) scale(1.1);
-  }
-
-  to {
-    opacity: 1;
-    visibility: visible;
-    transform: translate(-50%, -50%) scale(1);
-  }
-}
-
-@keyframes dialogDisappear {
-  from {
-    opacity: 1;
-    visibility: visible;
-    transform: translate(-50%, -50%) scale(1);
-  }
-
-  to {
-    opacity: 0;
-    visibility: hidden;
-    transform: translate(-50%, -50%) scale(1.1);
   }
 }
 

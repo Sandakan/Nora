@@ -1,10 +1,10 @@
+import { getUserSettings } from '@main/db/queries/settings';
+
 import { decrypt } from '../../utils/safeStorage';
-import { getUserData } from '../../filesystem';
 
-const getLastFmAuthData = () => {
-  const userData = getUserData();
+const getLastFmAuthData = async () => {
+  const { lastFmSessionKey: encryptedSessionKey } = await getUserSettings();
 
-  const encryptedSessionKey = userData.lastFmSessionData?.key;
   if (!encryptedSessionKey) throw new Error('Encrypted LastFM Session Key not found');
   const SESSION_KEY = decrypt(encryptedSessionKey);
 

@@ -1,19 +1,18 @@
-import { useContext, useMemo } from 'react';
+import { useNavigate } from '@tanstack/react-router';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import useSelectAllHandler from '../../hooks/useSelectAllHandler';
 
+import DefaultSongCover from '../../assets/images/webp/song_cover_default.webp';
+import useSelectAllHandler from '../../hooks/useSelectAllHandler';
 import Button from '../Button';
 import SecondaryContainer from '../SecondaryContainer';
 import SongCard from '../SongsPage/SongCard';
 
-import DefaultSongCover from '../../assets/images/webp/song_cover_default.webp';
-
 type Props = { recentlyPlayedSongs: SongData[]; noOfVisibleSongs: number };
 
 const RecentlyPlayedSongs = (props: Props) => {
-  const { changeCurrentActivePage } = useContext(AppUpdateContext);
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const { recentlyPlayedSongs, noOfVisibleSongs = 3 } = props;
   const MAX_SONG_LIMIT = 15;
@@ -58,7 +57,7 @@ const RecentlyPlayedSongs = (props: Props) => {
           }}
         >
           <>
-            <div className="title-container mb-4 mt-1 flex items-center justify-between text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+            <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center justify-between text-2xl font-medium">
               {t('homePage.recentlyPlayedSongs')}
 
               <Button
@@ -67,9 +66,8 @@ const RecentlyPlayedSongs = (props: Props) => {
                 iconName="apps"
                 className="show-all-btn text-sm font-normal"
                 clickHandler={() =>
-                  changeCurrentActivePage('PlaylistInfo', {
-                    playlistId: 'History',
-                    sortingOrder: 'addedOrder'
+                  navigate({
+                    to: '/main-player/playlists/history'
                   })
                 }
               />

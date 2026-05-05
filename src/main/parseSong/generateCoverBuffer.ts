@@ -1,13 +1,11 @@
-import path from 'path';
 import fs from 'fs/promises';
+import path from 'path';
 
-import * as musicMetaData from 'music-metadata';
 import sharp from 'sharp';
 
-import logger from '../logger';
-import { DEFAULT_ARTWORK_SAVE_LOCATION } from '../filesystem';
-
 import songCoverImage from '../../renderer/src/assets/images/webp/song_cover_default.webp?asset&asarUnpack';
+import { DEFAULT_ARTWORK_SAVE_LOCATION } from '../filesystem';
+import logger from '../logger';
 
 let defaultSongCoverImgBuffer: Buffer;
 
@@ -27,18 +25,15 @@ export const getDefaultSongCoverImgBuffer = async () => {
 };
 
 export const generateCoverBuffer = async (
-  cover?: musicMetaData.IPicture[] | string,
-  noDefaultOnUndefined = false
+  cover?: string,
+  appendDefaultArtworkLocationToPath = true
 ) => {
-  if (
-    (cover === undefined || (typeof cover !== 'string' && cover[0].data === undefined)) &&
-    noDefaultOnUndefined
-  )
-    return undefined;
   if (cover) {
     if (typeof cover === 'string') {
       try {
-        const imgPath = path.join(DEFAULT_ARTWORK_SAVE_LOCATION, cover);
+        const imgPath = appendDefaultArtworkLocationToPath
+          ? path.join(DEFAULT_ARTWORK_SAVE_LOCATION, cover)
+          : cover;
         const isWebp = path.extname(imgPath) === '.webp';
 
         const buffer = isWebp ? await sharp(imgPath).png().toBuffer() : await fs.readFile(imgPath);
@@ -49,19 +44,6 @@ export const generateCoverBuffer = async (
         return getDefaultSongCoverImgBuffer();
       }
     }
-
-    if (cover[0].format === 'image/webp') {
-      try {
-        const buffer = await sharp(cover[0].data).png().toBuffer();
-        return buffer;
-      } catch (error) {
-        logger.debug('Failed to get artwork buffer of a song.', { error });
-        return getDefaultSongCoverImgBuffer();
-      }
-    }
-
-    // return cover[0].data;
-    return Buffer.from(cover[0].data.buffer, 0, cover[0].data.length);
   }
 
   return getDefaultSongCoverImgBuffer();

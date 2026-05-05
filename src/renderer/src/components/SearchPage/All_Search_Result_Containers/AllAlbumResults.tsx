@@ -1,9 +1,10 @@
-import { Album } from '../../AlbumsPage/Album';
+import { store } from '@renderer/store/store';
+import { useStore } from '@tanstack/react-store';
+
 import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
+import { Album } from '../../AlbumsPage/Album';
 import SecondaryContainer from '../../SecondaryContainer';
 import VirtualizedGrid from '../../VirtualizedGrid';
-import { store } from '@renderer/store';
-import { useStore } from '@tanstack/react-store';
 
 type Props = { albumData: Album[] };
 
@@ -17,7 +18,7 @@ const AllAlbumResults = (prop: Props) => {
   const selectAllHandler = useSelectAllHandler(albumData, 'album', 'albumId');
 
   return (
-    <SecondaryContainer className="albums-container h-full w-full flex-grow">
+    <SecondaryContainer className="albums-container h-full w-full grow">
       {albumData && albumData.length > 0 && (
         <VirtualizedGrid
           data={albumData}

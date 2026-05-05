@@ -1,7 +1,7 @@
-import updateSongId3Tags from '../updateSongId3Tags';
-import sendSongID3Tags from './sendSongId3Tags';
 import { getArtistsData } from '../filesystem';
 import logger from '../logger';
+import updateSongId3Tags from '../updateSong/updateSongId3Tags';
+import sendSongID3Tags from './sendSongMetadata';
 
 const featArtistsRegex = /\(? ?feat.? (?<featArtists>[\w&, À-ÿ\d]+)\)?/gm;
 
@@ -9,7 +9,7 @@ const getArtist = (
   name: string
 ): {
   name: string;
-  artistId?: string;
+  artistId?: number;
 } => {
   const artists = getArtistsData();
   const lowerCasedName = name.toLowerCase();
@@ -21,7 +21,7 @@ const getArtist = (
 };
 
 const resolveFeaturingArtists = async (
-  songId: string,
+  songId: number,
   featArtistNames: string[],
   removeFeatInfoInTitle = false
 ): Promise<UpdateSongDataResult> => {

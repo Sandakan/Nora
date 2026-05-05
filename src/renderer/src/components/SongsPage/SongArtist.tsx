@@ -1,9 +1,12 @@
+import { useNavigate } from '@tanstack/react-router';
 import { type CSSProperties, useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import NavLink from '../NavLink';
 
 interface SongArtistProp {
-  artistId: string;
+  artistId: number;
   name: string;
   isFromKnownSource?: boolean;
   className?: string;
@@ -11,34 +14,29 @@ interface SongArtistProp {
 }
 
 function SongArtist(props: SongArtistProp) {
-  const { updateContextMenuData, changeCurrentActivePage } = useContext(AppUpdateContext);
+  const { updateContextMenuData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const { artistId, name, className = '', isFromKnownSource = true, style } = props;
 
   const showArtistInfoPage = useCallback(
-    (artistName: string, id: string) =>
-      changeCurrentActivePage('ArtistInfo', {
-        artistName,
-        artistId: id
-      }),
-    [changeCurrentActivePage]
+    () =>
+      navigate({ to: '/main-player/artists/$artistId', params: { artistId: String(artistId) } }),
+    [artistId, navigate]
   );
 
   return (
-    <span
-      className={`text-xs font-normal outline-1 -outline-offset-1 focus-visible:!outline ${
+    <NavLink
+      to="/main-player/artists/$artistId"
+      params={{ artistId: String(artistId) }}
+      className={`text-xs font-normal -outline-offset-1 focus-visible:outline! ${
         isFromKnownSource && 'hover:underline'
       } ${className}`}
+      disabled={!isFromKnownSource}
       key={artistId}
       title={name}
       style={style}
-      onClick={() => isFromKnownSource && showArtistInfoPage(name, artistId)}
-      onKeyDown={(e) =>
-        e.key === 'Enter' && isFromKnownSource && showArtistInfoPage(name, artistId)
-      }
-      role="button"
-      tabIndex={0}
       onContextMenu={(e) => {
         e.stopPropagation();
         if (isFromKnownSource) {
@@ -48,7 +46,7 @@ function SongArtist(props: SongArtistProp) {
               {
                 label: t('common.info'),
                 iconName: 'info',
-                handlerFunction: () => showArtistInfoPage(name, artistId)
+                handlerFunction: () => showArtistInfoPage()
               }
             ],
             e.pageX,
@@ -58,7 +56,7 @@ function SongArtist(props: SongArtistProp) {
       }}
     >
       {name}
-    </span>
+    </NavLink>
   );
 }
 

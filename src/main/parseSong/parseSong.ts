@@ -1,33 +1,28 @@
 import fs from 'fs/promises';
 import path from 'path';
-import * as musicMetaData from 'music-metadata';
 
-import { generateRandomId } from '../utils/randomId';
+import { db } from '@main/db/db';
+import { linkArtworksToSong } from '@main/db/queries/artworks';
+import { isSongWithPathAvailable, saveSong } from '@main/db/queries/songs';
+import type { songs } from '@main/db/schema';
+import { File } from 'node-taglib-sharp';
+
 import logger from '../logger';
-import {
-  getAlbumsData,
-  getArtistsData,
-  getGenresData,
-  getSongsData,
-  setAlbumsData,
-  setArtistsData,
-  setGenresData,
-  setSongsData
-} from '../filesystem';
 import { dataUpdateEvent, sendMessageToRenderer } from '../main';
 import { storeArtworks } from '../other/artworks';
 import { generatePalettes } from '../other/generatePalette';
-import { isSongBlacklisted } from '../utils/isBlacklisted';
+import manageAlbumArtistOfParsedSong from './manageAlbumArtistOfParsedSong';
 import manageAlbumsOfParsedSong from './manageAlbumsOfParsedSong';
 import manageArtistsOfParsedSong from './manageArtistsOfParsedSong';
 import manageGenresOfParsedSong from './manageGenresOfParsedSong';
-import manageAlbumArtistOfParsedSong from './manageAlbumArtistOfParsedSong';
 // import { timeEnd, timeStart } from './utils/measureTimeUsage';
 
-let pathsQueue: string[] = [];
+const pathsQueue = new Set<string>();
+export const ARTIST_SEPARATOR_REGEX = /[,&]/gm;
 
 export const tryToParseSong = (
   songPath: string,
+  folderId?: number,
   reparseToSync = false,
   generatePalettesAfterParsing = false,
   noRendererMessages = false
@@ -35,20 +30,20 @@ export const tryToParseSong = (
   let timeOutId: NodeJS.Timeout;
 
   const songFileName = path.basename(songPath);
-  const isSongInPathsQueue = pathsQueue.includes(songPath);
+  const isSongInPathsQueue = pathsQueue.has(songPath);
 
   // Here paths queue is used to prevent parsing the same song multiple times due to the event being fired multiple times for the same song even before they are parsed. So if the same is going to start the parsing process, it will stop the process if the song path is in the songPaths queue.
   if (!isSongInPathsQueue) {
-    pathsQueue.push(songPath);
+    pathsQueue.add(songPath);
 
     const tryParseSong = async (errRetryCount = 0): Promise<void> => {
       try {
-        await parseSong(songPath, reparseToSync, noRendererMessages);
+        await parseSong(songPath, folderId, reparseToSync, noRendererMessages);
         logger.debug(`song added to the library.`, { songPath });
         if (generatePalettesAfterParsing) setTimeout(generatePalettes, 1500);
 
         dataUpdateEvent('songs/newSong');
-        pathsQueue = pathsQueue.filter((x) => x !== songPath);
+        pathsQueue.delete(songPath);
       } catch (error) {
         if (errRetryCount < 5) {
           // THIS ERROR OCCURRED WHEN THE APP STARTS READING DATA WHILE THE SONG IS STILL WRITING TO THE DISK. POSSIBLE SOLUTION IS TO SET A TIMEOUT AND REDO THE PROCESS.
@@ -56,7 +51,11 @@ export const tryToParseSong = (
           logger.debug('Failed to parse song data. Retrying in 5 seconds. (error: read error)', {
             error
           });
-          timeOutId = setTimeout(() => tryParseSong(errRetryCount + 1), 5000);
+          timeOutId = setTimeout(() => {
+            tryParseSong(errRetryCount + 1).catch(() => {
+              // Error will be handled in the recursive call
+            });
+          }, 5000);
         } else {
           logger.debug(
             `Failed to parse a newly added song while the app is open. Failed 5 of 5 retry efforts.`,
@@ -66,6 +65,7 @@ export const tryToParseSong = (
             messageCode: 'PARSE_FAILED',
             data: { name: songFileName }
           });
+          pathsQueue.delete(songPath);
           throw error;
         }
       }
@@ -82,20 +82,28 @@ export const tryToParseSong = (
   return undefined;
 };
 
-let parseQueue: string[] = [];
+const parseQueue = new Set<string>();
 
 export const parseSong = async (
   absoluteFilePath: string,
+  folderId?: number,
   reparseToSync = false,
   noRendererMessages = false
 ): Promise<SongData | undefined> => {
   // const start = timeStart();
   logger.debug(`Starting the parsing process of song '${path.basename(absoluteFilePath)}'.`);
 
-  const songs = getSongsData();
-  const artists = getArtistsData();
-  const albums = getAlbumsData();
-  const genres = getGenresData();
+  // Check if already parsing this file (prevents concurrent parses of same file)
+  const isSongInParseQueue = parseQueue.has(absoluteFilePath);
+  if (isSongInParseQueue) {
+    logger.debug('Song not eligable for parsing.', {
+      absoluteFilePath,
+      reason: {
+        isSongInParseQueue
+      }
+    });
+    return undefined;
+  }
 
   // const start1 = timeEnd(start, 'Time to fetch songs,artists,albums,genres');
 
@@ -111,43 +119,31 @@ export const parseSong = async (
     //  logger.debug('song stream not readable', undefined, 'ERROR');
 
     const stats = await fs.stat(absoluteFilePath);
-    const metadata: musicMetaData.IAudioMetadata = await musicMetaData.parseFile(absoluteFilePath);
+    const file = File.createFromPath(absoluteFilePath);
+    const metadata = file.tag;
 
     // songFileStream.close();
 
     // const start2 = timeEnd(start1, 'Time to fetch stats and parse metadata');
 
-    const isSongAvailable = songs.some((song) => song.path === absoluteFilePath);
-    const isSongInParseQueue = parseQueue.includes(absoluteFilePath);
-    const isSongEligibleForParsing =
-      Array.isArray(songs) &&
-      metadata &&
-      (reparseToSync || !isSongAvailable) &&
-      !isSongInParseQueue;
+    const isSongAvailable = await isSongWithPathAvailable(absoluteFilePath);
+    const isSongEligibleForParsing = metadata && (reparseToSync || !isSongAvailable);
 
     if (isSongEligibleForParsing) {
-      parseQueue.push(absoluteFilePath);
+      parseQueue.add(absoluteFilePath);
 
       // timeEnd(start2, 'Time to start organizing metadata');
 
       const songTitle =
-        metadata.common.title ||
+        metadata.title ||
         path.basename(absoluteFilePath, path.extname(absoluteFilePath)) ||
         'Unknown Title';
 
       // const start3 = timeStart();
 
-      const songId = generateRandomId();
-
       // const start4 = timeEnd(start3, 'Time to generate random id');
 
       // const coverBuffer = await generateCoverBuffer(metadata.common.picture);
-
-      const songArtworkPaths = await storeArtworks(
-        songId,
-        'songs',
-        metadata.common?.picture?.at(0) ? Buffer.from(metadata.common.picture[0].data) : undefined
-      );
 
       // const start6 = timeEnd(start4, 'Time to generate store artwork');
 
@@ -158,157 +154,160 @@ export const parseSong = async (
       // if (metadata.common.lyrics)
       //   consolelogger.debug(metadata.common.title, metadata.common.lyrics);
 
-      const songInfo: SavableSongData = {
-        songId,
+      const artistsData = getArtistNamesFromSong(metadata.performers.join(', '));
+      const albumArtistsData = getArtistNamesFromSong(metadata.albumArtists.join(', '));
+      const albumData = getAlbumInfoFromSong(metadata.album);
+      const genresData = getGenreInfoFromSong(metadata.genres);
+
+      const songInfo: typeof songs.$inferInsert = {
         title: songTitle,
-        artists: getArtistNamesFromSong(metadata.common.artist),
-        albumArtists: getArtistNamesFromSong(metadata.common.albumartist),
-        duration: getSongDurationFromSong(metadata.format.duration),
-        album: getAlbumInfoFromSong(metadata.common.album),
-        genres: getGenreInfoFromSong(metadata.common.genre),
-        year: metadata.common?.year,
-        isAFavorite: false,
-        isArtworkAvailable: !songArtworkPaths.isDefaultArtwork,
+        duration: getSongDurationFromSong(file.properties.durationMilliseconds / 1000).toFixed(2),
+        year: metadata.year || undefined,
         path: absoluteFilePath,
-        sampleRate: metadata.format.sampleRate,
-        bitrate: metadata?.format?.bitrate,
-        noOfChannels: metadata?.format?.numberOfChannels,
-        discNo: metadata?.common?.disk?.no ?? undefined,
-        trackNo: metadata?.common?.track?.no ?? undefined,
-        addedDate: new Date().getTime(),
-        createdDate: stats ? stats.birthtime.getTime() : undefined,
-        modifiedDate: stats ? stats.mtime.getTime() : undefined
+        sampleRate: file.properties.audioSampleRate,
+        bitRate: file.properties.audioBitrate ? Math.ceil(file.properties.audioBitrate) : undefined,
+        noOfChannels: file.properties.audioChannels,
+        diskNumber: metadata.disc ?? undefined,
+        trackNumber: metadata.track ?? undefined,
+        fileCreatedAt: stats ? stats.birthtime : new Date(),
+        fileModifiedAt: stats ? stats.mtime : new Date(),
+        folderId
       };
 
-      // const start8 = timeEnd(start6, 'Time to create songInfo basic object');
+      const res = await db.transaction(async (trx) => {
+        const songData = await saveSong(songInfo, trx);
 
-      const { updatedAlbums, relevantAlbum, newAlbum } = manageAlbumsOfParsedSong(
-        albums,
-        songInfo,
-        songArtworkPaths
-      );
+        const artworkData = await storeArtworks(
+          'songs',
+          metadata.pictures?.at(0) ? metadata.pictures[0].data.toByteArray() : undefined,
+          trx
+        );
 
-      // const start9 = timeEnd(start8, 'Time to manage albums');
+        const linkedArtworks = await linkArtworksToSong(
+          artworkData.map((artwork) => ({
+            songId: songData.id,
+            artworkId: artwork.id
+          })),
+          trx
+        );
 
-      if (songInfo.album && relevantAlbum)
-        songInfo.album = {
-          name: relevantAlbum.title,
-          albumId: relevantAlbum.albumId
+        // const start8 = timeEnd(start6, 'Time to create songInfo basic object');
+
+        const { relevantAlbum, newAlbum } = await manageAlbumsOfParsedSong(
+          {
+            songId: songData.id,
+            artworkId: artworkData[0].id,
+            songYear: songData.year,
+            artists: artistsData,
+            albumArtists: albumArtistsData,
+            albumName: albumData
+          },
+          trx
+        );
+        // const start9 = timeEnd(start8, 'Time to manage albums');
+
+        // if (songInfo.album && relevantAlbum)
+        //   songInfo.album = {
+        //     name: relevantAlbum.title,
+        //     albumId: relevantAlbum.albumId
+        //   };
+
+        // const start10 = timeEnd(
+        //   start9,
+        //   'Time to update album data in songInfo object'
+        // );
+        const { newArtists, relevantArtists } = await manageArtistsOfParsedSong(
+          {
+            artworkId: artworkData[0].id,
+            songId: songData.id,
+            songArtists: artistsData
+          },
+          trx
+        );
+        // const start11 = timeEnd(start10, 'Time to manage artists');
+
+        const { newAlbumArtists, relevantAlbumArtists } = await manageAlbumArtistOfParsedSong(
+          { albumArtists: albumArtistsData, albumId: relevantAlbum?.id },
+          trx
+        );
+
+        // const start12 = timeEnd(
+        //   start11,
+        //   'Time to update artist data in songInfo object'
+        // );
+
+        const { newGenres, relevantGenres } = await manageGenresOfParsedSong(
+          {
+            artworkId: artworkData[0].id,
+            songId: songData.id,
+            songGenres: genresData
+          },
+          trx
+        );
+
+        return {
+          songData,
+          linkedArtworks,
+          relevantAlbum,
+          newAlbum,
+          newArtists,
+          relevantArtists,
+          newGenres,
+          relevantGenres,
+          relevantAlbumArtists,
+          newAlbumArtists
         };
-
-      // const start10 = timeEnd(
-      //   start9,
-      //   'Time to update album data in songInfo object'
-      // );
-      const {
-        updatedArtists: updatedSongArtists,
-        relevantArtists,
-        newArtists
-      } = manageArtistsOfParsedSong(artists, songInfo, songArtworkPaths);
-      // const start11 = timeEnd(start10, 'Time to manage artists');
-
-      const { relevantAlbumArtists, updatedArtists } = manageAlbumArtistOfParsedSong(
-        updatedSongArtists,
-        songInfo,
-        songArtworkPaths,
-        relevantAlbum
-      );
-
-      if (songInfo.artists && relevantArtists.length > 0) {
-        songInfo.artists = relevantArtists.map((artist) => ({
-          artistId: artist.artistId,
-          name: artist.name
-        }));
-      }
-
-      if (relevantAlbumArtists.length > 0) {
-        songInfo.albumArtists = relevantAlbumArtists.map((albumArtist) => ({
-          artistId: albumArtist.artistId,
-          name: albumArtist.name
-        }));
-      }
-
-      if (relevantAlbum) {
-        const allRelevantArtists = relevantArtists.concat(relevantAlbumArtists);
-
-        for (const relevantArtist of allRelevantArtists) {
-          relevantAlbum.artists?.forEach((artist) => {
-            if (artist.name === relevantArtist.name && artist.artistId.length === 0)
-              artist.artistId = relevantArtist.artistId;
-          });
-        }
-      }
-
-      // const start12 = timeEnd(
-      //   start11,
-      //   'Time to update artist data in songInfo object'
-      // );
-
-      const { updatedGenres, relevantGenres, newGenres } = manageGenresOfParsedSong(
-        genres,
-        songInfo,
-        songArtworkPaths
-      );
-
-      // const start13 = timeEnd(start12, 'Time to manage genres');
-
-      songInfo.genres = relevantGenres.map((genre) => {
-        return { name: genre.name, genreId: genre.genreId };
       });
 
-      // const start14 = timeEnd(
-      //   start13,
-      //   'Time to update genre data in songInfo object'
-      // );
-
-      songs.push(songInfo);
       logger.debug(`Song parsing completed successfully.`, {
-        songId,
-        title: songTitle,
-        artistCount: updatedArtists.length,
-        albumCount: updatedAlbums.length,
-        genreCount: updatedGenres.length
+        songId: res.songData.id,
+        title: res.songData.title,
+        artistCount: res.relevantArtists.length,
+        albumCount: 1,
+        genreCount: res.relevantGenres.length
       });
-      setSongsData(songs);
-      setArtistsData(updatedArtists);
-      setAlbumsData(updatedAlbums);
-      setGenresData(updatedGenres);
-      dataUpdateEvent('songs/newSong', [songId]);
 
-      parseQueue = parseQueue.filter((dir) => dir !== absoluteFilePath);
+      dataUpdateEvent('songs/newSong', [res.songData.id]);
+
+      parseQueue.delete(absoluteFilePath);
 
       // timeEnd(start14, 'Time to reach end of the parsing process.');
 
       // const start15 = timeEnd(start, 'Time to finish the parsing process.');
 
-      if (newArtists.length > 0)
+      if (res.newArtists.length > 0) {
         dataUpdateEvent(
           'artists/newArtist',
-          newArtists.map((x) => x.artistId)
+          res.newArtists.map((x) => x.id)
         );
-      if (relevantArtists.length > 0)
+      }
+      if (res.relevantArtists.length > 0) {
         dataUpdateEvent(
           'artists',
-          relevantArtists.map((x) => x.artistId)
+          res.relevantArtists.map((x) => x.id)
         );
-      if (newAlbum) dataUpdateEvent('albums/newAlbum', [newAlbum.albumId]);
-      if (relevantAlbum) dataUpdateEvent('albums', [relevantAlbum.albumId]);
-      if (newGenres.length > 0)
+      }
+      if (res.newAlbum) dataUpdateEvent('albums/newAlbum', [res.newAlbum.id]);
+      if (res.relevantAlbum) dataUpdateEvent('albums', [res.relevantAlbum.id]);
+      if (res.newGenres.length > 0) {
         dataUpdateEvent(
           'genres/newGenre',
-          newGenres.map((x) => x.genreId)
+          res.newGenres.map((x) => x.id)
         );
-      if (relevantGenres.length > 0)
+      }
+      if (res.relevantGenres.length > 0) {
         dataUpdateEvent(
           'genres',
-          relevantGenres.map((x) => x.genreId)
+          res.relevantGenres.map((x) => x.id)
         );
+      }
 
-      if (!noRendererMessages)
+      if (!noRendererMessages) {
         sendMessageToRenderer({
           messageCode: 'PARSE_SUCCESSFUL',
-          data: { name: songTitle, songId }
+          data: { name: songTitle, songId: res.songData.id }
         });
+      }
 
       // timeEnd(
       //   start15,
@@ -317,39 +316,36 @@ export const parseSong = async (
 
       // timeEnd(start, 'Total time taken for the parsing process.');
 
-      return {
-        ...songInfo,
-        artworkPaths: songArtworkPaths,
-        isBlacklisted: isSongBlacklisted(songId, absoluteFilePath)
-      };
+      return undefined;
     }
     logger.debug('Song not eligable for parsing.', {
       absoluteFilePath,
       reason: {
-        isSongArrayAvailable: Array.isArray(songs),
-        isSongInParseQueue
+        isSongArrayAvailable: true
       }
     });
     return undefined;
   } catch (error) {
-    logger.error(`Error occurred when parsing a song.`, { error, absoluteFilePath });
+    logger.error(`Error occurred when parsing a song.`, {
+      error,
+      absoluteFilePath
+    });
     throw error;
   } finally {
-    parseQueue = parseQueue.filter((dir) => dir !== absoluteFilePath);
+    parseQueue.delete(absoluteFilePath);
   }
 };
 
 export const getArtistNamesFromSong = (artists?: string) => {
   if (artists) {
-    const splittedArtists = artists.split(',');
-    const splittedArtistsInfo = splittedArtists.map((x) => ({
-      name: x.trim(),
-      artistId: ''
-    }));
+    const splittedArtists = artists
+      .split(ARTIST_SEPARATOR_REGEX)
+      .map((artist) => artist.trim())
+      .filter((a) => a.length > 0);
 
-    return splittedArtistsInfo;
+    return splittedArtists;
   }
-  return undefined;
+  return [];
 };
 
 export const getSongDurationFromSong = (duration?: number) => {
@@ -361,12 +357,12 @@ export const getSongDurationFromSong = (duration?: number) => {
 };
 
 export const getAlbumInfoFromSong = (album?: string) => {
-  if (album) return { name: album, albumId: '' };
+  if (album) return album;
   return undefined;
 };
 
 export const getGenreInfoFromSong = (genres?: string[]) => {
-  if (Array.isArray(genres) && genres.length > 0)
-    return genres.map((genre) => ({ name: genre, genreId: '' }));
-  return undefined;
+  if (Array.isArray(genres) && genres.length > 0) return genres;
+
+  return [];
 };

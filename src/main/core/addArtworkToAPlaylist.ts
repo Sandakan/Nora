@@ -1,38 +1,37 @@
-import { removeArtwork, storeArtworks } from '../other/artworks';
-import { getPlaylistData, setPlaylistData } from '../filesystem';
-import { dataUpdateEvent } from '../main';
-import { getPlaylistArtworkPath, resetArtworkCache } from '../fs/resolveFilePaths';
+import { db } from '@main/db/db';
+import { linkArtworkToPlaylist } from '@main/db/queries/artworks';
+import { generateLocalArtworkBuffer } from '@main/updateSong/updateSongId3Tags';
+
+import { resetArtworkCache } from '../fs/resolveFilePaths';
 import logger from '../logger';
+import { dataUpdateEvent } from '../main';
+import { storeArtworks } from '../other/artworks';
 
-const removePreviousArtwork = async (playlistId: string) => {
-  const artworkPaths = getPlaylistArtworkPath(playlistId, true);
-  removeArtwork(artworkPaths, 'playlist');
-  return logger.debug('Successfully removed previous playlist artwork.');
-};
+// const removePreviousArtwork = async (playlistId: string) => {
+//   const artworkPaths = getPlaylistArtworkPath(playlistId, true);
+//   removeArtwork(artworkPaths, 'playlist');
+//   return logger.debug('Successfully removed previous playlist artwork.');
+// };
 
-const addArtworkToAPlaylist = async (playlistId: string, artworkPath: string) => {
-  const playlists = getPlaylistData();
+const addArtworkToAPlaylist = async (playlistId: number, artworkPath: string) => {
+  try {
+    const buffer = await generateLocalArtworkBuffer(artworkPath || '');
 
-  for (let i = 0; i < playlists.length; i += 1) {
-    if (playlists[i].playlistId === playlistId) {
-      try {
-        if (playlists[i].isArtworkAvailable) await removePreviousArtwork(playlistId);
+    await db.transaction(async (trx) => {
+      // TODO: Remove previous artwork if exists
+      const artworks = await storeArtworks('playlist', buffer, trx);
 
-        const artworkPaths = await storeArtworks(playlistId, 'playlist', artworkPath);
-
-        playlists[i].isArtworkAvailable = !artworkPaths.isDefaultArtwork;
-
-        resetArtworkCache('playlistArtworks');
-        setPlaylistData(playlists);
-        dataUpdateEvent('playlists');
-
-        return artworkPaths;
-      } catch (error) {
-        logger.error('Failed to add an artwork to a playlist.', { error });
+      if (artworks && artworks.length > 0) {
+        await linkArtworkToPlaylist(playlistId, artworks[0].id, trx);
       }
-    }
+    });
+    resetArtworkCache('playlistArtworks');
+    dataUpdateEvent('playlists');
+
+    return undefined;
+  } catch (error) {
+    logger.error('Failed to add an artwork to a playlist.', { error });
   }
-  return undefined;
 };
 
 export default addArtworkToAPlaylist;

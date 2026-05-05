@@ -1,19 +1,23 @@
+import { getPlaylistById, updatePlaylistName } from '@main/db/queries/playlists';
+
 import logger from '../logger';
-import { getPlaylistData, setPlaylistData } from '../filesystem';
 import { sendMessageToRenderer } from '../main';
 
-export default async (playlistId: string, newName: string) => {
-  const playlists = getPlaylistData();
+export default async (playlistId: number, newName: string) => {
+  try {
+    const playlist = await getPlaylistById(playlistId);
 
-  for (let i = 0; i < playlists.length; i += 1) {
-    if (playlistId === playlists[i].playlistId) {
-      playlists[i].name = newName;
-      setPlaylistData(playlists);
+    if (playlist) {
+      await updatePlaylistName(playlist.id, newName);
 
       logger.info('Playlist renamed successfully.', { playlistId, newName });
       return sendMessageToRenderer({ messageCode: 'PLAYLIST_RENAME_SUCCESS' });
     }
+
+    logger.warn('Playlist not found.', { playlistId, newName });
+    return sendMessageToRenderer({ messageCode: 'PLAYLIST_NOT_FOUND' });
+  } catch (error) {
+    logger.error('Failed to rename the playlist.', { playlistId, newName, error });
+    return sendMessageToRenderer({ messageCode: 'PLAYLIST_RENAME_FAILED' });
   }
-  logger.warn('Playlist not found.', { playlistId, newName });
-  return sendMessageToRenderer({ messageCode: 'PLAYLIST_NOT_FOUND' });
 };
