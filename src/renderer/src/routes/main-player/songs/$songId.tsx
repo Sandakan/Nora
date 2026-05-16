@@ -237,7 +237,7 @@ function SongInfoPage() {
     }, [listeningData]);
 
   return songInfo ? (
-    <MainContainer className="song-information-container pt-8 [scrollbar-gutter:stable]">
+    <MainContainer className="song-information-container [scrollbar-gutter:stable] pt-8">
       <>
         <div className="appear-from-bottom container flex">
           <div className="song-cover-container mr-8 h-60 w-fit overflow-hidden rounded-md">

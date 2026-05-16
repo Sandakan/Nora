@@ -1,7 +1,7 @@
 import { settingsQuery } from '@renderer/queries/settings';
 import { updateRouteState } from '@renderer/store/routeStateStore';
-import { useNavigate } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from '@tanstack/react-router';
 import { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -198,7 +198,9 @@ const SongLyricsEditorInput = (props: Props) => {
         search: {
           songTitle,
           isEditingEnhancedSyncedLyrics:
-            currentLyricsType === 'synced' && synchronizedLyrics ? isLyricsEnhancedSynced(synchronizedLyrics) : false
+            currentLyricsType === 'synced' && synchronizedLyrics
+              ? isLyricsEnhancedSynced(synchronizedLyrics)
+              : false
         }
       });
     }

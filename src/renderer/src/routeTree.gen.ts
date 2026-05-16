@@ -33,7 +33,7 @@ import { Route as MainPlayerFoldersFolderPathRouteImport } from './routes/main-p
 import { Route as MainPlayerArtistsArtistIdRouteImport } from './routes/main-player/artists/$artistId'
 import { Route as MainPlayerAlbumsAlbumIdRouteImport } from './routes/main-player/albums/$albumId'
 import { Route as MainPlayerSearchAllIndexRouteImport } from './routes/main-player/search/all/index'
-import { Route as MainPlayerSongsSongIdEditRouteImport } from './routes/main-player/songs/$songId/edit'
+import { Route as MainPlayerSongsSongIdEditRouteImport } from './routes/main-player/songs/$songId.edit'
 import { Route as MainPlayerLyricsEditorSongIdRouteImport } from './routes/main-player/lyrics/editor/$songId'
 
 const MainPlayerRouteRoute = MainPlayerRouteRouteImport.update({
