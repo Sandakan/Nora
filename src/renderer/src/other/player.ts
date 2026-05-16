@@ -55,6 +55,9 @@ class AudioPlayer {
     this.audio = new Audio();
     this.queue = queue;
 
+    // MediaElementAudioSourceNode requires a CORS-enabled media fetch.
+    this.audio.crossOrigin = 'anonymous';
+
     this.audio.preload = 'auto';
     this.audio.defaultPlaybackRate = 1.0;
 
@@ -204,8 +207,10 @@ class AudioPlayer {
         storage.playback.setCurrentSongOptions('songId', songData.songId);
       }
 
-      // Set audio source with cache-busting timestamp
-      this.audio.src = `${songData.path}?ts=${Date.now()}`;
+      // Set audio source with a single cache-busting timestamp.
+      const audioSourceUrl = new URL(songData.path);
+      audioSourceUrl.searchParams.set('ts', `${Date.now()}`);
+      this.audio.src = audioSourceUrl.toString();
 
       // Load is synchronous, no need to await
       this.audio.load();
