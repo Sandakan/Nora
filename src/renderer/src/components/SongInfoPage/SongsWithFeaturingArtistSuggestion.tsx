@@ -1,4 +1,5 @@
 import { store } from '@renderer/store/store';
+import { useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
@@ -19,6 +20,7 @@ type Props = {
 const featArtistsRegex = /\(? ?feat.? (?<featArtists>[^\n\t()]+)\)?/gm;
 
 const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
+  const navigate = useNavigate();
   const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
   const currentSongData = useStore(store, (state) => state.currentSongData);
   const { ignoredFeaturingArtists, addIgnoredFeaturingArtistMutation } = useUserPreferences();
@@ -232,12 +234,10 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
                   iconClassName="material-icons-round-outlined"
                   label={t('featArtistsSuggestion.editInMetadataEditingPage')}
                   clickHandler={() => {
-                    // TODO: Implement song tags editor page navigation
-                    // changeCurrentActivePage('SongTagsEditor', {
-                    //   songId,
-                    //   songPath: path,
-                    //   isKnownSource: true
-                    // });
+                    navigate({
+                      to: '/main-player/songs/$songId/edit',
+                      params: { songId: String(songId) }
+                    });
                   }}
                 />
                 <Button

@@ -49,7 +49,11 @@ type GenreResult = { genreId?: number; name: string; artworkPath?: string };
 
 const { metadataEditingSupportedExtensions } = appPreferences;
 
-function SongTagsEditingPage() {
+interface SongTagsEditingPageProps {
+  routeParams?: { songId: number };
+}
+
+function SongTagsEditingPage({ routeParams }: SongTagsEditingPageProps = {}) {
   const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
   const currentSongData = useStore(store, (state) => state.currentSongData);
 
@@ -79,15 +83,21 @@ function SongTagsEditingPage() {
   const [genreResults, setGenreResults] = useState<GenreResult[]>([]);
 
   const [isMetadataUpdatesPending, setIsMetadataUpdatesPending] = useState(false);
+  const [fetchedSongPath, setFetchedSongPath] = useState<string>('');
 
-  const { songId, songPath, isKnownSource } = useMemo(
-    () => ({
+  // Support both new route params and old Redux state for backwards compatibility
+  const { songId, songPath, isKnownSource } = useMemo(() => {
+    if (routeParams?.songId) {
+      // New routing: use fetched path if available
+      return { songId: routeParams.songId, songPath: fetchedSongPath, isKnownSource: true };
+    }
+    // Old routing (deprecated): from Redux state
+    return {
       songId: currentlyActivePage.data?.songId as number,
       songPath: currentlyActivePage.data?.songPath as string,
       isKnownSource: (currentlyActivePage.data?.isKnownSource as boolean) ?? true
-    }),
-    [currentlyActivePage.data]
-  );
+    };
+  }, [routeParams?.songId, fetchedSongPath, currentlyActivePage.data]);
 
   const pathExt = useMemo(() => window.api.utils.getExtension(songPath), [songPath]);
 
@@ -121,6 +131,21 @@ function SongTagsEditingPage() {
   useEffect(() => {
     getSongId3Tags();
   }, [getSongId3Tags]);
+
+  // Fetch song path when using new route params
+  useEffect(() => {
+    if (routeParams?.songId && !fetchedSongPath) {
+      window.api.audioLibraryControls
+        .getSongInfo([routeParams.songId])
+        .then((songs) => {
+          if (songs && songs.length > 0) {
+            setFetchedSongPath(songs[0].path);
+          }
+          return undefined;
+        })
+        .catch((err) => console.error('Failed to fetch song path:', err));
+    }
+  }, [routeParams?.songId, fetchedSongPath]);
 
   useEffect(() => {
     const manageMetadataUpdatesInSongsTagsEditingPage = (e: Event) => {
