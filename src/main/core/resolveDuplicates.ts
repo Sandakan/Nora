@@ -1,16 +1,21 @@
+import { db } from '@main/db/db';
+import { getAllAlbums, linkArtistToAlbum } from '@main/db/queries/albums';
 import {
-  getAlbumsData,
-  getArtistsData,
-  getSongsData,
-  setAlbumsData,
-  setSongsData
-} from '../filesystem';
+  getAllArtists,
+  getLinkedSongArtist,
+  linkSongToArtist,
+  unlinkSongFromArtist,
+  deleteArtist,
+  getLinkedAlbumArtist
+} from '@main/db/queries/artists';
+import { getAllSongs } from '@main/db/queries/songs';
+
+import { dataUpdateEvent } from '../main';
 import updateSongId3Tags from '../updateSong/updateSongId3Tags';
+import { convertToArtist, convertToAlbum, convertToSongData } from '../utils/convert';
 import sendSongID3Tags from './sendSongMetadata';
 
-export const getSelectedArtist = (artistIdOrName: string | number) => {
-  const artists = getArtistsData();
-
+export const getSelectedArtist = (artistIdOrName: string | number, artists: Artist[]) => {
   for (let index = 0; index < artists.length; index += 1) {
     const artist = artists[index];
 
@@ -23,11 +28,15 @@ export const getSelectedArtist = (artistIdOrName: string | number) => {
 export const resolveArtistDuplicates = async (selectedArtistId: number, duplicateIds: number[]) => {
   let updatedData: UpdateSongDataResult | undefined;
 
-  const artists = getArtistsData();
-  const songs = getSongsData();
-  const albums = getAlbumsData();
+  const artistsRes = await getAllArtists({});
+  const songsRes = await getAllSongs({});
+  const albumsRes = await getAllAlbums({});
 
-  const selectedArtist = getSelectedArtist(selectedArtistId)?.artist;
+  const artists = artistsRes.data.map(convertToArtist);
+  const songs = songsRes.data.map(convertToSongData);
+  const albums = albumsRes.data.map(convertToAlbum);
+
+  const selectedArtist = getSelectedArtist(selectedArtistId, artists)?.artist;
 
   if (selectedArtist) {
     for (const artist of artists) {
@@ -38,13 +47,13 @@ export const resolveArtistDuplicates = async (selectedArtistId: number, duplicat
         // copy all the songs from the duplicate artist to the selected artist.
         selectedArtist?.songs.push(...artistSongs);
 
-        const artistAlbums = artist.albums || [];
+        const artistAlbums = (artist.albums || []) as { albumId: number; title?: string }[];
 
         // loop through albums
         for (const album of albums) {
           // check if the albums are linked to the duplicate artist
           const isAlbumLinkedToDuplicateArtist = artistAlbums.some(
-            (artistAlbum) => artistAlbum.albumId === album.albumId
+            (artistAlbum: { albumId: number }) => artistAlbum.albumId === album.albumId
           );
           if (isAlbumLinkedToDuplicateArtist) {
             if (album.artists) {
@@ -90,8 +99,34 @@ export const resolveArtistDuplicates = async (selectedArtistId: number, duplicat
       }
     }
 
-    setSongsData(songs);
-    setAlbumsData(albums);
+    // Persist changes to the database: link songs/albums to the selected artist and remove duplicates
+    for (const artist of artists) {
+      if (!duplicateIds.includes(artist.artistId)) continue;
+
+      const duplicateArtistId = artist.artistId;
+
+      // Link songs from duplicate artist to selected artist and unlink from duplicate
+      for (const artistSong of artist.songs) {
+        const songId = artistSong.songId;
+        const alreadyLinked = await getLinkedSongArtist(songId, selectedArtist.artistId, db);
+        if (!alreadyLinked) await linkSongToArtist(selectedArtist.artistId, songId, db);
+        await unlinkSongFromArtist(duplicateArtistId, songId, db);
+      }
+
+      // Link albums to selected artist if not already linked
+      for (const album of albums) {
+        const linked = await getLinkedAlbumArtist(album.albumId, selectedArtist.artistId, db);
+        if (!linked) await linkArtistToAlbum(album.albumId, selectedArtist.artistId, db);
+      }
+
+      // Delete the duplicate artist row (cascade will remove related rows)
+      await deleteArtist(duplicateArtistId, db);
+    }
+
+    // Notify renderer of updates (they should requery DB)
+    dataUpdateEvent('artists');
+    dataUpdateEvent('albums');
+    dataUpdateEvent('songs');
     return updatedData;
   }
   return undefined;

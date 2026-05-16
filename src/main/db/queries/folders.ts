@@ -234,6 +234,17 @@ export const getBlacklistedFolders = async () => {
   return data;
 };
 
+export const getBlacklistedFolderPaths = async () => {
+  const data = await db.query.musicFolders.findMany({
+    columns: {
+      path: true
+    },
+    where: (f) => eq(f.isBlacklisted, true)
+  });
+
+  return data.map((folder) => folder.path);
+};
+
 export const isFolderBlacklisted = async (folderId: number) => {
   const data = await db.query.musicFolders.findFirst({
     where: eq(musicFolders.id, folderId)
@@ -245,5 +256,12 @@ export const addFoldersToBlacklist = async (folderIds: number[]) => {
   await db
     .update(musicFolders)
     .set({ isBlacklisted: true, isBlacklistedUpdatedAt: new Date() })
+    .where(inArray(musicFolders.id, folderIds));
+};
+
+export const removeFoldersFromBlacklist = async (folderIds: number[]) => {
+  await db
+    .update(musicFolders)
+    .set({ isBlacklisted: false, isBlacklistedUpdatedAt: new Date() })
     .where(inArray(musicFolders.id, folderIds));
 };

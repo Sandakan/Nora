@@ -72,6 +72,7 @@ export const convertToArtist = (artist: GetAllArtistsReturnType[number]) => {
       title: s.song.title,
       songId: s.song.id
     })),
+    albums: artist.albums?.map((a) => ({ title: a.album.title, albumId: a.album.id })) ?? [],
     onlineArtworkPaths: parseArtistOnlineArtworks(artworks),
     isAFavorite: artist.isFavorite
   } satisfies Artist;

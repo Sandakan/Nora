@@ -1,34 +1,46 @@
 import path from 'path';
 
-import { getBlacklistData } from '../filesystem';
+import { getBlacklistedSongIds } from '@main/db/queries/blacklist';
+import { getBlacklistedFolderPaths } from '@main/db/queries/folders';
 
-export const isParentFolderBlacklisted = (folderPath: string) => {
-  const { folderBlacklist } = getBlacklistData();
+const normalizePath = (folderPath: string) => path.normalize(folderPath);
 
-  const isParentBlacklisted = folderBlacklist.some(
-    (blacklistedFolderPath) => path.dirname(folderPath) === blacklistedFolderPath
+export const isParentFolderBlacklisted = async (folderPath: string) => {
+  const blacklistedFolderPaths = await getBlacklistedFolderPaths();
+  const normalizedParentPath = normalizePath(path.dirname(folderPath));
+
+  return blacklistedFolderPaths.some(
+    (blacklistedFolderPath) => normalizePath(blacklistedFolderPath) === normalizedParentPath
   );
-
-  return isParentBlacklisted;
 };
 
-export const isFolderBlacklisted = (folderPath: string) => {
-  const { folderBlacklist } = getBlacklistData();
+export const isFolderBlacklisted = async (folderPath: string) => {
+  const blacklistedFolderPaths = await getBlacklistedFolderPaths();
+  const normalizedFolderPath = normalizePath(folderPath);
+  const normalizedParentPath = normalizePath(path.dirname(folderPath));
 
-  const isBlacklisted = folderBlacklist.includes(path.normalize(folderPath));
-  const isParentBlacklisted = isParentFolderBlacklisted(folderPath);
+  const isBlacklisted = blacklistedFolderPaths.some(
+    (blacklistedFolderPath) => normalizePath(blacklistedFolderPath) === normalizedFolderPath
+  );
+  const isParentBlacklisted = blacklistedFolderPaths.some(
+    (blacklistedFolderPath) => normalizePath(blacklistedFolderPath) === normalizedParentPath
+  );
 
   return isBlacklisted || isParentBlacklisted;
 };
 
-export const isSongBlacklisted = (songId: number, songPath: string) => {
-  const { folderBlacklist, songBlacklist } = getBlacklistData();
+export const isSongBlacklisted = async (songId: number, songPath: string) => {
+  const [blacklistedFolderPaths, blacklistedSongIds] = await Promise.all([
+    getBlacklistedFolderPaths(),
+    getBlacklistedSongIds()
+  ]);
 
-  const isFolderInBlacklist = folderBlacklist.some((folderPath) =>
-    path.normalize(songPath).includes(path.normalize(folderPath))
+  const normalizedSongPath = normalizePath(songPath);
+  const isFolderInBlacklist = blacklistedFolderPaths.some((folderPath) =>
+    normalizedSongPath.includes(normalizePath(folderPath))
   );
 
-  const isSongInBlacklist = songBlacklist.includes(songId);
+  const isSongInBlacklist = blacklistedSongIds.includes(songId);
 
   return isFolderInBlacklist || isSongInBlacklist;
 };

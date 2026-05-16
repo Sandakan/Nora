@@ -1,3 +1,4 @@
+import getBlacklistData from '@main/core/getBlacklistData';
 import { app, BrowserWindow, ipcMain, powerMonitor, shell } from 'electron';
 
 import addArtworkToAPlaylist from './core/addArtworkToAPlaylist';
@@ -68,7 +69,6 @@ import {
   getUserEqualizerPreset,
   saveUserEqualizerPreset
 } from './db/queries/userPreferences';
-import { getBlacklistData } from './filesystem';
 import { removeDefaultAppProtocolFromFilePath } from './fs/resolveFilePaths';
 import logger, { logFilePath } from './logger';
 import {

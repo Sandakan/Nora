@@ -1,11 +1,3 @@
-import { getBlacklistData } from '../filesystem';
-
-const isFolderBlacklisted = (folderPath: string) => {
-  const { folderBlacklist } = getBlacklistData();
-
-  return folderBlacklist.includes(folderPath);
-};
-
 const sortAtoZ = <T extends MusicFolder[]>(arr: T) =>
   arr.sort((a, b) =>
     a.path.toLowerCase().replace(/\W/gi, '') > b.path.toLowerCase().replace(/\W/gi, '')
@@ -42,10 +34,10 @@ const sortFolders = <T extends MusicFolder[]>(musicFolders: T, sortType: FolderS
         a.songIds.length > b.songIds.length ? 1 : a.songIds.length < b.songIds.length ? -1 : 0
       );
     if (sortType === 'blacklistedFolders')
-      return sortAtoZ(musicFolders.filter((folder) => isFolderBlacklisted(folder.path)));
+      return sortAtoZ(musicFolders.filter((folder) => folder.isBlacklisted));
 
     if (sortType === 'whitelistedFolders')
-      return sortAtoZ(musicFolders.filter((folder) => !isFolderBlacklisted(folder.path)));
+      return sortAtoZ(musicFolders.filter((folder) => !folder.isBlacklisted));
   }
   return musicFolders;
 };
