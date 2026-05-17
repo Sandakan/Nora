@@ -803,7 +803,7 @@ const updateSongId3TagsOfUnknownSource = async (
           isAFavorite: false,
           path: songOutsideLibraryData.path,
           isKnownSource: false,
-          isBlacklisted: isSongBlacklisted(
+          isBlacklisted: await isSongBlacklisted(
             songOutsideLibraryData.songId,
             songOutsideLibraryData.path
           )
@@ -1146,7 +1146,7 @@ const updateSongId3Tags = async (
           artworkPath: getSongArtworkPath(songId, !!artworkBuffer).artworkPath,
           duration: parseFloat(updatedSong.duration),
           isAFavorite: updatedSong.isFavorite,
-          isBlacklisted: isSongBlacklisted(songId, updatedSong.path),
+          isBlacklisted: await isSongBlacklisted(songId, updatedSong.path),
           path: updatedSong.path,
           isKnownSource: true
         };

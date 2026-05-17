@@ -1,6 +1,6 @@
 import { store } from '@renderer/store/store';
 import { useNavigate } from '@tanstack/react-router';
-import { useStore } from '@tanstack/react-store';
+import { useSelector } from '@tanstack/react-store';
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import { lazy, useCallback, useContext } from 'react';
@@ -14,9 +14,8 @@ import VolumeSlider from '../VolumeSlider';
 const AppShortcutsPrompt = lazy(() => import('../SettingsPage/AppShortcutsPrompt'));
 
 const OtherSongControlsContainer = () => {
-  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
-  const isMuted = useStore(store, (state) => state.player.volume.isMuted);
-  const volume = useStore(store, (state) => state.player.volume.value);
+  const isMuted = useSelector(store, (state) => state.player.volume.isMuted);
+  const volume = useSelector(store, (state) => state.player.volume.value);
 
   const { updatePlayerType, toggleMutedState, updateContextMenuData, changePromptMenuData } =
     useContext(AppUpdateContext);
@@ -81,15 +80,13 @@ const OtherSongControlsContainer = () => {
     <div className="other-controls-container flex items-center justify-end">
       <NavLink
         to="/main-player/queue"
-        className={`queue-btn text-font-color-black text-opacity-60 after:bg-font-color-highlight dark:text-font-color-white dark:after:bg-dark-font-color-highlight !mr-6 !rounded-none !border-0 bg-transparent !p-0 outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:opacity-0 after:transition-opacity hover:bg-transparent focus-visible:!outline lg:hidden dark:bg-transparent dark:hover:bg-transparent ${
-          currentlyActivePage.pageTitle === 'CurrentQueue' && 'after:opacity-100'
-        }`}
+        className={`queue-btn text-font-color-black text-opacity-60 after:bg-font-color-highlight dark:text-font-color-white dark:after:bg-dark-font-color-highlight mr-6! rounded-none! border-0! bg-transparent p-0! outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:opacity-0 after:transition-opacity hover:bg-transparent focus-visible:outline! lg:hidden dark:bg-transparent dark:hover:bg-transparent`}
         title={t('player.currentQueue')}
       >
         {({ isActive }) => {
           return (
             <span
-              className={`${isActive ? 'material-icons-round' : 'material-icons-round-outlined'} group-[.active]:text-font-color-highlight! dark:group-[.active]:text-dark-font-color-highlight! !text-2xl opacity-60 transition-[color,_opacity] group-[.active]:opacity-100! hover:opacity-80`}
+              className={`${isActive ? 'material-icons-round' : 'material-icons-round-outlined'} group-[.active]:text-font-color-highlight! dark:group-[.active]:text-dark-font-color-highlight! text-[1.3rem] opacity-60 transition-[color,opacity] group-[.active]:opacity-100! hover:opacity-80`}
             >
               table_rows
             </span>
@@ -97,24 +94,40 @@ const OtherSongControlsContainer = () => {
         }}
       </NavLink>
 
-      <Button
-        className="mini-player-btn text-font-color-black text-opacity-60 dark:text-font-color-white mr-6! rounded-none! border-0! bg-transparent p-0! outline-offset-1 hover:bg-transparent focus-visible:outline! lg:hidden dark:bg-transparent dark:hover:bg-transparent"
-        clickHandler={() => updatePlayerType('mini')}
-        tooltipLabel={t('player.openInMiniPlayer')}
-        iconName="pip"
-        iconClassName="material-icons-round-outlined icon cursor-pointer text-xl text-font-color-black opacity-60 transition-opacity hover:opacity-80 dark:text-font-color-white"
-      />
+      <NavLink
+        to="/mini-player"
+        className={`full-screen-player-btn text-font-color-black text-opacity-60 after:bg-font-color-highlight dark:text-font-color-white dark:after:bg-dark-font-color-highlight mr-6! rounded-none! border-0! bg-transparent p-0! outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:opacity-0 after:transition-opacity hover:bg-transparent focus-visible:outline! lg:hidden dark:bg-transparent dark:hover:bg-transparent`}
+        title={t('player.openInMiniPlayer')}
+      >
+        {({ isActive }) => {
+          return (
+            <span
+              className={`${isActive ? 'material-icons-round' : 'material-icons-round-outlined'} group-[.active]:text-font-color-highlight! dark:group-[.active]:text-dark-font-color-highlight! text-xl! opacity-60 transition-[color,opacity] group-[.active]:opacity-100! hover:opacity-80`}
+            >
+              pip
+            </span>
+          );
+        }}
+      </NavLink>
+
+      <NavLink
+        to="/fullscreen-player"
+        className={`full-screen-player-btn text-font-color-black text-opacity-60 after:bg-font-color-highlight dark:text-font-color-white dark:after:bg-dark-font-color-highlight mr-6! rounded-none! border-0! bg-transparent p-0! outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:opacity-0 after:transition-opacity hover:bg-transparent focus-visible:outline! lg:hidden dark:bg-transparent dark:hover:bg-transparent`}
+        title={t('player.openInFullScreen')}
+      >
+        {({ isActive }) => {
+          return (
+            <span
+              className={`${isActive ? 'material-icons-round' : 'material-icons-round-outlined'} group-[.active]:text-font-color-highlight! dark:group-[.active]:text-dark-font-color-highlight! text-xl! opacity-60 transition-[color,opacity] group-[.active]:opacity-100! hover:opacity-80`}
+            >
+              fullscreen
+            </span>
+          );
+        }}
+      </NavLink>
 
       <Button
-        className="full-screen-player-btn text-font-color-black text-opacity-60 after:bg-font-color-highlight dark:text-font-color-white dark:after:bg-dark-font-color-highlight mr-6! rounded-none! border-0! bg-transparent p-0! outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:opacity-0 after:transition-opacity hover:bg-transparent focus-visible:outline! lg:hidden dark:bg-transparent dark:hover:bg-transparent"
-        tooltipLabel={t('player.openInFullScreen')}
-        iconName="fullscreen"
-        iconClassName="material-icons-round-outlined text-xl text-font-color-black opacity-60 transition-opacity hover:opacity-80 dark:text-font-color-white"
-        clickHandler={() => updatePlayerType('full')}
-      />
-
-      <Button
-        className={`volume-btn after:bg-font-color-highlight dark:after:bg-dark-font-color-highlight !mr-2 !rounded-none !border-0 bg-transparent !p-0 outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:opacity-0 after:transition-opacity hover:bg-transparent focus-visible:!outline dark:bg-transparent dark:hover:bg-transparent ${
+        className={`volume-btn after:bg-font-color-highlight dark:after:bg-dark-font-color-highlight mr-2! rounded-none! border-0! bg-transparent p-0! outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:opacity-0 after:transition-opacity hover:bg-transparent focus-visible:outline! dark:bg-transparent dark:hover:bg-transparent ${
           isMuted && 'after:opacity-100'
         }`}
         tooltipLabel={t('player.muteUnmute')}
@@ -125,7 +138,7 @@ const OtherSongControlsContainer = () => {
         clickHandler={() => toggleMutedState(!isMuted)}
       />
 
-      <div className="volume-slider-container mr-4 max-w-[6rem] min-w-[4rem] lg:mr-4">
+      <div className="volume-slider-container mr-4 max-w-24 min-w-16 lg:mr-4">
         <VolumeSlider name="player-volume-slider" id="volumeSlider" />
       </div>
       <div className="other-settings-btn text-font-color-black text-opacity-60 dark:text-font-color-white mr-4 flex cursor-pointer items-center justify-center">

@@ -1,25 +1,25 @@
 #!/usr/bin/env tsx
 /**
- * Colorize-logs.ts Simple NDJSON log colorizer and tailer for Nora logs.
+ * Colorize-logs.ts — NDJSON log colorizer and tailer for Nora
  *
- * Features:
+ * Usage: yarn colorize-logs [--path <file>] [--no-follow] [--levels <levels>] [--depth N]
+ * [--use-env-log-path] [--show-latest] [--help]
  *
- * - Parses newline-delimited JSON (NDJSON) log files.
- * - Colorizes output by log level (error/warn/info/debug/verbose).
- * - Prints a short header per entry and pretty-prints `data` as indented JSON.
- * - If --path is not provided, searches the current working directory for log files (*.log, *.ndjson,
- *   *.txt). If multiple files are found, prompts the user to select one (the latest file is
- *   selected by default).
- * - If no files are found in CWD, falls back to %APPDATA%/nora/logs or LOG_PATH from .env.
+ * Examples: yarn colorize-logs yarn colorize-logs --path ./app.log --no-follow yarn colorize-logs
+ * --levels info,debug --show-latest
  *
- * Usage: node ./scripts/colorize-logs.ts [--path <file>] [--no-follow] [--levels info,debug]
- * [--depth N] [--use-env-log-path] [--show-latest] Examples: node ./scripts/colorize-logs.ts #
- * tails latest log (CWD first, then appdata) node ./scripts/colorize-logs.ts --path ./app.log
- * --no-follow node ./scripts/colorize-logs.ts --levels info,debug node ./scripts/colorize-logs.ts
- * --use-env-log-path --no-follow # use LOG_PATH from .env file node ./scripts/colorize-logs.ts
- * --use-env-log-path --show-latest # show latest log without file selection
+ * Flags: --path, -p Path to a log file to read. --no-follow, -n Read file once and exit instead of
+ * tailing. --levels, -l Comma-separated log levels to show (info,debug,error). --depth JSON
+ * pretty-print depth for `data` (default: 2). --use-env-log-path Use LOG_PATH environment variable
+ * as log directory. --show-latest Skip selection and use the latest matching log file. --help, -h
+ * Show this help message.
  *
- * Created: 2025-12-09T14:41:55.216Z Migrated to TypeScript: 2025-12-09
+ * Notes:
+ *
+ * - If no `--path` is provided, the script searches CWD, then %APPDATA%/nora/logs.
+ * - On Windows, %APPDATA% is used; on Unix, $HOME is used.
+ *
+ * Created: 2025-12-09T14:41:55.216Z
  */
 
 import 'dotenv/config';

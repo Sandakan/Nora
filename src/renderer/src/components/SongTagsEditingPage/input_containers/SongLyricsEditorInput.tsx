@@ -1,9 +1,12 @@
 import { settingsQuery } from '@renderer/queries/settings';
+import { updateRouteState } from '@renderer/store/routeStateStore';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from '@tanstack/react-router';
 import { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import isLyricsSynced, { isLyricsEnhancedSynced } from '../../../../../common/isLyricsSynced';
+import parseLyrics from '../../../../../common/parseLyrics';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import useNetworkConnectivity from '../../../hooks/useNetworkConnectivity';
 import Button from '../../Button';
@@ -31,6 +34,7 @@ type Props = {
 };
 
 const SongLyricsEditorInput = (props: Props) => {
+  const navigate = useNavigate();
   const { data: userData } = useQuery(settingsQuery.all);
 
   const { addNewNotifications } = useContext(AppUpdateContext);
@@ -40,7 +44,7 @@ const SongLyricsEditorInput = (props: Props) => {
 
   const {
     songTitle,
-    // songId,
+    songId,
     songArtists,
     synchronizedLyrics,
     unsynchronizedLyrics,
@@ -177,23 +181,30 @@ const SongLyricsEditorInput = (props: Props) => {
   );
 
   const goToLyricsEditor = useCallback(() => {
-    if (synchronizedLyrics || unsynchronizedLyrics) {
-      // const lyrics = currentLyricsType === 'synced' ? synchronizedLyrics : unsynchronizedLyrics;
-      // const { parsedLyrics } = parseLyrics(lyrics as string);
-      // const lines: LyricData[] = parsedLyrics.map((lyric) => ({
-      //   text: lyric.originalText,
-      //   start: lyric.start,
-      //   end: lyric.end
-      // }));
-      // TODO: Implement lyrics editor page navigation
-      // changeCurrentActivePage('LyricsEditor', {
-      //   lyrics: lines,
-      //   songId,
-      //   songTitle,
-      //   isEditingEnhancedSyncedLyrics: currentLyricsType === 'synced' && isLyricsEnhancedSynced
-      // });
+    const lyricsToEdit = currentLyricsType === 'synced' ? synchronizedLyrics : unsynchronizedLyrics;
+
+    if (lyricsToEdit) {
+      const { parsedLyrics } = parseLyrics(lyricsToEdit);
+      const lines: LyricData[] = parsedLyrics.map((lyric) => ({
+        text: lyric.originalText,
+        start: lyric.start,
+        end: lyric.end
+      }));
+
+      updateRouteState('lyrics-editor', { lyrics: lines, songId });
+      navigate({
+        to: '/main-player/lyrics/editor/$songId',
+        params: { songId: String(songId) },
+        search: {
+          songTitle,
+          isEditingEnhancedSyncedLyrics:
+            currentLyricsType === 'synced' && synchronizedLyrics
+              ? isLyricsEnhancedSynced(synchronizedLyrics)
+              : false
+        }
+      });
     }
-  }, [synchronizedLyrics, unsynchronizedLyrics]);
+  }, [navigate, songId, songTitle, currentLyricsType, synchronizedLyrics, unsynchronizedLyrics]);
 
   return (
     <div className="song-lyrics-editor-container col-span-2 grid w-[95%] grid-cols-[minmax(50%,65%)_1fr] gap-8">

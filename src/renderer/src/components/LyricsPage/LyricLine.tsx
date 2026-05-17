@@ -1,8 +1,6 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import { SYNCED_LYRICS_REGEX } from '@common/isLyricsSynced';
-import { store } from '@renderer/store/store';
-import { useStore } from '@tanstack/react-store';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -18,6 +16,7 @@ interface LyricProp {
   index: number;
   syncedLyrics?: { start: number; end: number };
   isAutoScrolling?: boolean;
+  playerType?: PlayerTypes;
 }
 
 // const syncedLyricsRegex = /^\[\d+:\d{1,2}\.\d{1,3}]/gm;
@@ -35,7 +34,6 @@ const getLyricText = (lyrics: string) => {
 };
 
 const LyricLine = (props: LyricProp) => {
-  const playerType = useStore(store, (state) => state.playerType);
   // const preferences = useStore(store, (state) => state.localStorage.preferences);
 
   const { updateSongPosition, updateContextMenuData } = useContext(AppUpdateContext);
@@ -51,7 +49,8 @@ const LyricLine = (props: LyricProp) => {
     translatedLyricLines = [],
     convertedLyric,
     syncedLyrics,
-    isAutoScrolling = true
+    isAutoScrolling = true,
+    playerType = 'normal'
   } = props;
 
   const handleLyricsActivity = useCallback(
@@ -172,7 +171,7 @@ const LyricLine = (props: LyricProp) => {
         syncedLyrics
           ? `cursor-pointer blur-[1px] ${
               isInRange
-                ? 'text-font-color-highlight/100! dark:text-dark-font-color-highlight/100! scale-100! font-medium blur-none! [&>div>span]:mr-3!'
+                ? 'text-font-color-highlight! dark:text-dark-font-color-highlight! scale-100! font-medium blur-none! [&>div>span]:mr-3!'
                 : 'scale-75!'
             }`
           : 'text-font-color-black! dark:text-font-color-white! scale-100! text-4xl! font-medium blur-none! [&>div>span]:mr-3'

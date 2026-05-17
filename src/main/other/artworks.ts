@@ -1,11 +1,11 @@
 import fs from 'fs/promises';
+import fsSync from 'fs';
 import path from 'path';
 
 import { db } from '@main/db/db';
 import { deleteArtworks, saveArtworks } from '@main/db/queries/artworks';
 import type { artworks } from '@main/db/schema';
 import { app } from 'electron';
-import fsExtra from 'fs-extra';
 import sharp from 'sharp';
 
 import albumCoverImage from '../../renderer/src/assets/images/webp/album_cover_default.webp?asset';
@@ -246,8 +246,13 @@ export const clearTempArtworkFolder = () => {
   const tempFolder = path.join(app.getPath('userData'), 'temp_artworks');
 
   try {
-    if (fsExtra.pathExistsSync(tempFolder)) {
-      fsExtra.emptyDirSync(tempFolder);
+    if (fsSync.existsSync(tempFolder)) {
+      const entries = fsSync.readdirSync(tempFolder);
+
+      for (const entry of entries) {
+        fsSync.rmSync(path.join(tempFolder, entry), { recursive: true, force: true });
+      }
+
       return logger.debug('Successfully cleared the contents in the temp_folder.');
     }
     return undefined;

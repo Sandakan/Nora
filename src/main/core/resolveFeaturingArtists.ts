@@ -1,22 +1,20 @@
-import { getArtistsData } from '../filesystem';
+import { getArtistWithName } from '@main/db/queries/artists';
+
 import logger from '../logger';
 import updateSongId3Tags from '../updateSong/updateSongId3Tags';
 import sendSongID3Tags from './sendSongMetadata';
 
 const featArtistsRegex = /\(? ?feat.? (?<featArtists>[\w&, À-ÿ\d]+)\)?/gm;
 
-const getArtist = (
+const getArtist = async (
   name: string
-): {
+): Promise<{
   name: string;
   artistId?: number;
-} => {
-  const artists = getArtistsData();
-  const lowerCasedName = name.toLowerCase();
+}> => {
+  const artist = await getArtistWithName(name);
+  if (artist) return { name, artistId: artist.id };
 
-  for (const artist of artists) {
-    if (artist.name.toLowerCase() === lowerCasedName) return { name, artistId: artist.artistId };
-  }
   return { name };
 };
 
@@ -28,8 +26,8 @@ const resolveFeaturingArtists = async (
   try {
     const songTags = await sendSongID3Tags(songId, true);
 
-    const featArtists: SongTagsArtistData[] = featArtistNames.map((featArtistName) =>
-      getArtist(featArtistName)
+    const featArtists: SongTagsArtistData[] = await Promise.all(
+      featArtistNames.map((featArtistName) => getArtist(featArtistName))
     );
 
     if (songTags?.artists) songTags?.artists.push(...featArtists);

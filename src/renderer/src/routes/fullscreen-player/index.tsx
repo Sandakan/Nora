@@ -2,9 +2,5 @@ import FullScreenPlayer from '@renderer/components/FullScreenPlayer/FullScreenPl
 import { createFileRoute } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/fullscreen-player/')({
-  component: RouteComponent
+  component: FullScreenPlayer
 });
-
-function RouteComponent() {
-  return <FullScreenPlayer />;
-}
