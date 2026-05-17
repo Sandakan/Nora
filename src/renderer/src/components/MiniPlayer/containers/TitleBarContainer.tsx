@@ -3,11 +3,10 @@ import { settingsMutation, settingsQuery } from '@renderer/queries/settings';
 import { store } from '@renderer/store/store';
 import { useMutation, useSuspenseQuery } from '@tanstack/react-query';
 import { useStore } from '@tanstack/react-store';
-import { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import Button from '../../Button';
+import NavLink from '../../NavLink';
 
 type Props = { isLyricsVisible: boolean };
 
@@ -46,14 +45,13 @@ const TitleBarContainer = (props: Props) => {
     onSettled: () => queryClient.invalidateQueries(settingsQuery.all)
   });
 
-  const { updatePlayerType } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { isLyricsVisible } = props;
 
   return (
     <div
-      className={`mini-player-title-bar z-10 flex h-[15%] max-h-[2.25rem] w-full justify-end opacity-0 transition-[visibility,opacity] select-none group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100 ${
+      className={`mini-player-title-bar z-10 flex h-[15%] max-h-9 w-full justify-end opacity-0 transition-[visibility,opacity] select-none group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100 ${
         !isCurrentSongPlaying ? 'visible opacity-100' : ''
       }`}
     >
@@ -64,16 +62,24 @@ const TitleBarContainer = (props: Props) => {
             : ''
         } ${!isCurrentSongPlaying ? 'visible! opacity-100!' : ''}`}
       >
-        <Button
+        {/* <Button
           className="go-to-main-player-btn text-font-color-white dark:text-font-color-white mt-1! mr-0! rounded-md! border-0! bg-[transparent]! p-2! outline-offset-1 focus-visible:outline!"
           tooltipLabel={t('player.goToMainPlayer')}
           iconName="pip_exit"
           iconClassName="material-icons-round-outlined text-xl!"
           clickHandler={() => updatePlayerType('normal')}
           removeFocusOnClick
-        />
+        /> */}
+
+        <NavLink
+          to="/main-player/home"
+          className={`go-to-main-player-btn text-font-color-white dark:text-font-color-white mt-1! mr-0! rounded-md! border-0! bg-transparent! p-2! outline-offset-1 focus-visible:outline!`}
+          title={t('player.goToMainPlayer')}
+        >
+          <span className={`material-icons-round-outlined text-xl!`}>pip_exit</span>
+        </NavLink>
         <Button
-          className={`always-on-top-btn text-font-color-white dark:text-font-color-white !mt-1 !mr-0 !rounded-md !border-0 !bg-[transparent] !p-2 outline-offset-1 focus-visible:!outline ${
+          className={`always-on-top-btn text-font-color-white dark:text-font-color-white mt-1! mr-0! rounded-md! border-0! bg-transparent! p-2! outline-offset-1 focus-visible:outline! ${
             isMiniPlayerAlwaysOnTop
               ? 'bg-dark-background-color-2! dark:bg-dark-background-color-2!'
               : ''
@@ -89,7 +95,7 @@ const TitleBarContainer = (props: Props) => {
       </div>
       <div className="window-controls-container flex">
         <Button
-          className="minimize-btn m-0! flex h-full items-center justify-center rounded-none! border-0! bg-[transparent]! px-2! text-center text-xl -outline-offset-2 transition-[background] ease-in-out hover:bg-[hsla(0deg,0%,80%,0.5)]! focus-visible:outline!"
+          className="minimize-btn m-0! flex h-full items-center justify-center rounded-none! border-0! bg-transparent! px-2! text-center text-xl -outline-offset-2 transition-[background] ease-in-out hover:bg-[hsla(0deg,0%,80%,0.5)]! focus-visible:outline!"
           clickHandler={() => window.api.windowControls.minimizeApp()}
           tooltipLabel={t('titleBar.minimize')}
           iconName="minimize"
@@ -97,7 +103,7 @@ const TitleBarContainer = (props: Props) => {
           removeFocusOnClick
         />
         <Button
-          className="close-btn hover:bg-font-color-crimson! hover:text-font-color-white! m-0! flex h-full items-center justify-center rounded-none! border-0! bg-[transparent]! px-2! text-center text-xl -outline-offset-2 transition-[background] ease-in-out focus-visible:outline!"
+          className="close-btn hover:bg-font-color-crimson! hover:text-font-color-white! m-0! flex h-full items-center justify-center rounded-none! border-0! bg-transparent! px-2! text-center text-xl -outline-offset-2 transition-[background] ease-in-out focus-visible:outline!"
           clickHandler={() => {
             if (hideWindowOnClose) window.api.windowControls.hideApp();
             else window.api.windowControls.closeApp();

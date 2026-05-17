@@ -1,3 +1,4 @@
+import { useLocation } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 import { memo } from 'react';
 
@@ -18,7 +19,9 @@ const appReleasePhase = getVersionInfoFromString(version)?.releasePhase || 'stab
 
 const TitleBar = memo(() => {
   const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
-  const playerType = useStore(store, (state) => state.playerType);
+  const location = useLocation();
+
+  const isFullScreenPlayer = location.href.includes('/fullscreen-player');
 
   return (
     <header
@@ -51,9 +54,13 @@ const TitleBar = memo(() => {
             </span>
           </span>
         </div>
-        {playerType !== 'full' ? <NavigationControlsContainer /> : <div />}
+        {isFullScreenPlayer ? <NavigationControlsContainer /> : <div />}
       </div>
-      {window.api.properties.isInDevelopment ? <CurrentLocationContainer /> : <div />}
+      {window.api.properties.isInDevelopment ? (
+        <CurrentLocationContainer href={location.href} />
+      ) : (
+        <div />
+      )}
       <div className="window-controls-and-special-controls-and-indicators-container flex h-full flex-row">
         <div className="special-controls-and-indicators-container mr-2 flex items-center justify-between py-1">
           <div className="indicators-container flex flex-row">
@@ -63,7 +70,7 @@ const TitleBar = memo(() => {
           </div>
           <div className="special-controls-container flex flex-row">
             {window.api.properties.isInDevelopment && <ChangeThemeBtn />}
-            {playerType === 'full' && <GoToMainPlayerBtn />}
+            {isFullScreenPlayer && <GoToMainPlayerBtn />}
           </div>
         </div>
         <WindowControlsContainer />
