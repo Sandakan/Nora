@@ -28,11 +28,11 @@ const TitleBar = memo(() => {
         'bg-background-color-1/50 text-font-color-white! dark:bg-dark-background-color-1/70 backdrop-blur-md'
       }`}
     >
-      <div className="logo-and-app-name-and-navigation-controls-container ml-2 flex h-full w-fit items-center gap-12">
+      <div className={`logo-and-app-name-and-navigation-controls-container flex h-full w-fit items-center gap-12 ${window.api.properties.platform === 'darwin' ? 'ml-16' : 'ml-2'}`}>
         <div className="logo-and-app-name-container flex items-center">
           <span className="logo-container">
             <Img
-              className="mr-2 h-7 rounded-md p-1 shadow-md"
+              className={`mr-2 rounded-md p-1 shadow-md ${window.api.properties.platform === 'darwin' ? 'h-5' : 'h-7'}`}
               src={LightModeLogo}
               alt="Nora Logo"
             />
@@ -66,7 +66,7 @@ const TitleBar = memo(() => {
             {playerType === 'full' && <GoToMainPlayerBtn />}
           </div>
         </div>
-        <WindowControlsContainer />
+        {window.api.properties.platform !== 'darwin' && <WindowControlsContainer />}
       </div>
     </header>
   );
