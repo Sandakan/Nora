@@ -193,6 +193,14 @@ describe('PlayerQueue', () => {
         queue.currentSongId = 'song1';
         expect(queue.position).toBe(0); // First occurrence
       });
+
+      test('should clear shuffle history when adding song not in queue', () => {
+        const queue = new PlayerQueue(['song1', 'song2'], 0);
+        queue.shuffle();
+        expect(queue.queueBeforeShuffle).toBeDefined();
+        queue.currentSongId = 'song99';
+        expect(queue.queueBeforeShuffle).toBeUndefined();
+      });
     });
   });
 
