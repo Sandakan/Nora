@@ -47,7 +47,13 @@
 	},
 	"appPreferences": {
 		"metadataEditingSupportedExtensions": [
-			"mp3"
+			"mp3",
+			"flac",
+			"ogg",
+			"opus",
+			"m4a",
+			"m4r",
+			"aac"
 		],
 		"removeReactStrictMode": false,
 		"showSongIdInsteadOfSongYear": false,
