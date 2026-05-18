@@ -39,7 +39,7 @@ const parseAndImportPlaylistFromPath = async (
   filePath: string,
   targetPlaylistId?: number
 ): Promise<void> => {
-  if (path.extname(filePath) !== '.m3u8' && path.extname(filePath) !== '.m3u') {
+  if (!/\.(m3u8|m3u)$/i.test(filePath)) {
     sendMessageToRenderer({
       messageCode: 'PLAYLIST_IMPORT_FAILED_DUE_TO_INVALID_FILE_EXTENSION'
     });
