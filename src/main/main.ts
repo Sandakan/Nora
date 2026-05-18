@@ -20,8 +20,7 @@ import {
   screen,
   session as electronSession,
   type OpenDialogOptions,
-  type SaveDialogOptions,
-  type Display
+  type SaveDialogOptions
 } from 'electron';
 
 import { version, appPreferences } from '../../package.json';
@@ -846,6 +845,7 @@ export async function changePlayerType(type: PlayerTypes) {
         const [x, y] = mainWindow.getPosition();
         await saveUserSettings({ miniPlayerX: x, miniPlayerY: y });
       }
+      manageWindowOnDisplayMetricsChange();
       mainWindow.setAspectRatio(MINI_PLAYER_ASPECT_RATIO);
     } else if (type === 'normal') {
       mainWindow.setMaximumSize(MAIN_WINDOW_MAX_SIZE_X, MAIN_WINDOW_MAX_SIZE_Y);
@@ -864,6 +864,7 @@ export async function changePlayerType(type: PlayerTypes) {
         const [x, y] = mainWindow.getPosition();
         await saveUserSettings({ mainWindowX: x, mainWindowY: y });
       }
+      manageWindowOnDisplayMetricsChange();
       mainWindow.setAspectRatio(MAIN_WINDOW_ASPECT_RATIO);
     } else {
       mainWindow.setMaximumSize(MAIN_WINDOW_MAX_SIZE_X, MAIN_WINDOW_MAX_SIZE_Y);
@@ -873,20 +874,33 @@ export async function changePlayerType(type: PlayerTypes) {
   }
 }
 
-function manageWindowOnDisplayMetricsChange(primaryDisplay: Display) {
-  const currentDisplay = screen.getDisplayMatching(mainWindow.getBounds());
+function manageWindowOnDisplayMetricsChange() {
+  const bounds = mainWindow.getBounds();
+  const displays = screen.getAllDisplays();
+  const isOnAnyDisplay = displays.some((display) => {
+    const { x, y, width, height } = display.workArea;
+    return (
+      bounds.x >= x &&
+      bounds.y >= y &&
+      bounds.x < x + width &&
+      bounds.y < y + height
+    );
+  });
 
-  if (!currentDisplay || currentDisplay.id !== primaryDisplay.id) {
+  if (!isOnAnyDisplay) {
+    const primaryDisplay = screen.getPrimaryDisplay();
     mainWindow.setPosition(primaryDisplay.workArea.x, primaryDisplay.workArea.y);
+    logger.debug('Window was off-screen; moved to primary display', {
+      previousPosition: { x: bounds.x, y: bounds.y },
+      newPosition: { x: primaryDisplay.workArea.x, y: primaryDisplay.workArea.y }
+    });
   }
 }
 
 function manageWindowPositionInMonitor() {
-  const primaryDisplay = screen.getPrimaryDisplay();
-  manageWindowOnDisplayMetricsChange(primaryDisplay);
+  manageWindowOnDisplayMetricsChange();
 
-  // Event listener for display change events
-  screen.on('display-metrics-changed', () => manageWindowOnDisplayMetricsChange(primaryDisplay));
+  screen.on('display-metrics-changed', () => manageWindowOnDisplayMetricsChange());
 }
 
 export async function toggleAutoLaunch(autoLaunchState: boolean) {
