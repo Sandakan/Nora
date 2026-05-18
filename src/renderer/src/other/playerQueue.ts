@@ -268,6 +268,7 @@ class PlayerQueue {
    * @param songIds - Array of song IDs to add
    */
   addSongIdsToNext(songIds: number[]): void {
+    this.queueBeforeShuffle = undefined;
     console.log('[PlayerQueue.addSongIdsToNext]', {
       addingCount: songIds.length,
       currentPosition: this.position,
@@ -291,6 +292,7 @@ class PlayerQueue {
    * @param songIds - Array of song IDs to add
    */
   addSongIdsToEnd(songIds: number[]): void {
+    this.queueBeforeShuffle = undefined;
     console.log('[PlayerQueue.addSongIdsToEnd]', {
       addingCount: songIds.length,
       currentPosition: this.position,
@@ -314,6 +316,7 @@ class PlayerQueue {
    * @param songId - Song ID to add
    */
   addSongIdToNext(songId: number): void {
+    this.queueBeforeShuffle = undefined;
     this.songIds.splice(this.position + 1, 0, songId);
     this.emit('songAdded', { songId, position: this.position + 1 });
     this.emit('queueChange', { queue: [...this.songIds], length: this.songIds.length });
@@ -325,6 +328,7 @@ class PlayerQueue {
    * @param songId - Song ID to add
    */
   addSongIdToEnd(songId: number): void {
+    this.queueBeforeShuffle = undefined;
     const position = this.songIds.length;
     this.songIds.push(songId);
     this.emit('songAdded', { songId, position });
@@ -338,6 +342,7 @@ class PlayerQueue {
    * @returns True if removed successfully, false if not found
    */
   removeSongId(songId: number): boolean {
+    this.queueBeforeShuffle = undefined;
     const index = this.songIds.indexOf(songId);
     console.log('[PlayerQueue.removeSongId]', {
       songId,
@@ -384,6 +389,7 @@ class PlayerQueue {
    * @returns The removed song ID, or null if position is invalid
    */
   removeSongAtPosition(position: number): number | null {
+    this.queueBeforeShuffle = undefined;
     if (position >= 0 && position < this.songIds.length) {
       const [removed] = this.songIds.splice(position, 1);
       this.emit('songRemoved', { songId: removed, position });
