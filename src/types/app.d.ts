@@ -68,8 +68,8 @@ declare global {
     | 'app/player/toggleSongPlaybackState'
     | 'app/player/skipForward'
     | 'app/player/skipBackward'
-    | 'app/player/toggleSongPlaybackState'
-    | 'app/player/skipBackward';
+    | 'app/importPlaylist'
+    | 'app/importPlaylistFromPath';
 
   interface ImageCoverData {
     format: string;
