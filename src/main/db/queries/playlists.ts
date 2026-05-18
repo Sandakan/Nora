@@ -182,7 +182,7 @@ export const linkSongsWithPlaylist = async (
     songId: songId
   }));
 
-  await trx.insert(playlistsSongs).values(records);
+  await trx.insert(playlistsSongs).values(records).onConflictDoNothing();
 };
 
 export const unlinkSongsFromPlaylist = async (

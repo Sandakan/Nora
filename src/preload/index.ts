@@ -468,7 +468,9 @@ const playlistsData = {
   exportPlaylist: (playlistId: number): Promise<void> =>
     ipcRenderer.invoke('app/exportPlaylist', playlistId),
   importPlaylist: (targetPlaylistId?: number): Promise<void> =>
-    ipcRenderer.invoke('app/importPlaylist', targetPlaylistId)
+    ipcRenderer.invoke('app/importPlaylist', targetPlaylistId),
+  importPlaylistFromPath: (filePath: string, targetPlaylistId?: number): Promise<void> =>
+    ipcRenderer.invoke('app/importPlaylistFromPath', filePath, targetPlaylistId)
 };
 
 const queue = {
@@ -577,7 +579,7 @@ const utils = {
     join: (...args: string[]) => args.join('/')
   },
   getExtension: (dir: string) => {
-    const regex = /(?<name>.+)\.(?<ext>[\w\d]+)(?<search>\?.+)?$/;
+    const regex = /(?<name>.+)?\.(?<ext>[\w\d]+)(?<search>\?.+)?$/;
     const match = dir.match(regex);
     const ext = match?.groups?.ext || '';
     return ext;

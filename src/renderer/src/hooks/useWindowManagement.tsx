@@ -9,6 +9,8 @@ const UnsupportedFileMessagePrompt = lazy(
   () => import('../components/UnsupportedFileMessagePrompt')
 );
 
+const PLAYLIST_EXTENSIONS = ['m3u8', 'm3u'];
+
 export interface UseWindowManagementOptions {
   changePromptMenuData?: (isVisible: boolean, prompt?: React.ReactNode, className?: string) => void;
   fetchSongFromUnknownSource?: (filePath: string) => void;
@@ -118,30 +120,60 @@ export function useWindowManagement(
   );
 
   /**
-   * Handles file drop events, validating and processing dropped audio files.
+   * Handles file drop events, validating and processing dropped audio and playlist files.
    *
    * @param e - React drag event containing dropped files
    */
   const onSongDrop = useCallback(
     (e: DragEvent<HTMLDivElement>) => {
-      console.log(e.dataTransfer.files);
-      if (e.dataTransfer.files.length > 0) {
-        const file = e.dataTransfer.files.item(0);
-        if (file) {
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        const audioFiles: { path: string; name: string }[] = [];
+        const playlistFiles: string[] = [];
+        const unsupportedFilePaths: string[] = [];
+
+        for (let i = 0; i < files.length; i++) {
+          const file = files.item(i);
+          if (!file) continue;
+
           const filePath = window.api.utils.showFilePath(file);
-          console.log('Dropped file path:', filePath);
-          const isASupportedAudioFormat = appPreferences.supportedMusicExtensions.some((type) =>
-            file?.webkitRelativePath.endsWith(type)
+          const fileName = file.name;
+          const ext = window.api.utils.getExtension(fileName);
+          const isAudio = appPreferences.supportedMusicExtensions.some((type) =>
+            ext.toLowerCase() === type
+          );
+          const isPlaylist = PLAYLIST_EXTENSIONS.some((pe) =>
+            ext.toLowerCase() === pe
           );
 
-          if (isASupportedAudioFormat && fetchSongFromUnknownSource) {
-            fetchSongFromUnknownSource(filePath);
-          } else if (changePromptMenuData) {
-            changePromptMenuData(
-              true,
-              <UnsupportedFileMessagePrompt filePath={filePath || file.name} />
-            );
+          if (!filePath) {
+            unsupportedFilePaths.push(fileName);
+          } else if (isAudio) {
+            audioFiles.push({ path: filePath, name: fileName });
+          } else if (isPlaylist) {
+            playlistFiles.push(filePath);
+          } else {
+            unsupportedFilePaths.push(filePath);
           }
+        }
+
+        if (unsupportedFilePaths.length > 0 && audioFiles.length === 0 && playlistFiles.length === 0 && changePromptMenuData) {
+          changePromptMenuData(
+            true,
+            <UnsupportedFileMessagePrompt filePath={unsupportedFilePaths[0]} />
+          );
+        }
+
+        for (const audioFile of audioFiles) {
+          if (fetchSongFromUnknownSource) {
+            fetchSongFromUnknownSource(audioFile.path);
+          }
+        }
+
+        for (const playlistPath of playlistFiles) {
+          window.api.playlistsData
+            .importPlaylistFromPath(playlistPath)
+            .catch((err) => console.error('Failed to import playlist:', err));
         }
       }
       if (appRef.current) appRef.current.classList.remove('song-drop');
