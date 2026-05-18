@@ -32,6 +32,7 @@ class PlayerQueue {
     } else {
       this.songIds.push(songId);
       this.position = this.songIds.length - 1;
+      this.queueBeforeShuffle = undefined;
     }
   }
 
