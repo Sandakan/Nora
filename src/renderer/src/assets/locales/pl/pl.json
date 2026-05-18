@@ -458,6 +458,8 @@
     "hideWindowAtStart": "Uruchamiaj zminimalizowane do zasobnika (Tray)",
     "hideWindowOnCloseDescription": "Zachowanie przycisku zamknięcia okna.",
     "hideWindowOnClose": "Minimalizuj do zasobnika po zamknięciu",
+    "trayClickBehaviorDescription": "Ustaw zachowanie ikony w zasobniku systemowym.",
+    "traySingleClickTogglesWindow": "Pojedyncze kliknięcie przełącza okno odtwarzacza.",
 
     "storage": "Pamięć",
     "storageDescription": "Zobacz jak Nora zarządza biblioteką i wykorzystuje miejsce na Twoim dysku.",

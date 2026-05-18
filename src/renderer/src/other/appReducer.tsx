@@ -605,6 +605,7 @@ export const USER_DATA_TEMPLATE: UserData = {
   isMiniPlayerAlwaysOnTop: false,
   isMusixmatchLyricsEnabled: false,
   hideWindowOnClose: false,
+  traySingleClickTogglesWindow: false,
   openWindowAsHiddenOnSystemStart: false,
   openWindowMaximizedOnStart: false,
   sendSongScrobblingDataToLastFM: false,
