@@ -115,11 +115,11 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
 
   useEffect(() => {
     setIsSongPlaying(() => currentSongData?.songId === songId && isCurrentSongPlaying);
-    setIsAFavorite((prevState) => {
+    setIsAFavorite(() => {
       if (currentSongData?.songId === songId) return currentSongData.isAFavorite;
-      return prevState;
+      return props.isAFavorite;
     });
-  }, [currentSongData.songId, currentSongData.isAFavorite, isCurrentSongPlaying, songId]);
+  }, [currentSongData.songId, currentSongData.isAFavorite, isCurrentSongPlaying, songId, props.isAFavorite]);
 
   const handlePlayBtnClick = useCallback(() => {
     if (onPlayClick) return onPlayClick(songId);

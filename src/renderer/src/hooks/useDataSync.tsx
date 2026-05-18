@@ -5,6 +5,7 @@ import { queryClient } from '..';
 import { albumQuery } from '../queries/albums';
 import { artistQuery } from '../queries/aritsts';
 import { genreQuery } from '../queries/genres';
+import { homeQuery } from '../queries/home';
 import { playlistQuery } from '../queries/playlists';
 import { searchQuery } from '../queries/search';
 import { songQuery } from '../queries/songs';
@@ -53,6 +54,7 @@ export function useDataSync(): void {
         if (songEvents.includes(dataEvent.dataType)) {
           queryClient.invalidateQueries({ queryKey: songQuery._def });
           queryClient.invalidateQueries({ queryKey: searchQuery.query._def });
+          queryClient.invalidateQueries({ queryKey: homeQuery._def });
         }
 
         // Artist events
