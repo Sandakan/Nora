@@ -1,3 +1,4 @@
+import { insertScrobble } from '@main/db/queries/scrobble_queue';
 import { getUserSettings } from '@main/db/queries/settings';
 
 import type {
@@ -40,47 +41,53 @@ const generateApiResponseBody = (method: Method, authData: AuthData, params: Lov
 const sendFavoritesDataToLastFM = async (method: Method, title: string, artists: string[] = []) => {
   try {
     const { sendSongFavoritesDataToLastFM: isSendingLoveEnabled } = await getUserSettings();
+
+    if (!isSendingLoveEnabled) {
+      return logger.debug('Love/Unlove request ignored - favorites scrobbling disabled');
+    }
+
     const isConnectedToInternet = checkIfConnectedToInternet();
 
-    if (isSendingLoveEnabled && isConnectedToInternet) {
-      const authData = await getLastFmAuthData();
-
-      const url = new URL('http://ws.audioscrobbler.com/2.0/');
-      url.searchParams.set('format', 'json');
-
-      const params: LoveParams = {
-        track: title,
-        artist: artists.join(', ')
-      };
-
-      const body = generateApiResponseBody(method, authData, params);
-
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body
-      });
-
-      if (res.status === 200)
-        return logger.debug('Love/Unlove song request accepted.', { method, title, artists });
-
-      const json: LastFMLoveUnlovePostResponse = await res.json();
-
-      return logger.warn('Failed the request to LastFM about love/unlove song.', {
-        json,
-        method,
-        title,
-        artists
-      });
+    if (!isConnectedToInternet) {
+      await insertScrobble({ operationType: method, trackTitle: title, artistNames: artists.join(', ') });
+      return logger.debug('Love/Unlove queued for later - offline', { method, title });
     }
-    return logger.debug('Request to Love/Unlove song ignored', {
-      isSendingLoveEnabled,
-      isConnectedToInternet
+
+    const authData = await getLastFmAuthData();
+
+    const url = new URL('http://ws.audioscrobbler.com/2.0/');
+    url.searchParams.set('format', 'json');
+
+    const params: LoveParams = {
+      track: title,
+      artist: artists.join(', ')
+    };
+
+    const body = generateApiResponseBody(method, authData, params);
+
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body
+    });
+
+    if (res.status === 200)
+      return logger.debug('Love/Unlove song request accepted.', { method, title, artists });
+
+    const json: LastFMLoveUnlovePostResponse = await res.json();
+
+    await insertScrobble({ operationType: method, trackTitle: title, artistNames: artists.join(', ') });
+    return logger.warn('Failed the request to LastFM about love/unlove song, queued for retry.', {
+      json,
+      method,
+      title,
+      artists
     });
   } catch (error) {
-    return logger.error('Failed to send data about making a song a favorite to LastFM.', {
+    await insertScrobble({ operationType: method, trackTitle: title, artistNames: artists.join(', ') }).catch(() => {});
+    return logger.error('Failed to send data about making a song a favorite to LastFM, queued for retry.', {
       error,
       method,
       title,

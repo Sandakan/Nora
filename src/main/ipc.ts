@@ -31,7 +31,7 @@ import getSongInfo from './core/getSongInfo';
 import getSongLyrics from './core/getSongLyrics';
 import getStorageUsage from './core/getStorageUsage';
 import importAppData from './core/importAppData';
-import importPlaylist from './core/importPlaylist';
+import importPlaylist, { importPlaylistFromPath } from './core/importPlaylist';
 import removeMusicFolder from './core/removeMusicFolder';
 import removePlaylists from './core/removePlaylists';
 import removeSongFromPlaylist from './core/removeSongFromPlaylist';
@@ -91,6 +91,7 @@ import {
 } from './main';
 import { setDiscordRpcActivity } from './other/discordRPC';
 import { generatePalettes } from './other/generatePalette';
+import { flushScrobbleQueue } from './other/lastFm/flushScrobbleQueue';
 import getAlbumInfoFromLastFM from './other/lastFm/getAlbumInfoFromLastFM';
 import getSimilarTracks from './other/lastFm/getSimilarTracks';
 import scrobbleSong from './other/lastFm/scrobbleSong';
@@ -529,6 +530,10 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       importPlaylist(targetPlaylistId)
     );
 
+    ipcMain.handle('app/importPlaylistFromPath', (_, filePath: string, targetPlaylistId?: number) =>
+      importPlaylistFromPath(filePath, targetPlaylistId)
+    );
+
     ipcMain.handle(
       'app/getRendererLogs',
       (
@@ -587,7 +592,7 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
           ? `App connected to the internet successfully`
           : `App disconnected from the internet`
       );
-      // isConnectedToInternet = isConnected;
+      if (isConnected) flushScrobbleQueue();
     });
 
     ipcMain.handle('app/getArtworksForMultipleArtworksCover', (_, songIds: number[]) =>
