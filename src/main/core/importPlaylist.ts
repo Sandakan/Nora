@@ -85,13 +85,17 @@ const parseAndImportPlaylistFromPath = async (
       `Found ${unavailableSongPaths.length} songs outside the library when importing a playlist.`,
       { unavailableSongPaths }
     );
-    sendMessageToRenderer({
-      messageCode: 'PLAYLIST_IMPORT_SUCCESS',
-      data: { count: availSongIdsForPlaylist.length }
-    });
   }
 
-  if (availSongIdsForPlaylist.length === 0) return;
+  if (availSongIdsForPlaylist.length === 0) {
+    if (unavailableSongPaths.length > 0) {
+      sendMessageToRenderer({
+        messageCode: 'PLAYLIST_IMPORT_SUCCESS',
+        data: { count: 0 }
+      });
+    }
+    return;
+  }
 
   const songIdNumbers = availSongIdsForPlaylist.map((id) => Number(id));
 
