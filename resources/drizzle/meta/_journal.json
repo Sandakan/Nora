@@ -27,7 +27,7 @@
 			"idx": 3,
 			"version": "7",
 			"when": 1776816000000,
-			"tag": "0003_add_scrobble_queue",
+			"tag": "0004_add_scrobble_queue",
 			"breakpoints": true
 		}
 	]

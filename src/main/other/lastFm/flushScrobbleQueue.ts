@@ -4,7 +4,8 @@ import {
   claimPendingBatch,
   deleteOldPending,
   markFailed,
-  markSent
+  markSent,
+  resetStuckSending
 } from '@main/db/queries/scrobble_queue';
 import { convertToSongData } from '@main/utils/convert';
 
@@ -25,6 +26,8 @@ export async function flushScrobbleQueue(): Promise<void> {
     logger.debug('Flush skipped - no Last.fm auth data');
     return;
   }
+
+  await resetStuckSending();
 
   const url = new URL('http://ws.audioscrobbler.com/2.0/');
   url.searchParams.set('format', 'json');

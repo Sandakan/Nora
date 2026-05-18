@@ -2,6 +2,7 @@ import { and, asc, eq, inArray, lte, sql } from 'drizzle-orm';
 
 import { db } from '../db';
 import { scrobbleQueue } from '../schema';
+import logger from '../../logger';
 
 const MAX_QUEUE_SIZE = 1000;
 const MAX_RETRY_COUNT = 3;
@@ -26,7 +27,10 @@ export async function insertScrobble(
   trx: DB | DBTransaction = db
 ): Promise<void> {
   const count = await getPendingCount(trx);
-  if (count >= MAX_QUEUE_SIZE) return;
+  if (count >= MAX_QUEUE_SIZE) {
+    logger.warn('Scrobble queue at capacity, dropping item', { count: MAX_QUEUE_SIZE });
+    return;
+  }
 
   await trx.insert(scrobbleQueue).values({
     songId: params.songId ?? null,
@@ -87,6 +91,13 @@ export async function markFailed(
       updatedAt: sql`NOW()`
     })
     .where(and(eq(scrobbleQueue.id, id), eq(scrobbleQueue.status, 'sending')));
+}
+
+export async function resetStuckSending(trx: DB | DBTransaction = db): Promise<void> {
+  await trx
+    .update(scrobbleQueue)
+    .set({ status: 'pending' })
+    .where(eq(scrobbleQueue.status, 'sending'));
 }
 
 export async function deleteOldPending(trx: DB | DBTransaction = db): Promise<void> {

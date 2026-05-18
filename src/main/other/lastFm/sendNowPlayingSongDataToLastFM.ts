@@ -1,4 +1,3 @@
-import { insertScrobble } from '@main/db/queries/scrobble_queue';
 import { getUserSettings } from '@main/db/queries/settings';
 import { getSongById } from '@main/db/queries/songs';
 import { convertToSongData } from '@main/utils/convert';
@@ -23,8 +22,7 @@ const sendNowPlayingSongDataToLastFM = async (songId: number) => {
     const isConnectedToInternet = checkIfConnectedToInternet();
 
     if (!isConnectedToInternet) {
-      await insertScrobble({ songId, operationType: 'now_playing' });
-      return logger.debug('Now playing queued for later - offline', { songId });
+      return logger.debug('Now playing skipped - offline (ephemeral, not queued)', { songId });
     }
 
     const songData = await getSongById(songId);
@@ -63,14 +61,10 @@ const sendNowPlayingSongDataToLastFM = async (songId: number) => {
         return logger.debug(`Now playing song data accepted in LastFM.`, { songId });
 
       const json: LastFMScrobblePostResponse = await res.json();
-      await insertScrobble({ songId, operationType: 'now_playing' });
-      return logger.warn('Failed to send now playing song to LastFM, queued for retry', { json, songId });
+      return logger.warn('Failed to send now playing song to LastFM', { json, songId });
     }
   } catch (error) {
-    await insertScrobble({ songId, operationType: 'now_playing' }).catch(() => {});
-        return logger.error('Failed to send now playing song data to LastFM, queued for retry.', {
-      error
-    });
+    return logger.error('Failed to send now playing song data to LastFM', { error });
   }
 };
 
