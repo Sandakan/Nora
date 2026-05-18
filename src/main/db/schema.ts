@@ -422,6 +422,9 @@ export const userSettings = pgTable(
     isMiniPlayerAlwaysOnTop: boolean('is_mini_player_always_on_top').notNull().default(false),
     isMusixmatchLyricsEnabled: boolean('is_musixmatch_lyrics_enabled').notNull().default(true),
     hideWindowOnClose: boolean('hide_window_on_close').notNull().default(false),
+    traySingleClickTogglesWindow: boolean('tray_single_click_toggles_window')
+      .notNull()
+      .default(false),
     sendSongScrobblingDataToLastFM: boolean('send_song_scrobbling_data_to_lastfm')
       .notNull()
       .default(false),

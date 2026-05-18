@@ -345,6 +345,8 @@ const settings = {
     }),
   updateHideWindowOnCloseState: (enable: boolean): Promise<void> =>
     ipcRenderer.invoke('app/saveUserSettings', { hideWindowOnClose: enable }),
+  updateTraySingleClickBehavior: (enable: boolean): Promise<void> =>
+    ipcRenderer.invoke('app/updateTraySingleClickBehavior', enable),
   updateSaveVerboseLogs: (enable: boolean): Promise<void> =>
     ipcRenderer.invoke('app/saveUserSettings', { saveVerboseLogs: enable })
 };

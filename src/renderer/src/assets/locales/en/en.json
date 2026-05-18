@@ -459,6 +459,8 @@
     "hideWindowAtStart": "Launch Nora in the System Tray on startup",
     "hideWindowOnCloseDescription": "Configure how Nora should behave when you click the close button.",
     "hideWindowOnClose": "Hide Nora to the System Tray when the close button is clicked.",
+    "trayClickBehaviorDescription": "Configure how the system tray icon behaves when clicked.",
+    "traySingleClickTogglesWindow": "Single-click tray icon toggles player window.",
 
     "storage": "Storage",
     "storageDescription": "See how Nora manages your library and utilizes your storage.",
