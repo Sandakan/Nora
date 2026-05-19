@@ -90,7 +90,7 @@ class AudioPlayer {
           console.error('[AudioPlayer.positionChange] Failed to load song:', err);
           if (this.queue.hasNext) {
             this.pendingAutoPlay = willAutoPlay;
-            this.queue.moveToNext();
+            setTimeout(() => this.queue.moveToNext(), 0);
           }
         });
         this.pendingAutoPlay = false; // Reset after use

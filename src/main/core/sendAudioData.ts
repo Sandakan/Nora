@@ -86,7 +86,7 @@ const sendAudioData = async (songId: number): Promise<AudioPlayerData> => {
           onlineArtworkPaths: parseArtistOnlineArtworks(a.artist.artworks.map((aw) => aw.artwork))
         })) ?? [];
 
-      const artworks = song.artworks.map((a) => a.artwork);
+      const artworks = song.artworks?.map((a) => a.artwork) ?? [];
       const artworkPaths = parseSongArtworks(artworks);
       const songArtwork = artworkPaths.artworkPath;
       const artworkData = await getArtworkBuffer(songArtwork);
