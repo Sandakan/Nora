@@ -20,53 +20,14 @@ export const parseArtworkDataForAudioPlayerData = (artworkData?: Buffer | Uint8A
   return artworkData;
 };
 
-// const getRelevantArtistData = (
-//   songArtists?: {
-//     artistId: string;
-//     name: string;
-//   }[]
-// ) => {
-//   const artists = getArtistsData();
-//   const relevantArtists: {
-//     artistId: string;
-//     artworkName?: string;
-//     name: string;
-//     onlineArtworkPaths?: OnlineArtistArtworks;
-//   }[] = [];
-
-//   if (songArtists) {
-//     for (const songArtist of songArtists) {
-//       for (const artist of artists) {
-//         if (artist.artistId === songArtist.artistId) {
-//           if (!artist.onlineArtworkPaths)
-//             getArtistInfoFromNet(artist.artistId).catch((error) =>
-//               logger.warn('Failed to get artist info from net', { err: error })
-//             );
-
-//           const { artistId, name, artworkName, onlineArtworkPaths } = artist;
-
-//           relevantArtists.push({
-//             artistId,
-//             name,
-//             artworkName,
-//             onlineArtworkPaths
-//           });
-//         }
-//       }
-//     }
-//   }
-
-//   return relevantArtists;
-// };
-
 const getArtworkBuffer = async (artworkPath: string) => {
   try {
     const realPath = removeDefaultAppProtocolFromFilePath(artworkPath);
     const buffer = await sharp(realPath).toBuffer();
 
     return buffer;
-  } catch {
-    // Failed to get artwork buffer most probably becuase the artwork path is a packaged path
+  } catch (error) {
+    logger.debug('Failed to get artwork buffer, artwork path may be a packaged path.', { error });
     return undefined;
   }
 };
@@ -84,7 +45,7 @@ const sendAudioData = async (songId: number): Promise<AudioPlayerData> => {
           onlineArtworkPaths: parseArtistOnlineArtworks(a.artist.artworks.map((aw) => aw.artwork))
         })) ?? [];
 
-      const artworks = song.artworks.map((a) => a.artwork);
+      const artworks = song.artworks?.map((a) => a.artwork) ?? [];
       const artworkPaths = parseSongArtworks(artworks);
       const songArtwork = artworkPaths.artworkPath;
       const artworkData = await getArtworkBuffer(songArtwork);
@@ -109,16 +70,24 @@ const sendAudioData = async (songId: number): Promise<AudioPlayerData> => {
         isBlacklisted
       };
 
-      addSongToPlayHistory(songId);
+      await addSongToPlayHistory(songId);
 
+      const firstArtist = data.artists?.find((a) => a.onlineArtworkPaths);
+      const artworkLink = firstArtist?.onlineArtworkPaths?.picture_xl
+        ?? firstArtist?.onlineArtworkPaths?.picture_medium
+        ?? firstArtist?.onlineArtworkPaths?.picture_small;
       const now = Date.now();
       setDiscordRpcActivity({
-        details: `Listening to '${data.title}'`,
-        state: `By ${data.artists?.map((artist) => artist.name).join(', ')}`,
-        largeImageKey: 'nora_logo',
-        smallImageKey: 'song_artwork',
-        startTimestamp: now,
-        endTimestamp: now + data.duration * 1000
+        details: data.title,
+        state: data.artists?.map((artist) => artist.name).join(', '),
+        timestamps: {
+          start: now,
+          end: now + data.duration * 1000
+        },
+        assets: {
+          large_image: artworkLink ?? 'nora_logo',
+          small_image: artworkLink ?? 'song_artwork'
+        }
       });
       setCurrentSongPath(song.path);
 

@@ -52,27 +52,20 @@ export function useDiscordRpc(player: HTMLAudioElement) {
     // Get current timestamp
     const now = Date.now();
 
-    // Find first artist with artwork for small image
+    // Find first artist with artwork for Discord presence images
     const firstArtistWithArtwork = currentSong?.artists?.find(
-      (artist) => artist.onlineArtworkPaths !== undefined
+      (artist) => artist.onlineArtworkPaths?.picture_small
     );
-    const onlineArtworkLink = firstArtistWithArtwork?.onlineArtworkPaths?.picture_small;
+    const artworkLink = firstArtistWithArtwork?.onlineArtworkPaths?.picture_xl
+      ?? firstArtistWithArtwork?.onlineArtworkPaths?.picture_medium
+      ?? firstArtistWithArtwork?.onlineArtworkPaths?.picture_small;
 
-    // Send activity to Discord via IPC
-    window.api.playerControls.setDiscordRpcActivity({
-      timestamps: {
-        // Only set timestamps when playing (not paused)
-        start: player.paused ? undefined : now - (player.currentTime ?? 0) * 1000,
-        end: player.paused
-          ? undefined
-          : now + ((player.duration ?? 0) - (player.currentTime ?? 0)) * 1000
-      },
+    const activity: Record<string, unknown> = {
       details: title,
       state: artists,
       assets: {
-        large_image: 'nora_logo',
-        // large_text: 'Nora', // Large text will also be displayed as the 3rd line (state) so I skipped it for now
-        small_image: onlineArtworkLink ?? 'song_artwork',
+        large_image: artworkLink ?? 'nora_logo',
+        small_image: 'song_artwork',
         small_text: firstArtistWithArtwork
           ? firstArtistWithArtwork.name
           : t('discordrpc.playingASong')
@@ -83,7 +76,20 @@ export function useDiscordRpc(player: HTMLAudioElement) {
           url: 'https://github.com/Sandakan/Nora/'
         }
       ]
-    });
+    };
+
+    if (!player.paused) {
+      const currentTime = player.currentTime ?? 0;
+      const duration = player.duration ?? 0;
+      if (Number.isFinite(currentTime) && Number.isFinite(duration) && duration > 0) {
+        activity.timestamps = {
+          start: now - currentTime * 1000,
+          end: now + (duration - currentTime) * 1000
+        };
+      }
+    }
+
+    window.api?.playerControls?.setDiscordRpcActivity(activity);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
