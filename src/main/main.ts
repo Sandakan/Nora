@@ -889,6 +889,7 @@ function manageWindowOnDisplayMetricsChange() {
 
   if (!isOnAnyDisplay) {
     const primaryDisplay = screen.getPrimaryDisplay();
+    if (mainWindow.fullScreen) mainWindow.setFullScreen(false);
     mainWindow.setPosition(primaryDisplay.workArea.x, primaryDisplay.workArea.y);
     logger.debug('Window was off-screen; moved to primary display', {
       previousPosition: { x: bounds.x, y: bounds.y },
