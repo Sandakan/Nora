@@ -65,7 +65,7 @@ export function useDiscordRpc(player: HTMLAudioElement) {
       state: artists,
       assets: {
         large_image: artworkLink ?? 'nora_logo',
-        small_image: artworkLink ?? 'song_artwork',
+        small_image: 'song_artwork',
         small_text: firstArtistWithArtwork
           ? firstArtistWithArtwork.name
           : t('discordrpc.playingASong')

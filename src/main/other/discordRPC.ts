@@ -44,6 +44,12 @@ export const clearDiscordRpcActivity = async () => {
     clearTimeout(debounceTimer);
     debounceTimer = null;
   }
+
+  // Flush any pending data from the queue before clearing
+  if (latestData) {
+    setDiscordRPC(latestData);
+  }
+
   latestData = null;
   setDiscordRPC(null);
 };
