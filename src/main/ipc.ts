@@ -131,7 +131,7 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     );
 
     ipcMain.on('app/setDiscordRpcActivity', (_: unknown, options: unknown) =>
-      setDiscordRpcActivity(options)
+      setDiscordRpcActivity(options as Record<string, unknown>)
     );
 
     ipcMain.on('app/stopScreenSleeping', stopScreenSleeping);

@@ -3,36 +3,47 @@ import { getUserSettings } from '@main/db/queries/settings';
 import logger from '../logger';
 import { Initialize, setDiscordRPC } from './discord';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let dataQueue: any[] = [];
+let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+let latestData: Record<string, unknown> | null = null;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const setDiscordRpcActivity = async (data: any) => {
+export const setDiscordRpcActivity = async (data: Record<string, unknown>) => {
   try {
-    const { enableDiscordRPC } = await getUserSettings();
+    const userSettings = await getUserSettings();
+    const { enableDiscordRPC } = userSettings ?? {};
 
     if (!enableDiscordRPC)
       return logger.debug('Discord Rich Presence skipped.', {
         reason: { enableDiscordRPC }
       });
     Initialize();
-    if (dataQueue.length == 0) {
-      setDiscordRPC(data);
-      setTimeout(() => {
-        if (dataQueue.length > 1) {
-          logger.debug('Send last activity in the queue.');
-          setDiscordRPC(dataQueue.pop());
-        }
-        logger.debug('Clear activity queue.');
-        dataQueue = [];
-      }, 3000);
-      logger.debug('Discord rich presence activity accepted.');
+
+    if (debounceTimer) {
+      latestData = data;
+      return;
     }
-    dataQueue.push(data);
-    return logger.debug('Pushed activity to queue.');
+
+    setDiscordRPC(data);
+
+    debounceTimer = setTimeout(() => {
+      debounceTimer = null;
+      const pending = latestData;
+      latestData = null;
+      if (pending) {
+        logger.debug('Send last activity in the queue.');
+        setDiscordRPC(pending);
+      }
+      logger.debug('Clear activity queue.');
+    }, 1000);
   } catch (error) {
     logger.error('Failed to set discord rich presence activity.', { error });
   }
 };
 
-export const clearDiscordRpcActivity = async () => setDiscordRPC(null);
+export const clearDiscordRpcActivity = async () => {
+  if (debounceTimer) {
+    clearTimeout(debounceTimer);
+    debounceTimer = null;
+  }
+  latestData = null;
+  setDiscordRPC(null);
+};
