@@ -1,3 +1,5 @@
+import { existsSync } from 'fs';
+
 import { addSongToPlayHistory } from '@main/db/queries/history';
 import { getPlayableSongById } from '@main/db/queries/songs';
 import { setDiscordRpcActivity } from '@main/other/discordRPC';
@@ -94,13 +96,20 @@ const sendAudioData = async (songId: number): Promise<AudioPlayerData> => {
       const isBlacklisted = song.isBlacklisted;
       const isAFavorite = song.isFavorite;
 
+      const resolvedPath = resolveSongFilePath(song.path);
+      const realFilePath = removeDefaultAppProtocolFromFilePath(resolvedPath);
+      if (!existsSync(realFilePath)) {
+        logger.warn(`Song file not found on disk`, { songId: song.id, path: realFilePath });
+        throw new Error('SONG_NOT_FOUND' as ErrorCodes);
+      }
+
       const data: AudioPlayerData = {
         title: song.title,
         artists,
         duration: Number(song.duration),
         artwork: parseArtworkDataForAudioPlayerData(artworkData),
         artworkPath: songArtwork,
-        path: resolveSongFilePath(song.path),
+        path: resolvedPath,
         songId: song.id,
         isAFavorite,
         album,
