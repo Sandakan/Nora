@@ -1,7 +1,6 @@
 import path from 'path';
 
 import { getSongByIdForSongMetadata } from '@main/db/queries/songs';
-import { File } from 'node-taglib-sharp';
 
 import { appPreferences } from '../../../package.json';
 // import { parseSyncedLyricsFromAudioDataSource } from '../../common/parseLyrics';
@@ -17,10 +16,11 @@ import logger from '../logger';
 import { getSongsOutsideLibraryData } from '../main';
 import { isLyricsSavePending } from '../saveLyricsToSong';
 import { isMetadataUpdatesPending } from '../updateSong/updateSongId3Tags';
+import { createTagFile } from '../utils/createTagFile';
 
 const { metadataEditingSupportedExtensions } = appPreferences;
 
-const getSongFileObject = (songPath: string) => File.createFromPath(songPath);
+const getSongFileObject = (songPath: string) => createTagFile(songPath);
 
 // const getUnsynchronizedLyricsFromSongID3Tags = (songID3Tags: SongTags) => {
 //   const { unsynchronisedLyrics } = songID3Tags;

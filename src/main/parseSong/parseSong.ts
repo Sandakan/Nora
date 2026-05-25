@@ -5,9 +5,8 @@ import { db } from '@main/db/db';
 import { linkArtworksToSong } from '@main/db/queries/artworks';
 import { isSongWithPathAvailable, saveSong } from '@main/db/queries/songs';
 import type { songs } from '@main/db/schema';
-import { File } from 'node-taglib-sharp';
-
 import logger from '../logger';
+import { createTagFile } from '../utils/createTagFile';
 import { dataUpdateEvent, sendMessageToRenderer } from '../main';
 import { storeArtworks } from '../other/artworks';
 import { generatePalettes } from '../other/generatePalette';
@@ -119,7 +118,7 @@ export const parseSong = async (
     //  logger.debug('song stream not readable', undefined, 'ERROR');
 
     const stats = await fs.stat(absoluteFilePath);
-    const file = File.createFromPath(absoluteFilePath);
+    const file = createTagFile(absoluteFilePath);
     const metadata = file.tag;
 
     // songFileStream.close();

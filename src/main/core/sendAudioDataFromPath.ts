@@ -1,7 +1,6 @@
 import path from 'path';
 
 import { getSongIdFromSongPath } from '@main/db/queries/songs';
-import { File } from 'node-taglib-sharp';
 
 import { appPreferences } from '../../../package.json';
 import songCoverImage from '../../renderer/src/assets/images/webp/song_cover_default.webp?asset';
@@ -9,6 +8,7 @@ import { DEFAULT_FILE_URL } from '../filesystem';
 import logger from '../logger';
 import { sendMessageToRenderer, addToSongsOutsideLibraryData } from '../main';
 import { createTempArtwork } from '../other/artworks';
+import { createTagFile } from '../utils/createTagFile';
 import sendAudioData, { parseArtworkDataForAudioPlayerData } from './sendAudioData';
 
 const toNoraLocalFileUrl = (filePath: string) => {
@@ -36,7 +36,7 @@ const sendAudioDataFromPath = async (songPath: string): Promise<AudioPlayerData>
         throw new Error('Audio data generation failed.');
       }
 
-      const file = File.createFromPath(songPath);
+      const file = createTagFile(songPath);
       const metadata = file.tag;
       if (metadata) {
         const artworkData = metadata.pictures?.at(0)?.data?.toByteArray();
