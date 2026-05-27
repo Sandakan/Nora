@@ -71,9 +71,9 @@ const container = document.getElementById('root') as HTMLElement;
 const root = createRoot(container);
 
 router.subscribe('onRendered', () => {
-  // if (location.href.includes('/fullscreen-player')) {
-  //   return window.api.windowControls.changePlayerType('full');
-  // }
+  if (location.href.includes('/display-player')) {
+    return window.api.windowControls.changePlayerType('display');
+  }
   if (location.href.includes('/mini-player')) {
     return window.api.windowControls.changePlayerType('mini');
   }

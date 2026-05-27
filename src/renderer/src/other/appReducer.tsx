@@ -208,7 +208,7 @@ export const reducer = (state: AppReducer, action: AppReducerStateActions): AppR
     case 'UPDATE_PLAYER_TYPE': {
       const type = action.data ?? state.playerType;
 
-      if (type !== 'full') window.api.windowControls.changePlayerType(type);
+      if (type !== 'full' && type !== 'display') window.api.windowControls.changePlayerType(type);
 
       return {
         ...state,
@@ -406,7 +406,11 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
     enableImageBasedDynamicThemes: false,
     doNotShowHelpPageOnLyricsEditorStartUp: false,
     autoTranslateLyrics: false,
-    autoConvertLyrics: false
+    autoConvertLyrics: false,
+    showSongTitleInDisplayMode: true,
+    showArtistNameInDisplayMode: true,
+    showControlsInDisplayMode: true,
+    displayModeIdleTimeout: 4000,
   },
   playback: {
     currentSong: {

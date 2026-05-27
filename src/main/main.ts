@@ -872,6 +872,10 @@ export async function changePlayerType(type: PlayerTypes) {
       }
       manageWindowOnDisplayMetricsChange();
       mainWindow.setAspectRatio(MAIN_WINDOW_ASPECT_RATIO);
+    } else if (type === 'display') {
+      mainWindow.setMaximumSize(MAIN_WINDOW_MAX_SIZE_X, MAIN_WINDOW_MAX_SIZE_Y);
+      mainWindow.setMinimumSize(MAIN_WINDOW_MIN_SIZE_X, MAIN_WINDOW_MIN_SIZE_Y);
+      mainWindow.setFullScreen(true);
     } else {
       mainWindow.setMaximumSize(MAIN_WINDOW_MAX_SIZE_X, MAIN_WINDOW_MAX_SIZE_Y);
       mainWindow.setMinimumSize(MAIN_WINDOW_MIN_SIZE_X, MAIN_WINDOW_MIN_SIZE_Y);

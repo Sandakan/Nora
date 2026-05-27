@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as MainPlayerRouteRouteImport } from './routes/main-player/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MiniPlayerIndexRouteImport } from './routes/mini-player/index'
+import { Route as DisplayPlayerIndexRouteImport } from './routes/display-player/index'
 import { Route as FullscreenPlayerIndexRouteImport } from './routes/fullscreen-player/index'
 import { Route as MainPlayerSongsIndexRouteImport } from './routes/main-player/songs/index'
 import { Route as MainPlayerSettingsIndexRouteImport } from './routes/main-player/settings/index'
@@ -49,6 +50,11 @@ const IndexRoute = IndexRouteImport.update({
 const MiniPlayerIndexRoute = MiniPlayerIndexRouteImport.update({
   id: '/mini-player/',
   path: '/mini-player/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DisplayPlayerIndexRoute = DisplayPlayerIndexRouteImport.update({
+  id: '/display-player/',
+  path: '/display-player/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FullscreenPlayerIndexRoute = FullscreenPlayerIndexRouteImport.update({
@@ -179,6 +185,7 @@ const MainPlayerLyricsEditorSongIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/main-player': typeof MainPlayerRouteRouteWithChildren
+  '/display-player/': typeof DisplayPlayerIndexRoute
   '/fullscreen-player/': typeof FullscreenPlayerIndexRoute
   '/mini-player/': typeof MiniPlayerIndexRoute
   '/main-player/albums/$albumId': typeof MainPlayerAlbumsAlbumIdRoute
@@ -207,6 +214,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/main-player': typeof MainPlayerRouteRouteWithChildren
+  '/display-player': typeof DisplayPlayerIndexRoute
   '/fullscreen-player': typeof FullscreenPlayerIndexRoute
   '/mini-player': typeof MiniPlayerIndexRoute
   '/main-player/albums/$albumId': typeof MainPlayerAlbumsAlbumIdRoute
@@ -236,6 +244,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/main-player': typeof MainPlayerRouteRouteWithChildren
+  '/display-player/': typeof DisplayPlayerIndexRoute
   '/fullscreen-player/': typeof FullscreenPlayerIndexRoute
   '/mini-player/': typeof MiniPlayerIndexRoute
   '/main-player/albums/$albumId': typeof MainPlayerAlbumsAlbumIdRoute
@@ -266,6 +275,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/main-player'
+    | '/display-player/'
     | '/fullscreen-player/'
     | '/mini-player/'
     | '/main-player/albums/$albumId'
@@ -294,6 +304,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/main-player'
+    | '/display-player'
     | '/fullscreen-player'
     | '/mini-player'
     | '/main-player/albums/$albumId'
@@ -322,6 +333,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/main-player'
+    | '/display-player/'
     | '/fullscreen-player/'
     | '/mini-player/'
     | '/main-player/albums/$albumId'
@@ -351,6 +363,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   MainPlayerRouteRoute: typeof MainPlayerRouteRouteWithChildren
+  DisplayPlayerIndexRoute: typeof DisplayPlayerIndexRoute
   FullscreenPlayerIndexRoute: typeof FullscreenPlayerIndexRoute
   MiniPlayerIndexRoute: typeof MiniPlayerIndexRoute
 }
@@ -369,6 +382,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/display-player/': {
+      id: '/display-player/'
+      path: '/display-player'
+      fullPath: '/display-player/'
+      preLoaderRoute: typeof DisplayPlayerIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mini-player/': {
@@ -610,6 +630,7 @@ const MainPlayerRouteRouteWithChildren = MainPlayerRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   MainPlayerRouteRoute: MainPlayerRouteRouteWithChildren,
+  DisplayPlayerIndexRoute: DisplayPlayerIndexRoute,
   FullscreenPlayerIndexRoute: FullscreenPlayerIndexRoute,
   MiniPlayerIndexRoute: MiniPlayerIndexRoute,
 }
