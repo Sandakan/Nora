@@ -419,7 +419,8 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
       isMuted: false,
       value: 50
     },
-    playbackRate: 1.0
+    playbackRate: 1.0,
+    crossfadeDuration: 0
   },
   queue: { position: 0, songIds: [] },
   sortingStates: {

@@ -30,12 +30,16 @@ const AudioPlaybackSettings = () => {
 
   const [playbackRateInterval, setPlaybackRateInterval] = useState(1);
 
+  const [crossfadeDuration, setCrossfadeDuration] = useState(0);
+
   useEffect(() => {
     const interval = storage.preferences.getPreferences('seekbarScrollInterval');
     const playbackRate = storage.playback.getPlaybackOptions('playbackRate');
+    const savedCrossfade = storage.playback.getPlaybackOptions('crossfadeDuration');
 
     setPlaybackRateInterval(playbackRate);
     setSeekbarScrollInterval(interval.toString());
+    setCrossfadeDuration(savedCrossfade ?? 0);
   }, []);
 
   const playbackRateSeekBarCssProperties: CSSProperties = {};
@@ -43,6 +47,10 @@ const AudioPlaybackSettings = () => {
   playbackRateSeekBarCssProperties['--seek-before-width'] = `${
     ((playbackRateInterval - 0.25) / (4 - 0.25)) * 100
   }%`;
+
+  const crossfadeSliderCssProperties: CSSProperties = {};
+
+  crossfadeSliderCssProperties['--seek-before-width'] = `${(crossfadeDuration / 12000) * 100}%`;
 
   return (
     <li
@@ -107,6 +115,48 @@ const AudioPlaybackSettings = () => {
                 setPlaybackRateInterval(1);
                 storage.playback.setPlaybackOptions('playbackRate', 1);
                 dispatch({ type: 'UPDATE_PLAYBACK_RATE', data: 1 });
+              }}
+            />
+          </div>
+        </li>
+
+        <li className="crossfade-duration mb-6" id="crossfadeDuration">
+          <div className="description">{t('settingsPage.crossfadeDurationDescription')}</div>
+          <div className="mt-6 flex items-center">
+            <div className="flex w-1/2 min-w-[120px] flex-col items-center justify-center">
+              <span className="text-font-color-highlight dark:text-dark-font-color-highlight">
+                {t('settingsPage.crossfadeDuration')}: {crossfadeDuration === 0 ? t('settingsPage.crossfadeDisabled') : t('settingsPage.crossfadeSeconds', { count: crossfadeDuration / 1000 })}
+              </span>
+              <div className="flex w-full items-center pl-2">
+                <span className="text-sm">{t('settingsPage.crossfadeDisabled')}</span>
+                <input
+                  type="range"
+                  name="crossfade-slider"
+                  id="crossfade-slider"
+                  className="seek-bar-slider thumb-visible before:bg-font-color-highlight hover:before:bg-font-color-highlight dark:before:bg-font-color-highlight dark:hover:before:bg-dark-font-color-highlight relative float-left mx-4 h-6 w-full appearance-none bg-[transparent] p-0 outline-hidden outline-offset-1 before:absolute before:top-1/2 before:left-0 before:h-1 before:w-[var(--seek-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:transition-[width,background] before:content-[''] focus-visible:outline!"
+                  min={0}
+                  step={500}
+                  max={12000}
+                  value={crossfadeDuration}
+                  onChange={(e) => {
+                    const val = e.currentTarget.valueAsNumber;
+                    setCrossfadeDuration(val);
+                    storage.playback.setPlaybackOptions('crossfadeDuration', val);
+                  }}
+                  style={crossfadeSliderCssProperties}
+                  title={crossfadeDuration === 0 ? t('settingsPage.crossfadeDisabled') : `${crossfadeDuration / 1000}s`}
+                />
+                <span className="text-sm">12s</span>
+              </div>
+            </div>
+            <Button
+              label={t('settingsPage.resetCrossfade')}
+              iconName="restart_alt"
+              className="ml-6"
+              isDisabled={crossfadeDuration === 0}
+              clickHandler={() => {
+                setCrossfadeDuration(0);
+                storage.playback.setPlaybackOptions('crossfadeDuration', 0);
               }}
             />
           </div>

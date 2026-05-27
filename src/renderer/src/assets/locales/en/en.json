@@ -384,6 +384,11 @@
     "changePlaybackRate": "Change the default playback speed of the player.",
     "resetPlaybackRate": "Reset to 1x",
     "seekbarScrollInterval": "Change the increment amount when scrolled over audio seek bar and volume seek bar.",
+    "crossfadeDuration": "Crossfade",
+    "crossfadeDurationDescription": "Sets how long the end of a song overlaps with the start of the next. Set to 0 for gapless playback.",
+    "crossfadeSeconds": "{{count}} seconds",
+    "crossfadeDisabled": "Off",
+    "resetCrossfade": "Reset crossfade",
     "second": "second",
     "second_other": "seconds",
 
