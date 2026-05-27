@@ -85,6 +85,8 @@ import {
   sendMessageToRenderer,
   stopScreenSleeping,
   toggleAudioPlayingState,
+  toggleAutoLaunch,
+  toggleMiniPlayerAlwaysOnTop,
   toggleOnBatteryPower,
   updateTraySingleClickBehavior
 } from './main';
