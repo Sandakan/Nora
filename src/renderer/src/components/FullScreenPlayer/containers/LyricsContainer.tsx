@@ -11,6 +11,7 @@ import LyricsMetadata from '../../LyricsPage/LyricsMetadata';
 type Props = {
   isLyricsVisible: boolean;
   setIsLyricsAvailable: (state: boolean) => void;
+  isShowLyricsWithSongInfo?: boolean;
 };
 
 const LyricsContainer = (props: Props) => {
@@ -18,7 +19,7 @@ const LyricsContainer = (props: Props) => {
   const currentSongData = useStore(store, (state) => state.currentSongData);
   const preferences = useStore(store, (state) => state.localStorage.preferences);
 
-  const { isLyricsVisible, setIsLyricsAvailable } = props;
+  const { isLyricsVisible, setIsLyricsAvailable, isShowLyricsWithSongInfo } = props;
   const { t } = useTranslation();
 
   const [lyrics, setLyrics] = useState<SongLyrics | null | undefined>(null);
@@ -147,25 +148,33 @@ const LyricsContainer = (props: Props) => {
 
   return (
     <div
-      className={`mini-player-lyrics-container appear-from-bottom w-ful absolute top-0 flex h-full max-h-screen! w-full max-w-full! flex-col items-start overflow-auto pt-20 pr-[20%] pb-[25%] pl-20 transition-[filter] delay-200 select-none group-focus-within:brightness-50 group-focus-within/fullScreenPlayer:blur-xs group-hover/fullScreenPlayer:blur-xs group-hover/fullScreenPlayer:brightness-50 ${
-        !isCurrentSongPlaying ? 'blur-xs brightness-50' : ''
+      className={`mini-player-lyrics-container appear-from-bottom ${
+        isShowLyricsWithSongInfo
+          ? 'relative flex h-full w-full flex-col items-start py-4 pr-4 pl-4'
+          : 'absolute top-0 flex h-full max-h-screen! w-full max-w-full! flex-col items-start overflow-auto pt-20 pr-[20%] pb-[25%] pl-20'
+      } transition-[filter] delay-200 select-none ${
+        !isShowLyricsWithSongInfo
+          ? 'group-focus-within:brightness-50 group-focus-within/fullScreenPlayer:blur-xs group-hover/fullScreenPlayer:blur-xs group-hover/fullScreenPlayer:brightness-50'
+          : ''
+      } ${
+        !isCurrentSongPlaying && !isShowLyricsWithSongInfo ? 'blur-xs brightness-50' : ''
       }`}
       id="miniPlayerLyricsContainer"
     >
-      {isLyricsVisible && lyricsComponents.length > 0 && lyrics && lyrics.lyrics.isSynced && (
+      {(isShowLyricsWithSongInfo || isLyricsVisible) && lyricsComponents.length > 0 && lyrics && lyrics.lyrics.isSynced && (
         <>
           {lyricsComponents}
           {lyricsSource}
         </>
       )}
-      {isLyricsVisible && lyrics && !lyrics.lyrics.isSynced && (
+      {(isShowLyricsWithSongInfo || isLyricsVisible) && lyrics && !lyrics.lyrics.isSynced && (
         <div className="text-font-color-highlight flex h-full w-full flex-col justify-center text-2xl opacity-50">
           <span className="material-icons-round-outlined mb-2 text-5xl">brightness_alert</span>
           {t('lyricsPage.noSyncedLyrics')}
           <p className="mt-4 text-base">{t('lyricsPage.noSyncedLyricsDescription')}</p>
         </div>
       )}
-      {isLyricsVisible && lyrics === undefined && (
+      {(isShowLyricsWithSongInfo || isLyricsVisible) && lyrics === undefined && (
         <div className="text-font-color-highlight flex h-full w-full flex-col justify-center text-2xl opacity-50">
           <span className="material-icons-round-outlined mb-2 text-5xl">brightness_alert</span>
           <p>{t('lyricsPage.noLyrics')}</p>
