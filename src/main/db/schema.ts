@@ -302,6 +302,8 @@ export const playlists = pgTable(
     name: varchar('name', { length: 255 }).notNull(),
     // Generated column: case-insensitive text for searches (using citext type)
     nameCI: citext('name_ci').generatedAlwaysAs((): SQL => sql`${playlists.name}::citext`),
+    isSmart: boolean('is_smart').notNull().default(false),
+    criteria: text('criteria'),
     createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },

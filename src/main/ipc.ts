@@ -70,6 +70,8 @@ import {
   saveUserEqualizerPreset
 } from './db/queries/userPreferences';
 import { removeDefaultAppProtocolFromFilePath } from './fs/resolveFilePaths';
+import { getPlaylistById, updatePlaylistCriteria } from './db/queries/playlists';
+import { refreshSmartPlaylist } from './db/queries/playlist-rules';
 import logger, { logFilePath } from './logger';
 import {
   allowScreenSleeping,
@@ -95,6 +97,9 @@ import { generatePalettes } from './other/generatePalette';
 import { flushScrobbleQueue } from './other/lastFm/flushScrobbleQueue';
 import getAlbumInfoFromLastFM from './other/lastFm/getAlbumInfoFromLastFM';
 import getSimilarTracks from './other/lastFm/getSimilarTracks';
+import getUserTopTracks from './other/lastFm/getUserTopTracks';
+import getUserRecentTracks from './other/lastFm/getUserRecentTracks';
+import getUserLovedTracks from './other/lastFm/getUserLovedTracks';
 import scrobbleSong from './other/lastFm/scrobbleSong';
 import sendNowPlayingSongDataToLastFM from './other/lastFm/sendNowPlayingSongDataToLastFM';
 import reParseSong from './parseSong/reParseSong';
@@ -345,6 +350,26 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       getAlbumInfoFromLastFM(albumId)
     );
 
+    ipcMain.handle(
+      'app/lastfm/getUserTopTracks',
+      (
+        _,
+        username: string,
+        period?: 'overall' | '7day' | '1month' | '3month' | '6month' | '12month',
+        limit?: number
+      ) => getUserTopTracks(username, period, limit)
+    );
+
+    ipcMain.handle(
+      'app/lastfm/getUserRecentTracks',
+      (_, username: string, limit?: number) => getUserRecentTracks(username, limit)
+    );
+
+    ipcMain.handle(
+      'app/lastfm/getUserLovedTracks',
+      (_, username: string, limit?: number) => getUserLovedTracks(username, limit)
+    );
+
     ipcMain.handle('app/getSongListeningData', (_, songIds: number[]) => getListeningData(songIds));
 
     ipcMain.handle(
@@ -465,6 +490,20 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     ipcMain.handle('app/renameAPlaylist', (_, playlistId: number, newName: string) =>
       renameAPlaylist(playlistId, newName)
     );
+
+    ipcMain.handle('app/saveSmartPlaylistCriteria', async (_, playlistId: number, criteria: SmartPlaylistCriteria) => {
+      await updatePlaylistCriteria(playlistId, criteria);
+      const songIds = await refreshSmartPlaylist(playlistId, criteria);
+      return { songIds };
+    });
+
+    ipcMain.handle('app/refreshSmartPlaylist', async (_, playlistId: number) => {
+      const playlist = await getPlaylistById(playlistId);
+      if (!playlist?.criteria) return { songIds: [] };
+      const criteria: SmartPlaylistCriteria = JSON.parse(playlist.criteria);
+      const songIds = await refreshSmartPlaylist(playlistId, criteria);
+      return { songIds };
+    });
 
     ipcMain.handle('app/clearSongHistory', () => clearSongHistory());
 

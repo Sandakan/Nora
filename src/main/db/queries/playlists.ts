@@ -256,6 +256,17 @@ export const createPlaylist = async (name: string, trx: DB | DBTransaction = db)
   return newPlaylist;
 };
 
+export const updatePlaylistCriteria = async (
+  playlistId: number,
+  criteria: SmartPlaylistCriteria,
+  trx: DB | DBTransaction = db
+) => {
+  return await trx
+    .update(playlists)
+    .set({ criteria: JSON.stringify(criteria), isSmart: true })
+    .where(eq(playlists.id, playlistId));
+};
+
 export const updatePlaylistName = async (
   playlistId: number,
   newName: string,

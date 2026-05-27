@@ -46,6 +46,8 @@ const PlaylistSearchResultsContainer = (props: Props) => {
                     songs={playlist.songs}
                     isArtworkAvailable={playlist.isArtworkAvailable}
                     artworkPaths={playlist.artworkPaths}
+                    isSmart={playlist.isSmart ?? false}
+                    criteria={playlist.criteria ?? null}
                     selectAllHandler={selectAllHandler}
                   />
                 );

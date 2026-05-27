@@ -427,6 +427,26 @@ const albumsData = {
     ipcRenderer.invoke('app/getAlbumInfoFromLastFM', albumId)
 };
 
+// $ LAST.FM USER DATA
+const lastFmUserData = {
+  getUserTopTracks: (
+    username: string,
+    period?: 'overall' | '7day' | '1month' | '3month' | '6month' | '12month',
+    limit?: number
+  ): Promise<{ tracks: { name: string; artist: string; url: string; playCount: number }[] } | undefined> =>
+    ipcRenderer.invoke('app/lastfm/getUserTopTracks', username, period, limit),
+  getUserRecentTracks: (
+    username: string,
+    limit?: number
+  ): Promise<{ tracks: { name: string; artist: string; url: string; playedAt: number }[] } | undefined> =>
+    ipcRenderer.invoke('app/lastfm/getUserRecentTracks', username, limit),
+  getUserLovedTracks: (
+    username: string,
+    limit?: number
+  ): Promise<{ tracks: { name: string; artist: string; url: string }[] } | undefined> =>
+    ipcRenderer.invoke('app/lastfm/getUserLovedTracks', username, limit)
+};
+
 // $ PLAYLIST DATA AND CONTROLS
 const playlistsData = {
   getPlaylistData: (
@@ -470,7 +490,11 @@ const playlistsData = {
   exportPlaylist: (playlistId: number): Promise<void> =>
     ipcRenderer.invoke('app/exportPlaylist', playlistId),
   importPlaylist: (targetPlaylistId?: number): Promise<void> =>
-    ipcRenderer.invoke('app/importPlaylist', targetPlaylistId)
+    ipcRenderer.invoke('app/importPlaylist', targetPlaylistId),
+  saveSmartPlaylistCriteria: (playlistId: number, criteria: SmartPlaylistCriteria): Promise<{ songIds: number[] }> =>
+    ipcRenderer.invoke('app/saveSmartPlaylistCriteria', playlistId, criteria),
+  refreshSmartPlaylist: (playlistId: number): Promise<{ songIds: number[] }> =>
+    ipcRenderer.invoke('app/refreshSmartPlaylist', playlistId)
 };
 
 const queue = {
@@ -621,6 +645,7 @@ export const api = {
   genresData,
   albumsData,
   playlistsData,
+  lastFmUserData,
   log,
   miniPlayer,
   settings,

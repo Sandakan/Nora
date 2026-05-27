@@ -102,7 +102,9 @@ export const convertToPlaylist = (playlist: GetAllPlaylistsReturnType['data'][nu
     artworkPaths: parsePlaylistArtworks(artworks),
     songs: playlist.songs.map((s) => s.song.id),
     isArtworkAvailable: artworks.length > 0,
-    createdDate: playlist.createdAt
+    createdDate: playlist.createdAt,
+    isSmart: playlist.isSmart ?? false,
+    criteria: playlist.criteria ?? null
   } satisfies Playlist;
 };
 

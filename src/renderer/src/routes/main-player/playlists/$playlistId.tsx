@@ -22,6 +22,9 @@ import { useTranslation } from 'react-i18next';
 const SensitiveActionConfirmPrompt = lazy(
   () => import('@renderer/components/SensitiveActionConfirmPrompt')
 );
+const SmartPlaylistCriteriaEditor = lazy(
+  () => import('@renderer/components/SmartPlaylistCriteriaEditor')
+);
 
 export const Route = createFileRoute('/main-player/playlists/$playlistId')({
   validateSearch: songSearchSchema,
@@ -156,6 +159,35 @@ function PlaylistInfoPage() {
     [createQueue, playlistData.playlistId, playlistSongs]
   );
 
+  const refreshSmartPlaylist = useCallback(() => {
+    window.api.playlistsData
+      .refreshSmartPlaylist(playlistData.playlistId)
+      .then(() => {
+        queryClient.invalidateQueries({ queryKey: playlistQuery._def });
+        addNewNotifications([
+          {
+            id: 'smartPlaylistRefreshed',
+            duration: 5000,
+            content: t('playlist.refreshSuccess')
+          }
+        ]);
+      })
+      .catch((err) => {
+        console.error(err);
+        addNewNotifications([
+          {
+            id: 'smartPlaylistRefreshFailed',
+            duration: 5000,
+            content: t('playlist.refreshFailed')
+          }
+        ]);
+      });
+  }, [addNewNotifications, playlistData.playlistId, queryClient, t]);
+
+  const openCriteriaEditor = useCallback(() => {
+    changePromptMenuData(true, <SmartPlaylistCriteriaEditor playlist={playlistData} />);
+  }, [changePromptMenuData, playlistData]);
+
   return (
     <MainContainer
       className="main-container playlist-info-page-container h-full! px-8 pr-0! pb-0!"
@@ -195,6 +227,18 @@ function PlaylistInfoPage() {
             iconName: 'add',
             clickHandler: addSongsToQueue,
             isDisabled: !(playlistData.songs && playlistData.songs.length > 0)
+          },
+          {
+            label: t('playlist.refreshPlaylist'),
+            iconName: 'refresh',
+            clickHandler: refreshSmartPlaylist,
+            isVisible: playlistData.isSmart
+          },
+          {
+            label: t('playlist.editCriteria'),
+            iconName: 'tune',
+            clickHandler: openCriteriaEditor,
+            isVisible: playlistData.isSmart
           }
         ]}
         dropdowns={[
@@ -244,6 +288,7 @@ function PlaylistInfoPage() {
                 {
                   label: t('playlistsPage.removeFromThisPlaylist'),
                   iconName: 'playlist_remove',
+                  isDisabled: playlistData.isSmart,
                   handlerFunction: () =>
                     window.api.playlistsData
                       .removeSongFromPlaylist(playlistData.playlistId, item.songId)

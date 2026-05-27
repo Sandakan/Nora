@@ -120,7 +120,9 @@ const AddSongsToPlaylistsPrompt = (props: AddSongsToPlaylistProp) => {
   const playlistComponents = useMemo(
     () =>
       playlists.length > 0
-        ? playlists.map((playlist) => {
+        ? playlists
+            .filter((p) => !p.isSmart)
+            .map((playlist) => {
             return (
               <SelectablePlaylist
                 name={playlist.name}
@@ -129,6 +131,8 @@ const AddSongsToPlaylistsPrompt = (props: AddSongsToPlaylistProp) => {
                 songs={playlist.songs}
                 artworkPaths={playlist.artworkPaths}
                 isArtworkAvailable={playlist.isArtworkAvailable}
+                isSmart={playlist.isSmart ?? false}
+                criteria={playlist.criteria ?? null}
                 isChecked={selectedPlaylistIds.includes(playlist.playlistId)}
                 playlistCheckedStateUpdateFunc={(state) => {
                   setSelectedPlaylistIds((prevData) => {
