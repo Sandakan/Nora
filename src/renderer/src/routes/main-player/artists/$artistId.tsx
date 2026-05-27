@@ -24,6 +24,7 @@ import { useSuspenseQuery, useMutation, useQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import storage from '@renderer/utils/localStorage';
 import { useTranslation } from 'react-i18next';
 
 export const Route = createFileRoute('/main-player/artists/$artistId')({
@@ -219,11 +220,21 @@ function ArtistInfoPage() {
       artistData?.onlineArtworkPaths?.picture_xl ||
       artistData?.onlineArtworkPaths?.picture_medium ||
       artistData?.artworkPaths?.artworkPath;
+    const isBackgroundArtworksDisabled = storage.preferences.getPreferences(
+      'disableBackgroundArtworks'
+    );
 
-    updateBodyBackgroundImage(true, artworkUrl);
+    if (!isBackgroundArtworksDisabled) {
+      updateBodyBackgroundImage(true, artworkUrl);
+    }
 
     return () => updateBodyBackgroundImage(false);
-  }, [artistData?.onlineArtworkPaths, artistData?.artworkPaths, updateBodyBackgroundImage]);
+  }, [
+    artistData?.onlineArtworkPaths?.picture_xl,
+    artistData?.onlineArtworkPaths?.picture_medium,
+    artistData?.artworkPaths?.artworkPath,
+    updateBodyBackgroundImage
+  ]);
 
   const selectAllHandlerForAlbums = useSelectAllHandler(albums, 'album', 'albumId');
 
