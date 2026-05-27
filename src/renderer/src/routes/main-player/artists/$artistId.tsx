@@ -49,7 +49,7 @@ function ArtistInfoPage() {
   const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
   const preferences = useStore(store, (state) => state.localStorage.preferences);
 
-  const { createQueue, updateContextMenuData, toggleMultipleSelections, playSong } =
+  const { createQueue, updateContextMenuData, toggleMultipleSelections, playSong, updateBodyBackgroundImage } =
     useContext(AppUpdateContext);
   const { t } = useTranslation();
 
@@ -213,6 +213,17 @@ function ArtistInfoPage() {
         .timeString,
     [songs]
   );
+
+  useEffect(() => {
+    const artworkUrl =
+      artistData?.onlineArtworkPaths?.picture_xl ||
+      artistData?.onlineArtworkPaths?.picture_medium ||
+      artistData?.artworkPaths?.artworkPath;
+
+    updateBodyBackgroundImage(true, artworkUrl);
+
+    return () => updateBodyBackgroundImage(false);
+  }, [artistData?.onlineArtworkPaths, artistData?.artworkPaths, updateBodyBackgroundImage]);
 
   const selectAllHandlerForAlbums = useSelectAllHandler(albums, 'album', 'albumId');
 

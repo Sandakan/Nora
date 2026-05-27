@@ -329,7 +329,7 @@ export const reducer = (state: AppReducer, action: AppReducerStateActions): AppR
     case 'UPDATE_BODY_BACKGROUND_IMAGE':
       return {
         ...state,
-        bodyBackgroundImage: action.data ?? state.bodyBackgroundImage
+        bodyBackgroundImage: 'data' in action ? action.data : state.bodyBackgroundImage
       };
     case 'UPDATE_MULTIPLE_SELECTIONS_DATA':
       return {
