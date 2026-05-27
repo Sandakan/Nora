@@ -369,6 +369,9 @@ class AudioPlayer {
 
     this.isCrossfading = false;
 
+    const now = this.currentContext.currentTime;
+    this.fadeGainPrimary.gain.cancelScheduledValues(now);
+    this.fadeGainSecondary.gain.cancelScheduledValues(now);
     this.fadeGainPrimary.gain.value = this.activeElement === 'primary' ? 1 : 0.001;
     this.fadeGainSecondary.gain.value = this.activeElement === 'primary' ? 0.001 : 1;
 
@@ -700,7 +703,7 @@ class AudioPlayer {
       return;
     }
 
-    if (this.crossfadeDuration > 0 && this.queue.hasNext && this.preloadedSongId) {
+    if (this.crossfadeDuration > 0 && this.queue.hasNext && this.preloadedSongId === this.queue.nextSongId) {
       this.startCrossfade();
       this.queue.moveToNext();
       return;
