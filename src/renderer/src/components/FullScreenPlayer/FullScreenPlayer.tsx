@@ -10,6 +10,8 @@ import TitleBar from '../TitleBar/TitleBar';
 import LyricsContainer from './containers/LyricsContainer';
 import SongInfoContainer from './containers/SongInfoContainer';
 
+let _persistedPinState = false;
+
 // type Props = {};
 
 const isArtistBackgroundsEnabled = false;
@@ -22,7 +24,12 @@ const FullScreenPlayer = () => {
 
   const [isLyricsVisible, setIsLyricsVisible] = useState(false);
   const [isLyricsAvailable, setIsLyricsAvailable] = useState(false);
+  const [isPinned, setIsPinned] = useState(_persistedPinState);
   const [songPos, setSongPos] = useState(0);
+
+  useEffect(() => {
+    _persistedPinState = isPinned;
+  }, [isPinned]);
 
   const fullScreenPlayerContainerRef = useRef<HTMLDivElement>(null);
   const { isMouseActive } = useMouseActiveState(fullScreenPlayerContainerRef, {
@@ -66,11 +73,12 @@ const FullScreenPlayer = () => {
       </div>
       <TitleBar />
       <div
-        className={`flex max-w-full flex-col justify-end ${isMouseActive && 'group/fullScreenPlayer'}`}
+        className={`flex max-w-full flex-col justify-end ${(isMouseActive || isPinned) && 'group/fullScreenPlayer'}`}
         ref={fullScreenPlayerContainerRef}
       >
         <LyricsContainer
           isLyricsVisible={isLyricsVisible}
+          isPinned={isPinned}
           setIsLyricsAvailable={setIsLyricsAvailable}
         />
         <SongInfoContainer
@@ -79,6 +87,8 @@ const FullScreenPlayer = () => {
           setIsLyricsVisible={setIsLyricsVisible}
           isLyricsAvailable={isLyricsAvailable}
           isMouseActive={isMouseActive}
+          isPinned={isPinned}
+          setIsPinned={setIsPinned}
         />
         <SeekBarSlider
           name="full-screen-player-seek-slider"
