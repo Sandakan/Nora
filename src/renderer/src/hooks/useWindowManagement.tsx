@@ -1,10 +1,10 @@
-import { type DragEvent, type RefObject, useCallback, useEffect } from 'react';
-import { lazy } from 'react';
+import { type DragEvent, type RefObject, lazy, useCallback, useEffect } from 'react';
 
 import { appPreferences } from '../../../../package.json';
 import { store } from '../store/store';
 
 // Lazy load prompts
+// eslint-disable-next-line react/only-export-components
 const UnsupportedFileMessagePrompt = lazy(
   () => import('../components/UnsupportedFileMessagePrompt')
 );

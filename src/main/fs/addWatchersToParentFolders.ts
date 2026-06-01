@@ -1,37 +1,86 @@
 import fsSync, { type WatchEventType } from 'fs';
+import { stat } from 'fs/promises';
 import path from 'path';
 
 import { getAllFolderStructures } from '@main/db/queries/folders';
 
-import logger from '../logger';
+import checkFolderForUnknownModifications from './checkFolderForUnknownContentModifications';
 import checkForFolderModifications from './checkForFolderModifications';
 import { saveAbortController } from './controlAbortControllers';
 import getParentFolderPaths from './getParentFolderPaths';
+import logger from '../logger';
 
-const fileNameRegex = /^.{1,}\.\w{1,}$/;
+const createParentFolderWatcherFunction = (
+  parentFolderPath: string,
+  initialFolderPaths: string[]
+) => {
+  const musicFolderPaths = initialFolderPaths;
+  let isScanning = false;
 
-const parentFolderWatcherFunction = async (eventType: WatchEventType, filename?: string | null) => {
-  if (filename) {
-    if (eventType === 'rename') {
-      // if not a filename, it should be a directory
-      const isADirectory = !fileNameRegex.test(filename);
-
-      if (isADirectory) {
-        // possible folder addition or deletion
-        checkForFolderModifications(filename);
-      }
-    }
-  } else {
-    logger.warn('Failed to watch parent folders because watcher sent an undefined filename', {
-      eventType,
-      filename
+  const findContainingMusicFolder = (fullPath: string): string | undefined => {
+    const sorted = [...musicFolderPaths].sort((a, b) => b.length - a.length);
+    return sorted.find((folderPath) => {
+      if (!fullPath.startsWith(folderPath)) return false;
+      if (fullPath.length === folderPath.length) return true;
+      return fullPath[folderPath.length] === path.sep;
     });
-  }
+  };
+
+  return async (eventType: WatchEventType, filename?: string | null) => {
+    if (filename) {
+      if (eventType === 'rename') {
+        const fullPath = path.normalize(path.join(parentFolderPath, filename));
+        const fullPathStat = await stat(fullPath).catch(() => null);
+
+        if (fullPathStat?.isDirectory()) {
+          const containingFolder = findContainingMusicFolder(fullPath);
+
+          if (containingFolder) {
+            if (isScanning) return;
+            isScanning = true;
+
+            try {
+              logger.debug(`New directory detected inside music folder.`, {
+                path: fullPath,
+                musicFolder: containingFolder
+              });
+              await checkForFolderModifications(filename);
+              await checkFolderForUnknownModifications(containingFolder);
+            } finally {
+              isScanning = false;
+            }
+            return;
+          }
+
+          await checkForFolderModifications(filename);
+        } else if (fullPathStat === null) {
+          // Path was deleted — check if a known folder was removed
+          await checkForFolderModifications(filename);
+        }
+      }
+    } else {
+      logger.warn('Failed to watch parent folders because watcher sent an undefined filename', {
+        eventType,
+        filename
+      });
+    }
+  };
 };
 
-const addWatcherToParentFolder = (parentFolderPath: string) => {
+const getAllPathsFromStructures = (structures: FolderStructure[], paths: string[] = []): string[] => {
+  for (const structure of structures) {
+    paths.push(structure.path);
+    for (const sub of structure.subFolders) {
+      getAllPathsFromStructures([sub], paths);
+    }
+  }
+  return paths;
+};
+
+const addWatcherToParentFolder = (parentFolderPath: string, folderPaths: string[]) => {
   try {
     const abortController = new AbortController();
+    const watcherFunction = createParentFolderWatcherFunction(parentFolderPath, folderPaths);
     const watcher = fsSync.watch(
       parentFolderPath,
       {
@@ -39,7 +88,7 @@ const addWatcherToParentFolder = (parentFolderPath: string) => {
         // TODO - recursive mode won't work on linux
         recursive: true
       },
-      (eventType, filename) => parentFolderWatcherFunction(eventType, filename)
+      (eventType, filename) => watcherFunction(eventType, filename)
     );
     logger.debug('Added watcher to a parent folder successfully.', { parentFolderPath });
 
@@ -64,9 +113,10 @@ const addWatchersToParentFolders = async () => {
   logger.debug(`${parentFolderPaths.length} parent folders of music folders found.`);
 
   if (parentFolderPaths.length > 0) {
+    const allFolderPaths = getAllPathsFromStructures(musicFolders);
     for (const parentFolderPath of parentFolderPaths) {
       try {
-        addWatcherToParentFolder(parentFolderPath);
+        addWatcherToParentFolder(parentFolderPath, allFolderPaths);
       } catch (error) {
         logger.error(
           `Failed to add watcher to '${path.basename(parentFolderPath)}' parent folder.`,

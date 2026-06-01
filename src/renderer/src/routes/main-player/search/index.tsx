@@ -22,6 +22,7 @@ import { useStore } from '@tanstack/react-store';
 import { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+// eslint-disable-next-line react/only-export-components
 export const Route = createFileRoute('/main-player/search/')({
   validateSearch: searchPageSchema,
   component: SearchPage

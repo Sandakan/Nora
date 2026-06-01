@@ -126,6 +126,16 @@ const Sidebar = memo(() => {
         <ul className="relative flex h-full! flex-col gap-1 overflow-x-hidden pt-4 pb-2">
           {sideBarItems}
         </ul>
+        <div className="mb-2 flex justify-center px-2">
+          <button
+            onClick={() => window.api.audioLibraryControls.resyncSongsLibrary()}
+            className={`flex w-full items-center justify-center gap-2 rounded-lg p-2 text-sm text-font-color-black outline-none transition-[colors,opacity] duration-200 hover:bg-background-color-3 dark:text-font-color-white dark:hover:bg-dark-background-color-3 active:opacity-70`}
+            title={t('settingsPage.resyncLibrary')}
+          >
+            <span className="material-icons-round icon text-xl">sync</span>
+            <span className="sidebar-item-label">{t('settingsPage.resyncLibrary')}</span>
+          </button>
+        </div>
       </ErrorBoundary>
     </nav>
   );

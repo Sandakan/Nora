@@ -1050,7 +1050,7 @@
   },
 
   "backend": {
-    "RESYNC_SUCCESSFUL": "Library resync successfull.",
+    "RESYNC_SUCCESSFUL": "Library resync successful.",
     "RESET_SUCCESSFUL": "App reset successfully, now restarting.",
     "RESET_FAILED": "Resetting the app failed. Reloading the app now.",
     "APP_THEME_CHANGE": "System theme changed to {{theme}}",

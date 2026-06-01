@@ -1,26 +1,28 @@
-import { getAllFolders } from '@main/db/queries/folders';
+import { getAllFolderStructures } from '@main/db/queries/folders';
 
 import checkFolderForUnknownModifications from '../fs/checkFolderForUnknownContentModifications';
 import logger from '../logger';
 
-const checkForNewSongs = async () => {
-  const folders = await getAllFolders();
+const getTopLevelFolderPaths = async (): Promise<string[]> => {
+  const structures = await getAllFolderStructures();
+  return structures.map((s) => s.path);
+};
 
-  if (folders.length > 0) {
-    for (const folder of folders) {
+const checkForNewSongs = async () => {
+  const topLevelFolders = await getTopLevelFolderPaths();
+
+  if (topLevelFolders.length > 0) {
+    for (const folderPath of topLevelFolders) {
       try {
-        return await checkFolderForUnknownModifications(folder.path);
+        await checkFolderForUnknownModifications(folderPath);
       } catch (error) {
         logger.error(`Failed to check for unknown modifications of a path.`, {
           error,
-          path: folder.path
+          path: folderPath
         });
       }
     }
   }
-  logger.error(`Failed to read music folders array in user data. it was possibly empty.`, {
-    folders
-  });
 };
 
 export default checkForNewSongs;

@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 
-import { getFolderFromPath } from '@main/db/queries/folders';
+import { getAllFolders, getFolderFromPath } from '@main/db/queries/folders';
 import { getSongsRelativeToFolder } from '@main/db/queries/songs';
 
 import { supportedMusicExtensions } from '../filesystem';
@@ -25,13 +25,21 @@ const getSongPathsRelativeToFolder = async (folderPath: string) => {
   return relevantSongPaths;
 };
 
-const getFullPathsOfFolderDirs = async (folderPath: string) => {
+const getFullPathsOfFolderDirs = async (folderPath: string): Promise<string[]> => {
   try {
-    const dirs = await fs.readdir(folderPath);
-    const supportedDirs = dirs.filter((filePath) =>
-      supportedMusicExtensions.includes(path.extname(filePath))
-    );
-    const fullPaths = supportedDirs.map((filePath) => path.join(folderPath, filePath));
+    const dirs = await fs.readdir(folderPath, { withFileTypes: true });
+    const fullPaths: string[] = [];
+
+    for (const dir of dirs) {
+      const fullPath = path.join(folderPath, dir.name);
+      if (dir.isDirectory()) {
+        const subDirPaths = await getFullPathsOfFolderDirs(fullPath);
+        fullPaths.push(...subDirPaths);
+      } else if (supportedMusicExtensions.includes(path.extname(dir.name))) {
+        fullPaths.push(fullPath);
+      }
+    }
+
     return fullPaths;
   } catch (error) {
     logger.error(`Failed to read directory.`, { error, folderPath });
@@ -57,6 +65,31 @@ const addNewlyAddedSongsToLibrary = async (
 ) => {
   const folder = await getFolderFromPath(folderPath);
 
+  // Fix BUG 3: Skip if folder is blacklisted — even when DB has 0 songs
+  if (folder?.isBlacklisted) {
+    logger.debug(`Skipping blacklisted folder.`, { folderPath });
+    return;
+  }
+
+  // Fix BUG 2b: Resolve correct folderId per song so nested songs get
+  // the closest known folder, not always the ancestor's id
+  const allMusicFolders = await getAllFolders();
+  const folderPathToId = new Map<string, number>(
+    allMusicFolders.map((f) => [f.path, f.id])
+  );
+
+  const getClosestFolderId = (songPath: string): number | undefined => {
+    let dir = path.dirname(songPath);
+    while (dir.length >= folderPath.length) {
+      const matchedId = folderPathToId.get(dir);
+      if (matchedId !== undefined) return matchedId;
+      const parentDir = path.dirname(dir);
+      if (parentDir === dir) break;
+      dir = parentDir;
+    }
+    return folder?.id;
+  };
+
   for (let i = 0; i < newlyAddedSongPaths.length; i += 1) {
     const newlyAddedSongPath = newlyAddedSongPaths[i];
 
@@ -69,7 +102,8 @@ const addNewlyAddedSongsToLibrary = async (
     }
 
     try {
-      await tryToParseSong(newlyAddedSongPath, folder?.id, false, false);
+      const resolvedFolderId = getClosestFolderId(newlyAddedSongPath);
+      await tryToParseSong(newlyAddedSongPath, resolvedFolderId, false, false);
       logger.debug(`${path.basename(newlyAddedSongPath)} song added.`, {
         songPath: newlyAddedSongPath
       });
@@ -86,35 +120,35 @@ const addNewlyAddedSongsToLibrary = async (
 const checkFolderForUnknownModifications = async (folderPath: string) => {
   const relevantFolderSongPaths = await getSongPathsRelativeToFolder(folderPath);
 
-  if (relevantFolderSongPaths.length > 0) {
-    const dirs = await getFullPathsOfFolderDirs(folderPath);
+  const dirs = await getFullPathsOfFolderDirs(folderPath);
 
-    if (dirs) {
-      // checks for newly added songs that got added before application launch
-      const newlyAddedSongPaths = dirs.filter(
-        (dir) => !relevantFolderSongPaths.some((songPath) => songPath === dir)
-      );
-      // checks for deleted songs that got deleted before application launch
+  if (dirs) {
+    if (relevantFolderSongPaths.length > 0) {
       const deletedSongPaths = relevantFolderSongPaths.filter(
         (songPath) => !dirs.some((dir) => dir === songPath)
       );
 
-      logger.debug(`New song additions/deletions detected.`, {
-        newlyAddedSongPathsCount: newlyAddedSongPaths.length,
-        deletedSongPathsCount: deletedSongPaths.length,
-        newlyAddedSongPaths,
-        deletedSongPaths,
-        folderPath
-      });
-
-      // Prioritises deleting songs before adding new songs to prevent data clashes.
       if (deletedSongPaths.length > 0) {
-        // deleting songs from the library that got deleted before application launch
+        logger.debug(`Song deletions detected.`, {
+          deletedSongPathsCount: deletedSongPaths.length,
+          deletedSongPaths,
+          folderPath
+        });
         await removeDeletedSongsFromLibrary(deletedSongPaths, abortController.signal);
       }
+    }
+
+    if (dirs.length > 0) {
+      const newlyAddedSongPaths = dirs.filter(
+        (dir) => !relevantFolderSongPaths.some((songPath) => songPath === dir)
+      );
 
       if (newlyAddedSongPaths.length > 0) {
-        // parses new songs that added before application launch
+        logger.debug(`New song additions detected.`, {
+          newlyAddedSongPathsCount: newlyAddedSongPaths.length,
+          newlyAddedSongPaths,
+          folderPath
+        });
         await addNewlyAddedSongsToLibrary(folderPath, newlyAddedSongPaths, abortController.signal);
       }
     }
