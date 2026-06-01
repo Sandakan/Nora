@@ -455,62 +455,77 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
       shortcutCategoryTitle: i18n.t('appShortcutsPrompt.mediaPlayback'),
       shortcuts: [
         {
+          id: 'playPause',
           label: i18n.t('appShortcutsPrompt.playPause'),
           keys: [normalizedKeys.spaceKey]
         },
         {
+          id: 'toggleMute',
           label: i18n.t('appShortcutsPrompt.toggleMute'),
           keys: [normalizedKeys.ctrlKey, 'M']
         },
         {
+          id: 'nextSong',
           label: i18n.t('appShortcutsPrompt.nextSong'),
           keys: [normalizedKeys.ctrlKey, normalizedKeys.rightArrowKey]
         },
         {
+          id: 'prevSong',
           label: i18n.t('appShortcutsPrompt.prevSong'),
           keys: [normalizedKeys.ctrlKey, normalizedKeys.leftArrowKey]
         },
         {
+          id: 'tenSecondsForward',
           label: i18n.t('appShortcutsPrompt.tenSecondsForward'),
           keys: [normalizedKeys.shiftKey, normalizedKeys.rightArrowKey]
         },
         {
+          id: 'tenSecondsBackward',
           label: i18n.t('appShortcutsPrompt.tenSecondsBackward'),
           keys: [normalizedKeys.shiftKey, normalizedKeys.leftArrowKey]
         },
         {
+          id: 'upVolume',
           label: i18n.t('appShortcutsPrompt.upVolume'),
           keys: [normalizedKeys.ctrlKey, normalizedKeys.upArrowKey]
         },
         {
+          id: 'downVolume',
           label: i18n.t('appShortcutsPrompt.downVolume'),
           keys: [normalizedKeys.ctrlKey, normalizedKeys.downArrowKey]
         },
         {
+          id: 'toggleShuffle',
           label: i18n.t('appShortcutsPrompt.toggleShuffle'),
           keys: [normalizedKeys.ctrlKey, 'S']
         },
         {
+          id: 'toggleRepeat',
           label: i18n.t('appShortcutsPrompt.toggleRepeat'),
           keys: [normalizedKeys.ctrlKey, 'T']
         },
         {
+          id: 'toggleFavorite',
           label: i18n.t('appShortcutsPrompt.toggleFavorite'),
           keys: [normalizedKeys.ctrlKey, 'H']
         },
         {
+          id: 'upPlaybackRate',
           label: i18n.t('appShortcutsPrompt.upPlaybackRate'),
           keys: [normalizedKeys.ctrlKey, ']']
         },
         {
+          id: 'downPlaybackRate',
           label: i18n.t('appShortcutsPrompt.downPlaybackRate'),
           keys: [normalizedKeys.ctrlKey, '[']
         },
         {
+          id: 'resetPlaybackRate',
           label: i18n.t('appShortcutsPrompt.resetPlaybackRate'),
           keys: [normalizedKeys.ctrlKey, '\\']
         },
         {
+          id: 'openAppShortcutsPrompt',
           label: i18n.t('appShortcutsPrompt.openAppShortcutsPrompt'),
           keys: [normalizedKeys.ctrlKey, '/']
         }
@@ -520,30 +535,37 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
       shortcutCategoryTitle: i18n.t('appShortcutsPrompt.navigation'),
       shortcuts: [
         {
+          id: 'goHome',
           label: i18n.t('appShortcutsPrompt.goHome'),
           keys: [normalizedKeys.altKey, normalizedKeys.homeKey]
         },
         {
+          id: 'goBack',
           label: i18n.t('appShortcutsPrompt.goBack'),
           keys: [normalizedKeys.altKey, normalizedKeys.leftArrowKey]
         },
         {
+          id: 'goForward',
           label: i18n.t('appShortcutsPrompt.goForward'),
           keys: [normalizedKeys.altKey, normalizedKeys.rightArrowKey]
         },
         {
+          id: 'openMiniPlayer',
           label: i18n.t('appShortcutsPrompt.openMiniPlayer'),
           keys: [normalizedKeys.ctrlKey, 'N']
         },
         {
+          id: 'goToLyrics',
           label: i18n.t('appShortcutsPrompt.goToLyrics'),
           keys: [normalizedKeys.ctrlKey, 'L']
         },
         {
+          id: 'goToQueue',
           label: i18n.t('appShortcutsPrompt.goToQueue'),
           keys: [normalizedKeys.ctrlKey, 'Q']
         },
         {
+          id: 'goToSearch',
           label: i18n.t('appShortcutsPrompt.goToSearch'),
           keys: [normalizedKeys.ctrlKey, 'F']
         }
@@ -553,6 +575,7 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
       shortcutCategoryTitle: i18n.t('appShortcutsPrompt.selections'),
       shortcuts: [
         {
+          id: 'selectMultipleItems',
           label: i18n.t('appShortcutsPrompt.selectMultipleItems'),
           keys: [normalizedKeys.shiftKey, normalizedKeys.mouseClick]
         }
@@ -562,10 +585,12 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
       shortcutCategoryTitle: i18n.t('appShortcutsPrompt.lyrics'),
       shortcuts: [
         {
+          id: 'playNextLyricsLine',
           label: i18n.t('appShortcutsPrompt.playNextLyricsLine'),
           keys: [normalizedKeys.altKey, normalizedKeys.downArrowKey]
         },
         {
+          id: 'playPrevLyricsLine',
           label: i18n.t('appShortcutsPrompt.playPrevLyricsLine'),
           keys: [normalizedKeys.altKey, normalizedKeys.upArrowKey]
         }
@@ -575,14 +600,17 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
       shortcutCategoryTitle: i18n.t('appShortcutsPrompt.lyricsEditor'),
       shortcuts: [
         {
+          id: 'selectNextLyricsLine',
           label: i18n.t('appShortcutsPrompt.selectNextLyricsLine'),
           keys: [normalizedKeys.enterKey]
         },
         {
+          id: 'selectPrevLyricsLine',
           label: i18n.t('appShortcutsPrompt.selectPrevLyricsLine'),
           keys: [normalizedKeys.shiftKey, normalizedKeys.enterKey]
         },
         {
+          id: 'selectCustomLyricsLine',
           label: i18n.t('appShortcutsPrompt.selectCustomLyricsLine'),
           keys: [normalizedKeys.doubleClick]
         }
@@ -592,18 +620,32 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
       shortcutCategoryTitle: i18n.t('appShortcutsPrompt.otherShortcuts'),
       shortcuts: [
         {
+          id: 'toggleTheme',
           label: i18n.t('appShortcutsPrompt.toggleTheme'),
           keys: [normalizedKeys.ctrlKey, 'Y']
         },
         {
+          id: 'toggleEqualizer',
+          label: i18n.t('appShortcutsPrompt.toggleEqualizer'),
+          keys: [normalizedKeys.ctrlKey, 'E']
+        },
+        {
+          id: 'toggleMiniPlayerAlwaysOnTop',
           label: i18n.t('appShortcutsPrompt.toggleMiniPlayerAlwaysOnTop'),
           keys: [normalizedKeys.ctrlKey, 'O']
         },
         {
+          id: 'toggleFullscreenPlayer',
+          label: i18n.t('appShortcutsPrompt.toggleFullscreenPlayer'),
+          keys: [normalizedKeys.altKey, 'F']
+        },
+        {
+          id: 'reload',
           label: i18n.t('appShortcutsPrompt.reload'),
           keys: [normalizedKeys.ctrlKey, 'R']
         },
         {
+          id: 'openDevtools',
           label: i18n.t('appShortcutsPrompt.openDevtools'),
           keys: ['F12']
         }

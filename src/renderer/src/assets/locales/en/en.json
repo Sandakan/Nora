@@ -431,6 +431,8 @@
     "equalizer": "Equalizer",
     "reset": "Reset",
 
+    "keyboardShortcuts": "Keyboard shortcuts",
+
     "defaultPage": "Default page",
     "changeDefaultPageDescription": "Change the default page you want to see when you open the app.",
 
@@ -912,7 +914,9 @@
 
     "otherShortcuts": "Other shortcuts",
     "toggleTheme": "Toggle app theme",
+    "toggleEqualizer": "Toggle equalizer",
     "toggleMiniPlayerAlwaysOnTop": "Toggle Mini Player always on top",
+    "toggleFullscreenPlayer": "Toggle fullscreen player",
     "reload": "Reload",
     "openDevtools": "Open devtools",
     "openAppShortcutsPrompt": "Open App Shortcuts prompt",
@@ -930,6 +934,18 @@
 
     "mouseClick": "Mouse click",
     "doubleClick": "Double-click"
+  },
+
+  "keyboardShortcutsSettings": {
+    "title": "Keyboard shortcuts",
+    "description": "Customize keyboard shortcuts for all app actions. Click the edit button next to any shortcut to change its key combination.",
+    "resetToDefaults": "Reset to defaults",
+    "resetConfirmTitle": "Confirm shortcut reset",
+    "resetConfirmContent": "Are you sure you want to reset all shortcuts to their default settings?",
+    "resetSuccess": "All shortcuts have been successfully reset.",
+    "editShortcut": "Edit shortcut",
+    "pressNewShortcut": "Press new shortcut",
+    "duplicateShortcut": "This key combination is already in use"
   },
 
   "clearLocalStoragePrompt": {

@@ -48,6 +48,7 @@ class AudioPlayer {
 
   private repeatMode: 'off' | 'one' | 'all' = 'off';
   private pendingAutoPlay: boolean = false;
+  private isEqualizerActive: boolean = false;
 
   constructor(queue: PlayerQueue) {
     this.listeners = new Map();
@@ -632,6 +633,38 @@ class AudioPlayer {
   /** Gets the current repeat mode. */
   getRepeatMode(): 'off' | 'one' | 'all' {
     return this.repeatMode;
+  }
+
+  // ========== EQUALIZER CONTROL ==========
+
+  applyEqualizerPreset(preset: Partial<Record<EqualizerBandFilters, number>>) {
+    for (const [filterName, gainValue] of Object.entries(preset)) {
+      const band = this.equalizerBands.get(filterName as EqualizerBandFilters);
+      if (band) {
+        band.gain.value = gainValue ?? 0;
+      }
+    }
+  }
+
+  /** Toggles the equalizer on/off. When toggled on, applies stored preset values. */
+  toggleEqualizer() {
+    if (this.isEqualizerActive) {
+      this.equalizerBands.forEach((band) => {
+        band.gain.value = 0;
+      });
+      this.isEqualizerActive = false;
+    } else {
+      const equalizerPreset = storage.getLocalStorage().equalizerPreset;
+      if (equalizerPreset) {
+        this.applyEqualizerPreset(equalizerPreset);
+      }
+      this.isEqualizerActive = true;
+    }
+  }
+
+  /** Returns whether the equalizer is currently active. */
+  getEqualizerState(): boolean {
+    return this.isEqualizerActive;
   }
 
   // ========== GETTERS FOR CURRENT STATE ==========

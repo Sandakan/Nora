@@ -10,6 +10,7 @@ import AudioPlaybackSettings from './Settings/AudioPlaybackSettings';
 import DefaultPageSettings from './Settings/DefaultPageSettings';
 // import StorageSettings from './Settings/StorageSettings';
 import EqualizerSettings from './Settings/EqualizerSettings';
+import KeyboardShortcutsSettings from './Settings/KeyboardShortcutsSettings';
 import LanguageSettings from './Settings/LanguageSettings';
 import LyricsSettings from './Settings/LyricsSettings';
 import PerformanceSettings from './Settings/PerformanceSettings';
@@ -44,6 +45,9 @@ const SettingsPage = () => {
 
           {/* ? EQUALIZER SETTINGS */}
           <EqualizerSettings />
+
+          {/* ? KEYBOARD SHORTCUTS SETTINGS */}
+          <KeyboardShortcutsSettings />
 
           {/* DEFAULT PAGE SETTINGS */}
           <DefaultPageSettings />

@@ -281,17 +281,38 @@ const getSortingStates = <Type extends keyof SortingStates>(type: Type) =>
 // Note: These read/write from the store's initial keyboardShortcuts, not database
 
 const getKeyboardShortcuts = (): ShortcutCategoryList => {
-  const storage = getLocalStorage();
-  return (storage as any)?.keyboardShortcuts || [];
+  const localData = getLocalStorage();
+  const userShortcuts = (localData as any)?.keyboardShortcuts || [];
+  const defaults = LOCAL_STORAGE_DEFAULT_TEMPLATE.keyboardShortcuts;
+  const merged = userShortcuts.map((category: ShortcutCategory, catIdx: number) => {
+    const defaultCategory = defaults[catIdx];
+    const patchedShortcuts = category.shortcuts.map((shortcut: Shortcut, scIdx: number) => {
+      if (shortcut.id) return shortcut;
+      const defaultShortcut = defaultCategory?.shortcuts[scIdx];
+      return {
+        ...shortcut,
+        id: defaultShortcut?.id || `unknown-${catIdx}-${scIdx}`
+      };
+    });
+    const existingIds = new Set(patchedShortcuts.map((s: Shortcut) => s.id));
+    const missingDefaults = (defaultCategory?.shortcuts || []).filter(
+      (ds: Shortcut) => !existingIds.has(ds.id)
+    );
+    return {
+      ...category,
+      shortcuts: [...patchedShortcuts, ...missingDefaults]
+    };
+  });
+  return merged;
 };
 
-const setKeyboardShortcuts = (label: string, newKeys: string[]): void => {
+const setKeyboardShortcuts = (idOrLabel: string, newKeys: string[]): void => {
   const currentData: ShortcutCategoryList = getKeyboardShortcuts();
 
   const updatedData = currentData.map((category) => ({
     ...category,
     shortcuts: category.shortcuts.map((shortcut) => {
-      if (shortcut.label === label) {
+      if (shortcut.id === idOrLabel || shortcut.label === idOrLabel) {
         return { ...shortcut, keys: newKeys };
       }
       return shortcut;

@@ -1,21 +1,21 @@
-import React, { Fragment, useEffect, useMemo, useState } from 'react';
+import { Fragment, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import storage from '../../utils/localStorage';
-import Button from '../Button';
-import SensitiveActionConfirmPrompt from '../SensitiveActionConfirmPrompt';
-import ShortcutButton from './ShortcutButton';
+import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
+import storage from '../../../utils/localStorage';
+import Button from '../../Button';
+import SensitiveActionConfirmPrompt from '../../SensitiveActionConfirmPrompt';
+import ShortcutButton from '../ShortcutButton';
 
-const AppShortcutsPrompt = () => {
+const KeyboardShortcutsSettings = () => {
   const { t } = useTranslation();
-  const [shortcuts, setShortcuts] = React.useState(
+  const [shortcuts, setShortcuts] = useState(
     storage.keyboardShortcuts.getKeyboardShortcuts()
   );
   const [newShortcut, setNewShortcut] = useState<Shortcut | null>(null);
   const [newKeys, setNewKeys] = useState<string[]>([]);
-  const [editingShortcut, setEditingShortcut] = React.useState<string | null>(null);
-  const { changePromptMenuData, addNewNotifications } = React.useContext(AppUpdateContext);
+  const [editingShortcut, setEditingShortcut] = useState<string | null>(null);
+  const { changePromptMenuData, addNewNotifications } = useContext(AppUpdateContext);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -41,6 +41,9 @@ const AppShortcutsPrompt = () => {
         keys: keys
       };
 
+      setNewKeys(keys);
+      setNewShortcut(new_shortcut);
+
       setShortcuts((prevShortcuts) =>
         prevShortcuts.map((category) => ({
           ...category,
@@ -51,9 +54,6 @@ const AppShortcutsPrompt = () => {
           )
         }))
       );
-
-      setNewKeys(keys);
-      setNewShortcut(new_shortcut);
     };
 
     document.addEventListener('keydown', handleKeyDown);
@@ -63,9 +63,9 @@ const AppShortcutsPrompt = () => {
   useEffect(() => {
     if (!editingShortcut) return;
 
-    const handleClickOutside = (e) => {
+    const handleClickOutside = (e: MouseEvent) => {
       const shortcutElements = document.querySelectorAll('.shortcut.editing');
-      const clickedOutside = Array.from(shortcutElements).every((el) => !el.contains(e.target));
+      const clickedOutside = Array.from(shortcutElements).every((el) => !el.contains(e.target as Node));
 
       const allShortcuts = storage.keyboardShortcuts
         .getKeyboardShortcuts()
@@ -77,14 +77,14 @@ const AppShortcutsPrompt = () => {
           JSON.stringify(sortKeys(shortcut.keys)) === JSON.stringify(sortKeys(newKeys))
       );
 
-      const editingElement = document.querySelector(`.shortcut.editing`);
+      const editingElement = document.querySelector('.shortcut.editing') as HTMLElement | null;
 
       if (duplicate && newKeys.length > 0) {
         editingElement?.classList.add('bg-font-color-crimson', 'dark:bg-font-color-crimson');
         addNewNotifications([
           {
             id: 'duplicateShortcut',
-            content: 'This key combination is already in use'
+            content: t('keyboardShortcutsSettings.duplicateShortcut')
           }
         ]);
         return;
@@ -94,7 +94,7 @@ const AppShortcutsPrompt = () => {
 
       if (clickedOutside) {
         if (newShortcut && !duplicate) {
-          storage.keyboardShortcuts.setKeyboardShortcuts(newShortcut.label, newShortcut.keys);
+          storage.keyboardShortcuts.setKeyboardShortcuts(newShortcut.id, newShortcut.keys);
           setShortcuts(storage.keyboardShortcuts.getKeyboardShortcuts());
         }
         setEditingShortcut(null);
@@ -103,40 +103,42 @@ const AppShortcutsPrompt = () => {
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [editingShortcut, newShortcut, newKeys, addNewNotifications]);
+  }, [editingShortcut, newShortcut, newKeys, addNewNotifications, t]);
 
   const shortcutCategoryComponents = useMemo(
     () =>
       shortcuts.map((category, categoryIndex) => (
-        <li key={categoryIndex} className="shortcut-category mt-8">
-          <div className="shortcut-category-title text-font-color-highlight dark:text-dark-font-color-highlight text-2xl">
+        <li key={categoryIndex} className="shortcut-category mt-6">
+          <div className="shortcut-category-title text-font-color-highlight dark:text-dark-font-color-highlight mb-2 text-lg font-medium">
             {category.shortcutCategoryTitle}
           </div>
-          <div className="shortcuts-container ml-4 flex flex-row flex-wrap justify-between">
+          <div className="shortcuts-container ml-2 flex flex-row flex-wrap justify-between">
             {category.shortcuts.map((shortcut, shortcutIndex) => {
               const isEditing = editingShortcut === shortcut.id;
 
               return (
                 <div
                   key={shortcutIndex}
-                  className={`shortcut mb-4 flex w-[45%] items-center justify-between p-2 ${
-                    isEditing && editingShortcut === shortcut.id
-                      ? 'editing bg-dark-background-color-3/75 dark:bg-dark-background-color-3/15 rounded-md'
+                  className={`shortcut mb-2 flex w-full items-center justify-between rounded-md p-2 sm:w-[48%] ${
+                    isEditing
+                      ? 'editing bg-dark-background-color-3/75 dark:bg-dark-background-color-3/15'
                       : ''
                   }`}
                 >
-                  <div className="shortcut-label opacity-75">{shortcut.label}</div>
+                  <div className="shortcut-label text-sm opacity-75">{shortcut.label}</div>
                   <div className="shortcut-keys flex items-center">
                     {isEditing ? (
                       <div className="flex items-center">
                         {newKeys.map((key, i) => (
                           <Fragment key={i}>
                             <ShortcutButton shortcutKey={key} />
-                            {i !== newKeys.length - 1 && <span className="mx-2">+</span>}
+                            {i !== newKeys.length - 1 && <span className="mx-1 text-xs">+</span>}
                           </Fragment>
                         ))}
                         {!newKeys.length && (
-                          <span className="text-font-color-dimmed">{'Press New Shortcut'}</span>
+                          <span className="text-font-color-dimmed text-xs">
+                            {t('keyboardShortcutsSettings.pressNewShortcut')}
+                          </span>
                         )}
                       </div>
                     ) : (
@@ -145,19 +147,20 @@ const AppShortcutsPrompt = () => {
                           <Fragment key={i}>
                             <ShortcutButton shortcutKey={key} />
                             {i !== shortcut.keys.length - 1 && (
-                              <span className="text-font-color-dimmed mx-2">+</span>
+                              <span className="text-font-color-dimmed mx-1 text-xs">+</span>
                             )}
                           </Fragment>
                         ))}
                         <Button
-                          className="m-0 ml-4 p-2"
+                          className="m-0 ml-2 p-1.5"
                           clickHandler={() => {
                             setEditingShortcut(shortcut.id);
                             setNewKeys(shortcut.keys);
                           }}
                           isDisabled={!!editingShortcut}
                           iconName="edit"
-                          iconClassName="material-icons-round-outlined"
+                          iconClassName="material-icons-round-outlined text-sm"
+                          tooltipLabel={t('keyboardShortcutsSettings.editShortcut')}
                         />
                       </>
                     )}
@@ -168,44 +171,46 @@ const AppShortcutsPrompt = () => {
           </div>
         </li>
       )),
-    [shortcuts, editingShortcut, newKeys]
+    [shortcuts, editingShortcut, newKeys, t]
   );
 
   return (
-    <div>
-      <div className="title-container text-center text-3xl font-medium">
-        {t('appShortcutsPrompt.inAppShortcuts')}
+    <li
+      className="main-container keyboard-shortcuts-settings-container mb-16"
+      id="keyboard-shortcuts-settings-container"
+    >
+      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center text-2xl font-medium">
+        <span className="material-icons-round-outlined mr-2 leading-none">keyboard</span>
+        {t('keyboardShortcutsSettings.title')}
       </div>
-      {editingShortcut && (
-        <div className="instruction-text text-font-color-dimmed px-4 text-center text-sm">
-          {'Edit your shortcut'}
-        </div>
-      )}
-      <ul className="shortcuts-categories-container px-4">{shortcutCategoryComponents}</ul>
+      <div className="description mb-4 pl-6 text-sm opacity-70">
+        {t('keyboardShortcutsSettings.description')}
+      </div>
+      <ul className="pl-6">{shortcutCategoryComponents}</ul>
       <div className="mt-4 flex justify-center">
         <Button
-          label="RESET"
+          label={t('keyboardShortcutsSettings.resetToDefaults')}
           iconName="refresh"
           className="button-label-text"
           clickHandler={() => {
             changePromptMenuData(
               true,
               <SensitiveActionConfirmPrompt
-                title="Confirm Shortcut Reset"
+                title={t('keyboardShortcutsSettings.resetConfirmTitle')}
                 content={
-                  <div>Are you sure you want to reset all shortcuts to their default settings?</div>
+                  <div>{t('keyboardShortcutsSettings.resetConfirmContent')}</div>
                 }
                 confirmButton={{
-                  label: 'RESET',
+                  label: t('keyboardShortcutsSettings.resetToDefaults'),
                   clickHandler: () => {
                     storage.keyboardShortcuts.resetShortcutsToDefaults();
                     addNewNotifications([
                       {
                         id: 'shortcutsReset',
-                        content: <span>All shortcuts have been successfully reset.</span>
+                        content: t('keyboardShortcutsSettings.resetSuccess')
                       }
                     ]);
-                    changePromptMenuData(false);
+                    setShortcuts(storage.keyboardShortcuts.getKeyboardShortcuts());
                   }
                 }}
               />
@@ -213,8 +218,8 @@ const AppShortcutsPrompt = () => {
           }}
         />
       </div>
-    </div>
+    </li>
   );
 };
 
-export default AppShortcutsPrompt;
+export default KeyboardShortcutsSettings;
