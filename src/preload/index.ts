@@ -470,7 +470,9 @@ const playlistsData = {
   exportPlaylist: (playlistId: number): Promise<void> =>
     ipcRenderer.invoke('app/exportPlaylist', playlistId),
   importPlaylist: (targetPlaylistId?: number): Promise<void> =>
-    ipcRenderer.invoke('app/importPlaylist', targetPlaylistId)
+    ipcRenderer.invoke('app/importPlaylist', targetPlaylistId),
+  importPlaylistFromPath: (filePath: string, targetPlaylistId?: number): Promise<void> =>
+    ipcRenderer.invoke('app/importPlaylistFromPath', filePath, targetPlaylistId)
 };
 
 const queue = {

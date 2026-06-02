@@ -124,18 +124,33 @@ export function useWindowManagement(
    */
   const onSongDrop = useCallback(
     (e: DragEvent<HTMLDivElement>) => {
-      console.log(e.dataTransfer.files);
       if (e.dataTransfer.files.length > 0) {
         const file = e.dataTransfer.files.item(0);
         if (file) {
           const filePath = window.api.utils.showFilePath(file);
-          console.log('Dropped file path:', filePath);
           const isASupportedAudioFormat = appPreferences.supportedMusicExtensions.some((type) =>
             file?.webkitRelativePath.endsWith(type)
           );
+          const isAM3u8Playlist = filePath.toLowerCase().endsWith('.m3u8');
 
-          if (isASupportedAudioFormat && fetchSongFromUnknownSource) {
+          // Note: webkitRelativePath is always "" for OS drag-drop (only set for HTML5
+          // webkitdirectory inputs), so the isASupportedAudioFormat check above is currently
+          // dead code for drag-drop. The m3u8 check below is the only functional drag-drop
+          // path. This is a pre-existing bug - see follow-up issue.
+          if (isASupportedAudioFormat && !isAM3u8Playlist && fetchSongFromUnknownSource) {
             fetchSongFromUnknownSource(filePath);
+          } else if (isAM3u8Playlist) {
+            // targetPlaylistId intentionally omitted for drag-drop:
+            // dropped m3u8 files should create a new playlist, not target an existing one.
+            // The filename-based autodetect still works for "Favorites" naming convention
+            // inside processPlaylistImport's existing logic.
+            window.api.playlistsData.importPlaylistFromPath(filePath).catch((err) => {
+              window.api.log.sendLogs(
+                err instanceof Error ? err.message : 'Unknown error',
+                { filePath, error: err },
+                'ERROR'
+              );
+            });
           } else if (changePromptMenuData) {
             changePromptMenuData(
               true,
