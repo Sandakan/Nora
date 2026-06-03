@@ -19,6 +19,7 @@ type PlayerEventType =
   | 'repeatAll'
   | 'playbackComplete'
   | 'songLoaded'
+  | 'songEnded'
   | 'loadError'
   | 'recordListening'
   | 'repeatSong'
@@ -152,6 +153,10 @@ class AudioPlayer {
    * Auto-resumes playback for the next song.
    */
   private async handleSongEnd() {
+    // Emit songEnded unconditionally before any conditional logic, so consumers
+    // (e.g. sleep timer) can react to every song ending regardless of repeat/queue state.
+    this.emit('songEnded', { songId: this.currentSongId });
+
     console.log('[AudioPlayer.handleSongEnd]', { repeatMode: this.repeatMode });
 
     if (this.repeatMode === 'one') {
