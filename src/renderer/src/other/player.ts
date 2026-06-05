@@ -62,7 +62,7 @@ class AudioPlayer {
   private suppressNextPositionLoad: boolean = false;
   private boundListeners: Map<HTMLAudioElement, Record<string, EventListener>> = new Map();
 
-  private secondarySource: MediaElementAudioSourceNode | null = null;
+  private secondarySource!: MediaElementAudioSourceNode;
 
   constructor(queue: PlayerQueue) {
     this.listeners = new Map();
@@ -247,6 +247,13 @@ class AudioPlayer {
     }
 
     if (this.queue.hasNext) {
+      if (
+        this.crossfadeDuration === 0 &&
+        this.preloadedSongId === this.queue.nextSongId
+      ) {
+        this.gaplessSwapToNext();
+        return;
+      }
       this.pendingAutoPlay = true;
       this.queue.moveToNext();
     } else if (this.repeatMode === 'all' && this.queue.length > 0) {
@@ -369,21 +376,74 @@ class AudioPlayer {
 
     oldActive.pause();
 
-    if (this.preloadedSongId) {
+    let completedSongData: AudioPlayerData | null = null;
+    if (this.preloadedSongId && this.preloadedSongData) {
       const nextSongId = this.preloadedSongId;
+      const nextSongData = this.preloadedSongData;
       const idx = this.queue.songIds.indexOf(nextSongId);
       if (idx >= 0) {
-        dispatch({ type: 'CURRENT_SONG_DATA_CHANGE', data: this.preloadedSongData });
+        completedSongData = nextSongData;
+        dispatch({ type: 'CURRENT_SONG_DATA_CHANGE', data: nextSongData });
         storage.playback.setCurrentSongOptions('songId', nextSongId);
         this.suppressNextPositionLoad = true;
         this.queue.moveToPosition(idx);
+      } else {
+        this.abortCrossfade();
       }
     }
 
     this.preloadedSongId = null;
     this.preloadedSongData = null;
 
-    this.emit('songLoaded', store.state.currentSongData);
+    this.emit('songLoaded', completedSongData ?? store.state.currentSongData);
+
+    if (this.queue.hasNext) {
+      this.preloadNextSong().catch(() => {});
+    }
+
+    if (this.currentContext.state === 'suspended') {
+      this.currentContext.resume();
+    }
+  }
+
+  private gaplessSwapToNext() {
+    if (!this.preloadedSongId || !this.preloadedSongData) return;
+    if (this.queue.nextSongId !== this.preloadedSongId) return;
+
+    const nextSongId = this.preloadedSongId;
+    const nextSongData = this.preloadedSongData;
+    const idx = this.queue.songIds.indexOf(nextSongId);
+    if (idx < 0) {
+      this.preloadedSongId = null;
+      this.preloadedSongData = null;
+      return;
+    }
+
+    const wasPrimary = this.activeElement === 'primary';
+    const oldActive = wasPrimary ? this.audio : this.secondaryAudio;
+
+    this.activeElement = wasPrimary ? 'secondary' : 'primary';
+    const newActive = this.getActiveAudio();
+
+    this.fadeGainPrimary.gain.value = this.activeElement === 'primary' ? 1 : 0;
+    this.fadeGainSecondary.gain.value = this.activeElement === 'primary' ? 0 : 1;
+
+    oldActive.pause();
+
+    this.preloadedSongId = null;
+    this.preloadedSongData = null;
+
+    dispatch({ type: 'CURRENT_SONG_DATA_CHANGE', data: nextSongData });
+    storage.playback.setCurrentSongOptions('songId', nextSongId);
+    this.suppressNextPositionLoad = true;
+    this.queue.moveToPosition(idx);
+
+    newActive.currentTime = 0;
+    newActive.play().catch((err) => {
+      console.error('[AudioPlayer.gaplessSwapToNext] play() rejected:', err);
+    });
+
+    this.emit('songLoaded', nextSongData);
 
     if (this.queue.hasNext) {
       this.preloadNextSong().catch(() => {});
