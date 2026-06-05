@@ -1047,7 +1047,6 @@ declare global {
     | 'sortingStates.artistsPage'
     | 'sortingStates.playlistsPage'
     | 'sortingStates.albumsPage'
-    | 'sortingStates.artistsPage'
     | 'sortingStates.genresPage'
     | 'sortingStates.playlistDetailPage'
     | 'sortingStates.albumDetailPage'
