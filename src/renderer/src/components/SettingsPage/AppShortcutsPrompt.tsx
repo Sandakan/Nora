@@ -46,9 +46,11 @@ const AppShortcutsPrompt = () => {
   useEffect(() => {
     if (!editingShortcut) return;
 
-    const handleClickOutside = (e) => {
+    const handleClickOutside = (e: MouseEvent) => {
       const shortcutElements = document.querySelectorAll('.shortcut.editing');
-      const clickedOutside = Array.from(shortcutElements).every((el) => !el.contains(e.target));
+      const clickedOutside = Array.from(shortcutElements).every(
+        (el) => !el.contains(e.target as Node)
+      );
 
       const sortKeys = (k: string[]) => [...k].sort();
       const duplicate = shortcuts.some((category) =>
@@ -85,7 +87,7 @@ const AppShortcutsPrompt = () => {
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [editingShortcut, newShortcut, newKeys, addNewNotifications]);
+  }, [editingShortcut, newShortcut, newKeys, addNewNotifications, shortcuts, t]);
 
   const shortcutCategoryComponents = useMemo(
     () =>
@@ -152,7 +154,7 @@ const AppShortcutsPrompt = () => {
           </div>
         </li>
       )),
-    [shortcuts, editingShortcut, newKeys]
+    [shortcuts, editingShortcut, newKeys, t]
   );
 
   return (

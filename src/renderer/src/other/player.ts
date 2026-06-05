@@ -655,11 +655,11 @@ class AudioPlayer {
       });
       this.isEqualizerActive = false;
     } else {
+      this.isEqualizerActive = true;
       const equalizerPreset = storage.getLocalStorage().equalizerPreset;
       if (equalizerPreset) {
         this.applyEqualizerPreset(equalizerPreset);
       }
-      this.isEqualizerActive = true;
     }
   }
 
