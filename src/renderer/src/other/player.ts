@@ -6,6 +6,7 @@ import { equalizerBandHertzData } from './equalizerData';
 import PlayerQueue from './playerQueue';
 
 const AUDIO_FADE_DURATION = 250;
+const GAIN_FLOOR = 0.001;
 
 type PlayerEventType =
   | 'timeUpdate'
@@ -56,6 +57,10 @@ class AudioPlayer {
 
   private preloadedSongId: number | null = null;
   private preloadedSongData: AudioPlayerData | null = null;
+
+  private preloadGeneration: number = 0;
+  private suppressNextPositionLoad: boolean = false;
+  private boundListeners: Map<HTMLAudioElement, Record<string, EventListener>> = new Map();
 
   private secondarySource: MediaElementAudioSourceNode | null = null;
 
@@ -125,6 +130,12 @@ class AudioPlayer {
       if (songId) {
         const wasAutoPlay = this.pendingAutoPlay;
 
+        if (this.suppressNextPositionLoad) {
+          this.suppressNextPositionLoad = false;
+          this.pendingAutoPlay = false;
+          return;
+        }
+
         if (this.isCrossfading && this.preloadedSongId === songId) {
           this.pendingAutoPlay = false;
           return;
@@ -167,7 +178,7 @@ class AudioPlayer {
   };
 
   private checkCrossfadeTrigger(el: HTMLAudioElement) {
-    if (this.isCrossfading || !el.duration || !el.duration || !this.preloadedSongId) return;
+    if (this.isCrossfading || !el.duration || !isFinite(el.duration) || !this.preloadedSongId) return;
     const remaining = el.duration - el.currentTime;
     const crossfadeSeconds = this.crossfadeDuration / 1000;
     if (remaining <= crossfadeSeconds && remaining > 0) {
@@ -177,34 +188,45 @@ class AudioPlayer {
 
   private setupAudioEventListeners() {
     const setupFor = (el: HTMLAudioElement) => {
-      el.addEventListener('ended', () => this.onElementEnded(el));
-      el.addEventListener('timeupdate', () => this.onElementTimeUpdate(el));
-      el.addEventListener('loadedmetadata', () => {
-        if (el === this.getActiveAudio()) {
-          this.emit('durationChange', el.duration);
+      const handlers: Record<string, EventListener> = {
+        ended: () => this.onElementEnded(el),
+        timeupdate: () => this.onElementTimeUpdate(el),
+        loadedmetadata: () => {
+          if (el === this.getActiveAudio()) {
+            this.emit('durationChange', el.duration);
+          }
+        },
+        play: () => {
+          if (el === this.getActiveAudio()) {
+            this.emit('play');
+          }
+        },
+        pause: () => {
+          if (el === this.getActiveAudio()) {
+            this.emit('pause');
+          }
+        },
+        error: (e) => {
+          if (el === this.getActiveAudio()) {
+            this.emit('error', e);
+          } else {
+            this.preloadedSongId = null;
+            this.preloadedSongData = null;
+          }
+        },
+        seeking: () => {
+          if (el === this.getActiveAudio()) {
+            this.emit('seeking');
+          }
+        },
+        seeked: () => {
+          if (el === this.getActiveAudio()) {
+            this.emit('seeked', el.currentTime);
+          }
         }
-      });
-      el.addEventListener('play', () => {
-        if (el === this.getActiveAudio()) {
-          this.emit('play');
-        }
-      });
-      el.addEventListener('pause', () => {
-        if (el === this.getActiveAudio()) {
-          this.emit('pause');
-        }
-      });
-      el.addEventListener('error', (e) => {
-        this.emit('error', e);
-      });
-      el.addEventListener('seeking', () => {
-        this.emit('seeking');
-      });
-      el.addEventListener('seeked', () => {
-        if (el === this.getActiveAudio()) {
-          this.emit('seeked', el.currentTime);
-        }
-      });
+      };
+      this.boundListeners.set(el, handlers);
+      Object.entries(handlers).forEach(([event, fn]) => el.addEventListener(event, fn));
     };
 
     setupFor(this.audio);
@@ -252,9 +274,12 @@ class AudioPlayer {
 
     if (nextId === this.preloadedSongId) return;
 
+    const gen = ++this.preloadGeneration;
+
     try {
-      console.log('[AudioPlayer.preloadNextSong]', { nextId });
       const songData = await window.api.audioLibraryControls.getSong(nextId);
+      if (gen !== this.preloadGeneration) return;
+
       const inactiveAudio = this.getInactiveAudio();
       const audioSourceUrl = new URL(songData.path);
       audioSourceUrl.searchParams.set('ts', `${Date.now()}`);
@@ -262,29 +287,35 @@ class AudioPlayer {
       inactiveAudio.load();
 
       await new Promise<void>((resolve, reject) => {
-        const onCanPlay = () => {
+        const cleanup = () => {
           inactiveAudio.removeEventListener('canplay', onCanPlay);
+          inactiveAudio.removeEventListener('error', onError);
+        };
+        const onCanPlay = () => {
+          cleanup();
           resolve();
         };
         const onError = () => {
-          inactiveAudio.removeEventListener('error', onError);
+          cleanup();
           reject(new Error(`Failed to preload song ${nextId}`));
         };
         inactiveAudio.addEventListener('canplay', onCanPlay);
         inactiveAudio.addEventListener('error', onError);
         if (inactiveAudio.readyState >= 3) {
-          inactiveAudio.removeEventListener('canplay', onCanPlay);
+          cleanup();
           resolve();
         }
       });
 
+      if (gen !== this.preloadGeneration) return;
+
       this.preloadedSongId = nextId;
       this.preloadedSongData = songData;
-      console.log('[AudioPlayer.preloadNextSong.done]', { nextId });
     } catch (error) {
-      console.warn('[AudioPlayer.preloadNextSong] Failed:', error);
-      this.preloadedSongId = null;
-      this.preloadedSongData = null;
+      if (gen === this.preloadGeneration) {
+        this.preloadedSongId = null;
+        this.preloadedSongData = null;
+      }
     }
   }
 
@@ -304,21 +335,21 @@ class AudioPlayer {
 
     this.isCrossfading = true;
 
-    dispatch({ type: 'CURRENT_SONG_DATA_CHANGE', data: this.preloadedSongData });
-    storage.playback.setCurrentSongOptions('songId', this.preloadedSongId);
-
     const now = this.currentContext.currentTime;
 
     activeGain.gain.cancelScheduledValues(now);
     inactiveGain.gain.cancelScheduledValues(now);
 
     activeGain.gain.setValueAtTime(activeGain.gain.value, now);
-    activeGain.gain.exponentialRampToValueAtTime(0.001, now + fadeSec);
+    activeGain.gain.exponentialRampToValueAtTime(GAIN_FLOOR, now + fadeSec);
 
-    inactiveGain.gain.setValueAtTime(0.001, now);
+    inactiveGain.gain.setValueAtTime(GAIN_FLOOR, now);
     inactiveGain.gain.exponentialRampToValueAtTime(1, now + fadeSec);
 
-    inactiveAudio.play();
+    inactiveAudio.play().catch((err) => {
+      console.error('[AudioPlayer.startCrossfade] play() rejected:', err);
+      this.abortCrossfade();
+    });
 
     this.crossfadeTimer = setTimeout(() => {
       this.completeCrossfade();
@@ -333,15 +364,19 @@ class AudioPlayer {
     this.activeElement = wasPrimary ? 'secondary' : 'primary';
     this.isCrossfading = false;
 
-    this.fadeGainPrimary.gain.value = this.activeElement === 'primary' ? 1 : 0.001;
-    this.fadeGainSecondary.gain.value = this.activeElement === 'primary' ? 0.001 : 1;
+    this.fadeGainPrimary.gain.value = this.activeElement === 'primary' ? 1 : 0;
+    this.fadeGainSecondary.gain.value = this.activeElement === 'primary' ? 0 : 1;
 
     oldActive.pause();
 
-    if (this.preloadedSongId && this.queue.currentSongId !== this.preloadedSongId) {
-      const idx = this.queue.songIds.indexOf(this.preloadedSongId);
+    if (this.preloadedSongId) {
+      const nextSongId = this.preloadedSongId;
+      const idx = this.queue.songIds.indexOf(nextSongId);
       if (idx >= 0) {
-        this.queue.position = idx;
+        dispatch({ type: 'CURRENT_SONG_DATA_CHANGE', data: this.preloadedSongData });
+        storage.playback.setCurrentSongOptions('songId', nextSongId);
+        this.suppressNextPositionLoad = true;
+        this.queue.moveToPosition(idx);
       }
     }
 
@@ -367,16 +402,22 @@ class AudioPlayer {
       this.crossfadeTimer = null;
     }
 
+    this.preloadGeneration++;
+
     this.isCrossfading = false;
 
     const now = this.currentContext.currentTime;
     this.fadeGainPrimary.gain.cancelScheduledValues(now);
     this.fadeGainSecondary.gain.cancelScheduledValues(now);
-    this.fadeGainPrimary.gain.value = this.activeElement === 'primary' ? 1 : 0.001;
-    this.fadeGainSecondary.gain.value = this.activeElement === 'primary' ? 0.001 : 1;
+    this.fadeGainPrimary.gain.value = this.activeElement === 'primary' ? 1 : 0;
+    this.fadeGainSecondary.gain.value = this.activeElement === 'primary' ? 0 : 1;
 
     const inactive = this.getInactiveAudio();
     inactive.pause();
+    inactive.currentTime = 0;
+
+    this.preloadedSongId = null;
+    this.preloadedSongData = null;
   }
 
   private checkCrossfadeCompletion() {
@@ -477,6 +518,11 @@ class AudioPlayer {
       clearTimeout(this.crossfadeTimer);
       this.crossfadeTimer = null;
     }
+
+    for (const [el, handlers] of this.boundListeners) {
+      Object.entries(handlers).forEach(([event, fn]) => el.removeEventListener(event, fn));
+    }
+    this.boundListeners.clear();
 
     this.audio.pause();
     this.audio.src = '';
@@ -628,8 +674,13 @@ class AudioPlayer {
 
   play() {
     const active = this.getActiveAudio();
-    active.play();
-    return this.fadeInAudio();
+    return active
+      .play()
+      .then(() => this.fadeInAudio())
+      .catch((err) => {
+        console.error('[AudioPlayer.play] play() rejected:', err);
+        this.emit('error', err);
+      });
   }
 
   pause() {

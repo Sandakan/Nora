@@ -145,8 +145,13 @@ const AudioPlaybackSettings = () => {
                   }}
                   style={crossfadeSliderCssProperties}
                   title={crossfadeDuration === 0 ? t('settingsPage.crossfadeDisabled') : `${crossfadeDuration / 1000}s`}
+                  aria-label={t('settingsPage.crossfadeDuration')}
+                  aria-valuemin={0}
+                  aria-valuemax={12000}
+                  aria-valuenow={crossfadeDuration}
+                  aria-valuetext={crossfadeDuration === 0 ? t('settingsPage.crossfadeDisabled') : t('settingsPage.crossfadeSeconds', { count: crossfadeDuration / 1000 })}
                 />
-                <span className="text-sm">12s</span>
+                <span className="text-sm">{t('settingsPage.crossfadeSeconds', { count: 12 })}</span>
               </div>
             </div>
             <Button
