@@ -95,7 +95,7 @@ const SongCard = (props: SongCardProp) => {
       if (currentSongData?.songId === songId) return currentSongData.isAFavorite;
       return isAFavorite;
     });
-  }, [currentSongData, isCurrentSongPlaying, songId, isAFavorite]);
+  }, [currentSongData?.songId, currentSongData?.isAFavorite, isCurrentSongPlaying, songId, isAFavorite]);
 
   const [h, s, l] = useMemo(() => {
     const swatch = palette?.LightVibrant;
