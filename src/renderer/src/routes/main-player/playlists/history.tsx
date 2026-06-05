@@ -10,10 +10,11 @@ import useSelectAllHandler from '@renderer/hooks/useSelectAllHandler';
 import { songQuery } from '@renderer/queries/songs';
 import { store } from '@renderer/store/store';
 import { songSearchSchema } from '@renderer/utils/zod/songSchema';
+import storage from '@renderer/utils/localStorage';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
-import { useCallback, useContext } from 'react';
+import { useCallback, useContext, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import historyPlaylistCoverImage from '../../../assets/images/webp/history-playlist-icon.webp';
@@ -35,13 +36,21 @@ const playlistData: Playlist = {
   isArtworkAvailable: true
 };
 
+/**
+ * Render the History playlist details page with controls for playback, queue management, selection, and sorting.
+ *
+ * The page displays saved history songs, provides actions to play, shuffle, and add songs to the queue, supports select-all,
+ * and persists the playlist sorting preference to local storage when it changes.
+ *
+ * @returns A React element representing the History playlist information page.
+ */
 function HistoryPlaylistInfoPage() {
   const { scrollTopOffset } = Route.useSearch();
 
   const queue = useStore(store, (state) => state.localStorage.queue);
   const playlistSortingState = useStore(
     store,
-    (state) => state.localStorage.sortingStates?.songsPage || 'addedOrder'
+    (state) => state.localStorage.sortingStates?.playlistDetailPage || 'addedOrder'
   );
   const preferences = useStore(store, (state) => state.localStorage.preferences);
   const { updateQueueData, addNewNotifications, createQueue, playSong } =
@@ -49,6 +58,10 @@ function HistoryPlaylistInfoPage() {
   const { t } = useTranslation();
   const { sortingOrder = playlistSortingState } = Route.useSearch();
   const navigate = useNavigate({ from: '/main-player/playlists/history' });
+
+  useEffect(() => {
+    storage.sortingStates.setSortingStates('playlistDetailPage', sortingOrder);
+  }, [sortingOrder]);
 
   const { data: historySongs = [] } = useSuspenseQuery({
     ...songQuery.history({ sortType: sortingOrder }),

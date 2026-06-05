@@ -280,7 +280,11 @@ protocol.registerSchemesAsPrivileged([
 app
   .whenReady()
   .then(async () => {
-    const { windowState, zoomFactor, traySingleClickTogglesWindow = false } = await getUserSettings();
+    const {
+      windowState,
+      zoomFactor,
+      traySingleClickTogglesWindow = false
+    } = await getUserSettings();
 
     currentWindowZoomFactor = normalizeZoomFactor(zoomFactor);
 

@@ -79,7 +79,7 @@ export const MostRelevantResult = (props: MostRelevantResultProp) => {
       <div className="result-img-container relative mr-4 flex h-full w-fit items-center justify-center overflow-hidden">
         {resultType.toLowerCase() !== 'artist' && (
           <Button
-            className="absolute z-10 m-0! rounded-none! border-0! p-0! opacity-75 outline-offset-1 transition-opacity group-hover:opacity-100 hover:opacity-100 focus-visible:outline!"
+            className="absolute z-10 m-0! rounded-none! border-0! bg-transparent p-0! opacity-75 outline-offset-1 transition-opacity group-hover:opacity-100 hover:opacity-100 focus-visible:outline! dark:bg-transparent"
             iconName="play_circle"
             iconClassName="text-4xl! leading-none! text-font-color-white"
             clickHandler={(e) => {

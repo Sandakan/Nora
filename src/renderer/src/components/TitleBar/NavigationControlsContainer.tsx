@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { store } from '../../store/store';
 import Button from '../Button';
 
-type Props = { disableHomeButton?: boolean, className?: string };
+type Props = { disableHomeButton?: boolean; className?: string };
 
 const NavigationControlsContainer = (props: Props) => {
   const { history, navigate } = useRouter();
@@ -23,7 +23,9 @@ const NavigationControlsContainer = (props: Props) => {
   const { disableHomeButton = false, className = '' } = props;
 
   return (
-    <div className={`navigation-controls-container flex w-fit items-center justify-between gap-2 ${className}`}>
+    <div
+      className={`navigation-controls-container flex w-fit items-center justify-between gap-2 ${className}`}
+    >
       <Button
         iconName="arrow_back"
         iconClassName="material-icons-round-outlined text-xl!"

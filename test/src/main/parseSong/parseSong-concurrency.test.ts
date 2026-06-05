@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { parseSong, tryToParseSong } from '../../../../src/main/parseSong/parseSong';
