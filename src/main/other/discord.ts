@@ -35,6 +35,11 @@ let discord: DiscordRPCClient | null = null;
 
 let lastPayload: { pid: number; activity: Record<string, unknown> };
 
+/**
+ * Initializes the Discord RPC client and begins the login/reconnect lifecycle.
+ *
+ * Creates an IPC Discord RPC client (if one does not already exist), registers handlers to set the last-known activity when the client becomes ready and to retry login on disconnection, and then starts the initial login attempt.
+ */
 function Initialize() {
   if (discord) return;
   discord = new Client({ transport: 'ipc' }) as unknown as DiscordRPCClient;
@@ -49,6 +54,11 @@ function Initialize() {
   loginRPC();
 }
 
+/**
+ * Attempts to log the IPC Discord RPC client using MAIN_VITE_DISCORD_CLIENT_ID and schedules a retry if login fails.
+ *
+ * @throws Error - If `MAIN_VITE_DISCORD_CLIENT_ID` is not defined in `import.meta.env`.
+ */
 function loginRPC() {
   const DISCORD_CLIENT_ID = import.meta.env.MAIN_VITE_DISCORD_CLIENT_ID;
   if (!DISCORD_CLIENT_ID) throw new Error('Discord Client ID not found.');
@@ -57,6 +67,13 @@ function loginRPC() {
   });
 }
 
+/**
+ * Updates the cached Discord activity payload and sends it to the connected RPC client.
+ *
+ * If `data` is an object, its properties are merged into the activity payload; `instance` is set to `true` and `type` is set to `ActivityType.Listening`. If `data` is `null`, the activity is reset to the module's default activity. The constructed payload is stored as `lastPayload` and dispatched via the Discord RPC `SET_ACTIVITY` request; failures are logged.
+ *
+ * @param data - Activity fields to apply to the current presence, or `null` to restore the default activity
+ */
 function setDiscordRPC(data: Record<string, unknown> | null) {
   if (!discord?.user) return;
 
