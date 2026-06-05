@@ -9,6 +9,27 @@ interface DiscordRPCClient {
   request(cmd: string, args: Record<string, unknown>): Promise<unknown>;
 }
 
+interface DiscordActivity {
+  details?: string;
+  state?: string;
+  timestamps?: {
+    start?: number;
+    end?: number;
+  };
+  assets?: {
+    large_image?: string;
+    large_text?: string;
+    small_image?: string;
+    small_text?: string;
+  };
+  buttons?: Array<{
+    label: string;
+    url: string;
+  }>;
+  instance?: boolean;
+  type?: number;
+}
+
 const ActivityType = {
   Game: 0,
   Streaming: 1,
@@ -28,12 +49,12 @@ const defaultPayload = {
     },
     instance: true,
     type: ActivityType.Listening
-  }
+  } as DiscordActivity
 };
 
 let discord: DiscordRPCClient | null = null;
 
-let lastPayload: { pid: number; activity: Record<string, unknown> };
+let lastPayload: { pid: number; activity: DiscordActivity };
 
 /**
  * Initializes the Discord RPC client and begins the login/reconnect lifecycle.
@@ -74,13 +95,13 @@ function loginRPC() {
  *
  * @param data - Activity fields to apply to the current presence, or `null` to restore the default activity
  */
-function setDiscordRPC(data: Record<string, unknown> | null) {
+function setDiscordRPC(data: DiscordActivity | null) {
   if (!discord?.user) return;
 
   const payload = data
     ? {
         pid: process.pid,
-        activity: { ...data, instance: true, type: ActivityType.Listening }
+        activity: { ...data, instance: true, type: ActivityType.Listening } as DiscordActivity
       }
     : { pid: process.pid, activity: { ...defaultPayload.activity } };
 

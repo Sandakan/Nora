@@ -45,7 +45,7 @@ export function useDiscordRpc(player: HTMLAudioElement) {
       ?? firstArtistWithArtwork?.onlineArtworkPaths?.picture_medium
       ?? firstArtistWithArtwork?.onlineArtworkPaths?.picture_small;
 
-    const activity: Record<string, unknown> = {
+    const activity: DiscordActivity = {
       details: title,
       state: artists,
       assets: {
