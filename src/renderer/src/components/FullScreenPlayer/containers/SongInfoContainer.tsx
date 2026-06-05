@@ -1,6 +1,6 @@
 import { store } from '@renderer/store/store';
 import { useStore } from '@tanstack/react-store';
-import { useCallback, useContext, useMemo, useState } from 'react';
+import { type Dispatch, type SetStateAction, useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import DefaultSongCover from '../../../assets/images/webp/song_cover_default.webp';
@@ -18,7 +18,7 @@ type Props = {
   isMouseActive: boolean;
   isPinned: boolean;
   setIsLyricsVisible: (callback: (state: boolean) => boolean) => void;
-  setIsPinned: (state: boolean) => void;
+  setIsPinned: Dispatch<SetStateAction<boolean>>;
 };
 
 const SongInfoContainer = (props: Props) => {
@@ -102,8 +102,8 @@ const SongInfoContainer = (props: Props) => {
                   ? 'material-icons-round text-font-color-highlight! dark:text-dark-font-color-highlight!'
                   : 'material-icons-round-outlined'
               }`}
-              tooltipLabel={isPinned ? 'Unpin overlay' : 'Pin overlay'}
-              clickHandler={() => setIsPinned(!isPinned)}
+              tooltipLabel={isPinned ? t('fullScreenPlayer.unpinOverlay') : t('fullScreenPlayer.pinOverlay')}
+              clickHandler={() => setIsPinned((prev) => !prev)}
               iconName="push_pin"
               removeFocusOnClick
               ariaPressed={isPinned}
@@ -112,7 +112,7 @@ const SongInfoContainer = (props: Props) => {
               className="favorite-btn bg-background-color-3/15! text-font-color-white hover:bg-background-color-3/30! dark:text-font-color-white dark:after:bg-dark-font-color-highlight h-fit cursor-pointer border-0! p-3! outline-offset-1 backdrop-blur-lg! transition-[background] focus-visible:outline!"
               iconClassName={`!text-2xl ${
                 currentSongData.isAFavorite
-                  ? 'meterial-icons-round text-font-color-highlight! dark:text-dark-font-color-highlight!'
+                  ? 'material-icons-round text-font-color-highlight! dark:text-dark-font-color-highlight!'
                   : 'material-icons-round-outlined'
               }`}
               isDisabled={!currentSongData.isKnownSource}
@@ -174,7 +174,13 @@ const SongInfoContainer = (props: Props) => {
             />
 
             <div
-              className={`volume-slider-container invisible mr-4 max-w-[6rem] min-w-[4rem] opacity-0 transition-[visibility,opacity] delay-150 ease-in-out lg:mr-4 ${(isMouseActive || isPinned) && 'group-hover/songInfoContainer:visible group-hover/songInfoContainer:opacity-100'}`}
+              className={`volume-slider-container mr-4 max-w-[6rem] min-w-[4rem] transition-[visibility,opacity] delay-150 ease-in-out lg:mr-4 ${
+                isPinned
+                  ? 'visible opacity-100'
+                  : isMouseActive
+                    ? 'invisible opacity-0 group-hover/songInfoContainer:visible group-hover/songInfoContainer:opacity-100'
+                    : 'invisible opacity-0'
+              }`}
             >
               <VolumeSlider name="player-volume-slider" id="volumeSlider" />
             </div>

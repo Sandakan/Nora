@@ -10,25 +10,30 @@ import TitleBar from '../TitleBar/TitleBar';
 import LyricsContainer from './containers/LyricsContainer';
 import SongInfoContainer from './containers/SongInfoContainer';
 
-let _persistedPinState = false;
-
-// type Props = {};
-
-const isArtistBackgroundsEnabled = false;
+const PINNED_STORAGE_KEY = 'fullScreenPlayer.isPinned';
 
 const FullScreenPlayer = () => {
-  // (props: Props)
   const isCurrentSongPlaying = useStore(store, (state) => state.player.isCurrentSongPlaying);
   const currentSongData = useStore(store, (state) => state.currentSongData);
   const preferences = useStore(store, (state) => state.localStorage.preferences);
 
   const [isLyricsVisible, setIsLyricsVisible] = useState(false);
   const [isLyricsAvailable, setIsLyricsAvailable] = useState(false);
-  const [isPinned, setIsPinned] = useState(_persistedPinState);
+  const [isPinned, setIsPinned] = useState(() => {
+    try {
+      return window.localStorage.getItem(PINNED_STORAGE_KEY) === 'true';
+    } catch {
+      return false;
+    }
+  });
   const [songPos, setSongPos] = useState(0);
 
   useEffect(() => {
-    _persistedPinState = isPinned;
+    try {
+      window.localStorage.setItem(PINNED_STORAGE_KEY, String(isPinned));
+    } catch {
+      // localStorage may be unavailable (private mode, quota); ignore.
+    }
   }, [isPinned]);
 
   const fullScreenPlayerContainerRef = useRef<HTMLDivElement>(null);
@@ -46,14 +51,8 @@ const FullScreenPlayer = () => {
   }, [preferences.allowToPreventScreenSleeping, preferences.removeAnimationsOnBatteryPower]);
 
   const imgPath = useMemo(() => {
-    const selectedArtist = currentSongData?.artists?.find(
-      (artist) => !!artist.onlineArtworkPaths?.picture_xl
-    );
-
-    if (isArtistBackgroundsEnabled && selectedArtist)
-      return selectedArtist.onlineArtworkPaths?.picture_xl;
     return currentSongData.artworkPath;
-  }, [currentSongData?.artists, currentSongData?.artworkPath]);
+  }, [currentSongData?.artworkPath]);
 
   return (
     <div
@@ -67,9 +66,8 @@ const FullScreenPlayer = () => {
           fallbackSrc={DefaultSongCover}
           loading="eager"
           alt="Song Cover"
-          className={`h-full w-full object-cover shadow-lg blur-none brightness-[.25]! transition-[filter] delay-100 duration-200 ease-in-out ${isLyricsVisible ? 'blur-[2rem]!' : 'blur-[2rem]!'}`}
+          className={`h-full w-full object-cover shadow-lg brightness-[.25]! transition-[filter] delay-100 duration-200 ease-in-out blur-[2rem]!`}
         />
-        {/* <div className="absolute inset-0 h-full w-full bg-linear-to-r from-black/50 to-black/5"></div> */}
       </div>
       <TitleBar />
       <div
