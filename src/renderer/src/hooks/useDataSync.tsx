@@ -37,13 +37,9 @@ export function useDataSync(): void {
   useEffect(() => {
     const noticeDataUpdateEvents = (_: unknown, dataEvents: DataUpdateEvent[]) => {
       for (const dataEvent of dataEvents) {
-        // Song events
+        // Events that should invalidate the songs query
         const songEvents: DataUpdateEventTypes[] = [
           'songs',
-          'artists',
-          'albums',
-          'playlists',
-          'genres',
           'songs/newSong',
           'songs/updatedSong',
           'songs/deletedSong',
@@ -51,9 +47,23 @@ export function useDataSync(): void {
           'songs/palette',
           'songs/likes'
         ];
+        // Events that should additionally invalidate the home page query
+        // (narrower than songEvents so the home page is not re-fetched for unrelated
+        //  artists/albums/playlists/genres events).
+        const homeRelevantEvents: DataUpdateEventTypes[] = [
+          'songs',
+          'songs/newSong',
+          'songs/updatedSong',
+          'songs/deletedSong',
+          'songs/likes',
+          'songs/artworks',
+          'songs/palette'
+        ];
         if (songEvents.includes(dataEvent.dataType)) {
           queryClient.invalidateQueries({ queryKey: songQuery._def });
           queryClient.invalidateQueries({ queryKey: searchQuery.query._def });
+        }
+        if (homeRelevantEvents.includes(dataEvent.dataType)) {
           queryClient.invalidateQueries({ queryKey: homeQuery._def });
         }
 

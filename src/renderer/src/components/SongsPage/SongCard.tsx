@@ -149,12 +149,25 @@ const SongCard = (props: SongCardProp) => {
         }
         return undefined;
       })
-      .catch((err) => console.error(err));
+      .catch((err) => {
+        console.error(err);
+        setIsSongAFavorite((prev) => !prev);
+        addNewNotifications([
+          {
+            id: `toggleLikeError-${songId}`,
+            content: t('errors.toggleLikeFailed'),
+            iconName: 'error',
+            duration: 5000
+          }
+        ]);
+      });
   }, [
+    addNewNotifications,
     currentSongData.isAFavorite,
     currentSongData.songId,
     isSongAFavorite,
     songId,
+    t,
     toggleIsFavorite
   ]);
 

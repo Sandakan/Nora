@@ -115,11 +115,14 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
 
   useEffect(() => {
     setIsSongPlaying(() => currentSongData?.songId === songId && isCurrentSongPlaying);
+  }, [currentSongData?.songId, isCurrentSongPlaying, songId]);
+
+  useEffect(() => {
     setIsAFavorite(() => {
       if (currentSongData?.songId === songId) return currentSongData.isAFavorite;
       return props.isAFavorite;
     });
-  }, [currentSongData.songId, currentSongData.isAFavorite, isCurrentSongPlaying, songId, props.isAFavorite]);
+  }, [currentSongData?.songId, currentSongData?.isAFavorite, songId, props.isAFavorite]);
 
   const handlePlayBtnClick = useCallback(() => {
     if (onPlayClick) return onPlayClick(songId);
@@ -138,8 +141,27 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
         setIsAFavorite((prevData) => !prevData);
         return undefined;
       })
-      .catch((err) => console.error(err));
-  }, [currentSongData.isAFavorite, currentSongData.songId, isAFavorite, songId, toggleIsFavorite]);
+      .catch((err) => {
+        console.error(err);
+        setIsAFavorite((prev) => !prev);
+        addNewNotifications([
+          {
+            id: `toggleLikeError-${songId}`,
+            content: t('errors.toggleLikeFailed'),
+            iconName: 'error',
+            duration: 5000
+          }
+        ]);
+      });
+  }, [
+    addNewNotifications,
+    currentSongData.isAFavorite,
+    currentSongData.songId,
+    isAFavorite,
+    songId,
+    t,
+    toggleIsFavorite
+  ]);
 
   const { minutes, seconds } = useMemo(() => {
     const addZero = (num: number) => {
