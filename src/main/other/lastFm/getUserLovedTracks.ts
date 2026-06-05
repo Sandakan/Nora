@@ -22,31 +22,38 @@ const getUserLovedTracks = async (
     const isOnline = checkIfConnectedToInternet();
     if (!isOnline) throw new Error('App not connected to internet.');
 
-    const url = new URL('http://ws.audioscrobbler.com/2.0/');
+    const url = new URL('https://ws.audioscrobbler.com/2.0/');
     url.searchParams.set('method', 'user.getLovedTracks');
     url.searchParams.set('api_key', LAST_FM_API_KEY);
     url.searchParams.set('user', username);
     url.searchParams.set('limit', String(limit));
     url.searchParams.set('format', 'json');
 
-    const res = await fetch(url);
-    if (res.ok) {
-      const data = await res.json();
-      if (data.error) throw new Error(`${data.error} - ${data.message}`);
-
-      const lovedTracks = data.lovedtracks?.track ?? [];
-      return {
-        tracks: lovedTracks.map((track: { name: string; url: string; artist: { name: string } }) => ({
-          name: track.name,
-          artist: track.artist.name,
-          url: track.url
-        }))
-      };
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 10_000);
+    let res: Response;
+    try {
+      res = await fetch(url, { signal: controller.signal });
+    } finally {
+      clearTimeout(timer);
     }
-    return undefined;
+    if (!res.ok) {
+      throw new Error(`LastFM user.getLovedTracks returned ${res.status} ${res.statusText}`);
+    }
+    const data = await res.json();
+    if (data.error) throw new Error(`${data.error} - ${data.message}`);
+
+    const lovedTracks = data.lovedtracks?.track ?? [];
+    return {
+      tracks: lovedTracks.map((track: { name: string; url: string; artist: { name: string } }) => ({
+        name: track.name,
+        artist: track.artist.name,
+        url: track.url
+      }))
+    };
   } catch (error) {
     logger.error('Failed to get loved tracks from LastFM.', { error });
-    return undefined;
+    throw error;
   }
 };
 

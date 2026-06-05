@@ -30,6 +30,20 @@ function defaultCriteria(): SmartPlaylistCriteria {
   return { matchType: 'ALL', rules: [defaultRule()] };
 }
 
+function isValidCriteriaShape(value: unknown): value is SmartPlaylistCriteria {
+  if (!value || typeof value !== 'object') return false;
+  const v = value as Partial<SmartPlaylistCriteria>;
+  if (v.matchType !== 'ALL' && v.matchType !== 'ANY') return false;
+  if (!Array.isArray(v.rules)) return false;
+  return v.rules.every(
+    (r) =>
+      r &&
+      typeof r === 'object' &&
+      typeof (r as SmartPlaylistRule).field === 'string' &&
+      typeof (r as SmartPlaylistRule).operator === 'string'
+  );
+}
+
 const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) => {
   const { playlist } = props;
   const { t } = useTranslation();
@@ -38,9 +52,10 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
   const initialCriteria = useMemo(() => {
     if (playlist.criteria) {
       try {
-        return JSON.parse(playlist.criteria) as SmartPlaylistCriteria;
+        const parsed = JSON.parse(playlist.criteria);
+        if (isValidCriteriaShape(parsed)) return parsed;
       } catch {
-        return defaultCriteria();
+        // fall through to default below
       }
     }
     return defaultCriteria();
@@ -122,10 +137,22 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
     }
     const cleaned: SmartPlaylistCriteria = { ...criteria, rules: cleanRules };
 
-    const result = await window.api.playlistsData.saveSmartPlaylistCriteria(
-      playlist.playlistId,
-      cleaned
-    );
+    const result = await window.api.playlistsData
+      .saveSmartPlaylistCriteria(playlist.playlistId, cleaned)
+      .catch((error: unknown) => {
+        addNewNotifications([
+          {
+            id: 'smartPlaylistSaveFailed',
+            duration: 5000,
+            content: t('playlist.criteriaSaveFailed')
+          }
+        ]);
+        // Re-throw is intentionally suppressed: the failure has been
+        // surfaced to the user. The catch+return-false pattern keeps
+        // the rest of the editor in a known state.
+        void error;
+        return false as const;
+      });
     if (result) {
       addNewNotifications([
         {
@@ -177,7 +204,7 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
           className="mt-1 w-full rounded-lg bg-background-color-2 px-3 py-1.5 text-sm text-font-color-black outline-1 outline-transparent transition-colors focus:outline-font-color-highlight dark:bg-dark-background-color-2 dark:text-font-color-white dark:focus:outline-dark-font-color-highlight"
           value={String(rule.value)}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="value"
+          placeholder={t('playlist.criteriaValuePlaceholder')}
         />
       );
     }
@@ -188,7 +215,7 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
         className="mt-1 w-full rounded-lg bg-background-color-2 px-3 py-1.5 text-sm text-font-color-black outline-1 outline-transparent transition-colors focus:outline-font-color-highlight dark:bg-dark-background-color-2 dark:text-font-color-white dark:focus:outline-dark-font-color-highlight"
         value={String(rule.value)}
         onChange={(e) => onChange(Number(e.target.value))}
-        placeholder="value"
+        placeholder={t('playlist.criteriaValuePlaceholder')}
       />
     );
   };

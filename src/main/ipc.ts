@@ -350,6 +350,19 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       getAlbumInfoFromLastFM(albumId)
     );
 
+    const allowedPeriods = new Set([
+      'overall',
+      '7day',
+      '1month',
+      '3month',
+      '6month',
+      '12month'
+    ]);
+    const clampLimit = (n: number | undefined): number => {
+      if (typeof n !== 'number' || !Number.isFinite(n)) return 50;
+      return Math.min(100, Math.max(1, Math.floor(n)));
+    };
+
     ipcMain.handle(
       'app/lastfm/getUserTopTracks',
       (
@@ -357,17 +370,30 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
         username: string,
         period?: 'overall' | '7day' | '1month' | '3month' | '6month' | '12month',
         limit?: number
-      ) => getUserTopTracks(username, period, limit)
+      ) => {
+        const cleanUser = (username ?? '').trim();
+        if (!cleanUser) return undefined;
+        const cleanPeriod = period && allowedPeriods.has(period) ? period : 'overall';
+        return getUserTopTracks(cleanUser, cleanPeriod, clampLimit(limit));
+      }
     );
 
     ipcMain.handle(
       'app/lastfm/getUserRecentTracks',
-      (_, username: string, limit?: number) => getUserRecentTracks(username, limit)
+      (_, username: string, limit?: number) => {
+        const cleanUser = (username ?? '').trim();
+        if (!cleanUser) return undefined;
+        return getUserRecentTracks(cleanUser, clampLimit(limit));
+      }
     );
 
     ipcMain.handle(
       'app/lastfm/getUserLovedTracks',
-      (_, username: string, limit?: number) => getUserLovedTracks(username, limit)
+      (_, username: string, limit?: number) => {
+        const cleanUser = (username ?? '').trim();
+        if (!cleanUser) return undefined;
+        return getUserLovedTracks(cleanUser, clampLimit(limit));
+      }
     );
 
     ipcMain.handle('app/getSongListeningData', (_, songIds: number[]) => getListeningData(songIds));
@@ -500,7 +526,13 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     ipcMain.handle('app/refreshSmartPlaylist', async (_, playlistId: number) => {
       const playlist = await getPlaylistById(playlistId);
       if (!playlist?.criteria) return { songIds: [] };
-      const criteria: SmartPlaylistCriteria = JSON.parse(playlist.criteria);
+      let criteria: SmartPlaylistCriteria;
+      try {
+        criteria = JSON.parse(playlist.criteria) as SmartPlaylistCriteria;
+      } catch (error) {
+        logger.error('Invalid smart playlist criteria JSON', { playlistId, error });
+        return { songIds: [] };
+      }
       const songIds = await refreshSmartPlaylist(playlistId, criteria);
       return { songIds };
     });

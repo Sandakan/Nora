@@ -8,6 +8,7 @@ function buildCondition(rule: SmartPlaylistRule): SQL | undefined {
 
   const numeric = (col: SQL) => {
     const n = Number(value);
+    if (!Number.isFinite(n)) return undefined;
     switch (operator) {
       case 'eq': return sql`${col} = ${n}`;
       case 'neq': return sql`${col} != ${n}`;
@@ -74,10 +75,12 @@ function buildCondition(rule: SmartPlaylistRule): SQL | undefined {
 
     case 'playCount': {
       const n = Number(value);
+      if (!Number.isFinite(n)) return undefined;
       switch (operator) {
         case 'gt': return sql`(select count(*) from play_events where play_events.song_id = songs.id) > ${n}`;
         case 'gte': return sql`(select count(*) from play_events where play_events.song_id = songs.id) >= ${n}`;
         case 'eq': return sql`(select count(*) from play_events where play_events.song_id = songs.id) = ${n}`;
+        case 'neq': return sql`(select count(*) from play_events where play_events.song_id = songs.id) != ${n}`;
         case 'lt': return sql`(select count(*) from play_events where play_events.song_id = songs.id) < ${n}`;
         case 'lte': return sql`(select count(*) from play_events where play_events.song_id = songs.id) <= ${n}`;
         default: return undefined;
@@ -86,10 +89,12 @@ function buildCondition(rule: SmartPlaylistRule): SQL | undefined {
 
     case 'skipCount': {
       const n = Number(value);
+      if (!Number.isFinite(n)) return undefined;
       switch (operator) {
         case 'gt': return sql`(select count(*) from skip_events where skip_events.song_id = songs.id) > ${n}`;
         case 'gte': return sql`(select count(*) from skip_events where skip_events.song_id = songs.id) >= ${n}`;
         case 'eq': return sql`(select count(*) from skip_events where skip_events.song_id = songs.id) = ${n}`;
+        case 'neq': return sql`(select count(*) from skip_events where skip_events.song_id = songs.id) != ${n}`;
         case 'lt': return sql`(select count(*) from skip_events where skip_events.song_id = songs.id) < ${n}`;
         case 'lte': return sql`(select count(*) from skip_events where skip_events.song_id = songs.id) <= ${n}`;
         default: return undefined;
@@ -98,12 +103,14 @@ function buildCondition(rule: SmartPlaylistRule): SQL | undefined {
 
     case 'lastPlayed': {
       const daysAgo = Number(value);
+      if (!Number.isFinite(daysAgo)) return undefined;
       const cutoff = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000);
       const lastPlayed = sql`(select max(play_history.created_at) from play_history where play_history.song_id = songs.id)`;
       switch (operator) {
         case 'gt': return sql`${lastPlayed} > ${cutoff}::timestamp`;
         case 'gte': return sql`${lastPlayed} >= ${cutoff}::timestamp`;
         case 'eq': return sql`${lastPlayed} between ${cutoff}::timestamp and ${new Date(cutoff.getTime() + 86400000)}::timestamp`;
+        case 'neq': return sql`${lastPlayed} not between ${cutoff}::timestamp and ${new Date(cutoff.getTime() + 86400000)}::timestamp`;
         case 'lt': return sql`${lastPlayed} < ${cutoff}::timestamp`;
         case 'lte': return sql`${lastPlayed} <= ${cutoff}::timestamp`;
         default: return undefined;

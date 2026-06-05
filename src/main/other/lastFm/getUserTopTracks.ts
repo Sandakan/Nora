@@ -24,7 +24,7 @@ const getUserTopTracks = async (
     const isOnline = checkIfConnectedToInternet();
     if (!isOnline) throw new Error('App not connected to internet.');
 
-    const url = new URL('http://ws.audioscrobbler.com/2.0/');
+    const url = new URL('https://ws.audioscrobbler.com/2.0/');
     url.searchParams.set('method', 'user.getTopTracks');
     url.searchParams.set('api_key', LAST_FM_API_KEY);
     url.searchParams.set('user', username);
@@ -32,25 +32,32 @@ const getUserTopTracks = async (
     url.searchParams.set('limit', String(limit));
     url.searchParams.set('format', 'json');
 
-    const res = await fetch(url);
-    if (res.ok) {
-      const data = await res.json();
-      if (data.error) throw new Error(`${data.error} - ${data.message}`);
-
-      const topTracks = data.toptracks?.track ?? [];
-      return {
-        tracks: topTracks.map((track: { name: string; url: string; artist: { name: string }; playcount: string }) => ({
-          name: track.name,
-          artist: track.artist.name,
-          url: track.url,
-          playCount: Number(track.playcount)
-        }))
-      };
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 10_000);
+    let res: Response;
+    try {
+      res = await fetch(url, { signal: controller.signal });
+    } finally {
+      clearTimeout(timer);
     }
-    return undefined;
+    if (!res.ok) {
+      throw new Error(`LastFM user.getTopTracks returned ${res.status} ${res.statusText}`);
+    }
+    const data = await res.json();
+    if (data.error) throw new Error(`${data.error} - ${data.message}`);
+
+    const topTracks = data.toptracks?.track ?? [];
+    return {
+      tracks: topTracks.map((track: { name: string; url: string; artist: { name: string }; playcount: string }) => ({
+        name: track.name,
+        artist: track.artist.name,
+        url: track.url,
+        playCount: Number(track.playcount)
+      }))
+    };
   } catch (error) {
     logger.error('Failed to get top tracks from LastFM.', { error });
-    return undefined;
+    throw error;
   }
 };
 

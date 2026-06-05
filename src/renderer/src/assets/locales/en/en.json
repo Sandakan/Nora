@@ -300,6 +300,7 @@
     "operatorContains": "contains",
     "criteriaSaveSuccess": "Smart playlist criteria saved successfully.",
     "criteriaSaveFailed": "Failed to save smart playlist criteria.",
+    "criteriaValuePlaceholder": "value",
     "refreshSuccess": "Smart playlist refreshed.",
     "refreshFailed": "Failed to refresh smart playlist.",
     "ruleField": "Field",
