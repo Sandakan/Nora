@@ -129,14 +129,10 @@ export function useWindowManagement(
         if (file) {
           const filePath = window.api.utils.showFilePath(file);
           const isASupportedAudioFormat = appPreferences.supportedMusicExtensions.some((type) =>
-            file?.webkitRelativePath.endsWith(type)
+            filePath.toLowerCase().endsWith(type.toLowerCase())
           );
           const isAM3u8Playlist = filePath.toLowerCase().endsWith('.m3u8');
 
-          // Note: webkitRelativePath is always "" for OS drag-drop (only set for HTML5
-          // webkitdirectory inputs), so the isASupportedAudioFormat check above is currently
-          // dead code for drag-drop. The m3u8 check below is the only functional drag-drop
-          // path. This is a pre-existing bug - see follow-up issue.
           if (isASupportedAudioFormat && !isAM3u8Playlist && fetchSongFromUnknownSource) {
             fetchSongFromUnknownSource(filePath);
           } else if (isAM3u8Playlist) {
@@ -144,13 +140,18 @@ export function useWindowManagement(
             // dropped m3u8 files should create a new playlist, not target an existing one.
             // The filename-based autodetect still works for "Favorites" naming convention
             // inside processPlaylistImport's existing logic.
-            window.api.playlistsData.importPlaylistFromPath(filePath).catch((err) => {
-              window.api.log.sendLogs(
-                err instanceof Error ? err.message : 'Unknown error',
-                { filePath, error: err },
-                'ERROR'
-              );
-            });
+            window.api.playlistsData
+              .importPlaylistFromPath(filePath)
+              .catch((err) => {
+                window.api.log.sendLogs(
+                  err instanceof Error ? err.message : 'Unknown error',
+                  { filePath, error: err },
+                  'ERROR'
+                );
+              })
+              .finally(() => {
+                if (appRef.current) appRef.current.classList.remove('song-drop');
+              });
           } else if (changePromptMenuData) {
             changePromptMenuData(
               true,

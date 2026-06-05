@@ -25,7 +25,8 @@ vi.mock('../../../../src/main/logger', () => ({
 
 vi.mock('../../../../src/main/main', () => ({
   sendMessageToRenderer: vi.fn(),
-  showOpenDialog: vi.fn()
+  showOpenDialog: vi.fn(),
+  dataUpdateEvent: vi.fn()
 }));
 
 vi.mock('../../../../src/main/core/addNewPlaylist', () => ({
@@ -39,7 +40,7 @@ import { getSongsInPathList, updateSongFavoriteStatuses } from '@main/db/queries
 import { processPlaylistImport } from '../../../../src/main/core/importPlaylist';
 import addNewPlaylist from '../../../../src/main/core/addNewPlaylist';
 import logger from '../../../../src/main/logger';
-import { sendMessageToRenderer } from '../../../../src/main/main';
+import { dataUpdateEvent, sendMessageToRenderer } from '../../../../src/main/main';
 
 const mockedReadFile = vi.mocked(readFile);
 const mockedGetPlaylistByName = vi.mocked(getPlaylistByName);
@@ -51,6 +52,7 @@ const mockedLoggerDebug = vi.mocked(logger.debug);
 const mockedLoggerInfo = vi.mocked(logger.info);
 const mockedLoggerWarn = vi.mocked(logger.warn);
 const mockedSendMessageToRenderer = vi.mocked(sendMessageToRenderer);
+const mockedDataUpdateEvent = vi.mocked(dataUpdateEvent);
 
 const M3U_HEADER = '#EXTM3U';
 const SONG1_PATH = '/music/song1.mp3';
@@ -94,7 +96,7 @@ describe('processPlaylistImport', () => {
       });
     });
 
-    test('Scenario 2: unavailable > 0, available = 0 — sends PLAYLIST_IMPORT_SUCCESS with count 0', async () => {
+    test('Scenario 2: unavailable > 0, available = 0 — sends PLAYLIST_IMPORT_FAILED_DUE_TO_SONGS_OUTSIDE_LIBRARY', async () => {
       // No songs available in the library
       mockedGetSongsInPathList.mockResolvedValue([]);
 
@@ -102,8 +104,7 @@ describe('processPlaylistImport', () => {
 
       expect(mockedSendMessageToRenderer).toHaveBeenCalledTimes(1);
       expect(mockedSendMessageToRenderer).toHaveBeenCalledWith({
-        messageCode: 'PLAYLIST_IMPORT_SUCCESS',
-        data: { count: 0 }
+        messageCode: 'PLAYLIST_IMPORT_FAILED_DUE_TO_SONGS_OUTSIDE_LIBRARY'
       });
     });
 
@@ -149,6 +150,49 @@ describe('processPlaylistImport', () => {
       expect(mockedSendMessageToRenderer).toHaveBeenCalledTimes(1);
       expect(mockedSendMessageToRenderer).toHaveBeenCalledWith({
         messageCode: 'PLAYLIST_IMPORT_FAILED_DUE_TO_INVALID_FILE_DATA'
+      });
+    });
+  });
+
+  describe('dataUpdateEvent notifications (CodeRabbit inline review)', () => {
+    test('Favorites import: calls dataUpdateEvent after updateSongFavoriteStatuses', async () => {
+      mockedUpdateSongFavoriteStatuses.mockResolvedValue(undefined);
+
+      await processPlaylistImport('C:/import/favorites.m3u8');
+
+      expect(mockedUpdateSongFavoriteStatuses).toHaveBeenCalledWith([SONG1_ID, SONG2_ID], true);
+      expect(mockedDataUpdateEvent).toHaveBeenCalledTimes(1);
+    });
+
+    test('Existing-playlist import: calls dataUpdateEvent after linkSongsWithPlaylist', async () => {
+      mockedGetPlaylistByName.mockResolvedValue({ id: 7, name: 'test' } as never);
+      mockedLinkSongsWithPlaylist.mockResolvedValue(undefined);
+
+      await processPlaylistImport('C:/import/test.m3u8');
+
+      expect(mockedLinkSongsWithPlaylist).toHaveBeenCalledWith([SONG1_ID, SONG2_ID], 7);
+      expect(mockedDataUpdateEvent).toHaveBeenCalledTimes(1);
+    });
+
+    test('New-playlist import: addNewPlaylist handles its own dataUpdateEvent (no double-fire)', async () => {
+      mockedGetPlaylistByName.mockResolvedValue(null);
+      mockedAddNewPlaylist.mockResolvedValue({ success: true, message: 'created' });
+
+      await processPlaylistImport('C:/import/test.m3u8');
+
+      // addNewPlaylist is responsible for firing dataUpdateEvent internally;
+      // importToPlaylist should NOT fire it again.
+      expect(mockedDataUpdateEvent).not.toHaveBeenCalled();
+    });
+
+    test('Failed favorites import does not call dataUpdateEvent', async () => {
+      mockedUpdateSongFavoriteStatuses.mockRejectedValue(new Error('db down'));
+
+      await processPlaylistImport('C:/import/favorites.m3u8');
+
+      expect(mockedDataUpdateEvent).not.toHaveBeenCalled();
+      expect(mockedSendMessageToRenderer).toHaveBeenCalledWith({
+        messageCode: 'PLAYLIST_IMPORT_FAILED'
       });
     });
   });
