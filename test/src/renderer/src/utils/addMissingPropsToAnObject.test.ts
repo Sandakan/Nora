@@ -31,7 +31,7 @@ const TEMPLATE: LocalStorage = {
     isRepeating: 'false',
     isShuffling: false,
     volume: { isMuted: false, value: 50 },
-    playbackRate: 1.0
+    playbackRate: 1
   },
   queue: { position: 0, songIds: [] },
   sortingStates: {
@@ -168,11 +168,11 @@ describe('addMissingPropsToAnObject with sortingStates', () => {
       sortingStates: undefined
     };
 
-    const result = addMissingPropsToAnObject(TEMPLATE, storageWithNullSorting as any);
+    const result = addMissingPropsToAnObject(TEMPLATE, storageWithNullSorting);
     expect(result.sortingStates).toBeDefined();
     expect(result.sortingStates).toHaveProperty('playlistDetailPage', 'addedOrder');
     expect(Object.keys(result.sortingStates)).toHaveLength(10);
-  });
+
 
   test('should preserve pre-existing top-level keys while filling sortingStates', () => {
     const oldStorage = {

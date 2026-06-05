@@ -1,4 +1,4 @@
-import { existsSync } from 'fs';
+import { existsSync } from 'node:fs';
 
 import { addSongToPlayHistory } from '@main/db/queries/history';
 import { getPlayableSongById } from '@main/db/queries/songs';
