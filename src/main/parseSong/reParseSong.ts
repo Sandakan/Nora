@@ -40,7 +40,24 @@ const reParseSong = async (filePath: string) => {
       const stats = await fs.stat(songPath);
 
       const file = File.createFromPath(songPath);
-      const metadata = file.tag;
+      let metadata: typeof file.tag;
+      let durationMs: number;
+      let sampleRate: number | undefined;
+      let bitRate: number | undefined;
+      let channels: number | undefined;
+      try {
+        metadata = file.tag;
+        durationMs = file.properties.durationMilliseconds;
+        sampleRate = file.properties.audioSampleRate;
+        bitRate = file.properties.audioBitrate;
+        channels = file.properties.audioChannels;
+      } finally {
+        try {
+          file.dispose();
+        } catch (disposeError) {
+          logger.warn('Error disposing file handle after re-parse', { disposeError, songPath });
+        }
+      }
 
       const songTitle =
         metadata.title || path.basename(songPath, path.extname(songPath)) || 'Unknown Title';
@@ -52,14 +69,12 @@ const reParseSong = async (filePath: string) => {
 
         const updatedSong: Partial<typeof songs.$inferInsert> = {
           title: songTitle,
-          duration: getSongDurationFromSong(file.properties.durationMilliseconds / 1000).toFixed(2),
+          duration: getSongDurationFromSong(durationMs / 1000).toFixed(2),
           year: metadata.year || undefined,
           path: songPath,
-          sampleRate: file.properties.audioSampleRate,
-          bitRate: file.properties.audioBitrate
-            ? Math.ceil(file.properties.audioBitrate)
-            : undefined,
-          noOfChannels: file.properties.audioChannels,
+          sampleRate,
+          bitRate: bitRate ? Math.ceil(bitRate) : undefined,
+          noOfChannels: channels,
           diskNumber: metadata.disc ?? undefined,
           trackNumber: metadata.track ?? undefined,
           fileCreatedAt: stats ? stats.birthtime : new Date(),
