@@ -110,9 +110,11 @@ function buildCondition(rule: SmartPlaylistRule): SQL | undefined {
         case 'gt': return sql`${lastPlayed} > ${cutoff}::timestamp`;
         case 'gte': return sql`${lastPlayed} >= ${cutoff}::timestamp`;
         case 'eq': return sql`${lastPlayed} between ${cutoff}::timestamp and ${new Date(cutoff.getTime() + 86400000)}::timestamp`;
-        case 'neq': return sql`${lastPlayed} not between ${cutoff}::timestamp and ${new Date(cutoff.getTime() + 86400000)}::timestamp`;
-        case 'lt': return sql`${lastPlayed} < ${cutoff}::timestamp`;
-        case 'lte': return sql`${lastPlayed} <= ${cutoff}::timestamp`;
+        // neq/lt/lte must also include "lastPlayed IS NULL" so never-played songs
+        // aren't silently dropped from "not played in window" / "played long ago" rules
+        case 'neq': return sql`${lastPlayed} IS NULL OR ${lastPlayed} not between ${cutoff}::timestamp and ${new Date(cutoff.getTime() + 86400000)}::timestamp`;
+        case 'lt': return sql`${lastPlayed} IS NULL OR ${lastPlayed} < ${cutoff}::timestamp`;
+        case 'lte': return sql`${lastPlayed} IS NULL OR ${lastPlayed} <= ${cutoff}::timestamp`;
         default: return undefined;
       }
     }

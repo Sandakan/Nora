@@ -140,16 +140,9 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
     const result = await window.api.playlistsData
       .saveSmartPlaylistCriteria(playlist.playlistId, cleaned)
       .catch((error: unknown) => {
-        addNewNotifications([
-          {
-            id: 'smartPlaylistSaveFailed',
-            duration: 5000,
-            content: t('playlist.criteriaSaveFailed')
-          }
-        ]);
-        // Re-throw is intentionally suppressed: the failure has been
-        // surfaced to the user. The catch+return-false pattern keeps
-        // the rest of the editor in a known state.
+        // The error is surfaced to the user via a single notification below;
+        // suppress the re-throw so the rest of the editor stays in a known
+        // state.
         void error;
         return false as const;
       });
