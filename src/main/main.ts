@@ -872,11 +872,9 @@ export async function changePlayerType(type: PlayerTypes) {
       }
       manageWindowOnDisplayMetricsChange();
       mainWindow.setAspectRatio(MAIN_WINDOW_ASPECT_RATIO);
-    } else if (type === 'display') {
-      mainWindow.setMaximumSize(MAIN_WINDOW_MAX_SIZE_X, MAIN_WINDOW_MAX_SIZE_Y);
-      mainWindow.setMinimumSize(MAIN_WINDOW_MIN_SIZE_X, MAIN_WINDOW_MIN_SIZE_Y);
-      mainWindow.setFullScreen(true);
     } else {
+      // Handles both 'full' and 'display' player types (kept separate above
+      // for clarity of intent and easier future divergence).
       mainWindow.setMaximumSize(MAIN_WINDOW_MAX_SIZE_X, MAIN_WINDOW_MAX_SIZE_Y);
       mainWindow.setMinimumSize(MAIN_WINDOW_MIN_SIZE_X, MAIN_WINDOW_MIN_SIZE_Y);
       mainWindow.setFullScreen(true);

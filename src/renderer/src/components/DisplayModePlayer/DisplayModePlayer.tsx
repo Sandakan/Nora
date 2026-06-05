@@ -43,9 +43,9 @@ const DisplayModePlayer = () => {
     return selectedArtist?.onlineArtworkPaths?.picture_xl ?? currentSongData.artworkPath;
   }, [currentSongData?.artists, currentSongData?.artworkPath]);
 
-  const showSongTitle = preferences?.showSongTitleInDisplayMode !== false;
-  const showArtistName = preferences?.showArtistNameInDisplayMode !== false;
-  const showControls = preferences?.showControlsInDisplayMode !== false;
+  const showSongTitle = preferences?.showSongTitleInDisplayMode ?? true;
+  const showArtistName = preferences?.showArtistNameInDisplayMode ?? true;
+  const showControls = preferences?.showControlsInDisplayMode ?? true;
 
   return (
     <div
