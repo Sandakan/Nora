@@ -10,15 +10,16 @@ import { saveAbortController } from './controlAbortControllers';
 import getParentFolderPaths from './getParentFolderPaths';
 import logger from '../logger';
 
-const createParentFolderWatcherFunction = (
-  parentFolderPath: string,
-  initialFolderPaths: string[]
-) => {
-  const musicFolderPaths = initialFolderPaths;
+const createParentFolderWatcherFunction = (parentFolderPath: string) => {
   let isScanning = false;
 
-  const findContainingMusicFolder = (fullPath: string): string | undefined => {
-    const sorted = [...musicFolderPaths].sort((a, b) => b.length - a.length);
+  const findContainingMusicFolder = async (fullPath: string): Promise<string | undefined> => {
+    // Fetch the current music folder set lazily so newly-added library
+    // folders (added after the watcher was created) are picked up.
+    const structures = await getAllFolderStructures();
+    const allPaths: string[] = [];
+    getAllPathsFromStructures(structures, allPaths);
+    const sorted = [...allPaths].sort((a, b) => b.length - a.length);
     return sorted.find((folderPath) => {
       if (!fullPath.startsWith(folderPath)) return false;
       if (fullPath.length === folderPath.length) return true;
@@ -33,7 +34,7 @@ const createParentFolderWatcherFunction = (
         const fullPathStat = await stat(fullPath).catch(() => null);
 
         if (fullPathStat?.isDirectory()) {
-          const containingFolder = findContainingMusicFolder(fullPath);
+          const containingFolder = await findContainingMusicFolder(fullPath);
 
           if (containingFolder) {
             if (isScanning) return;
@@ -55,7 +56,13 @@ const createParentFolderWatcherFunction = (
           await checkForFolderModifications(filename);
         } else if (fullPathStat === null) {
           // Path was deleted — check if a known folder was removed
-          await checkForFolderModifications(filename);
+          if (isScanning) return;
+          isScanning = true;
+          try {
+            await checkForFolderModifications(filename);
+          } finally {
+            isScanning = false;
+          }
         }
       }
     } else {
@@ -70,17 +77,15 @@ const createParentFolderWatcherFunction = (
 const getAllPathsFromStructures = (structures: FolderStructure[], paths: string[] = []): string[] => {
   for (const structure of structures) {
     paths.push(structure.path);
-    for (const sub of structure.subFolders) {
-      getAllPathsFromStructures([sub], paths);
-    }
+    getAllPathsFromStructures(structure.subFolders, paths);
   }
   return paths;
 };
 
-const addWatcherToParentFolder = (parentFolderPath: string, folderPaths: string[]) => {
+const addWatcherToParentFolder = (parentFolderPath: string) => {
   try {
     const abortController = new AbortController();
-    const watcherFunction = createParentFolderWatcherFunction(parentFolderPath, folderPaths);
+    const watcherFunction = createParentFolderWatcherFunction(parentFolderPath);
     const watcher = fsSync.watch(
       parentFolderPath,
       {
@@ -108,15 +113,19 @@ const addWatcherToParentFolder = (parentFolderPath: string, folderPaths: string[
 const addWatchersToParentFolders = async () => {
   const musicFolders = await getAllFolderStructures();
 
+  if (musicFolders.length === 0) {
+    logger.warn('addWatchersToParentFolders: no music folders found — nothing to watch.');
+    return;
+  }
+
   const musicFolderPaths = musicFolders.map((folder) => folder.path);
   const parentFolderPaths = getParentFolderPaths(musicFolderPaths);
   logger.debug(`${parentFolderPaths.length} parent folders of music folders found.`);
 
   if (parentFolderPaths.length > 0) {
-    const allFolderPaths = getAllPathsFromStructures(musicFolders);
     for (const parentFolderPath of parentFolderPaths) {
       try {
-        addWatcherToParentFolder(parentFolderPath, allFolderPaths);
+        addWatcherToParentFolder(parentFolderPath);
       } catch (error) {
         logger.error(
           `Failed to add watcher to '${path.basename(parentFolderPath)}' parent folder.`,

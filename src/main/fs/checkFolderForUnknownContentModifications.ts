@@ -11,9 +11,6 @@ import { tryToParseSong } from '../parseSong/parseSong';
 import removeSongsFromLibrary from '../removeSongsFromLibrary';
 import { saveAbortController } from './controlAbortControllers';
 
-const abortController = new AbortController();
-saveAbortController('checkFolderForUnknownContentModifications', abortController);
-
 const getSongPathsRelativeToFolder = async (folderPath: string) => {
   const relevantSongs = await getSongsRelativeToFolder(folderPath, {
     skipBlacklistedFolders: true,
@@ -65,7 +62,7 @@ const addNewlyAddedSongsToLibrary = async (
 ) => {
   const folder = await getFolderFromPath(folderPath);
 
-  // Fix BUG 3: Skip if folder is blacklisted — even when DB has 0 songs
+  // Defensive: skip blacklisted folders even when the DB has 0 songs on disk
   if (folder?.isBlacklisted) {
     logger.debug(`Skipping blacklisted folder.`, { folderPath });
     return;
@@ -118,11 +115,14 @@ const addNewlyAddedSongsToLibrary = async (
 };
 
 const checkFolderForUnknownModifications = async (folderPath: string) => {
-  const relevantFolderSongPaths = await getSongPathsRelativeToFolder(folderPath);
+  const abortController = new AbortController();
+  saveAbortController('checkFolderForUnknownContentModifications', abortController);
 
-  const dirs = await getFullPathsOfFolderDirs(folderPath);
+  try {
+    const relevantFolderSongPaths = await getSongPathsRelativeToFolder(folderPath);
 
-  if (dirs) {
+    const dirs = await getFullPathsOfFolderDirs(folderPath);
+
     if (relevantFolderSongPaths.length > 0) {
       const deletedSongPaths = relevantFolderSongPaths.filter(
         (songPath) => !dirs.some((dir) => dir === songPath)
@@ -152,6 +152,8 @@ const checkFolderForUnknownModifications = async (folderPath: string) => {
         await addNewlyAddedSongsToLibrary(folderPath, newlyAddedSongPaths, abortController.signal);
       }
     }
+  } finally {
+    abortController.abort();
   }
 };
 
