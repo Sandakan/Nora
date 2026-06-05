@@ -74,7 +74,7 @@ export function useDiscordRpc(player: HTMLAudioElement) {
       }
     }
 
-    window.api?.playerControls?.setDiscordRpcActivity(activity);
+    (globalThis as typeof window).api?.playerControls?.setDiscordRpcActivity(activity);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
