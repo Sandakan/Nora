@@ -24,7 +24,7 @@ const LyricsContainer = (props: Props) => {
   const { isLyricsVisible, setIsLyricsAvailable, isShowLyricsWithSongInfo } = props;
   const { t } = useTranslation();
 
-  const { data: lyrics } = useQuery({
+  const { data: lyrics, isPending } = useQuery({
     ...lyricsQuery.fullScreenPlayer({
       title: currentSongData.title,
       artists: Array.isArray(currentSongData.artists)
@@ -37,7 +37,8 @@ const LyricsContainer = (props: Props) => {
       autoTranslate: !!preferences.autoTranslateLyrics,
       autoConvert: !!preferences.autoConvertLyrics
     }),
-    enabled: isLyricsVisible
+    enabled: isLyricsVisible || !!isShowLyricsWithSongInfo,
+    staleTime: Infinity
   });
 
   useSkipLyricsLines(lyrics ?? null);
@@ -145,7 +146,7 @@ const LyricsContainer = (props: Props) => {
           <p className="mt-4 text-base">{t('lyricsPage.noSyncedLyricsDescription')}</p>
         </div>
       )}
-      {(isShowLyricsWithSongInfo || isLyricsVisible) && !lyrics && (
+      {(isShowLyricsWithSongInfo || isLyricsVisible) && !isPending && !lyrics && (
         <div className="text-font-color-highlight flex h-full w-full flex-col justify-center text-2xl opacity-50">
           <span className="material-icons-round-outlined mb-2 text-5xl">brightness_alert</span>
           <p>{t('lyricsPage.noLyrics')}</p>
