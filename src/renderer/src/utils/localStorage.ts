@@ -282,28 +282,37 @@ const getSortingStates = <Type extends keyof SortingStates>(type: Type) =>
 
 const getKeyboardShortcuts = (): ShortcutCategoryList => {
   const localData = getLocalStorage();
-  const userShortcuts = (localData as any)?.keyboardShortcuts || [];
-  const defaults = LOCAL_STORAGE_DEFAULT_TEMPLATE.keyboardShortcuts;
-  const merged = userShortcuts.map((category: ShortcutCategory, catIdx: number) => {
-    const defaultCategory = defaults[catIdx];
-    const patchedShortcuts = category.shortcuts.map((shortcut: Shortcut, scIdx: number) => {
-      if (shortcut.id) return shortcut;
-      const defaultShortcut = defaultCategory?.shortcuts[scIdx];
-      return {
-        ...shortcut,
-        id: defaultShortcut?.id || `unknown-${catIdx}-${scIdx}`
-      };
-    });
-    const existingIds = new Set(patchedShortcuts.map((s: Shortcut) => s.id));
-    const missingDefaults = (defaultCategory?.shortcuts || []).filter(
-      (ds: Shortcut) => !existingIds.has(ds.id)
+  const userShortcuts: ShortcutCategory[] = (localData as any)?.keyboardShortcuts || [];
+  const defaults: ShortcutCategory[] = LOCAL_STORAGE_DEFAULT_TEMPLATE.keyboardShortcuts;
+
+  const merged: ShortcutCategory[] = defaults.map((defaultCategory) => {
+    const matchingUserCategory = userShortcuts.find(
+      (uc) => uc.shortcutCategoryTitle === defaultCategory.shortcutCategoryTitle
     );
-    return {
-      ...category,
-      shortcuts: [...patchedShortcuts, ...missingDefaults]
-    };
+
+    if (!matchingUserCategory) return defaultCategory;
+
+    const patchedShortcuts = defaultCategory.shortcuts.map((defaultShortcut) => {
+      const matchingUserShortcut = matchingUserCategory.shortcuts.find(
+        (us) => us.id === defaultShortcut.id || us.label === defaultShortcut.label
+      );
+      if (matchingUserShortcut) {
+        return { ...defaultShortcut, keys: matchingUserShortcut.keys };
+      }
+      return defaultShortcut;
+    });
+
+    return { ...defaultCategory, shortcuts: patchedShortcuts };
   });
-  return merged;
+
+  const userCategoryTitles = new Set(userShortcuts.map((c) => c.shortcutCategoryTitle));
+  const extraUserCategories = userShortcuts.filter(
+    (uc) => !userCategoryTitles.has(uc.shortcutCategoryTitle) || !defaults.some(
+      (dc) => dc.shortcutCategoryTitle === uc.shortcutCategoryTitle
+    )
+  );
+
+  return [...merged, ...extraUserCategories];
 };
 
 const setKeyboardShortcuts = (idOrLabel: string, newKeys: string[]): void => {

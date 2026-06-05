@@ -638,6 +638,7 @@ class AudioPlayer {
   // ========== EQUALIZER CONTROL ==========
 
   applyEqualizerPreset(preset: Partial<Record<EqualizerBandFilters, number>>) {
+    if (!this.isEqualizerActive) return;
     for (const [filterName, gainValue] of Object.entries(preset)) {
       const band = this.equalizerBands.get(filterName as EqualizerBandFilters);
       if (band) {

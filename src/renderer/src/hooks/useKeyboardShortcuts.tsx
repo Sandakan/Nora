@@ -154,7 +154,10 @@ export function useKeyboardShortcuts(dependencies: KeyboardShortcutDependencies)
       if (matchedShortcut) {
         e.preventDefault();
         let updatedPlaybackRate: number;
-        const shortcutId = matchedShortcut.id || matchedShortcut.label;
+        const shortcutId = (matchedShortcut.id || matchedShortcut.label || '').replace(
+          /(_key|Key)$/i,
+          ''
+        );
         switch (shortcutId) {
           case 'playPause':
             toggleSongPlayback();

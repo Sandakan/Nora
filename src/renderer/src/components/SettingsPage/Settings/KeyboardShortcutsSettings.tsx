@@ -35,25 +35,8 @@ const KeyboardShortcutsSettings = () => {
         keys.push(key === ' ' ? 'Space' : key);
       }
 
-      const new_shortcut: Shortcut = {
-        id: editingShortcut,
-        label: editingShortcut,
-        keys: keys
-      };
-
       setNewKeys(keys);
-      setNewShortcut(new_shortcut);
-
-      setShortcuts((prevShortcuts) =>
-        prevShortcuts.map((category) => ({
-          ...category,
-          shortcuts: category.shortcuts.map((shortcut) =>
-            shortcut.id === new_shortcut.id
-              ? { ...shortcut, keys: new_shortcut.keys }
-              : shortcut
-          )
-        }))
-      );
+      setNewShortcut({ id: editingShortcut, label: editingShortcut, keys });
     };
 
     document.addEventListener('keydown', handleKeyDown);
@@ -67,14 +50,13 @@ const KeyboardShortcutsSettings = () => {
       const shortcutElements = document.querySelectorAll('.shortcut.editing');
       const clickedOutside = Array.from(shortcutElements).every((el) => !el.contains(e.target as Node));
 
-      const allShortcuts = storage.keyboardShortcuts
-        .getKeyboardShortcuts()
-        .flatMap((category) => category.shortcuts);
       const sortKeys = (k: string[]) => [...k].sort();
-      const duplicate = allShortcuts.some(
-        (shortcut) =>
-          shortcut.id !== editingShortcut &&
-          JSON.stringify(sortKeys(shortcut.keys)) === JSON.stringify(sortKeys(newKeys))
+      const duplicate = shortcuts.some((category) =>
+        category.shortcuts.some(
+          (shortcut) =>
+            shortcut.id !== editingShortcut &&
+            JSON.stringify(sortKeys(shortcut.keys)) === JSON.stringify(sortKeys(newKeys))
+        )
       );
 
       const editingElement = document.querySelector('.shortcut.editing') as HTMLElement | null;
@@ -103,7 +85,7 @@ const KeyboardShortcutsSettings = () => {
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [editingShortcut, newShortcut, newKeys, addNewNotifications, t]);
+  }, [editingShortcut, newShortcut, newKeys, shortcuts, addNewNotifications, t]);
 
   const shortcutCategoryComponents = useMemo(
     () =>
