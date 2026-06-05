@@ -22,6 +22,8 @@ const checkForNewSongs = async () => {
         });
       }
     }
+  } else {
+    logger.warn('checkForNewSongs: no top-level music folders found — nothing to scan.');
   }
 };
 

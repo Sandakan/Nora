@@ -1,9 +1,10 @@
 import { store } from '@renderer/store/store';
 import { linkOptions } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
-import { memo, useEffect, useMemo, useState } from 'react';
+import { memo, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import ErrorBoundary from '../ErrorBoundary';
 import SideBarItem from './SideBarItem';
 
@@ -13,6 +14,7 @@ const Sidebar = memo(() => {
 
   const { t } = useTranslation();
   const [isSyncing, setIsSyncing] = useState(false);
+  const { addNewNotifications } = useContext(AppUpdateContext);
 
   const handleResyncClick = async () => {
     if (isSyncing) return;
@@ -21,6 +23,14 @@ const Sidebar = memo(() => {
       await window.api.audioLibraryControls.resyncSongsLibrary();
     } catch (err) {
       console.error('Failed to resync songs library.', err);
+      addNewNotifications([
+        {
+          id: 'resyncLibraryFailed',
+          content: t('notifications.songDataUpdateFailed'),
+          iconName: 'error',
+          duration: 5000
+        }
+      ]);
     } finally {
       setIsSyncing(false);
     }

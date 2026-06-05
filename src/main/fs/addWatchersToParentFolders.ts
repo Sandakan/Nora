@@ -34,26 +34,25 @@ const createParentFolderWatcherFunction = (parentFolderPath: string) => {
         const fullPathStat = await stat(fullPath).catch(() => null);
 
         if (fullPathStat?.isDirectory()) {
-          const containingFolder = await findContainingMusicFolder(fullPath);
+          if (isScanning) return;
+          isScanning = true;
+          try {
+            const containingFolder = await findContainingMusicFolder(fullPath);
 
-          if (containingFolder) {
-            if (isScanning) return;
-            isScanning = true;
-
-            try {
+            if (containingFolder) {
               logger.debug(`New directory detected inside music folder.`, {
                 path: fullPath,
                 musicFolder: containingFolder
               });
               await checkForFolderModifications(filename);
               await checkFolderForUnknownModifications(containingFolder);
-            } finally {
-              isScanning = false;
+              return;
             }
-            return;
-          }
 
-          await checkForFolderModifications(filename);
+            await checkForFolderModifications(filename);
+          } finally {
+            isScanning = false;
+          }
         } else if (fullPathStat === null) {
           // Path was deleted — check if a known folder was removed
           if (isScanning) return;
