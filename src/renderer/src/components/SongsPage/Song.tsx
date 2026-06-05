@@ -147,7 +147,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
         addNewNotifications([
           {
             id: `toggleLikeError-${songId}`,
-            content: t('errors.toggleLikeFailed'),
+            content: t('song.toggleLikeFailed'),
             iconName: 'error',
             duration: 5000
           }

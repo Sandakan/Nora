@@ -155,7 +155,7 @@ const SongCard = (props: SongCardProp) => {
         addNewNotifications([
           {
             id: `toggleLikeError-${songId}`,
-            content: t('errors.toggleLikeFailed'),
+            content: t('song.toggleLikeFailed'),
             iconName: 'error',
             duration: 5000
           }
