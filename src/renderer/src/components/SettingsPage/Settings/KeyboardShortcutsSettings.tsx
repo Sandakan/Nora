@@ -200,6 +200,7 @@ const KeyboardShortcutsSettings = () => {
                       }
                     ]);
                     setShortcuts(storage.keyboardShortcuts.getKeyboardShortcuts());
+                    changePromptMenuData(false);
                   }
                 }}
               />
