@@ -24,14 +24,17 @@ export const lyricsQuery = createQueryKeys('lyrics', {
 
     return {
       queryKey: [
-        `title=${title}`,
-        `artists=${artists.join(',')}`,
-        `album=${album}`,
-        `path=${path}`,
-        `duration=${duration}`,
-        `lyricsType=${lyricsType}`,
-        `lyricsRequestType=${lyricsRequestType}`,
-        `saveLyricsAutomatically=${saveLyricsAutomatically}`
+        {
+          scope: 'single',
+          title,
+          artists,
+          album,
+          path,
+          duration,
+          lyricsType,
+          lyricsRequestType,
+          saveLyricsAutomatically
+        }
       ],
       queryFn: () =>
         window.api.lyrics.getSongLyrics(
@@ -62,14 +65,17 @@ export const lyricsQuery = createQueryKeys('lyrics', {
 
     return {
       queryKey: [
-        `fsp-title=${title}`,
-        `fsp-artists=${artists.join(',')}`,
-        `fsp-album=${album ?? ''}`,
-        `fsp-path=${path}`,
-        `fsp-duration=${duration}`,
-        `fsp-language=${language}`,
-        `fsp-autoTranslate=${autoTranslate}`,
-        `fsp-autoConvert=${autoConvert}`
+        {
+          scope: 'fullScreenPlayer',
+          title,
+          artists,
+          album,
+          path,
+          duration,
+          language,
+          autoTranslate,
+          autoConvert
+        }
       ],
       queryFn: async (): Promise<SongLyrics | null> => {
         try {

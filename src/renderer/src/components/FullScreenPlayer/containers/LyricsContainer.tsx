@@ -146,7 +146,7 @@ const LyricsContainer = (props: Props) => {
           <p className="mt-4 text-base">{t('lyricsPage.noSyncedLyricsDescription')}</p>
         </div>
       )}
-      {(isShowLyricsWithSongInfo || isLyricsVisible) && lyrics === undefined && (
+      {(isShowLyricsWithSongInfo || isLyricsVisible) && !isPending && lyrics === null && (
         <div className="text-font-color-highlight flex h-full w-full flex-col justify-center text-2xl opacity-50">
           <span className="material-icons-round-outlined mb-2 text-5xl">brightness_alert</span>
           <p>{t('lyricsPage.noLyrics')}</p>
