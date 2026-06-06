@@ -12,6 +12,7 @@ const UnsupportedFileMessagePrompt = lazy(
 export interface UseWindowManagementOptions {
   changePromptMenuData?: (isVisible: boolean, prompt?: React.ReactNode, className?: string) => void;
   fetchSongFromUnknownSource?: (filePath: string) => void;
+  importPlaylistFromPath?: (filePath: string) => void;
 }
 
 /**
@@ -56,7 +57,7 @@ export function useWindowManagement(
   appRef: RefObject<HTMLDivElement | null>,
   options: UseWindowManagementOptions = {}
 ) {
-  const { changePromptMenuData, fetchSongFromUnknownSource } = options;
+  const { changePromptMenuData, fetchSongFromUnknownSource, importPlaylistFromPath } = options;
 
   /**
    * Manages window blur and focus states by adding/removing CSS classes.
@@ -118,52 +119,43 @@ export function useWindowManagement(
   );
 
   /**
-   * Handles file drop events, validating and processing dropped audio files.
+   * Handles file drop events, validating and processing dropped audio files and playlists.
    *
    * @param e - React drag event containing dropped files
    */
   const onSongDrop = useCallback(
     (e: DragEvent<HTMLDivElement>) => {
-      if (e.dataTransfer.files.length > 0) {
-        const file = e.dataTransfer.files.item(0);
-        if (file) {
-          const filePath = window.api.utils.showFilePath(file);
-          const isASupportedAudioFormat = appPreferences.supportedMusicExtensions.some((type) =>
-            filePath.toLowerCase().endsWith(type.toLowerCase())
-          );
-          const isAM3u8Playlist = filePath.toLowerCase().endsWith('.m3u8');
+      e.preventDefault();
+      e.stopPropagation();
+      const files = Array.from(e.dataTransfer.files);
+      console.log('Dropped files:', files);
 
-          if (isASupportedAudioFormat && !isAM3u8Playlist && fetchSongFromUnknownSource) {
-            fetchSongFromUnknownSource(filePath);
-          } else if (isAM3u8Playlist) {
-            // targetPlaylistId intentionally omitted for drag-drop:
-            // dropped m3u8 files should create a new playlist, not target an existing one.
-            // The filename-based autodetect still works for "Favorites" naming convention
-            // inside processPlaylistImport's existing logic.
-            window.api.playlistsData
-              .importPlaylistFromPath(filePath)
-              .catch((err) => {
-                window.api.log.sendLogs(
-                  err instanceof Error ? err.message : 'Unknown error',
-                  { filePath, error: err },
-                  'ERROR'
-                );
-              })
-              .finally(() => {
-                if (appRef.current) appRef.current.classList.remove('song-drop');
-              })
-              .catch(() => undefined);
-          } else if (changePromptMenuData) {
-            changePromptMenuData(
-              true,
-              <UnsupportedFileMessagePrompt filePath={filePath || file.name} />
-            );
-          }
+      for (const file of files) {
+        const filePath = window.api.utils.showFilePath(file);
+        console.log('Dropped file path:', filePath);
+
+        const ext = filePath.toLowerCase().split('.').pop() || '';
+        const isPlaylistFile = ext === 'm3u8' || ext === 'm3u';
+
+        const isASupportedAudioFormat = appPreferences.supportedMusicExtensions.some((type) =>
+          file?.webkitRelativePath.endsWith(type)
+        );
+
+        if (isPlaylistFile && importPlaylistFromPath) {
+          importPlaylistFromPath(filePath);
+        } else if (isASupportedAudioFormat && fetchSongFromUnknownSource) {
+          fetchSongFromUnknownSource(filePath);
+        } else if (changePromptMenuData) {
+          changePromptMenuData(
+            true,
+            <UnsupportedFileMessagePrompt filePath={filePath || file.name} />
+          );
         }
       }
+
       if (appRef.current) appRef.current.classList.remove('song-drop');
     },
-    [appRef, changePromptMenuData, fetchSongFromUnknownSource]
+    [appRef, changePromptMenuData, fetchSongFromUnknownSource, importPlaylistFromPath]
   );
 
   /**

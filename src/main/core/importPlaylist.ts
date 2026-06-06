@@ -12,11 +12,11 @@ import { dataUpdateEvent, sendMessageToRenderer, showOpenDialog } from '../main'
 import addNewPlaylist from './addNewPlaylist';
 
 const DEFAULT_EXPORT_DIALOG_OPTIONS: OpenDialogOptions = {
-  title: `Select a Destination where your M3U8 file is`,
-  buttonLabel: 'Select M3U8 file',
-  properties: ['openFile'],
+  title: `Select a Destination where your M3U8/M3U file is`,
+  buttonLabel: 'Select M3U8/M3U file',
+  properties: ['openFile', 'multiSelections'],
   filters: [
-    { name: 'M3U8 Files', extensions: ['m3u8'] },
+    { name: 'M3U8/M3U Files', extensions: ['m3u8', 'm3u'] },
     { name: 'All Files', extensions: ['*'] }
   ]
 };
@@ -42,19 +42,20 @@ type ResolvedSongIds = {
   totalExtracted: number;
 };
 
-const validateM3u8File = async (
+const validatePlaylistFile = async (
   filePath: string
 ): Promise<{ fileName: string; textArr: string[] } | null> => {
-  if (path.extname(filePath).toLowerCase() !== '.m3u8') {
+  const ext = path.extname(filePath).toLowerCase();
+  if (ext !== '.m3u8' && ext !== '.m3u') {
     logger.warn(
-      `Failed to import the playlist because user selected a file with a different extension other than 'm3u8'.`,
+      `Failed to import the playlist because user selected a file with a different extension other than 'm3u8' or 'm3u'.`,
       { filePath }
     );
     sendMessageToRenderer({ messageCode: 'PLAYLIST_IMPORT_FAILED_DUE_TO_INVALID_FILE_EXTENSION' });
     return null;
   }
 
-  const fileName = path.basename(filePath).replace(/\.m3u8$/gim, '');
+  const fileName = path.basename(filePath).replace(/\.m3u8?$/gim, '');
   const text = await readFile(filePath, 'utf-8');
   const textArr = text.replaceAll('\r', '').split('\n');
 
@@ -165,7 +166,7 @@ const importToPlaylist = async (songIdNumbers: number[], playlistName: string) =
 
 export const processPlaylistImport = async (filePath: string, targetPlaylistId?: number) => {
   try {
-    const validated = await validateM3u8File(filePath);
+    const validated = await validatePlaylistFile(filePath);
     if (!validated) return;
 
     const { fileName, textArr } = validated;
@@ -199,18 +200,23 @@ export const processPlaylistImport = async (filePath: string, targetPlaylistId?:
 
     return importToPlaylist(availableIds, fileName);
   } catch (error) {
-    logger.error(`Failed to import the playlist.`, { error });
+    logger.error(`Failed to import the playlist from path.`, { error, filePath });
     return sendMessageToRenderer({ messageCode: 'PLAYLIST_IMPORT_FAILED' });
   }
 };
 
-const importPlaylist = async (targetPlaylistId?: number) => {
+const importPlaylist = async (targetPlaylistId?: number, playlistPath?: string) => {
   try {
+    if (playlistPath) {
+      return processPlaylistImport(playlistPath, targetPlaylistId);
+    }
+
     const destinations = await showOpenDialog(DEFAULT_EXPORT_DIALOG_OPTIONS);
 
     if (destinations) {
-      const [filePath] = destinations;
-      await processPlaylistImport(filePath, targetPlaylistId);
+      for (const filePath of destinations) {
+        await processPlaylistImport(filePath, targetPlaylistId);
+      }
     } else {
       logger.warn(`Failed to export a playlist because user didn't select a file.`);
       sendMessageToRenderer({ messageCode: 'DESTINATION_NOT_SELECTED' });

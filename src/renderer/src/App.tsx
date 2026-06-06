@@ -216,11 +216,24 @@ export default function App() {
     [playSongFromUnknownSource, changePromptMenuData]
   );
 
+  const importPlaylistFromPath = useCallback(
+    (playlistPath: string) => {
+      window.api.playlist
+        .importPlaylistFromPath(playlistPath)
+        .catch((err) => {
+          console.error(err);
+          changePromptMenuData(true, <SongUnplayableErrorPrompt err={err} />);
+        });
+    },
+    [changePromptMenuData]
+  );
+
   // ? INITIALIZE WINDOW MANAGEMENT
   // Window management hook handles blur/focus, fullscreen, drag-and-drop, and title bar updates
   const windowManagement = useWindowManagement(AppRef, {
     changePromptMenuData,
-    fetchSongFromUnknownSource
+    fetchSongFromUnknownSource,
+    importPlaylistFromPath
   });
 
   // ? INITIALIZE QUEUE MANAGEMENT
