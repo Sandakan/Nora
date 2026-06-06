@@ -151,7 +151,8 @@ export function useWindowManagement(
               })
               .finally(() => {
                 if (appRef.current) appRef.current.classList.remove('song-drop');
-              });
+              })
+              .catch(() => undefined);
           } else if (changePromptMenuData) {
             changePromptMenuData(
               true,
