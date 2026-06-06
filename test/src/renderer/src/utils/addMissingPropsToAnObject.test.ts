@@ -172,7 +172,7 @@ describe('addMissingPropsToAnObject with sortingStates', () => {
     expect(result.sortingStates).toBeDefined();
     expect(result.sortingStates).toHaveProperty('playlistDetailPage', 'addedOrder');
     expect(Object.keys(result.sortingStates)).toHaveLength(10);
-
+  });
 
   test('should preserve pre-existing top-level keys while filling sortingStates', () => {
     const oldStorage = {
