@@ -91,11 +91,14 @@ const SongCard = (props: SongCardProp) => {
       if (currentSongData) return currentSongData.songId === songId && isCurrentSongPlaying;
       return false;
     });
+  }, [currentSongData?.songId, isCurrentSongPlaying, songId]);
+
+  useEffect(() => {
     setIsSongAFavorite(() => {
       if (currentSongData?.songId === songId) return currentSongData.isAFavorite;
       return isAFavorite;
     });
-  }, [currentSongData?.songId, currentSongData?.isAFavorite, isCurrentSongPlaying, songId, isAFavorite]);
+  }, [currentSongData?.songId, currentSongData?.isAFavorite, songId, isAFavorite]);
 
   const [h, s, l] = useMemo(() => {
     const swatch = palette?.LightVibrant;

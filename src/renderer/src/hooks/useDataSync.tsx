@@ -41,6 +41,15 @@ export function useDataSync(): void {
         // The home page is co-invalidated with the song list because every
         // song-level change (artwork, palette, like, etc.) is also reflected
         // in home-page views.
+        //
+        // Artist/album/playlist/genre events are intentionally NOT in this
+        // list: each of those event types invalidates its own typed cache
+        // (artistQuery, albumQuery, playlistQuery, genreQuery) below, and
+        // song records reference those entities by id, not by embedded
+        // name — so a rename of an artist does not require re-fetching the
+        // songs list to keep `Song.tsx` rows correct. If song records ever
+        // start embedding resolved artist/album names, re-add the four
+        // `artists` / `albums` / `playlists` / `genres` entries here.
         const songAndHomeEvents: DataUpdateEventTypes[] = [
           'songs',
           'songs/newSong',
