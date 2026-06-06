@@ -22,6 +22,12 @@ const FullScreenPlayer = () => {
   const [isLyricsAvailable, setIsLyricsAvailable] = useState(false);
   const [songPos, setSongPos] = useState(0);
 
+  useEffect(() => {
+    if (isShowLyricsWithSongInfo !== undefined) {
+      setIsLyricsVisible(isShowLyricsWithSongInfo);
+    }
+  }, [isShowLyricsWithSongInfo]);
+
   const fullScreenPlayerContainerRef = useRef<HTMLDivElement>(null);
   const { isMouseActive } = useMouseActiveState(fullScreenPlayerContainerRef, {
     idleTimeout: 4000,

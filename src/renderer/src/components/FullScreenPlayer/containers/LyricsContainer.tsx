@@ -133,20 +133,20 @@ const LyricsContainer = (props: Props) => {
       }`}
       id="miniPlayerLyricsContainer"
     >
-      {(isShowLyricsWithSongInfo || isLyricsVisible) && lyricsComponents.length > 0 && lyrics && lyrics.lyrics.isSynced && (
+      {(isShowLyricsWithSongInfo || isLyricsVisible) && lyrics !== null && lyricsComponents.length > 0 && lyrics && lyrics.lyrics.isSynced && (
         <>
           {lyricsComponents}
           {lyricsSource}
         </>
       )}
-      {(isShowLyricsWithSongInfo || isLyricsVisible) && lyrics && !lyrics.lyrics.isSynced && (
+      {(isShowLyricsWithSongInfo || isLyricsVisible) && lyrics !== null && lyrics && !lyrics.lyrics.isSynced && (
         <div className="text-font-color-highlight flex h-full w-full flex-col justify-center text-2xl opacity-50">
           <span className="material-icons-round-outlined mb-2 text-5xl">brightness_alert</span>
           {t('lyricsPage.noSyncedLyrics')}
           <p className="mt-4 text-base">{t('lyricsPage.noSyncedLyricsDescription')}</p>
         </div>
       )}
-      {(isShowLyricsWithSongInfo || isLyricsVisible) && !isPending && !lyrics && (
+      {(isShowLyricsWithSongInfo || isLyricsVisible) && lyrics === undefined && (
         <div className="text-font-color-highlight flex h-full w-full flex-col justify-center text-2xl opacity-50">
           <span className="material-icons-round-outlined mb-2 text-5xl">brightness_alert</span>
           <p>{t('lyricsPage.noLyrics')}</p>
