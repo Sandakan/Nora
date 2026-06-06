@@ -365,6 +365,20 @@ class AudioPlayer {
 
   private completeCrossfade() {
     if (!this.isCrossfading) return;
+
+    const nextSongId = this.preloadedSongId;
+    const nextSongData = this.preloadedSongData;
+    if (nextSongId === null || nextSongData === null) {
+      this.abortCrossfade();
+      return;
+    }
+
+    const idx = this.queue.songIds.indexOf(nextSongId);
+    if (idx < 0) {
+      this.abortCrossfade();
+      return;
+    }
+
     const wasPrimary = this.activeElement === 'primary';
     const oldActive = wasPrimary ? this.audio : this.secondaryAudio;
 
@@ -376,26 +390,15 @@ class AudioPlayer {
 
     oldActive.pause();
 
-    let completedSongData: AudioPlayerData | null = null;
-    if (this.preloadedSongId && this.preloadedSongData) {
-      const nextSongId = this.preloadedSongId;
-      const nextSongData = this.preloadedSongData;
-      const idx = this.queue.songIds.indexOf(nextSongId);
-      if (idx >= 0) {
-        completedSongData = nextSongData;
-        dispatch({ type: 'CURRENT_SONG_DATA_CHANGE', data: nextSongData });
-        storage.playback.setCurrentSongOptions('songId', nextSongId);
-        this.suppressNextPositionLoad = true;
-        this.queue.moveToPosition(idx);
-      } else {
-        this.abortCrossfade();
-      }
-    }
+    dispatch({ type: 'CURRENT_SONG_DATA_CHANGE', data: nextSongData });
+    storage.playback.setCurrentSongOptions('songId', nextSongId);
+    this.suppressNextPositionLoad = true;
+    this.queue.moveToPosition(idx);
 
     this.preloadedSongId = null;
     this.preloadedSongData = null;
 
-    this.emit('songLoaded', completedSongData ?? store.state.currentSongData);
+    this.emit('songLoaded', nextSongData);
 
     if (this.queue.hasNext) {
       this.preloadNextSong().catch(() => {});
