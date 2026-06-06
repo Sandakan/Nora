@@ -40,7 +40,7 @@ const DisplayModePlayer = () => {
     const selectedArtist = currentSongData?.artists?.find(
       (artist) => !!artist.onlineArtworkPaths?.picture_xl
     );
-    return selectedArtist?.onlineArtworkPaths?.picture_xl ?? currentSongData.artworkPath;
+    return selectedArtist?.onlineArtworkPaths?.picture_xl ?? currentSongData?.artworkPath;
   }, [currentSongData?.artists, currentSongData?.artworkPath]);
 
   const showSongTitle = preferences?.showSongTitleInDisplayMode ?? true;
@@ -51,7 +51,7 @@ const DisplayModePlayer = () => {
     <div
       className={`display-mode-player dark bg-dark-background-color-1! relative grid h-screen w-full grid-rows-[1fr_auto] overflow-y-hidden ${
         !isCurrentSongPlaying && 'paused'
-      } ${preferences?.isReducedMotion ? 'reduced-motion' : ''}`}
+      } ${preferences?.isReducedMotion ? 'reduced-motion' : ''} ${!isMouseActive ? 'cursor-none' : ''}`}
       ref={containerRef}
     >
       <div className="background-cover-img-container absolute inset-0">
@@ -64,11 +64,7 @@ const DisplayModePlayer = () => {
         />
       </div>
 
-      <div
-        className={`z-10 flex flex-col items-center justify-center gap-8 transition-opacity duration-500 ${
-          isMouseActive ? 'opacity-100' : 'opacity-0'
-        }`}
-      >
+      <div className="z-10 flex flex-col items-center justify-center gap-8">
         <div className="flex h-[50vh] max-h-[70vh] w-[50vh] max-w-[70vw] items-center justify-center">
           <Img
             src={currentSongData.artworkPath}
@@ -133,7 +129,7 @@ const DisplayModePlayer = () => {
         id="displayModeSeekSlider"
         sliderOpacity={0.25}
         className={`absolute bottom-0 z-10 h-fit w-full bg-background-color-3/25 before:bg-background-color-3 outline-offset-1 before:absolute before:top-1/2 before:left-0 before:h-1 before:w-[var(--seek-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:content-[''] focus-visible:outline! ${
-          isMouseActive ? 'opacity-100' : 'opacity-0'
+          isMouseActive ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
       />
 
