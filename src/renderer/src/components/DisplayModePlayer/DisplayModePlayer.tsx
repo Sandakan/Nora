@@ -67,7 +67,7 @@ const DisplayModePlayer = () => {
       <div className="z-10 flex flex-col items-center justify-center gap-8">
         <div className="flex h-[50vh] max-h-[70vh] w-[50vh] max-w-[70vw] items-center justify-center">
           <Img
-            src={currentSongData.artworkPath}
+            src={currentSongData?.artworkPath}
             fallbackSrc={DefaultSongCover}
             loading="eager"
             alt="Song Cover"
@@ -75,7 +75,7 @@ const DisplayModePlayer = () => {
           />
         </div>
 
-        {showSongTitle && currentSongData.title && (
+        {showSongTitle && currentSongData?.title && (
           <div
             className="text-font-color-highlight max-w-[80vw] overflow-hidden text-center text-7xl font-bold text-ellipsis whitespace-nowrap"
             title={currentSongData.title}
@@ -84,7 +84,7 @@ const DisplayModePlayer = () => {
           </div>
         )}
 
-        {showArtistName && currentSongData.artists && currentSongData.artists.length > 0 && (
+        {showArtistName && currentSongData?.artists && currentSongData.artists.length > 0 && (
           <div className="text-font-color-white/80 max-w-[80vw] overflow-hidden text-center text-3xl text-ellipsis whitespace-nowrap">
             {currentSongData.artists.map((artist) => artist.name).join(', ')}
           </div>
