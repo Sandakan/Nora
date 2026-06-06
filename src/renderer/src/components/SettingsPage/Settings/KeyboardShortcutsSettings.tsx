@@ -15,12 +15,13 @@ const KeyboardShortcutsSettings = () => {
   const [newShortcut, setNewShortcut] = useState<Shortcut | null>(null);
   const [newKeys, setNewKeys] = useState<string[]>([]);
   const [editingShortcut, setEditingShortcut] = useState<string | null>(null);
+  const [hasDuplicate, setHasDuplicate] = useState(false);
   const { changePromptMenuData, addNewNotifications } = useContext(AppUpdateContext);
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!editingShortcut) return;
+    if (!editingShortcut) return;
 
+    const handleKeyDown = (e: KeyboardEvent) => {
       e.preventDefault();
       e.stopPropagation();
 
@@ -36,12 +37,16 @@ const KeyboardShortcutsSettings = () => {
       }
 
       setNewKeys(keys);
-      setNewShortcut({ id: editingShortcut, label: editingShortcut, keys });
+
+      const original = shortcuts
+        .flatMap((category) => category.shortcuts)
+        .find((shortcut) => shortcut.id === editingShortcut);
+      setNewShortcut({ id: editingShortcut, label: original?.label ?? editingShortcut, keys });
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [editingShortcut]);
+  }, [editingShortcut, shortcuts]);
 
   useEffect(() => {
     if (!editingShortcut) return;
@@ -51,18 +56,19 @@ const KeyboardShortcutsSettings = () => {
       const clickedOutside = Array.from(shortcutElements).every((el) => !el.contains(e.target as Node));
 
       const sortKeys = (k: string[]) => [...k].sort();
-      const duplicate = shortcuts.some((category) =>
-        category.shortcuts.some(
-          (shortcut) =>
-            shortcut.id !== editingShortcut &&
-            JSON.stringify(sortKeys(shortcut.keys)) === JSON.stringify(sortKeys(newKeys))
-        )
-      );
+      const duplicate =
+        newKeys.length > 0 &&
+        shortcuts.some((category) =>
+          category.shortcuts.some(
+            (shortcut) =>
+              shortcut.id !== editingShortcut &&
+              JSON.stringify(sortKeys(shortcut.keys)) === JSON.stringify(sortKeys(newKeys))
+          )
+        );
 
-      const editingElement = document.querySelector('.shortcut.editing') as HTMLElement | null;
+      setHasDuplicate(duplicate);
 
       if (duplicate && newKeys.length > 0) {
-        editingElement?.classList.add('bg-font-color-crimson', 'dark:bg-font-color-crimson');
         addNewNotifications([
           {
             id: 'duplicateShortcut',
@@ -70,8 +76,6 @@ const KeyboardShortcutsSettings = () => {
           }
         ]);
         return;
-      } else {
-        editingElement?.classList.remove('bg-font-color-crimson', 'dark:bg-font-color-crimson');
       }
 
       if (clickedOutside) {
@@ -80,6 +84,7 @@ const KeyboardShortcutsSettings = () => {
           setShortcuts(storage.keyboardShortcuts.getKeyboardShortcuts());
         }
         setEditingShortcut(null);
+        setHasDuplicate(false);
       }
     };
 
@@ -103,7 +108,9 @@ const KeyboardShortcutsSettings = () => {
                   key={shortcutIndex}
                   className={`shortcut mb-2 flex w-full items-center justify-between rounded-md p-2 sm:w-[48%] ${
                     isEditing
-                      ? 'editing bg-dark-background-color-3/75 dark:bg-dark-background-color-3/15'
+                      ? `editing bg-dark-background-color-3/75 dark:bg-dark-background-color-3/15${
+                          hasDuplicate ? ' bg-font-color-crimson dark:bg-font-color-crimson' : ''
+                        }`
                       : ''
                   }`}
                 >
