@@ -5,7 +5,7 @@ import { db } from '@main/db/db';
 import { linkArtworksToSong } from '@main/db/queries/artworks';
 import { isSongWithPathAvailable, saveSong } from '@main/db/queries/songs';
 import type { songs } from '@main/db/schema';
-import { File } from 'node-taglib-sharp';
+import { withTagFile } from '../utils/createTagFile';
 
 import logger from '../logger';
 import { dataUpdateEvent, sendMessageToRenderer } from '../main';
@@ -119,8 +119,20 @@ export const parseSong = async (
     //  logger.debug('song stream not readable', undefined, 'ERROR');
 
     const stats = await fs.stat(absoluteFilePath);
-    const file = File.createFromPath(absoluteFilePath);
-    const metadata = file.tag;
+
+    let metadata: ReturnType<typeof File.prototype.tag>;
+    let durationMs: number;
+    let sampleRate: number | undefined;
+    let bitRate: number | undefined;
+    let channels: number | undefined;
+
+    await withTagFile(absoluteFilePath, (file) => {
+      metadata = file.tag;
+      durationMs = file.properties.durationMilliseconds;
+      sampleRate = file.properties.audioSampleRate;
+      bitRate = file.properties.audioBitrate;
+      channels = file.properties.audioChannels;
+    });
 
     // songFileStream.close();
 
@@ -161,12 +173,12 @@ export const parseSong = async (
 
       const songInfo: typeof songs.$inferInsert = {
         title: songTitle,
-        duration: getSongDurationFromSong(file.properties.durationMilliseconds / 1000).toFixed(2),
+        duration: getSongDurationFromSong(durationMs / 1000).toFixed(2),
         year: metadata.year || undefined,
         path: absoluteFilePath,
-        sampleRate: file.properties.audioSampleRate,
-        bitRate: file.properties.audioBitrate ? Math.ceil(file.properties.audioBitrate) : undefined,
-        noOfChannels: file.properties.audioChannels,
+        sampleRate,
+        bitRate: bitRate ? Math.ceil(bitRate) : undefined,
+        noOfChannels: channels,
         diskNumber: metadata.disc ?? undefined,
         trackNumber: metadata.track ?? undefined,
         fileCreatedAt: stats ? stats.birthtime : new Date(),

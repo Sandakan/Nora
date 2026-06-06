@@ -1,5 +1,7 @@
 import { createQueryKeys } from '@lukemorales/query-key-factory';
 
+import log from '../utils/log';
+
 export const lyricsQuery = createQueryKeys('lyrics', {
   single: (data: {
     title: string;
@@ -109,7 +111,7 @@ export const lyricsQuery = createQueryKeys('lyrics', {
 
           return current;
         } catch (error) {
-          console.error('Failed to fetch full-screen-player lyrics:', error);
+          log('Failed to fetch full-screen-player lyrics:', { error }, 'ERROR');
           return null;
         }
       }
