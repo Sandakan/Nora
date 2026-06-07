@@ -26,6 +26,14 @@ const StartupSettings = () => {
     }
   });
 
+  const { mutate: updateTraySingleClickBehavior } = useMutation({
+    mutationFn: (enable: boolean) =>
+      window.api.settings.updateTraySingleClickBehavior(enable),
+    onSettled: () => {
+      queryClient.invalidateQueries(settingsQuery.all);
+    }
+  });
+
   return (
     <li className="main-container startup-settings-container mb-16" id="startup-settings-container">
       <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center text-2xl font-medium">
@@ -72,6 +80,15 @@ const StartupSettings = () => {
             isChecked={userSettings ? userSettings.hideWindowOnClose : false}
             checkedStateUpdateFunction={(state) => updateHideWindowOnCloseState(state)}
             labelContent={t('settingsPage.hideWindowOnClose')}
+          />
+        </li>
+        <li className="tray-click-behavior-checkbox-container mt-4">
+          <div className="description">{t('settingsPage.trayClickBehaviorDescription')}</div>
+          <Checkbox
+            id="trayClickBehavior"
+            isChecked={userSettings ? userSettings.traySingleClickTogglesWindow : false}
+            checkedStateUpdateFunction={(state) => updateTraySingleClickBehavior(state)}
+            labelContent={t('settingsPage.traySingleClickTogglesWindow')}
           />
         </li>
       </ul>

@@ -90,6 +90,7 @@ const DEFAULT_SAVE_DIALOG_OPTIONS: SaveDialogOptions = {
 // / / / / / / VARIABLES / / / / / / /
 export let mainWindow: BrowserWindow;
 let tray: Tray;
+let trayContextMenu: Electron.Menu;
 let playerType: PlayerTypes = 'normal';
 // let isConnectedToInternet = false;
 let isAudioPlaying = false;
@@ -279,7 +280,7 @@ protocol.registerSchemesAsPrivileged([
 app
   .whenReady()
   .then(async () => {
-    const { windowState, zoomFactor } = await getUserSettings();
+    const { windowState, zoomFactor, traySingleClickTogglesWindow = false } = await getUserSettings();
 
     currentWindowZoomFactor = normalizeZoomFactor(zoomFactor);
 
@@ -301,7 +302,7 @@ app
     protocol.handle('nora', handleFileProtocol);
 
     tray = new Tray(appIcon);
-    const trayContextMenu = Menu.buildFromTemplate([
+    trayContextMenu = Menu.buildFromTemplate([
       {
         label: 'Show/Hide Nora',
         type: 'normal',
@@ -315,13 +316,18 @@ app
     tray.setContextMenu(trayContextMenu);
     tray.setToolTip('Nora');
 
-    tray.addListener('click', () => tray.popUpContextMenu(trayContextMenu));
-    tray.addListener('double-click', () => {
-      if (mainWindow.isVisible()) mainWindow.hide();
-      else mainWindow.show();
-    });
-
-    // powerMonitor.addListener('shutdown', (e) => e.preventDefault());
+    if (traySingleClickTogglesWindow) {
+      tray.addListener('click', () => {
+        if (mainWindow.isVisible()) mainWindow.hide();
+        else mainWindow.show();
+      });
+    } else {
+      tray.addListener('click', () => tray.popUpContextMenu(trayContextMenu));
+      tray.addListener('double-click', () => {
+        if (mainWindow.isVisible()) mainWindow.hide();
+        else mainWindow.show();
+      });
+    }
 
     mainWindow.webContents.once('did-finish-load', manageWindowFinishLoad);
 
@@ -728,6 +734,26 @@ export async function resetApp(isRestartApp = true) {
     restartApp('App reset.');
     // else mainWindow.webContents.reload();
   }
+}
+
+export function updateTraySingleClickBehavior(traySingleClickTogglesWindow: boolean) {
+  tray.removeAllListeners('click');
+  tray.removeAllListeners('double-click');
+
+  if (traySingleClickTogglesWindow) {
+    tray.addListener('click', () => {
+      if (mainWindow.isVisible()) mainWindow.hide();
+      else mainWindow.show();
+    });
+  } else {
+    tray.addListener('click', () => tray.popUpContextMenu(trayContextMenu));
+    tray.addListener('double-click', () => {
+      if (mainWindow.isVisible()) mainWindow.hide();
+      else mainWindow.show();
+    });
+  }
+
+  saveUserSettings({ traySingleClickTogglesWindow });
 }
 
 export function toggleMiniPlayerAlwaysOnTop(isMiniPlayerAlwaysOnTop: boolean) {

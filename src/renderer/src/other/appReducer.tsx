@@ -397,7 +397,8 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
     enableImageBasedDynamicThemes: false,
     doNotShowHelpPageOnLyricsEditorStartUp: false,
     autoTranslateLyrics: false,
-    autoConvertLyrics: false
+    autoConvertLyrics: false,
+    showLyricsWithSongInfo: false
   },
   playback: {
     currentSong: {
@@ -605,6 +606,7 @@ export const USER_DATA_TEMPLATE: UserData = {
   isMiniPlayerAlwaysOnTop: false,
   isMusixmatchLyricsEnabled: false,
   hideWindowOnClose: false,
+  traySingleClickTogglesWindow: false,
   openWindowAsHiddenOnSystemStart: false,
   openWindowMaximizedOnStart: false,
   sendSongScrobblingDataToLastFM: false,

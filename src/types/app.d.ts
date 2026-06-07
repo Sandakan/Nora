@@ -60,6 +60,7 @@ declare global {
     | 'app/dataUpdateEvent'
     | 'app/toggleMiniPlayer'
     | 'app/toggleAutoLaunch'
+    | 'app/updateTraySingleClickBehavior'
     | 'app/getFolderData'
     | 'app/restartRenderer'
     | 'app/restartApp'
@@ -419,6 +420,7 @@ declare global {
     isMiniPlayerAlwaysOnTop: boolean;
     isMusixmatchLyricsEnabled: boolean;
     hideWindowOnClose: boolean;
+    traySingleClickTogglesWindow: boolean;
     sendSongScrobblingDataToLastFM: boolean;
     sendSongFavoritesDataToLastFM: boolean;
     sendNowPlayingSongDataToLastFM: boolean;
@@ -511,6 +513,7 @@ declare global {
     enableImageBasedDynamicThemes: boolean;
     autoTranslateLyrics: boolean;
     autoConvertLyrics: boolean;
+    showLyricsWithSongInfo: boolean;
   }
 
   interface CurrentSong {

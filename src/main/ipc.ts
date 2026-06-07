@@ -87,7 +87,8 @@ import {
   toggleAudioPlayingState,
   toggleAutoLaunch,
   toggleMiniPlayerAlwaysOnTop,
-  toggleOnBatteryPower
+  toggleOnBatteryPower,
+  updateTraySingleClickBehavior
 } from './main';
 import { setDiscordRpcActivity } from './other/discordRPC';
 import { generatePalettes } from './other/generatePalette';
@@ -206,6 +207,10 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     // );
     ipcMain.handle('app/saveUserSettings', (_, settings: Partial<UserSettings>) =>
       saveUserSettings(settings)
+    );
+
+    ipcMain.handle('app/updateTraySingleClickBehavior', (_, enable: boolean) =>
+      updateTraySingleClickBehavior(enable)
     );
 
     // User Keyboard Shortcuts Handlers
