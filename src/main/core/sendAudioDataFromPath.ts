@@ -1,6 +1,7 @@
 import path from 'path';
 
 import { getSongIdFromSongPath } from '@main/db/queries/songs';
+import { withTagFile } from '../utils/createTagFile';
 
 import { appPreferences } from '../../../package.json';
 import songCoverImage from '../../renderer/src/assets/images/webp/song_cover_default.webp?asset';
@@ -8,7 +9,6 @@ import { DEFAULT_FILE_URL } from '../filesystem';
 import logger from '../logger';
 import { sendMessageToRenderer, addToSongsOutsideLibraryData } from '../main';
 import { createTempArtwork } from '../other/artworks';
-import { createTagFile } from '../utils/createTagFile';
 import sendAudioData, { parseArtworkDataForAudioPlayerData } from './sendAudioData';
 
 const toNoraLocalFileUrl = (filePath: string) => {
@@ -36,51 +36,52 @@ const sendAudioDataFromPath = async (songPath: string): Promise<AudioPlayerData>
         throw new Error('Audio data generation failed.');
       }
 
-      const file = createTagFile(songPath);
-      const metadata = file.tag;
-      if (metadata) {
-        const artworkData = metadata.pictures?.at(0)?.data?.toByteArray();
+      await withTagFile(songPath, async (file) => {
+        const metadata = file.tag;
+        if (metadata) {
+          const artworkData = metadata.pictures?.at(0)?.data?.toByteArray();
 
-        const tempArtworkPath = path.join(
-          DEFAULT_FILE_URL,
-          metadata.pictures
-            ? ((await createTempArtwork(metadata.pictures[0].data.toByteArray()).catch((error) => {
-                logger.error(`Failed to create song artwork from an unknown source.`, {
-                  error,
-                  songPath
-                });
-                return songCoverImage;
-              })) ?? songCoverImage)
-            : songCoverImage
-        );
+          const tempArtworkPath = path.join(
+            DEFAULT_FILE_URL,
+            metadata.pictures
+              ? ((await createTempArtwork(metadata.pictures[0].data.toByteArray()).catch((error) => {
+                  logger.error(`Failed to create song artwork from an unknown source.`, {
+                    error,
+                    songPath
+                  });
+                  return songCoverImage;
+                })) ?? songCoverImage)
+              : songCoverImage
+          );
 
-        const title = metadata.title || path.basename(songPath).split('.')[0] || 'Unknown Title';
+          const title = metadata.title || path.basename(songPath).split('.')[0] || 'Unknown Title';
 
-        const data: AudioPlayerData = {
-          title,
-          artists: metadata.performers?.map((artistName) => ({
-            artistId: 0,
-            name: artistName
-          })),
-          duration: (file.properties.durationMilliseconds ?? 0) / 1000,
-          artwork: parseArtworkDataForAudioPlayerData(artworkData),
-          artworkPath: tempArtworkPath,
-          path: toNoraLocalFileUrl(songPath),
-          songId: Math.floor(Math.random() * 1000000),
-          isAFavorite: false,
-          isKnownSource: false,
-          isBlacklisted: false
-        };
+          const data: AudioPlayerData = {
+            title,
+            artists: metadata.performers?.map((artistName) => ({
+              artistId: 0,
+              name: artistName
+            })),
+            duration: (file.properties.durationMilliseconds ?? 0) / 1000,
+            artwork: parseArtworkDataForAudioPlayerData(artworkData),
+            artworkPath: tempArtworkPath,
+            path: toNoraLocalFileUrl(songPath),
+            songId: Math.floor(Math.random() * 1000000),
+            isAFavorite: false,
+            isKnownSource: false,
+            isBlacklisted: false
+          };
 
-        addToSongsOutsideLibraryData(data);
+          addToSongsOutsideLibraryData(data);
 
-        sendMessageToRenderer({
-          messageCode: 'PLAYBACK_FROM_UNKNOWN_SOURCE'
-        });
-        return data;
-      }
-      logger.error(`No matching song for songId -${songPath}-`);
-      throw new Error('SONG_NOT_FOUND' as ErrorCodes);
+          sendMessageToRenderer({
+            messageCode: 'PLAYBACK_FROM_UNKNOWN_SOURCE'
+          });
+          return data;
+        }
+        logger.error(`No matching song for songId -${songPath}-`);
+        throw new Error('SONG_NOT_FOUND' as ErrorCodes);
+      });
     } catch (error) {
       logger.debug(`Failed to send songs data from an unparsed source.`, { error });
       throw new Error('SONG_DATA_SEND_FAILED' as ErrorCodes);

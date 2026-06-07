@@ -46,15 +46,15 @@
 		"url": "https://github.com/Sandakan/Nora"
 	},
 	"appPreferences": {
-		"metadataEditingSupportedExtensions": [
-			"mp3",
-			"flac",
-			"ogg",
-			"opus",
-			"m4a",
-			"m4r",
-			"aac"
-		],
+"metadataEditingSupportedExtensions": [
+      "mp3",
+      "flac",
+      "ogg",
+      "opus",
+      "m4a",
+      "m4r",
+      "aac"
+    ],
 		"removeReactStrictMode": false,
 		"showSongIdInsteadOfSongYear": false,
 		"supportedMusicExtensions": [
