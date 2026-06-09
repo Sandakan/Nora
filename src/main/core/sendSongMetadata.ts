@@ -1,6 +1,7 @@
 import path from 'path';
 
 import { getSongByIdForSongMetadata } from '@main/db/queries/songs';
+import { File } from 'node-taglib-sharp';
 import { withTagFile } from '../utils/createTagFile';
 
 import { appPreferences } from '../../../package.json';

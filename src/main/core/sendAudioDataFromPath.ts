@@ -36,7 +36,7 @@ const sendAudioDataFromPath = async (songPath: string): Promise<AudioPlayerData>
         throw new Error('Audio data generation failed.');
       }
 
-      await withTagFile(songPath, async (file) => {
+      return await withTagFile(songPath, async (file) => {
         const metadata = file.tag;
         if (metadata) {
           const artworkData = metadata.pictures?.at(0)?.data?.toByteArray();

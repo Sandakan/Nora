@@ -6,7 +6,7 @@ import { linkArtworksToSong } from '@main/db/queries/artworks';
 import { getSongByPath, updateSongByPath } from '@main/db/queries/songs';
 import type { songs } from '@main/db/schema';
 import { convertToSongData } from '@main/utils/convert';
-import { File } from 'node-taglib-sharp';
+import { createTagFile } from ../utils/createTagFile;
 
 import { removeDefaultAppProtocolFromFilePath } from '../fs/resolveFilePaths';
 import logger from '../logger';
@@ -39,7 +39,7 @@ const reParseSong = async (filePath: string) => {
       const { songId, isArtworkAvailable, artworkPaths: oldArtworkPaths } = song;
       const stats = await fs.stat(songPath);
 
-      const file = File.createFromPath(songPath);
+      const file = createTagFile(songPath);
       let metadata: typeof file.tag;
       let durationMs: number;
       let sampleRate: number | undefined;
