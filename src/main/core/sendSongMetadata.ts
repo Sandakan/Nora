@@ -58,11 +58,7 @@ const sendSongMetadata = async (
       if (!isASupporedFormat)
         throw new Error(`No support for editing song metadata in '${pathExt}' format.`);
 
-      let songMetadata: ReturnType<typeof File.prototype.tag>;
-
-      await withTagFile(song.path, (file) => {
-        songMetadata = file.tag;
-      });
+      const songMetadata: ReturnType<typeof File.prototype.tag> | undefined = await withTagFile(song.path, (file) => file.tag);
 
       const songAlbums: SongTags['albums'] =
         song.albums.length > 0
@@ -168,11 +164,7 @@ const sendSongMetadata = async (
       const songsOutsideLibraryData = getSongsOutsideLibraryData();
       for (const songOutsideLibraryData of songsOutsideLibraryData) {
         if (songOutsideLibraryData.path === songPathWithDefaultUrl) {
-          let songMetadata: ReturnType<typeof File.prototype.tag>;
-
-          await withTagFile(songPath, (file) => {
-            songMetadata = file.tag;
-          });
+          const songMetadata: ReturnType<typeof File.prototype.tag> | undefined = await withTagFile(songPath, (file) => file.tag);
 
           const res: SongTags = {
             title: songMetadata?.title || '',

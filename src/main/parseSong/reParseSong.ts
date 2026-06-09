@@ -6,7 +6,7 @@ import { linkArtworksToSong } from '@main/db/queries/artworks';
 import { getSongByPath, updateSongByPath } from '@main/db/queries/songs';
 import type { songs } from '@main/db/schema';
 import { convertToSongData } from '@main/utils/convert';
-import { createTagFile } from ../utils/createTagFile;
+import { createTagFile } from '../utils/createTagFile';
 
 import { removeDefaultAppProtocolFromFilePath } from '../fs/resolveFilePaths';
 import logger from '../logger';
