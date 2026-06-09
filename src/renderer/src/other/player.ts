@@ -344,6 +344,7 @@ class AudioPlayer {
 
     // Update UI immediately — Spotify-style: user sees new song as soon as they skip
     dispatch({ type: 'CURRENT_SONG_DATA_CHANGE', data: this.preloadedSongData });
+    dispatch({ type: 'CURRENT_SONG_PLAYBACK_STATE', data: true });
     storage.playback.setCurrentSongOptions('songId', this.preloadedSongId);
 
     const now = this.currentContext.currentTime;
@@ -393,7 +394,7 @@ class AudioPlayer {
     this.fadeGainSecondary.gain.value = this.activeElement === 'primary' ? 0 : 1;
 
     oldActive.pause();
-    this.emit('play'); // Re-announce play state after element swap
+    dispatch({ type: 'CURRENT_SONG_PLAYBACK_STATE', data: true });
 
     this.suppressNextPositionLoad = true;
     this.queue.moveToPosition(idx);
