@@ -81,16 +81,20 @@ class AudioPlayer {
     // React to queue position changes - load the new song
     this.queue.on('positionChange', () => {
       const songId = this.queue.currentSongId;
+      const willAutoPlay = this.pendingAutoPlay;
       console.log('[AudioPlayer.positionChange]', {
         position: this.queue.position,
         songId,
         willLoad: !!songId,
-        pendingAutoPlay: this.pendingAutoPlay
+        pendingAutoPlay: willAutoPlay
       });
       if (songId) {
-        this.loadSong(songId, { autoPlay: this.pendingAutoPlay }).catch((err) => {
+        this.loadSong(songId, { autoPlay: willAutoPlay }).catch((err) => {
           console.error('[AudioPlayer.positionChange] Failed to load song:', err);
-          // Error will be handled by error event listener
+          if (this.queue.hasNext) {
+            this.pendingAutoPlay = willAutoPlay;
+            setTimeout(() => this.queue.moveToNext(), 0);
+          }
         });
         this.pendingAutoPlay = false; // Reset after use
       }
@@ -185,15 +189,15 @@ class AudioPlayer {
   ): Promise<AudioPlayerData> {
     let songData: AudioPlayerData;
 
-    if (typeof songIdOrData === 'number') {
-      // Fetch song data if ID provided
-      songData = await window.api.audioLibraryControls.getSong(songIdOrData);
-    } else {
-      // Use provided song data
-      songData = songIdOrData;
-    }
-
     try {
+      if (typeof songIdOrData === 'number') {
+        // Fetch song data if ID provided (may throw if file not found)
+        songData = await window.api.audioLibraryControls.getSong(songIdOrData);
+      } else {
+        // Use provided song data
+        songData = songIdOrData;
+      }
+
       console.log('[AudioPlayer.loadSong]', {
         songId: songData.songId,
         options
@@ -249,11 +253,12 @@ class AudioPlayer {
 
       return songData;
     } catch (error) {
+      const failedSongId = songData?.songId;
       console.error(
-        `Failed to load song (ID: ${songData.songId}):`,
+        `Failed to load song (ID: ${failedSongId}):`,
         error instanceof Error ? error.message : error
       );
-      this.emit('loadError', { songId: songData.songId, error });
+      this.emit('loadError', { songId: failedSongId ?? 0, error });
       throw error; // Re-throw for caller to handle
     }
   }

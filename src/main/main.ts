@@ -20,8 +20,7 @@ import {
   screen,
   session as electronSession,
   type OpenDialogOptions,
-  type SaveDialogOptions,
-  type Display
+  type SaveDialogOptions
 } from 'electron';
 import { installExtension, REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 
@@ -280,7 +279,11 @@ protocol.registerSchemesAsPrivileged([
 app
   .whenReady()
   .then(async () => {
-    const { windowState, zoomFactor, traySingleClickTogglesWindow = false } = await getUserSettings();
+    const {
+      windowState,
+      zoomFactor,
+      traySingleClickTogglesWindow = false
+    } = await getUserSettings();
 
     currentWindowZoomFactor = normalizeZoomFactor(zoomFactor);
 
@@ -846,6 +849,7 @@ export async function changePlayerType(type: PlayerTypes) {
         const [x, y] = mainWindow.getPosition();
         await saveUserSettings({ miniPlayerX: x, miniPlayerY: y });
       }
+      manageWindowOnDisplayMetricsChange();
       mainWindow.setAspectRatio(MINI_PLAYER_ASPECT_RATIO);
     } else if (type === 'normal') {
       mainWindow.setMaximumSize(MAIN_WINDOW_MAX_SIZE_X, MAIN_WINDOW_MAX_SIZE_Y);
@@ -864,6 +868,7 @@ export async function changePlayerType(type: PlayerTypes) {
         const [x, y] = mainWindow.getPosition();
         await saveUserSettings({ mainWindowX: x, mainWindowY: y });
       }
+      manageWindowOnDisplayMetricsChange();
       mainWindow.setAspectRatio(MAIN_WINDOW_ASPECT_RATIO);
     } else {
       mainWindow.setMaximumSize(MAIN_WINDOW_MAX_SIZE_X, MAIN_WINDOW_MAX_SIZE_Y);
@@ -873,20 +878,62 @@ export async function changePlayerType(type: PlayerTypes) {
   }
 }
 
-function manageWindowOnDisplayMetricsChange(primaryDisplay: Display) {
-  const currentDisplay = screen.getDisplayMatching(mainWindow.getBounds());
+function manageWindowOnDisplayMetricsChange() {
+  const bounds = mainWindow.getBounds();
+  const displays = screen.getAllDisplays();
+  // Use rectangle overlap so a partially visible window counts as on-screen
+  // (otherwise a window straddling a display edge gets teleported to the primary).
+  const isOnAnyDisplay = displays.some((display) => {
+    const { x, y, width, height } = display.workArea;
+    return (
+      bounds.x < x + width &&
+      bounds.x + bounds.width > x &&
+      bounds.y < y + height &&
+      bounds.y + bounds.height > y
+    );
+  });
 
-  if (!currentDisplay || currentDisplay.id !== primaryDisplay.id) {
-    mainWindow.setPosition(primaryDisplay.workArea.x, primaryDisplay.workArea.y);
+  if (!isOnAnyDisplay) {
+    const primaryDisplay = screen.getPrimaryDisplay();
+    const newX = primaryDisplay.workArea.x;
+    const newY = primaryDisplay.workArea.y;
+
+    const reposition = () => {
+      mainWindow.setPosition(newX, newY);
+
+      // Persist the corrected coordinates so stale values don't cause a
+      // repeat correction on the next launch (CodeRabbit minor finding).
+      if (playerType === 'mini') {
+        saveUserSettings({ miniPlayerX: newX, miniPlayerY: newY });
+      } else {
+        saveUserSettings({ mainWindowX: newX, mainWindowY: newY });
+      }
+
+      logger.debug('Window was off-screen; moved to primary display', {
+        previousPosition: { x: bounds.x, y: bounds.y },
+        newPosition: { x: newX, y: newY }
+      });
+    };
+
+    if (mainWindow.fullScreen) {
+      // On macOS the fullscreen-exit animation takes ~500 ms; calling
+      // setPosition during the animation is a no-op.  Defer repositioning
+      // until the animation completes (CodeRabbit major finding).
+      mainWindow.setFullScreen(false);
+      mainWindow.once('leave-full-screen', reposition);
+    } else {
+      reposition();
+    }
   }
 }
 
 function manageWindowPositionInMonitor() {
-  const primaryDisplay = screen.getPrimaryDisplay();
-  manageWindowOnDisplayMetricsChange(primaryDisplay);
+  manageWindowOnDisplayMetricsChange();
 
-  // Event listener for display change events
-  screen.on('display-metrics-changed', () => manageWindowOnDisplayMetricsChange(primaryDisplay));
+  screen.on('display-metrics-changed', () => manageWindowOnDisplayMetricsChange());
+  // `display-metrics-changed` is only fired for resolution / scale changes on
+  // existing displays; a hot-unplugged monitor fires `display-removed` instead.
+  screen.on('display-removed', () => manageWindowOnDisplayMetricsChange());
 }
 
 export async function toggleAutoLaunch(autoLaunchState: boolean) {

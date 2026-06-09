@@ -5,30 +5,12 @@ import log from '../utils/log';
 
 const ErrorPrompt = lazy(() => import('../components/ErrorPrompt'));
 
-/**
- * Hook for managing playback errors and retry logic.
- *
- * This hook handles audio player errors, tracks repetitive error counts, and provides error
- * recovery mechanisms. It displays error prompts when errors exceed threshold limits.
- *
- * @example
- *   ```tsx
- *   const { managePlaybackErrors, resetErrorCount } = usePlaybackErrors(
- *     player,
- *     changePromptMenuData
- *   );
- *
- *   // Use in error handler
- *   player.addEventListener('error', (err) => managePlaybackErrors(err));
- *   ```;
- *
- * @param player - The HTMLAudioElement instance
- * @param changePromptMenuData - Function to show error prompts to user
- * @returns Object containing error management functions
- */
+const MEDIA_ERR_SRC_NOT_SUPPORTED = 4;
+
 export function usePlaybackErrors(
   player: HTMLAudioElement,
-  changePromptMenuData: (isVisible?: boolean, prompt?: React.ReactNode | null) => void
+  changePromptMenuData: (isVisible?: boolean, prompt?: React.ReactNode | null) => void,
+  skipSongRef?: React.MutableRefObject<(() => void) | undefined>
 ) {
   const { t } = useTranslation();
   const repetitivePlaybackErrorsCountRef = useRef(0);
@@ -37,6 +19,8 @@ export function usePlaybackErrors(
     (appError: unknown) => {
       const playerErrorData = player.error;
       console.error(appError, playerErrorData);
+
+      const playerErrorCode = playerErrorData?.code;
 
       const prompt = (
         <ErrorPrompt
@@ -57,10 +41,13 @@ export function usePlaybackErrors(
             />
           }
           showSendFeedbackBtn
+          onSkipSong={
+            skipSongRef?.current ? () => skipSongRef.current?.() : undefined
+          }
         />
       );
 
-      if (repetitivePlaybackErrorsCountRef.current > 5) {
+      if (repetitivePlaybackErrorsCountRef.current >= 5) {
         changePromptMenuData(true, prompt);
         return log(
           'Playback errors exceeded the 5 errors limit.',
@@ -74,6 +61,11 @@ export function usePlaybackErrors(
       log(`Error occurred in the player.`, { appError, playerErrorData }, 'ERROR');
 
       if (player.src && playerErrorData) {
+        if (playerErrorCode === MEDIA_ERR_SRC_NOT_SUPPORTED) {
+          log('Song file not found, skipping to next song.', {}, 'WARN');
+          skipSongRef?.current?.();
+          return undefined;
+        }
         player.load();
         player.currentTime = prevSongPosition;
       } else {
@@ -82,7 +74,7 @@ export function usePlaybackErrors(
       }
       return undefined;
     },
-    [changePromptMenuData, player, t]
+    [changePromptMenuData, player, t, skipSongRef]
   );
 
   const resetErrorCount = useCallback(() => {

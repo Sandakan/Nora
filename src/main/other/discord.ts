@@ -2,6 +2,13 @@ import { Client } from 'discord-rpc';
 
 import logger from '../logger';
 
+interface DiscordRPCClient {
+  user?: { id: string };
+  on(event: string, handler: (...args: unknown[]) => void): void;
+  login(options: { clientId: string }): Promise<void>;
+  request(cmd: string, args: Record<string, unknown>): Promise<unknown>;
+}
+
 const ActivityType = {
   Game: 0,
   Streaming: 1,
@@ -14,39 +21,27 @@ const ActivityType = {
 const defaultPayload = {
   pid: process.pid,
   activity: {
-    timestamps: {
-      start: Date.now()
-      //end: Date.now() + 100000
-    },
     details: 'Nora',
-    //state: '',
     assets: {
       large_image: 'nora_logo',
-      //large_text: 'Nora',
       small_image: 'song_artwork'
-      //small_text: ''
     },
-    // buttons: [
-    //   {
-    //     label: '',
-    //     url: ''
-    //   }
-    // ],
     instance: true,
     type: ActivityType.Listening
   }
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let discord: any;
+let discord: DiscordRPCClient | null = null;
 
-let lastPayload: typeof defaultPayload;
+let lastPayload: { pid: number; activity: Record<string, unknown> };
 
 function Initialize() {
   if (discord) return;
-  discord = new Client({ transport: 'ipc' });
-  discord.on('ready', async () => {
-    discord.request('SET_ACTIVITY', lastPayload ?? defaultPayload);
+  discord = new Client({ transport: 'ipc' }) as unknown as DiscordRPCClient;
+  discord.on('ready', () => {
+    discord?.request('SET_ACTIVITY', lastPayload ?? defaultPayload).catch((error: unknown) => {
+      logger.error('Failed to set initial activity on ready', { error });
+    });
   });
   discord.on('disconnected', () => {
     setTimeout(() => loginRPC(), 1000).unref();
@@ -57,30 +52,27 @@ function Initialize() {
 function loginRPC() {
   const DISCORD_CLIENT_ID = import.meta.env.MAIN_VITE_DISCORD_CLIENT_ID;
   if (!DISCORD_CLIENT_ID) throw new Error('Discord Client ID not found.');
-  discord.login({ clientId: DISCORD_CLIENT_ID }).catch(() => {
+  discord?.login({ clientId: DISCORD_CLIENT_ID }).catch(() => {
     setTimeout(() => loginRPC(), 5000).unref();
   });
 }
 
-function setDiscordRPC(data: null | typeof defaultPayload.activity) {
-  if (discord.user) {
-    const payload = data
-      ? {
-          pid: process.pid,
-          activity: data
-        }
-      : defaultPayload;
+function setDiscordRPC(data: Record<string, unknown> | null) {
+  if (!discord?.user) return;
 
-    if (data) {
-      data.instance = true;
-      data.type = ActivityType.Listening;
-    }
+  const payload = data
+    ? {
+        pid: process.pid,
+        activity: { ...data, instance: true, type: ActivityType.Listening }
+      }
+    : { pid: process.pid, activity: { ...defaultPayload.activity } };
 
-    lastPayload = payload;
+  lastPayload = payload;
 
-    logger.debug(JSON.stringify(payload));
-    discord.request('SET_ACTIVITY', payload); //send raw payload to discord RPC server
-  }
+  logger.debug(JSON.stringify(payload));
+  discord.request('SET_ACTIVITY', payload).catch((error: unknown) => {
+    logger.error('Failed to set Discord activity', { error });
+  });
 }
 
 export { Initialize, setDiscordRPC };

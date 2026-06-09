@@ -10,10 +10,11 @@ import useSelectAllHandler from '@renderer/hooks/useSelectAllHandler';
 import { songQuery } from '@renderer/queries/songs';
 import { store } from '@renderer/store/store';
 import { songSearchSchema } from '@renderer/utils/zod/songSchema';
+import storage from '@renderer/utils/localStorage';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
-import { useCallback, useContext } from 'react';
+import { useCallback, useContext, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import historyPlaylistCoverImage from '../../../assets/images/webp/history-playlist-icon.webp';
@@ -41,7 +42,7 @@ function HistoryPlaylistInfoPage() {
   const queue = useStore(store, (state) => state.localStorage.queue);
   const playlistSortingState = useStore(
     store,
-    (state) => state.localStorage.sortingStates?.songsPage || 'addedOrder'
+    (state) => state.localStorage.sortingStates?.playlistDetailPage || 'addedOrder'
   );
   const preferences = useStore(store, (state) => state.localStorage.preferences);
   const { updateQueueData, addNewNotifications, createQueue, playSong } =
@@ -49,6 +50,10 @@ function HistoryPlaylistInfoPage() {
   const { t } = useTranslation();
   const { sortingOrder = playlistSortingState } = Route.useSearch();
   const navigate = useNavigate({ from: '/main-player/playlists/history' });
+
+  useEffect(() => {
+    storage.sortingStates.setSortingStates('playlistDetailPage', sortingOrder);
+  }, [sortingOrder]);
 
   const { data: historySongs = [] } = useSuspenseQuery({
     ...songQuery.history({ sortType: sortingOrder }),

@@ -18,13 +18,16 @@ import { artistQuery } from '@renderer/queries/aritsts';
 import { songQuery } from '@renderer/queries/songs';
 import { store } from '@renderer/store/store';
 import calculateTimeFromSeconds from '@renderer/utils/calculateTimeFromSeconds';
+import storage from '@renderer/utils/localStorage';
+import { songSearchSchema } from '@renderer/utils/zod/songSchema';
 import { useSuspenseQuery, useMutation, useQuery } from '@tanstack/react-query';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
-import { useCallback, useContext, useMemo, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 export const Route = createFileRoute('/main-player/artists/$artistId')({
+  validateSearch: songSearchSchema,
   component: ArtistInfoPage,
   loader: async (route) => {
     const artistId = Number(route.params.artistId);
@@ -56,7 +59,16 @@ function ArtistInfoPage() {
   });
   const [isAllAlbumsVisible, setIsAllAlbumsVisible] = useState(false);
   const [isAllSongsVisible, setIsAllSongsVisible] = useState(false);
-  const [sortingOrder, setSortingOrder] = useState<SongSortTypes>('aToZ');
+  const artistDetailSortingState = useStore(
+    store,
+    (state) => state.localStorage.sortingStates?.artistDetailPage || 'aToZ'
+  );
+  const { sortingOrder = artistDetailSortingState } = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
+
+  useEffect(() => {
+    storage.sortingStates.setSortingStates('artistDetailPage', sortingOrder);
+  }, [sortingOrder]);
 
   const songsContainerRef = useRef(null);
   const { width } = useResizeObserver(songsContainerRef);
@@ -274,7 +286,7 @@ function ArtistInfoPage() {
 
   return (
     <MainContainer
-      className="artist-info-page-container appear-from-bottom relative overflow-y-auto rounded-tl-lg pt-8 pr-2 pb-2 pl-2 [scrollbar-gutter:stable]"
+      className="artist-info-page-container appear-from-bottom relative [scrollbar-gutter:stable] overflow-y-auto rounded-tl-lg pt-8 pr-2 pb-2 pl-2"
       ref={songsContainerRef}
     >
       <div className="artist-img-and-info-container relative mb-12 flex flex-row items-center pl-8 *:z-10">
@@ -529,7 +541,10 @@ function ArtistInfoPage() {
                   name: 'ArtistInfoPageSongsSortDropdown',
                   value: sortingOrder,
                   options: songSortOptions,
-                  onChange: (e) => setSortingOrder(e.currentTarget.value as SongSortTypes)
+                  onChange: (e) => {
+                    const order = e.currentTarget.value as SongSortTypes;
+                    navigate({ search: (prev) => ({ ...prev, sortingOrder: order }) });
+                  }
                 }
               ]}
             />

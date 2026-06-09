@@ -27,14 +27,14 @@ jobs:
 
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 'lts/*'
           check-latest: true
-          package-manager-cache: false
+          cache: npm
 
       - name: Install Dependencies
         run: |
@@ -59,7 +59,7 @@ jobs:
         run: npm run build:win
 
       - name: release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           draft: true
           name: Nora Release ${{ github.ref }} ${{ github.sha }}

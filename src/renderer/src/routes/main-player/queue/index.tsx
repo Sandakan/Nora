@@ -31,6 +31,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { type VirtuosoHandle } from 'react-virtuoso';
 
+// eslint-disable-next-line react/only-export-components
 export const Route = createFileRoute('/main-player/queue/')({
   component: RouteComponent,
   validateSearch: baseInfoPageSearchParamsSchema
@@ -314,105 +315,106 @@ function RouteComponent() {
           <div
             className={`songs-container overflow-auto ${queuedSongs && queuedSongs?.length > 0 ? 'h-full' : 'h-0'}`}
           >
-            {queuedSongs && queuedSongs.length > 0 && (
-              // $ Enabling StrictMode throws an error in the CurrentQueuePage when using react-beautiful-dnd for drag and drop.
+            {queuedSongs &&
+              queuedSongs.length > 0 && (
+                // $ Enabling StrictMode throws an error in the CurrentQueuePage when using react-beautiful-dnd for drag and drop.
 
-              <DragDropContext onDragEnd={handleDragEnd}>
-                <Droppable
-                  droppableId="droppable"
-                  mode="virtual"
-                  renderClone={(provided, _, rubric) => {
-                    const data = queuedSongs[rubric.source.index];
-                    return (
-                      <Song
-                        provided={provided}
-                        key={data.songId}
-                        isDraggable
-                        index={rubric.source.index}
-                        ref={provided.innerRef}
-                        isIndexingSongs={preferences?.isSongIndexingEnabled}
-                        title={data.title}
-                        songId={data.songId}
-                        artists={data.artists}
-                        album={data.album}
-                        artworkPaths={data.artworkPaths}
-                        duration={data.duration}
-                        path={data.path}
-                        isAFavorite={data.isAFavorite}
-                        year={data.year}
-                        isBlacklisted={data.isBlacklisted}
-                      />
-                    );
-                  }}
-                >
-                  {(droppableProvided) => (
-                    <VirtualizedList
-                      data={queuedSongs}
-                      fixedItemHeight={60}
-                      ref={ListRef}
-                      scrollerRef={droppableProvided.innerRef}
-                      scrollTopOffset={scrollTopOffset}
-                      components={{
-                        Item: ({ children, ...props }: { children?: ReactNode }) => (
-                          <div {...props} className="height-preserving-container">
-                            {children}
-                          </div>
-                        )
-                      }}
-                      itemContent={(index, song) => {
-                        return (
-                          <Draggable
-                            draggableId={String(song.songId)}
-                            index={index}
-                            key={song.songId}
-                          >
-                            {(provided) => {
-                              const { multipleSelections: songIds } = multipleSelectionsData;
-                              const isMultipleSelectionsEnabled =
-                                multipleSelectionsData.selectionType === 'songs' &&
-                                multipleSelectionsData.multipleSelections.length !== 1;
+                <DragDropContext onDragEnd={handleDragEnd}>
+                  <Droppable
+                    droppableId="droppable"
+                    mode="virtual"
+                    renderClone={(provided, _, rubric) => {
+                      const data = queuedSongs[rubric.source.index];
+                      return (
+                        <Song
+                          provided={provided}
+                          key={data.songId}
+                          isDraggable
+                          index={rubric.source.index}
+                          ref={provided.innerRef}
+                          isIndexingSongs={preferences?.isSongIndexingEnabled}
+                          title={data.title}
+                          songId={data.songId}
+                          artists={data.artists}
+                          album={data.album}
+                          artworkPaths={data.artworkPaths}
+                          duration={data.duration}
+                          path={data.path}
+                          isAFavorite={data.isAFavorite}
+                          year={data.year}
+                          isBlacklisted={data.isBlacklisted}
+                        />
+                      );
+                    }}
+                  >
+                    {(droppableProvided) => (
+                      <VirtualizedList
+                        data={queuedSongs}
+                        fixedItemHeight={60}
+                        ref={ListRef}
+                        scrollerRef={droppableProvided.innerRef}
+                        scrollTopOffset={scrollTopOffset}
+                        components={{
+                          Item: ({ children, ...props }: { children?: ReactNode }) => (
+                            <div {...props} className="height-preserving-container">
+                              {children}
+                            </div>
+                          )
+                        }}
+                        itemContent={(index, song) => {
+                          return (
+                            <Draggable
+                              draggableId={String(song.songId)}
+                              index={index}
+                              key={song.songId}
+                            >
+                              {(provided) => {
+                                const { multipleSelections: songIds } = multipleSelectionsData;
+                                const isMultipleSelectionsEnabled =
+                                  multipleSelectionsData.selectionType === 'songs' &&
+                                  multipleSelectionsData.multipleSelections.length !== 1;
 
-                              return (
-                                <Song
-                                  provided={provided}
-                                  key={`${song.songId}-${index}`}
-                                  isDraggable
-                                  index={index}
-                                  ref={provided.innerRef}
-                                  isIndexingSongs={preferences?.isSongIndexingEnabled}
-                                  {...song}
-                                  trackNo={undefined}
-                                  selectAllHandler={selectAllHandler}
-                                  // no need for onPlayClick because the component is in the currentQueuePage
-                                  // onPlayClick={handleSongPlayBtnClick}
-                                  additionalContextMenuItems={[
-                                    {
-                                      label: t('common.removeFromQueue'),
-                                      iconName: 'remove_circle_outline',
-                                      handlerFunction: () => {
-                                        updateQueueData(
-                                          undefined,
-                                          currentQueue.filter((id) =>
-                                            isMultipleSelectionsEnabled
-                                              ? !songIds.includes(id)
-                                              : id !== song.songId
-                                          )
-                                        );
-                                        toggleMultipleSelections(false);
+                                return (
+                                  <Song
+                                    provided={provided}
+                                    key={`${song.songId}-${index}`}
+                                    isDraggable
+                                    index={index}
+                                    ref={provided.innerRef}
+                                    isIndexingSongs={preferences?.isSongIndexingEnabled}
+                                    {...song}
+                                    trackNo={undefined}
+                                    selectAllHandler={selectAllHandler}
+                                    // no need for onPlayClick because the component is in the currentQueuePage
+                                    // onPlayClick={handleSongPlayBtnClick}
+                                    additionalContextMenuItems={[
+                                      {
+                                        label: t('common.removeFromQueue'),
+                                        iconName: 'remove_circle_outline',
+                                        handlerFunction: () => {
+                                          updateQueueData(
+                                            undefined,
+                                            currentQueue.filter((id) =>
+                                              isMultipleSelectionsEnabled
+                                                ? !songIds.includes(id)
+                                                : id !== song.songId
+                                            )
+                                          );
+                                          toggleMultipleSelections(false);
+                                        }
                                       }
-                                    }
-                                  ]}
-                                />
-                              );
-                            }}
-                          </Draggable>
-                        );
-                      }}
-                    />
-                  )}
-                </Droppable>
-              </DragDropContext>
-            )}
+                                    ]}
+                                  />
+                                );
+                              }}
+                            </Draggable>
+                          );
+                        }}
+                      />
+                    )}
+                  </Droppable>
+                </DragDropContext>
+              )}
           </div>
           {currentQueue.length === 0 && (
             <div className="no-songs-container flex h-full w-full flex-col items-center justify-center text-center text-2xl text-[#ccc]">

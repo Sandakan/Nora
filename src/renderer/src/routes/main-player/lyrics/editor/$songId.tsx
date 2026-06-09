@@ -422,7 +422,7 @@ function LyricsEditingPage() {
         </div>
       </div>
       <div
-        className={`lyrics-container flex h-full flex-col items-center overflow-auto py-10 pr-6 transition-[background,opacity] [scrollbar-gutter:stable] ${
+        className={`lyrics-container flex h-full [scrollbar-gutter:stable] flex-col items-center overflow-auto py-10 pr-6 transition-[background,opacity] ${
           !isTheEditingSongTheCurrSong && 'opacity-10'
         }`}
       >

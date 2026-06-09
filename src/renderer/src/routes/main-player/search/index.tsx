@@ -118,7 +118,7 @@ function SearchPage() {
   );
 
   return (
-    <MainContainer className="h-full! pb-0! [scrollbar-gutter:stable]" ref={searchContainerRef}>
+    <MainContainer className="h-full! [scrollbar-gutter:stable] pb-0!" ref={searchContainerRef}>
       <div className="search-controls-container">
         <div className="search-input-container appear-from-bottom mb-4 flex items-center">
           <div className="search-bar-container bg-background-color-2 dark:bg-dark-background-color-2 flex w-1/2 max-w-xl min-w-[25rem] items-center rounded-3xl px-2 py-1">

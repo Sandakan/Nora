@@ -5,7 +5,9 @@ interface CurrentLocationContainerProps {
 
 const CurrentLocationContainer = ({ href, className = '' }: CurrentLocationContainerProps) => {
   return (
-    <div className={`text-font-color-dimmed dark:text-dark-font-color-dimmed text-sm ${className}`}>{href}</div>
+    <div className={`text-font-color-dimmed dark:text-dark-font-color-dimmed text-sm ${className}`}>
+      {href}
+    </div>
   );
 };
 

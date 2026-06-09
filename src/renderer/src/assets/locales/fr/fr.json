@@ -1,0 +1,1127 @@
+{
+  "common": {
+    "song_one": "chanson",
+    "song_other": "Chansons",
+    "playlist_one": "liste de lecture",
+    "playlist_other": "Listes de lecture",
+    "artist_one": "artiste",
+    "artist_other": "Artistes",
+    "album_one": "album",
+    "album_other": "Albums",
+    "genre_one": "genre",
+    "genre_other": "Genres",
+    "folder_one": "dossier",
+    "folder_other": "Dossiers",
+    "songWithCount_one": "{{count}} chanson",
+    "songWithCount_other": "{{count}} chansons",
+    "playlistWithCount_one": "{{count}} liste de lecture",
+    "playlistWithCount_other": "{{count}} listes de lecture",
+    "artistWithCount_one": "{{count}} artiste",
+    "artistWithCount_other": "{{count}} artistes",
+    "albumWithCount_one": "{{count}} album",
+    "albumWithCount_other": "{{count}} albums",
+    "genreWithCount_one": "{{count}} genre",
+    "genreWithCount_other": "{{count}} genres",
+    "folderWithCount_one": "{{count}} dossier",
+    "folderWithCount_other": "{{count}} dossiers",
+    "subFolderWithCount_one": "{{count}} sous-dossier",
+    "subFolderWithCount_other": "{{count}} sous-dossiers",
+
+    "selectionWithCount_one": "{{count}} sélectionné",
+    "selectionWithCount_other": "{{count}} sélectionnés",
+
+    "shownWithCount": "{{count}} affiché",
+
+    "unknownTitle": "Titre inconnu",
+    "unknownArtist": "Artiste inconnu",
+    "unknownAlbum": "Album inconnu",
+    "unknownGenre": "Genre inconnu",
+    "unknownFolder": "Dossier inconnu",
+    "unknownLyricsProvider": "Fournisseur de paroles inconnu",
+
+    "songTitle": "Titre de la chanson",
+    "duration": "Durée",
+    "albumArtists": "Artistes de l'album de la chanson",
+    "albumTrackNo": "Numéro de piste de l'album",
+    "releasedYear": "Année de sortie",
+    "songAddedOn": "Chanson ajoutée le",
+    "lastModifiedOn": "Dernière modification le",
+    "sampleRate": "Taux d'échantillonnage",
+    "bitRate": "Débit binaire",
+    "noOfAudioChannels": "Nombre de canaux audio",
+    "channelWithCount_one": "{{count}} canal (Mono)",
+    "channelWithCount_other": "{{count}} canaux (Stéréo)",
+    "songLocation": "Emplacement de la chanson",
+    "lyrics": "Paroles de la chanson",
+    "syncedLyrics": "Paroles synchronisées",
+    "unsyncedLyrics": "Paroles non synchronisées",
+
+    "play": "Lire",
+    "playNext": "Lire ensuite",
+    "playNextAll": "Tout ajouter à lire ensuite",
+    "shuffleAndPlay": "Lecture aléatoire et lire",
+    "shuffleAndPlayAll": "Lecture aléatoire et tout lire",
+    "playAll": "Tout lire",
+    "addToQueue": "Ajouter à la file d'attente",
+    "removeFromQueue": "Retirer de la file d'attente",
+    "addSongsToQueue": "Ajouter des chansons à la file d'attente",
+    "createAQueue": "Créer une file d'attente",
+    "info": "Info",
+    "select": "Sélectionner",
+    "unselect": "Désélectionner",
+    "selectAll": "Tout sélectionner",
+    "unselectAll": "Tout désélectionner",
+    "showAll": "Tout afficher",
+    "cancel": "Annuler",
+    "search": "Rechercher",
+    "help": "Aide",
+    "copy": "Copier",
+
+    "sortBy": "Trier par",
+    "filterBy": "Filtrer par",
+    "moreOptions": "Plus d'options",
+    "title": "Titre",
+    "suggestion": "Suggestion",
+    "hideSuggestion": "Masquer la suggestion",
+    "showSuggestion": "Afficher la suggestion",
+    "and": "et",
+    "ignore": "Ignorer",
+    "goBack": "Revenir en arrière",
+    "saveArtwork": "Enregistrer l'illustration",
+    "readMoreAboutTitle": "En savoir plus sur `{{title}}`",
+    "doNotShowThisMessageAgain": "Ne plus afficher.",
+    "artistConflictResolved": "Le conflit d'artistes a été résolu avec succès.",
+    "featArtistSuggestionResolved": "La suggestion d'artistes invités a été résolue avec succès.",
+    "hasInternet": "Vous êtes connecté à internet.",
+    "noInternet": "Vous n'êtes pas connecté à internet.",
+    "newUpdateAvailable": "Une nouvelle mise à jour de l'application est disponible.",
+    "checkingForUpdates": "Vérification des mises à jour de l'application...",
+    "updateCheckError": "Une erreur s'est produite lors de la vérification des mises à jour.",
+    "updateCheckErrorNoInternet": "$t(common.updateCheckError) $t(common.noInternet)",
+    "optionDisabled": "Cette option est désactivée.",
+    "somethingWentWrong": "Quelque chose s'est mal passé.",
+    "details": "Détails",
+    "restartApp": "Redémarrer l'application",
+    "ok": "OK",
+    "loading": "Chargement"
+  },
+
+  "titleBar": {
+    "changeTheme": "Changer le thème",
+    "goBack": "Revenir en arrière (Alt + Flèche gauche)",
+    "goHome": "Aller à l'accueil (Alt + Accueil)",
+    "goForward": "Aller en avant (Alt + Flèche droite)",
+
+    "minimize": "Réduire",
+    "maximize": "Agrandir",
+    "close": "Fermer"
+  },
+
+  "player": {
+    "goToMainPlayer": "Aller au lecteur principal (Ctrl + N)",
+    "openInMiniPlayer": "Ouvrir dans le mini-lecteur (Ctrl + N)",
+    "openInFullScreen": "Ouvrir en plein écran",
+    "likeDislike": "J'aime/Je n'aime pas (Ctrl + H)",
+    "likeDislikeDisabled": "J'aime/Je n'aime pas est désactivé car la chanson en cours provient d'une source inconnue.",
+    "prevSong": "Chanson précédente (Ctrl + Flèche gauche)",
+    "playPause": "Lecture/Pause (Espace)",
+    "nextSong": "Chanson suivante (Ctrl + Flèche droite)",
+    "lyrics": "Paroles (Ctrl + L)",
+    "shuffle": "Lecture aléatoire (Ctrl + S)",
+    "repeat": "Répétition (Ctrl + T)",
+    "muteUnmute": "Activer/Désactiver le son (Ctrl + M)",
+    "currentQueue": "File d'attente (Ctrl + Q)",
+    "adjustPlaybackSpeed": "Ajuster la vitesse de lecture",
+    "showCurrentQueue": "Afficher la file d'attente",
+    "showMiniPlayer": "Afficher le mini-lecteur",
+    "otherSettings": "Autres paramètres",
+    "upNext": "SUIVANT : ",
+    "closeUpNext": "Fermer 'SUIVANT'",
+    "by": "par",
+
+    "errorTitle": "Une erreur s'est produite dans le lecteur.",
+    "errorMessage": "$t(player.errorTitle)<br /> Cela peut être dû à une chanson corrompue. <details/>",
+    "noErrorMessage": "Aucun message d'erreur généré"
+  },
+
+  "sortTypes": {
+    "aToZ": "A à Z",
+    "zToA": "Z à A",
+    "dateAddedAscending": "Plus anciennes",
+    "dateAddedDescending": "Plus récentes",
+    "releasedYearAscending": "Année de sortie (Croissante)",
+    "releasedYearDescending": "Année de sortie (Décroissante)",
+    "allTimeMostListened": "Plus écoutées (Tout temps)",
+    "allTimeLeastListened": "Moins écoutées (Tout temps)",
+    "monthlyMostListened": "Plus écoutées (Ce mois)",
+    "monthlyLeastListened": "Moins écoutées (Ce mois)",
+    "artistNameAscending": "Nom de l'artiste (A à Z)",
+    "artistNameDescending": "Nom de l'artiste (Z à A)",
+    "albumNameAscending": "Nom de l'album (A à Z)",
+    "albumNameDescending": "Nom de l'album (Z à A)",
+    "noOfSongsDescending": "Plus grand nombre de chansons",
+    "noOfSongsAscending": "Plus petit nombre de chansons",
+    "blacklistedFolders": "Dossiers en liste noire",
+    "whitelistedFolders": "Dossiers en liste blanche",
+    "mostLovedDescending": "Plus aimés",
+    "mostLovedAscending": "Moins aimés",
+    "trackNoAscending": "Numéro de piste (Croissant)",
+    "trackNoDescending": "Numéro de piste (Décroissant)",
+    "addedOrder": "Ordre d'ajout"
+  },
+
+  "filterTypes": {
+    "notSelected": "Non sélectionné",
+    "blacklistedSongs": "Chansons en liste noire",
+    "whitelistedSongs": "Chansons en liste blanche",
+    "favorites": "Favoris",
+    "nonFavorites": "Non favoris"
+  },
+
+  "equalizerPresets": {
+    "custom": "Personnalisé",
+    "flat": "Plat",
+    "acoustic": "Acoustique",
+    "bassBooster": "Amplification des basses",
+    "bassReducer": "Réduction des basses",
+    "classical": "Classique",
+    "club": "Club",
+    "dance": "Danse",
+    "deep": "Profond",
+    "electronic": "Électronique",
+    "hipHop": "Hip Hop",
+    "jazz": "Jazz",
+    "latin": "Latin",
+    "live": "Live",
+    "loudness": "Loudness",
+    "lounge": "Lounge",
+    "metal": "Metal",
+    "piano": "Piano",
+    "pop": "Pop",
+    "reggae": "Reggae",
+    "rnb": "RnB",
+    "rock": "Rock",
+    "ska": "Ska",
+    "smallSpeakers": "Petits haut-parleurs",
+    "soft": "Douce",
+    "softRock": "Soft rock",
+    "spokenWord": "Parole",
+    "techno": "Techno",
+    "trebleBooster": "Amplification des aigus",
+    "trebleReducer": "Réduction des aigus",
+    "vocalBooster": "Amplification des voix"
+  },
+
+  "song": {
+    "showInFileExplorer": "Afficher dans l'explorateur",
+    "artwork": "Illustration de la chanson",
+    "selectedSongCount_one": "{{count}} $t(common.song, {\"count\":{{count}}}) sélectionnée",
+    "selectedSongCount_other": "{{count}} $t(common.song, {\"count\":{{count}}}) sélectionnées",
+    "likeSong": "Ajouter aux favoris",
+    "unlikeSong": "Retirer des favoris",
+    "toggleLikeSongs": "Ajouter/retirer des chansons aux favoris",
+    "addToPlaylists": "Ajouter à la/aux liste(s) de lecture",
+    "goToAlbum": "Aller à l'album",
+    "editSongTags": "Modifier les balises",
+    "reparseSong": "Ré-analyser la chanson",
+    "blacklistSong_one": "Mettre en liste noire",
+    "blacklistSong_other": "Mettre en liste noire",
+    "deblacklist": "Restaurer de la liste noire",
+    "delete": "Supprimer du système",
+    "playingNext": "Lecture suivante",
+    "playingNow": "Lecture en cours",
+    "blacklisted": "En liste noire",
+    "likedThisSong": "Vous avez aimé cette chanson",
+    "dislikedThisSong": "Vous n'avez pas aimé cette chanson"
+  },
+
+  "artist": {
+    "playAllSongs": "Lire toutes les chansons",
+    "toggleLikeArtists": "Ajouter/retirer des artistes aux favoris",
+    "likeArtist": "Ajouter l'artiste aux favoris",
+    "dislikeArtist": "Retirer l'artiste des favoris",
+    "selectedArtistCount_one": "{{count}} $t(common.artist, {\"count\":{{count}}}) sélectionné",
+    "selectedArtistCount_other": "{{count}} $t(common.artist, {\"count\":{{count}}}) sélectionnés"
+  },
+
+  "folder": {
+    "toggleBlacklistFolder": "Basculer le dossier en liste noire",
+    "blacklistFolder": "Mettre le dossier en liste noire",
+    "selectedFolderCount_one": "{{count}} $t(common.folder, {\"count\":{{count}}}) sélectionné",
+    "selectedFolderCount_other": "{{count}} $t(common.folder, {\"count\":{{count}}}) sélectionnés",
+    "selectedParentFolderCount_one": "{{count}} dossier parent sélectionné",
+    "selectedParentFolderCount_other": "{{count}} dossiers parents sélectionnés",
+    "directoryCount_one": "{{count}} répertoire",
+    "directoryCount_other": "{{count}} répertoires",
+    "selectedDirectoryCount_one": "{{count}} répertoire sélectionné",
+    "selectedDirectoryCount_other": "{{count}} répertoires sélectionnés"
+  },
+
+  "playlist": {
+    "changeArtwork": "Changer l'illustration",
+    "addArtwork": "Ajouter une illustration",
+    "playlistArtworkUpdateSuccess": "Illustration de la liste de lecture mise à jour.",
+    "renamePlaylist": "Renommer la liste de lecture",
+    "exportPlaylist": "Exporter la liste de lecture",
+    "importSongs": "Importer des chansons depuis M3U8",
+    "deleteSelectedPlaylists": "Supprimer la/les liste(s) de lecture sélectionnée(s)",
+    "deletePlaylist_one": "Supprimer la liste de lecture",
+    "deletePlaylist_other": "Supprimer les listes de lecture",
+    "selectedPlaylistCount_one": "{{count}} $t(common.playlist, {\"count\":{{count}}}) sélectionnée",
+    "selectedPlaylistCount_other": "{{count}} $t(common.playlist, {\"count\":{{count}}}) sélectionnées",
+    "empty": "Cette liste de lecture semble vide."
+  },
+
+  "album": {
+    "selectedAlbumCount_one": "{{count}} $t(common.album, {\"count\":{{count}}}) sélectionné",
+    "selectedAlbumCount_other": "{{count}} $t(common.album, {\"count\":{{count}}}) sélectionnés"
+  },
+
+  "genre": {
+    "selectedGenreCount_one": "{{count}} $t(common.genre, {\"count\":{{count}}}) sélectionné",
+    "selectedGenreCount_other": "{{count}} $t(common.genre, {\"count\":{{count}}}) sélectionnés"
+  },
+
+  "homePage": {
+    "empty": "Il n'y a rien ici..",
+    "emptyDescription": "Il semble que vous n'ayez pas encore ajouté de dossiers musicaux à votre bibliothèque.",
+    "loading": "Patientez. Nous préparons tout pour vous...",
+    "listenMoreToShowMetrics": "Écoutez plus de chansons pour afficher des métriques supplémentaires.",
+
+    "recentlyAddedSongs": "Chansons récemment ajoutées",
+    "recentlyPlayedSongs": "Chansons récemment écoutées",
+    "recentArtists": "Artistes récents",
+    "mostLovedSongs": "Chansons les plus aimées",
+    "mostLovedArtists": "Artistes les plus aimés",
+
+    "openSongsWithNewestSortOption": "Ouvre 'Chansons' avec le tri 'Plus récentes'.",
+    "openPlaybackHistory": "Ouvre la liste 'Historique' avec le tri 'Ordre d'ajout'",
+    "openFavoritesWithAllTimeMostListenedSortOption": "Ouvre la liste 'Favoris' avec le tri 'Plus écoutées (Tout temps)'",
+
+    "noSongsAvailable": "Aucune chanson disponible",
+    "stayCalm": "Restez calme",
+    "favoritesAndRecaps": "Favoris et bilans"
+  },
+
+  "searchPage": {
+    "addFolder": "Ajouter un dossier",
+    "enablePredictiveSearch": "Activer la recherche prédictive",
+    "disablePredictiveSearch": "Désactiver la recherche prédictive",
+    "searchForAnything": "Rechercher quelque chose",
+    "searchForAnythingInLibrary": "Rechercher dans votre bibliothèque",
+    "separateKeywords": "Utilisez ' ; ' pour séparer les mots-clés.",
+    "allFilter": "Tout",
+    "mostRelevant": "Plus pertinent",
+    "resultCount_one": "{{count}} résultat",
+    "resultCount_other": "{{count}} résultats",
+    "resultAndVisibleCount_other": "{{count}} résultats ($t(common.shownWithCount, {\"count\":{{noVisible}}}))",
+    "noResults": "Rien ne correspond à votre recherche.",
+    "recentSearchResultTooltipLabel": "Rechercher '{{value}}'",
+    "showingResultsFor": "Résultats pour <span>'{{query}}'</span>",
+    "showingResultsForWithFilter": "Résultats pour <span>'{{query}}'</span> dans <span>{{filter}}</span>",
+
+    "a": "Rechercher quelque chose"
+  },
+
+  "songsPage": {
+    "loading": "Patientez. Nous préparons tout pour vous...",
+    "empty": "Il n'y a rien ici.."
+  },
+
+  "artistsPage": {
+    "empty": "Il n'y a rien ici..."
+  },
+
+  "foldersPage": {
+    "addFolder": "Ajouter un dossier",
+    "musicFolders": "Dossiers musicaux",
+    "empty": "Aucun dossier ajouté à votre bibliothèque."
+  },
+
+  "playlistsPage": {
+    "createNewPlaylist": "Créer une nouvelle liste de lecture",
+    "importPlaylist": "Importer une liste de lecture",
+    "addPlaylist": "Ajouter une liste de lecture",
+    "removeFromThisPlaylist": "Retirer de cette liste de lecture",
+    "removeSongFromPlaylistSuccess": "`{{title}}` retirée de '{{playlistName}}'",
+    "createdOn": "Créée le {{val, datetime}}",
+    "clearSongHistoryConfirm": "Effacer l'historique",
+    "clearSongHistoryConfirmNotice": "Voulez-vous vraiment effacer votre historique d'écoute ? Cette action est irréversible.",
+    "clearSongHistorySuccess": "Votre historique d'écoute a été effacé.",
+    "empty": "Aucune liste de lecture créée.",
+
+    "favorites": "Favoris",
+    "history": "Historique"
+  },
+
+  "albumsPage": {
+    "empty": "Il n'y a rien ici..."
+  },
+
+  "genresPage": {
+    "empty": "Il n'y a rien ici..."
+  },
+
+  "settingsPage": {
+    "settings": "Paramètres",
+
+    "appearance": "Apparence",
+    "changeTheme": "Changez le thème de l'application selon vos préférences.",
+    "lightTheme": "Thème clair",
+    "darkTheme": "Thème sombre",
+    "systemTheme": "Thème système",
+
+    "enableImageBasedDynamicThemes": "Activer les thèmes dynamiques",
+    "enableImageBasedDynamicThemesDescription": "Change le thème de l'application dynamiquement selon la pochette de la chanson en cours.",
+
+    "language": "Langue",
+    "languageDescription": "Sélectionnez la langue d'affichage de Nora.",
+
+    "audioPlayback": "Lecture audio",
+    "showRemainingSongDuration": "Afficher la durée restante",
+    "showRemainingSongDurationDescription": "Affiche la durée restante de la chanson au lieu de la durée totale.",
+    "playbackRate": "Vitesse de lecture",
+    "changePlaybackRate": "Modifier la vitesse de lecture par défaut.",
+    "resetPlaybackRate": "Réinitialiser à 1x",
+    "seekbarScrollInterval": "Modifier l'incrément lors du défilement sur la barre de lecture et le volume.",
+    "second": "seconde",
+    "second_other": "secondes",
+
+    "accounts": "Comptes",
+    "integrateLastFm": "Intégrer Last.fm à Nora.",
+    "lastFmLogo": "Logo LastFM",
+    "lastFmConnected": "LastFM connecté",
+    "lastFmNotConnected": "LastFM non connecté",
+    "loggedInAs": "Connecté en tant que",
+    "lastFmDescription1": "Connectez-vous à Last.fm pour activer le Scrobbling.",
+    "lastFmDescription2": "Le Scrobbling envoie des informations sur la musique que vous écoutez.",
+    "lastFmDescription3": "Chaque fois que vous écoutez une chanson, Last.fm l'enregistre et l'ajoute à votre compte.",
+    "lastFmDescription4": "Cette fonctionnalité nécessite une connexion internet.",
+    "authenticateAgain": "S'authentifier à nouveau",
+    "loginInBrowser": "Connexion via navigateur",
+    "scrobblingDescription": "Activer le Scrobbling Last.fm pour envoyer des données d'écoute.",
+    "enableScrobbling": "Activer le Scrobbling Last.fm",
+    "sendFavoritesToLastFmDescription": "Envoyer les favoris à Last.fm lorsque vous aimez/n'aimez pas.",
+    "sendFavoritesToLastFm": "Envoyer les favoris",
+    "sendNowPlayingToLastFmDescription": "Envoyer automatiquement la chanson en cours à Last.fm.",
+    "sendNowPlayingToLastFm": "Envoyer la chanson en cours",
+    "enableDiscordRpcDescription": "Intégrer Discord Rich Presence à Nora",
+    "enableDiscordRpc": "Activer Discord Rich Presence",
+
+    "doNotSaveLyricsAutomatically": "Ne pas sauvegarder automatiquement",
+    "syncedLyricsOnly": "Paroles synchronisées uniquement",
+    "saveEitherLyrics": "Paroles synchronisées ou non",
+    "lyrics": "Paroles",
+    "enableMusixmatchLyricsDescription": "Activer Musixmatch pour obtenir des paroles synchronisées et non synchronisées.",
+    "musixmatchDisclaimerNotice": "Activer cette fonctionnalité signifie que vous acceptez les <Button>Conditions de Musixmatch</Button>.",
+    "editMusixmatchSettings": "Modifier les paramètres Musixmatch",
+    "enableMusixmatch": "Activer Musixmatch",
+    "musixmatchEnabled": "Musixmatch est activé",
+    "saveLyricsAutomaticallyDescription": "Sélectionnez une option pour sauvegarder automatiquement les paroles.",
+    "saveLyricsAutomaticallyInfo": "Les paroles téléchargées automatiquement seront sauvegardées après la fin de la chanson en cours.",
+    "saveLyricsInLrcFilesDescription": "Sauvegarder les paroles dans des fichiers LRC pour les chansons qui le permettent.",
+    "saveLyricsInLrcFiles": "Sauvegarder aussi en fichiers LRC",
+    "autoTranslateLyricsDescription": "Traduire automatiquement les paroles dans la langue sélectionnée.",
+    "autoTranslateLyrics": "Traduction automatique",
+    "autoConvertLyricsDescription": "Convertir automatiquement les paroles en caractères latins (japonais, chinois, coréen).",
+    "autoConvertLyrics": "Conversion automatique",
+    "lrcFileCustomSaveLocationDescription": "Choisir un emplacement personnalisé pour les fichiers LRC.",
+    "selectedCustomLocation": "Emplacement sélectionné",
+    "setCustomLocation": "Définir l'emplacement",
+
+    "equalizer": "Égaliseur",
+    "reset": "Réinitialiser",
+
+    "defaultPage": "Page par défaut",
+    "changeDefaultPageDescription": "Modifier la page affichée au démarrage de l'application.",
+
+    "preferences": "Préférences",
+    "songIndexingDescription": "Active l'indexation des chansons avec des numéros dans l'onglet Chansons.",
+    "enableSongIndexing": "Activer l'indexation",
+    "showTrackNumberAsSongIndexDescription": "Afficher le numéro de piste devant la chanson dans la page album.",
+    "showTrackNumberAsSongIndex": "Afficher le numéro de piste",
+    "showArtistArtworkNearSongControlsDescription": "Affiche les illustrations des artistes près de leur nom dans le panneau de contrôle.",
+    "showArtistArtworkNearSongControls": "Afficher les illustrations des artistes",
+    "disableBackgroundArtworksDescription": "Désactive les grandes illustrations en arrière-plan de certaines pages.",
+    "disableBackgroundArtworks": "Désactiver les illustrations d'arrière-plan",
+    "playlistArtworksDescription": "Modifier le comportement des illustrations créées à partir des pochettes.",
+    "enablePlaylistArtworks": "Activer les illustrations composites",
+    "shuffleArtworkFromSongCovers": "Activer le mélange des illustrations composites.",
+
+    "accessibility": "Accessibilité",
+    "reducedMotionDescription": "Supprime les animations de l'application. L'application sera moins fluide.",
+    "enableReducedMotion": "Activer la réduction des mouvements",
+
+    "performance": "Performances",
+    "removeAnimationOnBatteryDescription": "Supprime les animations lorsque le système est sur batterie.",
+    "removeAnimationOnBattery": "Supprimer les animations sur batterie",
+    "allowToPreventScreenSleepingDescription": "Empêcher l'écran de s'éteindre lors de l'affichage de paroles.",
+    "allowToPreventScreenSleeping": "Empêcher la mise en veille de l'écran",
+
+    "startupAndWindowCustomization": "Démarrage et fenêtre",
+    "autoLaunchAtStartDescription": "Lance automatiquement Nora à la connexion.",
+    "autoLaunchAtStart": "Lancer au démarrage",
+    "hideWindowAtStartDescription": "Configure si Nora doit être visible au démarrage.",
+    "hideWindowAtStart": "Lancer dans la barre des tâches",
+    "hideWindowOnCloseDescription": "Configure le comportement lors du clic sur fermer.",
+    "hideWindowOnClose": "Cacher dans la barre des tâches en fermant",
+    "trayClickBehaviorDescription": "Configure le comportement au clic sur l'icône de la barre des tâches.",
+    "traySingleClickTogglesWindow": "Un clic simple sur l'icône bascule la fenêtre.",
+
+    "storage": "Stockage",
+    "storageDescription": "Voir comment Nora gère votre bibliothèque et utilise le stockage.",
+
+    "fullStorageSpace": "Espace utilisé total",
+    "fullStorageOutOfUsage": "{{value}} sur {{total}}",
+    "freeSpace": "Espace libre",
+    "otherApplications": "Autres applications",
+    "artworkCache": "Cache des illustrations",
+    "tempArtworkCache": "Cache temporaire",
+    "databaseData": "Base de données",
+    "songsData": "Données des chansons",
+    "artistsData": "Données des artistes",
+    "albumsData": "Données des albums",
+    "playlistsData": "Données des listes de lecture",
+    "palettesData": "Données des palettes",
+    "genresData": "Données des genres",
+    "appLogs": "Journaux d'application",
+    "userData": "Données utilisateur",
+    "internalAppFiles": "Fichiers internes",
+    "storageUseForLibraryData": "Epace utilisé par la bibliothèque",
+    "otherAppFiles": "Autres fichiers",
+    "generated": "Généré",
+    "generateStorageMetrics": "Générer les métriques de stockage",
+    "generateStorageMetricsAgain": "Regénérer les métriques",
+    "noStorageMetrics": "Vous n'avez pas encore généré de métriques.",
+    "storageMetricsGenerationDisclaimer": "La génération de métriques est une tâche exigeante. Nora peut devenir temporairement indisponible.",
+    "storageMetricsGenerationError": "Une erreur s'est produite. Veuillez signaler ce problème au développeur.",
+
+    "advanced": "Avancé",
+    "saveVerboseLogsDescription": "Sauvegarder des journaux détaillés pour le débogage.",
+    "saveVerboseLogs": "Journaux détaillés",
+
+    "about": "À propos",
+    "releasedOn": "Publié le {{val, datetime}}",
+    "noraWebsite": "Site officiel de Nora",
+    "noraDiscordServer": "Serveur Discord officiel",
+    "noraGithubRepo": "Dépôt GitHub de Nora",
+    "noraGithubIssues": "Issues GitHub de Nora",
+    "noraLocalizationStatus": "État de la localisation",
+    "noraDescription": "Nora est un lecteur de musique élégant construit avec Electron et React.",
+    "noraInspiration": "Inspiré par <Hyperlink>Oto Music for Android</Hyperlink> de Piyush Mamidwar.",
+    "otoMusicOnPlayStore": "Oto Music for Android sur le Play Store",
+    "noraLicenseNotice": "Ce produit est sous licence <Button>MIT</Button>.",
+    "appLicense": "Licence",
+    "releaseNotes": "Notes de version",
+    "openSourceLicenses": "Licences open-source",
+    "openLogFile": "Ouvrir le journal",
+    "openDevtools": "Ouvrir les outils de développement",
+    "resyncLibrary": "Resynchroniser la bibliothèque",
+    "generatePalettes": "Générer les palettes",
+    "appShortcuts": "Raccourcis",
+
+    "resetApp": "Réinitialiser l'application",
+    "clearOptionalData": "Effacer les données optionnelles",
+    "clearHistory": "Effacer l'historique",
+    "confirmSongHistoryDeletion": "Effacer l'historique",
+    "songHistoryDeletionDisclaimer": "Voulez-vous vraiment effacer votre historique ? Cette action est irréversible.",
+    "songHistoryDeletionSuccess": "Votre historique a été effacé.",
+    "exportAppData": "Exporter les données",
+    "importAppData": "Importer les données",
+    "createIssueOnNoraGithubRepo": "créer une issue sur $t(settingsPage.noraGithubRepo)",
+    "contact": "Pour tout retour (bugs, suggestions, etc.), veuillez <Hyperlink>$t(settingsPage.createIssueOnNoraGithubRepo)</Hyperlink>",
+    "emailContact": "ou me contacter par email.",
+    "loveNora": "Fait avec <span>❤</span> par <Hyperlink>Sandakan Nipunajith</Hyperlink>.",
+    "sandakanGithubProfile": "Profil GitHub de Sandakan",
+    "beautifulSriLanka": "Magnifique Sri Lanka"
+  },
+
+  "artistInfoPage": {
+    "likeArtist": "Aimer {{name}}",
+    "dislikeArtist": "Ne pas aimer {{name}}",
+    "appearsInAlbums": "Apparaît dans les albums",
+    "appearsInSongs": "Apparaît dans les chansons",
+    "similarArtistsInLibrary": "Artistes similaires dans la bibliothèque",
+    "otherSimilarArtists": "Autres artistes similaires",
+    "viewInLastFm": "Voir `{{name}}` sur Last.fm"
+  },
+
+  "albumInfoPage": {
+    "unavailableTracks": "Pistes indisponibles de cet album"
+  },
+
+  "currentQueuePage": {
+    "queue": "File d'attente en cours",
+    "folderWithName": "Dossier {{name}}",
+    "enableAutoScrolling": "Activer le défilement automatique",
+    "disableAutoScrolling": "Désactiver le défilement automatique",
+    "scrollToCurrentPlayingSong": "Défiler vers la chanson en cours",
+    "shuffleQueue": "Mélanger la file",
+    "queueShuffleSuccess": "File mélangée avec succès.",
+    "clearQueue": "Vider la file",
+    "queueCleared": "File vidée.",
+    "durationRemaining": "{{duration}} restantes",
+    "empty": "La file est vide."
+  },
+
+  "lyricsEditingPage": {
+    "lyricsText": "Texte des paroles",
+    "startInSeconds": "Début en secondes",
+    "endInSeconds": "Fin en secondes",
+    "fromTo": "De {{start}} à {{end}}",
+    "deleteLine": "Supprimer la ligne",
+    "addLineAbove": "Ajouter une ligne au-dessus",
+    "addLineBelow": "Ajouter une ligne en dessous",
+    "addInstrumentalLineBelow": "Ajouter une ligne instrumentale",
+    "editLine": "Modifier la ligne",
+    "finishEditing": "Terminer",
+    "resetLyrics": "Réinitialiser les paroles",
+    "resetLyricsConfirm": "Voulez-vous vraiment réinitialiser les paroles ?",
+    "resetLyricsConfirmMessage": "<p>Vous perdrez <span>les modifications récentes</span> et <span>les données de synchronisation</span> si vous continuez.</p> <br/> <p>Cette action est irréversible.</p>",
+    "incorrectSongTitle": "Mauvaise chanson",
+    "incorrectSongMessage": "Pour commencer l'édition, lisez la chanson `{{title}}`.",
+    "lyricsEditor": "Éditeur de paroles",
+    "playbackSpeed": "Vitesse",
+    "playbackTime": "Temps",
+    "offsetWithCount": "{{count}} de décalage",
+    "saveLyrics": "Sauvegarder",
+    "stopAndEditLyrics": "Arrêter et éditer",
+    "playLyrics": "Lire les paroles",
+    "configure": "Configurer"
+  },
+
+  "lyricsPage": {
+    "noLyrics": "Paroles non trouvées.",
+    "noLyricsDescription": "Aucune parole trouvée pour cette chanson. Vous pouvez en ajouter dans l'éditeur de balises.",
+    "noSyncedLyrics": "Aucune parole synchronisée trouvée.",
+    "noSyncedLyricsDescription": "Aucune parole synchronisée trouvée pour cette chanson.",
+    "noOnlineLyrics": "Aucune parole en ligne trouvée.",
+    "noOfflineLyrics": "Aucune parole hors ligne trouvée.",
+    "noSavedLyrics": "Aucune parole sauvegardée trouvée.",
+    "onlineLyricsRefreshFailed": "Échec du rafraîchissement des paroles en ligne.",
+    "offlineLyricsForSong": "Paroles hors ligne pour `{{title}}`",
+    "onlineLyricsForSong": "Paroles en ligne pour `{{title}}`",
+    "editLyrics": "Éditer les paroles",
+    "translateLyrics": "Traduire les paroles",
+    "romanizeLyrics": "Romaniser les paroles japonaises",
+    "convertLyricsToPinyin": "Convertir en pinyin",
+    "convertLyricsToRomaja": "Convertir en romaja",
+    "resetLyrics": "Réinitialiser",
+    "showOnlineLyrics": "Afficher les paroles en ligne",
+    "refreshOnlineLyrics": "Rafraîchir",
+    "showSavedLyrics": "Afficher les paroles sauvegardées",
+
+    "lyricsLoading": "Recherche de paroles",
+    "lyricsLoadingDescription": "Patientez... Nous cherchons partout...",
+    "noInternet": "Pas de connexion internet",
+    "noInternetDescription": "Aucune parole hors ligne. Une connexion internet est nécessaire.",
+    "lyricsProvidedBy": "Paroles fournies par <Hyperlink/>",
+    "lyricsTranslatedBy": "Paroles traduites avec Google Traduction"
+  },
+
+  "songInfoPage": {
+    "listensCount": "{{count}} écoutes",
+    "listeningActivityInLastMonths": "Activité d'écoute des {{count}} derniers mois",
+    "similarTracksInLibrary": "Pistes similaires dans la bibliothèque",
+    "otherSimilarTracks": "Autres pistes similaires",
+    "additionalSongInfo": "Informations supplémentaires",
+    "allTimeListens": "Écoutes totales",
+    "listensThisMonth": "Écoutes ce mois",
+    "listensThisYear": "Écoutes cette année",
+    "totalSongSkips": "Sauts totaux",
+    "fullSongListens": "Écoutes complètes",
+    "mostSoughtPosition": "Position la plus recherchée",
+    "mostSoughtFrequency": "Fréquence la plus recherchée",
+    "lovedSong": "Vous avez aimé cette chanson",
+    "unlovedSong": "Vous n'avez pas aimé cette chanson",
+    "byArtists": " <By>par</By> <span>{{val, list}}</span>"
+  },
+
+  "songTagsEditingPage": {
+    "editArtwork": "Modifier l'illustration",
+    "removeArtwork": "Supprimer l'illustration",
+    "lyricsIncluded": "Paroles incluses",
+    "addToMetadata": "Ajouter aux métadonnées",
+    "customizeMetadata": "Personnaliser les métadonnées",
+    "songMetadataEditor": "Éditeur de métadonnées",
+    "searchMetadataOnInternet": "Rechercher sur internet",
+    "saveTags": "Sauvegarder",
+    "updateAddedToBeSavedLater": "Les mises à jour seront sauvegardées après la lecture.",
+    "pendingUpdateAvailable": "Une mise à jour des métadonnées est en attente.",
+    "saveTagsNotSupportedTitle": "Non supporté",
+    "saveTagsNotSupportedDescription": "<P1>Nora ne supporte pas l'édition des métadonnées en format <Format/>.</P1><P2>Seul le format <SupportedFormat/> est supporté.",
+    "albumArtistNotMentioned": "La chanson fait déjà partie de l'album `{{title}}` mais le(s) artiste(s) '{{artists}}' n'est/sont pas spécifié(s) comme artiste(s) de l'album.",
+    "songAlbumArtistMismatch": "Le(s) artiste(s) d'album sélectionné(s) '{{albumArtists}}' ne correspond(ent) pas à l'album sélectionné '{{albumTitle}}' dont le(s) artiste(s) est/sont '{{songAlbumArtists}}'.",
+    "searchForArtists": "Rechercher des artistes",
+    "searchForAlbums": "Rechercher des albums",
+    "searchForGenres": "Rechercher des genres",
+    "addNewArtist": "Ajouter l'artiste `{{name}}`",
+    "addNewAlbum": "Ajouter l'album `{{name}}`",
+    "addNewGenre": "Ajouter le genre `{{name}}`",
+    "albumName": "Nom de l'album",
+    "songArtists": "Artistes de la chanson",
+    "songName": "Nom de la chanson",
+    "composer": "Compositeur",
+    "syncedLyricsFetchFailed": "Échec de la récupération des paroles synchronisées.",
+    "lyricsEnhancedSynced": "Paroles synchronisées améliorées.",
+    "lyricsNotEnhancedSynced": "Paroles non synchronisées améliorées.",
+    "enhancedLyricsSupported": "Paroles synchronisées améliorées supportées.",
+    "readMoreAboutLrc": "$t(common.readMoreAboutTitle, {\"title\": \"format LRC\"})",
+    "avoidUnsyncedOnSyncedLyricsTab": "Évitez de saisir des paroles non synchronisées dans l'onglet synchronisé.",
+    "avoidSyncedOnUnsyncedLyricsTab": "Évitez de saisir des paroles synchronisées dans l'onglet non synchronisé.",
+    "pendingLyricsSavesAvailable": "Des paroles sont en attente de sauvegarde.",
+    "downloadLyrics": "Télécharger les paroles",
+    "downloadSyncedLyrics": "Télécharger les paroles synchronisées",
+    "musixmatchNotEnabled": "Vous devez activer Musixmatch dans les paramètres."
+  },
+
+  "miniPlayer": {
+    "alwaysOnTopEnabled": "Toujours au-dessus : OUI",
+    "alwaysOnTopDisabled": "Toujours au-dessus : NON"
+  },
+
+  "time": {
+    "second_one": "seconde",
+    "second_other": "secondes",
+    "minute_one": "minute",
+    "minute_other": "minutes",
+    "hour_one": "heure",
+    "hour_other": "heures",
+    "day_one": "jour",
+    "day_other": "jours",
+    "month_one": "mois",
+    "month_other": "mois",
+    "year_one": "an",
+    "year_other": "ans",
+    "secondWithCount": "{{count}} $t(time.second, {\"count\":{{count}}})",
+    "minuteWithCount": "{{count}} $t(time.minute, {\"count\":{{count}}})",
+    "hourWithCount": "{{count}} $t(time.hour, {\"count\":{{count}}})",
+    "dayWithCount": "{{count}} $t(time.day, {\"count\":{{count}}})",
+    "monthWithCount": "{{count}} $t(time.month, {\"count\":{{count}}})",
+    "yearWithCount": "{{count}} $t(time.year, {\"count\":{{count}}})"
+  },
+
+  "elapsedTime": {
+    "second_one": "il y a {{count}} seconde",
+    "second_other": "il y a {{count}} secondes",
+    "minute_one": "il y a {{count}} minute",
+    "minute_other": "il y a {{count}} minutes",
+    "hour_one": "il y a {{count}} heure",
+    "hour_other": "il y a {{count}} heures",
+    "day_one": "il y a {{count}} jour",
+    "day_other": "il y a {{count}} jours",
+    "month_one": "il y a {{count}} mois",
+    "month_other": "il y a {{count}} mois",
+    "year_one": "il y a {{count}} an",
+    "year_other": "il y a {{count}} ans"
+  },
+
+  "month": {
+    "january": "Janvier",
+    "february": "Février",
+    "march": "Mars",
+    "april": "Avril",
+    "may": "Mai",
+    "june": "Juin",
+    "july": "Juillet",
+    "august": "Août",
+    "september": "Septembre",
+    "october": "Octobre",
+    "november": "Novembre",
+    "december": "Décembre"
+  },
+
+  "data": {
+    "byteWithCount_one": "{{count}} octet",
+    "byteWithCount_other": "{{count}} octets"
+  },
+
+  "sideBar": {
+    "home": "Accueil",
+    "search": "Recherche"
+  },
+
+  "renamePlaylistPrompt": {
+    "renamePlaylistWithName": "Renommer la liste `{{name}}`",
+    "playlistName": "Nom de la liste"
+  },
+
+  "newPlaylistPrompt": {
+    "addPlaylistSuccess": "Liste de lecture ajoutée.",
+    "playlistNameEmpty": "Le nom de la liste est requis",
+    "addNewPlaylist": "Ajouter une liste de lecture"
+  },
+
+  "confirmDeletePlaylistsPrompt": {
+    "playlistsDeletedWithCount": "$t(common.playlistWithCount, {\"count\":{{count}}}) supprimée(s).",
+    "confirmPlaylistDeleteWithCount": "Confirmer la suppression de $t(common.playlistWithCount, {\"count\":{{count}}})",
+    "message_one": "La suppression de cette liste retirera les liens entre les chansons. Vous ne pourrez plus y accéder.",
+    "message_other": "La suppression de ces listes retirera les liens entre les chansons. Vous ne pourrez plus y accéder.",
+    "modificationNotice": "Cette action affectera ces fichiers : "
+  },
+
+  "resetAppConfirmationPrompt": {
+    "confirmAppReset": "Confirmer la réinitialisation",
+    "message": "La réinitialisation supprime toutes les données utilisateur (favoris, préférences, paramètres, etc.) mais PAS les chansons. Cette action est <span>IRRÉVERSIBLE</span>.",
+    "restartAfterReset": "Nora redémarrera après la réinitialisation.",
+    "systemPlaylistsRemovalProhibited": "Vous ne pouvez pas supprimer les listes système (Historique, Favoris)."
+  },
+
+  "addSongsToPlaylistsPrompt": {
+    "songsAddedToPlaylists": "$t(common.songWithCount, {\"count\":{{count}}}) ajoutée(s) à $t(common.playlistWithCount, {\"count\":{{playlistCount}}})",
+    "selectPlaylistsToAdd": "Sélectionnez les listes de destination pour $t(common.songWithCount, {\"count\":{{count}}})",
+    "duplicationNotice": "Les chansons déjà présentes seront ignorées."
+  },
+
+  "blacklistSongConfirmPrompt": {
+    "title": "Confirmer la mise en liste noire de $t(common.songWithCount, {\"count\":{{count}}})",
+    "message_one": "Vous allez mettre cette chanson en liste noire. Vous pourrez la restaurer en cliquant droit puis '$t(song.deblacklist)'.",
+    "message_other": "Vous allez mettre ces chansons en liste noire. Vous pourrez les restaurer en cliquant droit puis '$t(song.deblacklist)'.",
+    "effectTitle": "Effet de la liste noire",
+    "effect1": "Apparaîtra grisée avec un symbole '<span/>'.",
+    "effect2": "Ne sera pas ajoutée automatiquement à la file, sauf si vous l'ajoutez explicitement via <span>'$t(common.shuffleAndPlay)'</span> ou <span>'$t(common.playAll)'</span>.",
+    "effect3": "Peut toujours être lue via double-clic, '$t(common.play)' ou '$t(common.playNext)'.",
+    "songsBlacklisted": "$t(common.songWithCount, {\"count\":{{count}}}) mise(s) en liste noire"
+  },
+
+  "blacklistFolderConfirmPrompt": {
+    "title": "Confirmer la mise en liste noire de $t(common.folderWithCount, {\"count\":{{count}}})",
+    "message_one": "Vous allez mettre ce dossier en liste noire. Vous pourrez le restaurer depuis la page Dossiers en cliquant droit et en sélectionnant '$t(song.deblacklist)'.",
+    "message_other": "Vous allez mettre ces dossiers en liste noire. Vous pourrez les restaurer depuis la page Dossiers en cliquant droit et en sélectionnant '$t(song.deblacklist)'.",
+    "effectTitle": "Effet de la liste noire sur un dossier",
+    "effect1": "Apparaîtra grisé avec un symbole '<span/>'.",
+    "effect2": "Les chansons liées seront aussi en liste noire.",
+    "effectTitle2": "Effet sur les chansons liées",
+    "folderBlacklisted": "$t(common.folderWithCount, {\"count\":{{count}}}) mis en liste noire."
+  },
+
+  "deleteSongFromSystemConfirmPrompt": {
+    "title_one": "Supprimer `{{title}}` du système",
+    "title_other": "Supprimer $t(common.songWithCount, {\"count\":{{count}}}) du système",
+    "permanentlyDeleteFromSystem": "Supprimer définitivement",
+    "message_one": "Vous perdrez cette chanson et ne pourrez peut-être pas la récupérer.",
+    "message_other": "Vous perdrez ces chansons et ne pourrez peut-être pas les récupérer.",
+    "modificationNotice": "Cette action affecte ces fichiers :",
+    "deleteSong": "Supprimer",
+    "songPermanentlyDeleted": "$t(common.songWithCount, {\"count\":{{count}}}) supprimée(s) du système.",
+    "songMovedToBin": "$t(common.songWithCount, {\"count\":{{count}}}) déplacée(s) vers la corbeille."
+  },
+
+  "addMusicFoldersPrompt": {
+    "title": "Sélectionnez les dossiers à ajouter",
+    "emptyMessage1": "Vous n'avez sélectionné aucun dossier.",
+    "emptyMessage2": "Choisissez des dossiers sur votre système.",
+    "chooseFolders": "Choisir des dossiers",
+    "addSelectedFolders": "Ajouter les dossiers sélectionnés",
+    "noFoldersSelected": "Aucun dossier sélectionné."
+  },
+
+  "removeFolderConfirmationPrompt": {
+    "title": "Confirmer la suppression de `{{folderName}}`",
+    "message": "Voulez-vous vraiment retirer ce dossier de la bibliothèque ? Les fichiers resteront intacts.",
+    "removeFolder": "Retirer le dossier"
+  },
+
+  "lyricsEditorHelpPrompt": {
+    "title": "Utilisation de l'éditeur de paroles",
+    "subTitle1": "Comment démarrer ?",
+    "subTitle1Message": " <ol><li>Lisez la chanson dont vous voulez éditer les paroles.</li><li>Cliquez sur la page pour lui donner le focus.</li><li>Lancez la chanson depuis le début.</li><li>Appuyez sur <ShortcutButton>$t(appShortcutsPrompt.enterKey)</ShortcutButton> pour ajouter le timecode.</li><li>Continuez jusqu'à la dernière ligne.</li></ol>",
+    "subTitle2": "Quels sont les raccourcis ?",
+    "subTitle2Message": "Consultez le <Button>Raccourcis</Button> pour voir les raccourcis de l'éditeur.",
+    "subTitle3": "J'ai raté une ligne ?",
+    "subTitle3Message": "<ol><li>Mettez la chanson en pause.</li><li>Trouvez la ligne concernée.</li><li>Cliquez sur <ShortcutButton>Modifier</ShortcutButton> et modifiez.</li><li>Cliquez sur <ShortcutButton>$t(lyricsEditingPage.finishEditing)</ShortcutButton>.</li></ol>",
+    "subTitle4": "Mauvaise donnée sur une mauvaise ligne ?"
+  },
+
+  "lyricsEditorSavePrompt": {
+    "lyricsUpdateSuccess": "Paroles mises à jour.",
+    "saveEditedLyrics": "Sauvegarder",
+    "copyLyrics": "Copier",
+    "saveLyricsToSong": "Sauvegarder sur la chanson",
+    "saveLyricsNotSupported": "Nora ne supporte pas la sauvegarde de paroles en format '{{format}}'.",
+    "saveLyricsFormatInfo": "* Les paroles sont sauvegardées en <Hyperlink>format LRC</Hyperlink>.",
+    "readAboutLrcFormat": "En savoir plus sur le format LRC"
+  },
+
+  "lyricsEditorSettingsPrompt": {
+    "lyricsEditorSettings": "Paramètres de l'éditeur",
+    "editNextAndCurrentStartAndEndTagsAutomaticallyDescription": "Modifier automatiquement le timecode de début de la ligne suivante lors de l'édition du timecode de fin de la ligne courante.",
+    "editNextAndCurrentStartAndEndTagsAutomatically": "Modifier les timecodes automatiquement",
+    "lyricOffsetInputDescription": "Décalage à ajouter aux lignes de paroles.",
+    "lyricOffsetInput": "Décalage (+ ou -)"
+  },
+
+  "pageFocusPrompt": { "pageNotFocused": "Page non ciblée." },
+
+  "releaseNotesPrompt": {
+    "latestVersion": "Vous avez la dernière version.",
+    "oldVersion": "<br/><span>Vous n'avez pas la dernière version.</span> <Hyperlink>Mettre à jour</Hyperlink>",
+    "outdatedChangelogNotice": "Vous consultez peut-être un changelog obsolète.",
+    "versionCheckError": "<br/><span>Échec de la vérification des mises à jour.<div>$t(releaseNotesPrompt.outdatedChangelogNotice)</div></span>",
+    "versionCheckNetworkError": "<br/><span>Impossible de vérifier les mises à jour. Vérifiez votre connexion.<div>$t(releaseNotesPrompt.outdatedChangelogNotice)</div></span>",
+    "noraReleases": "Versions de Nora",
+    "changelog": "Changelog",
+    "doNotRemindThisVersionUpdate": "Ne plus me rappeler cette version.",
+    "current": "Actuelle",
+    "latest": "Dernière",
+    "newFeaturesAndUpdates": "Nouvelles fonctionnalités",
+    "fixesAndImprovements": "Corrections et améliorations",
+    "issuesAndBugs": "Problèmes connus",
+    "developerUpdates": "Mises à jour développeur"
+  },
+
+  "appShortcutsPrompt": {
+    "inAppShortcuts": "Raccourcis",
+
+    "mediaPlayback": "Lecture",
+    "playPause": "Lecture / Pause",
+    "toggleMute": "Activer/Désactiver le son",
+    "nextSong": "Chanson suivante",
+    "prevSong": "Chanson précédente",
+    "tenSecondsForward": "10 secondes avant",
+    "tenSecondsBackward": "10 secondes arrière",
+    "upVolume": "Augmenter le volume",
+    "downVolume": "Baisser le volume",
+    "toggleShuffle": "Activer le mélange",
+    "toggleRepeat": "Activer la répétition",
+    "toggleFavorite": "Basculer en favori",
+    "upPlaybackRate": "Augmenter la vitesse (0.05x)",
+    "downPlaybackRate": "Diminuer la vitesse (0.05x)",
+    "resetPlaybackRate": "Réinitialiser la vitesse (1x)",
+
+    "navigation": "Navigation",
+    "goHome": "Accueil",
+    "goBack": "Retour",
+    "goForward": "Avancer",
+    "openMiniPlayer": "Mini-lecteur",
+    "goToLyrics": "Paroles",
+    "goToQueue": "File d'attente",
+    "goToSearch": "Recherche",
+
+    "selections": "Sélections",
+    "selectMultipleItems": "Sélection multiple",
+
+    "lyrics": "Paroles",
+    "playNextLyricsLine": "Ligne de paroles suivante",
+    "playPrevLyricsLine": "Ligne de paroles précédente",
+
+    "lyricsEditor": "Éditeur de paroles",
+    "selectNextLyricsLine": "Sélectionner la ligne suivante",
+    "selectPrevLyricsLine": "Sélectionner la ligne précédente",
+    "selectCustomLyricsLine": "Sélectionner une ligne personnalisée",
+
+    "otherShortcuts": "Autres",
+    "toggleTheme": "Changer le thème",
+    "toggleMiniPlayerAlwaysOnTop": "Mini-lecteur toujours au-dessus",
+    "reload": "Recharger",
+    "openDevtools": "Outils de développement",
+    "openAppShortcutsPrompt": "Raccourcis de l'application",
+
+    "enterKey": "Entrée",
+    "spaceKey": "Espace",
+    "ctrlKey": "Ctrl",
+    "shiftKey": "Maj",
+    "altKey": "Alt",
+    "homeKey": "Début",
+    "rightArrowKey": "Flèche droite",
+    "leftArrowKey": "Flèche gauche",
+    "upArrowKey": "Flèche haut",
+    "downArrowKey": "Flèche bas",
+
+    "mouseClick": "Clic",
+    "doubleClick": "Double-clic"
+  },
+
+  "clearLocalStoragePrompt": {
+    "title": "Confirmer le nettoyage",
+    "description": "Ce processus effacera les données corrompues et restaurera les paramètres par défaut.",
+    "effect": "<p>Cette action affectera : </p><ul><li>La plupart des préférences</li><li>Les paramètres de lecture</li><li>La file d'attente</li><li>Les suggestions ignorées</li><li>Les tris de pages</li><li>Les réglages de l'égaliseur</li><li>Les paramètres de l'éditeur</li></ul>",
+    "restartNotice": "Nora redémarrera après l'opération."
+  },
+
+  "musixmatchDisclaimerPrompt": {
+    "title": "Avertissement - Musixmatch",
+    "message": "<li> Musixmatch est une fonctionnalité d'évaluation et peut être retirée à tout moment.</li><li>Nora n'est pas affiliée à Musixmatch.</li><li>Les mainteneurs de cette application appellent à une utilisation responsable de cette fonctionnalité.</li>",
+    "implementationNotice": "Implémentation depuis le <Hyperlink/> de Fashni.",
+    "hyperlinkTitle": "Dépôt GitHub MxLRC",
+    "contactAboutComplaints": "Pour toute réclamation, contactez-moi via Discord ou par <Hyperlink>email</Hyperlink>."
+  },
+
+  "musixmatchSettingsPrompt": {
+    "title": "Paramètres Musixmatch",
+    "message": "<li>Musixmatch nécessite un jeton utilisateur.</li><li>L'utilisation prolongée peut parfois causer des échecs d'affichage.</li><li>Suivez le guide du <Hyperlink>Wiki Spicetify</Hyperlink> pour obtenir un nouveau jeton.</li>",
+    "showToken": "Afficher le jeton",
+    "hideToken": "Cacher le jeton",
+    "updateToken": "Mettre à jour",
+    "tokenUpdateSuccess": "Jeton mis à jour.",
+    "tokenUpdateFailed": "Échec de la mise à jour.",
+    "tokenMissingCharacters": "Le jeton doit contenir 54 caractères ({{count}} requis supplémentaires).",
+    "tokenIncorrectCharacters": "Le jeton ne doit contenir que des caractères alphanumériques.",
+    "savedTokenAvailableMessage": "<Title><span/> Un jeton sauvegardé existe.</Title><p> Un jeton Musixmatch valide sauvegardé est déjà disponible dans Nora.</p> <p> Vous n'avez besoin de changer le jeton que si le service ne fonctionne pas correctement.</p>"
+  },
+
+  "customizeSelectedMetadataPrompt": {
+    "selected": "Sélectionné",
+    "select": "Sélectionner",
+    "title": "Personnaliser les métadonnées pour `{{title}}`",
+    "selectArtwork": "Choisir une illustration",
+    "noArtworksFound": "Aucune illustration trouvée",
+    "customizeOtherMetadata": "Autres métadonnées",
+    "syncedLyricsAvailable": "Paroles synchronisées disponibles",
+    "unsyncedLyricsAvailable": "Paroles non synchronisées disponibles",
+    "addOnlySelected": "Ajouter la sélection",
+    "addAll": "Tout ajouter"
+  },
+
+  "resetTagsToDefaultPrompt": {
+    "changed": "Modifié",
+    "title": "Confirmer la réinitialisation",
+    "description": "Voulez-vous vraiment réinitialiser les données de la chanson ?",
+    "resetToDefault": "Réinitialiser"
+  },
+
+  "songMetadataResultSelectPrompt": {
+    "title": "Résultats pour <span/>"
+  },
+
+  "errorPrompt": {
+    "title": "Une erreur est survenue",
+    "sendErrorInfo": "Veuillez nous envoyer un <Hyperlink1>feedback</Hyperlink1> ou <Hyperlink2>créer une issue</Hyperlink2> sur GitHub."
+  },
+
+  "openLinkConfirmPrompt": {
+    "description": "Vous allez ouvrir le lien <span/>.<br/> Ce lien s'ouvrira dans votre navigateur par défaut.",
+    "doNotVerifyLink": "Ne pas vérifier les liens à l'avenir.",
+    "openLink": "Ouvrir le lien"
+  },
+
+  "songUnplayableErrorPrompt": {
+    "title": "Lecture impossible",
+    "description": "Cette chanson ne peut pas être lue. Vérifiez qu'elle est accessible par l'application."
+  },
+
+  "unsupportedFileMessagePrompt": {
+    "title": "Format audio non supporté",
+    "description": "Vous essayez d'ouvrir un fichier avec l'extension <span/>, qui n'est pas supportée.<br/> Les formats supportés sont : <div/>"
+  },
+
+  "duplicateArtistsSuggestion": {
+    "message": "<div><p><span/> sont-ils le même artiste ?</p><p>Si oui, vous pouvez lier leur contenu ou ignorer cette suggestion.</p></div>",
+    "linkToArtist": "Lier à {{name}}"
+  },
+
+  "separateArtistsSuggestion": {
+    "message": "<div><p><span/> sont-ils {{count}} artistes distincts ?</p><p>Si oui, vous pouvez les organiser comme artistes séparés.</p></div>",
+    "separateAsArtists": "Séparer en {{count}} artistes"
+  },
+
+  "featArtistsSuggestion": {
+    "message_one": "<p><span/> est-il un artiste invité sur cette chanson ?</p><p>Si oui, ajoutez-le comme artiste de la chanson.</p>",
+    "message_other": "<p><span/> sont-ils {{count}} artistes invités ?</p><p>Si oui, ajoutez-les comme artistes de la chanson.</p>",
+    "featArtistsTitleReset": "Retirer les artistes invités du titre après ajout.",
+    "addArtistsToSong": "Ajouter $t(common.artistWithCount, {\"count\":{{count}}}) à la chanson",
+    "editInMetadataEditingPage": "Éditer dans l'éditeur",
+    "modificationNotice": "L'ajout d'artistes invités mettra à jour la chanson dans la bibliothèque et ses métadonnées."
+  },
+
+  "biography": {
+    "readMore": "Lire la suite...",
+    "readMoreInLastFm": "Lire la suite sur LastFM",
+    "aboutName": "À propos de <span/>",
+    "goToTagInLastFm": "Voir le tag {{name}} sur LastFM"
+  },
+
+  "notifications": {
+    "clearAll": "Tout effacer",
+    "playingNext": "`{{title}}` sera jouée ensuite.",
+    "songBlacklisted": "`{{title}}` est en liste noire.",
+    "playingNextSongsWithCount": "$t(common.songWithCount, {\"count\":{{count}}}) seront jouées ensuite.",
+    "addedToQueue": "$t(common.songWithCount, {\"count\":{{count}}}) ajoutée(s) à la file d'attente",
+    "suggestionIgnored": "Suggestion ignorée.",
+    "songRestoreSuccess": "Chanson restaurée.",
+    "songDataUpdateFailed": "Échec de la mise à jour.",
+    "noSongDataEdits": "Aucune modification de données.",
+    "selectASongToPlay": "Sélectionnez une chanson.",
+    "alreadyInPage": "Vous êtes déjà sur cette page.",
+    "playbackRateChanged": "Vitesse modifiée à {{val}}x",
+    "playbackRateReset": "Vitesse réinitialisée à 1x",
+    "playbackPausedDueToSongDeletion": "Lecture interrompue car la chanson a été supprimée.",
+    "languageChanged": "Langue changée avec succès."
+  },
+
+  "backend": {
+    "RESYNC_SUCCESSFUL": "Bibliothèque resynchronisée.",
+    "RESET_SUCCESSFUL": "Application réinitialisée, redémarrage...",
+    "RESET_FAILED": "Échec de la réinitialisation. Rechargement...",
+    "APP_THEME_CHANGE": "Thème changé pour {{theme}}",
+    "SONG_REMOVE_PROCESS_UPDATE": "{{value}} chansons supprimées sur {{total}}.",
+    "OPEN_SONG_IN_EXPLORER_FAILED": "Impossible d'ouvrir le fichier dans l'explorateur.",
+    "PENDING_METADATA_UPDATES_SAVED": "Métadonnées de `{{title}}` sauvegardées.",
+    "METADATA_UPDATE_FAILED": "Échec de la mise à jour. {{message}}",
+    "SONG_EXT_NOT_SUPPORTED_FOR_LYRICS_SAVES": "Impossible de sauvegarder les paroles car le format ({{ext}}) n'est pas supporté.",
+    "LASTFM_LOGIN_SUCCESS": "Connexion à LastFM réussie.",
+    "AUDIO_PARSING_PROCESS_UPDATE": "{{value}} chansons analysées sur {{total}}.",
+    "SONG_PALETTE_GENERATING_PROCESS_UPDATE": "Génération des palettes pour {{value}} chansons sur {{total}}.",
+    "GENRE_PALETTE_GENERATING_PROCESS_UPDATE": "Génération des palettes pour {{value}} genres sur {{total}}.",
+    "LYRICS_FIND_FAILED": "Paroles introuvables pour `{{title}}`",
+    "LYRICS_TRANSLATION_SUCCESS": "Paroles traduites.",
+    "LYRICS_CONVERT_SUCCESS": "Paroles converties.",
+    "RESET_CONVERTED_LYRICS_SUCCESS": "Paroles réinitialisées.",
+    "LYRICS_TRANSLATION_FAILED": "Échec de la traduction.",
+    "LYRICS_TRANSLATION_TO_SAME_SOURCE_LANGUAGE": "Traduction demandée vers la même langue source '{{language}}'.",
+    "LYRICS_CONVERT_FAILED": "Échec de la conversion.",
+    "RESET_CONVERTED_LYRICS_FAILED": "Échec de la réinitialisation.",
+    "MUSIC_FOLDER_DELETED": "Le dossier `{{name}}` a été supprimé du système. $t(common.songWithCount, {\"count\":{{count}}}) liée(s) sera(ont) retirée(s).",
+    "EMPTY_MUSIC_FOLDER_DELETED": "Le dossier `{{name}}` a été supprimé. Aucune chanson concernée.",
+    "WHITELISTING_FOLDER_FAILED_DUE_TO_BLACKLISTED_PARENT_FOLDER": "Impossible de mettre en liste blanche `{{folderName}}` car son dossier parent est en liste noire.",
+    "WHITELISTING_SONG_FAILED_DUE_TO_BLACKLISTED_DIRECTORY": "Impossible de mettre en liste blanche `{{songName}}` car son dossier est en liste noire.",
+    "SONG_WHITELISTED": "$t(common.songWithCount, {\"count\":{{count}}}) restaurée(s) de la liste noire.",
+    "ARTWORK_SAVED": "Illustration sauvegardée.",
+    "DESTINATION_NOT_SELECTED": "Aucune destination sélectionnée.",
+    "ARTWORK_SAVE_FAILED": "Échec de la sauvegarde de l'illustration.",
+    "PLAYBACK_FROM_UNKNOWN_SOURCE": "Vous lisez une chanson hors de votre bibliothèque.",
+    "ARTIST_DISLIKE": "`{{name}}` retiré(e) des favoris.",
+    "ARTIST_LIKE": "`{{name}}` ajouté(e) aux favoris.",
+    "SONG_DISLIKE": "`{{name}}` retirée des favoris.",
+    "SONG_LIKE": "`{{name}}` ajoutée aux favoris.",
+    "SONG_DELETED": "`{{name}}` supprimée du système.",
+    "FOLDER_PARSED_FOR_DIRECTORIES": "$t(folder.directoryCount, {\"count\":{{count}}}) trouvé(s) dans $t(folder.selectedFolderCount, {\"count\":{{folderCount}}}).",
+    "NO_MORE_SONG_PALETTES": "Plus de palettes à générer pour les chansons.",
+    "NO_MORE_GENRE_PALETTES": "Plus de palettes à générer pour les genres.",
+    "PARSE_FAILED": "`{{name}}` n'a pas pu être ajoutée à la bibliothèque.",
+    "PARSE_SUCCESSFUL": "`{{name}}` ajoutée à la bibliothèque.",
+    "LYRICS_SAVE_QUEUED": "Les paroles de `{{title}}` seront sauvegardées automatiquement.",
+    "LYRICS_SAVED_IN_LRC_FILE": "Les paroles pour ce format '{{ext}}' seront sauvegardées en fichier LRC.",
+    "PENDING_LYRICS_SAVED": "Paroles de `{{title}}` sauvegardées.",
+    "ADDED_SONGS_TO_PLAYLIST": "$t(common.songWithCount, {\"count\":{{count}}}) ajoutée(s) à `{{name}}`.",
+    "APPDATA_IMPORT_STARTED": "Importation des données...",
+    "APPDATA_IMPORT_SUCCESS": "Données importées.",
+    "APPDATA_IMPORT_SUCCESS_WITH_PENDING_RESTART": "$t(backend.APPDATA_IMPORT_SUCCESS) Redémarrage dans 5 secondes.",
+    "APPDATA_IMPORT_FAILED": "Échec de l'importation.",
+    "APPDATA_IMPORT_FAILED_DUE_TO_MISSING_FILES": "$t(backend.APPDATA_IMPORT_FAILED) Fichiers requis manquants.",
+    "APPDATA_EXPORT_STARTED": "Exportation des données...",
+    "APPDATA_EXPORT_SUCCESS": "Données exportées.",
+    "APPDATA_EXPORT_FAILED": "Erreur lors de l'exportation.",
+    "PLAYLIST_EXPORT_SUCCESS": "Liste `{{name}}` exportée.",
+    "PLAYLIST_EXPORT_FAILED": "Erreur lors de l'exportation de `{{name}}`.",
+    "PLAYLIST_IMPORT_SUCCESS": "Liste `{{name}}` importée.",
+    "PLAYLIST_IMPORT_FAILED": "Échec de l'importation.",
+    "PLAYLIST_IMPORT_FAILED_DUE_TO_SONGS_OUTSIDE_LIBRARY": "$t(common.songWithCount, {\"count\":{{count}}}) trouvée(s) hors bibliothèque (non supporté).",
+    "PLAYLIST_IMPORT_FAILED_DUE_TO_INVALID_FILE_DATA": "Fichier de données invalide.",
+    "PLAYLIST_IMPORT_FAILED_DUE_TO_INVALID_FILE_EXTENSION": "Le format du fichier doit être '.m3u8'.",
+    "PLAYLIST_IMPORT_TO_EXISTING_PLAYLIST": "$t(common.songWithCount, {\"count\":{{count}}}) importée(s) dans `{{name}}`.",
+    "PLAYLIST_IMPORT_TO_EXISTING_PLAYLIST_FAILED": "Erreur lors de l'importation dans la liste existante.",
+    "PLAYLIST_CREATION_FAILED": "Échec de la création.",
+    "PLAYLIST_RENAME_SUCCESS": "Liste renommée.",
+    "PLAYLIST_NOT_FOUND": "Liste introuvable.",
+    "SONG_REPARSE_SUCCESS": "`{{title}}` ré-analysée.",
+    "SONG_REPARSE_FAILED": "Erreur lors de la ré-analyse."
+  },
+
+  "discordrpc": {
+    "noraOnGitHub": "Nora sur GitHub",
+    "untitledSong": "Chanson sans titre",
+    "unknownArtist": "artiste inconnu",
+    "playingASong": "Lecture d'une chanson"
+  }
+}

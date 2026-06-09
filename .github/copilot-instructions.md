@@ -209,11 +209,13 @@ MINI_PLAYER_ASPECT_RATIO = 17/10
 ipcMain.handle('app/getSong', (_, id: string) => sendAudioData(id));
 
 // Fire-and-forget (no return)
-ipcMain.on('app/player/songPlaybackStateChange', (_, isPlaying: boolean) => toggleAudioPlayingState(isPlaying));
+ipcMain.on('app/player/songPlaybackStateChange', (_, isPlaying: boolean) =>
+  toggleAudioPlayingState(isPlaying)
+);
 
 // With abort signal (cancellable long operations)
 ipcMain.handle('app/deleteSongsFromSystem', (_, paths: string[], isPermanent: boolean) =>
-	deleteSongsFromSystem(paths, abortSignal, isPermanent),
+  deleteSongsFromSystem(paths, abortSignal, isPermanent)
 );
 ```
 
@@ -250,7 +252,7 @@ db/
 ```typescript
 // PGlite with extensions
 const pgliteInstance = await PGlite.create(DB_PATH, {
-	extensions: { pg_trgm, citext }, // Full-text search, case-insensitive text
+  extensions: { pg_trgm, citext } // Full-text search, case-insensitive text
 });
 
 // Drizzle ORM instance
@@ -262,7 +264,7 @@ await seedDatabase(); // Insert default settings if needed
 
 // Graceful shutdown
 export const closeDatabaseInstance = async () => {
-	await pgliteInstance.close();
+  await pgliteInstance.close();
 };
 ```
 
@@ -273,22 +275,22 @@ import { db } from '../db';
 import { songs, artists } from '../schema';
 
 export async function getSongById(id: number) {
-	const [song] = await db.select().from(songs).where(eq(songs.id, id)).limit(1);
-	return song;
+  const [song] = await db.select().from(songs).where(eq(songs.id, id)).limit(1);
+  return song;
 }
 
 export async function getAllSongs(sortType?: SongSortTypes, filterType?: SongFilterTypes) {
-	let query = db.select().from(songs);
+  let query = db.select().from(songs);
 
-	if (filterType === 'favorites') {
-		query = query.where(eq(songs.isFavorite, true));
-	}
+  if (filterType === 'favorites') {
+    query = query.where(eq(songs.isFavorite, true));
+  }
 
-	if (sortType === 'aToZ') {
-		query = query.orderBy(asc(songs.title));
-	}
+  if (sortType === 'aToZ') {
+    query = query.orderBy(asc(songs.title));
+  }
 
-	return await query;
+  return await query;
 }
 ```
 
@@ -354,25 +356,25 @@ import { dataUpdateEvent } from '@main/main';
 import logger from '@main/logger';
 
 export default async function toggleLikeSongs(songIds: string[], isLikeSong?: boolean) {
-	try {
-		const songIdsNum = songIds.map(Number);
+  try {
+    const songIdsNum = songIds.map(Number);
 
-		// Update database
-		await db
-			.update(songs)
-			.set({ isFavorite: isLikeSong ?? true })
-			.where(inArray(songs.id, songIdsNum));
+    // Update database
+    await db
+      .update(songs)
+      .set({ isFavorite: isLikeSong ?? true })
+      .where(inArray(songs.id, songIdsNum));
 
-		// Notify renderer of data change
-		dataUpdateEvent('songs/favoriteStatus', songIds);
+    // Notify renderer of data change
+    dataUpdateEvent('songs/favoriteStatus', songIds);
 
-		logger.info(`Toggled like status for ${songIds.length} songs`, { songIds, isLikeSong });
+    logger.info(`Toggled like status for ${songIds.length} songs`, { songIds, isLikeSong });
 
-		return { success: true };
-	} catch (error) {
-		logger.error('Failed to toggle like songs', { songIds, error });
-		throw error;
-	}
+    return { success: true };
+  } catch (error) {
+    logger.error('Failed to toggle like songs', { songIds, error });
+    throw error;
+  }
 }
 ```
 
@@ -394,10 +396,10 @@ export default async function toggleLikeSongs(songIds: string[], isLikeSong?: bo
 ```typescript
 // Uses Node.js fs.watch() with recursive option
 const watcher = fs.watch(folderPath, { recursive: true }, (eventType, filename) => {
-	if (eventType === 'rename') {
-		// Song added or deleted
-		checkFolderForContentModifications(folderPath);
-	}
+  if (eventType === 'rename') {
+    // Song added or deleted
+    checkFolderForContentModifications(folderPath);
+  }
 });
 
 // Cleanup on app quit
@@ -508,32 +510,32 @@ focused, reusable hooks.
 const player = new AudioPlayer();
 
 export function useAudioPlayer() {
-	useEffect(() => {
-		const interval = setInterval(() => {
-			// player is always the same instance, no stale closures
-			if (!player.paused) dispatchCurrentSongTime();
-		}, 100);
-		return () => clearInterval(interval);
-	}, []);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // player is always the same instance, no stale closures
+      if (!player.paused) dispatchCurrentSongTime();
+    }, 100);
+    return () => clearInterval(interval);
+  }, []);
 
-	return player; // Return instance directly (not wrapped in ref)
+  return player; // Return instance directly (not wrapped in ref)
 }
 
 // ❌ BAD: Ref-based singletons with intervals lead to stale closure issues
 export function useAudioPlayer() {
-	const playerRef = useRef<AudioPlayer>();
+  const playerRef = useRef<AudioPlayer>();
 
-	useEffect(() => {
-		playerRef.current = new AudioPlayer(); // Ref assigned after effect creation
+  useEffect(() => {
+    playerRef.current = new AudioPlayer(); // Ref assigned after effect creation
 
-		const interval = setInterval(() => {
-			// playerRef.current may be null/stale when closure was created
-			if (!playerRef.current?.paused) dispatchCurrentSongTime();
-		}, 100);
-		return () => clearInterval(interval);
-	}, []);
+    const interval = setInterval(() => {
+      // playerRef.current may be null/stale when closure was created
+      if (!playerRef.current?.paused) dispatchCurrentSongTime();
+    }, 100);
+    return () => clearInterval(interval);
+  }, []);
 
-	return playerRef.current; // Timing issues: ref not ready yet
+  return playerRef.current; // Timing issues: ref not ready yet
 }
 ```
 
@@ -553,14 +555,14 @@ import storage from '../utils/localStorage';
 export const store = new Store(DEFAULT_REDUCER_DATA);
 
 export const dispatch = (options: AppReducerStateActions) => {
-	store.setState((state) => {
-		return appReducer(state, options);
-	});
+  store.setState((state) => {
+    return appReducer(state, options);
+  });
 };
 
 // Automatically sync state to localStorage
 store.subscribe((state) => {
-	storage.setLocalStorage(state.currentVal.localStorage);
+  storage.setLocalStorage(state.currentVal.localStorage);
 });
 ```
 
@@ -610,14 +612,14 @@ window.api.unknownSource; // External file associations
 
    ```typescript
    useEffect(() => {
-   	const handleEvent = (e: unknown) => {
-   		/* handler */
-   	};
-   	window.api.playerControls.toggleSongPlayback(handleEvent);
+     const handleEvent = (e: unknown) => {
+       /* handler */
+     };
+     window.api.playerControls.toggleSongPlayback(handleEvent);
 
-   	return () => {
-   		window.api.playerControls.removeTogglePlaybackStateEvent(handleEvent);
-   	};
+     return () => {
+       window.api.playerControls.removeTogglePlaybackStateEvent(handleEvent);
+     };
    }, [dependencies]);
    ```
 
@@ -633,7 +635,7 @@ window.api.unknownSource; // External file associations
 ```typescript
 // Player position updates (dispatched by useAudioPlayer every 100ms)
 const playerPositionChange = new CustomEvent('player/positionChange', {
-	detail: roundTo(player.currentTime || 0, 2),
+  detail: roundTo(player.currentTime || 0, 2)
 });
 document.dispatchEvent(playerPositionChange);
 
@@ -672,39 +674,47 @@ import { createQueryKeys } from '@lukemorales/query-key-factory';
 
 // Simple query (no parameters)
 export const homeQuery = createQueryKeys('home', {
-	recentlyPlayedSongs: {
-		queryKey: null,
-		queryFn: async (): Promise<SongData[]> => {
-			try {
-				const { data: playlists } = await window.api.playlistsData.getPlaylistData([SpecialPlaylists.History]);
-				const historyPlaylist = playlists[0];
-				if (!historyPlaylist?.songs.length) return [];
+  recentlyPlayedSongs: {
+    queryKey: null,
+    queryFn: async (): Promise<SongData[]> => {
+      try {
+        const { data: playlists } = await window.api.playlistsData.getPlaylistData([
+          SpecialPlaylists.History
+        ]);
+        const historyPlaylist = playlists[0];
+        if (!historyPlaylist?.songs.length) return [];
 
-				const songs = await window.api.audioLibraryControls.getSongInfo(
-					historyPlaylist.songs,
-					undefined,
-					undefined,
-					35,
-					true,
-				);
-				return Array.isArray(songs) ? songs : [];
-			} catch (error) {
-				console.error(error);
-				return [];
-			}
-		},
-	},
+        const songs = await window.api.audioLibraryControls.getSongInfo(
+          historyPlaylist.songs,
+          undefined,
+          undefined,
+          35,
+          true
+        );
+        return Array.isArray(songs) ? songs : [];
+      } catch (error) {
+        console.error(error);
+        return [];
+      }
+    }
+  }
 });
 
 // Parameterized query
 export const songQuery = createQueryKeys('songs', {
-	all: (data: { sortType: SongSortTypes; filterType?: SongFilterTypes; start?: number; end?: number }) => {
-		const { sortType = 'addedOrder', start = 0, end = 0 } = data;
-		return {
-			queryKey: [`sortType=${sortType}`, `start=${start}`, `end=${end}`, `limit=${end - start}`],
-			queryFn: () => window.api.audioLibraryControls.getAllSongs(sortType, undefined, { start, end }),
-		};
-	},
+  all: (data: {
+    sortType: SongSortTypes;
+    filterType?: SongFilterTypes;
+    start?: number;
+    end?: number;
+  }) => {
+    const { sortType = 'addedOrder', start = 0, end = 0 } = data;
+    return {
+      queryKey: [`sortType=${sortType}`, `start=${start}`, `end=${end}`, `limit=${end - start}`],
+      queryFn: () =>
+        window.api.audioLibraryControls.getAllSongs(sortType, undefined, { start, end })
+    };
+  }
 });
 ```
 
@@ -714,11 +724,13 @@ export const songQuery = createQueryKeys('songs', {
 
 ```typescript
 export const Route = createFileRoute('/main-player/home/')({
-	component: HomePage,
-	loader: async () => {
-		await queryClient.ensureQueryData(songQuery.all({ sortType: 'dateAddedDescending', start: 0, end: 30 }));
-		await queryClient.ensureQueryData(homeQuery.recentlyPlayedSongs);
-	},
+  component: HomePage,
+  loader: async () => {
+    await queryClient.ensureQueryData(
+      songQuery.all({ sortType: 'dateAddedDescending', start: 0, end: 30 })
+    );
+    await queryClient.ensureQueryData(homeQuery.recentlyPlayedSongs);
+  }
 });
 ```
 
@@ -726,7 +738,9 @@ export const Route = createFileRoute('/main-player/home/')({
 
 ```typescript
 const { data: recentlyPlayedSongs } = useSuspenseQuery(homeQuery.recentlyPlayedSongs);
-const { data: latestSongs } = useSuspenseQuery(songQuery.all({ sortType: 'dateAddedDescending', start: 0, end: 30 }));
+const { data: latestSongs } = useSuspenseQuery(
+  songQuery.all({ sortType: 'dateAddedDescending', start: 0, end: 30 })
+);
 ```
 
 #### Best Practices
@@ -764,13 +778,13 @@ For detailed patterns, file structure, and debugging tips, see the TanStack Quer
 ```typescript
 // useDynamicTheme.tsx
 useEffect(() => {
-	const { data: userSettings } = useSuspenseQuery(settingsQuery.all);
+  const { data: userSettings } = useSuspenseQuery(settingsQuery.all);
 
-	if (userSettings.isDarkMode) {
-		document.body.classList.add('dark');
-	} else {
-		document.body.classList.remove('dark');
-	}
+  if (userSettings.isDarkMode) {
+    document.body.classList.add('dark');
+  } else {
+    document.body.classList.remove('dark');
+  }
 }, [userSettings.isDarkMode]);
 ```
 
@@ -803,12 +817,12 @@ import { describe, test, expect } from 'vitest';
 import { parseLyrics } from '@common/parseLyrics';
 
 describe('parseLyrics', () => {
-	test('should parse synced lyrics', () => {
-		const input = '[00:12.00]Line 1\n[00:15.00]Line 2';
-		const result = parseLyrics(input);
-		expect(result.isSynced).toBe(true);
-		expect(result.lyrics).toHaveLength(2);
-	});
+  test('should parse synced lyrics', () => {
+    const input = '[00:12.00]Line 1\n[00:15.00]Line 2';
+    const result = parseLyrics(input);
+    expect(result.isSynced).toBe(true);
+    expect(result.lyrics).toHaveLength(2);
+  });
 });
 ```
 
@@ -820,11 +834,11 @@ import { vi } from 'vitest';
 
 // Module mocking
 vi.mock('../../../src/main/logger', () => ({
-	default: {
-		info: vi.fn((...data) => console.log(...data)),
-		error: vi.fn((...data) => console.error(...data)),
-		warn: vi.fn((...data) => console.warn(...data)),
-	},
+  default: {
+    info: vi.fn((...data) => console.log(...data)),
+    error: vi.fn((...data) => console.error(...data)),
+    warn: vi.fn((...data) => console.warn(...data))
+  }
 }));
 
 // Spy on console methods
@@ -897,14 +911,14 @@ npm run husky-test          # Run before commits (Prettier + tests)
 
 ```tsx
 useEffect(() => {
-	const handler = (e: unknown) => {
-		/* ... */
-	};
-	window.api.playerControls.toggleSongPlayback(handler);
+  const handler = (e: unknown) => {
+    /* ... */
+  };
+  window.api.playerControls.toggleSongPlayback(handler);
 
-	return () => {
-		window.api.playerControls.removeTogglePlaybackStateEvent(handler);
-	};
+  return () => {
+    window.api.playerControls.removeTogglePlaybackStateEvent(handler);
+  };
 }, [dependencies]);
 ```
 
@@ -958,36 +972,36 @@ Follow the language-agnostic style guide in `coding_style_guide.instructions.md`
 ```tsx
 // ✅ GOOD: Guard clauses flatten logic
 function playSong(songId: string) {
-	if (!songId) {
-		console.error('No song ID provided');
-		return;
-	}
+  if (!songId) {
+    console.error('No song ID provided');
+    return;
+  }
 
-	const song = await getSongById(songId);
-	if (!song) {
-		console.error('Song not found');
-		return;
-	}
+  const song = await getSongById(songId);
+  if (!song) {
+    console.error('Song not found');
+    return;
+  }
 
-	// Main logic here (flat, readable)
-	player.loadSong(song);
-	player.play();
+  // Main logic here (flat, readable)
+  player.loadSong(song);
+  player.play();
 }
 
 // ❌ BAD: Nested conditionals
 function playSong(songId: string) {
-	if (songId) {
-		getSongById(songId).then((song) => {
-			if (song) {
-				player.loadSong(song);
-				player.play();
-			} else {
-				console.error('Song not found');
-			}
-		});
-	} else {
-		console.error('No song ID provided');
-	}
+  if (songId) {
+    getSongById(songId).then((song) => {
+      if (song) {
+        player.loadSong(song);
+        player.play();
+      } else {
+        console.error('Song not found');
+      }
+    });
+  } else {
+    console.error('No song ID provided');
+  }
 }
 ```
 

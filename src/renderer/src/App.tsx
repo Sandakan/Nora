@@ -117,7 +117,12 @@ export default function App() {
 
   // ? INITIALIZE PLAYBACK ERRORS
   // Playback errors hook handles error management and retry logic
-  const { managePlaybackErrors } = usePlaybackErrors(audio, changePromptMenuData);
+  const skipForwardRef = useRef<() => void>();
+  const { managePlaybackErrors, resetErrorCount } = usePlaybackErrors(
+    audio,
+    changePromptMenuData,
+    skipForwardRef
+  );
 
   // ? INITIALIZE PLAYBACK SETTINGS
   // Playback settings hook handles repeat, volume, mute, position, favorites, and equalizer
@@ -138,6 +143,7 @@ export default function App() {
   // Listen for songLoaded events from AudioPlayer to record listening data
   useEffect(() => {
     const handleSongLoaded = (songData: AudioPlayerData) => {
+      resetErrorCount();
       recordListeningData(songData.songId, songData.duration, false, true);
     };
 
@@ -146,7 +152,7 @@ export default function App() {
     return () => {
       player.off('songLoaded', handleSongLoaded);
     };
-  }, [player, recordListeningData]);
+  }, [player, recordListeningData, resetErrorCount]);
 
   // ? INITIALIZE PLAYER CONTROL
   // Player control hook handles play/pause, song loading, and player state management
@@ -172,6 +178,7 @@ export default function App() {
   // Songs are auto-loaded by AudioPlayer on queue position changes
   const { changeQueueCurrentSongIndex, handleSkipBackwardClick, handleSkipForwardClick } =
     usePlayerNavigation(player, playerQueue, toggleSongPlayback, recordListeningData);
+  skipForwardRef.current = handleSkipForwardClick;
 
   // ? INITIALIZE APP UPDATES
   // App updates hook handles checking for updates and showing release notes
@@ -261,6 +268,7 @@ export default function App() {
     createQueue,
     changeUpNextSongData,
     managePlaybackErrors,
+    resetErrorCount,
     toggleSongPlayback,
     handleSkipBackwardClick,
     handleSkipForwardClick,
