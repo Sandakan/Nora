@@ -73,6 +73,7 @@ import { removeDefaultAppProtocolFromFilePath } from './fs/resolveFilePaths';
 import { getPlaylistById, updatePlaylistCriteria } from './db/queries/playlists';
 import { refreshSmartPlaylist } from './db/queries/playlist-rules';
 import logger, { logFilePath } from './logger';
+import { db } from './db/db';
 import {
   allowScreenSleeping,
   changePlayerType,
@@ -518,8 +519,11 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     );
 
     ipcMain.handle('app/saveSmartPlaylistCriteria', async (_, playlistId: number, criteria: SmartPlaylistCriteria) => {
-      await updatePlaylistCriteria(playlistId, criteria);
-      const songIds = await refreshSmartPlaylist(playlistId, criteria);
+      let songIds: number[] = [];
+      await db.transaction(async (trx) => {
+        await updatePlaylistCriteria(playlistId, criteria, trx);
+        songIds = await refreshSmartPlaylist(playlistId, criteria);
+      });
       return { songIds };
     });
 
@@ -528,7 +532,12 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       if (!playlist?.criteria) return { songIds: [] };
       let criteria: SmartPlaylistCriteria;
       try {
-        criteria = JSON.parse(playlist.criteria) as SmartPlaylistCriteria;
+        const parsed = JSON.parse(playlist.criteria);
+        if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.rules)) {
+          logger.error('Smart playlist criteria shape invalid', { playlistId });
+          return { songIds: [] };
+        }
+        criteria = parsed as SmartPlaylistCriteria;
       } catch (error) {
         logger.error('Invalid smart playlist criteria JSON', { playlistId, error });
         return { songIds: [] };

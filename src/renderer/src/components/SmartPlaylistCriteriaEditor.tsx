@@ -22,8 +22,8 @@ const FIELDS: SmartPlaylistRuleField[] = [
   'bitRate'
 ];
 
-function defaultRule(): SmartPlaylistRule {
-  return { field: 'genre', operator: 'eq', value: '' };
+function defaultRule(): SmartPlaylistRule & { id: string } {
+  return { id: crypto.randomUUID(), field: 'genre', operator: 'eq', value: '' };
 }
 
 function defaultCriteria(): SmartPlaylistCriteria {
@@ -248,7 +248,7 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
       <div className="rules-list flex max-h-[50vh] flex-col gap-3 overflow-y-auto">
         {criteria.rules.map((rule, idx) => (
           <div
-            key={idx}
+            key={(rule as SmartPlaylistRule & { id?: string }).id ?? idx}
             className="rule-row flex flex-wrap items-end gap-2 rounded-lg bg-background-color-1 p-3 dark:bg-dark-background-color-1"
           >
             <div className="flex flex-1 flex-col">
