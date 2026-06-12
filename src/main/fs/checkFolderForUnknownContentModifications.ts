@@ -58,7 +58,8 @@ const removeDeletedSongsFromLibrary = async (
 const addNewlyAddedSongsToLibrary = async (
   folderPath: string,
   newlyAddedSongPaths: string[],
-  abortSignal: AbortSignal
+  abortSignal: AbortSignal,
+  allMusicFolders: MusicFolder[]
 ) => {
   const folder = await getFolderFromPath(folderPath);
 
@@ -70,7 +71,6 @@ const addNewlyAddedSongsToLibrary = async (
 
   // Fix BUG 2b: Resolve correct folderId per song so nested songs get
   // the closest known folder, not always the ancestor's id
-  const allMusicFolders = await getAllFolders();
   const folderPathToId = new Map<string, number>(
     allMusicFolders.map((f) => [f.path, f.id])
   );
@@ -123,6 +123,11 @@ const checkFolderForUnknownModifications = async (folderPath: string) => {
 
     const dirs = await getFullPathsOfFolderDirs(folderPath);
 
+    // Fetch the full folder list once per top-level scan, then reuse for each
+    // addNewlyAddedSongsToLibrary call below. Previously getAllFolders() was
+    // called inside the loop, doing N sequential reads for N library roots.
+    const allMusicFolders = await getAllFolders();
+
     if (relevantFolderSongPaths.length > 0) {
       const deletedSongPaths = relevantFolderSongPaths.filter(
         (songPath) => !dirs.some((dir) => dir === songPath)
@@ -149,10 +154,18 @@ const checkFolderForUnknownModifications = async (folderPath: string) => {
           newlyAddedSongPaths,
           folderPath
         });
-        await addNewlyAddedSongsToLibrary(folderPath, newlyAddedSongPaths, abortController.signal);
+        await addNewlyAddedSongsToLibrary(
+          folderPath,
+          newlyAddedSongPaths,
+          abortController.signal,
+          allMusicFolders
+        );
       }
     }
   } finally {
+    // Always abort the in-flight abortController, even when the scan completed
+    // successfully. Any pending async work spawned by the scan that checks
+    // abortSignal will observe the abort and bail out instead of stacking.
     abortController.abort();
   }
 };
