@@ -116,11 +116,15 @@ export function useAppLifecycle(dependencies: AppLifecycleDependencies): void {
     windowManagement
   } = dependencies;
 
-  // Extract audio element from AudioPlayer or use HTMLAudioElement directly
-  const player =
-    playerInstance instanceof HTMLAudioElement
-      ? playerInstance
-      : (playerInstance as AudioPlayer).audio;
+  // Extract audio element from AudioPlayer or use HTMLAudioElement directly.
+  // audioPlayerAccess gives us the AudioPlayer instance when available so we can
+  // subscribe through its event emitter — the emitter routes events from whichever
+  // audio element is currently active, so listeners stay alive after crossfade.
+  const audioPlayerAccess =
+    playerInstance instanceof HTMLAudioElement ? null : (playerInstance as AudioPlayer);
+  const player = audioPlayerAccess
+    ? audioPlayerAccess.audio
+    : (playerInstance as HTMLAudioElement);
 
   useEffect(() => {
     // LOCAL STORAGE
@@ -264,6 +268,39 @@ export function useAppLifecycle(dependencies: AppLifecycleDependencies): void {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [managePlaybackErrors]);
 
+  // Subscribe to AudioPlayer's play/pause/error emitter when available so that
+  // subscribers stay alive across crossfade swaps. The DOM listeners above are
+  // kept as a fallback for the HTMLAudioElement-only path.
+  useEffect(() => {
+    if (!audioPlayerAccess) return;
+    const handlePlayerErrorEvent = (err: unknown) => managePlaybackErrors(err);
+    const handlePlayerPlayEvent = () => {
+      dispatch({
+        type: 'CURRENT_SONG_PLAYBACK_STATE',
+        data: true
+      });
+      window.api.playerControls.songPlaybackStateChange(true);
+    };
+    const handlePlayerPauseEvent = () => {
+      dispatch({
+        type: 'CURRENT_SONG_PLAYBACK_STATE',
+        data: false
+      });
+      window.api.playerControls.songPlaybackStateChange(false);
+    };
+
+    audioPlayerAccess.on('error', handlePlayerErrorEvent);
+    audioPlayerAccess.on('play', handlePlayerPlayEvent);
+    audioPlayerAccess.on('pause', handlePlayerPauseEvent);
+
+    return () => {
+      audioPlayerAccess.off('error', handlePlayerErrorEvent);
+      audioPlayerAccess.off('play', handlePlayerPlayEvent);
+      audioPlayerAccess.off('pause', handlePlayerPauseEvent);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [audioPlayerAccess, managePlaybackErrors]);
+
   // Setup player lifecycle event listeners for canplay and title bar updates
   useEffect(() => {
     const displayDefaultTitleBar = () => {
@@ -288,6 +325,31 @@ export function useAppLifecycle(dependencies: AppLifecycleDependencies): void {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Subscribe to AudioPlayer's canplay/play/pause emitter when available so the
+  // title-bar and playSongIfPlayable callbacks stay alive across crossfade swaps.
+  useEffect(() => {
+    if (!audioPlayerAccess) return;
+    const displayDefaultTitleBar = () => {
+      windowManagement.resetTitleBarInfo();
+      storage.playback.setCurrentSongOptions('stoppedPosition', player.currentTime);
+    };
+    const playSongIfPlayable = () => {
+      if (refStartPlay.current) toggleSongPlayback(true);
+    };
+
+    audioPlayerAccess.on('canplay', playSongIfPlayable);
+    audioPlayerAccess.on('play', windowManagement.addSongTitleToTitleBar);
+    audioPlayerAccess.on('pause', displayDefaultTitleBar);
+
+    return () => {
+      toggleSongPlayback(false);
+      audioPlayerAccess.off('canplay', playSongIfPlayable);
+      audioPlayerAccess.off('play', windowManagement.addSongTitleToTitleBar);
+      audioPlayerAccess.off('pause', displayDefaultTitleBar);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [audioPlayerAccess]);
 
   // Setup IPC control listeners from main process
   useEffect(() => {

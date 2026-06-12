@@ -16,6 +16,7 @@ type PlayerEventType =
   | 'error'
   | 'seeking'
   | 'seeked'
+  | 'canplay'
   | 'repeatOne'
   | 'repeatAll'
   | 'playbackComplete'
@@ -222,6 +223,11 @@ class AudioPlayer {
         seeked: () => {
           if (el === this.getActiveAudio()) {
             this.emit('seeked', el.currentTime);
+          }
+        },
+        canplay: () => {
+          if (el === this.getActiveAudio()) {
+            this.emit('canplay');
           }
         }
       };
