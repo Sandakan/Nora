@@ -9,27 +9,6 @@ interface DiscordRPCClient {
   request(cmd: string, args: Record<string, unknown>): Promise<unknown>;
 }
 
-interface DiscordActivity {
-  details?: string;
-  state?: string;
-  timestamps?: {
-    start?: number;
-    end?: number;
-  };
-  assets?: {
-    large_image?: string;
-    large_text?: string;
-    small_image?: string;
-    small_text?: string;
-  };
-  buttons?: Array<{
-    label: string;
-    url: string;
-  }>;
-  instance?: boolean;
-  type?: number;
-}
-
 const ActivityType = {
   Game: 0,
   Streaming: 1,
