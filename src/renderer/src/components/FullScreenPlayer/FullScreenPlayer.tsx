@@ -1,6 +1,6 @@
 import { store } from '@renderer/store/store';
 import { useStore } from '@tanstack/react-store';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import DefaultSongCover from '../../assets/images/webp/song_cover_default.webp';
 import useMouseActiveState from '../../hooks/useMouseActiveState';
@@ -42,9 +42,7 @@ const FullScreenPlayer = () => {
     return () => window.api.appControls.allowScreenSleeping();
   }, [preferences.allowToPreventScreenSleeping, preferences.removeAnimationsOnBatteryPower]);
 
-  const imgPath = useMemo(() => {
-    return currentSongData.artworkPath;
-  }, [currentSongData?.artworkPath]);
+  const imgPath = currentSongData.artworkPath;
 
   return (
     <div
@@ -58,7 +56,7 @@ const FullScreenPlayer = () => {
           fallbackSrc={DefaultSongCover}
           loading="eager"
           alt="Song Cover"
-          className={`h-full w-full object-cover shadow-lg blur-none brightness-[.25]! transition-[filter] delay-100 duration-200 ease-in-out ${isLyricsVisible ? 'blur-[2rem]!' : 'blur-[2rem]!'}`}
+          className={`h-full w-full object-cover shadow-lg blur-none brightness-[.25]! transition-[filter] delay-100 duration-200 ease-in-out blur-[2rem]!`}
         />
         {/* <div className="absolute inset-0 h-full w-full bg-linear-to-r from-black/50 to-black/5"></div> */}
       </div>

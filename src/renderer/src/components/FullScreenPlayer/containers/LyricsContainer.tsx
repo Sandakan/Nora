@@ -122,7 +122,7 @@ const LyricsContainer = (props: Props) => {
     <div
       className={`mini-player-lyrics-container appear-from-bottom ${
         isShowLyricsWithSongInfo
-          ? 'relative flex h-full w-full flex-col items-start py-4 pr-4 pl-4'
+          ? 'relative flex h-full w-full flex-col items-start p-4'
           : 'absolute top-0 flex h-full max-h-screen! w-full max-w-full! flex-col items-start overflow-auto pt-20 pr-[20%] pb-[25%] pl-20'
       } transition-[filter] delay-200 select-none ${
         !isShowLyricsWithSongInfo
