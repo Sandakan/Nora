@@ -184,8 +184,8 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
           value={String(rule.value)}
           onChange={(e) => onChange(e.target.value === 'true')}
         >
-          <option value="true">true</option>
-          <option value="false">false</option>
+          <option value="true">{t('playlist.valueTrue')}</option>
+          <option value="false">{t('playlist.valueFalse')}</option>
         </select>
       );
     }

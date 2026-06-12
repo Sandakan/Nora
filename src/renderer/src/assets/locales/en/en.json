@@ -305,7 +305,9 @@
     "refreshFailed": "Failed to refresh smart playlist.",
     "ruleField": "Field",
     "ruleOperator": "Operator",
-    "ruleValue": "Value"
+    "ruleValue": "Value",
+    "valueTrue": "true",
+    "valueFalse": "false"
   },
 
   "album": {
