@@ -31,7 +31,8 @@ const TEMPLATE: LocalStorage = {
     isRepeating: 'false',
     isShuffling: false,
     volume: { isMuted: false, value: 50 },
-    playbackRate: 1
+    playbackRate: 1,
+    crossfadeDuration: 0
   },
   queue: { position: 0, songIds: [] },
   sortingStates: {
@@ -194,5 +195,6 @@ describe('addMissingPropsToAnObject with sortingStates', () => {
     const result = addMissingPropsToAnObject(TEMPLATE, oldStorage);
     expect(result.sortingStates).toHaveProperty('playlistDetailPage', 'addedOrder');
     expect(result.preferences.showSongRemainingTime).toBe(true);
+    expect(result.playback.crossfadeDuration).toBe(0);
   });
 });
