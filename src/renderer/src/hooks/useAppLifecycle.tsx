@@ -233,6 +233,10 @@ export function useAppLifecycle(dependencies: AppLifecycleDependencies): void {
 
   // Setup player event listeners for error, play, pause, and quit events
   useEffect(() => {
+    // When the AudioPlayer emitter is available, the dedicated emitter-subscription
+    // useEffect below handles the same play/pause/error callbacks. Skip the DOM
+    // fallback here to avoid firing each event twice.
+    if (audioPlayerAccess) return;
     const handlePlayerErrorEvent = (err: unknown) => managePlaybackErrors(err);
     const handlePlayerPlayEvent = () => {
       dispatch({
@@ -303,6 +307,10 @@ export function useAppLifecycle(dependencies: AppLifecycleDependencies): void {
 
   // Setup player lifecycle event listeners for canplay and title bar updates
   useEffect(() => {
+    // When the AudioPlayer emitter is available, the dedicated emitter-subscription
+    // useEffect below covers canplay/play/pause. Skip the DOM fallback to avoid
+    // a second dispatch per event.
+    if (audioPlayerAccess) return;
     const displayDefaultTitleBar = () => {
       windowManagement.resetTitleBarInfo();
       storage.playback.setCurrentSongOptions('stoppedPosition', player.currentTime);
