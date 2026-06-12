@@ -120,19 +120,19 @@ export const parseSong = async (
 
     const stats = await fs.stat(absoluteFilePath);
 
-    let metadata: ReturnType<typeof File.prototype.tag>;
-    let durationMs: number;
-    let sampleRate: number | undefined;
-    let bitRate: number | undefined;
-    let channels: number | undefined;
-
-    await withTagFile(absoluteFilePath, (file) => {
-      metadata = file.tag;
-      durationMs = file.properties.durationMilliseconds;
-      sampleRate = file.properties.audioSampleRate;
-      bitRate = file.properties.audioBitrate;
-      channels = file.properties.audioChannels;
-    });
+    const {
+      metadata,
+      durationMs,
+      sampleRate,
+      bitRate,
+      channels
+    } = await withTagFile(absoluteFilePath, (file) => ({
+      metadata: file.tag,
+      durationMs: file.properties.durationMilliseconds,
+      sampleRate: file.properties.audioSampleRate,
+      bitRate: file.properties.audioBitrate,
+      channels: file.properties.audioChannels
+    }));
 
     // songFileStream.close();
 
