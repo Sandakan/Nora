@@ -143,7 +143,6 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
       })
       .catch((err) => {
         console.error(err);
-        setIsAFavorite((prev) => !prev);
         addNewNotifications([
           {
             id: `toggleLikeError-${songId}`,

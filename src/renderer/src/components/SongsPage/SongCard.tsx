@@ -154,7 +154,6 @@ const SongCard = (props: SongCardProp) => {
       })
       .catch((err) => {
         console.error(err);
-        setIsSongAFavorite((prev) => !prev);
         addNewNotifications([
           {
             id: `toggleLikeError-${songId}`,
