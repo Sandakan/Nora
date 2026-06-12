@@ -224,7 +224,9 @@ function ArtistInfoPage() {
       updateBodyBackgroundImage(true, artworkUrl);
     }
 
-    return () => updateBodyBackgroundImage(false);
+    return () => {
+      if (artworkUrl) updateBodyBackgroundImage(false);
+    };
   }, [
     artistData?.onlineArtworkPaths?.picture_xl,
     artistData?.onlineArtworkPaths?.picture_medium,
