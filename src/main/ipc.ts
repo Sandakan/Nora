@@ -533,7 +533,12 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       let criteria: SmartPlaylistCriteria;
       try {
         const parsed = JSON.parse(playlist.criteria);
-        if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.rules)) {
+        if (
+          !parsed ||
+          typeof parsed !== 'object' ||
+          !Array.isArray(parsed.rules) ||
+          (parsed.matchType !== 'ALL' && parsed.matchType !== 'ANY')
+        ) {
           logger.error('Smart playlist criteria shape invalid', { playlistId });
           return { songIds: [] };
         }
