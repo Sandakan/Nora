@@ -128,17 +128,15 @@ export function useWindowManagement(
       e.preventDefault();
       e.stopPropagation();
       const files = Array.from(e.dataTransfer.files);
-      console.log('Dropped files:', files);
 
       for (const file of files) {
         const filePath = window.api.utils.showFilePath(file);
-        console.log('Dropped file path:', filePath);
 
         const ext = filePath.toLowerCase().split('.').pop() || '';
         const isPlaylistFile = ext === 'm3u8' || ext === 'm3u';
 
         const isASupportedAudioFormat = appPreferences.supportedMusicExtensions.some((type) =>
-          file?.webkitRelativePath.endsWith(type)
+          filePath.toLowerCase().endsWith(type.toLowerCase())
         );
 
         if (isPlaylistFile && importPlaylistFromPath) {

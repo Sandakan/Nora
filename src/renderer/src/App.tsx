@@ -218,7 +218,7 @@ export default function App() {
 
   const importPlaylistFromPath = useCallback(
     (playlistPath: string) => {
-      window.api.playlist
+      window.api.playlistsData
         .importPlaylistFromPath(playlistPath)
         .catch((err) => {
           console.error(err);
