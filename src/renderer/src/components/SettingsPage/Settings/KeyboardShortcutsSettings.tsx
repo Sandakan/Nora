@@ -160,7 +160,7 @@ const KeyboardShortcutsSettings = () => {
           </div>
         </li>
       )),
-    [shortcuts, editingShortcut, newKeys, t]
+    [shortcuts, editingShortcut, newKeys, t, hasDuplicate]
   );
 
   return (
