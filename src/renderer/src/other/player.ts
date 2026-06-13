@@ -100,7 +100,7 @@ class AudioPlayer {
     this.setupAudioEventListeners();
   }
 
-  private getActiveAudio(): HTMLAudioElement {
+  getActiveAudio(): HTMLAudioElement {
     return this.activeElement === 'primary' ? this.audio : this.secondaryAudio;
   }
 

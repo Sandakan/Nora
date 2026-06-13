@@ -252,25 +252,38 @@ export function useAppLifecycle(dependencies: AppLifecycleDependencies): void {
       });
       window.api.playerControls.songPlaybackStateChange(false);
     };
-    const handleBeforeQuitEvent = async () => {
-      storage.playback.setCurrentSongOptions('stoppedPosition', player.currentTime);
-      storage.playback.setPlaybackOptions('isRepeating', store.state.player.isRepeating);
-      storage.playback.setPlaybackOptions('isShuffling', store.state.player.isShuffling);
-    };
 
     player.addEventListener('error', handlePlayerErrorEvent);
     player.addEventListener('play', handlePlayerPlayEvent);
     player.addEventListener('pause', handlePlayerPauseEvent);
-    window.api.quitEvent.beforeQuitEvent(handleBeforeQuitEvent);
 
     return () => {
       player.removeEventListener('error', handlePlayerErrorEvent);
       player.removeEventListener('play', handlePlayerPlayEvent);
       player.removeEventListener('pause', handlePlayerPauseEvent);
-      window.api.quitEvent.removeBeforeQuitEventListener(handleBeforeQuitEvent);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [managePlaybackErrors]);
+
+  // Persist playback state on quit. Lives in its own effect (outside the
+  // audioPlayerAccess guard above) so register/unregister always happens,
+  // and uses audioPlayerAccess.getActiveAudio() so stoppedPosition reflects
+  // whichever element actually played last after a crossfade.
+  useEffect(() => {
+    const handleBeforeQuitEvent = async () => {
+      const activeAudio = audioPlayerAccess ? audioPlayerAccess.getActiveAudio() : player;
+      storage.playback.setCurrentSongOptions('stoppedPosition', activeAudio.currentTime);
+      storage.playback.setPlaybackOptions('isRepeating', store.state.player.isRepeating);
+      storage.playback.setPlaybackOptions('isShuffling', store.state.player.isShuffling);
+    };
+
+    window.api.quitEvent.beforeQuitEvent(handleBeforeQuitEvent);
+
+    return () => {
+      window.api.quitEvent.removeBeforeQuitEventListener(handleBeforeQuitEvent);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Subscribe to AudioPlayer's play/pause/error emitter when available so that
   // subscribers stay alive across crossfade swaps. The DOM listeners above are
