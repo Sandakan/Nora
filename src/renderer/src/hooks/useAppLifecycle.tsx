@@ -353,7 +353,8 @@ export function useAppLifecycle(dependencies: AppLifecycleDependencies): void {
     if (!audioPlayerAccess) return;
     const displayDefaultTitleBar = () => {
       windowManagement.resetTitleBarInfo();
-      storage.playback.setCurrentSongOptions('stoppedPosition', player.currentTime);
+      const activeAudio = audioPlayerAccess.getActiveAudio();
+      storage.playback.setCurrentSongOptions('stoppedPosition', activeAudio.currentTime);
     };
     const playSongIfPlayable = () => {
       if (refStartPlay.current) toggleSongPlayback(true);
