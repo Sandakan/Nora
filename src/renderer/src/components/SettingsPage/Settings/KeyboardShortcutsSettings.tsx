@@ -24,6 +24,7 @@ const KeyboardShortcutsSettings = () => {
     const handleKeyDown = (e: KeyboardEvent) => {
       e.preventDefault();
       e.stopPropagation();
+      setHasDuplicate(false);
 
       const keys: string[] = [];
       if (e.ctrlKey) keys.push('Ctrl');

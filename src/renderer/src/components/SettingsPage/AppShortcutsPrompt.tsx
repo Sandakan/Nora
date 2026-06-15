@@ -185,6 +185,7 @@ const AppShortcutsPrompt = () => {
                   label: t('keyboardShortcutsSettings.resetToDefaults'),
                   clickHandler: () => {
                     storage.keyboardShortcuts.resetShortcutsToDefaults();
+                    setShortcuts(storage.keyboardShortcuts.getKeyboardShortcuts());
                     addNewNotifications([
                       {
                         id: 'shortcutsReset',
