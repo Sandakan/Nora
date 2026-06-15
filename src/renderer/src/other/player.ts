@@ -353,8 +353,6 @@ class AudioPlayer {
     dispatch({ type: 'CURRENT_SONG_PLAYBACK_STATE', data: true });
     storage.playback.setCurrentSongOptions('songId', this.preloadedSongId);
 
-    this.emit('durationChange', inactiveAudio.duration);
-
     const now = this.currentContext.currentTime;
 
     activeGain.gain.cancelScheduledValues(now);
@@ -400,8 +398,6 @@ class AudioPlayer {
 
     this.fadeGainPrimary.gain.value = this.activeElement === 'primary' ? 1 : 0;
     this.fadeGainSecondary.gain.value = this.activeElement === 'primary' ? 0 : 1;
-
-    this.emit('durationChange', this.getActiveAudio().duration);
 
     oldActive.pause();
     dispatch({ type: 'CURRENT_SONG_PLAYBACK_STATE', data: true });
