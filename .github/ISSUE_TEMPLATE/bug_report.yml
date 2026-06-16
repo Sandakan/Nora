@@ -1,76 +1,102 @@
-name: New Bug Report
-description: File a bug report here
-title: '[BUG]: Title'
-labels: ['bug']
+name: "🐛 Bug Report"
+description: Report a bug or unexpected behavior in Nora
+title: "[Bug]: "
+labels:
+  - bug
+
 body:
-  - type: markdown
-    attributes:
-      value: |
-        Thanks for taking the time to fill out this bug report
-        Make sure there aren't any open/closed issues for this topic
-
   - type: textarea
-    id: bug-description
+    id: description
     attributes:
-      label: Description of the bug
-      description: Give us a brief description of what happened and what should have happened
+      label: Description
+      description: A clear and concise description of what the bug is.
+      placeholder: Describe the bug...
     validations:
       required: true
 
   - type: textarea
-    id: app-version
+    id: reproduce
     attributes:
-      label: Nora app Version
-      description: Please provide detailed version information and installation method, such as v2.5.0-stable and Linux dmg file, Windows exe file, etc.
-    placeholder: |
-      version: v2.5.0-stable
-      installation method: Windows exe file
-    validations:
-      required: true
-
-  - type: textarea
-    attributes:
-      label: Environment
-      description: |
-        Run this command in your project's root folder and paste the result:
-
-        ```sh
-        npx envinfo --system --binaries --browsers
-        ```
-        add `| pbcopy` if you're in macOS for easy copy paste.
-        Alternatively, you can manually gather the version information from your environment.
-    validations:
-      required: true
-
-  - type: textarea
-    id: steps-to-reproduce
-    attributes:
-      label: Steps To Reproduce
+      label: Steps to Reproduce
       description: Steps to reproduce the behavior.
-      placeholder: |
-        1. Go to '...'
+      placeholder: 
+        1. Open Nora
         2. Click on '...'
-        3. Scroll down to '...'
-        4. See error
+        3. See error
     validations:
       required: true
 
   - type: textarea
-    id: additional-information
+    id: expected
     attributes:
-      label: Additional Information
-      description: |
-        Provide any additional information such as logs, screenshots, scenarios in which the bug occurs so that it facilitates resolving the issue.
+      label: Expected Behavior
+      description: What you expected to happen.
+      placeholder: Describe what should have happened...
+    validations:
+      required: true
 
-        Also attach the log file of the app to better understand what went wrong in the app.
-        It is situated in C:\Users\USER_NAME\AppData\Roaming\nora\logs.txt
-
-  - type: checkboxes
-    id: checkboxes
+  - type: textarea
+    id: actual
     attributes:
-      label: Validations
-      description: Before submitting the issue, please make sure you do the following
-      options:
-        - label: Check that there isn't already an issue that reports the same bug to avoid creating a duplicate.
-          required: true
-# This bug report is created with the help of Motrix's bug report (https://github.com/agalwood/Motrix/blob/master/.github/ISSUE_TEMPLATE/1_bug_report.yml)
+      label: Actual Behavior
+      description: What actually happened.
+      placeholder: Describe what actually happened...
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots / Recordings
+      description: Add screenshots or recordings if applicable.
+
+  - type: input
+    id: nora_version
+    attributes:
+    label: Nora Version
+    placeholder: e.g. v3.1.0-stable
+    validations:
+    required: true
+
+  - type: dropdown
+    id: architecture
+    attributes:
+    label: CPU Architecture
+    options:
+      - ARM64
+      - x86_64 (Intel/AMD)
+      - Unknown
+    validations:
+    required: true
+
+  - type: dropdown
+    id: operating_system
+    attributes:
+    label: Operating System
+    options:
+      - macOS
+      - Windows
+      - Linux
+    validations:
+    required: true
+
+  - type: input
+    id: os_version
+    attributes:
+    label: OS Version
+    description: Enter your operating system version. 
+    placeholder: e.g. macOS 27 Golden Gate, Windows 11 24H2, Ubuntu 24.04
+    validations:
+    required: true
+
+  - type: input
+    id: installation_method
+    attributes:
+      label: Installation Method
+      placeholder: EXE, DMG, GitHub Release, etc.
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Add any other context about the problem here.
