@@ -170,7 +170,7 @@ const LyricLine = (props: LyricProp) => {
         syncedLyrics
           ? `cursor-pointer blur-[2px] ${
               isInRange
-                ? 'text-font-color-highlight! dark:text-dark-font-color-highlight! scale-105! font-medium blur-none! text-glow-md! [&>div>span]:mr-3!'
+                ? `text-font-color-highlight! dark:text-dark-font-color-highlight! scale-105! font-medium blur-none! ${playerType !== 'mini' ? 'text-glow-md!' : ''} [&>div>span]:mr-3!`
                 : 'scale-75! opacity-80!'
             }`
           : 'text-font-color-black! dark:text-font-color-white! scale-100! text-4xl! font-medium blur-none! [&>div>span]:mr-3'
