@@ -7,7 +7,6 @@ import { useTranslation } from 'react-i18next';
 import roundTo from '../../../../common/roundTo';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import EnhancedSyncedLyricWord from '../LyricsEditingPage/EnhancedSyncedLyricWord';
-import LyricsProgressBar from './LyricsProgressBar';
 
 interface LyricProp {
   lyric: string | SyncedLyricsLineWord[];
@@ -167,17 +166,17 @@ const LyricLine = (props: LyricProp) => {
             })
           : undefined
       }
-      className={`highlight text-font-color-black/20 dark:text-font-color-white/20 z-0 mb-5 flex w-fit flex-col items-center justify-center text-center text-5xl font-medium text-balance transition-[transform,translate,scale,color,filter] duration-250 select-none first:mt-8 last:mb-4 empty:mb-16 ${
+      className={`highlight text-font-color-black/15 dark:text-font-color-white/15 z-0 mb-5 flex w-fit flex-col items-center justify-center text-center text-5xl font-medium text-balance transition-[transform,translate,scale,color,filter,opacity] duration-250 select-none first:mt-8 last:mb-4 empty:mb-16 ${
         syncedLyrics
-          ? `cursor-pointer blur-[1px] ${
+          ? `cursor-pointer blur-[2px] ${
               isInRange
-                ? 'text-font-color-highlight! dark:text-dark-font-color-highlight! scale-100! font-medium blur-none! [&>div>span]:mr-3!'
-                : 'scale-75!'
+                ? 'text-font-color-highlight! dark:text-dark-font-color-highlight! scale-105! font-medium blur-none! text-glow-md! [&>div>span]:mr-3!'
+                : 'scale-75! opacity-80!'
             }`
           : 'text-font-color-black! dark:text-font-color-white! scale-100! text-4xl! font-medium blur-none! [&>div>span]:mr-3'
-      } ${playerType === 'mini' && 'text-font-color-white/20! mb-2! text-2xl!'} ${
+      } ${playerType === 'mini' && 'text-font-color-white/15! mb-2! text-2xl!'} ${
         playerType === 'full' &&
-        'text-font-color-white/20! mb-6! origin-left items-start! justify-start! text-left! text-7xl!'
+        'text-font-color-white/15! mb-6! origin-left items-start! justify-start! text-left! text-7xl!'
       }`}
       ref={lyricsRef}
       onClick={() =>
@@ -221,7 +220,6 @@ const LyricLine = (props: LyricProp) => {
       >
         {lyricStringLinePrimary}
       </div>
-      {syncedLyrics && isInRange && <LyricsProgressBar delay={0} syncedLyrics={syncedLyrics} />}
     </div>
   );
 };
