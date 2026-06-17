@@ -32,6 +32,7 @@ const EnhancedSyncedLyricWord = (props: Props) => {
     if (isActive) {
       document.addEventListener('player/positionChange', handleSongPositionChange);
     } else {
+      setIsInRange(false);
       document.removeEventListener('player/positionChange', handleSongPositionChange);
     }
 

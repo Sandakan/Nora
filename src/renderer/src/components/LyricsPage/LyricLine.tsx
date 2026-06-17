@@ -166,7 +166,7 @@ const LyricLine = (props: LyricProp) => {
             })
           : undefined
       }
-      className={`highlight text-font-color-black/15 dark:text-font-color-white/15 z-0 mb-5 flex w-fit flex-col items-center justify-center text-center text-5xl font-medium text-balance transition-[transform,translate,scale,color,filter,opacity] duration-250 select-none first:mt-8 last:mb-4 empty:mb-16 ${
+      className={`highlight text-font-color-black/15 dark:text-font-color-white/15 z-0 mb-5 flex w-fit flex-col items-center justify-center text-center text-5xl font-medium text-balance transition-[transform,translate,scale,color,filter,opacity,text-shadow] duration-250 select-none first:mt-8 last:mb-4 empty:mb-16 ${
         syncedLyrics
           ? `cursor-pointer blur-[2px] ${
               isInRange
