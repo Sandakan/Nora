@@ -90,6 +90,7 @@ const DEFAULT_SAVE_DIALOG_OPTIONS: SaveDialogOptions = {
 // / / / / / / VARIABLES / / / / / / /
 export let mainWindow: BrowserWindow;
 let tray: Tray;
+let cleanupDisplayListeners: (() => void) | undefined;
 let trayContextMenu: Electron.Menu;
 let playerType: PlayerTypes = 'normal';
 // let isConnectedToInternet = false;
@@ -455,6 +456,7 @@ async function handleBeforeQuit() {
       await Promise.all([promise1, promise2, promise3, promise4]);
 
       mainWindow.webContents.send('app/beforeQuitEvent');
+      cleanupDisplayListeners?.();
       await closeDatabaseInstance();
 
       logger.debug(`Quiting Nora`, { uptime: `${Math.floor(process.uptime())} seconds` });
@@ -947,10 +949,18 @@ function manageWindowOnDisplayMetricsChange() {
 function manageWindowPositionInMonitor() {
   manageWindowOnDisplayMetricsChange();
 
-  screen.on('display-metrics-changed', () => manageWindowOnDisplayMetricsChange());
+  const onDisplayMetricsChanged = () => manageWindowOnDisplayMetricsChange();
+  const onDisplayRemoved = () => manageWindowOnDisplayMetricsChange();
+
+  screen.on('display-metrics-changed', onDisplayMetricsChanged);
   // `display-metrics-changed` is only fired for resolution / scale changes on
   // existing displays; a hot-unplugged monitor fires `display-removed` instead.
-  screen.on('display-removed', () => manageWindowOnDisplayMetricsChange());
+  screen.on('display-removed', onDisplayRemoved);
+
+  cleanupDisplayListeners = () => {
+    screen.removeListener('display-metrics-changed', onDisplayMetricsChanged);
+    screen.removeListener('display-removed', onDisplayRemoved);
+  };
 }
 
 export async function toggleAutoLaunch(autoLaunchState: boolean) {
