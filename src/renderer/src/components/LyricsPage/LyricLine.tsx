@@ -82,10 +82,11 @@ const LyricLine = (props: LyricProp) => {
   );
 
   useEffect(() => {
+    if (!syncedLyrics) return;
     document.addEventListener('player/positionChange', handleLyricsActivity);
 
     return () => document.removeEventListener('player/positionChange', handleLyricsActivity);
-  }, [handleLyricsActivity]);
+  }, [handleLyricsActivity, syncedLyrics]);
 
   const lyricString = useMemo(() => {
     if (typeof lyric === 'string') return getLyricText(lyric);
@@ -98,7 +99,6 @@ const LyricLine = (props: LyricProp) => {
           start={extendedText.start}
           end={extendedText.end}
           text={extendedText.text}
-          delay={0}
         />
       );
     });
@@ -120,7 +120,6 @@ const LyricLine = (props: LyricProp) => {
           start={extendedText.start}
           end={extendedText.end}
           text={extendedText.text}
-          delay={0}
         />
       );
     });
@@ -140,7 +139,6 @@ const LyricLine = (props: LyricProp) => {
           start={extendedText.start}
           end={extendedText.end}
           text={extendedText.text}
-          delay={0}
         />
       );
     });

@@ -8,13 +8,12 @@ type Props = {
   isActive: boolean;
   start: number;
   end: number;
-  delay: number;
   text: string;
 };
 
 const EnhancedSyncedLyricWord = (props: Props) => {
   const { updateSongPosition } = useContext(AppUpdateContext);
-  const { isActive, start, end, delay, text } = props;
+  const { isActive, start, end, text } = props;
   const [isInRange, setIsInRange] = useState(false);
 
   const handleSongPositionChange = useCallback(
@@ -22,10 +21,10 @@ const EnhancedSyncedLyricWord = (props: Props) => {
       if ('detail' in e && !Number.isNaN(e.detail)) {
         const songPosition = e.detail as number;
 
-        setIsInRange(songPosition > start - delay && songPosition < end - delay);
+        setIsInRange(songPosition > start && songPosition < end);
       }
     },
-    [delay, end, start]
+    [end, start]
   );
 
   useEffect(() => {
