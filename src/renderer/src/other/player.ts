@@ -513,6 +513,7 @@ class AudioPlayer {
       this.pendingAutoPlay = true; // Auto-play when restarting queue
       this.queue.moveToStart();
     } else if (this.queue.isEmpty) {
+      // Queue is empty — song ends naturally
     }
     // else: at end without repeat, do nothing (song ends)
   }
