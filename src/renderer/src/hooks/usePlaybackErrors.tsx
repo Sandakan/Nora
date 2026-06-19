@@ -32,7 +32,7 @@ export function usePlaybackErrors(
   const managePlaybackErrors = useCallback(
     (appError: unknown) => {
       const playerErrorData = player.error;
-      console.error(appError, playerErrorData);
+      log('Playback error occurred', { appError, playerErrorData }, 'ERROR');
 
       const playerErrorCode = playerErrorData?.code;
 

@@ -545,9 +545,10 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       importPlaylist(targetPlaylistId)
     );
 
-    ipcMain.handle('app/importPlaylistFromPath', (_, filePath: string, targetPlaylistId?: number) =>
-      processPlaylistImport(filePath, targetPlaylistId)
-    );
+    ipcMain.handle('app/importPlaylistFromPath', (_, filePath: string, targetPlaylistId?: number) => {
+      if (!filePath) return;
+      return processPlaylistImport(filePath, targetPlaylistId);
+    });
 
     ipcMain.handle(
       'app/getRendererLogs',

@@ -639,6 +639,8 @@ declare global {
     albumDetailPage?: SongSortTypes;
     genreDetailPage?: SongSortTypes;
     artistDetailPage?: SongSortTypes;
+    favoritesDetailPage?: SongSortTypes;
+    historyDetailPage?: SongSortTypes;
   }
 
   interface LyricsEditorSettings {
