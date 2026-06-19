@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest';
+import path from 'path';
 
 vi.mock('@main/db/queries/playlists', () => ({
   getPlaylistByName: vi.fn(),
@@ -59,6 +60,8 @@ const SONG1_PATH = '/music/song1.mp3';
 const SONG2_PATH = '/music/song2.mp3';
 const SONG1_ID = 101;
 const SONG2_ID = 102;
+const RELATIVE_SONG_PATH = 'subdir/song3.mp3';
+const SONG3_ID = 103;
 
 function makeM3u8(lines: string[]): string {
   return lines.join('\n');
@@ -75,6 +78,44 @@ describe('processPlaylistImport', () => {
       { id: SONG1_ID, path: SONG1_PATH } as never,
       { id: SONG2_ID, path: SONG2_PATH } as never
     ]);
+  });
+
+  describe('relative path resolution (CodeRabbit hardening)', () => {
+    test('resolves relative M3U paths against the playlist file directory', async () => {
+      const RESOLVED_RELATIVE_PATH = path.resolve('/music/playlists', RELATIVE_SONG_PATH);
+      mockedReadFile.mockResolvedValue(
+        makeM3u8([M3U_HEADER, RELATIVE_SONG_PATH])
+      );
+      mockedGetSongsInPathList.mockImplementation(async (paths) => {
+        // Should receive the resolved absolute path
+        if (paths.includes(RESOLVED_RELATIVE_PATH)) {
+          return [{ id: SONG3_ID, path: RESOLVED_RELATIVE_PATH } as never];
+        }
+        return [];
+      });
+      mockedGetPlaylistByName.mockResolvedValue(null);
+      mockedAddNewPlaylist.mockResolvedValue({ success: true, message: 'created' });
+
+      await processPlaylistImport('/music/playlists/test.m3u8');
+
+      expect(mockedGetSongsInPathList).toHaveBeenCalledWith(
+        expect.arrayContaining([RESOLVED_RELATIVE_PATH])
+      );
+      expect(mockedSendMessageToRenderer).toHaveBeenCalledTimes(1);
+    });
+
+    test('skips raw text lines that are neither absolute nor valid relative paths', async () => {
+      mockedReadFile.mockResolvedValue(
+        makeM3u8([M3U_HEADER, '', '# comment line', '  ', 'not-a-path'])
+      );
+
+      await processPlaylistImport('/music/playlists/test.m3u8');
+
+      // No song paths extracted = empty playlist = invalid file data
+      expect(mockedSendMessageToRenderer).toHaveBeenCalledWith({
+        messageCode: 'PLAYLIST_IMPORT_FAILED_DUE_TO_INVALID_FILE_DATA'
+      });
+    });
   });
 
   describe('double-message guard (Issue #361 regression check)', () => {

@@ -546,8 +546,11 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     );
 
     ipcMain.handle('app/importPlaylistFromPath', (_, filePath: string, targetPlaylistId?: number) => {
-      if (!filePath) return;
-      return processPlaylistImport(filePath, targetPlaylistId);
+      if (!filePath || typeof filePath !== 'string' || !filePath.trim()) {
+        logger.warn('Invalid filePath received in app/importPlaylistFromPath', { filePath });
+        return;
+      }
+      return processPlaylistImport(filePath.trim(), targetPlaylistId);
     });
 
     ipcMain.handle(

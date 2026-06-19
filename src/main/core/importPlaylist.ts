@@ -21,18 +21,16 @@ const DEFAULT_EXPORT_DIALOG_OPTIONS: OpenDialogOptions = {
   ]
 };
 
-const isASongPath = (text: string) => {
+const isASongPath = (text: string, playlistDir?: string) => {
   const textLine = text.trim();
-  const isTextLineAPath = path.isAbsolute(textLine);
+  const resolvedPath = path.isAbsolute(textLine)
+    ? textLine
+    : (playlistDir && path.resolve(playlistDir, textLine)) || '';
 
-  if (isTextLineAPath) {
-    const textLinePath = textLine;
-    const textLinePathExt =
-      path.extname(textLinePath).split('.').pop() || path.extname(textLinePath);
-    const isPathToASong = appPreferences.supportedMusicExtensions.includes(textLinePathExt.toLowerCase());
-    return isPathToASong;
-  }
-  return false;
+  if (!resolvedPath) return false;
+
+  const ext = (path.extname(resolvedPath).split('.').pop() || path.extname(resolvedPath)).toLowerCase();
+  return appPreferences.supportedMusicExtensions.includes(ext);
 };
 
 type ResolvedSongIds = {
@@ -71,16 +69,30 @@ const validatePlaylistFile = async (
   return { fileName, textArr };
 };
 
-const resolveSongIds = async (textArr: string[]): Promise<ResolvedSongIds> => {
-  const songPathsRaw = textArr.filter((line) => isASongPath(line));
+const resolveSongIds = async (textArr: string[], playlistDir?: string): Promise<ResolvedSongIds> => {
+  const resolvePath = (line: string): string | null => {
+    const textLine = line.trim();
+    if (path.isAbsolute(textLine)) return textLine;
+    if (playlistDir) return path.resolve(playlistDir, textLine);
+    return null;
+  };
+
+  const songPathsRaw: string[] = [];
+  for (const line of textArr) {
+    const resolved = resolvePath(line);
+    if (resolved && isASongPath(line, playlistDir)) {
+      songPathsRaw.push(resolved);
+    }
+  }
   const songPaths = Array.from(new Set(songPathsRaw));
   const availableSongs = await getSongsInPathList(songPaths);
+  const songsByPath = new Map(availableSongs.map((song) => [song.path, song]));
 
   const availableIds: number[] = [];
   const unavailablePaths: string[] = [];
 
   for (const songPath of songPaths) {
-    const songData = availableSongs.find((song) => song.path === songPath);
+    const songData = songsByPath.get(songPath);
     if (songData) availableIds.push(Number(songData.id));
     else unavailablePaths.push(songPath);
   }
@@ -170,8 +182,9 @@ export const processPlaylistImport = async (filePath: string, targetPlaylistId?:
     if (!validated) return;
 
     const { fileName, textArr } = validated;
+    const playlistDir = path.dirname(filePath);
     const { availableIds, unavailablePaths, deduplicatedCount, totalExtracted } =
-      await resolveSongIds(textArr);
+      await resolveSongIds(textArr, playlistDir);
 
     if (unavailablePaths.length > 0) {
       logger.debug(

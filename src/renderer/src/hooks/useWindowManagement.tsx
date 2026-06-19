@@ -127,31 +127,34 @@ export function useWindowManagement(
     (e: DragEvent<HTMLDivElement>) => {
       e.preventDefault();
       e.stopPropagation();
-      const files = Array.from(e.dataTransfer.files);
 
-      for (const file of files) {
-        const filePath = window.api.utils.showFilePath(file);
+      try {
+        const files = Array.from(e.dataTransfer.files);
 
-        const ext = filePath.toLowerCase().split('.').pop() || '';
-        const isPlaylistFile = ext === 'm3u8' || ext === 'm3u';
+        for (const file of files) {
+          const filePath = window.api.utils.showFilePath(file);
 
-        const isASupportedAudioFormat = appPreferences.supportedMusicExtensions.some((type) =>
-          filePath.toLowerCase().endsWith(type.toLowerCase())
-        );
+          const ext = filePath.toLowerCase().split('.').pop() || '';
+          const isPlaylistFile = ext === 'm3u8' || ext === 'm3u';
 
-        if (isPlaylistFile && importPlaylistFromPath) {
-          importPlaylistFromPath(filePath);
-        } else if (isASupportedAudioFormat && fetchSongFromUnknownSource) {
-          fetchSongFromUnknownSource(filePath);
-        } else if (changePromptMenuData) {
-          changePromptMenuData(
-            true,
-            <UnsupportedFileMessagePrompt filePath={filePath || file.name} />
+          const isASupportedAudioFormat = appPreferences.supportedMusicExtensions.some((type) =>
+            filePath.toLowerCase().endsWith(type.toLowerCase())
           );
-        }
-      }
 
-      if (appRef.current) appRef.current.classList.remove('song-drop');
+          if (isPlaylistFile && importPlaylistFromPath) {
+            importPlaylistFromPath(filePath);
+          } else if (isASupportedAudioFormat && fetchSongFromUnknownSource) {
+            fetchSongFromUnknownSource(filePath);
+          } else if (changePromptMenuData) {
+            changePromptMenuData(
+              true,
+              <UnsupportedFileMessagePrompt filePath={filePath || file.name} />
+            );
+          }
+        }
+      } finally {
+        if (appRef.current) appRef.current.classList.remove('song-drop');
+      }
     },
     [appRef, changePromptMenuData, fetchSongFromUnknownSource, importPlaylistFromPath]
   );
@@ -178,15 +181,18 @@ export function useWindowManagement(
    * cleans up listeners on unmount.
    */
   useEffect(() => {
-    // Setup window state listeners
-    window.api.windowControls.onWindowBlur(() => manageWindowBlurOrFocus('blur-sm'));
-    window.api.windowControls.onWindowFocus(() => manageWindowBlurOrFocus('focus'));
+    const unsubBlur = window.api.windowControls.onWindowBlur(() => manageWindowBlurOrFocus('blur-sm'));
+    const unsubFocus = window.api.windowControls.onWindowFocus(() => manageWindowBlurOrFocus('focus'));
 
-    window.api.fullscreen.onEnterFullscreen(() => manageWindowFullscreen('fullscreen'));
-    window.api.fullscreen.onLeaveFullscreen(() => manageWindowFullscreen('windowed'));
+    const unsubFullscreenEnter = window.api.fullscreen.onEnterFullscreen(() => manageWindowFullscreen('fullscreen'));
+    const unsubFullscreenLeave = window.api.fullscreen.onLeaveFullscreen(() => manageWindowFullscreen('windowed'));
 
-    // Note: Cleanup is handled by the individual IPC listeners in Electron
-    // If explicit cleanup is needed, return a cleanup function here
+    return () => {
+      unsubBlur();
+      unsubFocus();
+      unsubFullscreenEnter();
+      unsubFullscreenLeave();
+    };
   }, [manageWindowBlurOrFocus, manageWindowFullscreen]);
 
   return {
