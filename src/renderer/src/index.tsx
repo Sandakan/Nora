@@ -8,6 +8,8 @@ import './i18n';
 // Import the generated route tree
 import { routeTree } from './routeTree.gen';
 
+import { dispatch } from './store/store';
+
 // Create a new router instance
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -72,12 +74,15 @@ const root = createRoot(container);
 
 router.subscribe('onRendered', () => {
   if (location.href.includes('/display-player')) {
+    dispatch({ type: 'UPDATE_PLAYER_TYPE', data: 'display' });
     return window.api.windowControls.changePlayerType('display');
   }
   if (location.href.includes('/mini-player')) {
+    dispatch({ type: 'UPDATE_PLAYER_TYPE', data: 'mini' });
     return window.api.windowControls.changePlayerType('mini');
   }
 
+  dispatch({ type: 'UPDATE_PLAYER_TYPE', data: 'normal' });
   return window.api.windowControls.changePlayerType('normal');
 });
 
