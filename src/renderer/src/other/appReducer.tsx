@@ -165,7 +165,6 @@ export const reducer = (state: AppReducer, action: AppReducerStateActions): AppR
       const navigationHistory = { ...action.data };
       return {
         ...state,
-        bodyBackgroundImage: undefined,
         navigationHistory,
         currentlyActivePage: navigationHistory.history[navigationHistory.pageHistoryIndex]
       };
