@@ -80,6 +80,16 @@ export function usePlaybackErrors(
           skipSongRef?.current?.();
           return undefined;
         }
+        if (
+          appError &&
+          typeof appError === 'object' &&
+          'code' in (appError as object) &&
+          (appError as Record<string, unknown>).code === 'SONG_NOT_FOUND'
+        ) {
+          log('Song file not found (IPC), skipping to next song.', {}, 'WARN');
+          skipSongRef?.current?.();
+          return undefined;
+        }
         player.load();
         player.currentTime = prevSongPosition;
       } else {

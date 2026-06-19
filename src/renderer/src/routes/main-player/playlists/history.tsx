@@ -50,7 +50,7 @@ function HistoryPlaylistInfoPage() {
   const queue = useStore(store, (state) => state.localStorage.queue);
   const playlistSortingState = useStore(
     store,
-    (state) => state.localStorage.sortingStates?.playlistDetailPage || 'addedOrder'
+    (state) => state.localStorage.sortingStates?.historyDetailPage || 'addedOrder'
   );
   const preferences = useStore(store, (state) => state.localStorage.preferences);
   const { updateQueueData, addNewNotifications, createQueue, playSong } =
@@ -60,7 +60,7 @@ function HistoryPlaylistInfoPage() {
   const navigate = useNavigate({ from: '/main-player/playlists/history' });
 
   useEffect(() => {
-    storage.sortingStates.setSortingStates('playlistDetailPage', sortingOrder);
+    storage.sortingStates.setSortingStates('historyDetailPage', sortingOrder);
   }, [sortingOrder]);
 
   const { data: historySongs = [] } = useSuspenseQuery({
