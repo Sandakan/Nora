@@ -29,7 +29,7 @@ const isASongPath = (text: string) => {
     const textLinePath = textLine;
     const textLinePathExt =
       path.extname(textLinePath).split('.').pop() || path.extname(textLinePath);
-    const isPathToASong = appPreferences.supportedMusicExtensions.includes(textLinePathExt);
+    const isPathToASong = appPreferences.supportedMusicExtensions.includes(textLinePathExt.toLowerCase());
     return isPathToASong;
   }
   return false;
@@ -59,7 +59,7 @@ const validatePlaylistFile = async (
   const text = await readFile(filePath, 'utf-8');
   const textArr = text.replaceAll('\r', '').split('\n');
 
-  if (textArr[0] !== '#EXTM3U') {
+  if (textArr[0].replace(/^\uFEFF/, '').trim() !== '#EXTM3U') {
     logger.warn(
       `Failed to import the playlist because user selected a file with invalid file data.`,
       { filePath, firstLine: textArr[0] }
