@@ -47,6 +47,8 @@ const DisplayModePlayer = () => {
     [handleSkipForwardClick]
   );
 
+  // Prefer artist's high-res online artwork for the background image over
+  // the song's own artwork, which may be lower resolution.
   const imgPath = useMemo(() => {
     const selectedArtist = currentSongData?.artists?.find(
       (artist) => !!artist.onlineArtworkPaths?.picture_xl
@@ -148,6 +150,7 @@ const DisplayModePlayer = () => {
         to="/main-player/home"
         className="absolute top-4 right-4 z-20 cursor-pointer rounded-full bg-background-color-3/15 p-2 text-white backdrop-blur-lg transition-opacity hover:bg-background-color-3/30 focus-visible:outline!"
         title={t('player.backToPlayer')}
+        aria-label={t('player.backToPlayer')}
       >
         <span className="material-icons-round text-2xl">close_fullscreen</span>
       </NavLink>
