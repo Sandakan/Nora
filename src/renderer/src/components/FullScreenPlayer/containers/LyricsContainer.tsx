@@ -133,13 +133,13 @@ const LyricsContainer = (props: Props) => {
       }`}
       id="miniPlayerLyricsContainer"
     >
-      {(isShowLyricsWithSongInfo || isLyricsVisible) && lyrics !== null && lyricsComponents.length > 0 && lyrics && lyrics.lyrics.isSynced && (
+      {(isShowLyricsWithSongInfo || isLyricsVisible) && lyrics && lyricsComponents.length > 0 && lyrics.lyrics.isSynced && (
         <>
           {lyricsComponents}
           {lyricsSource}
         </>
       )}
-      {(isShowLyricsWithSongInfo || isLyricsVisible) && lyrics !== null && lyrics && !lyrics.lyrics.isSynced && (
+      {(isShowLyricsWithSongInfo || isLyricsVisible) && lyrics && !lyrics.lyrics.isSynced && (
         <div className="text-font-color-highlight flex h-full w-full flex-col justify-center text-2xl opacity-50">
           <span className="material-icons-round-outlined mb-2 text-5xl">brightness_alert</span>
           {t('lyricsPage.noSyncedLyrics')}

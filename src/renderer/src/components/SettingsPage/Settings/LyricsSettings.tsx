@@ -71,9 +71,9 @@ const LyricsSettings = () => {
   const [showLyricsWithSongInfo, setShowLyricsWithSongInfo] = useState(false);
 
   useEffect(() => {
-    const showLyricsWithSongInfo = storage.preferences.getPreferences('showLyricsWithSongInfo');
+    const storedPreference = storage.preferences.getPreferences('showLyricsWithSongInfo');
 
-    setShowLyricsWithSongInfo(showLyricsWithSongInfo);
+    setShowLyricsWithSongInfo(storedPreference);
   }, []);
 
   return (

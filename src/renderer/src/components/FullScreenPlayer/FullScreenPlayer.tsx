@@ -77,7 +77,7 @@ const FullScreenPlayer = () => {
                 isShowLyricsWithSongInfo={isShowLyricsWithSongInfo}
               />
             </div>
-            <div className="w-1/2 overflow-auto">
+            <div className="w-1/2">
               <LyricsContainer
                 isLyricsVisible={isLyricsVisible}
                 setIsLyricsAvailable={setIsLyricsAvailable}
