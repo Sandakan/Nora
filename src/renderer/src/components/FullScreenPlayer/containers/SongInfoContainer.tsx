@@ -105,7 +105,7 @@ const SongInfoContainer = (props: Props) => {
               tooltipLabel={isPinned ? t('fullScreenPlayer.unpinOverlay') : t('fullScreenPlayer.pinOverlay')}
               clickHandler={() => setIsPinned((prev) => !prev)}
               iconName="push_pin"
-              removeFocusOnClick
+              removeFocusOnClick={false}
               ariaPressed={isPinned}
             />
             <Button
