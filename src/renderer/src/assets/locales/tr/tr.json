@@ -126,6 +126,10 @@
     "upNext": "Sıradaki",
     "closeUpNext": "Sonraki Yakından Çekim",
     "by": "tarafından",
+
+    "backToPlayer": "Oyuncuya Geri Dön",
+    "openInDisplayMode": "Görüntüleme Modunda Aç",
+
     "errorTitle": "Oyuncuda bir hata oluştu.",
     "errorMessage": "$t(player.errorTitle)<br> Bu, bozuk bir şarkıyı çalmaya çalışmanın bir sonucu olabilir. <details></details>",
     "noErrorMessage": "Hata mesajı oluşturulmadı"

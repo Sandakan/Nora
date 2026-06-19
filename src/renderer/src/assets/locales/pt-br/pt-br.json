@@ -140,6 +140,9 @@
     "closeUpNext": "Fechar 'PRÓXIMA'",
     "by": "por",
 
+    "backToPlayer": "Voltar ao Player",
+    "openInDisplayMode": "Abrir no Modo de Exibição",
+
     "errorTitle": "Ocorreu um erro no player.",
     "errorMessage": "$t(player.errorTitle)<br /> Isso pode ser resultado de tentar reproduzir uma música corrompida. <details/>",
     "noErrorMessage": "Nenhuma mensagem de erro gerada"
