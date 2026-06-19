@@ -1074,7 +1074,9 @@ declare global {
     | 'sortingStates.playlistDetailPage'
     | 'sortingStates.albumDetailPage'
     | 'sortingStates.genreDetailPage'
-    | 'sortingStates.artistDetailPage';
+    | 'sortingStates.artistDetailPage'
+    | 'sortingStates.favoritesDetailPage'
+    | 'sortingStates.historyDetailPage';
 
   type SongFilterTypes =
     | 'notSelected'

@@ -18,6 +18,7 @@ import { useDynamicTheme } from './hooks/useDynamicTheme';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useListeningData } from './hooks/useListeningData';
 import { useMediaSession } from './hooks/useMediaSession';
+import log from './utils/log';
 import { useMultiSelection } from './hooks/useMultiSelection';
 // ? HOOKS
 import useNetworkConnectivity from './hooks/useNetworkConnectivity';
@@ -209,7 +210,7 @@ export default function App() {
         .getSongFromUnknownSource(songPath)
         .then((res) => playSongFromUnknownSource(res, true))
         .catch((err) => {
-          console.error(err);
+          log('Failed to fetch song from unknown source', { err }, 'ERROR');
           changePromptMenuData(true, <SongUnplayableErrorPrompt err={err} />);
         });
     },
@@ -221,7 +222,7 @@ export default function App() {
       window.api.playlistsData
         .importPlaylistFromPath(playlistPath)
         .catch((err) => {
-          console.error(err);
+          log('Failed to import playlist from path', { err }, 'ERROR');
           changePromptMenuData(true, <SongUnplayableErrorPrompt err={err} />);
         });
     },
