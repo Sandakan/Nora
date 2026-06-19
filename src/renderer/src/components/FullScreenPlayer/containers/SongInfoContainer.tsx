@@ -17,7 +17,7 @@ type Props = {
   isLyricsAvailable: boolean;
   isMouseActive: boolean;
   isPinned: boolean;
-  setIsLyricsVisible: (callback: (state: boolean) => boolean) => void;
+  setIsLyricsVisible: Dispatch<SetStateAction<boolean>>;
   setIsPinned: Dispatch<SetStateAction<boolean>>;
 };
 
@@ -174,7 +174,9 @@ const SongInfoContainer = (props: Props) => {
             />
 
             <div
-              className={`volume-slider-container mr-4 max-w-[6rem] min-w-[4rem] transition-[visibility,opacity] delay-150 ease-in-out lg:mr-4 ${
+              className={`volume-slider-container mr-4 max-w-[6rem] min-w-[4rem] lg:mr-4 ${
+                !isPinned && 'transition-[visibility,opacity] delay-150 ease-in-out'
+              } ${
                 isPinned
                   ? 'visible opacity-100'
                   : isMouseActive
