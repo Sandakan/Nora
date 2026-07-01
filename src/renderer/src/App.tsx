@@ -143,7 +143,7 @@ export default function App() {
 
   // ? INITIALIZE LISTENING DATA
   // Listening data hook handles recording song playback sessions for analytics
-  const { recordListeningData } = useListeningData(audio);
+  const { recordListeningData } = useListeningData(player);
 
   // ? WIRE UP LISTENING DATA RECORDING TO PLAYER EVENTS
   // Listen for songLoaded events from AudioPlayer to record listening data
@@ -244,7 +244,7 @@ export default function App() {
 
   // ? INITIALIZE MEDIA SESSION
   // Media session hook handles OS-level media controls and browser media notifications
-  useMediaSession(audio, {
+  useMediaSession(player, {
     toggleSongPlayback,
     handleSkipBackwardClick,
     handleSkipForwardClick,
@@ -253,7 +253,7 @@ export default function App() {
 
   // ? INITIALIZE DISCORD RPC
   // Discord RPC hook handles Discord Rich Presence integration
-  useDiscordRpc(audio);
+  useDiscordRpc(player);
 
   // Set up keyboard shortcuts with all required dependencies
   useKeyboardShortcuts({

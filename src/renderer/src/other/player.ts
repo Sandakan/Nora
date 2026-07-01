@@ -401,6 +401,7 @@ class AudioPlayer {
 
     oldActive.pause();
     dispatch({ type: 'CURRENT_SONG_PLAYBACK_STATE', data: true });
+    this.emit('play');
 
     this.suppressNextPositionLoad = true;
     this.queue.moveToPosition(idx);
