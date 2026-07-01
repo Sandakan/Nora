@@ -47,6 +47,10 @@ function SongsPage() {
     store,
     (state) => state.localStorage.sortingStates.songsPage
   );
+  const songsPageFilteringState = useStore(
+    store,
+    (state) => state.localStorage.filteringStates.songsPage
+  );
   const isSongIndexingEnabled = useStore(
     store,
     (state) => state.localStorage.preferences.isSongIndexingEnabled
@@ -68,7 +72,7 @@ function SongsPage() {
   const {
     scrollTopOffset,
     sortingOrder = songsPageSortingState || 'aToZ',
-    filteringOrder = 'notSelected'
+    filteringOrder = songsPageFilteringState || 'notSelected'
   } = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
 
@@ -81,6 +85,10 @@ function SongsPage() {
   useEffect(() => {
     storage.sortingStates.setSortingStates('songsPage', sortingOrder);
   }, [sortingOrder]);
+
+  useEffect(() => {
+    storage.filteringStates.setFilteringStates('songsPage', filteringOrder);
+  }, [filteringOrder]);
 
   const addNewSongs = useCallback(() => {
     changePromptMenuData(

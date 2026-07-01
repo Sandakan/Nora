@@ -75,7 +75,7 @@ const BlacklistSongConfirmPrompt = (props: { songIds: number[]; title?: string }
               .blacklistSongs(songIds)
               .then(() => {
                 if (isDoNotShowAgain)
-                  storage.preferences.setPreferences('isSongIndexingEnabled', isDoNotShowAgain);
+                  storage.preferences.setPreferences('doNotShowBlacklistSongConfirm', isDoNotShowAgain);
                 changePromptMenuData(false);
                 return addNewNotifications([
                   {
