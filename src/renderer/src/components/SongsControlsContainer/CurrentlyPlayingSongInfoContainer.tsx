@@ -43,7 +43,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
         .map((artist, index) => (
           <Img
             key={artist.artistId}
-            src={artist.onlineArtworkPaths?.picture_small}
+            src={artist.onlineArtworkPaths?.picture_medium}
             fallbackSrc={artist.artworkPath}
             loading="eager"
             className={`border-background-color-1 dark:border-dark-background-color-1 absolute aspect-square w-6 rounded-full border-2 ${

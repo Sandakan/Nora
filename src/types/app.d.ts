@@ -1013,8 +1013,8 @@ declare global {
   // ? Context menu related related types
 
   interface ContextMenuAdditionalData {
-    title: string;
-    artworkPath: string;
+    title?: string;
+    artworkPath?: string;
     artworkClassName?: string;
     subTitle?: string;
     subTitle2?: string;

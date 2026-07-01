@@ -97,7 +97,7 @@ const ContextMenu = memo(() => {
       tabIndex={isVisible ? 0 : -1}
       role="menu"
     >
-      {data && <ContextMenuDataItem data={data} />}
+      {data?.title && <ContextMenuDataItem data={data} />}
       {contextMenuItems}
     </div>
   );

@@ -175,7 +175,7 @@ function SongsPage() {
       <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-8 flex items-center pr-4 text-3xl font-medium">
         <div className="container flex">
           {t('common.song_other')}{' '}
-          <div className="other-stats-container text-font-color-black dark:text-font-color-white ml-12 flex items-center text-xs">
+          <div className="other-stats-container text-font-color-black dark:text-font-color-white ml-4 flex shrink-0 items-center text-xs sm:ml-12">
             {isMultipleSelectionEnabled ? (
               <div className="text-font-color-highlight dark:text-dark-font-color-highlight text-sm">
                 {t('common.selectionWithCount', {

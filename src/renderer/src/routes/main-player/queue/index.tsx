@@ -312,11 +312,10 @@ function RouteComponent() {
               </div>
             </div>
           )}
-          <div
-            className={`songs-container overflow-auto ${queuedSongs && queuedSongs?.length > 0 ? 'h-full' : 'h-0'}`}
-          >
-            {queuedSongs &&
-              queuedSongs.length > 0 && (
+          {queuedSongs && queuedSongs.length > 0 && (
+            <div
+              className="songs-container overflow-auto h-full"
+            >
                 // $ Enabling StrictMode throws an error in the CurrentQueuePage when using react-beautiful-dnd for drag and drop.
 
                 <DragDropContext onDragEnd={handleDragEnd}>
@@ -414,8 +413,8 @@ function RouteComponent() {
                     )}
                   </Droppable>
                 </DragDropContext>
-              )}
-          </div>
+              </div>
+          )}
           {currentQueue.length === 0 && (
             <div className="no-songs-container flex h-full w-full flex-col items-center justify-center text-center text-2xl text-[#ccc]">
               <Img src={NoSongsImage} className="mb-8 w-60" alt="" /> {t('currentQueuePage.empty')}
