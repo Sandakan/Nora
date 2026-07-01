@@ -26,10 +26,12 @@ export const Route = createFileRoute('/main-player/songs/')({
     filteringOrder: search.filteringOrder
   }),
   loader: async ({ deps }) => {
+    const persistedSort = storage.sortingStates.getSortingStates('songsPage');
+    const persistedFilter = storage.filteringStates.getFilteringStates('songsPage');
     await queryClient.ensureQueryData(
       songQuery.all({
-        sortType: deps.sortingOrder ?? 'aToZ',
-        filterType: deps.filteringOrder ?? 'notSelected',
+        sortType: deps.sortingOrder ?? persistedSort ?? 'aToZ',
+        filterType: deps.filteringOrder ?? persistedFilter ?? 'notSelected',
         start: 0,
         end: 0
       })
