@@ -32,10 +32,14 @@ const AudioPlaybackSettings = () => {
 
   const [crossfadeDuration, setCrossfadeDuration] = useState(0);
 
-  const persistTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const playbackRatePersistTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const crossfadePersistTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
-    return () => clearTimeout(persistTimeoutRef.current);
+    return () => {
+      clearTimeout(playbackRatePersistTimeoutRef.current);
+      clearTimeout(crossfadePersistTimeoutRef.current);
+    };
   }, []);
 
   useEffect(() => {
@@ -104,8 +108,8 @@ const AudioPlaybackSettings = () => {
                     const val = e.currentTarget.valueAsNumber;
                     setPlaybackRateInterval(val);
                     dispatch({ type: 'UPDATE_PLAYBACK_RATE', data: val });
-                    clearTimeout(persistTimeoutRef.current);
-                    persistTimeoutRef.current = setTimeout(() => {
+                    clearTimeout(playbackRatePersistTimeoutRef.current);
+                    playbackRatePersistTimeoutRef.current = setTimeout(() => {
                       storage.playback.setPlaybackOptions('playbackRate', val);
                     }, 200);
                   }}
@@ -150,8 +154,8 @@ const AudioPlaybackSettings = () => {
                   onChange={(e) => {
                     const val = e.currentTarget.valueAsNumber;
                     setCrossfadeDuration(val);
-                    clearTimeout(persistTimeoutRef.current);
-                    persistTimeoutRef.current = setTimeout(() => {
+                    clearTimeout(crossfadePersistTimeoutRef.current);
+                    crossfadePersistTimeoutRef.current = setTimeout(() => {
                       storage.playback.setPlaybackOptions('crossfadeDuration', val);
                     }, 200);
                   }}
