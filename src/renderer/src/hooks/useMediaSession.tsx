@@ -53,6 +53,9 @@ export function useMediaSession(
 
   // Track artwork URL for cleanup
   const artworkPathRef = useRef<string | undefined>(undefined);
+  // Track last seen values so store subscription only re-runs on meaningful changes
+  const lastSongRef = useRef<unknown>(undefined);
+  const lastPlayingRef = useRef<boolean | undefined>(undefined);
 
   useEffect(() => {
     if (typeof navigator === 'undefined' || !('mediaSession' in navigator)) {
@@ -173,7 +176,13 @@ export function useMediaSession(
     };
 
     const storeSubscription = store.subscribe(() => {
-      updateMediaSessionMetaData();
+      const currentSong = store.state.currentSongData;
+      const isPlaying = store.state.player.isCurrentSongPlaying;
+      if (currentSong !== lastSongRef.current || isPlaying !== lastPlayingRef.current) {
+        lastSongRef.current = currentSong;
+        lastPlayingRef.current = isPlaying;
+        updateMediaSessionMetaData();
+      }
     });
 
     // Register metadata + handlers immediately so media keys are available without requiring

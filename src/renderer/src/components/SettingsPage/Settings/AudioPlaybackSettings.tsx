@@ -1,6 +1,6 @@
 import { dispatch, store } from '@renderer/store/store';
 import { useStore } from '@tanstack/react-store';
-import { useEffect, useState, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import i18n from '../../../i18n';
@@ -31,6 +31,12 @@ const AudioPlaybackSettings = () => {
   const [playbackRateInterval, setPlaybackRateInterval] = useState(1);
 
   const [crossfadeDuration, setCrossfadeDuration] = useState(0);
+
+  const persistTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => {
+    return () => clearTimeout(persistTimeoutRef.current);
+  }, []);
 
   useEffect(() => {
     const interval = storage.preferences.getPreferences('seekbarScrollInterval');
@@ -97,8 +103,11 @@ const AudioPlaybackSettings = () => {
                   onChange={(e) => {
                     const val = e.currentTarget.valueAsNumber;
                     setPlaybackRateInterval(val);
-                    storage.playback.setPlaybackOptions('playbackRate', val);
                     dispatch({ type: 'UPDATE_PLAYBACK_RATE', data: val });
+                    clearTimeout(persistTimeoutRef.current);
+                    persistTimeoutRef.current = setTimeout(() => {
+                      storage.playback.setPlaybackOptions('playbackRate', val);
+                    }, 200);
                   }}
                   style={playbackRateSeekBarCssProperties}
                   title={`${playbackRateInterval}x`}
@@ -141,7 +150,10 @@ const AudioPlaybackSettings = () => {
                   onChange={(e) => {
                     const val = e.currentTarget.valueAsNumber;
                     setCrossfadeDuration(val);
-                    storage.playback.setPlaybackOptions('crossfadeDuration', val);
+                    clearTimeout(persistTimeoutRef.current);
+                    persistTimeoutRef.current = setTimeout(() => {
+                      storage.playback.setPlaybackOptions('crossfadeDuration', val);
+                    }, 200);
                   }}
                   style={crossfadeSliderCssProperties}
                   title={crossfadeDuration === 0 ? t('settingsPage.crossfadeDisabled') : `${crossfadeDuration / 1000}s`}
