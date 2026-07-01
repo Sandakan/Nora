@@ -88,7 +88,7 @@ const Button = memo((props: ButtonProps) => {
       type="button"
       id={id}
       className={twMerge(
-        `button group border-background-color-2 bg-background-color-2/25 text-font-color-black hover:border-background-color-3 hover:bg-background-color-2/50 focus-visible:!border-font-color-highlight-2 focus-visible:bg-background-color-2/50 dark:border-dark-background-color-2 dark:bg-dark-background-color-2/25 dark:text-font-color-white dark:hover:border-dark-background-color-3 dark:hover:bg-dark-background-color-2/50 dark:focus-visible:!border-dark-font-color-highlight-2 dark:focus-visible:bg-dark-background-color-2/50 mr-4 flex cursor-pointer items-center justify-center rounded-3xl border-[3px] px-4 py-2 text-sm transition-[border,background,color] ease-in-out ${
+        `button group border-background-color-2 bg-background-color-2/25 text-font-color-black hover:border-background-color-3 hover:bg-background-color-2/50 focus-visible:!border-font-color-highlight-2 focus-visible:bg-background-color-2/50 dark:border-dark-background-color-2 dark:bg-dark-background-color-2/25 dark:text-font-color-white dark:hover:border-dark-background-color-3 dark:hover:bg-dark-background-color-2/50 dark:focus-visible:!border-dark-font-color-highlight-2 dark:focus-visible:bg-dark-background-color-2/50 mr-4 flex cursor-pointer items-center justify-center rounded-3xl border-[3px] px-4 py-2 text-sm active:scale-[0.97] transition-[border,background,color,transform] ease-in-out ${
           isButtonDisabled &&
           `border-font-color-dimmed/10! text-opacity-50! dark:border-font-color-dimmed/40! cursor-not-allowed! brightness-50! transition-none!`
         } ${!isVisible && 'hidden'}`,

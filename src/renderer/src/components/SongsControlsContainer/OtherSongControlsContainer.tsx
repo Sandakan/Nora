@@ -16,6 +16,12 @@ const AppShortcutsPrompt = lazy(() => import('../SettingsPage/AppShortcutsPrompt
 const OtherSongControlsContainer = () => {
   const isMuted = useSelector(store, (state) => state.player.volume.isMuted);
   const volume = useSelector(store, (state) => state.player.volume.value);
+  const isContextMenuVisible = useSelector(
+    store,
+    (state) =>
+      state.contextMenuData.isVisible &&
+      state.contextMenuData.data?.source === 'other-song-controls'
+  );
 
   const { updatePlayerType, toggleMutedState, updateContextMenuData, changePromptMenuData } =
     useContext(AppUpdateContext);
@@ -70,7 +76,8 @@ const OtherSongControlsContainer = () => {
           }
         ],
         pageX,
-        pageY
+        pageY,
+        { source: 'other-song-controls' }
       );
     },
     [changePromptMenuData, navigate, t, updateContextMenuData, updatePlayerType]
@@ -144,7 +151,7 @@ const OtherSongControlsContainer = () => {
       <div className="other-settings-btn text-font-color-black text-opacity-60 dark:text-font-color-white mr-4 flex cursor-pointer items-center justify-center">
         <span
           title={t('player.otherSettings')}
-          className="material-icons-round icon text-font-color-black dark:text-font-color-white cursor-pointer text-xl opacity-60 transition-opacity hover:opacity-80"
+          className={`material-icons-round icon cursor-pointer text-xl opacity-60 transition-[color,opacity] hover:opacity-80 ${isContextMenuVisible ? 'text-font-color-highlight! dark:text-dark-font-color-highlight! opacity-100!' : 'text-font-color-black dark:text-font-color-white'}`}
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();

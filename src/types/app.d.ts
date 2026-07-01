@@ -1019,6 +1019,7 @@ declare global {
     subTitle?: string;
     subTitle2?: string;
     button?: ReactElement;
+    source?: string;
   }
 
   interface ContextMenuData {

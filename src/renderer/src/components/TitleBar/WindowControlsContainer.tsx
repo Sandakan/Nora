@@ -1,6 +1,6 @@
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { useStore } from '@tanstack/react-store';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { settingsQuery } from '../../queries/settings';
@@ -17,6 +17,20 @@ const WindowControlsContainer = () => {
   });
 
   const { t } = useTranslation();
+  const [isMaximized, setIsMaximized] = useState(false);
+
+  useEffect(() => {
+    window.api.windowControls
+      .isMaximized()
+      .then(setIsMaximized)
+      .catch((err) => console.warn('Failed to read maximize state', err));
+    const unsubMax = window.api.windowControls.onMaximized(() => setIsMaximized(true));
+    const unsubUnmax = window.api.windowControls.onUnmaximized(() => setIsMaximized(false));
+    return () => {
+      unsubMax();
+      unsubUnmax();
+    };
+  }, []);
 
   const close = useCallback(() => {
     if (hideWindowOnClose) window.api.windowControls.hideApp();
@@ -45,9 +59,9 @@ const WindowControlsContainer = () => {
           bodyBackgroundImage && 'text-font-color-white!'
         } `}
         clickHandler={maximize}
-        tooltipLabel={t('titleBar.maximize')}
+        tooltipLabel={isMaximized ? t('titleBar.restore') : t('titleBar.maximize')}
         iconClassName="material-icons-round-outlined h-fit text-lg font-light! transition-[background] ease-in-out"
-        iconName="crop_square"
+        iconName={isMaximized ? 'filter_none' : 'crop_square'}
       />
       <Button
         className={`close-btn hover:!bg-font-color-crimson hover:!text-font-color-white !m-0 h-full !rounded-none !border-0 bg-transparent !px-3 text-xl -outline-offset-2 transition-[background] ease-in-out focus-visible:!outline dark:bg-transparent ${

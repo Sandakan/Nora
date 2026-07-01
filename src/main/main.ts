@@ -346,11 +346,17 @@ app
       manageAppResizeEvent();
     });
 
-    mainWindow.on('maximize', () => recordWindowState('maximized'));
+    mainWindow.on('maximize', () => {
+      recordWindowState('maximized');
+      mainWindow.webContents.send('app/maximized');
+    });
 
     mainWindow.on('minimize', () => recordWindowState('minimized'));
 
-    mainWindow.on('unmaximize', () => recordWindowState('normal'));
+    mainWindow.on('unmaximize', () => {
+      recordWindowState('normal');
+      mainWindow.webContents.send('app/unmaximized');
+    });
 
     mainWindow.on('restore', () => recordWindowState('normal'));
 
