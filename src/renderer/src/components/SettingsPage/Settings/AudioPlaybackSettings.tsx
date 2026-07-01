@@ -125,6 +125,7 @@ const AudioPlaybackSettings = () => {
               className="ml-6"
               isDisabled={playbackRateInterval === 1}
               clickHandler={() => {
+                clearTimeout(playbackRatePersistTimeoutRef.current);
                 setPlaybackRateInterval(1);
                 storage.playback.setPlaybackOptions('playbackRate', 1);
                 dispatch({ type: 'UPDATE_PLAYBACK_RATE', data: 1 });
@@ -176,6 +177,7 @@ const AudioPlaybackSettings = () => {
               className="ml-6"
               isDisabled={crossfadeDuration === 0}
               clickHandler={() => {
+                clearTimeout(crossfadePersistTimeoutRef.current);
                 setCrossfadeDuration(0);
                 storage.playback.setPlaybackOptions('crossfadeDuration', 0);
               }}

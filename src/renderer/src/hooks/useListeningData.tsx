@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 import type AudioPlayer from '../other/player';
 import ListeningDataSession from '../other/listeningDataSession';
@@ -136,6 +136,14 @@ export function useListeningData(playerInput: AudioPlayer | HTMLAudioElement) {
     },
     [audioPlayer, player]
   );
+
+  useEffect(() => {
+    return () => {
+      emitterCleanupRef.current?.();
+      emitterCleanupRef.current = undefined;
+      recordRef.current?.stopRecording();
+    };
+  }, []);
 
   return {
     recordListeningData

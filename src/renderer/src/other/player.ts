@@ -50,6 +50,7 @@ class AudioPlayer {
 
   private repeatMode: 'off' | 'one' | 'all' = 'off';
   private pendingAutoPlay: boolean = false;
+  private pendingAutoPlayHandler: (() => void) | null = null;
 
   private activeElement: 'primary' | 'secondary' = 'primary';
   private isCrossfading: boolean = false;
@@ -416,7 +417,9 @@ class AudioPlayer {
     }
 
     if (this.currentContext.state === 'suspended') {
-      this.currentContext.resume();
+      void this.currentContext.resume().catch((err) => {
+        console.error('[AudioPlayer] Failed to resume AudioContext:', err);
+      });
     }
   }
 
@@ -464,7 +467,9 @@ class AudioPlayer {
     }
 
     if (this.currentContext.state === 'suspended') {
-      this.currentContext.resume();
+      void this.currentContext.resume().catch((err) => {
+        console.error('[AudioPlayer] Failed to resume AudioContext:', err);
+      });
     }
   }
 
@@ -546,12 +551,17 @@ class AudioPlayer {
             console.error('[AudioPlayer] Immediate auto-play failed:', err)
           );
         } else {
+          if (this.pendingAutoPlayHandler) {
+            targetAudio.removeEventListener('canplay', this.pendingAutoPlayHandler);
+          }
           const autoPlayHandler = () => {
+            this.pendingAutoPlayHandler = null;
             this.play().catch((err) =>
               console.error('[AudioPlayer] Auto-play on canplay failed:', err)
             );
             targetAudio.removeEventListener('canplay', autoPlayHandler);
           };
+          this.pendingAutoPlayHandler = autoPlayHandler;
           targetAudio.addEventListener('canplay', autoPlayHandler);
         }
       }
