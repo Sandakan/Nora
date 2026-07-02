@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 
+import type AudioPlayer from '../other/player';
 import toggleSongIsFavorite from '../other/toggleSongIsFavorite';
 import { dispatch, store } from '../store/store';
 import storage from '../utils/localStorage';
@@ -32,7 +33,7 @@ import { useUserPreferences } from './useUserPreferences';
  * @param player - The HTMLAudioElement instance
  * @returns Object containing playback setting functions
  */
-export function usePlaybackSettings(player: HTMLAudioElement) {
+export function usePlaybackSettings(player: HTMLAudioElement, audioPlayer?: AudioPlayer) {
   const { saveEqualizerPreset } = useUserPreferences();
 
   const toggleRepeat = useCallback((newState?: RepeatTypes) => {
@@ -102,8 +103,9 @@ export function usePlaybackSettings(player: HTMLAudioElement) {
   const updateEqualizerOptions = useCallback(
     (options: Equalizer) => {
       saveEqualizerPreset(options);
+      audioPlayer?.applyEqualizerPreset(options);
     },
-    [saveEqualizerPreset]
+    [saveEqualizerPreset, audioPlayer]
   );
 
   return {

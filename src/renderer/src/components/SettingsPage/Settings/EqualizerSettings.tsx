@@ -221,7 +221,7 @@ const EqualizerSettings = () => {
                   onChange={(e) => {
                     const val = e.currentTarget.valueAsNumber;
                     if (!Number.isNaN(val)) {
-                      dispatch({ type: 'preAmpValue', data: Math.min(12, Math.max(-12, val)) });
+                      dispatch({ type: 'preAmpValue', data: Math.round(Math.min(12, Math.max(-12, val)) * 10) / 10 });
                     }
                   }}
                   onBlur={(e) => {

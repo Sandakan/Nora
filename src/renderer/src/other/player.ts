@@ -681,6 +681,14 @@ class AudioPlayer {
     this.preAmpNode.gain.value = Math.pow(10, clamped / 20);
   }
 
+  /** Applies an equalizer preset (bands + pre-amp) to the live audio nodes. */
+  applyEqualizerPreset(preset: Equalizer) {
+    this.equalizerBands.forEach((filter, filterName) => {
+      filter.gain.value = preset[filterName] ?? 0;
+    });
+    this.preAmp = preset.preAmpValue ?? 0;
+  }
+
   /** Gets the muted state. */
   get muted(): boolean {
     return this.audio.muted;
