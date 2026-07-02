@@ -161,6 +161,7 @@ export function useUserPreferences() {
     // Shortcut mutate functions
     saveKeyboardShortcuts: saveKeyboardShortcutsMutation.mutate,
     saveEqualizerPreset: saveEqualizerPresetMutation.mutate,
+    saveEqualizerPresetAsync: saveEqualizerPresetMutation.mutateAsync,
     addIgnoredArtist: addIgnoredArtistMutation.mutate,
     removeIgnoredArtist: removeIgnoredArtistMutation.mutate,
     addIgnoredFeaturingArtist: addIgnoredFeaturingArtistMutation.mutate,

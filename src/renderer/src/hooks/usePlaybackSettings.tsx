@@ -34,7 +34,7 @@ import { useUserPreferences } from './useUserPreferences';
  * @returns Object containing playback setting functions
  */
 export function usePlaybackSettings(player: HTMLAudioElement, audioPlayer?: AudioPlayer) {
-  const { saveEqualizerPreset } = useUserPreferences();
+  const { saveEqualizerPresetAsync } = useUserPreferences();
 
   const toggleRepeat = useCallback((newState?: RepeatTypes) => {
     const repeatState =
@@ -102,10 +102,15 @@ export function usePlaybackSettings(player: HTMLAudioElement, audioPlayer?: Audi
 
   const updateEqualizerOptions = useCallback(
     (options: Equalizer) => {
-      saveEqualizerPreset(options);
-      audioPlayer?.applyEqualizerPreset(options);
+      saveEqualizerPresetAsync(options)
+        .then(() => {
+          audioPlayer?.applyEqualizerPreset(options);
+        })
+        .catch((err) => {
+          console.error('Failed to save equalizer preset:', err);
+        });
     },
-    [saveEqualizerPreset, audioPlayer]
+    [saveEqualizerPresetAsync, audioPlayer]
   );
 
   return {
