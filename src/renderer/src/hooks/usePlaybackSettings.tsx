@@ -1,5 +1,4 @@
-import { useCallback } from 'react';
-
+import { useCallback, useEffect, useRef } from 'react';
 import type AudioPlayer from '../other/player';
 import toggleSongIsFavorite from '../other/toggleSongIsFavorite';
 import { dispatch, store } from '../store/store';
@@ -35,6 +34,13 @@ import { useUserPreferences } from './useUserPreferences';
  */
 export function usePlaybackSettings(player: HTMLAudioElement, audioPlayer?: AudioPlayer) {
   const { saveEqualizerPresetAsync } = useUserPreferences();
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    };
+  }, []);
 
   const toggleRepeat = useCallback((newState?: RepeatTypes) => {
     const repeatState =
@@ -102,13 +108,13 @@ export function usePlaybackSettings(player: HTMLAudioElement, audioPlayer?: Audi
 
   const updateEqualizerOptions = useCallback(
     (options: Equalizer) => {
-      saveEqualizerPresetAsync(options)
-        .then(() => {
-          audioPlayer?.applyEqualizerPreset(options);
-        })
-        .catch((err) => {
+      audioPlayer?.applyEqualizerPreset(options);
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+      saveTimeoutRef.current = setTimeout(() => {
+        saveEqualizerPresetAsync(options).catch((err) => {
           console.error('Failed to save equalizer preset:', err);
         });
+      }, 300);
     },
     [saveEqualizerPresetAsync, audioPlayer]
   );
