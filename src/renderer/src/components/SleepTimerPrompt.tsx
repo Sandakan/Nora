@@ -1,3 +1,5 @@
+import { store } from '@renderer/store/store';
+import { useStore } from '@tanstack/react-store';
 import { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -6,6 +8,7 @@ import Button from './Button';
 
 const SleepTimerPrompt = () => {
   const { t } = useTranslation();
+  const sleepTimer = useStore(store, (state) => state.sleepTimer);
   const {
     startSleepTimer,
     startSleepTimerForSongEnd,
@@ -86,24 +89,28 @@ const SleepTimerPrompt = () => {
         />
       </div>
 
-      <div className="border-t border-background-color-3 dark:border-dark-background-color-3 my-2" />
+      {sleepTimer.isActive && sleepTimer.mode === 'time' && (
+        <>
+          <div className="border-t border-background-color-3 dark:border-dark-background-color-3 my-2" />
 
-      <div className="flex flex-col gap-2">
-        <Button
-          label={t('player.sleepTimerExtend15')}
-          iconName="add"
-          className="bg-background-color-3! text-font-color-black! hover:border-background-color-3 dark:bg-dark-background-color-3! dark:hover:border-dark-background-color-3 mt-2 w-full"
-          iconClassName="material-icons-round-outlined mr-2"
-          clickHandler={() => handleExtend(15)}
-        />
-        <Button
-          label={t('player.sleepTimerExtend30')}
-          iconName="add"
-          className="bg-background-color-3! text-font-color-black! hover:border-background-color-3 dark:bg-dark-background-color-3! dark:hover:border-dark-background-color-3 mt-2 w-full"
-          iconClassName="material-icons-round-outlined mr-2"
-          clickHandler={() => handleExtend(30)}
-        />
-      </div>
+          <div className="flex flex-col gap-2">
+            <Button
+              label={t('player.sleepTimerExtend15')}
+              iconName="add"
+              className="bg-background-color-3! text-font-color-black! hover:border-background-color-3 dark:bg-dark-background-color-3! dark:hover:border-dark-background-color-3 mt-2 w-full"
+              iconClassName="material-icons-round-outlined mr-2"
+              clickHandler={() => handleExtend(15)}
+            />
+            <Button
+              label={t('player.sleepTimerExtend30')}
+              iconName="add"
+              className="bg-background-color-3! text-font-color-black! hover:border-background-color-3 dark:bg-dark-background-color-3! dark:hover:border-dark-background-color-3 mt-2 w-full"
+              iconClassName="material-icons-round-outlined mr-2"
+              clickHandler={() => handleExtend(30)}
+            />
+          </div>
+        </>
+      )}
 
       <div className="border-t border-background-color-3 dark:border-dark-background-color-3 my-2" />
 

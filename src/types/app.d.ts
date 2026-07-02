@@ -213,7 +213,7 @@ declare global {
     playbackRate: number;
   }
 
-  type TimerMode = 'time' | 'endOfSong' | 'endOfAlbum' | null;
+  type TimerMode = 'time' | 'endOfSong' | null;
 
   interface SleepTimerState {
     mode: TimerMode;
