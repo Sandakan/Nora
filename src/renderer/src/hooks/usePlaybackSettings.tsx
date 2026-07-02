@@ -32,6 +32,8 @@ import { useUserPreferences } from './useUserPreferences';
  * @param player - The HTMLAudioElement instance
  * @returns Object containing playback setting functions
  */
+const EQUALIZER_SAVE_DEBOUNCE_MS = 300;
+
 export function usePlaybackSettings(player: HTMLAudioElement, audioPlayer?: AudioPlayer) {
   const { saveEqualizerPresetAsync } = useUserPreferences();
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -114,7 +116,7 @@ export function usePlaybackSettings(player: HTMLAudioElement, audioPlayer?: Audi
         saveEqualizerPresetAsync(options).catch((err) => {
           console.error('Failed to save equalizer preset:', err);
         });
-      }, 300);
+      }, EQUALIZER_SAVE_DEBOUNCE_MS);
     },
     [saveEqualizerPresetAsync, audioPlayer]
   );
