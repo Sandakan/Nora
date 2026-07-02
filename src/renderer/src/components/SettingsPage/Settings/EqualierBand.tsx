@@ -31,6 +31,28 @@ const EqualierBand = (props: Props) => {
           <span className="scope-min mt-24 text-sm opacity-80">
             {hertzValue > 1000 ? `${hertzValue / 1000}KHz` : `${hertzValue}Hz`}
           </span>
+          <input
+            type="number"
+            className="equalizer-band-input mt-1 w-full rounded border border-background-color-3 bg-background-color px-1 py-0.5 text-center text-xs text-font-color outline-none focus:border-font-color-highlight dark:border-dark-background-color-3 dark:bg-dark-background-color dark:text-dark-font-color dark:focus:border-dark-font-color-highlight"
+            min="-12"
+            max="12"
+            step="0.1"
+            value={Number(value.toFixed(1))}
+            onChange={(e) => {
+              const val = e.currentTarget.valueAsNumber;
+              if (!Number.isNaN(val)) {
+                onChange(Math.min(12, Math.max(-12, val)));
+              }
+            }}
+            onBlur={(e) => {
+              const val = e.currentTarget.valueAsNumber;
+              if (Number.isNaN(val)) {
+                onChange(0);
+              } else {
+                onChange(Math.min(12, Math.max(-12, Math.round(val * 10) / 10)));
+              }
+            }}
+          />
         </div>
       </div>
     </div>

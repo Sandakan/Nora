@@ -444,7 +444,8 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
     twoThousandHertzFilter: 0,
     fourThousandHertzFilter: 0,
     eightThousandHertzFilter: 0,
-    sixteenThousandHertzFilter: 0
+    sixteenThousandHertzFilter: 0,
+    preAmpValue: 0
   },
   lyricsEditorSettings: {
     offset: 0,

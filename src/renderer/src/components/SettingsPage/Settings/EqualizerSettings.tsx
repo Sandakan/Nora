@@ -1,5 +1,6 @@
 import { LOCAL_STORAGE_DEFAULT_TEMPLATE } from '@renderer/other/appReducer';
 import {
+  type CSSProperties,
   type ReactNode,
   useContext,
   useEffect,
@@ -99,6 +100,7 @@ const EqualizerSettings = () => {
     equalizerBandKeys.forEach((key, index) => {
       hydratedEqualizer[key] = bands[index] ?? 0;
     });
+    hydratedEqualizer.preAmpValue = equalizerPreset.preAmpValue ?? 0;
 
     hasHydratedFromDatabaseRef.current = true;
     shouldSkipNextSaveRef.current = true;
@@ -193,6 +195,46 @@ const EqualizerSettings = () => {
             <span className="mb-20">+12dB</span>
             <span className="">0dB</span>
             <span className="mt-20 mb-8">-12dB</span>
+          </div>
+          <div className="section mx-6 flex flex-col text-center xl:mx-2" style={{ '--equalizer-band': `${((content.preAmpValue + 12) / 24) * 100}%` } as CSSProperties}>
+            <div className="sliders flex flex-col items-center">
+              <div className="range-slider flex h-60 w-full max-w-[1.75rem] flex-col items-center justify-end pt-2">
+                <input
+                  type="range"
+                  className="vertical thumb-visible before:bg-font-color-highlight hover:before:bg-font-color-highlight dark:before:bg-dark-font-color-highlight dark:hover:before:bg-dark-font-color-highlight h-10 w-48 -rotate-90 cursor-row-resize appearance-none bg-[transparent] p-0 outline-hidden outline-offset-1 before:absolute before:top-1/2 before:left-0 before:h-1 before:w-[var(--equalizer-band)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:transition-[width,background] before:content-[''] focus-visible:outline!"
+                  min="-12"
+                  max="12"
+                  step="0.1"
+                  value={content.preAmpValue}
+                  onChange={(e) => {
+                    dispatch({ type: 'preAmpValue', data: e.currentTarget.valueAsNumber });
+                  }}
+                />
+                <span className="scope-min mt-24 text-xs font-medium opacity-80">Pre</span>
+                <input
+                  type="number"
+                  className="equalizer-band-input mt-1 w-full rounded border border-background-color-3 bg-background-color px-1 py-0.5 text-center text-xs text-font-color outline-none focus:border-font-color-highlight dark:border-dark-background-color-3 dark:bg-dark-background-color dark:text-dark-font-color dark:focus:border-dark-font-color-highlight"
+                  min="-12"
+                  max="12"
+                  step="0.1"
+                  value={Number(content.preAmpValue.toFixed(1))}
+                  onChange={(e) => {
+                    const val = e.currentTarget.valueAsNumber;
+                    if (!Number.isNaN(val)) {
+                      dispatch({ type: 'preAmpValue', data: Math.min(12, Math.max(-12, val)) });
+                    }
+                  }}
+                  onBlur={(e) => {
+                    const val = e.currentTarget.valueAsNumber;
+                    if (Number.isNaN(val)) {
+                      dispatch({ type: 'preAmpValue', data: 0 });
+                    } else {
+                      dispatch({ type: 'preAmpValue', data: Math.min(12, Math.max(-12, Math.round(val * 10) / 10)) });
+                    }
+                  }}
+                />
+              </div>
+            </div>
           </div>
           {equalizerBands}
         </div>

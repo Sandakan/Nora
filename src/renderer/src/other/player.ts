@@ -42,6 +42,7 @@ class AudioPlayer {
 
   currentContext: AudioContext;
   equalizerBands: Map<EqualizerBandFilters, BiquadFilterNode>;
+  preAmpNode: GainNode;
   gainNode: GainNode;
 
   unsubscribeFunc: Subscription;
@@ -63,6 +64,7 @@ class AudioPlayer {
 
     this.currentContext = new window.AudioContext();
     this.equalizerBands = new Map();
+    this.preAmpNode = this.currentContext.createGain();
     this.gainNode = this.currentContext.createGain();
 
     this.currentVolume = this.audio.volume;
@@ -370,7 +372,7 @@ class AudioPlayer {
       const isTheFirstFilter = currentFilterIndex === 0;
       const isTheLastFilter = currentFilterIndex === filterMapKeys.length - 1;
 
-      if (isTheFirstFilter) source.connect(filter);
+      if (isTheFirstFilter) source.connect(this.preAmpNode).connect(filter);
       else {
         const prevFilter = map.get(filterMapKeys[currentFilterIndex - 1]);
         if (prevFilter) prevFilter.connect(filter);
@@ -671,6 +673,12 @@ class AudioPlayer {
     this.currentVolume = volume * 100;
     this.audio.volume = volume;
     this.gainNode.gain.value = volume;
+  }
+
+  /** Sets the pre-amp gain in dB (-12 to +12). Converts to linear gain internally. */
+  set preAmp(db: number) {
+    const clamped = Math.min(12, Math.max(-12, db));
+    this.preAmpNode.gain.value = Math.pow(10, clamped / 20);
   }
 
   /** Gets the muted state. */

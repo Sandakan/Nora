@@ -17,7 +17,6 @@ export const getUserKeyboardShortcuts = async () => {
 
 export const saveUserKeyboardShortcuts = async (shortcuts: Record<string, string>) => {
   const existing = await db.query.userKeyboardShortcuts.findFirst();
-
   if (existing) {
     await db
       .update(userKeyboardShortcuts)
@@ -48,10 +47,10 @@ export const getUserEqualizerPreset = async () => {
 export const saveUserEqualizerPreset = async (presetData: {
   presetName?: string;
   frequencyBands?: number[];
+  preAmpValue?: number;
   isEnabled?: boolean;
 }) => {
   const existing = await db.query.userEqualizerPreset.findFirst();
-
   if (existing) {
     await db
       .update(userEqualizerPreset)
@@ -64,6 +63,7 @@ export const saveUserEqualizerPreset = async (presetData: {
     await db.insert(userEqualizerPreset).values({
       presetName: presetData.presetName || 'Default',
       frequencyBands: presetData.frequencyBands || [],
+      preAmpValue: presetData.preAmpValue ?? 0,
       isEnabled: presetData.isEnabled || false
     });
   }

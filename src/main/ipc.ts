@@ -237,6 +237,7 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
         presetData: {
           presetName?: string;
           frequencyBands?: number[];
+          preAmpValue?: number;
           isEnabled?: boolean;
         }
       ) => saveUserEqualizerPreset(presetData)

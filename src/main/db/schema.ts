@@ -495,6 +495,7 @@ export const userEqualizerPreset = pgTable(
     id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
     presetName: varchar('preset_name', { length: 255 }).notNull().default('Default'),
     frequencyBands: json('frequency_bands').$type<number[]>().notNull().default([]),
+    preAmpValue: doublePrecision('pre_amp_value').notNull().default(0),
     isEnabled: boolean('is_enabled').notNull().default(false),
     createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
