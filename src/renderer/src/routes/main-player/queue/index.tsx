@@ -7,6 +7,7 @@ import Button from '@renderer/components/Button';
 import Img from '@renderer/components/Img';
 import MainContainer from '@renderer/components/MainContainer';
 import Song from '@renderer/components/SongsPage/Song';
+import SongListSkeleton from '@renderer/components/SongListSkeleton';
 import VirtualizedList from '@renderer/components/VirtualizedList';
 import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
 import useSelectAllHandler from '@renderer/hooks/useSelectAllHandler';
@@ -34,7 +35,8 @@ import { type VirtuosoHandle } from 'react-virtuoso';
 // eslint-disable-next-line react/only-export-components
 export const Route = createFileRoute('/main-player/queue/')({
   component: RouteComponent,
-  validateSearch: baseInfoPageSearchParamsSchema
+  validateSearch: baseInfoPageSearchParamsSchema,
+  pendingComponent: SongListSkeleton
 });
 
 function RouteComponent() {

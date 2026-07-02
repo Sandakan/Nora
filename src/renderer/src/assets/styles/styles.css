@@ -513,6 +513,15 @@ input[type='checkbox']:checked ~ .checkmark .icon {
   }
 }
 
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
 .blurred::after {
   content: '';
   position: absolute;

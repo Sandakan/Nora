@@ -13,6 +13,7 @@ import { songQuery } from '@renderer/queries/songs';
 import { store } from '@renderer/store/store';
 import storage from '@renderer/utils/localStorage';
 import { songSearchSchema } from '@renderer/utils/zod/songSchema';
+import SongListSkeleton from '@renderer/components/SongListSkeleton';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
@@ -35,7 +36,8 @@ export const Route = createFileRoute('/main-player/songs/')({
       })
     );
   },
-  component: SongsPage
+  component: SongsPage,
+  pendingComponent: SongListSkeleton
 });
 
 const AddMusicFoldersPrompt = lazy(

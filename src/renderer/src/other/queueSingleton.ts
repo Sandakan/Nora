@@ -139,6 +139,12 @@ function setupQueueStoreSync(queue: PlayerQueue) {
     const positionChanged = queue.position !== storeQueue.position;
 
     if (queueChanged || positionChanged) {
+      // Clamp position to valid range to prevent stale state after clear+repopulate
+      const safePosition =
+        storeQueue.position >= 0 && storeQueue.position < storeSongIds.length
+          ? storeQueue.position
+          : 0;
+
       // Set flag to prevent handlers from updating store
       isSyncingFromStore = true;
 
@@ -146,7 +152,7 @@ function setupQueueStoreSync(queue: PlayerQueue) {
         // Update queue from store
         queue.replaceQueue(
           storeSongIds,
-          storeQueue.position,
+          safePosition,
           false, // Don't clear shuffle history
           storeQueue.metadata
         );

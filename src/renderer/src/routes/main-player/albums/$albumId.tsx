@@ -13,6 +13,7 @@ import { songQuery } from '@renderer/queries/songs';
 import { store } from '@renderer/store/store';
 import { songSearchSchema } from '@renderer/utils/zod/songSchema';
 import storage from '@renderer/utils/localStorage';
+import SongListSkeleton from '@renderer/components/SongListSkeleton';
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
@@ -22,6 +23,7 @@ import { useTranslation } from 'react-i18next';
 export const Route = createFileRoute('/main-player/albums/$albumId')({
   validateSearch: songSearchSchema,
   component: AlbumInfoPage,
+  pendingComponent: SongListSkeleton,
   loader: async ({ params }) => {
     await queryClient.ensureQueryData(albumQuery.single({ albumId: Number(params.albumId) }));
   }
@@ -94,8 +96,10 @@ function AlbumInfoPage() {
         className="pr-4"
         buttons={[
           {
+            label: t('common.shuffleAndPlay'),
             tooltipLabel: t('common.shuffleAndPlay'),
             iconName: 'shuffle',
+            className: 'shuffle-and-play-all-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0',
             clickHandler: () =>
               createQueue(
                 albumSongs.filter((song) => !song.isBlacklisted).map((song) => song.songId),

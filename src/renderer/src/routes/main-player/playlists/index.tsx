@@ -15,6 +15,7 @@ import { playlistQuery } from '@renderer/queries/playlists';
 import { store } from '@renderer/store/store';
 import storage from '@renderer/utils/localStorage';
 import { playlistSearchSchema } from '@renderer/utils/zod/playlistSchema';
+import GridSkeleton from '@renderer/components/GridSkeleton';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
@@ -27,6 +28,7 @@ import historyPlaylistCoverImage from '../../../assets/images/webp/history-playl
 export const Route = createFileRoute('/main-player/playlists/')({
   validateSearch: playlistSearchSchema,
   component: PlaylistsPage,
+  pendingComponent: GridSkeleton,
   loaderDeps: ({ search }) => ({
     sortingOrder: search.sortingOrder
   }),

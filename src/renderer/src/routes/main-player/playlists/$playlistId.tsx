@@ -178,8 +178,10 @@ function PlaylistInfoPage() {
             isDisabled: !(playlistData.songs && playlistData.songs.length > 0)
           },
           {
+            label: t('common.shuffleAndPlay'),
             tooltipLabel: t('common.shuffleAndPlay'),
             iconName: 'shuffle',
+            className: 'shuffle-and-play-all-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0',
             clickHandler: shuffleAndPlaySongs,
             isDisabled: !(playlistData.songs && playlistData.songs.length > 0)
           },
