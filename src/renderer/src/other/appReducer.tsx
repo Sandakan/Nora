@@ -68,7 +68,7 @@ export type AppReducerStateActions =
       type: 'UPDATE_LOCAL_STORAGE_PREFERENCE_ITEM';
       data: { item: string; value: LocalStorage['preferences'] };
     }
-  | { type: 'UPDATE_PLAYBACK_RATE'; data: number };
+  | { type: 'UPDATE_PLAYBACK_RATE'; data: number }
   | { type: 'UPDATE_SLEEP_TIMER_STATE'; data: Partial<SleepTimerState> };
 
 export const reducer = (state: AppReducer, action: AppReducerStateActions): AppReducer => {
@@ -380,6 +380,7 @@ export const reducer = (state: AppReducer, action: AppReducerStateActions): AppR
           ...state.player,
           playbackRate: action.data ?? state.player.playbackRate
         }
+      };
     case 'UPDATE_SLEEP_TIMER_STATE':
       return {
         ...state,

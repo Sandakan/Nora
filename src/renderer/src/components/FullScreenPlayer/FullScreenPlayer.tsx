@@ -6,6 +6,7 @@ import DefaultSongCover from '../../assets/images/webp/song_cover_default.webp';
 import useMouseActiveState from '../../hooks/useMouseActiveState';
 import Img from '../Img';
 import SeekBarSlider from '../SeekBarSlider';
+import SleepTimerIndicator from '../SleepTimerIndicator';
 import TitleBar from '../TitleBar/TitleBar';
 import LyricsContainer from './containers/LyricsContainer';
 import SongInfoContainer from './containers/SongInfoContainer';
@@ -65,6 +66,9 @@ const FullScreenPlayer = () => {
         {/* <div className="absolute inset-0 h-full w-full bg-linear-to-r from-black/50 to-black/5"></div> */}
       </div>
       <TitleBar />
+      <div className="absolute top-12 right-4 z-10">
+        <SleepTimerIndicator />
+      </div>
       <div
         className={`flex max-w-full flex-col justify-end ${isMouseActive && 'group/fullScreenPlayer'}`}
         ref={fullScreenPlayerContainerRef}

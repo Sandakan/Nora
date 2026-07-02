@@ -28,6 +28,7 @@ import { usePlayerControl } from './hooks/usePlayerControl';
 import { usePlayerNavigation } from './hooks/usePlayerNavigation';
 import { usePromptMenu } from './hooks/usePromptMenu';
 import { useQueueManagement } from './hooks/useQueueManagement';
+import { useSleepTimer } from './hooks/useSleepTimer';
 import { useUserPreferences } from './hooks/useUserPreferences';
 import { useWindowManagement } from './hooks/useWindowManagement';
 import { initializeQueue } from './other/queueSingleton';
@@ -286,6 +287,17 @@ export default function App() {
     windowManagement
   });
 
+  // ? INITIALIZE SLEEP TIMER
+  // Sleep timer hook wires the singleton engine to the store for UI reactivity
+  const {
+    startTimer,
+    startTimerForSongEnd,
+    stopTimer,
+    pauseTimer,
+    resumeTimer,
+    extendTimer
+  } = useSleepTimer(player);
+
   const appUpdateContextValues = useMemo<AppUpdateContextType>(() => {
     const contextValue: AppUpdateContextType = {
       updateCurrentSongData,
@@ -318,7 +330,13 @@ export default function App() {
       updateMultipleSelections,
       toggleMultipleSelections,
       updateAppUpdatesState,
-      updateEqualizerOptions
+      updateEqualizerOptions,
+      startSleepTimer: startTimer,
+      startSleepTimerForSongEnd: startTimerForSongEnd,
+      stopSleepTimer: stopTimer,
+      pauseSleepTimer: pauseTimer,
+      resumeSleepTimer: resumeTimer,
+      extendSleepTimer: extendTimer
     };
     return contextValue;
   }, [
@@ -352,7 +370,13 @@ export default function App() {
     updateMultipleSelections,
     toggleMultipleSelections,
     updateAppUpdatesState,
-    updateEqualizerOptions
+    updateEqualizerOptions,
+    startTimer,
+    startTimerForSongEnd,
+    stopTimer,
+    pauseTimer,
+    resumeTimer,
+    extendTimer
   ]);
 
   return (

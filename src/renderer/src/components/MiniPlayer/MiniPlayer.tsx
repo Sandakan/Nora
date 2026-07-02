@@ -8,6 +8,7 @@ import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Button from '../Button';
 import Img from '../Img';
 import SeekBarSlider from '../SeekBarSlider';
+import SleepTimerIndicator from '../SleepTimerIndicator';
 import UpNextSongPopup from '../SongsControlsContainer/UpNextSongPopup';
 import VolumeSlider from '../VolumeSlider';
 import LyricsContainer from './containers/LyricsContainer';
@@ -89,6 +90,9 @@ export default function MiniPlayer(props: MiniPlayerProps) {
           'bg-[linear-gradient(180deg,rgba(2,0,36,0)_0%,rgba(33,34,38,0.9)_90%)]'
         }`}
       >
+        <div className="absolute top-2 right-2 z-10">
+          <SleepTimerIndicator />
+        </div>
         <TitleBarContainer isLyricsVisible={isLyricsVisible} />
         <div
           className={`song-controls-container absolute top-[45%] left-1/2 flex h-fit -translate-x-1/2 -translate-y-1/2 items-center justify-center bg-transparent! shadow-none transition-[visibility,opacity] delay-50 dark:bg-transparent! ${
