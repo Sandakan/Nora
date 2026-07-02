@@ -17,10 +17,7 @@ export function useSleepTimer(player: AudioPlayer) {
           isActive: sleepTimer.isActive(),
           mode: sleepTimer.getMode(),
           remainingSeconds: remaining as number,
-          endTimestamp:
-            sleepTimer.getMode() === 'time'
-              ? Date.now() + (remaining as number) * 1000
-              : null
+          endTimestamp: sleepTimer.getEndTimestamp()
         }
       });
     };

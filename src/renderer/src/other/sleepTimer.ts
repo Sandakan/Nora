@@ -1,6 +1,6 @@
 import type AudioPlayer from './player';
 
-type SleepTimerMode = 'time' | 'endOfSong' | 'endOfAlbum';
+type SleepTimerMode = 'time' | 'endOfSong';
 type SleepTimerEventType = 'tick' | 'complete' | 'start' | 'stop' | 'pause' | 'resume';
 type SleepTimerEventCallback = (data?: unknown) => void;
 
@@ -21,16 +21,18 @@ class SleepTimer {
 
   private pausedRemainingSeconds = 0;
 
-  // ========== LIFECYCLE ==========
-
   setPlayer(player: AudioPlayer) {
+    if (this.playerRef && this.songEndedHandler) {
+      this.playerRef.off('songEnded', this.songEndedHandler);
+    }
     this.playerRef = player;
+    if (this.isActive() && this.mode !== 'time' && !this._isPaused) {
+      this.listenForSongEnd();
+    }
   }
 
-  // ========== PUBLIC API ==========
-
   start(mode: 'time', minutes: number): void;
-  start(mode: 'endOfSong' | 'endOfAlbum'): void;
+  start(mode: 'endOfSong'): void;
   start(mode: SleepTimerMode, minutes?: number): void {
     if (this.isActive()) this.stop();
 
@@ -41,7 +43,7 @@ class SleepTimer {
       const durationMs = minutes * 60 * 1000;
       this.endTimestamp = Date.now() + durationMs;
       this.startTicking();
-    } else if (mode === 'endOfSong' || mode === 'endOfAlbum') {
+    } else if (mode === 'endOfSong') {
       this.endTimestamp = null;
       this.listenForSongEnd();
     }
@@ -52,6 +54,7 @@ class SleepTimer {
 
   stop(): void {
     this.clearTimer();
+    this.removeSongEndListener();
     this.mode = null;
     this.endTimestamp = null;
     this._isPaused = false;
@@ -64,7 +67,13 @@ class SleepTimer {
     if (!this.isActive() || this._isPaused) return;
     this._isPaused = true;
     this.pausedRemainingSeconds = this.getRemainingSeconds();
-    this.clearTimer();
+
+    if (this.mode === 'time') {
+      this.clearTimer();
+    } else {
+      this.removeSongEndListener();
+    }
+
     this.emit('pause');
   }
 
@@ -75,7 +84,7 @@ class SleepTimer {
     if (this.mode === 'time') {
       this.endTimestamp = Date.now() + this.pausedRemainingSeconds * 1000;
       this.startTicking();
-    } else if (this.mode === 'endOfSong' || this.mode === 'endOfAlbum') {
+    } else if (this.mode === 'endOfSong') {
       this.listenForSongEnd();
     }
 
@@ -91,14 +100,16 @@ class SleepTimer {
     this.emit('tick', this.getRemainingSeconds());
   }
 
-  // ========== GETTERS ==========
-
   getRemainingSeconds(): number {
     if (this._isPaused) return this.pausedRemainingSeconds;
     if (this.mode === 'time' && this.endTimestamp !== null) {
       return Math.max(0, Math.ceil((this.endTimestamp - Date.now()) / 1000));
     }
     return 0;
+  }
+
+  getEndTimestamp(): number | null {
+    return this.endTimestamp;
   }
 
   getMode(): SleepTimerMode | null {
@@ -112,8 +123,6 @@ class SleepTimer {
   get isPaused(): boolean {
     return this._isPaused;
   }
-
-  // ========== EVENTS ==========
 
   on(event: SleepTimerEventType, callback: SleepTimerEventCallback): void {
     if (!this.listeners.has(event)) {
@@ -129,8 +138,6 @@ class SleepTimer {
   private emit(event: SleepTimerEventType, data?: unknown): void {
     this.listeners.get(event)?.forEach((cb) => cb(data));
   }
-
-  // ========== PRIVATE ==========
 
   private startTicking(): void {
     this.clearTimer();
@@ -151,7 +158,7 @@ class SleepTimer {
     this.removeSongEndListener();
 
     this.songEndedHandler = () => {
-      if (this.mode === 'endOfSong' || this.mode === 'endOfAlbum') {
+      if (this.mode === 'endOfSong') {
         this.fireTimer();
       }
     };

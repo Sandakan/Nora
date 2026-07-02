@@ -1,6 +1,6 @@
 import { store } from '@renderer/store/store';
 import { useStore } from '@tanstack/react-store';
-import { lazy, useContext, useEffect, useState } from 'react';
+import { lazy, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppUpdateContext } from '../contexts/AppUpdateContext';
@@ -18,22 +18,6 @@ const SleepTimerIndicator = () => {
   const sleepTimer = useStore(store, (state) => state.sleepTimer);
   const { changePromptMenuData } = useContext(AppUpdateContext);
 
-  const [remaining, setRemaining] = useState(sleepTimer.remainingSeconds);
-
-  useEffect(() => {
-    if (!sleepTimer.isActive || sleepTimer.mode !== 'time') return;
-
-    const interval = setInterval(() => {
-      setRemaining((prev) => Math.max(0, prev - 1));
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [sleepTimer.isActive, sleepTimer.mode]);
-
-  useEffect(() => {
-    setRemaining(sleepTimer.remainingSeconds);
-  }, [sleepTimer.remainingSeconds]);
-
   if (!sleepTimer.isActive) return null;
 
   return (
@@ -44,7 +28,7 @@ const SleepTimerIndicator = () => {
       title={t('player.sleepTimer')}
     >
       <span className="material-icons-round text-sm">bedtime</span>
-      {sleepTimer.mode === 'time' && <span>{formatTime(remaining)}</span>}
+      {sleepTimer.mode === 'time' && <span>{formatTime(sleepTimer.remainingSeconds)}</span>}
       {sleepTimer.mode === 'endOfSong' && (
         <span className="material-icons-round text-sm">music_note</span>
       )}
