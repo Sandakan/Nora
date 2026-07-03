@@ -761,7 +761,10 @@ class AudioPlayer {
     }
   }
 
-  play() {
+  async play() {
+    await this.currentContext.resume().catch((err) => {
+      console.error('[AudioPlayer.play] Failed to resume AudioContext:', err);
+    });
     const active = this.getActiveAudio();
     return active
       .play()
