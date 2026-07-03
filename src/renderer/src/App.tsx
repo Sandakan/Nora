@@ -74,7 +74,6 @@ export default function App() {
 
   // ? INITIALIZE PLAYER AND QUEUE (singleton instances via custom hooks)
   const player = useAudioPlayer();
-  const audio = player.audio;
   const playerQueue = player.queue; // Access properties directly from AudioPlayer instance
 
   // const [content, dispatch] = useReducer(reducer, DEFAULT_REDUCER_DATA);
