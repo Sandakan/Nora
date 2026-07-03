@@ -180,7 +180,7 @@ class AudioPlayer {
   };
 
   private checkCrossfadeTrigger(el: HTMLAudioElement) {
-    if (this.isCrossfading || !el.duration || !isFinite(el.duration) || !this.preloadedSongId) return;
+    if (this.isCrossfading || !el.duration || !isFinite(el.duration) || this.preloadedSongId === null) return;
     const remaining = el.duration - el.currentTime;
     const fadeSec = Math.min(this.crossfadeDuration / 1000, el.duration * 0.5);
     if (remaining <= fadeSec && remaining > 0) {
@@ -324,6 +324,7 @@ class AudioPlayer {
       this.preloadedSongId = nextId;
       this.preloadedSongData = songData;
     } catch (error) {
+      console.error(`[AudioPlayer.preloadNextSong] Failed to preload song ${nextId}:`, error);
       if (gen === this.preloadGeneration) {
         this.preloadedSongId = null;
         this.preloadedSongData = null;
@@ -332,7 +333,7 @@ class AudioPlayer {
   }
 
   private startCrossfade() {
-    if (this.isCrossfading || !this.preloadedSongData || !this.preloadedSongId) return;
+    if (this.isCrossfading || !this.preloadedSongData || this.preloadedSongId === null) return;
     if (this.queue.nextSongId !== this.preloadedSongId) return;
 
     const inactiveAudio = this.getInactiveAudio();
@@ -429,7 +430,7 @@ class AudioPlayer {
   }
 
   private gaplessSwapToNext() {
-    if (!this.preloadedSongId || !this.preloadedSongData) return;
+    if (this.preloadedSongId === null || this.preloadedSongData === null) return;
     if (this.queue.nextSongId !== this.preloadedSongId) return;
 
     const nextSongId = this.preloadedSongId;
@@ -786,9 +787,7 @@ class AudioPlayer {
     const shouldPlay = forcePlay !== undefined ? forcePlay : this.getActiveAudio().paused;
 
     if (shouldPlay) {
-      if (this.getActiveAudio().readyState > 0) {
-        await this.play();
-      }
+      await this.play();
     } else {
       await this.pause();
     }
