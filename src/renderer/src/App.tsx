@@ -125,7 +125,7 @@ export default function App() {
   // Playback errors hook handles error management and retry logic
   const skipForwardRef = useRef<() => void>();
   const { managePlaybackErrors, resetErrorCount } = usePlaybackErrors(
-    audio,
+    player,
     changePromptMenuData,
     skipForwardRef
   );

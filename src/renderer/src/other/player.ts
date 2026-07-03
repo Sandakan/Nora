@@ -349,10 +349,10 @@ class AudioPlayer {
 
     this.isCrossfading = true;
 
-    // Update UI immediately — Spotify-style: user sees new song as soon as they skip
-    dispatch({ type: 'CURRENT_SONG_DATA_CHANGE', data: this.preloadedSongData });
+    // Song identity switch deferred to completeCrossfade() — avoids state mismatch
+    // during the crossfade overlap window (seek bar, currentTime, duration all still
+    // belong to the old active element until the swap completes).
     dispatch({ type: 'CURRENT_SONG_PLAYBACK_STATE', data: true });
-    storage.playback.setCurrentSongOptions('songId', this.preloadedSongId);
 
     const now = this.currentContext.currentTime;
 
@@ -401,7 +401,9 @@ class AudioPlayer {
     this.fadeGainSecondary.gain.value = this.activeElement === 'primary' ? 0 : 1;
 
     oldActive.pause();
+    dispatch({ type: 'CURRENT_SONG_DATA_CHANGE', data: nextSongData });
     dispatch({ type: 'CURRENT_SONG_PLAYBACK_STATE', data: true });
+    storage.playback.setCurrentSongOptions('songId', nextSongId);
     this.emit('play');
 
     this.suppressNextPositionLoad = true;

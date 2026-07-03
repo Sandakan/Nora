@@ -95,8 +95,8 @@ const SeekBarSlider = (props: Props) => {
         isMouseDownRef.current = false;
         updateSongPosition(seekbarRef.current?.valueAsNumber ?? 0);
       };
-      seekbarRef.current.addEventListener('mousedown', () => handleSeekbarMouseDown());
-      seekbarRef.current.addEventListener('mouseup', () => handleSeekbarMouseUp());
+      seekbarRef.current.addEventListener('mousedown', handleSeekbarMouseDown);
+      seekbarRef.current.addEventListener('mouseup', handleSeekbarMouseUp);
       return () => {
         seekBar?.removeEventListener('mouseup', handleSeekbarMouseUp);
         seekBar?.removeEventListener('mousedown', handleSeekbarMouseDown);

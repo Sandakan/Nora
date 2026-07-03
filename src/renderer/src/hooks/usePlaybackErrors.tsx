@@ -1,6 +1,7 @@
 import { lazy, useCallback, useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import type AudioPlayer from '../other/player';
 import log from '../utils/log';
 
 const ErrorPrompt = lazy(() => import('../components/ErrorPrompt'));
@@ -22,16 +23,19 @@ const MEDIA_ERR_SRC_NOT_SUPPORTED = 4;
  *  - `resetErrorCount`: a function that resets the internal consecutive-error counter to zero.
  */
 export function usePlaybackErrors(
-  player: HTMLAudioElement,
+  playerInput: AudioPlayer | HTMLAudioElement,
   changePromptMenuData: (isVisible?: boolean, prompt?: React.ReactNode | null) => void,
   skipSongRef?: React.MutableRefObject<(() => void) | undefined>
 ) {
   const { t } = useTranslation();
   const repetitivePlaybackErrorsCountRef = useRef(0);
 
+  const audioPlayer = playerInput instanceof HTMLAudioElement ? null : (playerInput as AudioPlayer);
+  const activeEl = audioPlayer?.getActiveAudio() ?? (playerInput as HTMLAudioElement);
+
   const managePlaybackErrors = useCallback(
     (appError: unknown) => {
-      const playerErrorData = player.error;
+      const playerErrorData = activeEl.error;
       console.error(appError, playerErrorData);
 
       const playerErrorCode = playerErrorData?.code;
@@ -71,24 +75,24 @@ export function usePlaybackErrors(
       }
 
       repetitivePlaybackErrorsCountRef.current += 1;
-      const prevSongPosition = player.currentTime;
+      const prevSongPosition = activeEl.currentTime;
       log(`Error occurred in the player.`, { appError, playerErrorData }, 'ERROR');
 
-      if (player.src && playerErrorData) {
+      if (activeEl.src && playerErrorData) {
         if (playerErrorCode === MEDIA_ERR_SRC_NOT_SUPPORTED) {
           log('Song file not found, skipping to next song.', {}, 'WARN');
           skipSongRef?.current?.();
           return undefined;
         }
-        player.load();
-        player.currentTime = prevSongPosition;
+        activeEl.load();
+        activeEl.currentTime = prevSongPosition;
       } else {
-        player.pause();
+        activeEl.pause();
         changePromptMenuData(true, prompt);
       }
       return undefined;
     },
-    [changePromptMenuData, player, t, skipSongRef]
+    [changePromptMenuData, activeEl, t, skipSongRef]
   );
 
   const resetErrorCount = useCallback(() => {
