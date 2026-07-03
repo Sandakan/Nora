@@ -243,8 +243,6 @@ class AudioPlayer {
   private async handleSongEnd() {
     if (this.isCrossfading) return;
 
-    console.log('[AudioPlayer.handleSongEnd]', { repeatMode: this.repeatMode });
-
     if (this.repeatMode === 'one') {
       const active = this.getActiveAudio();
       active.currentTime = 0;
@@ -335,6 +333,7 @@ class AudioPlayer {
 
   private startCrossfade() {
     if (this.isCrossfading || !this.preloadedSongData || !this.preloadedSongId) return;
+    if (this.queue.nextSongId !== this.preloadedSongId) return;
 
     const inactiveAudio = this.getInactiveAudio();
     const activeGain = this.getActiveFadeGain();
@@ -387,6 +386,10 @@ class AudioPlayer {
 
     const idx = this.queue.songIds.indexOf(nextSongId);
     if (idx < 0) {
+      this.abortCrossfade();
+      return;
+    }
+    if (this.queue.nextSongId !== nextSongId) {
       this.abortCrossfade();
       return;
     }
