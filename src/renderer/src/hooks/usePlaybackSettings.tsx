@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 
+import type AudioPlayer from '../other/player';
 import toggleSongIsFavorite from '../other/toggleSongIsFavorite';
 import { dispatch, store } from '../store/store';
 import storage from '../utils/localStorage';
@@ -27,12 +28,14 @@ import { useUserPreferences } from './useUserPreferences';
  *   <button onClick={() => toggleRepeat()}>Repeat</button>
  *   <input onChange={(e) => updateVolume(e.target.value)} />
  *   updateEqualizerOptions({ preset: 'rock', bands: [...] });
- *   ```;
+ *   ```
  *
- * @param player - The HTMLAudioElement instance
+ * @param player - The AudioPlayer instance. `player.currentTime`/`player.duration` delegate to
+ *   `getActiveAudio()` internally, so seeks always target whichever element (primary or
+ *   secondary) is actually audible, including mid-crossfade and immediately after a swap.
  * @returns Object containing playback setting functions
  */
-export function usePlaybackSettings(player: HTMLAudioElement) {
+export function usePlaybackSettings(player: AudioPlayer) {
   const { saveEqualizerPreset } = useUserPreferences();
 
   const toggleRepeat = useCallback((newState?: RepeatTypes) => {
