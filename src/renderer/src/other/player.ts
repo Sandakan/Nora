@@ -182,8 +182,8 @@ class AudioPlayer {
   private checkCrossfadeTrigger(el: HTMLAudioElement) {
     if (this.isCrossfading || !el.duration || !isFinite(el.duration) || !this.preloadedSongId) return;
     const remaining = el.duration - el.currentTime;
-    const crossfadeSeconds = this.crossfadeDuration / 1000;
-    if (remaining <= crossfadeSeconds && remaining > 0) {
+    const fadeSec = Math.min(this.crossfadeDuration / 1000, el.duration * 0.5);
+    if (remaining <= fadeSec && remaining > 0) {
       this.startCrossfade();
     }
   }
@@ -334,7 +334,7 @@ class AudioPlayer {
   }
 
   private startCrossfade() {
-    if (!this.preloadedSongData || !this.preloadedSongId) return;
+    if (this.isCrossfading || !this.preloadedSongData || !this.preloadedSongId) return;
 
     const inactiveAudio = this.getInactiveAudio();
     const activeGain = this.getActiveFadeGain();
@@ -768,6 +768,9 @@ class AudioPlayer {
   }
 
   pause() {
+    if (this.isCrossfading) {
+      this.abortCrossfade();
+    }
     return this.fadeOutAudio();
   }
 
@@ -835,6 +838,11 @@ class AudioPlayer {
           duration: store.state.currentSongData.duration
         });
       }
+      return;
+    }
+
+    if (this.crossfadeDuration === 0 && this.queue.hasNext && this.preloadedSongId === this.queue.nextSongId) {
+      this.gaplessSwapToNext();
       return;
     }
 
