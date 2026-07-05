@@ -4,9 +4,9 @@ import logger from '../logger';
 import { Initialize, setDiscordRPC } from './discord';
 
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
-let latestData: Record<string, unknown> | null = null;
+let latestData: DiscordActivity | null = null;
 
-export const setDiscordRpcActivity = async (data: Record<string, unknown>) => {
+export const setDiscordRpcActivity = async (data: DiscordActivity) => {
   try {
     const userSettings = await getUserSettings();
     const { enableDiscordRPC } = userSettings ?? {};

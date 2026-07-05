@@ -4,27 +4,12 @@ import { useTranslation } from 'react-i18next';
 import { store } from '../store/store';
 
 /**
- * Custom hook to manage Discord Rich Presence integration.
+ * Synchronizes Discord Rich Presence with the provided audio element's current song.
  *
- * This hook automatically updates Discord Rich Presence activity with the currently playing song
- * information, including: - Song title and artists - Playback timestamps (start/end times) - Artist
- * artwork (if available) - Nora logo as large image - Button link to Nora's GitHub repository
+ * Registers listeners on the audio player to update Discord activity (song title, artists,
+ * artwork, action button) and to set playback timestamps while the player is actively playing.
  *
- * The activity is updated on: - Play event (starts activity timer) - Pause event (clears activity
- * timer) - Seek event (updates timestamps)
- *
- * Text is automatically truncated to Discord's 128 character limit.
- *
- * @example
- *   ```tsx
- *   function App() {
- *     const player = useAudioPlayer();
- *
- *     useDiscordRpc(player);
- *   }
- *   ```;
- *
- * @param player - The HTML audio player element
+ * @param player - The HTMLAudioElement whose playback state and metadata drive the presence updates
  */
 export function useDiscordRpc(player: HTMLAudioElement) {
   const { t } = useTranslation();
@@ -60,12 +45,12 @@ export function useDiscordRpc(player: HTMLAudioElement) {
       ?? firstArtistWithArtwork?.onlineArtworkPaths?.picture_medium
       ?? firstArtistWithArtwork?.onlineArtworkPaths?.picture_small;
 
-    const activity: Record<string, unknown> = {
+    const activity: DiscordActivity = {
       details: title,
       state: artists,
       assets: {
         large_image: artworkLink ?? 'nora_logo',
-        small_image: 'song_artwork',
+        small_image: artworkLink ?? 'song_artwork',
         small_text: firstArtistWithArtwork
           ? firstArtistWithArtwork.name
           : t('discordrpc.playingASong')

@@ -37,6 +37,13 @@ export const Route = createFileRoute('/main-player/queue/')({
   validateSearch: baseInfoPageSearchParamsSchema
 });
 
+/**
+ * Render the main-player queue page, including header controls, queue metadata, and a virtualized, draggable list of queued songs with selection and context-menu actions.
+ *
+ * The component reads queue and selection state from the store, fetches queued song and queue info, supports reordering via drag-and-drop, auto-centers the currently playing song, and exposes controls for shuffle, clear, select/unselect, and additional context actions.
+ *
+ * @returns The rendered main-player queue page UI as a React element
+ */
 function RouteComponent() {
   const currentSongData = useStore(store, (state) => state.currentSongData);
   const isMultipleSelectionEnabled = useStore(

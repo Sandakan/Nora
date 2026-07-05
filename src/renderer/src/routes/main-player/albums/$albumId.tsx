@@ -27,6 +27,15 @@ export const Route = createFileRoute('/main-player/albums/$albumId')({
   }
 });
 
+/**
+ * Render the album detail page with album metadata, a virtualized list of songs, and playback/queue controls.
+ *
+ * Reads `albumId` from route parameters and restores the initial sort order from persisted sorting state; it also
+ * persists changes to the sort order. Provides actions for play, shuffle, add-to-queue, play-all, and a select-all
+ * keyboard shortcut, and shows optional online album information when available.
+ *
+ * @returns The rendered album detail page element
+ */
 function AlbumInfoPage() {
   const { albumId } = Route.useParams({
     select: (params) => ({ albumId: Number(params.albumId) })

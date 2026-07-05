@@ -216,7 +216,8 @@
   "song": {
     "showInFileExplorer": "Mostrar no Explorador de Arquivos",
     "artwork": "Imagem do álbum",
-    "selectedSongCount": "{{count}} selecionada(s) $t(common.song, {\"count\":{{count}}})",
+    "selectedSongCount_one": "{{count}} $t(common.song, {\"count\":{{count}}}) selecionada",
+        "selectedSongCount_other": "{{count}} $t(common.song, {\"count\":{{count}}}) selecionadas",
     "likeSong": "Adicionar aos favoritos",
     "unlikeSong": "Remover dos favoritos",
     "toggleLikeSongs": "Adicionar/remover músicas dos favoritos",
@@ -240,13 +241,15 @@
     "toggleLikeArtists": "Adicionar/remover artistas dos favoritos",
     "likeArtist": "Adicionar artista aos favoritos",
     "dislikeArtist": "Remover artista dos favoritos",
-    "selectedArtistCount": "{{count}} selecionado(s) $t(common.artist, {\"count\":{{count}}})"
+    "selectedArtistCount_one": "{{count}} $t(common.artist, {\"count\":{{count}}}) selecionado",
+    "selectedArtistCount_other": "{{count}} $t(common.artist, {\"count\":{{count}}}) selecionados"
   },
 
   "folder": {
     "toggleBlacklistFolder": "Alternar pasta na lista negra",
     "blacklistFolder": "Colocar pasta na lista negra",
-    "selectedFolderCount": "{{count}} selecionada(s) $t(common.folder, {\"count\":{{count}}})",
+    "selectedFolderCount_one": "{{count}} $t(common.folder, {\"count\":{{count}}}) selecionada",
+    "selectedFolderCount_other": "{{count}} $t(common.folder, {\"count\":{{count}}}) selecionadas",
     "selectedParentFolderCount_one": "{{count}} pasta pai selecionada",
     "selectedParentFolderCount_other": "{{count}} pastas pai selecionadas",
     "directoryCount_one": "{{count}} diretório",
@@ -265,16 +268,19 @@
     "deleteSelectedPlaylists": "Excluir playlist(s) selecionada(s)",
     "deletePlaylist_one": "Excluir playlist",
     "deletePlaylist_other": "Excluir playlists",
-    "selectedPlaylistCount": "{{count}} selecionada(s) $t(common.playlist, {\"count\":{{count}}})",
+    "selectedPlaylistCount_one": "{{count}} $t(common.playlist, {\"count\":{{count}}}) selecionada",
+    "selectedPlaylistCount_other": "{{count}} $t(common.playlist, {\"count\":{{count}}}) selecionadas",
     "empty": "Parece que esta playlist está vazia."
   },
 
   "album": {
-    "selectedAlbumCount": "{{count}} selecionado(s) $t(common.album, {\"count\":{{count}}})"
+    "selectedAlbumCount_one": "{{count}} $t(common.album, {\"count\":{{count}}}) selecionado",
+    "selectedAlbumCount_other": "{{count}} $t(common.album, {\"count\":{{count}}}) selecionados"
   },
 
   "genre": {
-    "selectedGenreCount": "{{count}} selecionado(s) $t(common.genre, {\"count\":{{count}}})"
+    "selectedGenreCount_one": "{{count}} $t(common.genre, {\"count\":{{count}}}) selecionado",
+    "selectedGenreCount_other": "{{count}} $t(common.genre, {\"count\":{{count}}}) selecionados"
   },
 
   "homePage": {
@@ -460,6 +466,8 @@
     "hideWindowAtStart": "Iniciar o Nora na Bandeja do Sistema ao iniciar",
     "hideWindowOnCloseDescription": "Configure como o Nora deve se comportar quando você clicar no botão fechar.",
     "hideWindowOnClose": "Ocultar o Nora na Bandeja do Sistema quando o botão fechar for clicado.",
+    "trayClickBehaviorDescription": "Configure o comportamento ao clicar no ícone da bandeja do sistema.",
+    "traySingleClickTogglesWindow": "Um único clique no ícone da bandeja alterna a janela.",
 
     "storage": "Armazenamento",
     "storageDescription": "Veja como o Nora gerencia sua biblioteca e utiliza seu armazenamento.",

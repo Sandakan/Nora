@@ -38,6 +38,13 @@ const playlistData: Playlist = {
   isArtworkAvailable: true
 };
 
+/**
+ * Renders the Favorites playlist information and song list UI with controls for playback, queue management, import, and sorting.
+ *
+ * The component loads the current Favorites songs (respecting the selected sort order), persists the sort order to local storage, and provides actions to play a single song, play all, shuffle and play, add songs to the queue, and import favorites. It also supports Ctrl+A to select all songs and disables controls when there are no favorite songs.
+ *
+ * @returns The React element representing the Favorites playlist info page.
+ */
 function FavoritesPlaylistInfoPage() {
   const { scrollTopOffset } = Route.useSearch();
 

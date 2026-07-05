@@ -26,6 +26,13 @@ export const Route = createFileRoute('/main-player/genres/$genreId')({
   }
 });
 
+/**
+ * Renders the Genre Info page for the main player, showing genre details, a virtualized list of songs, and controls for playback, queueing, sorting, and filtering.
+ *
+ * The component persists and initializes the sort order from local storage, provides keyboard selection (Ctrl+A), and exposes actions to play, shuffle, and add genre songs to the queue.
+ *
+ * @returns The page element containing the genre header, action buttons and dropdowns, and a virtualized list of songs for the current genre.
+ */
 function GenreInfoPage() {
   const queue = useStore(store, (state) => state.localStorage.queue);
   const preferences = useStore(store, (state) => state.localStorage.preferences);
