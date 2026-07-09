@@ -468,6 +468,9 @@ export const userSettings = pgTable(
     lastFmSessionName: varchar('lastfm_session_name', { length: 255 }),
     lastFmSessionKey: varchar('lastfm_session_key', { length: 255 }),
 
+    // Lyrics search index state (set true after indexAllLyrics backfill completes)
+    isLyricIndexBuilt: boolean('is_lyric_index_built').notNull().default(false),
+
     createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
@@ -477,6 +480,26 @@ export const userSettings = pgTable(
     // Index for window state queries
     index('idx_user_settings_window_state').on(t.windowState)
   ]
+);
+
+// ============================================================================
+// Lyrics Search Index Table
+// ============================================================================
+export const songLyrics = pgTable(
+  'song_lyrics',
+  {
+    songId: integer('song_id')
+      .primaryKey()
+      .references((): AnyPgColumn => songs.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    lyricsText: text('lyrics_text').notNull(),
+    source: varchar('source', { length: 20 }).notNull(),
+    lyricsVector: tsvector('lyrics_vector').generatedAlwaysAs(
+      (): SQL => sql`to_tsvector('simple', ${songLyrics.lyricsText})`
+    ),
+    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
+  },
+  (t) => [index('idx_song_lyrics_vector').using('gin', t.lyricsVector)]
 );
 
 // ============================================================================

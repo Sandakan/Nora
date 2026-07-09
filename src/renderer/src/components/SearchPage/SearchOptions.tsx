@@ -8,7 +8,8 @@ export const searchFilterTypes = [
   'Albums',
   'Artists',
   'Playlists',
-  'Genres'
+  'Genres',
+  'Lyrics'
 ] as const;
 
 export const searchFilter: SearchResultFilter[] = [
@@ -21,5 +22,6 @@ export const searchFilter: SearchResultFilter[] = [
     icon: 'track_changes',
     value: 'Playlists'
   },
-  { label: i18n.t('common.genre_other'), icon: 'queue_music', value: 'Genres' }
+  { label: i18n.t('common.genre_other'), icon: 'queue_music', value: 'Genres' },
+  { label: i18n.t('common.lyric_other'), icon: 'subtitles', value: 'Lyrics' }
 ];

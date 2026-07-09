@@ -553,6 +553,7 @@ declare global {
     currentSong: CurrentSong;
     volume: Volume;
     playbackRate: number;
+    crossfadeDuration: number;
   }
 
   type EqualizerBandFilters =
@@ -851,7 +852,7 @@ declare global {
 
   // ? Search related types
 
-  type SearchFilters = 'All' | 'Artists' | 'Albums' | 'Songs' | 'Playlists' | 'Genres';
+  type SearchFilters = 'All' | 'Artists' | 'Albums' | 'Songs' | 'Playlists' | 'Genres' | 'Lyrics';
 
   interface SearchResult {
     songs: SongData[];
@@ -859,7 +860,14 @@ declare global {
     albums: Album[];
     playlists: Playlist[];
     genres: Genre[];
+    lyrics: LyricsSearchResult[];
     availableResults: string[];
+  }
+
+  interface LyricsSearchResult {
+    song: SongData;
+    matchedLyricSnippet: string;
+    source: 'LRC' | 'EMBEDDED' | 'BOTH';
   }
 
   // ? Prompt menu related types

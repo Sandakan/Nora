@@ -36,6 +36,13 @@
       "when": 1781070000000,
       "tag": "0004_talented_master_chief",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1783587604894,
+      "tag": "0005_lyrics_index",
+      "breakpoints": true
     }
   ]
 }
