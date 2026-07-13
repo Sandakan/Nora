@@ -88,6 +88,7 @@ export const savePendingSongLyrics = async (currentSongPath = '', forceSave = fa
     pendingSongs: pendingSongLyrics.keys
   });
 
+  const { customLrcFilesSaveLocation } = await getUserSettings();
   const entries = pendingSongLyrics.entries();
 
   for (const [songPath, updatingTags] of entries) {
@@ -111,7 +112,7 @@ export const savePendingSongLyrics = async (currentSongPath = '', forceSave = fa
         const { getSongByPath } = await import('@main/db/queries/songs');
         const song = await getSongByPath(songPath).catch(() => undefined);
         if (song) {
-          await upsertSongLyrics(song.id, songPath).catch((err) =>
+          await upsertSongLyrics(song.id, songPath, customLrcFilesSaveLocation).catch((err) =>
             logger.error('Failed to re-index lyrics after save', { err, songId: song.id })
           );
         }
