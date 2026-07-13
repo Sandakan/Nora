@@ -291,7 +291,7 @@ app
 
     // Background lyrics index backfill (runs once per library, non-blocking)
     if (!isLyricIndexBuilt) {
-      import('./db/queries/lyricsIndex')
+      import('@main/db/queries/lyricsIndex')
         .then(({ indexAllLyrics }) => indexAllLyrics())
         .then(() => saveUserSettings({ isLyricIndexBuilt: true }))
         .catch((error) => logger.error('Lyrics index backfill failed', { error }));

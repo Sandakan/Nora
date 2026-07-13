@@ -4,7 +4,6 @@ import path from 'path';
 import { db } from '@main/db/db';
 import { linkArtworksToSong } from '@main/db/queries/artworks';
 import { isSongWithPathAvailable, saveSong } from '@main/db/queries/songs';
-import { upsertSongLyrics } from '@main/db/queries/lyricsIndex';
 import type { songs } from '@main/db/schema';
 import { File } from 'node-taglib-sharp';
 
@@ -270,9 +269,11 @@ export const parseSong = async (
 
       dataUpdateEvent('songs/newSong', [res.songData.id]);
 
-      upsertSongLyrics(res.songData.id, res.songData.path).catch((error) =>
-        logger.error('Failed to index lyrics on import', { error, songId: res.songData.id })
-      );
+      import('@main/db/queries/lyricsIndex')
+        .then(({ upsertSongLyrics }) => upsertSongLyrics(res.songData.id, res.songData.path))
+        .catch((error) =>
+          logger.error('Failed to index lyrics on import', { error, songId: res.songData.id })
+        );
 
       parseQueue.delete(absoluteFilePath);
 
