@@ -47,8 +47,10 @@ const readEmbeddedLyrics = async (songPath: string): Promise<LyricReadResult> =>
   }
 };
 
-const readLrcLyrics = async (songPath: string): Promise<LyricReadResult> => {
-  const { customLrcFilesSaveLocation } = await getUserSettings();
+const readLrcLyrics = async (
+  songPath: string,
+  customLrcFilesSaveLocation?: string | null
+): Promise<LyricReadResult> => {
   const lrcFilePaths = getLrcFilePaths(songPath, customLrcFilesSaveLocation);
 
   let encounteredError = false;
@@ -89,9 +91,13 @@ export const upsertSongLyricsFromText = async (
 export const upsertSongLyrics = async (
   songId: number,
   songPath: string,
+  customLrcFilesSaveLocation?: string | null,
   trx: typeof db = db
 ): Promise<boolean> => {
-  const [embedded, lrc] = await Promise.all([readEmbeddedLyrics(songPath), readLrcLyrics(songPath)]);
+  const [embedded, lrc] = await Promise.all([
+    readEmbeddedLyrics(songPath),
+    readLrcLyrics(songPath, customLrcFilesSaveLocation)
+  ]);
 
   // null = read/parse error on at least one source; keep existing index, don't delete
   if (embedded === null || lrc === null) {
@@ -125,6 +131,7 @@ export const removeSongLyrics = async (songId: number, trx: typeof db = db): Pro
 export const indexAllLyrics = async (): Promise<void> => {
   logger.info('Starting lyrics index backfill.');
   const songs = await db.select({ id: songTable.id, path: songTable.path }).from(songTable);
+  const { customLrcFilesSaveLocation } = await getUserSettings();
 
   let indexed = 0;
   let processed = 0;
@@ -132,7 +139,7 @@ export const indexAllLyrics = async (): Promise<void> => {
   for (let i = 0; i < songs.length; i += BATCH_SIZE) {
     const batch = songs.slice(i, i + BATCH_SIZE);
     const results = await Promise.allSettled(
-      batch.map((song) => upsertSongLyrics(song.id, song.path))
+      batch.map((song) => upsertSongLyrics(song.id, song.path, customLrcFilesSaveLocation))
     );
     for (let j = 0; j < results.length; j += 1) {
       const result = results[j];
