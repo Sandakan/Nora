@@ -14,14 +14,12 @@ const { metadataEditingSupportedExtensions } = appPreferences;
 
 type LyricsSource = 'LRC' | 'EMBEDDED' | 'BOTH';
 
-type ParsedLine = { originalText: string | { text: string }[] };
-
-const extractPlainText = (parsedLyrics: ParsedLine[]): string => {
+const extractPlainText = (parsedLyrics: LyricLine[]): string => {
   return parsedLyrics
     .map((line) => {
       const { originalText } = line;
       if (typeof originalText === 'string') return originalText;
-      return (originalText as { text: string }[]).map((w) => w.text).join('');
+      return originalText.map((w) => w.text).join('');
     })
     .filter((text) => text.trim().length > 0)
     .join('\n');
@@ -42,7 +40,7 @@ const readEmbeddedLyrics = async (songPath: string): Promise<LyricReadResult> =>
     const storedLyrics = await withFileHandle(songPath, (file) => file.tag.lyrics);
     if (!storedLyrics) return undefined;
     const parsed = parseLyrics(storedLyrics);
-    return extractPlainText(parsed.parsedLyrics as ParsedLine[]);
+    return extractPlainText(parsed.parsedLyrics);
   } catch (error) {
     logger.error(`Failed to read embedded lyrics for ${songPath}`, { error });
     return null;
@@ -59,7 +57,7 @@ const readLrcLyrics = async (songPath: string): Promise<LyricReadResult> => {
       const data = await readFile(lrcPath, { encoding: 'utf-8' });
       if (data) {
         const parsed = parseLyrics(data);
-        return extractPlainText(parsed.parsedLyrics as ParsedLine[]);
+        return extractPlainText(parsed.parsedLyrics);
       }
     } catch (error) {
       if ((error as NodeJS.ErrnoException)?.code !== 'ENOENT') {
