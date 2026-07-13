@@ -128,13 +128,14 @@ export const removeSongLyrics = async (songId: number, trx: typeof db = db): Pro
   await trx.delete(songLyrics).where(eq(songLyrics.songId, songId));
 };
 
-export const indexAllLyrics = async (): Promise<void> => {
+export const indexAllLyrics = async (): Promise<{ allSucceeded: boolean }> => {
   logger.info('Starting lyrics index backfill.');
   const songs = await db.select({ id: songTable.id, path: songTable.path }).from(songTable);
   const { customLrcFilesSaveLocation } = await getUserSettings();
 
   let indexed = 0;
   let processed = 0;
+  let failed = 0;
   const BATCH_SIZE = 10;
   for (let i = 0; i < songs.length; i += BATCH_SIZE) {
     const batch = songs.slice(i, i + BATCH_SIZE);
@@ -146,11 +147,15 @@ export const indexAllLyrics = async (): Promise<void> => {
       if (result.status === 'fulfilled') {
         processed += 1;
         if (result.value) indexed += 1;
-      } else logger.error(`Failed to index lyrics for song ${batch[j].id}`, { error: result.reason });
+      } else {
+        failed += 1;
+        logger.error(`Failed to index lyrics for song ${batch[j].id}`, { error: result.reason });
+      }
     }
   }
 
   logger.info(
-    `Lyrics index backfill complete. Indexed ${indexed} songs, processed ${processed} of ${songs.length}.`
+    `Lyrics index backfill complete. Indexed ${indexed} songs, processed ${processed} of ${songs.length}, failed ${failed}.`
   );
+  return { allSucceeded: failed === 0 };
 };

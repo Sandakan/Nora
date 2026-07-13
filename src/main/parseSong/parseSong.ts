@@ -270,7 +270,13 @@ export const parseSong = async (
       dataUpdateEvent('songs/newSong', [res.songData.id]);
 
       import('@main/db/queries/lyricsIndex')
-        .then(({ upsertSongLyrics }) => upsertSongLyrics(res.songData.id, res.songData.path))
+        .then(({ upsertSongLyrics }) =>
+          import('@main/db/queries/settings')
+            .then(({ getUserSettings }) => getUserSettings())
+            .then(({ customLrcFilesSaveLocation }) =>
+              upsertSongLyrics(res.songData.id, res.songData.path, customLrcFilesSaveLocation)
+            )
+        )
         .catch((error) =>
           logger.error('Failed to index lyrics on import', { error, songId: res.songData.id })
         );

@@ -107,17 +107,12 @@ export const savePendingSongLyrics = async (currentSongPath = '', forceSave = fa
         });
         dataUpdateEvent('songs/lyrics');
 
-        const { upsertSongLyricsFromText } = await import('@main/db/queries/lyricsIndex');
+        const { upsertSongLyrics } = await import('@main/db/queries/lyricsIndex');
         const { getSongByPath } = await import('@main/db/queries/songs');
         const song = await getSongByPath(songPath).catch(() => undefined);
         if (song) {
-          const plainText = updatingTags.lyrics
-            .split('\n')
-            .map((line) => line.replace(/^\[\d+:\d+\.\d+\]/, '').trim())
-            .filter((line) => line.length > 0)
-            .join('\n');
-          await upsertSongLyricsFromText(song.id, plainText, 'EMBEDDED').catch((err) =>
-            logger.error('Failed to index saved lyrics', { err, songId: song.id })
+          await upsertSongLyrics(song.id, songPath).catch((err) =>
+            logger.error('Failed to re-index lyrics after save', { err, songId: song.id })
           );
         }
         pendingSongLyrics.delete(songPath);

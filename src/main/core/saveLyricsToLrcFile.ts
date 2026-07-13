@@ -133,19 +133,6 @@ const getLrcFileSaveDirectory = async (songPathWithoutProtocol: string, lrcFileN
   return path.join(saveDirectory, `${extensionDroppedLrcFileName}.lrc`);
 };
 
-const extractPlainTextFromParsed = (
-  parsedLyrics: { originalText: string | { text: string }[] }[]
-): string => {
-  return parsedLyrics
-    .map((line) => {
-      const { originalText } = line;
-      if (typeof originalText === 'string') return originalText;
-      return (originalText as { text: string }[]).map((w) => w.text).join('');
-    })
-    .filter((text) => text.trim().length > 0)
-    .join('\n');
-};
-
 const saveLyricsToLRCFile = async (songPathWithoutProtocol: string, songLyrics: SongLyrics) => {
   const songFileName = path.basename(songPathWithoutProtocol);
   const lrcFilePath = await getLrcFileSaveDirectory(songPathWithoutProtocol, songFileName);
@@ -155,15 +142,12 @@ const saveLyricsToLRCFile = async (songPathWithoutProtocol: string, songLyrics: 
   await fs.writeFile(lrcFilePath, lrcFormattedLyrics);
   logger.debug(`Lyrics saved in LRC file successfully.`, { title: songLyrics.title, lrcFilePath });
 
-  const plainText = extractPlainTextFromParsed(songLyrics.lyrics.parsedLyrics);
-  if (plainText) {
-    const song = await getSongByPath(songPathWithoutProtocol).catch(() => undefined);
-    if (song) {
-      const { upsertSongLyricsFromText } = await import('@main/db/queries/lyricsIndex');
-      await upsertSongLyricsFromText(song.id, plainText, 'LRC').catch((error) =>
-        logger.error('Failed to index LRC lyrics', { error, songId: song.id })
-      );
-    }
+  const song = await getSongByPath(songPathWithoutProtocol).catch(() => undefined);
+  if (song) {
+    const { upsertSongLyrics } = await import('@main/db/queries/lyricsIndex');
+    await upsertSongLyrics(song.id, songPathWithoutProtocol).catch((error) =>
+      logger.error('Failed to re-index lyrics after LRC save', { error, songId: song.id })
+    );
   }
 };
 

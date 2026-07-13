@@ -2,6 +2,7 @@ import { db } from '@db/db';
 import { albums, artists, genres, playlists, songs, songLyrics } from '@db/schema';
 import { convertToSongData } from '@main/utils/convert';
 import type { GetAllSongsReturnType } from '@main/db/queries/songs';
+import logger from '@main/logger';
 import { timeEnd, timeStart } from '@main/utils/measureTimeUsage';
 import { asc, eq, ilike, sql } from 'drizzle-orm';
 
@@ -229,25 +230,31 @@ export const searchSongsByLyrics = async (
   const { keyword } = options;
   const timer = timeStart();
 
-  const results = await trx
-    .select({
-      song: songs,
-      snippet: sql<string>`ts_headline('simple', ${songLyrics.lyricsText}, phraseto_tsquery('simple', ${keyword}), 'MaxWords=12, MinWords=4, ShortWord=2')`,
-      source: songLyrics.source
-    })
-    .from(songLyrics)
-    .innerJoin(songs, eq(songLyrics.songId, songs.id))
-    .where(sql`${songLyrics.lyricsVector} @@ phraseto_tsquery('simple', ${keyword})`)
-    .orderBy(sql`ts_rank(${songLyrics.lyricsVector}, phraseto_tsquery('simple', ${keyword})) DESC`)
-    .limit(100);
+  try {
+    const results = await trx
+      .select({
+        song: songs,
+        snippet: sql<string>`ts_headline('simple', ${songLyrics.lyricsText}, phraseto_tsquery('simple', ${keyword}), 'MaxWords=12, MinWords=4, ShortWord=2')`,
+        source: songLyrics.source
+      })
+      .from(songLyrics)
+      .innerJoin(songs, eq(songLyrics.songId, songs.id))
+      .where(sql`${songLyrics.lyricsVector} @@ phraseto_tsquery('simple', ${keyword})`)
+      .orderBy(sql`ts_rank(${songLyrics.lyricsVector}, phraseto_tsquery('simple', ${keyword})) DESC`)
+      .limit(100);
 
-  timeEnd(timer, 'Search Songs By Lyrics');
+    timeEnd(timer, 'Search Songs By Lyrics');
 
-  return results.map((result) => ({
-    song: convertToSongData(result.song as GetAllSongsReturnType[number]),
-    matchedLyricSnippet: result.snippet,
-    source: result.source as 'LRC' | 'EMBEDDED' | 'BOTH'
-  }));
+    return results.map((result) => ({
+      song: convertToSongData(result.song as GetAllSongsReturnType[number]),
+      matchedLyricSnippet: result.snippet,
+      source: result.source as 'LRC' | 'EMBEDDED' | 'BOTH'
+    }));
+  } catch (error) {
+    logger.error('Lyrics search failed', { error, keyword });
+    timeEnd(timer, 'Search Songs By Lyrics (failed)');
+    return [];
+  }
 };
 
 const songSearchPreparedQuery = db

@@ -293,7 +293,11 @@ app
     if (!isLyricIndexBuilt) {
       import('@main/db/queries/lyricsIndex')
         .then(({ indexAllLyrics }) => indexAllLyrics())
-        .then(() => saveUserSettings({ isLyricIndexBuilt: true }))
+        .then(({ allSucceeded }) => {
+          if (allSucceeded) return saveUserSettings({ isLyricIndexBuilt: true });
+          logger.warn('Lyrics backfill had failures, will retry on next launch');
+          return undefined;
+        })
         .catch((error) => logger.error('Lyrics index backfill failed', { error }));
     }
 
