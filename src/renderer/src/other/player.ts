@@ -611,6 +611,9 @@ class AudioPlayer {
 
   /** Starts or resumes audio playback with fade-in effect. */
   async play() {
+    if (this.currentContext.state === 'suspended') {
+      await this.currentContext.resume();
+    }
     await this.audio.play();
     return this.fadeInAudio();
   }
