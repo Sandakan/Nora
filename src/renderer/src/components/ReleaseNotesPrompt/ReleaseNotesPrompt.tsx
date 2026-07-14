@@ -4,15 +4,17 @@ import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { version, releaseNotes as currentReleaseNotes, urls } from '../../../../../package.json';
-import localReleseNotes from '../../../../../release-notes.json';
+import rawChangelog from '../../../../../CHANGELOG.md?raw';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import useNetworkConnectivity from '../../hooks/useNetworkConnectivity';
 import isLatestVersion from '../../utils/isLatestVersion';
 import storage from '../../utils/localStorage';
+import { parseChangelog } from '../../utils/parseChangelog';
 import Checkbox from '../Checkbox';
 import Img from '../Img';
 import ReleaseNotesAppUpdateInfo from './ReleaseNotesAppUpdateInfo';
 import Version from './Version';
+import { parseMarkdownLinks } from './VersionNote';
 
 const ReleaseNotesPrompt = () => {
   const appUpdatesState = useStore(store, (state) => state.appUpdatesState);
@@ -21,7 +23,7 @@ const ReleaseNotesPrompt = () => {
   const { t } = useTranslation();
 
   const { isOnline } = useNetworkConnectivity();
-  const [releaseNotes, setReleaseNotes] = useState<Changelog>(localReleseNotes as Changelog);
+  const [releaseNotes, setReleaseNotes] = useState<Changelog>(parseChangelog(rawChangelog));
 
   const latestUpdatedInfo = useMemo(() => {
     const sortedReleaseNotes = releaseNotes.versions.sort((versionA, versionB) => {
@@ -64,14 +66,15 @@ const ReleaseNotesPrompt = () => {
     if (isOnline) {
       updateAppUpdatesState('CHECKING');
 
-      fetch(currentReleaseNotes.json)
+      fetch(currentReleaseNotes.md)
         .then((res) => {
-          if (res.status === 200) return res.json();
+          if (res.status === 200) return res.text();
           throw new Error('response status is not 200');
         })
-        .then((res: Changelog) => {
-          console.log('fetched release notes from the server.', res);
-          return setReleaseNotes(res);
+        .then((resText) => {
+          const parsed = parseChangelog(resText);
+          console.log('fetched release notes from the server.', parsed);
+          setReleaseNotes(parsed);
         })
         .catch((err) => {
           updateAppUpdatesState('ERROR');
@@ -111,7 +114,7 @@ const ReleaseNotesPrompt = () => {
             key={`important note ${index + 1}`}
             className="latest-version-important-note mb-2 max-w-[90%] font-medium"
           >
-            {note}
+            {parseMarkdownLinks(note)}
           </li>
         );
       });

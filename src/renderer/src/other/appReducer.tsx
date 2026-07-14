@@ -66,7 +66,8 @@ export type AppReducerStateActions =
   | {
       type: 'UPDATE_LOCAL_STORAGE_PREFERENCE_ITEM';
       data: { item: string; value: LocalStorage['preferences'] };
-    };
+    }
+  | { type: 'UPDATE_PLAYBACK_RATE'; data: number };
 
 export const reducer = (state: AppReducer, action: AppReducerStateActions): AppReducer => {
   switch (action.type) {
@@ -370,6 +371,14 @@ export const reducer = (state: AppReducer, action: AppReducerStateActions): AppR
         ...state,
         isOnBatteryPower: action.data ?? state.isOnBatteryPower
       };
+    case 'UPDATE_PLAYBACK_RATE':
+      return {
+        ...state,
+        player: {
+          ...state.player,
+          playbackRate: action.data ?? state.player.playbackRate
+        }
+      };
     default:
       return state;
   }
@@ -419,7 +428,11 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
     genresPage: 'aToZ',
     playlistsPage: 'aToZ',
     songsPage: 'aToZ',
-    musicFoldersPage: 'aToZ'
+    musicFoldersPage: 'aToZ',
+    playlistDetailPage: 'addedOrder',
+    albumDetailPage: 'trackNoDescending',
+    genreDetailPage: 'aToZ',
+    artistDetailPage: 'aToZ'
   },
   equalizerPreset: {
     thirtyTwoHertzFilter: 0,

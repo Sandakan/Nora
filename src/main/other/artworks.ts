@@ -1,5 +1,5 @@
-import fs from 'fs/promises';
 import fsSync from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
 
 import { db } from '@main/db/db';

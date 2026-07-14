@@ -6,7 +6,8 @@ import { Trans, useTranslation } from 'react-i18next';
 import appLicense from '../../../../../../LICENSE.txt?raw';
 import openSourceLicenses from '../../../../../../open_source_licenses.txt?raw';
 import { version, author, homepage, bugs, urls } from '../../../../../../package.json';
-import localReleaseNotes from '../../../../../../release-notes.json';
+import rawChangelog from '../../../../../../CHANGELOG.md?raw';
+import { parseChangelog } from '../../../utils/parseChangelog';
 import DiscordLightIcon from '../../../assets/images/svg/discord_dark_mode.svg';
 import DiscordDarkIcon from '../../../assets/images/svg/discord_light_mode.svg';
 import GithubLightIcon from '../../../assets/images/svg/github-white.svg';
@@ -39,7 +40,7 @@ const AboutSettings = () => {
   const { t } = useTranslation();
 
   const currentVersionReleasedDate = useMemo(() => {
-    const { versions } = localReleaseNotes;
+    const { versions } = parseChangelog(rawChangelog);
 
     for (let i = 0; i < versions.length; i += 1) {
       if (versions[i].version === version) {

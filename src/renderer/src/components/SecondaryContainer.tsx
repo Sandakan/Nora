@@ -19,7 +19,7 @@ const SecondaryContainer = forwardRef(
           className={`secondary-container mb-4 h-fit w-full ${className}`}
           onKeyDown={onKeyDown}
           role={(role ?? focusable) ? 'none' : undefined}
-          tabIndex={focusable ? 1 : undefined}
+          tabIndex={focusable ? 0 : undefined}
           ref={ref}
         >
           {children}

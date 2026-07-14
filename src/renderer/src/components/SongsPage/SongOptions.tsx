@@ -7,6 +7,8 @@ export const songSortTypes = [
   'addedOrder',
   'dateAddedAscending',
   'dateAddedDescending',
+  'dateModifiedAscending',
+  'dateModifiedDescending',
   'releasedYearAscending',
   'releasedYearDescending',
   'trackNoAscending',
@@ -17,9 +19,10 @@ export const songSortTypes = [
   'allTimeLeastListened',
   'monthlyMostListened',
   'monthlyLeastListened',
-  'artistNameDescending',
   'albumNameAscending',
   'albumNameDescending',
+  'mostSkipped',
+  'leastSkipped',
   'blacklistedSongs',
   'whitelistedSongs'
 ] as const;
@@ -43,6 +46,14 @@ export const songSortOptions: DropdownOption<SongSortTypes>[] = [
   {
     label: i18n.t('sortTypes.dateAddedDescending'),
     value: 'dateAddedDescending'
+  },
+  {
+    label: i18n.t('sortTypes.dateModifiedAscending'),
+    value: 'dateModifiedAscending'
+  },
+  {
+    label: i18n.t('sortTypes.dateModifiedDescending'),
+    value: 'dateModifiedDescending'
   },
   {
     label: i18n.t('sortTypes.releasedYearAscending'),
@@ -83,6 +94,14 @@ export const songSortOptions: DropdownOption<SongSortTypes>[] = [
   {
     label: i18n.t('sortTypes.albumNameDescending'),
     value: 'albumNameDescending'
+  },
+  {
+    label: i18n.t('sortTypes.mostSkipped'),
+    value: 'mostSkipped'
+  },
+  {
+    label: i18n.t('sortTypes.leastSkipped'),
+    value: 'leastSkipped'
   }
 ];
 

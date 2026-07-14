@@ -4,27 +4,12 @@ import { useTranslation } from 'react-i18next';
 import { store } from '../store/store';
 
 /**
- * Custom hook to manage Discord Rich Presence integration.
+ * Synchronizes Discord Rich Presence with the provided audio element's current song.
  *
- * This hook automatically updates Discord Rich Presence activity with the currently playing song
- * information, including: - Song title and artists - Playback timestamps (start/end times) - Artist
- * artwork (if available) - Nora logo as large image - Button link to Nora's GitHub repository
+ * Registers listeners on the audio player to update Discord activity (song title, artists,
+ * artwork, action button) and to set playback timestamps while the player is actively playing.
  *
- * The activity is updated on: - Play event (starts activity timer) - Pause event (clears activity
- * timer) - Seek event (updates timestamps)
- *
- * Text is automatically truncated to Discord's 128 character limit.
- *
- * @example
- *   ```tsx
- *   function App() {
- *     const player = useAudioPlayer();
- *
- *     useDiscordRpc(player);
- *   }
- *   ```;
- *
- * @param player - The HTML audio player element
+ * @param player - The HTMLAudioElement whose playback state and metadata drive the presence updates
  */
 export function useDiscordRpc(player: HTMLAudioElement) {
   const { t } = useTranslation();
@@ -52,27 +37,20 @@ export function useDiscordRpc(player: HTMLAudioElement) {
     // Get current timestamp
     const now = Date.now();
 
-    // Find first artist with artwork for small image
+    // Find first artist with artwork for Discord presence images
     const firstArtistWithArtwork = currentSong?.artists?.find(
-      (artist) => artist.onlineArtworkPaths !== undefined
+      (artist) => artist.onlineArtworkPaths?.picture_small
     );
-    const onlineArtworkLink = firstArtistWithArtwork?.onlineArtworkPaths?.picture_small;
+    const artworkLink = firstArtistWithArtwork?.onlineArtworkPaths?.picture_xl
+      ?? firstArtistWithArtwork?.onlineArtworkPaths?.picture_medium
+      ?? firstArtistWithArtwork?.onlineArtworkPaths?.picture_small;
 
-    // Send activity to Discord via IPC
-    window.api.playerControls.setDiscordRpcActivity({
-      timestamps: {
-        // Only set timestamps when playing (not paused)
-        start: player.paused ? undefined : now - (player.currentTime ?? 0) * 1000,
-        end: player.paused
-          ? undefined
-          : now + ((player.duration ?? 0) - (player.currentTime ?? 0)) * 1000
-      },
+    const activity: DiscordActivity = {
       details: title,
       state: artists,
       assets: {
-        large_image: 'nora_logo',
-        // large_text: 'Nora', // Large text will also be displayed as the 3rd line (state) so I skipped it for now
-        small_image: onlineArtworkLink ?? 'song_artwork',
+        large_image: artworkLink ?? 'nora_logo',
+        small_image: artworkLink ?? 'song_artwork',
         small_text: firstArtistWithArtwork
           ? firstArtistWithArtwork.name
           : t('discordrpc.playingASong')
@@ -83,7 +61,20 @@ export function useDiscordRpc(player: HTMLAudioElement) {
           url: 'https://github.com/Sandakan/Nora/'
         }
       ]
-    });
+    };
+
+    if (!player.paused) {
+      const currentTime = player.currentTime ?? 0;
+      const duration = player.duration ?? 0;
+      if (Number.isFinite(currentTime) && Number.isFinite(duration) && duration > 0) {
+        activity.timestamps = {
+          start: now - currentTime * 1000,
+          end: now + (duration - currentTime) * 1000
+        };
+      }
+    }
+
+    window.api?.playerControls?.setDiscordRpcActivity(activity);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

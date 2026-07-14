@@ -57,7 +57,13 @@ updateNetworkStatus();
 window.addEventListener('online', updateNetworkStatus);
 window.addEventListener('offline', updateNetworkStatus);
 
-// console.log('Command line args', window.api.properties.commandLineArgs);
+/**
+ * Root application component that bootstraps the audio player/queue, initializes app-wide hooks and integrations, and provides update/context values to the UI tree.
+ *
+ * Initializes the queue singleton, audio player and queue wiring, playback/error handling, window and queue management, media session and OS integrations, keyboard shortcuts, app lifecycle, and other global hooks (network, theme, notifications, preferences, data sync). Wraps the routed UI in an ErrorBoundary and supplies AppUpdateContext to descendants.
+ *
+ * @returns The top-level React element containing the application UI and providers
+ */
 
 export default function App() {
   // ? INITIALIZE QUEUE (singleton with store sync)
@@ -117,7 +123,12 @@ export default function App() {
 
   // ? INITIALIZE PLAYBACK ERRORS
   // Playback errors hook handles error management and retry logic
-  const { managePlaybackErrors } = usePlaybackErrors(audio, changePromptMenuData);
+  const skipForwardRef = useRef<() => void>();
+  const { managePlaybackErrors, resetErrorCount } = usePlaybackErrors(
+    audio,
+    changePromptMenuData,
+    skipForwardRef
+  );
 
   // ? INITIALIZE PLAYBACK SETTINGS
   // Playback settings hook handles repeat, volume, mute, position, favorites, and equalizer
@@ -138,6 +149,7 @@ export default function App() {
   // Listen for songLoaded events from AudioPlayer to record listening data
   useEffect(() => {
     const handleSongLoaded = (songData: AudioPlayerData) => {
+      resetErrorCount();
       recordListeningData(songData.songId, songData.duration, false, true);
     };
 
@@ -146,7 +158,7 @@ export default function App() {
     return () => {
       player.off('songLoaded', handleSongLoaded);
     };
-  }, [player, recordListeningData]);
+  }, [player, recordListeningData, resetErrorCount]);
 
   // ? INITIALIZE PLAYER CONTROL
   // Player control hook handles play/pause, song loading, and player state management
@@ -172,7 +184,18 @@ export default function App() {
   // Songs are auto-loaded by AudioPlayer on queue position changes
   const { changeQueueCurrentSongIndex, handleSkipBackwardClick, handleSkipForwardClick } =
     usePlayerNavigation(player, playerQueue, toggleSongPlayback, recordListeningData);
+  skipForwardRef.current = handleSkipForwardClick;
 
+  // ? UP NEXT POPUP TRIGGER
+  const showUpNextPopupRef = useRef<(() => void) | null>(null);
+
+  const registerUpNextPopupFn = useCallback((fn: () => void) => {
+    showUpNextPopupRef.current = fn;
+  }, []);
+
+  const showUpNextSongPopup = useCallback(() => {
+    showUpNextPopupRef.current?.();
+  }, []);
   // ? INITIALIZE APP UPDATES
   // App updates hook handles checking for updates and showing release notes
   const { updateAppUpdatesState } = useAppUpdates({
@@ -261,6 +284,7 @@ export default function App() {
     createQueue,
     changeUpNextSongData,
     managePlaybackErrors,
+    resetErrorCount,
     toggleSongPlayback,
     handleSkipBackwardClick,
     handleSkipForwardClick,
@@ -284,6 +308,8 @@ export default function App() {
       updatePlayerType,
       handleSkipBackwardClick,
       handleSkipForwardClick,
+      showUpNextSongPopup,
+      registerUpNextPopupFn,
       updateSongPosition,
       updateVolume,
       toggleMutedState,
@@ -316,6 +342,8 @@ export default function App() {
     updatePlayerType,
     handleSkipBackwardClick,
     handleSkipForwardClick,
+    showUpNextSongPopup,
+    registerUpNextPopupFn,
     updateSongPosition,
     updateVolume,
     toggleMutedState,

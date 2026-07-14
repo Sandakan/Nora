@@ -1,7 +1,7 @@
 import { eq, inArray, sql } from 'drizzle-orm';
 
 import { db } from '../db';
-import { playEvents, seekEvents, skipEvents } from '../schema';
+import { playEvents, seekEvents, skipEvents, songs } from '../schema';
 
 export type GetAllSongListeningDataReturnType = Awaited<ReturnType<typeof getAllSongListeningData>>;
 export const getAllSongListeningData = async (songIds?: number[], trx: DB | DBTransaction = db) => {
@@ -70,6 +70,13 @@ export const deleteSongSeekEvents = (songId: number, trx: DB | DBTransaction = d
   return trx.delete(seekEvents).where(eq(seekEvents.songId, songId));
 };
 
-export const deleteSongSkipEvents = (songId: number, trx: DB | DBTransaction = db) => {
-  return trx.delete(skipEvents).where(eq(skipEvents.songId, songId));
+export const incrementSongSkipCount = (songId: number, trx: DB | DBTransaction = db) => {
+  return trx.update(songs).set({ skipCount: sql`${songs.skipCount} + 1` }).where(eq(songs.id, songId));
+};
+
+export const deleteSongSkipEvents = (songId: number) => {
+  return db.transaction(async (tx) => {
+    await tx.delete(skipEvents).where(eq(skipEvents.songId, songId));
+    await tx.update(songs).set({ skipCount: 0 }).where(eq(songs.id, songId));
+  });
 };

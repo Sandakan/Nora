@@ -1,38 +1,33 @@
-name: Lint
+name: Lint & Format Check
 
 on:
-  # Trigger the workflow on push or pull request,
-  # but only for the main branch
-  push:
-    branches:
-      - master
+  # Trigger on pull requests
   pull_request:
-    branches:
-      - master
+
+  # Trigger manually
+  workflow_dispatch:
 
 jobs:
-  run-linters:
-    name: Run linters
+  lint-format-check:
+    name: Lint & Format Check
     runs-on: ubuntu-latest
 
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v6
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 'lts/*'
           check-latest: true
+          cache: npm
 
-      # ESLint and Prettier must be in `package.json`
       - name: Install Node.js dependencies
         run: npm ci
 
       - name: Run linters
-        uses: wearerequired/lint-action@v2
-        with:
-          # TODO Disabled until eslint v9 is supported
-          # https://github.com/wearerequired/lint-action/issues/788
-          eslint: false
-          prettier: false
+        run: npm run lint --deny-warnings
+
+      - name: Run formatters
+        run: npm run format

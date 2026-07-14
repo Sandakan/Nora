@@ -102,6 +102,7 @@
     "somethingWentWrong": "Đã xảy ra lỗi.",
     "details": "Chi tiết",
     "restartApp": "Khởi động lại ứng dụng",
+    "skipSong": "Bỏ qua bài hát tiếp theo",
     "ok": "Đồng ý",
     "loading": "Đang tải"
   },
@@ -167,7 +168,9 @@
     "mostLovedAscending": "Ít lượt thích nhất",
     "trackNoAscending": "Số thứ tự bài hát (Tăng dần)",
     "trackNoDescending": "Số thứ tự bài hát (Giảm dần)",
-    "addedOrder": "Thứ tự thêm"
+    "addedOrder": "Thứ tự thêm",
+    "mostSkipped": "Most skipped (All time)",
+    "leastSkipped": "Least skipped (All time)"
   },
 
   "filterTypes": {

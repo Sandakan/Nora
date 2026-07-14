@@ -1,6 +1,6 @@
+import SongTagsEditingPage from '@renderer/components/SongTagsEditingPage/SongTagsEditingPage';
 import { queryClient } from '@renderer/index';
 import { songQuery } from '@renderer/queries/songs';
-import SongTagsEditingPage from '@renderer/components/SongTagsEditingPage/SongTagsEditingPage';
 import { createFileRoute } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/main-player/songs/$songId/edit')({
