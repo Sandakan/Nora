@@ -255,6 +255,8 @@ class AudioPlayer {
       } catch (rebuildErr) {
         console.error('[AudioPlayer.handleDeviceChange] All recovery strategies failed', rebuildErr);
         this.emit('error', rebuildErr);
+        // Dispatch native error event so the app's playback-error UI picks it up
+        this.audio.dispatchEvent(new Event('error'));
       }
     } finally {
       if (generation === this.deviceChangeGeneration) {
@@ -298,6 +300,12 @@ class AudioPlayer {
     } catch {
       // Already closed
     }
+
+    // Release the old audio element to free media resources
+    const oldAudio = this.audio;
+    oldAudio.pause();
+    oldAudio.removeAttribute('src');
+    oldAudio.load();
 
     // Create a new Audio element (Chromium requires this — see Critical #2)
     const newAudio = new Audio();
@@ -352,6 +360,10 @@ class AudioPlayer {
 
     // Restore position after load
     this.audio.currentTime = savedTime;
+
+    // Force React re-render so hooks re-read this.audio and get the new element.
+    // Without this, hooks like useAppLifecycle hold stale references to the old element.
+    dispatch({ type: 'CURRENT_SONG_PLAYBACK_STATE', data: false });
   }
 
   /**
@@ -394,6 +406,8 @@ class AudioPlayer {
     songIdOrData: number | AudioPlayerData,
     options?: { autoPlay?: boolean; updateStore?: boolean }
   ): Promise<AudioPlayerData> {
+    // Cancel any in-flight device-change recovery when loading a new track
+    ++this.deviceChangeGeneration;
     let songData: AudioPlayerData;
 
     try {
