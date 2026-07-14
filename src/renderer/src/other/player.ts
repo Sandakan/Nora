@@ -50,6 +50,7 @@ class AudioPlayer {
   private pendingAutoPlay: boolean = false;
   private boundDeviceChangeHandler: (() => void) | null = null;
   private isRecoveringFromDeviceChange = false;
+  private deviceChangeGeneration = 0;
 
   constructor(queue: PlayerQueue) {
     this.listeners = new Map();
@@ -155,9 +156,10 @@ class AudioPlayer {
    * detects the change and recovers playback by reloading the audio source on the new device.
    */
   private setupDeviceChangeListener() {
-    if (!navigator.mediaDevices?.ondevicechange) return;
+    if (!navigator.mediaDevices || !('ondevicechange' in navigator.mediaDevices)) return;
 
     this.boundDeviceChangeHandler = () => {
+      if (this.isRecoveringFromDeviceChange) return;
       this.handleDeviceChange().catch((err) => {
         console.error('[AudioPlayer] Device change recovery failed:', err);
       });
@@ -165,20 +167,40 @@ class AudioPlayer {
     navigator.mediaDevices.ondevicechange = this.boundDeviceChangeHandler;
   }
 
+  private waitForCanPlay(timeoutMs = 5000): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      let timer: ReturnType<typeof setTimeout> | null = null;
+      const cleanup = () => {
+        if (timer) clearTimeout(timer);
+        this.audio.removeEventListener('canplay', onCanPlay);
+        this.audio.removeEventListener('error', onError);
+      };
+      const onCanPlay = () => { cleanup(); resolve(); };
+      const onError = (e: Event) => { cleanup(); reject(e); };
+      this.audio.addEventListener('canplay', onCanPlay);
+      this.audio.addEventListener('error', onError);
+      timer = setTimeout(() => {
+        cleanup();
+        reject(new Error('Timeout waiting for canplay'));
+      }, timeoutMs);
+    });
+  }
+
   /**
    * Recovers playback after an audio output device change. Saves position, attempts a simple
    * play() first (Chromium often auto-reroutes to the new default). If that fails, reloads
    * the audio element to force Chromium to re-establish the audio path. As a last resort,
-   * rebuilds the entire AudioContext + EQ chain.
+   * rebuilds the entire AudioContext + EQ chain with a fresh Audio element.
    */
   private async handleDeviceChange() {
-    const wasPlaying = !this.audio.paused;
     const savedTime = this.audio.currentTime;
     const currentSrc = this.audio.src;
 
-    console.log('[AudioPlayer.handleDeviceChange]', { wasPlaying, savedTime });
+    if (!currentSrc) return;
 
-    if (!wasPlaying || !currentSrc) return;
+    const generation = ++this.deviceChangeGeneration;
+
+    console.log('[AudioPlayer.handleDeviceChange]', { savedTime });
 
     // Mark recovery in progress so other methods know
     this.isRecoveringFromDeviceChange = true;
@@ -192,6 +214,7 @@ class AudioPlayer {
       // Strategy 1: Simple play() — Chromium may auto-reroute to the new default device
       try {
         await this.audio.play();
+        if (generation !== this.deviceChangeGeneration) return;
         this.audio.currentTime = savedTime;
         console.log('[AudioPlayer.handleDeviceChange] Simple play() succeeded');
         return;
@@ -206,74 +229,56 @@ class AudioPlayer {
       this.audio.src = url.toString();
       this.audio.load();
 
-      await new Promise<void>((resolve, reject) => {
-        const onCanPlay = () => {
-          this.audio.removeEventListener('canplay', onCanPlay);
-          this.audio.removeEventListener('error', onError);
-          resolve();
-        };
-        const onError = (e: Event) => {
-          this.audio.removeEventListener('canplay', onCanPlay);
-          this.audio.removeEventListener('error', onError);
-          reject(e);
-        };
-        this.audio.addEventListener('canplay', onCanPlay);
-        this.audio.addEventListener('error', onError);
-
-        setTimeout(() => {
-          this.audio.removeEventListener('canplay', onCanPlay);
-          this.audio.removeEventListener('error', onError);
-          reject(new Error('Timeout waiting for canplay after device change'));
-        }, 5000);
-      });
+      await this.waitForCanPlay();
+      if (generation !== this.deviceChangeGeneration) return;
 
       this.audio.currentTime = savedTime;
       await this.audio.play();
       console.log('[AudioPlayer.handleDeviceChange] Reload recovery succeeded');
     } catch (err) {
+      if (generation !== this.deviceChangeGeneration) return;
+
       console.error('[AudioPlayer.handleDeviceChange] Reload failed, rebuilding AudioContext', err);
 
-      // Strategy 3: Nuclear — rebuild the entire AudioContext + EQ chain
-      this.rebuildAudioContext();
-      this.audio.src = currentSrc;
-      this.audio.load();
+      // Strategy 3: Nuclear — rebuild the entire AudioContext + EQ chain with a new Audio element
+      try {
+        this.rebuildAudioContext();
+        this.audio.src = currentSrc;
+        this.audio.load();
 
-      await new Promise<void>((resolve, reject) => {
-        const onCanPlay = () => {
-          this.audio.removeEventListener('canplay', onCanPlay);
-          this.audio.removeEventListener('error', onError);
-          resolve();
-        };
-        const onError = (e: Event) => {
-          this.audio.removeEventListener('canplay', onCanPlay);
-          this.audio.removeEventListener('error', onError);
-          reject(e);
-        };
-        this.audio.addEventListener('canplay', onCanPlay);
-        this.audio.addEventListener('error', onError);
+        await this.waitForCanPlay();
+        if (generation !== this.deviceChangeGeneration) return;
 
-        setTimeout(() => {
-          this.audio.removeEventListener('canplay', onCanPlay);
-          this.audio.removeEventListener('error', onError);
-          reject(new Error('Timeout waiting for canplay after AudioContext rebuild'));
-        }, 5000);
-      });
-
-      this.audio.currentTime = savedTime;
-      await this.audio.play();
-      console.log('[AudioPlayer.handleDeviceChange] AudioContext rebuild recovery succeeded');
+        this.audio.currentTime = savedTime;
+        await this.audio.play();
+        console.log('[AudioPlayer.handleDeviceChange] AudioContext rebuild recovery succeeded');
+      } catch (rebuildErr) {
+        console.error('[AudioPlayer.handleDeviceChange] All recovery strategies failed', rebuildErr);
+        this.emit('error', rebuildErr);
+      }
     } finally {
-      this.isRecoveringFromDeviceChange = false;
+      if (generation === this.deviceChangeGeneration) {
+        this.isRecoveringFromDeviceChange = false;
+      }
     }
   }
 
   /**
    * Tears down and rebuilds the entire Web Audio graph (AudioContext, EQ chain, gain, destination).
-   * Used as a last-resort recovery when the AudioContext sink is dead after an audio device change.
-   * Restores EQ band values, volume, and mute state from current settings.
+   * Creates a new Audio element because Chromium permanently binds an element to its first
+   * MediaElementSourceNode — reusing the same element after closing the old context throws
+   * InvalidStateError. Restores EQ band values, volume, mute state, and re-attaches all event
+   * listeners to the new element.
    */
   private rebuildAudioContext() {
     console.log('[AudioPlayer.rebuildAudioContext]');
+
+    // Save current state from old element
+    const savedSrc = this.audio.src;
+    const savedTime = this.audio.currentTime;
+    const savedVolume = this.audio.volume;
+    const savedMuted = this.audio.muted;
+    const savedPlaybackRate = this.audio.playbackRate;
 
     // Disconnect and close old context
     try {
@@ -294,6 +299,22 @@ class AudioPlayer {
       // Already closed
     }
 
+    // Create a new Audio element (Chromium requires this — see Critical #2)
+    const newAudio = new Audio();
+    newAudio.crossOrigin = 'anonymous';
+    newAudio.preload = 'auto';
+    newAudio.src = savedSrc;
+    newAudio.volume = savedVolume;
+    newAudio.muted = savedMuted;
+    newAudio.defaultPlaybackRate = 1.0;
+    newAudio.playbackRate = savedPlaybackRate;
+
+    // Replace the old element
+    this.audio = newAudio;
+
+    // Re-attach all event listeners to the new element
+    this.setupAudioEventListeners();
+
     // Create fresh context
     this.currentContext = new window.AudioContext();
     this.gainNode = this.currentContext.createGain();
@@ -304,7 +325,6 @@ class AudioPlayer {
       filter.type = 'peaking';
       filter.frequency.value = hertzValue;
       filter.Q.value = 1;
-      // Preserve existing gain value if the band was previously set
       const oldBand = this.equalizerBands.get(filterName as EqualizerBandFilters);
       filter.gain.value = oldBand?.gain?.value ?? 0;
       this.equalizerBands.set(filterName as EqualizerBandFilters, filter);
@@ -327,8 +347,11 @@ class AudioPlayer {
 
     this.gainNode.connect(this.currentContext.destination);
 
-    // Restore volume and mute state
+    // Restore volume and mute state on the gain node
     this.gainNode.gain.value = this.audio.muted ? 0 : this.currentVolume / 100;
+
+    // Restore position after load
+    this.audio.currentTime = savedTime;
   }
 
   /**
