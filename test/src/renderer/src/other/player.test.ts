@@ -1,16 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock dependencies before importing the module under test
-vi.mock('../../../../src/renderer/src/store/store', () => ({
+vi.mock('../../../../../src/renderer/src/store/store', () => ({
   dispatch: vi.fn(),
-  store: { state: { player: { volume: { value: 50, isMuted: false }, playbackRate: 1, isRepeating: 'off' as const } }, subscribe: vi.fn(() => vi.fn()) }
+  store: { state: { player: { volume: { value: 50, isMuted: false }, playbackRate: 1, isRepeating: 'off' as const } }, subscribe: vi.fn(() => ({ unsubscribe: vi.fn() })) }
 }));
 
-vi.mock('../../../../src/renderer/src/utils/localStorage', () => ({
+vi.mock('../../../../../src/renderer/src/utils/localStorage', () => ({
   default: { playback: { setCurrentSongOptions: vi.fn() } }
 }));
 
-vi.mock('../../../../src/renderer/src/other/equalizerData', () => ({
+vi.mock('../../../../../src/renderer/src/other/equalizerData', () => ({
   equalizerBandHertzData: { '60': 60, '170': 170, '310': 310, '600': 600, '1000': 1000, '3000': 3000, '6000': 6000, '12000': 12000, '14000': 14000, '16000': 16000 }
 }));
 
@@ -46,30 +46,53 @@ class MockAudio {
   src = '';
   srcObject = null;
   currentSrc = '';
-  private listeners: Record<string, Function[]> = {};
-  addEventListener(event: string, fn: Function) { (this.listeners[event] ??= []).push(fn); }
-  removeEventListener(event: string, fn: Function) { this.listeners[event] = this.listeners[event]?.filter(f => f !== fn) ?? []; }
+  private listeners: Record<string, ((...args: unknown[]) => void)[]> = {};
+  addEventListener(event: string, fn: (...args: unknown[]) => void) { (this.listeners[event] ??= []).push(fn); }
+  removeEventListener(event: string, fn: (...args: unknown[]) => void) { this.listeners[event] = this.listeners[event]?.filter(f => f !== fn) ?? []; }
   dispatchEvent(event: Event) { this.listeners[event.type]?.forEach(fn => fn(event)); }
   play() { this.paused = false; return Promise.resolve(); }
   pause() { this.paused = true; }
-  load() {}
-  setAttribute() {}
-  removeAttribute() {}
+  load() { /* no-op in mock */ }
+  setAttribute(_name: string, _value: string) { /* no-op in mock */ }
+  removeAttribute(_name: string) { /* no-op in mock */ }
 }
 
-// @ts-expect-error - injecting mocks for Node environment
+// Injecting mocks for Node environment where AudioContext/Audio don't exist
+// @ts-expect-error -- Node test environment lacks Web Audio API globals
 globalThis.AudioContext = MockAudioContext;
-// @ts-expect-error
+// @ts-expect-error -- Node test environment lacks HTMLAudioElement constructor
 globalThis.Audio = MockAudio;
+// Node test environment lacks window and navigator.mediaDevices globals
+// @ts-expect-error -- Node test environment lacks window object
+globalThis.window = globalThis;
+Object.defineProperty(globalThis, 'navigator', {
+  value: { mediaDevices: { ondevicechange: null } },
+  writable: true,
+  configurable: true
+});
 
-import AudioPlayer from '../../../../src/renderer/src/other/player';
+import AudioPlayer from '../../../../../src/renderer/src/other/player';
 
 describe('AudioPlayer device change recovery', () => {
   let player: AudioPlayer;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    player = new AudioPlayer({} as any);
+    const mockQueue = {
+      on: vi.fn(),
+      removeAllListeners: vi.fn(),
+      currentSongId: null,
+      position: 0,
+      length: 0,
+      hasNext: false,
+      hasPrevious: false,
+      isEmpty: true,
+      moveToNext: vi.fn(),
+      moveToPrevious: vi.fn(),
+      moveToPosition: vi.fn(),
+      moveToStart: vi.fn()
+    };
+    player = new AudioPlayer(mockQueue as any);
   });
 
   describe('setupDeviceChangeListener', () => {
