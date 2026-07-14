@@ -51,6 +51,7 @@ class AudioPlayer {
   private boundDeviceChangeHandler: (() => void) | null = null;
   private isRecoveringFromDeviceChange = false;
   private deviceChangeGeneration = 0;
+  private static readonly DEBUG = false;
 
   constructor(queue: PlayerQueue) {
     this.listeners = new Map();
@@ -200,7 +201,7 @@ class AudioPlayer {
 
     const generation = ++this.deviceChangeGeneration;
 
-    console.log('[AudioPlayer.handleDeviceChange]', { savedTime });
+    if (AudioPlayer.DEBUG) console.log('[AudioPlayer.handleDeviceChange]', { savedTime });
 
     // Mark recovery in progress so other methods know
     this.isRecoveringFromDeviceChange = true;
@@ -216,10 +217,10 @@ class AudioPlayer {
         await this.audio.play();
         if (generation !== this.deviceChangeGeneration) return;
         this.audio.currentTime = savedTime;
-        console.log('[AudioPlayer.handleDeviceChange] Simple play() succeeded');
+        if (AudioPlayer.DEBUG) console.log('[AudioPlayer.handleDeviceChange] Simple play() succeeded');
         return;
       } catch {
-        console.log('[AudioPlayer.handleDeviceChange] Simple play() failed, reloading src');
+        if (AudioPlayer.DEBUG) console.log('[AudioPlayer.handleDeviceChange] Simple play() failed, reloading src');
       }
 
       // Strategy 2: Reload the src with fresh cache-busting to force a new audio path
@@ -234,7 +235,7 @@ class AudioPlayer {
 
       this.audio.currentTime = savedTime;
       await this.audio.play();
-      console.log('[AudioPlayer.handleDeviceChange] Reload recovery succeeded');
+      if (AudioPlayer.DEBUG) console.log('[AudioPlayer.handleDeviceChange] Reload recovery succeeded');
     } catch (err) {
       if (generation !== this.deviceChangeGeneration) return;
 
@@ -251,7 +252,7 @@ class AudioPlayer {
 
         this.audio.currentTime = savedTime;
         await this.audio.play();
-        console.log('[AudioPlayer.handleDeviceChange] AudioContext rebuild recovery succeeded');
+        if (AudioPlayer.DEBUG) console.log('[AudioPlayer.handleDeviceChange] AudioContext rebuild recovery succeeded');
       } catch (rebuildErr) {
         console.error('[AudioPlayer.handleDeviceChange] All recovery strategies failed', rebuildErr);
         this.emit('error', rebuildErr);
@@ -273,7 +274,7 @@ class AudioPlayer {
    * listeners to the new element.
    */
   private rebuildAudioContext() {
-    console.log('[AudioPlayer.rebuildAudioContext]');
+    if (AudioPlayer.DEBUG) console.log('[AudioPlayer.rebuildAudioContext]');
 
     // Save current state from old element
     const savedSrc = this.audio.src;
