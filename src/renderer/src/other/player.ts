@@ -408,6 +408,7 @@ class AudioPlayer {
   ): Promise<AudioPlayerData> {
     // Cancel any in-flight device-change recovery when loading a new track
     ++this.deviceChangeGeneration;
+    this.isRecoveringFromDeviceChange = false;
     let songData: AudioPlayerData;
 
     try {

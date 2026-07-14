@@ -262,8 +262,7 @@ export function useAppLifecycle(dependencies: AppLifecycleDependencies): void {
       player.removeEventListener('pause', handlePlayerPauseEvent);
       window.api.quitEvent.removeBeforeQuitEventListener(handleBeforeQuitEvent);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [managePlaybackErrors]);
+  }, [managePlaybackErrors, player]);
 
   // Setup player lifecycle event listeners for canplay and title bar updates
   useEffect(() => {
@@ -287,8 +286,7 @@ export function useAppLifecycle(dependencies: AppLifecycleDependencies): void {
       player.removeEventListener('play', windowManagement.addSongTitleToTitleBar);
       player.removeEventListener('pause', displayDefaultTitleBar);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [player]);
 
   // Setup IPC control listeners from main process
   useEffect(() => {
