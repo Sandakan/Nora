@@ -379,7 +379,13 @@ class AudioPlayer {
 
     if (this.repeatMode === 'one') {
       this.audio.currentTime = 0;
-      await this.play();
+      try {
+        await this.play();
+      } catch {
+        if (!this.isRecoveringFromDeviceChange) {
+          await this.handleDeviceChange();
+        }
+      }
       this.emit('repeatOne');
       return;
     }
@@ -438,6 +444,11 @@ class AudioPlayer {
       }
 
       // Set audio source with a single cache-busting timestamp.
+      // Bump generation again to cancel any device-change recovery that started
+      // during the getSong() fetch window (before we set the new src).
+      ++this.deviceChangeGeneration;
+      this.isRecoveringFromDeviceChange = false;
+
       const audioSourceUrl = new URL(songData.path);
       audioSourceUrl.searchParams.set('ts', `${Date.now()}`);
       this.audio.src = audioSourceUrl.toString();
@@ -682,6 +693,10 @@ class AudioPlayer {
           // Play failed, likely a dead audio path from device change. Try recovery.
           if (!this.isRecoveringFromDeviceChange) {
             await this.handleDeviceChange();
+          } else {
+            // Recovery already in progress, surface the failure to the UI
+            this.emit('error', new Error('Play failed while recovery is in progress'));
+            this.audio.dispatchEvent(new Event('error'));
           }
         }
       } else if (this.audio.src) {
@@ -762,7 +777,13 @@ class AudioPlayer {
     // Handle repeat-one mode (only auto-repeat, not on user skip)
     if (this.repeatMode === 'one' && reason !== 'USER_SKIP') {
       this.audio.currentTime = 0;
-      await this.play();
+      try {
+        await this.play();
+      } catch {
+        if (!this.isRecoveringFromDeviceChange) {
+          await this.handleDeviceChange();
+        }
+      }
 
       // Emit event for listening data recording (repetition)
       if (store.state.currentSongData?.songId) {
