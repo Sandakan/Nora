@@ -48,13 +48,14 @@ class AudioPlayer {
 
   private repeatMode: 'off' | 'one' | 'all' = 'off';
   private pendingAutoPlay: boolean = false;
+  private boundDeviceChangeHandler: (() => void) | null = null;
+  private isRecoveringFromDeviceChange = false;
 
   constructor(queue: PlayerQueue) {
     this.listeners = new Map();
 
     this.audio = new Audio();
     this.queue = queue;
-
     // MediaElementAudioSourceNode requires a CORS-enabled media fetch.
     this.audio.crossOrigin = 'anonymous';
 
@@ -71,6 +72,7 @@ class AudioPlayer {
     this.initializeEqualizer();
     this.setupQueueIntegration();
     this.setupAudioEventListeners();
+    this.setupDeviceChangeListener();
   }
 
   /**
@@ -145,6 +147,188 @@ class AudioPlayer {
     this.audio.addEventListener('seeked', () => {
       this.emit('seeked', this.audio.currentTime);
     });
+  }
+
+  /**
+   * Listens for OS audio output device changes (Bluetooth connect/disconnect, USB, FxSound).
+   * When the active device drops, Chromium's AudioContext sink dies silently. This handler
+   * detects the change and recovers playback by reloading the audio source on the new device.
+   */
+  private setupDeviceChangeListener() {
+    if (!navigator.mediaDevices?.ondevicechange) return;
+
+    this.boundDeviceChangeHandler = () => {
+      this.handleDeviceChange().catch((err) => {
+        console.error('[AudioPlayer] Device change recovery failed:', err);
+      });
+    };
+    navigator.mediaDevices.ondevicechange = this.boundDeviceChangeHandler;
+  }
+
+  /**
+   * Recovers playback after an audio output device change. Saves position, attempts a simple
+   * play() first (Chromium often auto-reroutes to the new default). If that fails, reloads
+   * the audio element to force Chromium to re-establish the audio path. As a last resort,
+   * rebuilds the entire AudioContext + EQ chain.
+   */
+  private async handleDeviceChange() {
+    const wasPlaying = !this.audio.paused;
+    const savedTime = this.audio.currentTime;
+    const currentSrc = this.audio.src;
+
+    console.log('[AudioPlayer.handleDeviceChange]', { wasPlaying, savedTime });
+
+    if (!wasPlaying || !currentSrc) return;
+
+    // Mark recovery in progress so other methods know
+    this.isRecoveringFromDeviceChange = true;
+
+    try {
+      // Resume AudioContext if it got suspended during the device switch
+      if (this.currentContext.state === 'suspended') {
+        await this.currentContext.resume();
+      }
+
+      // Strategy 1: Simple play() — Chromium may auto-reroute to the new default device
+      try {
+        await this.audio.play();
+        this.audio.currentTime = savedTime;
+        console.log('[AudioPlayer.handleDeviceChange] Simple play() succeeded');
+        return;
+      } catch {
+        console.log('[AudioPlayer.handleDeviceChange] Simple play() failed, reloading src');
+      }
+
+      // Strategy 2: Reload the src with fresh cache-busting to force a new audio path
+      this.audio.src = '';
+      const url = new URL(currentSrc.split('?')[0]);
+      url.searchParams.set('ts', `${Date.now()}`);
+      this.audio.src = url.toString();
+      this.audio.load();
+
+      await new Promise<void>((resolve, reject) => {
+        const onCanPlay = () => {
+          this.audio.removeEventListener('canplay', onCanPlay);
+          this.audio.removeEventListener('error', onError);
+          resolve();
+        };
+        const onError = (e: Event) => {
+          this.audio.removeEventListener('canplay', onCanPlay);
+          this.audio.removeEventListener('error', onError);
+          reject(e);
+        };
+        this.audio.addEventListener('canplay', onCanPlay);
+        this.audio.addEventListener('error', onError);
+
+        setTimeout(() => {
+          this.audio.removeEventListener('canplay', onCanPlay);
+          this.audio.removeEventListener('error', onError);
+          reject(new Error('Timeout waiting for canplay after device change'));
+        }, 5000);
+      });
+
+      this.audio.currentTime = savedTime;
+      await this.audio.play();
+      console.log('[AudioPlayer.handleDeviceChange] Reload recovery succeeded');
+    } catch (err) {
+      console.error('[AudioPlayer.handleDeviceChange] Reload failed, rebuilding AudioContext', err);
+
+      // Strategy 3: Nuclear — rebuild the entire AudioContext + EQ chain
+      this.rebuildAudioContext();
+      this.audio.src = currentSrc;
+      this.audio.load();
+
+      await new Promise<void>((resolve, reject) => {
+        const onCanPlay = () => {
+          this.audio.removeEventListener('canplay', onCanPlay);
+          this.audio.removeEventListener('error', onError);
+          resolve();
+        };
+        const onError = (e: Event) => {
+          this.audio.removeEventListener('canplay', onCanPlay);
+          this.audio.removeEventListener('error', onError);
+          reject(e);
+        };
+        this.audio.addEventListener('canplay', onCanPlay);
+        this.audio.addEventListener('error', onError);
+
+        setTimeout(() => {
+          this.audio.removeEventListener('canplay', onCanPlay);
+          this.audio.removeEventListener('error', onError);
+          reject(new Error('Timeout waiting for canplay after AudioContext rebuild'));
+        }, 5000);
+      });
+
+      this.audio.currentTime = savedTime;
+      await this.audio.play();
+      console.log('[AudioPlayer.handleDeviceChange] AudioContext rebuild recovery succeeded');
+    } finally {
+      this.isRecoveringFromDeviceChange = false;
+    }
+  }
+
+  /**
+   * Tears down and rebuilds the entire Web Audio graph (AudioContext, EQ chain, gain, destination).
+   * Used as a last-resort recovery when the AudioContext sink is dead after an audio device change.
+   * Restores EQ band values, volume, and mute state from current settings.
+   */
+  private rebuildAudioContext() {
+    console.log('[AudioPlayer.rebuildAudioContext]');
+
+    // Disconnect and close old context
+    try {
+      this.gainNode.disconnect();
+    } catch {
+      // Already disconnected
+    }
+    this.equalizerBands.forEach((filter) => {
+      try {
+        filter.disconnect();
+      } catch {
+        // Already disconnected
+      }
+    });
+    try {
+      this.currentContext.close();
+    } catch {
+      // Already closed
+    }
+
+    // Create fresh context
+    this.currentContext = new window.AudioContext();
+    this.gainNode = this.currentContext.createGain();
+
+    // Rebuild EQ chain with saved values
+    for (const [filterName, hertzValue] of Object.entries(equalizerBandHertzData)) {
+      const filter = this.currentContext.createBiquadFilter();
+      filter.type = 'peaking';
+      filter.frequency.value = hertzValue;
+      filter.Q.value = 1;
+      // Preserve existing gain value if the band was previously set
+      const oldBand = this.equalizerBands.get(filterName as EqualizerBandFilters);
+      filter.gain.value = oldBand?.gain?.value ?? 0;
+      this.equalizerBands.set(filterName as EqualizerBandFilters, filter);
+    }
+
+    // Re-wire: source -> EQ filters -> gain -> destination
+    const source = this.currentContext.createMediaElementSource(this.audio);
+    const filterMapKeys = [...this.equalizerBands.keys()];
+
+    this.equalizerBands.forEach((filter, key, map) => {
+      const idx = filterMapKeys.indexOf(key);
+      if (idx === 0) {
+        source.connect(filter);
+      } else {
+        const prev = map.get(filterMapKeys[idx - 1]);
+        if (prev) prev.connect(filter);
+        if (idx === filterMapKeys.length - 1) filter.connect(this.gainNode);
+      }
+    });
+
+    this.gainNode.connect(this.currentContext.destination);
+
+    // Restore volume and mute state
+    this.gainNode.gain.value = this.audio.muted ? 0 : this.currentVolume / 100;
   }
 
   /**
@@ -271,6 +455,12 @@ class AudioPlayer {
     this.audio.pause();
     this.audio.src = '';
     this.currentContext.close();
+
+    // Clean up device change listener
+    if (this.boundDeviceChangeHandler && navigator.mediaDevices?.ondevicechange) {
+      navigator.mediaDevices.ondevicechange = null;
+      this.boundDeviceChangeHandler = null;
+    }
   }
 
   /**
@@ -420,8 +610,8 @@ class AudioPlayer {
   // ========== PUBLIC PLAYBACK CONTROLS ==========
 
   /** Starts or resumes audio playback with fade-in effect. */
-  play() {
-    this.audio.play();
+  async play() {
+    await this.audio.play();
     return this.fadeInAudio();
   }
 
@@ -441,7 +631,17 @@ class AudioPlayer {
 
     if (shouldPlay) {
       if (this.audio.readyState > 0) {
-        await this.play();
+        try {
+          await this.play();
+        } catch {
+          // Play failed, likely a dead audio path from device change. Try recovery.
+          if (!this.isRecoveringFromDeviceChange) {
+            await this.handleDeviceChange();
+          }
+        }
+      } else if (this.audio.src) {
+        // readyState is 0 but src exists — audio path may be dead. Attempt recovery.
+        await this.handleDeviceChange();
       }
     } else {
       await this.pause();
