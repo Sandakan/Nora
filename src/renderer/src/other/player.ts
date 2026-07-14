@@ -220,8 +220,11 @@ class AudioPlayer {
         if (AudioPlayer.DEBUG) console.log('[AudioPlayer.handleDeviceChange] Simple play() succeeded');
         return;
       } catch {
+        if (generation !== this.deviceChangeGeneration) return;
         if (AudioPlayer.DEBUG) console.log('[AudioPlayer.handleDeviceChange] Simple play() failed, reloading src');
       }
+
+      if (generation !== this.deviceChangeGeneration) return;
 
       // Strategy 2: Reload the src with fresh cache-busting to force a new audio path
       this.audio.src = '';
