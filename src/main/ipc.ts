@@ -125,6 +125,7 @@ import { compare } from './utils/safeStorage';
  */
 export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSignal) {
   if (mainWindow) {
+    let resyncPromise: Promise<void> | null = null;
     ipcMain.on('app/close', () => app.quit());
 
     ipcMain.on('app/minimize', () => mainWindow.minimize());
@@ -475,12 +476,22 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     );
 
     ipcMain.handle('app/resyncSongsLibrary', async () => {
-      const { failedFolders } = await checkForNewSongs();
-      if (failedFolders.length > 0) {
-        sendMessageToRenderer({ messageCode: 'RESYNC_PARTIAL' });
-      } else {
-        sendMessageToRenderer({ messageCode: 'RESYNC_SUCCESSFUL' });
+      if (resyncPromise) {
+        await resyncPromise;
+        return;
       }
+      resyncPromise = checkForNewSongs()
+        .then(({ hasFailures }) => {
+          if (hasFailures) {
+            sendMessageToRenderer({ messageCode: 'RESYNC_PARTIAL' });
+          } else {
+            sendMessageToRenderer({ messageCode: 'RESYNC_SUCCESSFUL' });
+          }
+        })
+        .finally(() => {
+          resyncPromise = null;
+        });
+      await resyncPromise;
     });
 
     ipcMain.handle('app/getBlacklistData', getBlacklistData);

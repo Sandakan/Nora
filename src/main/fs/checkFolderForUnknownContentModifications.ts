@@ -59,14 +59,21 @@ const getFullPathsOfFolderDirs = async (
   }
 };
 
+type ScanResult = {
+  failedSongPaths: string[];
+  deletionFailures: string[];
+};
+
 const removeDeletedSongsFromLibrary = async (
   deletedSongPaths: string[],
   abortSignal: AbortSignal
-) => {
+): Promise<string[]> => {
   try {
     await removeSongsFromLibrary(deletedSongPaths, abortSignal);
+    return [];
   } catch (error) {
     logger.error(`Failed to remove deleted songs from library.`, { error, deletedSongPaths });
+    return deletedSongPaths;
   }
 };
 
@@ -77,14 +84,16 @@ const addNewlyAddedSongsToLibrary = async (
   newlyAddedSongPaths: string[],
   abortSignal: AbortSignal,
   allMusicFolders: FolderRow[]
-) => {
+): Promise<string[]> => {
   const folder = await getFolderFromPath(folderPath);
 
   // Defensive: skip blacklisted folders even when the DB has 0 songs on disk
   if (folder?.isBlacklisted) {
     logger.debug(`Skipping blacklisted folder.`, { folderPath });
-    return;
+    return [];
   }
+
+  const failedSongPaths: string[] = [];
 
   // Fix BUG 2b: Resolve correct folderId per song so nested songs get
   // the closest known folder, not always the ancestor's id.
@@ -141,13 +150,18 @@ const addNewlyAddedSongsToLibrary = async (
         error,
         newlyAddedSongPath
       });
+      failedSongPaths.push(newlyAddedSongPath);
     }
   }
   if (newlyAddedSongPaths.length > 0) setTimeout(generatePalettes, 1500);
+  return failedSongPaths;
 };
 
-const checkFolderForUnknownModifications = async (folderPath: string) => {
+const checkFolderForUnknownModifications = async (
+  folderPath: string
+): Promise<ScanResult> => {
   const abortController = new AbortController();
+  const result: ScanResult = { failedSongPaths: [], deletionFailures: [] };
 
   try {
     const allMusicFolders = await getAllFolders();
@@ -163,7 +177,7 @@ const checkFolderForUnknownModifications = async (folderPath: string) => {
       logger.warn(`Disk inventory failed. Skipping reconciliation for this folder.`, {
         folderPath
       });
-      return;
+      return result;
     }
 
     if (relevantFolderSongPaths.length > 0) {
@@ -177,7 +191,11 @@ const checkFolderForUnknownModifications = async (folderPath: string) => {
           deletedSongPaths,
           folderPath
         });
-        await removeDeletedSongsFromLibrary(deletedSongPaths, abortController.signal);
+        const deletionFailed = await removeDeletedSongsFromLibrary(
+          deletedSongPaths,
+          abortController.signal
+        );
+        if (deletionFailed.length > 0) result.deletionFailures.push(...deletionFailed);
       }
     }
 
@@ -192,20 +210,20 @@ const checkFolderForUnknownModifications = async (folderPath: string) => {
           newlyAddedSongPaths,
           folderPath
         });
-        await addNewlyAddedSongsToLibrary(
+        const parseFailed = await addNewlyAddedSongsToLibrary(
           folderPath,
           newlyAddedSongPaths,
           abortController.signal,
           allMusicFolders
         );
+        if (parseFailed.length > 0) result.failedSongPaths.push(...parseFailed);
       }
     }
   } finally {
-    // Always abort the in-flight abortController, even when the scan completed
-    // successfully. Any pending async work spawned by the scan that checks
-    // abortSignal will observe the abort and bail out instead of stacking.
     abortController.abort();
   }
+
+  return result;
 };
 
 export default checkFolderForUnknownModifications;

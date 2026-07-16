@@ -13,11 +13,11 @@ import logger from '../logger';
 
 const createParentFolderWatcherFunction = (parentFolderPath: string) => {
   let isScanning = false;
+  let dirtyScan = false;
+  let dirtyPath: string | null = null;
   let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   const findContainingMusicFolder = async (fullPath: string): Promise<string | undefined> => {
-    // Fetch the current music folder set lazily so newly-added library
-    // folders (added after the watcher was created) are picked up.
     const structures = await getAllFolderStructures();
     const allPaths: string[] = [];
     getAllPathsFromStructures(structures, allPaths);
@@ -29,19 +29,34 @@ const createParentFolderWatcherFunction = (parentFolderPath: string) => {
     });
   };
 
+  const runScan = (containingFolder: string) => {
+    isScanning = true;
+    checkFolderForUnknownModifications(containingFolder)
+      .catch((error) => {
+        logger.error('Debounced folder scan failed.', { error, containingFolder });
+      })
+      .finally(() => {
+        isScanning = false;
+        if (dirtyScan && dirtyPath) {
+          dirtyScan = false;
+          const next = dirtyPath;
+          dirtyPath = null;
+          runScan(next);
+        }
+      });
+  };
+
   const scheduleScan = (containingFolder: string) => {
+    dirtyPath = containingFolder;
     if (debounceTimer) clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
       debounceTimer = null;
-      if (isScanning) return;
-      isScanning = true;
-      checkFolderForUnknownModifications(containingFolder)
-        .catch((error) => {
-          logger.error('Debounced folder scan failed.', { error, containingFolder });
-        })
-        .finally(() => {
-          isScanning = false;
-        });
+      if (isScanning) {
+        dirtyScan = true;
+        return;
+      }
+      dirtyScan = false;
+      runScan(containingFolder);
     }, 1500);
   };
 

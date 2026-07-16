@@ -11,11 +11,17 @@ const getTopLevelFolderPaths = async (): Promise<string[]> => {
 const checkForNewSongs = async () => {
   const topLevelFolders = await getTopLevelFolderPaths();
   const failedFolders: string[] = [];
+  const failedSongPaths: string[] = [];
+  const deletionFailures: string[] = [];
 
   if (topLevelFolders.length > 0) {
     for (const folderPath of topLevelFolders) {
       try {
-        await checkFolderForUnknownModifications(folderPath);
+        const result = await checkFolderForUnknownModifications(folderPath);
+        if (result.failedSongPaths.length > 0)
+          failedSongPaths.push(...result.failedSongPaths);
+        if (result.deletionFailures.length > 0)
+          deletionFailures.push(...result.deletionFailures);
       } catch (error) {
         logger.error(`Failed to check for unknown modifications of a path.`, {
           error,
@@ -28,7 +34,10 @@ const checkForNewSongs = async () => {
     logger.warn('checkForNewSongs: no top-level music folders found — nothing to scan.');
   }
 
-  return { failedFolders };
+  const hasFailures =
+    failedFolders.length > 0 || failedSongPaths.length > 0 || deletionFailures.length > 0;
+
+  return { failedFolders, failedSongPaths, deletionFailures, hasFailures };
 };
 
 export default checkForNewSongs;

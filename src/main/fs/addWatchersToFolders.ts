@@ -74,8 +74,16 @@ export const addWatcherToFolder = async (folder: MusicFolderData) => {
       {
         signal: abortController.signal
       },
-      (eventType, filename) =>
-        folderWatcherFunction(eventType, filename, folder, abortController.signal)
+      (eventType, filename) => {
+        void folderWatcherFunction(eventType, filename, folder, abortController.signal).catch(
+          (error) => {
+            logger.error('Failed to process folder watcher event.', {
+              error,
+              folderPath: folder.path
+            });
+          }
+        );
+      }
     );
 
     logger.debug('Added watcher to a folder successfully.', { folderPath: folder.path });
