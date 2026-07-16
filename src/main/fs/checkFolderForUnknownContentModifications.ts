@@ -9,7 +9,6 @@ import logger from '../logger';
 import { generatePalettes } from '../other/generatePalette';
 import { tryToParseSong } from '../parseSong/parseSong';
 import removeSongsFromLibrary from '../removeSongsFromLibrary';
-import { saveAbortController } from './controlAbortControllers';
 
 const getSongPathsRelativeToFolder = async (folderPath: string) => {
   const relevantSongs = await getSongsRelativeToFolder(folderPath, {
@@ -22,7 +21,9 @@ const getSongPathsRelativeToFolder = async (folderPath: string) => {
   return relevantSongPaths;
 };
 
-const getFullPathsOfFolderDirs = async (folderPath: string): Promise<string[]> => {
+const getFullPathsOfFolderDirs = async (
+  folderPath: string
+): Promise<string[] | undefined> => {
   try {
     const dirs = await fs.readdir(folderPath, { withFileTypes: true });
     const fullPaths: string[] = [];
@@ -31,6 +32,7 @@ const getFullPathsOfFolderDirs = async (folderPath: string): Promise<string[]> =
       const fullPath = path.join(folderPath, dir.name);
       if (dir.isDirectory()) {
         const subDirPaths = await getFullPathsOfFolderDirs(fullPath);
+        if (subDirPaths === undefined) return undefined;
         fullPaths.push(...subDirPaths);
       } else if (supportedMusicExtensions.includes(path.extname(dir.name))) {
         fullPaths.push(fullPath);
@@ -39,8 +41,11 @@ const getFullPathsOfFolderDirs = async (folderPath: string): Promise<string[]> =
 
     return fullPaths;
   } catch (error) {
-    logger.error(`Failed to read directory.`, { error, folderPath });
-    return [];
+    logger.error(`Failed to read directory. Skipping scan for this folder.`, {
+      error,
+      folderPath
+    });
+    return undefined;
   }
 };
 
@@ -55,11 +60,13 @@ const removeDeletedSongsFromLibrary = async (
   }
 };
 
+type FolderRow = { id: number; path: string; isBlacklisted: boolean };
+
 const addNewlyAddedSongsToLibrary = async (
   folderPath: string,
   newlyAddedSongPaths: string[],
   abortSignal: AbortSignal,
-  allMusicFolders: MusicFolder[]
+  allMusicFolders: FolderRow[]
 ) => {
   const folder = await getFolderFromPath(folderPath);
 
@@ -70,16 +77,23 @@ const addNewlyAddedSongsToLibrary = async (
   }
 
   // Fix BUG 2b: Resolve correct folderId per song so nested songs get
-  // the closest known folder, not always the ancestor's id
-  const folderPathToId = new Map<string, number>(
-    allMusicFolders.map((f) => [f.path, f.id])
+  // the closest known folder, not always the ancestor's id.
+  // Also track blacklist status so songs under blacklisted children are skipped.
+  const folderPathToMeta = new Map<
+    string,
+    { id: number; isBlacklisted: boolean }
+  >(
+    allMusicFolders.map((f) => [f.path, { id: f.id, isBlacklisted: f.isBlacklisted }])
   );
 
   const getClosestFolderId = (songPath: string): number | undefined => {
     let dir = path.dirname(songPath);
     while (dir.length >= folderPath.length) {
-      const matchedId = folderPathToId.get(dir);
-      if (matchedId !== undefined) return matchedId;
+      const meta = folderPathToMeta.get(dir);
+      if (meta !== undefined) {
+        if (meta.isBlacklisted) return undefined;
+        return meta.id;
+      }
       const parentDir = path.dirname(dir);
       if (parentDir === dir) break;
       dir = parentDir;
@@ -100,6 +114,14 @@ const addNewlyAddedSongsToLibrary = async (
 
     try {
       const resolvedFolderId = getClosestFolderId(newlyAddedSongPath);
+
+      if (resolvedFolderId === undefined) {
+        logger.debug(`Skipping song under blacklisted folder.`, {
+          songPath: newlyAddedSongPath
+        });
+        continue;
+      }
+
       await tryToParseSong(newlyAddedSongPath, resolvedFolderId, false, false);
       logger.debug(`${path.basename(newlyAddedSongPath)} song added.`, {
         songPath: newlyAddedSongPath
@@ -116,16 +138,21 @@ const addNewlyAddedSongsToLibrary = async (
 
 const checkFolderForUnknownModifications = async (folderPath: string) => {
   const abortController = new AbortController();
-  saveAbortController('checkFolderForUnknownContentModifications', abortController);
 
   try {
     const relevantFolderSongPaths = await getSongPathsRelativeToFolder(folderPath);
 
     const dirs = await getFullPathsOfFolderDirs(folderPath);
 
+    if (dirs === undefined) {
+      logger.warn(`Disk inventory failed. Skipping reconciliation for this folder.`, {
+        folderPath
+      });
+      return;
+    }
+
     // Fetch the full folder list once per top-level scan, then reuse for each
-    // addNewlyAddedSongsToLibrary call below. Previously getAllFolders() was
-    // called inside the loop, doing N sequential reads for N library roots.
+    // addNewlyAddedSongsToLibrary call below.
     const allMusicFolders = await getAllFolders();
 
     if (relevantFolderSongPaths.length > 0) {

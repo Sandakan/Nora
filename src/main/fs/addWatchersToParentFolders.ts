@@ -92,7 +92,16 @@ const addWatcherToParentFolder = (parentFolderPath: string) => {
         // TODO - recursive mode won't work on linux
         recursive: true
       },
-      (eventType, filename) => watcherFunction(eventType, filename)
+      (eventType, filename) => {
+        void watcherFunction(eventType, filename).catch((error) => {
+          logger.error('Failed to process parent-folder watcher event.', {
+            error,
+            parentFolderPath,
+            eventType,
+            filename
+          });
+        });
+      }
     );
     logger.debug('Added watcher to a parent folder successfully.', { parentFolderPath });
 
