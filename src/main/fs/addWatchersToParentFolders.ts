@@ -4,6 +4,7 @@ import path from 'path';
 
 import { getAllFolderStructures } from '@main/db/queries/folders';
 
+import { supportedMusicExtensions } from '../filesystem';
 import checkFolderForUnknownModifications from './checkFolderForUnknownContentModifications';
 import checkForFolderModifications from './checkForFolderModifications';
 import { saveAbortController } from './controlAbortControllers';
@@ -12,6 +13,7 @@ import logger from '../logger';
 
 const createParentFolderWatcherFunction = (parentFolderPath: string) => {
   let isScanning = false;
+  let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   const findContainingMusicFolder = async (fullPath: string): Promise<string | undefined> => {
     // Fetch the current music folder set lazily so newly-added library
@@ -27,6 +29,22 @@ const createParentFolderWatcherFunction = (parentFolderPath: string) => {
     });
   };
 
+  const scheduleScan = (containingFolder: string) => {
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      debounceTimer = null;
+      if (isScanning) return;
+      isScanning = true;
+      checkFolderForUnknownModifications(containingFolder)
+        .catch((error) => {
+          logger.error('Debounced folder scan failed.', { error, containingFolder });
+        })
+        .finally(() => {
+          isScanning = false;
+        });
+    }, 1500);
+  };
+
   return async (eventType: WatchEventType, filename?: string | null) => {
     if (filename) {
       if (eventType === 'rename') {
@@ -34,33 +52,25 @@ const createParentFolderWatcherFunction = (parentFolderPath: string) => {
         const fullPathStat = await stat(fullPath).catch(() => null);
 
         if (fullPathStat?.isDirectory()) {
-          if (isScanning) return;
-          isScanning = true;
-          try {
-            const containingFolder = await findContainingMusicFolder(fullPath);
-
-            if (containingFolder) {
-              logger.debug(`New directory detected inside music folder.`, {
-                path: fullPath,
-                musicFolder: containingFolder
-              });
-              await checkForFolderModifications(filename);
-              await checkFolderForUnknownModifications(containingFolder);
-              return;
-            }
-
-            await checkForFolderModifications(filename);
-          } finally {
-            isScanning = false;
+          const containingFolder = await findContainingMusicFolder(fullPath);
+          if (containingFolder) {
+            logger.debug(`New directory detected inside music folder.`, {
+              path: fullPath,
+              musicFolder: containingFolder
+            });
+            scheduleScan(containingFolder);
+            return;
           }
+          await checkForFolderModifications(filename);
         } else if (fullPathStat === null) {
-          // Path was deleted — check if a known folder was removed
-          if (isScanning) return;
-          isScanning = true;
-          try {
-            await checkForFolderModifications(filename);
-          } finally {
-            isScanning = false;
+          await checkForFolderModifications(filename);
+        } else if (
+          fullPathStat.isFile() &&
+          supportedMusicExtensions.includes(path.extname(fullPath))
+        ) {
+          const containingFolder = await findContainingMusicFolder(fullPath);
+          if (containingFolder) {
+            scheduleScan(containingFolder);
           }
         }
       }

@@ -2,7 +2,7 @@ import fs from 'fs/promises';
 import path from 'path';
 
 import { getAllFolders, getFolderFromPath } from '@main/db/queries/folders';
-import { getSongsRelativeToFolder } from '@main/db/queries/songs';
+import { getSongsInFolders } from '@main/db/queries/songs';
 
 import { supportedMusicExtensions } from '../filesystem';
 import logger from '../logger';
@@ -10,15 +10,25 @@ import { generatePalettes } from '../other/generatePalette';
 import { tryToParseSong } from '../parseSong/parseSong';
 import removeSongsFromLibrary from '../removeSongsFromLibrary';
 
-const getSongPathsRelativeToFolder = async (folderPath: string) => {
-  const relevantSongs = await getSongsRelativeToFolder(folderPath, {
+const getSongPathsUnderFolder = async (
+  folderPath: string,
+  allFolders: FolderRow[]
+) => {
+  const topFolder = allFolders.find((f) => f.path === folderPath);
+  if (!topFolder) return [];
+
+  const descendantIds = allFolders
+    .filter((f) => f.path.startsWith(folderPath + path.sep) || f.path === folderPath)
+    .filter((f) => !f.isBlacklisted)
+    .map((f) => f.id);
+
+  if (descendantIds.length === 0) return [];
+
+  const songs = await getSongsInFolders(descendantIds, {
     skipBlacklistedFolders: true,
     skipBlacklistedSongs: true
   });
-
-  const relevantSongPaths = relevantSongs.map((song) => song.path);
-
-  return relevantSongPaths;
+  return songs.map((song) => song.path);
 };
 
 const getFullPathsOfFolderDirs = async (
@@ -140,7 +150,12 @@ const checkFolderForUnknownModifications = async (folderPath: string) => {
   const abortController = new AbortController();
 
   try {
-    const relevantFolderSongPaths = await getSongPathsRelativeToFolder(folderPath);
+    const allMusicFolders = await getAllFolders();
+
+    const relevantFolderSongPaths = await getSongPathsUnderFolder(
+      folderPath,
+      allMusicFolders
+    );
 
     const dirs = await getFullPathsOfFolderDirs(folderPath);
 
@@ -150,10 +165,6 @@ const checkFolderForUnknownModifications = async (folderPath: string) => {
       });
       return;
     }
-
-    // Fetch the full folder list once per top-level scan, then reuse for each
-    // addNewlyAddedSongsToLibrary call below.
-    const allMusicFolders = await getAllFolders();
 
     if (relevantFolderSongPaths.length > 0) {
       const deletedSongPaths = relevantFolderSongPaths.filter(

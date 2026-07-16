@@ -475,8 +475,12 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     );
 
     ipcMain.handle('app/resyncSongsLibrary', async () => {
-      await checkForNewSongs();
-      sendMessageToRenderer({ messageCode: 'RESYNC_SUCCESSFUL' });
+      const { failedFolders } = await checkForNewSongs();
+      if (failedFolders.length > 0) {
+        sendMessageToRenderer({ messageCode: 'RESYNC_PARTIAL' });
+      } else {
+        sendMessageToRenderer({ messageCode: 'RESYNC_SUCCESSFUL' });
+      }
     });
 
     ipcMain.handle('app/getBlacklistData', getBlacklistData);

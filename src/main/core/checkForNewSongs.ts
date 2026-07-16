@@ -10,6 +10,7 @@ const getTopLevelFolderPaths = async (): Promise<string[]> => {
 
 const checkForNewSongs = async () => {
   const topLevelFolders = await getTopLevelFolderPaths();
+  const failedFolders: string[] = [];
 
   if (topLevelFolders.length > 0) {
     for (const folderPath of topLevelFolders) {
@@ -20,11 +21,14 @@ const checkForNewSongs = async () => {
           error,
           path: folderPath
         });
+        failedFolders.push(folderPath);
       }
     }
   } else {
     logger.warn('checkForNewSongs: no top-level music folders found — nothing to scan.');
   }
+
+  return { failedFolders };
 };
 
 export default checkForNewSongs;

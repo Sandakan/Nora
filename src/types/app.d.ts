@@ -969,7 +969,8 @@ declare global {
     | 'SONG_REPARSE_SUCCESS'
     | 'ADDED_SONGS_TO_PLAYLIST'
     | 'ARTWORK_SAVED'
-    | 'RESYNC_SUCCESSFUL';
+    | 'RESYNC_SUCCESSFUL'
+    | 'RESYNC_PARTIAL';
 
   interface MessageToRendererData extends Record<string, unknown> {
     total?: number;
