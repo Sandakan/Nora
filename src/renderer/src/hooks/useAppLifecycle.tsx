@@ -302,10 +302,12 @@ export function useAppLifecycle(dependencies: AppLifecycleDependencies): void {
     window.api.playerControls.skipForwardToNextSong(handleSkipForwardClickListener);
 
     return () => {
-      window.api.unknownSource.removePlaySongFromUnknownSourceEvent(handlePlaySongFromUnknownSource);
+      window.api.unknownSource.removePlaySongFromUnknownSourceEvent(
+        handlePlaySongFromUnknownSource
+      );
       window.api.playerControls.removeTogglePlaybackStateEvent(handleToggleSongPlayback);
       window.api.playerControls.removeSkipBackwardToPreviousSongEvent(handleSkipBackwardClick);
-      (globalThis as typeof window).api.playerControls.removeSkipForwardToNextSongEvent(handleSkipForwardClickListener);
+      window.api.playerControls.removeSkipForwardToNextSongEvent(handleSkipForwardClickListener);
       window.api.dataUpdates.removeDataUpdateEventListeners();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
