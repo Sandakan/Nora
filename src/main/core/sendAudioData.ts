@@ -1,4 +1,4 @@
-import { existsSync } from 'fs';
+import { existsSync } from 'node:fs';
 
 import { addSongToPlayHistory } from '@main/db/queries/history';
 import { getPlayableSongById } from '@main/db/queries/songs';
@@ -97,7 +97,7 @@ const sendAudioData = async (songId: number): Promise<AudioPlayerData> => {
         },
         assets: {
           large_image: artworkLink ?? 'nora_logo',
-          small_image: artworkLink ?? 'song_artwork'
+          small_image: 'song_artwork'
         }
       });
       setCurrentSongPath(song.path);
