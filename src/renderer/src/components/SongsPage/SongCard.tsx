@@ -91,11 +91,14 @@ const SongCard = (props: SongCardProp) => {
       if (currentSongData) return currentSongData.songId === songId && isCurrentSongPlaying;
       return false;
     });
-    setIsSongAFavorite((prevState) => {
+  }, [currentSongData?.songId, isCurrentSongPlaying, songId]);
+
+  useEffect(() => {
+    setIsSongAFavorite(() => {
       if (currentSongData?.songId === songId) return currentSongData.isAFavorite;
-      return prevState;
+      return isAFavorite;
     });
-  }, [currentSongData, isCurrentSongPlaying, songId]);
+  }, [currentSongData?.songId, currentSongData?.isAFavorite, songId, isAFavorite]);
 
   const [h, s, l] = useMemo(() => {
     const swatch = palette?.LightVibrant;
@@ -149,12 +152,24 @@ const SongCard = (props: SongCardProp) => {
         }
         return undefined;
       })
-      .catch((err) => console.error(err));
+      .catch((err) => {
+        console.error(err);
+        addNewNotifications([
+          {
+            id: `toggleLikeError-${songId}`,
+            content: t('song.toggleLikeFailed'),
+            iconName: 'error',
+            duration: 5000
+          }
+        ]);
+      });
   }, [
+    addNewNotifications,
     currentSongData.isAFavorite,
     currentSongData.songId,
     isSongAFavorite,
     songId,
+    t,
     toggleIsFavorite
   ]);
 
