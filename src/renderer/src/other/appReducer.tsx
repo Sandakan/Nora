@@ -66,7 +66,8 @@ export type AppReducerStateActions =
   | {
       type: 'UPDATE_LOCAL_STORAGE_PREFERENCE_ITEM';
       data: { item: string; value: LocalStorage['preferences'] };
-    };
+    }
+  | { type: 'UPDATE_PLAYBACK_RATE'; data: number };
 
 export const reducer = (state: AppReducer, action: AppReducerStateActions): AppReducer => {
   switch (action.type) {
@@ -369,6 +370,14 @@ export const reducer = (state: AppReducer, action: AppReducerStateActions): AppR
       return {
         ...state,
         isOnBatteryPower: action.data ?? state.isOnBatteryPower
+      };
+    case 'UPDATE_PLAYBACK_RATE':
+      return {
+        ...state,
+        player: {
+          ...state.player,
+          playbackRate: action.data ?? state.player.playbackRate
+        }
       };
     default:
       return state;

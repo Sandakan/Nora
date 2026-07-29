@@ -170,7 +170,9 @@
     "mostLovedAscending": "Least-loved",
     "trackNoAscending": "Track number (Ascending)",
     "trackNoDescending": "Track number (Descending)",
-    "addedOrder": "Added order"
+    "addedOrder": "Added order",
+    "mostSkipped": "Most skipped (All time)",
+    "leastSkipped": "Least skipped (All time)"
   },
 
   "filterTypes": {
@@ -222,6 +224,7 @@
     "likeSong": "Add to favorites",
     "unlikeSong": "Remove from favorites",
     "toggleLikeSongs": "Add/remove songs from favorites",
+    "toggleLikeFailed": "Failed to update favorite. Please try again.",
     "addToPlaylists": "Add to playlist(s)",
     "goToAlbum": "Go to album",
     "editSongTags": "Edit song tags",

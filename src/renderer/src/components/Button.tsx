@@ -27,6 +27,8 @@ export interface ButtonProps {
   pendingAnimationOnDisabled?: boolean;
   style?: CSSProperties;
   onContextMenu?: (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  onMouseEnter?: (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  onMouseLeave?: (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => void;
   removeFocusOnClick?: boolean;
   children?: string;
 }
@@ -44,6 +46,8 @@ const Button = memo((props: ButtonProps) => {
     tooltipLabel = label,
     pendingAnimationOnDisabled = false,
     onContextMenu,
+    onMouseEnter,
+    onMouseLeave,
     isDisabled = false,
     isVisible = true,
     style,
@@ -99,6 +103,8 @@ const Button = memo((props: ButtonProps) => {
       title={tooltipLabel || label}
       disabled={isButtonDisabled}
       onContextMenu={onContextMenu}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
       style={style}
     >
       {isStatusPending && isButtonDisabled ? (

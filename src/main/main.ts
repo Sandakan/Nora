@@ -47,6 +47,7 @@ import resetAppData from './resetAppData';
 import { savePendingSongLyrics } from './saveLyricsToSong';
 import checkForUpdates from './update';
 import { savePendingMetadataUpdates } from './updateSong/updateSongId3Tags';
+import { flushScrobbleQueue } from './other/lastFm/flushScrobbleQueue';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -276,6 +277,10 @@ protocol.registerSchemesAsPrivileged([
   }
 ]);
 
+if (process.platform === 'win32') {
+  app.setAppUserModelId('com.sandakannipunajith.nora');
+}
+
 app
   .whenReady()
   .then(async () => {
@@ -375,6 +380,7 @@ app
     // ? / / / / / / / / /  IPC RENDERER EVENTS  / / / / / / / / / / / /
     if (mainWindow) {
       initializeIPC(mainWindow, abortController.signal);
+      flushScrobbleQueue();
       checkForUpdates();
       //  / / / / / / / / / / / GLOBAL SHORTCUTS / / / / / / / / / / / / / /
       // globalShortcut.register('F5', () => {

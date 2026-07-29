@@ -1,4 +1,5 @@
-import { addSongPlayEvent, addSongSeekEvent, addSongSkipEvent } from '@main/db/queries/listens';
+import { addSongPlayEvent, addSongSeekEvent, addSongSkipEvent, incrementSongSkipCount } from '@main/db/queries/listens';
+import { db } from '@main/db/db';
 
 import logger from '../logger';
 import { dataUpdateEvent } from '../main';
@@ -13,9 +14,12 @@ const updateSongListeningData = async (
 
     if (dataType === 'LISTEN' && typeof value === 'number')
       await addSongPlayEvent(songId, value.toString());
-    else if (dataType === 'SKIP' && typeof value === 'number')
-      await addSongSkipEvent(songId, value.toString());
-    else if (dataType === 'SEEK' && typeof value === 'number')
+    else if (dataType === 'SKIP' && typeof value === 'number') {
+      await db.transaction(async (trx) => {
+        await addSongSkipEvent(songId, value.toString(), trx);
+        await incrementSongSkipCount(songId, trx);
+      });
+    } else if (dataType === 'SEEK' && typeof value === 'number')
       await addSongSeekEvent(songId, value.toString());
     else {
       logger.error(`Requested to update song listening data with unknown data type`, { dataType });

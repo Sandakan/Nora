@@ -33,6 +33,13 @@ export const Route = createFileRoute('/main-player/playlists/$playlistId')({
   }
 });
 
+/**
+ * Render the playlist detail page with playlist metadata, a virtualized list of songs, and controls for playing, queuing, sorting, filtering, and playlist-specific actions.
+ *
+ * The component reads the current playlist ID and search params, persists the chosen sort order, loads playlist and song data, and provides UI handlers for play, shuffle, add-to-queue, clear history, and removing songs from the playlist.
+ *
+ * @returns The JSX element for the playlist detail page.
+ */
 function PlaylistInfoPage() {
   const { playlistId } = Route.useParams({
     select: (params) => ({ playlistId: Number(params.playlistId) })

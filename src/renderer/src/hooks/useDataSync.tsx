@@ -5,6 +5,7 @@ import { queryClient } from '..';
 import { albumQuery } from '../queries/albums';
 import { artistQuery } from '../queries/aritsts';
 import { genreQuery } from '../queries/genres';
+import { homeQuery } from '../queries/home';
 import { playlistQuery } from '../queries/playlists';
 import { searchQuery } from '../queries/search';
 import { songQuery } from '../queries/songs';
@@ -36,13 +37,21 @@ export function useDataSync(): void {
   useEffect(() => {
     const noticeDataUpdateEvents = (_: unknown, dataEvents: DataUpdateEvent[]) => {
       for (const dataEvent of dataEvents) {
-        // Song events
-        const songEvents: DataUpdateEventTypes[] = [
+        // Events that should invalidate the songs and home page queries.
+        // The home page is co-invalidated with the song list because every
+        // song-level change (artwork, palette, like, etc.) is also reflected
+        // in home-page views.
+        //
+        // Artist/album/playlist/genre events are intentionally NOT in this
+        // list: each of those event types invalidates its own typed cache
+        // (artistQuery, albumQuery, playlistQuery, genreQuery) below, and
+        // song records reference those entities by id, not by embedded
+        // name — so a rename of an artist does not require re-fetching the
+        // songs list to keep `Song.tsx` rows correct. If song records ever
+        // start embedding resolved artist/album names, re-add the four
+        // `artists` / `albums` / `playlists` / `genres` entries here.
+        const songAndHomeEvents: DataUpdateEventTypes[] = [
           'songs',
-          'artists',
-          'albums',
-          'playlists',
-          'genres',
           'songs/newSong',
           'songs/updatedSong',
           'songs/deletedSong',
@@ -50,9 +59,10 @@ export function useDataSync(): void {
           'songs/palette',
           'songs/likes'
         ];
-        if (songEvents.includes(dataEvent.dataType)) {
+        if (songAndHomeEvents.includes(dataEvent.dataType)) {
           queryClient.invalidateQueries({ queryKey: songQuery._def });
           queryClient.invalidateQueries({ queryKey: searchQuery.query._def });
+          queryClient.invalidateQueries({ queryKey: homeQuery._def });
         }
 
         // Artist events

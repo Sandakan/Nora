@@ -168,7 +168,9 @@
     "mostLovedAscending": "Najmniej lubiane",
     "trackNoAscending": "Numer ścieżki (Rosnąco)",
     "trackNoDescending": "Numer ścieżki (Malejąco)",
-    "addedOrder": "Kolejność dodania"
+    "addedOrder": "Kolejność dodania",
+    "mostSkipped": "Most skipped (All time)",
+    "leastSkipped": "Least skipped (All time)"
   },
 
   "filterTypes": {

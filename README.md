@@ -18,7 +18,7 @@ Built with Electron and React • Inspired by [Oto Music](https://play.google.co
 
 [![Crowdin](https://badges.crowdin.net/nora/localized.svg)](https://crowdin.com/project/nora)
 
-[Download](https://github.com/Sandakan/Nora/releases/latest) • [Features](#-features) • [Build Guide](#-build-from-source) • [Changelog](/changelog.md) • [Discord](https://discord.gg/c5rGKnBs4y)
+[Download](https://github.com/Sandakan/Nora/releases/latest) • [Features](#-features) • [Build Guide](#-build-from-source) • [Changelog](/CHANGELOG.md) • [Discord](https://discord.gg/c5rGKnBs4y)
 
 </div>
 
@@ -58,7 +58,7 @@ Nora reimagines desktop music playback with thoughtful design and powerful featu
 
 ![Latest Version Artwork](/resources/other/release%20artworks/whats-new-v3.1.0-stable.webp)
 
-Check out the [changelog](/changelog.md) to see what's new in the latest release.
+Check out the [changelog](/CHANGELOG.md) to see what's new in the latest release.
 
 ## 📥 Download
 

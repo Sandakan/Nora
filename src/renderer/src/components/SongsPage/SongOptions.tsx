@@ -19,9 +19,10 @@ export const songSortTypes = [
   'allTimeLeastListened',
   'monthlyMostListened',
   'monthlyLeastListened',
-  'artistNameDescending',
   'albumNameAscending',
   'albumNameDescending',
+  'mostSkipped',
+  'leastSkipped',
   'blacklistedSongs',
   'whitelistedSongs'
 ] as const;
@@ -93,6 +94,14 @@ export const songSortOptions: DropdownOption<SongSortTypes>[] = [
   {
     label: i18n.t('sortTypes.albumNameDescending'),
     value: 'albumNameDescending'
+  },
+  {
+    label: i18n.t('sortTypes.mostSkipped'),
+    value: 'mostSkipped'
+  },
+  {
+    label: i18n.t('sortTypes.leastSkipped'),
+    value: 'leastSkipped'
   }
 ];
 
