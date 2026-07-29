@@ -19,8 +19,18 @@ const windowControls = {
   showApp: (): void => ipcRenderer.send('app/show'),
   changePlayerType: (type: PlayerTypes): Promise<void> =>
     ipcRenderer.invoke('app/changePlayerType', type),
-  onWindowFocus: (callback: (e: unknown) => void) => ipcRenderer.on('app/focused', callback),
-  onWindowBlur: (callback: (e: unknown) => void) => ipcRenderer.on('app/blurred', callback)
+  onWindowFocus: (callback: (e: unknown) => void) => {
+    ipcRenderer.on('app/focused', callback);
+    return () => {
+      ipcRenderer.removeListener('app/focused', callback);
+    };
+  },
+  onWindowBlur: (callback: (e: unknown) => void) => {
+    ipcRenderer.on('app/blurred', callback);
+    return () => {
+      ipcRenderer.removeListener('app/blurred', callback);
+    };
+  }
 };
 
 const theme = {
@@ -184,10 +194,18 @@ const battery = {
 
 // $ APP FULL-SCREEN EVENTS
 const fullscreen = {
-  onEnterFullscreen: (callback: (e: unknown) => void) =>
-    ipcRenderer.on('app/enteredFullscreen', callback),
-  onLeaveFullscreen: (callback: (e: unknown) => void) =>
-    ipcRenderer.on('app/leftFullscreen', callback)
+  onEnterFullscreen: (callback: (e: unknown) => void) => {
+    ipcRenderer.on('app/enteredFullscreen', callback);
+    return () => {
+      ipcRenderer.removeListener('app/enteredFullscreen', callback);
+    };
+  },
+  onLeaveFullscreen: (callback: (e: unknown) => void) => {
+    ipcRenderer.on('app/leftFullscreen', callback);
+    return () => {
+      ipcRenderer.removeListener('app/leftFullscreen', callback);
+    };
+  }
 };
 
 // $ APP SEARCH
