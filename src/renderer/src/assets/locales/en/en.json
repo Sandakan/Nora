@@ -225,6 +225,7 @@
     "likeSong": "Add to favorites",
     "unlikeSong": "Remove from favorites",
     "toggleLikeSongs": "Add/remove songs from favorites",
+    "toggleLikeFailed": "Failed to update favorite. Please try again.",
     "addToPlaylists": "Add to playlist(s)",
     "goToAlbum": "Go to album",
     "editSongTags": "Edit song tags",
