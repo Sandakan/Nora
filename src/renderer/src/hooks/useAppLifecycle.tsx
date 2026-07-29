@@ -109,7 +109,6 @@ export function useAppLifecycle(dependencies: AppLifecycleDependencies): void {
     createQueue,
     changeUpNextSongData,
     managePlaybackErrors,
-    resetErrorCount,
     toggleSongPlayback,
     handleSkipBackwardClick,
     handleSkipForwardClick,
@@ -301,7 +300,9 @@ export function useAppLifecycle(dependencies: AppLifecycleDependencies): void {
     window.api.playerControls.skipForwardToNextSong(handleSkipForwardClickListener);
 
     return () => {
-      window.api.unknownSource.removePlaySongFromUnknownSourceEvent(handlePlaySongFromUnknownSource);
+      window.api.unknownSource.removePlaySongFromUnknownSourceEvent(
+        handlePlaySongFromUnknownSource
+      );
       window.api.playerControls.removeTogglePlaybackStateEvent(handleToggleSongPlayback);
       window.api.playerControls.removeSkipBackwardToPreviousSongEvent(handleSkipBackwardClick);
       window.api.playerControls.removeSkipForwardToNextSongEvent(handleSkipForwardClickListener);
