@@ -6,6 +6,7 @@ import { songFilterOptions, songSortOptions } from '@renderer/components/SongsPa
 import TitleContainer from '@renderer/components/TitleContainer';
 import VirtualizedList from '@renderer/components/VirtualizedList';
 import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
+import useLastFmConsumer from '@renderer/hooks/useLastFmConsumer';
 import useSelectAllHandler from '@renderer/hooks/useSelectAllHandler';
 import { queryClient } from '@renderer/index';
 import { playlistQuery } from '@renderer/queries/playlists';
@@ -197,6 +198,28 @@ function PlaylistInfoPage() {
   const openCriteriaEditor = useCallback(() => {
     changePromptMenuData(true, <SmartPlaylistCriteriaEditor playlist={playlistData} />);
   }, [changePromptMenuData, playlistData]);
+
+  const { syncToSmartPlaylist } = useLastFmConsumer();
+
+  const syncFromLastFm = useCallback(async () => {
+    const userSettings = store.getState().localStorage.userSettings;
+    const username = userSettings?.lastFmSessionName;
+    if (!username) {
+      addNewNotifications([
+        {
+          id: 'lastFmNotConnected',
+          duration: 5000,
+          content: t('settingsPage.lastFmNotConnected')
+        }
+      ]);
+      return;
+    }
+
+    const result = await syncToSmartPlaylist(playlistData.playlistId, username, 'top', 'overall', 50);
+    if (result) {
+      queryClient.invalidateQueries({ queryKey: playlistQuery._def });
+    }
+  }, [addNewNotifications, playlistData.playlistId, queryClient, syncToSmartPlaylist, t]);
 
   return (
     <MainContainer
