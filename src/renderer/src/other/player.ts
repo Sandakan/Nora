@@ -346,7 +346,7 @@ class AudioPlayer {
 
   private startCrossfade() {
     if (this.isCrossfading || !this.preloadedSongData || this.preloadedSongId === null) return;
-    if (this.queue.nextSongId !== this.preloadedSongId) return;
+    if (this.getEffectiveNextSongId() !== this.preloadedSongId) return;
 
     const inactiveAudio = this.getInactiveAudio();
     const activeGain = this.getActiveFadeGain();
@@ -407,7 +407,7 @@ class AudioPlayer {
       this.abortCrossfade();
       return;
     }
-    if (this.queue.nextSongId !== nextSongId) {
+    if (this.getEffectiveNextSongId() !== nextSongId) {
       this.abortCrossfade();
       return;
     }
