@@ -1,13 +1,17 @@
 /* eslint-disable jsx-a11y/no-autofocus */
 
 /* eslint-disable promise/catch-or-return */
-import { useContext, useState } from 'react';
+import { Suspense, lazy, useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import PlaylistDefaultCover from '../../assets/images/webp/playlist_cover_default.webp';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Button from '../Button';
 import Img from '../Img';
+
+const SmartPlaylistCriteriaEditor = lazy(
+  () => import('../SmartPlaylistCriteriaEditor')
+);
 
 interface NewPlaylistPromptProp {
   updatePlaylists: (_updatedPlaylist: Playlist[]) => void;
@@ -20,11 +24,12 @@ const NewPlaylistPrompt = (props: NewPlaylistPromptProp) => {
 
   const [input, setInput] = useState('');
   const [artworkPath, setArtworkPath] = useState('');
+  const [isSmart, setIsSmart] = useState(false);
 
   const createNewPlaylist = (playlistName: string) => {
     if (playlistName !== '') {
       window.api.playlistsData
-        .addNewPlaylist(playlistName.trim(), undefined, artworkPath)
+        .addNewPlaylist(playlistName.trim(), undefined, artworkPath, isSmart)
         .then((res) => {
           if (res && res.success && res.playlist) {
             changePromptMenuData(false);
@@ -36,6 +41,14 @@ const NewPlaylistPrompt = (props: NewPlaylistPromptProp) => {
                 content: t('newPlaylistPrompt.addPlaylistSuccess')
               }
             ]);
+            if (isSmart && res.playlist) {
+              changePromptMenuData(
+                true,
+                <Suspense>
+                  <SmartPlaylistCriteriaEditor playlist={res.playlist} />
+                </Suspense>
+              );
+            }
           } else {
             addNewNotifications([
               {
@@ -95,9 +108,20 @@ const NewPlaylistPrompt = (props: NewPlaylistPromptProp) => {
         }}
         autoFocus
       />
+      <div className="mt-4 flex items-center gap-3">
+        <label className="flex items-center gap-2 text-sm text-font-color-dimmed dark:text-dark-font-color-dimmed">
+          <input
+            type="checkbox"
+            checked={isSmart}
+            onChange={(e) => setIsSmart(e.target.checked)}
+            className="accent-font-color-highlight"
+          />
+          {t('playlistsPage.smartPlaylist') ?? 'Smart playlist'}
+        </label>
+      </div>
       <Button
-        label={t('playlistsPage.addPlaylist')}
-        iconName="add"
+        label={isSmart ? (t('playlistsPage.createSmartPlaylist') ?? 'Create smart playlist') : t('playlistsPage.addPlaylist')}
+        iconName={isSmart ? 'auto_awesome' : 'add'}
         className="bg-background-color-3! text-font-color-black! dark:bg-dark-background-color-3! dark:text-font-color-black mt-6 mr-0! cursor-pointer justify-center p-2 px-8! py-3! text-lg"
         clickHandler={() => createNewPlaylist(input)}
       />

@@ -494,8 +494,8 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
 
     ipcMain.handle(
       'app/addNewPlaylist',
-      (_, playlistName: string, songIds?: string[], artworkPath?: string) =>
-        addNewPlaylist(playlistName, songIds, artworkPath)
+      (_, playlistName: string, songIds?: string[], artworkPath?: string, isSmart?: boolean) =>
+        addNewPlaylist(playlistName, songIds, artworkPath, isSmart)
     );
 
     ipcMain.handle('app/removePlaylists', (_, playlistIds: number[]) =>

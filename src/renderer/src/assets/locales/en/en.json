@@ -379,6 +379,8 @@
     "createNewPlaylist": "Create new playlist",
     "importPlaylist": "Import a playlist",
     "addPlaylist": "Add a playlist",
+    "smartPlaylist": "Smart playlist",
+    "createSmartPlaylist": "Create smart playlist",
     "removeFromThisPlaylist": "Remove from this playlist",
     "removeSongFromPlaylistSuccess": "`{{title}}` removed from '{{playlistName}}'this playlist",
     "createdOn": "Created on {{val, datetime}}",
