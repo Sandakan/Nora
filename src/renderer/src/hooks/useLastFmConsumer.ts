@@ -134,6 +134,13 @@ const useLastFmConsumer = () => {
         return;
       }
 
+      await window.api.playlistsData.setLastFmSource(playlistId, {
+        username,
+        type,
+        period,
+        limit
+      });
+
       addNewNotifications([
         {
           id: 'lastFmSyncSuccess',

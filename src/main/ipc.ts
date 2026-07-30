@@ -6,6 +6,7 @@ import addSongsFromFolderStructures from './core/addMusicFolder';
 import addNewPlaylist from './core/addNewPlaylist';
 import addSongsToPlaylist from './core/addSongsToPlaylist';
 import { replaceSmartPlaylistMembership } from './core/replaceSmartPlaylistMembership';
+import { setLastFmSource } from './core/setLastFmSource';
 import blacklistFolders from './core/blacklistFolders';
 import blacklistSongs from './core/blacklistSongs';
 import changeAppTheme from './core/changeAppTheme';
@@ -540,6 +541,12 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       }
     );
 
+    ipcMain.handle(
+      'app/setLastFmSource',
+      (_, playlistId: number, source: { username: string; type: 'top' | 'recent' | 'loved'; period?: string; limit?: number }) =>
+        setLastFmSource(playlistId, source)
+    );
+
     ipcMain.handle('app/removeSongFromPlaylist', (_, playlistId: number, songId: number) =>
       removeSongFromPlaylist(playlistId, songId)
     );
@@ -590,6 +597,9 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
           let criteria: SmartPlaylistCriteria;
           try {
             const parsed = JSON.parse(playlist.criteria);
+            if (parsed.lastFmSource) {
+              return { songIds: [], success: true as const, skipped: 'lastfm-synced' as const };
+            }
             if (
               !parsed ||
               typeof parsed !== 'object' ||
