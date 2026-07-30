@@ -9,7 +9,7 @@ import logger from '../logger';
 import { sendMessageToRenderer } from '../main';
 import addWatchersToFolders from './addWatchersToFolders';
 import addWatchersToParentFolders from './addWatchersToParentFolders';
-import { closeAbortController } from './controlAbortControllers';
+import { closeAllAbortControllers } from './controlAbortControllers';
 
 export const getAllFoldersFromFolderStructures = (folderStructures: FolderStructure[]) => {
   const folderData: MusicFolderData[] = [];
@@ -101,13 +101,8 @@ const updateStructure = (
 };
 
 const clearAllFolderWatches = async () => {
-  const musicFolders = await getAllFolderStructures();
-  const folderPaths = getAllFoldersFromFolderStructures(musicFolders);
-
-  for (const folderPath of folderPaths) {
-    closeAbortController(folderPath.path);
-  }
-  logger.info('Closed all folders watches successfully.');
+  closeAllAbortControllers();
+  logger.info('Closed all folder watches successfully.');
 };
 
 export const saveFolderStructures = async (
