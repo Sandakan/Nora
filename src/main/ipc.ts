@@ -5,6 +5,7 @@ import addArtworkToAPlaylist from './core/addArtworkToAPlaylist';
 import addSongsFromFolderStructures from './core/addMusicFolder';
 import addNewPlaylist from './core/addNewPlaylist';
 import addSongsToPlaylist from './core/addSongsToPlaylist';
+import { replaceSmartPlaylistMembership } from './core/replaceSmartPlaylistMembership';
 import blacklistFolders from './core/blacklistFolders';
 import blacklistSongs from './core/blacklistSongs';
 import changeAppTheme from './core/changeAppTheme';
@@ -504,6 +505,12 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
 
     ipcMain.handle('app/addSongsToPlaylist', (_, playlistId: number, songIds: number[]) =>
       addSongsToPlaylist(playlistId, songIds)
+    );
+
+    ipcMain.handle(
+      'app/replaceSmartPlaylistMembership',
+      (_, playlistId: number, songIds: number[]) =>
+        replaceSmartPlaylistMembership(playlistId, songIds)
     );
 
     ipcMain.handle('app/removeSongFromPlaylist', (_, playlistId: number, songId: number) =>

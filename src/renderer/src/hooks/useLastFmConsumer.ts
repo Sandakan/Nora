@@ -121,7 +121,18 @@ const useLastFmConsumer = () => {
         return;
       }
 
-      await window.api.playlistsData.addSongsToPlaylist(playlistId, matchedIds);
+      const replaceResult = await window.api.playlistsData.replaceSmartPlaylistMembership(playlistId, matchedIds);
+
+      if (!replaceResult.success) {
+        addNewNotifications([
+          {
+            id: 'lastFmSyncFailed',
+            duration: 5000,
+            content: 'Failed to update smart playlist'
+          }
+        ]);
+        return;
+      }
 
       addNewNotifications([
         {

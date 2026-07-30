@@ -473,6 +473,11 @@ const playlistsData = {
     ipcRenderer.invoke('app/addNewPlaylist', playlistName, songIds, artworkPath, isSmart),
   addSongsToPlaylist: (playlistId: number, songIds: number[]): PromiseFunctionReturn =>
     ipcRenderer.invoke('app/addSongsToPlaylist', playlistId, songIds),
+  replaceSmartPlaylistMembership: (
+    playlistId: number,
+    songIds: number[]
+  ): Promise<{ success: boolean; count: number }> =>
+    ipcRenderer.invoke('app/replaceSmartPlaylistMembership', playlistId, songIds),
   addArtworkToAPlaylist: (
     playlistId: number,
     artworkPath: string
