@@ -63,6 +63,7 @@ class AudioPlayer {
   private preloadGeneration: number = 0;
   private suppressNextPositionLoad: boolean = false;
   private boundListeners: Map<HTMLAudioElement, Record<string, EventListener>> = new Map();
+  private queueHandlers: Record<string, (...args: unknown[]) => void> = {};
 
   private secondarySource!: MediaElementAudioSourceNode;
 
@@ -118,7 +119,7 @@ class AudioPlayer {
   }
 
   private setupQueueIntegration() {
-    this.queue.on('positionChange', () => {
+    this.queueHandlers.positionChange = () => {
       const songId = this.queue.currentSongId;
       const willAutoPlay = this.pendingAutoPlay;
       console.log('[AudioPlayer.positionChange]', {
@@ -152,15 +153,19 @@ class AudioPlayer {
         });
         this.pendingAutoPlay = false;
       }
-    });
+    };
 
-    this.queue.on('queueChange', (data) => {
+    this.queueHandlers.queueChange = (data: unknown) => {
       this.emit('queueChange', data);
-    });
+    };
 
-    this.queue.on('metadataChange', (data) => {
+    this.queueHandlers.metadataChange = (data: unknown) => {
       this.emit('queueMetadataChange', data);
-    });
+    };
+
+    this.queue.on('positionChange', this.queueHandlers.positionChange);
+    this.queue.on('queueChange', this.queueHandlers.queueChange);
+    this.queue.on('metadataChange', this.queueHandlers.metadataChange);
   }
 
   private onElementEnded = (el: HTMLAudioElement) => {
@@ -627,7 +632,9 @@ class AudioPlayer {
 
   destroy() {
     if (this.unsubscribeFunc) this.unsubscribeFunc.unsubscribe();
-    this.queue.removeAllListeners();
+    for (const [event, handler] of Object.entries(this.queueHandlers)) {
+      this.queue.off(event, handler);
+    }
     this.removeAllListeners();
 
     if (this.crossfadeTimer) {
