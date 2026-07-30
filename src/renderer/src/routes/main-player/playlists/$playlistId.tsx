@@ -272,6 +272,12 @@ function PlaylistInfoPage() {
             iconName: 'tune',
             clickHandler: openCriteriaEditor,
             isVisible: playlistData.isSmart
+          },
+          {
+            label: t('playlist.syncFromLastFm') ?? 'Sync from Last.fm',
+            iconName: 'auto_awesome',
+            clickHandler: syncFromLastFm,
+            isVisible: playlistData.isSmart
           }
         ]}
         dropdowns={[

@@ -275,6 +275,7 @@
     "empty": "Seems like this playlist is empty.",
     "smartPlaylist": "Smart playlist",
     "editCriteria": "Edit criteria",
+    "syncFromLastFm": "Sync from Last.fm",
     "refreshPlaylist": "Refresh playlist",
     "smartPlaylistDescription": "This playlist is automatically populated based on rules.",
     "matchTypeAll": "Match all rules",
