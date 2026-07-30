@@ -1,5 +1,7 @@
 import { describe, test, expect, vi } from 'vitest';
 
+import { normalizeGenres } from '../../../../src/main/core/normalizeGenres';
+
 const ARTIST_SEPARATOR_REGEX = /[,&]/gm;
 
 const getArtistNamesFromSong = (artists?: string) => {
@@ -27,17 +29,7 @@ const getAlbumInfoFromSong = (album?: string) => {
   return undefined;
 };
 
-const getGenreInfoFromSong = (genres?: string[]): string[] => {
-  if (!Array.isArray(genres) || genres.length === 0) return [];
-
-  const splitGenres: string[] = [];
-  for (const genre of genres) {
-    const parts = genre.split(',').map((g) => g.trim()).filter((g) => g.length > 0);
-    splitGenres.push(...parts);
-  }
-
-  return splitGenres;
-};
+const getGenreInfoFromSong = normalizeGenres;
 
 describe('parseSong Helper Functions', () => {
   describe('ARTIST_SEPARATOR_REGEX', () => {

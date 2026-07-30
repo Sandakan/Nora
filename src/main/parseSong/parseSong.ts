@@ -5,6 +5,7 @@ import { db } from '@main/db/db';
 import { linkArtworksToSong } from '@main/db/queries/artworks';
 import { isSongWithPathAvailable, saveSong } from '@main/db/queries/songs';
 import type { songs } from '@main/db/schema';
+import { normalizeGenres } from '@main/core/normalizeGenres';
 import { File } from 'node-taglib-sharp';
 
 import logger from '../logger';
@@ -157,7 +158,7 @@ export const parseSong = async (
       const artistsData = getArtistNamesFromSong(metadata.performers.join(', '));
       const albumArtistsData = getArtistNamesFromSong(metadata.albumArtists.join(', '));
       const albumData = getAlbumInfoFromSong(metadata.album);
-      const genresData = getGenreInfoFromSong(metadata.genres);
+      const genresData = normalizeGenres(metadata.genres);
 
       const songInfo: typeof songs.$inferInsert = {
         title: songTitle,
@@ -361,14 +362,4 @@ export const getAlbumInfoFromSong = (album?: string) => {
   return undefined;
 };
 
-export const getGenreInfoFromSong = (genres?: string[]): string[] => {
-  if (!Array.isArray(genres) || genres.length === 0) return [];
-
-  const splitGenres: string[] = [];
-  for (const genre of genres) {
-    const parts = genre.split(',').map((g) => g.trim()).filter((g) => g.length > 0);
-    splitGenres.push(...parts);
-  }
-
-  return splitGenres;
-};
+export const getGenreInfoFromSong = normalizeGenres;
