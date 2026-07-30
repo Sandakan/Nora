@@ -13,6 +13,7 @@ const checkForNewSongs = async () => {
   const failedFolders: string[] = [];
   const failedSongPaths: string[] = [];
   const deletionFailures: string[] = [];
+  let scanFailed = false;
 
   if (topLevelFolders.length > 0) {
     for (const folderPath of topLevelFolders) {
@@ -22,6 +23,7 @@ const checkForNewSongs = async () => {
           failedSongPaths.push(...result.failedSongPaths);
         if (result.deletionFailures.length > 0)
           deletionFailures.push(...result.deletionFailures);
+        if (result.scanFailed) scanFailed = true;
       } catch (error) {
         logger.error(`Failed to check for unknown modifications of a path.`, {
           error,
@@ -35,9 +37,9 @@ const checkForNewSongs = async () => {
   }
 
   const hasFailures =
-    failedFolders.length > 0 || failedSongPaths.length > 0 || deletionFailures.length > 0;
+    failedFolders.length > 0 || failedSongPaths.length > 0 || deletionFailures.length > 0 || scanFailed;
 
-  return { failedFolders, failedSongPaths, deletionFailures, hasFailures };
+  return { failedFolders, failedSongPaths, deletionFailures, hasFailures, scanFailed };
 };
 
 export default checkForNewSongs;

@@ -62,6 +62,7 @@ const getFullPathsOfFolderDirs = async (
 type ScanResult = {
   failedSongPaths: string[];
   deletionFailures: string[];
+  scanFailed: boolean;
 };
 
 const removeDeletedSongsFromLibrary = async (
@@ -161,7 +162,7 @@ const checkFolderForUnknownModifications = async (
   folderPath: string
 ): Promise<ScanResult> => {
   const abortController = new AbortController();
-  const result: ScanResult = { failedSongPaths: [], deletionFailures: [] };
+  const result: ScanResult = { failedSongPaths: [], deletionFailures: [], scanFailed: false };
 
   try {
     const allMusicFolders = await getAllFolders();
@@ -177,6 +178,7 @@ const checkFolderForUnknownModifications = async (
       logger.warn(`Disk inventory failed. Skipping reconciliation for this folder.`, {
         folderPath
       });
+      result.scanFailed = true;
       return result;
     }
 
