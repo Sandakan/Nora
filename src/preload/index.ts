@@ -507,9 +507,9 @@ const playlistsData = {
     ipcRenderer.invoke('app/exportPlaylist', playlistId),
   importPlaylist: (targetPlaylistId?: number): Promise<void> =>
     ipcRenderer.invoke('app/importPlaylist', targetPlaylistId),
-  saveSmartPlaylistCriteria: (playlistId: number, criteria: SmartPlaylistCriteria): Promise<{ songIds: number[] }> =>
+  saveSmartPlaylistCriteria: (playlistId: number, criteria: SmartPlaylistCriteria): Promise<{ success: boolean; songIds: number[]; reason?: string }> =>
     ipcRenderer.invoke('app/saveSmartPlaylistCriteria', playlistId, criteria),
-  refreshSmartPlaylist: (playlistId: number): Promise<{ songIds: number[] }> =>
+  refreshSmartPlaylist: (playlistId: number): Promise<{ success: boolean; songIds: number[]; reason?: string; skipped?: string }> =>
     ipcRenderer.invoke('app/refreshSmartPlaylist', playlistId)
 };
 
