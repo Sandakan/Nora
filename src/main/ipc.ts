@@ -1,5 +1,6 @@
 import getBlacklistData from '@main/core/getBlacklistData';
 import { app, BrowserWindow, ipcMain, powerMonitor, shell } from 'electron';
+import { statSync } from 'fs';
 
 import addArtworkToAPlaylist from './core/addArtworkToAPlaylist';
 import addSongsFromFolderStructures from './core/addMusicFolder';
@@ -550,7 +551,18 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
         logger.warn('Invalid filePath received in app/importPlaylistFromPath', { filePath });
         return;
       }
-      return processPlaylistImport(filePath.trim(), targetPlaylistId);
+      const trimmedPath = filePath.trim();
+      try {
+        const stat = statSync(trimmedPath);
+        if (!stat.isFile()) {
+          logger.warn('importPlaylistFromPath: path is not a file', { trimmedPath });
+          return;
+        }
+      } catch {
+        logger.warn('importPlaylistFromPath: file not accessible', { trimmedPath });
+        return;
+      }
+      return processPlaylistImport(trimmedPath, targetPlaylistId);
     });
 
     ipcMain.handle(
