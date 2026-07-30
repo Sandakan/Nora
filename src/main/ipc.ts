@@ -511,8 +511,33 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
 
     ipcMain.handle(
       'app/replaceSmartPlaylistMembership',
-      (_, playlistId: number, songIds: number[]) =>
-        replaceSmartPlaylistMembership(playlistId, songIds)
+      async (_, playlistId: number, songIds: number[]) => {
+        if (
+          typeof playlistId !== 'number' || !Number.isFinite(playlistId) || playlistId <= 0 ||
+          !Array.isArray(songIds) || songIds.length === 0
+        ) {
+          logger.error('Invalid replaceSmartPlaylistMembership payload', { playlistId });
+          return { success: false as const, count: 0 };
+        }
+        const uniqueIds = [...new Set(songIds.filter((id) => typeof id === 'number' && Number.isFinite(id) && id > 0))];
+        if (uniqueIds.length === 0) {
+          return { success: false as const, count: 0 };
+        }
+        const playlist = await getPlaylistById(playlistId);
+        if (!playlist?.isSmart) {
+          logger.warn('replaceSmartPlaylistMembership: playlist is not smart', { playlistId });
+          return { success: false as const, count: 0 };
+        }
+        const prev = smartPlaylistLocks.get(playlistId) ?? Promise.resolve();
+        const locked = prev
+          .then(() => replaceSmartPlaylistMembership(playlistId, uniqueIds))
+          .catch((error) => {
+            logger.error('replaceSmartPlaylistMembership failed', { playlistId, error });
+            return { success: false as const, count: 0 };
+          });
+        smartPlaylistLocks.set(playlistId, locked);
+        return locked;
+      }
     );
 
     ipcMain.handle('app/removeSongFromPlaylist', (_, playlistId: number, songId: number) =>
@@ -557,29 +582,35 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
 
     ipcMain.handle('app/refreshSmartPlaylist', async (_, playlistId: number) => {
       const prev = smartPlaylistLocks.get(playlistId) ?? Promise.resolve();
-      const locked = prev.then(async () => {
-        const playlist = await getPlaylistById(playlistId);
-        if (!playlist?.criteria) return { songIds: [], success: false as const, reason: 'no-criteria' as const };
-        let criteria: SmartPlaylistCriteria;
-        try {
-          const parsed = JSON.parse(playlist.criteria);
-          if (
-            !parsed ||
-            typeof parsed !== 'object' ||
-            !Array.isArray(parsed.rules) ||
-            (parsed.matchType !== 'ALL' && parsed.matchType !== 'ANY')
-          ) {
-            logger.error('Smart playlist criteria shape invalid', { playlistId });
-            return { songIds: [], success: false as const, reason: 'invalid-criteria' as const };
+      const locked = prev
+        .then(async () => {
+          const playlist = await getPlaylistById(playlistId);
+          if (!playlist?.criteria)
+            return { songIds: [], success: false as const, reason: 'no-criteria' as const };
+          let criteria: SmartPlaylistCriteria;
+          try {
+            const parsed = JSON.parse(playlist.criteria);
+            if (
+              !parsed ||
+              typeof parsed !== 'object' ||
+              !Array.isArray(parsed.rules) ||
+              (parsed.matchType !== 'ALL' && parsed.matchType !== 'ANY')
+            ) {
+              logger.error('Smart playlist criteria shape invalid', { playlistId });
+              return { songIds: [], success: false as const, reason: 'invalid-criteria' as const };
+            }
+            criteria = parsed as SmartPlaylistCriteria;
+          } catch (error) {
+            logger.error('Invalid smart playlist criteria JSON', { playlistId, error });
+            return { songIds: [], success: false as const, reason: 'corrupt-json' as const };
           }
-          criteria = parsed as SmartPlaylistCriteria;
-        } catch (error) {
-          logger.error('Invalid smart playlist criteria JSON', { playlistId, error });
-          return { songIds: [], success: false as const, reason: 'corrupt-json' as const };
-        }
-        const songIds = await refreshSmartPlaylist(playlistId, criteria);
-        return { songIds, success: true as const };
-      });
+          const songIds = await refreshSmartPlaylist(playlistId, criteria);
+          return { songIds, success: true as const };
+        })
+        .catch((error) => {
+          logger.error('Refresh smart playlist failed', { playlistId, error });
+          return { songIds: [], success: false as const, reason: 'refresh-failed' as const };
+        });
       smartPlaylistLocks.set(playlistId, locked);
       return locked;
     });
