@@ -121,9 +121,13 @@ const useLastFmConsumer = () => {
         return;
       }
 
-      const replaceResult = await window.api.playlistsData.replaceSmartPlaylistMembership(playlistId, matchedIds);
+      const syncResult = await window.api.playlistsData.syncLastFmToSmartPlaylist(
+        playlistId,
+        matchedIds,
+        { username, type, period, limit }
+      );
 
-      if (!replaceResult.success) {
+      if (!syncResult.success) {
         addNewNotifications([
           {
             id: 'lastFmSyncFailed',
@@ -133,13 +137,6 @@ const useLastFmConsumer = () => {
         ]);
         return;
       }
-
-      await window.api.playlistsData.setLastFmSource(playlistId, {
-        username,
-        type,
-        period,
-        limit
-      });
 
       addNewNotifications([
         {

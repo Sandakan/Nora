@@ -482,6 +482,12 @@ const playlistsData = {
     playlistId: number,
     source: { username: string; type: string; period?: string; limit?: number }
   ): Promise<boolean> => ipcRenderer.invoke('app/setLastFmSource', playlistId, source),
+  syncLastFmToSmartPlaylist: (
+    playlistId: number,
+    songIds: number[],
+    source: { username: string; type: 'top' | 'recent' | 'loved'; period?: string; limit?: number }
+  ): Promise<{ success: boolean; count: number }> =>
+    ipcRenderer.invoke('app/syncLastFmToSmartPlaylist', playlistId, songIds, source),
   addArtworkToAPlaylist: (
     playlistId: number,
     artworkPath: string

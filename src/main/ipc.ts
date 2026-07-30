@@ -7,6 +7,7 @@ import addNewPlaylist from './core/addNewPlaylist';
 import addSongsToPlaylist from './core/addSongsToPlaylist';
 import { replaceSmartPlaylistMembership } from './core/replaceSmartPlaylistMembership';
 import { setLastFmSource } from './core/setLastFmSource';
+import { syncLastFmToSmartPlaylist } from './core/syncLastFmToSmartPlaylist';
 import blacklistFolders from './core/blacklistFolders';
 import blacklistSongs from './core/blacklistSongs';
 import changeAppTheme from './core/changeAppTheme';
@@ -547,6 +548,20 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
         setLastFmSource(playlistId, source)
     );
 
+    ipcMain.handle(
+      'app/syncLastFmToSmartPlaylist',
+      (_, playlistId: number, songIds: number[], source: { username: string; type: 'top' | 'recent' | 'loved'; period?: string; limit?: number }) => {
+        const prev = smartPlaylistLocks.get(playlistId) ?? Promise.resolve();
+        const locked = prev
+          .then(() => syncLastFmToSmartPlaylist(playlistId, songIds, source))
+          .catch((error) => {
+            logger.error('syncLastFmToSmartPlaylist failed', { playlistId, error });
+            return { success: false as const, count: 0 };
+          });
+        smartPlaylistLocks.set(playlistId, locked);
+        return locked;
+      }
+    );
     ipcMain.handle('app/removeSongFromPlaylist', (_, playlistId: number, songId: number) =>
       removeSongFromPlaylist(playlistId, songId)
     );
