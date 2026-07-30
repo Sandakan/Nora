@@ -476,6 +476,9 @@ class AudioPlayer {
     newActive.currentTime = 0;
     newActive.play().catch((err) => {
       console.error('[AudioPlayer.gaplessSwapToNext] play() rejected:', err);
+      dispatch({ type: 'CURRENT_SONG_PLAYBACK_STATE', data: false });
+      this.emit('pause');
+      this.emit('error', err);
     });
 
     this.emit('songLoaded', nextSongData);

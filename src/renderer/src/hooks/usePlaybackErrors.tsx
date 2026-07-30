@@ -35,10 +35,10 @@ export function usePlaybackErrors(
   const repetitivePlaybackErrorsCountRef = useRef(0);
 
   const audioPlayer = playerInput instanceof HTMLAudioElement ? null : (playerInput as AudioPlayer);
-  const activeEl = audioPlayer?.getActiveAudio() ?? (playerInput as HTMLAudioElement);
 
   const managePlaybackErrors = useCallback(
     (appError: unknown) => {
+      const activeEl = audioPlayer?.getActiveAudio() ?? (playerInput as HTMLAudioElement);
       const playerErrorData = activeEl.error;
       console.error(appError, playerErrorData);
 
@@ -94,7 +94,7 @@ export function usePlaybackErrors(
       }
       return undefined;
     },
-    [changePromptMenuData, activeEl, t, skipSongRef]
+    [changePromptMenuData, audioPlayer, playerInput, t, skipSongRef]
   );
 
   const resetErrorCount = useCallback(() => {
