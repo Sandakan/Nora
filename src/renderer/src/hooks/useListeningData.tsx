@@ -57,7 +57,7 @@ export function useListeningData(player: HTMLAudioElement) {
         }
 
         // Create new listening session
-        const listeningDataSession = new ListeningDataSession(songId, duration, isKnownSource);
+        const listeningDataSession = new ListeningDataSession(songId, duration, undefined, isKnownSource);
         listeningDataSession.recordListeningData();
 
         // Set up event listeners for the session

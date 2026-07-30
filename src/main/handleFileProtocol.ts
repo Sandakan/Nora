@@ -1,4 +1,5 @@
 import { createReadStream, existsSync, statSync } from 'fs';
+import { resolve } from 'path';
 import { pathToFileURL } from 'url';
 
 import { net } from 'electron';
@@ -12,6 +13,12 @@ export const handleFileProtocol = async (req: GlobalRequest) => {
     const decodedPath = decodeURI(pathname);
     const filePath =
       process.platform === 'darwin' ? decodedPath : decodedPath.replace(/^[/\\]{1,2}/gm, '');
+
+    const resolvedPath = resolve(filePath);
+    if (resolvedPath.includes('..')) {
+      logger.warn('Rejected path traversal in nora:// protocol', { url: req.url, resolvedPath });
+      return new Response('Forbidden', { status: 403 });
+    }
 
     if (!existsSync(filePath)) {
       logger.warn('File not found via nora:// protocol', { url: req.url, filePath });
@@ -44,18 +51,15 @@ export const handleFileProtocol = async (req: GlobalRequest) => {
 
       const chunksize = end - start + 1;
 
-      // Create a proper ReadableStream from the file stream
       const fileStream = createReadStream(filePath, { start, end });
 
       const webStream = new ReadableStream({
         start(controller) {
           fileStream.on('data', (chunk) => {
             try {
-              // Ensure chunk is a Buffer before converting to Uint8Array
               const bufferChunk = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
               controller.enqueue(new Uint8Array(bufferChunk));
             } catch (error) {
-              // Stream might be closed, ignore the error
               if (controller.desiredSize !== null) {
                 controller.error(error);
               }
@@ -66,7 +70,6 @@ export const handleFileProtocol = async (req: GlobalRequest) => {
             try {
               controller.close();
             } catch {
-              // Stream might already be closed, ignore the error
             }
           });
 
@@ -74,7 +77,6 @@ export const handleFileProtocol = async (req: GlobalRequest) => {
             try {
               controller.error(error);
             } catch {
-              // Stream might already be closed, ignore the error
             }
           });
         },

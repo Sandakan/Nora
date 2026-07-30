@@ -22,13 +22,30 @@ const addSongsToPlaylist = async (playlistId: number, songIds: number[]) => {
       if (!isSongIdInPlaylist) addedIds.push(songId);
       else existingIds.push(songId);
     }
-    await linkSongsWithPlaylist(addedIds, playlist.id);
+
+    let linkError: unknown = null;
+    if (addedIds.length > 0) {
+      try {
+        await linkSongsWithPlaylist(addedIds, playlist.id);
+      } catch (error) {
+        linkError = error;
+        logger.error('Failed to link some songs to playlist', { addedIds, playlistId, error });
+      }
+    }
 
     logger.debug(`Successfully added ${addedIds.length} songs to the playlist.`, {
       addedIds,
       existingIds,
       playlistId
     });
+
+    if (linkError) {
+      return sendMessageToRenderer({
+        messageCode: 'ADDED_SONGS_TO_PLAYLIST',
+        data: { count: addedIds.length, name: playlist.name, partialFailure: true }
+      });
+    }
+
     return sendMessageToRenderer({
       messageCode: 'ADDED_SONGS_TO_PLAYLIST',
       data: { count: addedIds.length, name: playlist.name }
