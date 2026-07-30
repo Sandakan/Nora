@@ -246,6 +246,12 @@ class AudioPlayer {
     setupFor(this.secondaryAudio);
   }
 
+  private getEffectiveNextSongId(): number | null {
+    if (this.queue.nextSongId !== null) return this.queue.nextSongId;
+    if (this.repeatMode === 'all' && this.queue.length > 0) return this.queue.songIds[0] ?? null;
+    return null;
+  }
+
   private async handleSongEnd() {
     if (this.isCrossfading) return;
 
@@ -257,24 +263,27 @@ class AudioPlayer {
       return;
     }
 
-    if (this.queue.hasNext) {
-      if (this.crossfadeDuration === 0 && this.preloadedSongId === this.queue.nextSongId) {
+    const effectiveNext = this.getEffectiveNextSongId();
+
+    if (effectiveNext !== null) {
+      if (this.crossfadeDuration === 0 && this.preloadedSongId === effectiveNext) {
         this.gaplessSwapToNext();
         return;
       }
       this.pendingAutoPlay = true;
-      this.queue.moveToNext();
-    } else if (this.repeatMode === 'all' && this.queue.length > 0) {
-      this.pendingAutoPlay = true;
-      this.queue.moveToPosition(0);
-      this.emit('repeatAll');
+      if (this.queue.hasNext) {
+        this.queue.moveToNext();
+      } else {
+        this.queue.moveToPosition(0);
+        this.emit('repeatAll');
+      }
     } else {
       this.emit('playbackComplete');
     }
   }
 
   private async preloadNextSong() {
-    const nextId = this.queue.nextSongId;
+    const nextId = this.getEffectiveNextSongId();
     if (nextId === null || nextId === undefined) {
       this.preloadedSongId = null;
       this.preloadedSongData = null;
@@ -430,7 +439,7 @@ class AudioPlayer {
 
     this.emit('songLoaded', nextSongData);
 
-    if (this.queue.hasNext) {
+    if (this.getEffectiveNextSongId() !== null) {
       this.preloadNextSong().catch(() => {});
     }
 
@@ -443,7 +452,7 @@ class AudioPlayer {
 
   private gaplessSwapToNext() {
     if (this.preloadedSongId === null || this.preloadedSongData === null) return;
-    if (this.queue.nextSongId !== this.preloadedSongId) return;
+    if (this.getEffectiveNextSongId() !== this.preloadedSongId) return;
 
     const nextSongId = this.preloadedSongId;
     const nextSongData = this.preloadedSongData;
@@ -483,7 +492,7 @@ class AudioPlayer {
 
     this.emit('songLoaded', nextSongData);
 
-    if (this.queue.hasNext) {
+    if (this.getEffectiveNextSongId() !== null) {
       this.preloadNextSong().catch(() => {});
     }
 
@@ -865,10 +874,12 @@ class AudioPlayer {
       return;
     }
 
+    const effectiveNext = this.getEffectiveNextSongId();
+
     if (
       this.crossfadeDuration === 0 &&
-      this.queue.hasNext &&
-      this.preloadedSongId === this.queue.nextSongId
+      effectiveNext !== null &&
+      this.preloadedSongId === effectiveNext
     ) {
       this.gaplessSwapToNext();
       return;
@@ -876,11 +887,15 @@ class AudioPlayer {
 
     if (
       this.crossfadeDuration > 0 &&
-      this.queue.hasNext &&
-      this.preloadedSongId === this.queue.nextSongId
+      effectiveNext !== null &&
+      this.preloadedSongId === effectiveNext
     ) {
       this.startCrossfade();
-      this.queue.moveToNext();
+      if (this.queue.hasNext) {
+        this.queue.moveToNext();
+      } else {
+        this.queue.moveToPosition(0);
+      }
       return;
     }
 
