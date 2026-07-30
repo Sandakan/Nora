@@ -139,7 +139,10 @@ const AudioPlaybackSettings = () => {
           <div className="mt-6 flex items-center">
             <div className="flex w-1/2 min-w-[120px] flex-col items-center justify-center">
               <span className="text-font-color-highlight dark:text-dark-font-color-highlight">
-                {t('settingsPage.crossfadeDuration')}: {crossfadeDuration === 0 ? t('settingsPage.crossfadeDisabled') : t('settingsPage.crossfadeSeconds', { count: crossfadeDuration / 1000 })}
+                {t('settingsPage.crossfadeDuration')}:{' '}
+                {crossfadeDuration === 0
+                  ? t('settingsPage.crossfadeDisabled')
+                  : t('settingsPage.crossfadeSeconds', { count: crossfadeDuration / 1000 })}
               </span>
               <div className="flex w-full items-center pl-2">
                 <span className="text-sm">{t('settingsPage.crossfadeDisabled')}</span>
@@ -161,12 +164,20 @@ const AudioPlaybackSettings = () => {
                     }, 200);
                   }}
                   style={crossfadeSliderCssProperties}
-                  title={crossfadeDuration === 0 ? t('settingsPage.crossfadeDisabled') : `${crossfadeDuration / 1000}s`}
+                  title={
+                    crossfadeDuration === 0
+                      ? t('settingsPage.crossfadeDisabled')
+                      : `${crossfadeDuration / 1000}s`
+                  }
                   aria-label={t('settingsPage.crossfadeDuration')}
                   aria-valuemin={0}
                   aria-valuemax={12000}
                   aria-valuenow={crossfadeDuration}
-                  aria-valuetext={crossfadeDuration === 0 ? t('settingsPage.crossfadeDisabled') : t('settingsPage.crossfadeSeconds', { count: crossfadeDuration / 1000 })}
+                  aria-valuetext={
+                    crossfadeDuration === 0
+                      ? t('settingsPage.crossfadeDisabled')
+                      : t('settingsPage.crossfadeSeconds', { count: crossfadeDuration / 1000 })
+                  }
                 />
                 <span className="text-sm">{t('settingsPage.crossfadeSeconds', { count: 12 })}</span>
               </div>

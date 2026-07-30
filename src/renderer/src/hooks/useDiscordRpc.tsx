@@ -7,18 +7,17 @@ import { store } from '../store/store';
 /**
  * Synchronizes Discord Rich Presence with the provided audio player or audio element.
  *
- * Accepts either an AudioPlayer instance (preferred) or a bare HTMLAudioElement.
- * When an AudioPlayer is provided, the hook subscribes through its event emitter
- * and reads playback state via AudioPlayer getters that delegate to getActiveAudio(),
- * ensuring correct timestamps after crossfade swaps.
+ * Accepts either an AudioPlayer instance (preferred) or a bare HTMLAudioElement. When an
+ * AudioPlayer is provided, the hook subscribes through its event emitter and reads playback state
+ * via AudioPlayer getters that delegate to getActiveAudio(), ensuring correct timestamps after
+ * crossfade swaps.
  *
  * @param playerInput - The AudioPlayer instance or HTMLAudioElement for Discord presence
  */
 export function useDiscordRpc(playerInput: AudioPlayer | HTMLAudioElement) {
   const { t } = useTranslation();
 
-  const audioPlayer =
-    playerInput instanceof HTMLAudioElement ? null : (playerInput as AudioPlayer);
+  const audioPlayer = playerInput instanceof HTMLAudioElement ? null : (playerInput as AudioPlayer);
 
   const setDiscordRpcActivity = useCallback(() => {
     const currentSong = store.state.currentSongData;

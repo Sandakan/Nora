@@ -122,9 +122,7 @@ export function useAppLifecycle(dependencies: AppLifecycleDependencies): void {
   // audio element is currently active, so listeners stay alive after crossfade.
   const audioPlayerAccess =
     playerInstance instanceof HTMLAudioElement ? null : (playerInstance as AudioPlayer);
-  const player = audioPlayerAccess
-    ? audioPlayerAccess.audio
-    : (playerInstance as HTMLAudioElement);
+  const player = audioPlayerAccess ? audioPlayerAccess.audio : (playerInstance as HTMLAudioElement);
 
   useEffect(() => {
     // LOCAL STORAGE

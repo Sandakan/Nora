@@ -1,23 +1,22 @@
 import { useCallback, useEffect, useRef } from 'react';
 
-import type AudioPlayer from '../other/player';
 import ListeningDataSession from '../other/listeningDataSession';
+import type AudioPlayer from '../other/player';
 
 /**
  * Custom hook to manage listening data recording sessions.
  *
- * Accepts either an AudioPlayer instance (preferred) or a bare HTMLAudioElement.
- * When an AudioPlayer is provided, the hook subscribes through its event emitter
- * so event callbacks always track the active audio element, even after crossfade
- * element swaps.
+ * Accepts either an AudioPlayer instance (preferred) or a bare HTMLAudioElement. When an
+ * AudioPlayer is provided, the hook subscribes through its event emitter so event callbacks always
+ * track the active audio element, even after crossfade element swaps.
  *
- * This hook handles the recording of user listening data for analytics and statistics
- * purposes. It tracks: - Song playback duration - Pause/play events - Seek positions -
- * Whether the song is from a known source - Song repetitions
+ * This hook handles the recording of user listening data for analytics and statistics purposes. It
+ * tracks: - Song playback duration - Pause/play events - Seek positions - Whether the song is from
+ * a known source - Song repetitions
  *
- * Each listening session is tracked independently, and sessions are automatically
- * managed when songs change or repeat. The hook ensures only one session is active
- * at a time and properly cleans up when songs change.
+ * Each listening session is tracked independently, and sessions are automatically managed when
+ * songs change or repeat. The hook ensures only one session is active at a time and properly cleans
+ * up when songs change.
  *
  * @example
  *   ```tsx
@@ -28,7 +27,7 @@ import ListeningDataSession from '../other/listeningDataSession';
  *     // Start recording when playing a song
  *     recordListeningData(songId, duration, false, true);
  *   }
- *   ```
+ *   ```;
  *
  * @param playerInput - The AudioPlayer instance or HTMLAudioElement
  * @returns Object with the recordListeningData function
@@ -39,19 +38,18 @@ export function useListeningData(playerInput: AudioPlayer | HTMLAudioElement) {
   // Track cleanup function for emitter subscriptions (AudioPlayer path)
   const emitterCleanupRef = useRef<() => void>(undefined);
 
-  const audioPlayer =
-    playerInput instanceof HTMLAudioElement ? null : (playerInput as AudioPlayer);
+  const audioPlayer = playerInput instanceof HTMLAudioElement ? null : (playerInput as AudioPlayer);
   const player = audioPlayer ? audioPlayer.audio : (playerInput as HTMLAudioElement);
 
   /**
    * Records listening data for a song.
    *
-   * Creates a new listening session to track how the user listens to a song. If a session
-   * already exists for a different song, it stops the previous session before starting a new
-   * one. For repeated songs, creates a new session instance.
+   * Creates a new listening session to track how the user listens to a song. If a session already
+   * exists for a different song, it stops the previous session before starting a new one. For
+   * repeated songs, creates a new session instance.
    *
-   * When an AudioPlayer is available, subscribes to emitter events so all callbacks
-   * automatically route to the active audio element after crossfade swaps.
+   * When an AudioPlayer is available, subscribes to emitter events so all callbacks automatically
+   * route to the active audio element after crossfade swaps.
    *
    * @param songId - The unique identifier of the song
    * @param duration - The total duration of the song in seconds

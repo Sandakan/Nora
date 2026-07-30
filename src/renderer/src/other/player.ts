@@ -180,7 +180,13 @@ class AudioPlayer {
   };
 
   private checkCrossfadeTrigger(el: HTMLAudioElement) {
-    if (this.isCrossfading || !el.duration || !isFinite(el.duration) || this.preloadedSongId === null) return;
+    if (
+      this.isCrossfading ||
+      !el.duration ||
+      !isFinite(el.duration) ||
+      this.preloadedSongId === null
+    )
+      return;
     const remaining = el.duration - el.currentTime;
     const fadeSec = Math.min(this.crossfadeDuration / 1000, el.duration * 0.5);
     if (remaining <= fadeSec && remaining > 0) {
@@ -252,10 +258,7 @@ class AudioPlayer {
     }
 
     if (this.queue.hasNext) {
-      if (
-        this.crossfadeDuration === 0 &&
-        this.preloadedSongId === this.queue.nextSongId
-      ) {
+      if (this.crossfadeDuration === 0 && this.preloadedSongId === this.queue.nextSongId) {
         this.gaplessSwapToNext();
         return;
       }
@@ -354,6 +357,11 @@ class AudioPlayer {
     // belong to the old active element until the swap completes).
     dispatch({ type: 'CURRENT_SONG_PLAYBACK_STATE', data: true });
 
+    // Emit durationChange for the incoming song — loadedmetadata for the inactive
+    // element was suppressed during preload (correct); manually re-emit now that it
+    // becomes the audio source.
+    this.emit('durationChange', inactiveAudio.duration);
+
     const now = this.currentContext.currentTime;
 
     activeGain.gain.cancelScheduledValues(now);
@@ -403,6 +411,10 @@ class AudioPlayer {
 
     this.fadeGainPrimary.gain.value = this.activeElement === 'primary' ? 1 : 0;
     this.fadeGainSecondary.gain.value = this.activeElement === 'primary' ? 0 : 1;
+
+    // Re-emit durationChange after element swap — covers edge cases where duration
+    // metadata differs between preload and completion time (e.g. VBR streams).
+    this.emit('durationChange', this.getActiveAudio().duration);
 
     oldActive.pause();
     dispatch({ type: 'CURRENT_SONG_DATA_CHANGE', data: nextSongData });
@@ -510,7 +522,10 @@ class AudioPlayer {
 
     const oldElement = this.activeElement === 'primary' ? this.audio : this.secondaryAudio;
 
-    if (oldElement.ended || (oldElement.duration > 0 && oldElement.currentTime >= oldElement.duration)) {
+    if (
+      oldElement.ended ||
+      (oldElement.duration > 0 && oldElement.currentTime >= oldElement.duration)
+    ) {
       if (this.crossfadeTimer) {
         clearTimeout(this.crossfadeTimer);
         this.crossfadeTimer = null;
@@ -524,7 +539,6 @@ class AudioPlayer {
     options?: { autoPlay?: boolean; updateStore?: boolean }
   ): Promise<AudioPlayerData> {
     let songData: AudioPlayerData;
-
 
     try {
       if (typeof songIdOrData === 'number') {
@@ -848,12 +862,20 @@ class AudioPlayer {
       return;
     }
 
-    if (this.crossfadeDuration === 0 && this.queue.hasNext && this.preloadedSongId === this.queue.nextSongId) {
+    if (
+      this.crossfadeDuration === 0 &&
+      this.queue.hasNext &&
+      this.preloadedSongId === this.queue.nextSongId
+    ) {
       this.gaplessSwapToNext();
       return;
     }
 
-    if (this.crossfadeDuration > 0 && this.queue.hasNext && this.preloadedSongId === this.queue.nextSongId) {
+    if (
+      this.crossfadeDuration > 0 &&
+      this.queue.hasNext &&
+      this.preloadedSongId === this.queue.nextSongId
+    ) {
       this.startCrossfade();
       this.queue.moveToNext();
       return;

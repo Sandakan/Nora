@@ -28,11 +28,11 @@ import { useUserPreferences } from './useUserPreferences';
  *   <button onClick={() => toggleRepeat()}>Repeat</button>
  *   <input onChange={(e) => updateVolume(e.target.value)} />
  *   updateEqualizerOptions({ preset: 'rock', bands: [...] });
- *   ```
+ *   ```;
  *
  * @param player - The AudioPlayer instance. `player.currentTime`/`player.duration` delegate to
- *   `getActiveAudio()` internally, so seeks always target whichever element (primary or
- *   secondary) is actually audible, including mid-crossfade and immediately after a swap.
+ *   `getActiveAudio()` internally, so seeks always target whichever element (primary or secondary)
+ *   is actually audible, including mid-crossfade and immediately after a swap.
  * @returns Object containing playback setting functions
  */
 export function usePlaybackSettings(player: AudioPlayer) {

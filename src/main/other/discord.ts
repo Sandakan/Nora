@@ -38,7 +38,9 @@ let lastPayload: { pid: number; activity: DiscordActivity };
 /**
  * Initializes the Discord RPC client and begins the login/reconnect lifecycle.
  *
- * Creates an IPC Discord RPC client (if one does not already exist), registers handlers to set the last-known activity when the client becomes ready and to retry login on disconnection, and then starts the initial login attempt.
+ * Creates an IPC Discord RPC client (if one does not already exist), registers handlers to set the
+ * last-known activity when the client becomes ready and to retry login on disconnection, and then
+ * starts the initial login attempt.
  */
 function Initialize() {
   if (discord) return;
@@ -55,7 +57,8 @@ function Initialize() {
 }
 
 /**
- * Attempts to log the IPC Discord RPC client using MAIN_VITE_DISCORD_CLIENT_ID and schedules a retry if login fails.
+ * Attempts to log the IPC Discord RPC client using MAIN_VITE_DISCORD_CLIENT_ID and schedules a
+ * retry if login fails.
  *
  * @throws Error - If `MAIN_VITE_DISCORD_CLIENT_ID` is not defined in `import.meta.env`.
  */
@@ -70,9 +73,13 @@ function loginRPC() {
 /**
  * Updates the cached Discord activity payload and sends it to the connected RPC client.
  *
- * If `data` is an object, its properties are merged into the activity payload; `instance` is set to `true` and `type` is set to `ActivityType.Listening`. If `data` is `null`, the activity is reset to the module's default activity. The constructed payload is stored as `lastPayload` and dispatched via the Discord RPC `SET_ACTIVITY` request; failures are logged.
+ * If `data` is an object, its properties are merged into the activity payload; `instance` is set to
+ * `true` and `type` is set to `ActivityType.Listening`. If `data` is `null`, the activity is reset
+ * to the module's default activity. The constructed payload is stored as `lastPayload` and
+ * dispatched via the Discord RPC `SET_ACTIVITY` request; failures are logged.
  *
- * @param data - Activity fields to apply to the current presence, or `null` to restore the default activity
+ * @param data - Activity fields to apply to the current presence, or `null` to restore the default
+ *   activity
  */
 function setDiscordRPC(data: DiscordActivity | null) {
   if (!discord?.user) return;

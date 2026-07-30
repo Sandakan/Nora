@@ -447,7 +447,6 @@ class PlayerQueue {
     this.position = 0;
     this.queueBeforeShuffle = positions;
 
-
     this.emit('shuffled', {
       originalQueue: initialQueue,
       shuffledQueue: [...this.songIds],

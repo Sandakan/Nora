@@ -19,10 +19,10 @@ export interface MediaSessionDependencies {
 /**
  * Custom hook to manage the Media Session API integration.
  *
- * Accepts either an AudioPlayer instance (preferred) or a bare HTMLAudioElement.
- * When an AudioPlayer is provided, the hook subscribes through its event emitter
- * so all callbacks automatically track whichever audio element is active after
- * crossfade swaps. Falls back to DOM listeners for bare HTMLAudioElement usage.
+ * Accepts either an AudioPlayer instance (preferred) or a bare HTMLAudioElement. When an
+ * AudioPlayer is provided, the hook subscribes through its event emitter so all callbacks
+ * automatically track whichever audio element is active after crossfade swaps. Falls back to DOM
+ * listeners for bare HTMLAudioElement usage.
  *
  * @example
  *   ```tsx
@@ -30,7 +30,7 @@ export interface MediaSessionDependencies {
  *     const player = useAudioPlayer();
  *     useMediaSession(player, { ... });
  *   }
- *   ```
+ *   ```;
  *
  * @param playerInput - The AudioPlayer instance or HTMLAudioElement
  * @param dependencies - Object containing required callback functions
@@ -47,8 +47,7 @@ export function useMediaSession(
     updateSongPosition
   } = dependencies;
 
-  const audioPlayer =
-    playerInput instanceof HTMLAudioElement ? null : (playerInput as AudioPlayer);
+  const audioPlayer = playerInput instanceof HTMLAudioElement ? null : (playerInput as AudioPlayer);
   const player = audioPlayer ? audioPlayer.audio : (playerInput as HTMLAudioElement);
 
   // Track artwork URL for cleanup
