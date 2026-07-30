@@ -2,8 +2,7 @@ import i18n from '@renderer/i18n';
 import { normalizedKeys } from '@renderer/other/appShortcuts';
 import { store } from '@renderer/store/store';
 import { useNavigate } from '@tanstack/react-router';
-import { useCallback, useEffect, type ReactNode } from 'react';
-import { lazy } from 'react';
+import { lazy, useCallback, useEffect, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import storage from '../utils/localStorage';
