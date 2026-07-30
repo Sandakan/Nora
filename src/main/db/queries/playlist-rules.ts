@@ -128,7 +128,8 @@ function buildCondition(rule: SmartPlaylistRule): SQL | undefined {
 }
 
 export const evaluateSmartPlaylist = async (
-  criteria: SmartPlaylistCriteria
+  criteria: SmartPlaylistCriteria,
+  trx: DB | DBTransaction = db
 ): Promise<number[]> => {
   const conditions: SQL[] = [];
 
@@ -153,7 +154,7 @@ export const evaluateSmartPlaylist = async (
     query = sql`${query} order by songs.created_at desc`;
   }
 
-  const result = await db.execute<{ id: number }>(query);
+  const result = await trx.execute<{ id: number }>(query);
   return result.rows?.map((r) => r.id) ?? [];
 };
 
@@ -162,9 +163,9 @@ export const refreshSmartPlaylist = async (
   criteria: SmartPlaylistCriteria,
   trx?: DBTransaction
 ): Promise<number[]> => {
-  const songIds = await evaluateSmartPlaylist(criteria);
-
   const run = async (t: DBTransaction) => {
+    const songIds = await evaluateSmartPlaylist(criteria, t);
+
     await t.delete(playlistsSongs).where(eq(playlistsSongs.playlistId, playlistId));
 
     if (songIds.length > 0) {
@@ -177,13 +178,12 @@ export const refreshSmartPlaylist = async (
         }))
       );
     }
+
+    return songIds;
   };
 
   if (trx) {
-    await run(trx);
-  } else {
-    await db.transaction(run);
+    return run(trx);
   }
-
-  return songIds;
+  return db.transaction(run);
 };
