@@ -162,7 +162,17 @@ function PlaylistInfoPage() {
   const refreshSmartPlaylist = useCallback(() => {
     window.api.playlistsData
       .refreshSmartPlaylist(playlistData.playlistId)
-      .then(() => {
+      .then((result) => {
+        if (!result.success) {
+          addNewNotifications([
+            {
+              id: 'smartPlaylistRefreshFailed',
+              duration: 5000,
+              content: t('playlist.refreshFailed')
+            }
+          ]);
+          return;
+        }
         queryClient.invalidateQueries({ queryKey: playlistQuery._def });
         addNewNotifications([
           {

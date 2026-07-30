@@ -207,7 +207,7 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
         type="number"
         className="mt-1 w-full rounded-lg bg-background-color-2 px-3 py-1.5 text-sm text-font-color-black outline-1 outline-transparent transition-colors focus:outline-font-color-highlight dark:bg-dark-background-color-2 dark:text-font-color-white dark:focus:outline-dark-font-color-highlight"
         value={String(rule.value)}
-        onChange={(e) => onChange(Number(e.target.value))}
+        onChange={(e) => onChange(e.target.value === '' ? '' : Number(e.target.value))}
         placeholder={t('playlist.criteriaValuePlaceholder')}
       />
     );
@@ -305,6 +305,7 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
               className="material-icons-round mt-1 flex h-9 w-9 items-center justify-center rounded-lg text-font-color-dimmed outline-1 outline-transparent transition-colors hover:bg-background-color-3 hover:text-font-color-black focus:outline-font-color-highlight dark:text-dark-font-color-dimmed dark:hover:bg-dark-background-color-3 dark:hover:text-font-color-white dark:focus:outline-dark-font-color-highlight"
               onClick={() => removeRule(idx)}
               title={t('playlist.removeRule')}
+              aria-label={t('playlist.removeRule')}
             >
               close
             </button>

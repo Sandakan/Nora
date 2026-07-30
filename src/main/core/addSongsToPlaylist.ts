@@ -13,6 +13,11 @@ const addSongsToPlaylist = async (playlistId: number, songIds: number[]) => {
 
   const playlist = await getPlaylistById(playlistId);
 
+  if (playlist?.isSmart) {
+    logger.warn(`Cannot add songs to a smart playlist.`, { playlistId });
+    return;
+  }
+
   if (playlist) {
     for (let i = 0; i < songIds.length; i += 1) {
       const songId = songIds[i];

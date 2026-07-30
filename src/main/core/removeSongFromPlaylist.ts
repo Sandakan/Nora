@@ -8,6 +8,11 @@ const removeSongFromPlaylist = async (playlistId: number, songId: number) => {
 
   const playlist = await getPlaylistById(playlistId);
 
+  if (playlist?.isSmart) {
+    logger.warn(`Cannot remove songs from a smart playlist.`, { playlistId, songId });
+    return;
+  }
+
   if (playlist) {
     await unlinkSongsFromPlaylist([songId], playlist.id);
 

@@ -25,7 +25,10 @@ function buildCondition(rule: SmartPlaylistRule): SQL | undefined {
     switch (operator) {
       case 'eq': return sql`${col} = ${s}`;
       case 'neq': return sql`${col} != ${s}`;
-      case 'contains': return sql`${col} ILIKE ${`%${s.replace(/%/g, '\\%').replace(/_/g, '\\_')}%`}`;
+      case 'contains': {
+        const escaped = s.replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_');
+        return sql`${col} ILIKE ${`%${escaped}%`} ESCAPE '\\'`;
+      }
       default: return undefined;
     }
   };

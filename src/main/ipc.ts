@@ -519,6 +519,15 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     );
 
     ipcMain.handle('app/saveSmartPlaylistCriteria', async (_, playlistId: number, criteria: SmartPlaylistCriteria) => {
+      if (
+        typeof playlistId !== 'number' || !Number.isFinite(playlistId) || playlistId <= 0 ||
+        !criteria || typeof criteria !== 'object' ||
+        !Array.isArray(criteria.rules) || criteria.rules.length === 0 ||
+        (criteria.matchType !== 'ALL' && criteria.matchType !== 'ANY')
+      ) {
+        logger.error('Invalid saveSmartPlaylistCriteria payload', { playlistId });
+        return { songIds: [] };
+      }
       let songIds: number[] = [];
       await db.transaction(async (trx) => {
         await updatePlaylistCriteria(playlistId, criteria, trx);
@@ -529,7 +538,7 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
 
     ipcMain.handle('app/refreshSmartPlaylist', async (_, playlistId: number) => {
       const playlist = await getPlaylistById(playlistId);
-      if (!playlist?.criteria) return { songIds: [] };
+      if (!playlist?.criteria) return { songIds: [], success: false as const, reason: 'no-criteria' as const };
       let criteria: SmartPlaylistCriteria;
       try {
         const parsed = JSON.parse(playlist.criteria);
@@ -540,15 +549,15 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
           (parsed.matchType !== 'ALL' && parsed.matchType !== 'ANY')
         ) {
           logger.error('Smart playlist criteria shape invalid', { playlistId });
-          return { songIds: [] };
+          return { songIds: [], success: false as const, reason: 'invalid-criteria' as const };
         }
         criteria = parsed as SmartPlaylistCriteria;
       } catch (error) {
         logger.error('Invalid smart playlist criteria JSON', { playlistId, error });
-        return { songIds: [] };
+        return { songIds: [], success: false as const, reason: 'corrupt-json' as const };
       }
       const songIds = await refreshSmartPlaylist(playlistId, criteria);
-      return { songIds };
+      return { songIds, success: true as const };
     });
 
     ipcMain.handle('app/clearSongHistory', () => clearSongHistory());
