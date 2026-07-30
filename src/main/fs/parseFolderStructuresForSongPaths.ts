@@ -8,6 +8,7 @@ import { supportedMusicExtensions } from '../filesystem';
 import logger from '../logger';
 import { sendMessageToRenderer } from '../main';
 import addWatchersToFolders from './addWatchersToFolders';
+import addWatchersToParentFolders from './addWatchersToParentFolders';
 import { closeAbortController } from './controlAbortControllers';
 
 export const getAllFoldersFromFolderStructures = (folderStructures: FolderStructure[]) => {
@@ -126,6 +127,7 @@ export const saveFolderStructures = async (
   });
 
   if (resetWatchers) addWatchersToFolders();
+  if (resetWatchers) addWatchersToParentFolders();
   return data;
 };
 
