@@ -522,7 +522,7 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       let songIds: number[] = [];
       await db.transaction(async (trx) => {
         await updatePlaylistCriteria(playlistId, criteria, trx);
-        songIds = await refreshSmartPlaylist(playlistId, criteria);
+        songIds = await refreshSmartPlaylist(playlistId, criteria, trx);
       });
       return { songIds };
     });

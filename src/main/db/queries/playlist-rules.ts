@@ -25,7 +25,7 @@ function buildCondition(rule: SmartPlaylistRule): SQL | undefined {
     switch (operator) {
       case 'eq': return sql`${col} = ${s}`;
       case 'neq': return sql`${col} != ${s}`;
-      case 'contains': return sql`${col} ILIKE ${`%${s}%`}`;
+      case 'contains': return sql`${col} ILIKE ${`%${s.replace(/%/g, '\\%').replace(/_/g, '\\_')}%`}`;
       default: return undefined;
     }
   };
@@ -141,7 +141,7 @@ export const evaluateSmartPlaylist = async (
     const whereClause = conditions.reduce((a, b) => sql`${a}${joiner}${b}`);
     query = sql`select ${songs.id} from songs where ${whereClause}`;
   } else {
-    query = sql`select ${songs.id} from songs`;
+    query = sql`select ${songs.id} from songs where 1 = 0`;
   }
 
   if (criteria.limit && criteria.limit > 0) {
@@ -156,15 +156,16 @@ export const evaluateSmartPlaylist = async (
 
 export const refreshSmartPlaylist = async (
   playlistId: number,
-  criteria: SmartPlaylistCriteria
+  criteria: SmartPlaylistCriteria,
+  trx?: DBTransaction
 ): Promise<number[]> => {
   const songIds = await evaluateSmartPlaylist(criteria);
 
-  await db.transaction(async (trx) => {
-    await trx.delete(playlistsSongs).where(eq(playlistsSongs.playlistId, playlistId));
+  const run = async (t: DBTransaction) => {
+    await t.delete(playlistsSongs).where(eq(playlistsSongs.playlistId, playlistId));
 
     if (songIds.length > 0) {
-      await trx.insert(playlistsSongs).values(
+      await t.insert(playlistsSongs).values(
         songIds.map((songId, idx) => ({
           playlistId,
           songId,
@@ -173,7 +174,13 @@ export const refreshSmartPlaylist = async (
         }))
       );
     }
-  });
+  };
+
+  if (trx) {
+    await run(trx);
+  } else {
+    await db.transaction(run);
+  }
 
   return songIds;
 };
