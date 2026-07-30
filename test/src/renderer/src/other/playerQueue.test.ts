@@ -385,6 +385,18 @@ describe('PlayerQueue', () => {
         expect(queue.songIds).toEqual([]);
         expect(queue.position).toBe(0);
       });
+
+      test('should clear shuffle history on successful removal', () => {
+        const queue = new PlayerQueue(['song1', 'song2', 'song3'], 0, [2, 1, 0]);
+        queue.removeSongId('song2');
+        expect(queue.queueBeforeShuffle).toBeUndefined();
+      });
+
+      test('should not clear shuffle history on no-op', () => {
+        const queue = new PlayerQueue(['song1', 'song2'], 0, [1, 0]);
+        queue.removeSongId('song99');
+        expect(queue.queueBeforeShuffle).toEqual([1, 0]);
+      });
     });
 
     describe('removeSongAtPosition', () => {
@@ -411,6 +423,18 @@ describe('PlayerQueue', () => {
         const queue = new PlayerQueue(['song1', 'song2', 'song3'], 2);
         queue.removeSongAtPosition(2);
         expect(queue.position).toBe(1);
+      });
+
+      test('should clear shuffle history on successful removal', () => {
+        const queue = new PlayerQueue(['song1', 'song2', 'song3'], 0, [2, 1, 0]);
+        queue.removeSongAtPosition(1);
+        expect(queue.queueBeforeShuffle).toBeUndefined();
+      });
+
+      test('should not clear shuffle history on no-op', () => {
+        const queue = new PlayerQueue(['song1', 'song2'], 0, [1, 0]);
+        queue.removeSongAtPosition(5);
+        expect(queue.queueBeforeShuffle).toEqual([1, 0]);
       });
     });
 
