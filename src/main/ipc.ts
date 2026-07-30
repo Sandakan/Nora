@@ -120,6 +120,8 @@ import resetLyrics from './utils/resetLyrics';
 import romanizeLyrics from './utils/romanizeLyrics';
 import { compare } from './utils/safeStorage';
 
+const smartPlaylistLocks = new Map<number, Promise<unknown>>();
+
 /**
  * Registers Electron IPC listeners and main-window event handlers for the provided window.
  *
@@ -533,38 +535,53 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
         (criteria.matchType !== 'ALL' && criteria.matchType !== 'ANY')
       ) {
         logger.error('Invalid saveSmartPlaylistCriteria payload', { playlistId });
-        return { songIds: [] };
+        return { songIds: [], success: false as const, reason: 'invalid-payload' as const };
       }
-      let songIds: number[] = [];
-      await db.transaction(async (trx) => {
-        await updatePlaylistCriteria(playlistId, criteria, trx);
-        songIds = await refreshSmartPlaylist(playlistId, criteria, trx);
+      const prev = smartPlaylistLocks.get(playlistId) ?? Promise.resolve();
+      const locked = prev.then(async () => {
+        try {
+          let songIds: number[] = [];
+          await db.transaction(async (trx) => {
+            await updatePlaylistCriteria(playlistId, criteria, trx);
+            songIds = await refreshSmartPlaylist(playlistId, criteria, trx);
+          });
+          return { songIds, success: true as const };
+        } catch (error) {
+          logger.error('Failed to save smart playlist criteria', { playlistId, error });
+          return { songIds: [], success: false as const, reason: 'transaction-failed' as const };
+        }
       });
-      return { songIds };
+      smartPlaylistLocks.set(playlistId, locked);
+      return locked;
     });
 
     ipcMain.handle('app/refreshSmartPlaylist', async (_, playlistId: number) => {
-      const playlist = await getPlaylistById(playlistId);
-      if (!playlist?.criteria) return { songIds: [], success: false as const, reason: 'no-criteria' as const };
-      let criteria: SmartPlaylistCriteria;
-      try {
-        const parsed = JSON.parse(playlist.criteria);
-        if (
-          !parsed ||
-          typeof parsed !== 'object' ||
-          !Array.isArray(parsed.rules) ||
-          (parsed.matchType !== 'ALL' && parsed.matchType !== 'ANY')
-        ) {
-          logger.error('Smart playlist criteria shape invalid', { playlistId });
-          return { songIds: [], success: false as const, reason: 'invalid-criteria' as const };
+      const prev = smartPlaylistLocks.get(playlistId) ?? Promise.resolve();
+      const locked = prev.then(async () => {
+        const playlist = await getPlaylistById(playlistId);
+        if (!playlist?.criteria) return { songIds: [], success: false as const, reason: 'no-criteria' as const };
+        let criteria: SmartPlaylistCriteria;
+        try {
+          const parsed = JSON.parse(playlist.criteria);
+          if (
+            !parsed ||
+            typeof parsed !== 'object' ||
+            !Array.isArray(parsed.rules) ||
+            (parsed.matchType !== 'ALL' && parsed.matchType !== 'ANY')
+          ) {
+            logger.error('Smart playlist criteria shape invalid', { playlistId });
+            return { songIds: [], success: false as const, reason: 'invalid-criteria' as const };
+          }
+          criteria = parsed as SmartPlaylistCriteria;
+        } catch (error) {
+          logger.error('Invalid smart playlist criteria JSON', { playlistId, error });
+          return { songIds: [], success: false as const, reason: 'corrupt-json' as const };
         }
-        criteria = parsed as SmartPlaylistCriteria;
-      } catch (error) {
-        logger.error('Invalid smart playlist criteria JSON', { playlistId, error });
-        return { songIds: [], success: false as const, reason: 'corrupt-json' as const };
-      }
-      const songIds = await refreshSmartPlaylist(playlistId, criteria);
-      return { songIds, success: true as const };
+        const songIds = await refreshSmartPlaylist(playlistId, criteria);
+        return { songIds, success: true as const };
+      });
+      smartPlaylistLocks.set(playlistId, locked);
+      return locked;
     });
 
     ipcMain.handle('app/clearSongHistory', () => clearSongHistory());

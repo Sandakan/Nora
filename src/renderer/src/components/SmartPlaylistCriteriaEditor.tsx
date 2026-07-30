@@ -140,13 +140,10 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
     const result = await window.api.playlistsData
       .saveSmartPlaylistCriteria(playlist.playlistId, cleaned)
       .catch((error: unknown) => {
-        // The error is surfaced to the user via a single notification below;
-        // suppress the re-throw so the rest of the editor stays in a known
-        // state.
         void error;
-        return false as const;
+        return { songIds: [], success: false as const, reason: 'ipc-error' as const };
       });
-    if (result) {
+    if (result.success) {
       addNewNotifications([
         {
           id: 'smartPlaylistCriteriaSaved',
