@@ -14,7 +14,7 @@ interface LovedTracksResponse {
 const getUserLovedTracks = async (
   username: string,
   limit: number = 50
-): Promise<LovedTracksResponse | undefined> => {
+): Promise<LovedTracksResponse> => {
   try {
     const LAST_FM_API_KEY = import.meta.env.MAIN_VITE_LAST_FM_API_KEY;
     if (!LAST_FM_API_KEY) throw new Error('LastFM api key not found.');

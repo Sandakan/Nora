@@ -17,7 +17,7 @@ import storage from '@renderer/utils/localStorage';
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
-import { Suspense, lazy, useCallback, useContext, useEffect } from 'react';
+import { Suspense, lazy, useCallback, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 const SensitiveActionConfirmPrompt = lazy(
@@ -200,8 +200,10 @@ function PlaylistInfoPage() {
   }, [changePromptMenuData, playlistData]);
 
   const { syncToSmartPlaylist } = useLastFmConsumer();
+  const [isSyncing, setIsSyncing] = useState(false);
 
   const syncFromLastFm = useCallback(async () => {
+    if (isSyncing) return;
     const userSettings = store.getState().localStorage.userSettings;
     const username = userSettings?.lastFmSessionName;
     if (!username) {
@@ -215,11 +217,16 @@ function PlaylistInfoPage() {
       return;
     }
 
-    const result = await syncToSmartPlaylist(playlistData.playlistId, username, 'top', 'overall', 50);
-    if (result) {
-      queryClient.invalidateQueries({ queryKey: playlistQuery._def });
+    setIsSyncing(true);
+    try {
+      const result = await syncToSmartPlaylist(playlistData.playlistId, username, 'top', 'overall', 50);
+      if (result) {
+        queryClient.invalidateQueries({ queryKey: playlistQuery._def });
+      }
+    } finally {
+      setIsSyncing(false);
     }
-  }, [addNewNotifications, playlistData.playlistId, queryClient, syncToSmartPlaylist, t]);
+  }, [addNewNotifications, isSyncing, playlistData.playlistId, queryClient, syncToSmartPlaylist, t]);
 
   return (
     <MainContainer
@@ -265,19 +272,22 @@ function PlaylistInfoPage() {
             label: t('playlist.refreshPlaylist'),
             iconName: 'refresh',
             clickHandler: refreshSmartPlaylist,
-            isVisible: playlistData.isSmart
+            isVisible: playlistData.isSmart,
+            isDisabled: isSyncing
           },
           {
             label: t('playlist.editCriteria'),
             iconName: 'tune',
             clickHandler: openCriteriaEditor,
-            isVisible: playlistData.isSmart
+            isVisible: playlistData.isSmart,
+            isDisabled: isSyncing
           },
           {
             label: t('playlist.syncFromLastFm') ?? 'Sync from Last.fm',
             iconName: 'auto_awesome',
             clickHandler: syncFromLastFm,
-            isVisible: playlistData.isSmart
+            isVisible: playlistData.isSmart,
+            isDisabled: isSyncing
           }
         ]}
         dropdowns={[

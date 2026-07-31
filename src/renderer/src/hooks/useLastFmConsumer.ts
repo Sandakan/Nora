@@ -1,13 +1,16 @@
-import { useCallback, useContext, useRef } from 'react';
+import { useCallback, useContext, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { AppUpdateContext } from '../contexts/AppUpdateContext';
+import log from '../utils/log';
 
 type LastFmTrack = {
   name: string;
   artist: string;
   url: string;
   playCount?: number;
-  playedAt?: number;
+  playedAt?: number | null;
+  isNowPlaying?: boolean;
 };
 
 type MatchResult = {
@@ -17,7 +20,12 @@ type MatchResult = {
 
 const useLastFmConsumer = () => {
   const { addNewNotifications } = useContext(AppUpdateContext);
+  const { t } = useTranslation();
   const abortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    return () => abortRef.current?.abort();
+  }, []);
 
   const fetchAndMatchTracks = useCallback(
     async (
@@ -28,8 +36,8 @@ const useLastFmConsumer = () => {
     ): Promise<MatchResult[]> => {
       if (!username) return [];
 
-      abortRef.current?.abort();
-      abortRef.current = new AbortController();
+      const controller = new AbortController();
+      abortRef.current = controller;
 
       try {
         let lastFmResult:
@@ -53,7 +61,7 @@ const useLastFmConsumer = () => {
         const results: MatchResult[] = [];
 
         for (const track of lastFmResult.tracks) {
-          if (abortRef.current.signal.aborted) break;
+          if (controller.signal.aborted) break;
 
           const searchQuery = `${track.name} ${track.artist}`;
           const searchResults = await window.api.search.searchSongsByName({
@@ -82,19 +90,19 @@ const useLastFmConsumer = () => {
         return results;
       } catch (error) {
         if ((error as Error).name !== 'AbortError') {
-          console.error('[useLastFmConsumer] Error fetching/matching tracks:', error);
+          log('[useLastFmConsumer] Error fetching/matching tracks', { error }, 'ERROR');
           addNewNotifications([
             {
               id: 'lastFmFetchError',
               duration: 5000,
-              content: 'Failed to fetch Last.fm data'
+              content: t('playlist.lastFmFetchFailed')
             }
           ]);
         }
         return [];
       }
     },
-    [addNewNotifications]
+    [addNewNotifications, t]
   );
 
   const syncToSmartPlaylist = useCallback(
@@ -115,7 +123,7 @@ const useLastFmConsumer = () => {
           {
             id: 'lastFmNoMatches',
             duration: 5000,
-            content: 'No matching songs found in library'
+            content: t('playlist.lastFmNoMatches')
           }
         ]);
         return;
@@ -132,7 +140,7 @@ const useLastFmConsumer = () => {
           {
             id: 'lastFmSyncFailed',
             duration: 5000,
-            content: 'Failed to update smart playlist'
+            content: t('playlist.lastFmSyncFailed')
           }
         ]);
         return;
@@ -142,13 +150,13 @@ const useLastFmConsumer = () => {
         {
           id: 'lastFmSyncSuccess',
           duration: 5000,
-          content: `Added ${matchedIds.length} songs from Last.fm`
+          content: t('playlist.lastFmSyncSuccess', { count: matchedIds.length })
         }
       ]);
 
       return { matched: matchedIds.length, total: matches.length };
     },
-    [fetchAndMatchTracks, addNewNotifications]
+    [fetchAndMatchTracks, addNewNotifications, t]
   );
 
   return { fetchAndMatchTracks, syncToSmartPlaylist, abortRef };

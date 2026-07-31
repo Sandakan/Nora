@@ -16,7 +16,7 @@ const getUserTopTracks = async (
   username: string,
   period: 'overall' | '7day' | '1month' | '3month' | '6month' | '12month' = 'overall',
   limit: number = 50
-): Promise<TopTracksResponse | undefined> => {
+): Promise<TopTracksResponse> => {
   try {
     const LAST_FM_API_KEY = import.meta.env.MAIN_VITE_LAST_FM_API_KEY;
     if (!LAST_FM_API_KEY) throw new Error('LastFM api key not found.');

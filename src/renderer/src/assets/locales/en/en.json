@@ -305,6 +305,10 @@
     "criteriaValuePlaceholder": "value",
     "refreshSuccess": "Smart playlist refreshed.",
     "refreshFailed": "Failed to refresh smart playlist.",
+    "lastFmFetchFailed": "Failed to fetch Last.fm data.",
+    "lastFmNoMatches": "No matching songs found in library.",
+    "lastFmSyncFailed": "Failed to update smart playlist.",
+    "lastFmSyncSuccess": "Added {{count}} songs from Last.fm.",
     "ruleField": "Field",
     "ruleOperator": "Operator",
     "ruleValue": "Value",
@@ -788,6 +792,7 @@
 
   "newPlaylistPrompt": {
     "addPlaylistSuccess": "Playlist added successfully.",
+    "playlistCreateFailed": "Failed to create playlist.",
     "playlistNameEmpty": "Playlist name is required",
     "addNewPlaylist": "Add new playlist"
   },

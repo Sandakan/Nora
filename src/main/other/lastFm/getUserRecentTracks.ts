@@ -5,7 +5,8 @@ interface RecentTrack {
   name: string;
   artist: string;
   url: string;
-  playedAt: number;
+  playedAt: number | null;
+  isNowPlaying?: boolean;
 }
 
 interface RecentTracksResponse {
@@ -15,7 +16,7 @@ interface RecentTracksResponse {
 const getUserRecentTracks = async (
   username: string,
   limit: number = 50
-): Promise<RecentTracksResponse | undefined> => {
+): Promise<RecentTracksResponse> => {
   try {
     const LAST_FM_API_KEY = import.meta.env.MAIN_VITE_LAST_FM_API_KEY;
     if (!LAST_FM_API_KEY) throw new Error('LastFM api key not found.');
@@ -46,12 +47,21 @@ const getUserRecentTracks = async (
 
     const recentTracks = data.recenttracks?.track ?? [];
     return {
-      tracks: recentTracks.map((track: { name: string; url: string; artist: { '#text': string }; date?: { uts: string } }) => ({
-        name: track.name,
-        artist: track.artist['#text'],
-        url: track.url,
-        playedAt: track.date ? Number(track.date.uts) : 0
-      }))
+      tracks: recentTracks.map(
+        (track: {
+          name: string;
+          url: string;
+          artist: { '#text': string };
+          date?: { uts: string };
+          '@attr'?: { nowplaying: string };
+        }) => ({
+          name: track.name,
+          artist: track.artist['#text'],
+          url: track.url,
+          isNowPlaying: track['@attr']?.nowplaying === 'true',
+          playedAt: track.date ? Number(track.date.uts) : null
+        })
+      )
     };
   } catch (error) {
     logger.error('Failed to get recent tracks from LastFM.', { error });

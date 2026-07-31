@@ -433,17 +433,17 @@ const lastFmUserData = {
     username: string,
     period?: 'overall' | '7day' | '1month' | '3month' | '6month' | '12month',
     limit?: number
-  ): Promise<{ tracks: { name: string; artist: string; url: string; playCount: number }[] } | undefined> =>
+  ): Promise<{ tracks: { name: string; artist: string; url: string; playCount: number }[] }> =>
     ipcRenderer.invoke('app/lastfm/getUserTopTracks', username, period, limit),
   getUserRecentTracks: (
     username: string,
     limit?: number
-  ): Promise<{ tracks: { name: string; artist: string; url: string; playedAt: number }[] } | undefined> =>
+  ): Promise<{ tracks: { name: string; artist: string; url: string; playedAt: number | null; isNowPlaying?: boolean }[] }> =>
     ipcRenderer.invoke('app/lastfm/getUserRecentTracks', username, limit),
   getUserLovedTracks: (
     username: string,
     limit?: number
-  ): Promise<{ tracks: { name: string; artist: string; url: string }[] } | undefined> =>
+  ): Promise<{ tracks: { name: string; artist: string; url: string }[] }> =>
     ipcRenderer.invoke('app/lastfm/getUserLovedTracks', username, limit)
 };
 
