@@ -2,7 +2,7 @@ import { SpecialPlaylists } from '@common/playlists.enum';
 import { store } from '@renderer/store/store';
 import { useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
-import { lazy, useCallback, useContext, useMemo } from 'react';
+import { Suspense, lazy, useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import DefaultPlaylistCover from '../../assets/images/webp/playlist_cover_default.webp';
@@ -214,7 +214,7 @@ export const Playlist = (props: PlaylistProp) => {
         label: t('playlist.editCriteria'),
         iconName: 'tune',
         handlerFunction: () => {
-          changePromptMenuData(true, <SmartPlaylistCriteriaEditor playlist={props} />);
+          changePromptMenuData(true, <Suspense><SmartPlaylistCriteriaEditor playlist={props} /></Suspense>);
         },
         isDisabled: isMultipleSelectionsEnabled || !props.isSmart
       },

@@ -17,7 +17,7 @@ import storage from '@renderer/utils/localStorage';
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
-import { lazy, useCallback, useContext, useEffect } from 'react';
+import { Suspense, lazy, useCallback, useContext, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 const SensitiveActionConfirmPrompt = lazy(
@@ -196,7 +196,7 @@ function PlaylistInfoPage() {
   }, [addNewNotifications, playlistData.playlistId, queryClient, t]);
 
   const openCriteriaEditor = useCallback(() => {
-    changePromptMenuData(true, <SmartPlaylistCriteriaEditor playlist={playlistData} />);
+    changePromptMenuData(true, <Suspense><SmartPlaylistCriteriaEditor playlist={playlistData} /></Suspense>);
   }, [changePromptMenuData, playlistData]);
 
   const { syncToSmartPlaylist } = useLastFmConsumer();
