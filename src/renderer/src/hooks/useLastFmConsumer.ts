@@ -87,18 +87,21 @@ const useLastFmConsumer = () => {
           });
         }
 
+        if (controller.signal.aborted) {
+          throw new DOMException('The operation was aborted.', 'AbortError');
+        }
+
         return results;
       } catch (error) {
-        if ((error as Error).name !== 'AbortError') {
-          log('[useLastFmConsumer] Error fetching/matching tracks', { error }, 'ERROR');
-          addNewNotifications([
-            {
-              id: 'lastFmFetchError',
-              duration: 5000,
-              content: t('playlist.lastFmFetchFailed')
-            }
-          ]);
-        }
+        if ((error as Error).name === 'AbortError') throw error;
+        log('[useLastFmConsumer] Error fetching/matching tracks', { error }, 'ERROR');
+        addNewNotifications([
+          {
+            id: 'lastFmFetchError',
+            duration: 5000,
+            content: t('playlist.lastFmFetchFailed')
+          }
+        ]);
         return [];
       }
     },
@@ -113,7 +116,13 @@ const useLastFmConsumer = () => {
       period?: string,
       limit?: number
     ) => {
-      const matches = await fetchAndMatchTracks(username, type, period, limit);
+      let matches: MatchResult[];
+      try {
+        matches = await fetchAndMatchTracks(username, type, period, limit);
+      } catch (error) {
+        if ((error as Error).name === 'AbortError') return;
+        throw error;
+      }
       const matchedIds = matches
         .filter((m) => m.matchedSongId !== null)
         .map((m) => m.matchedSongId!);

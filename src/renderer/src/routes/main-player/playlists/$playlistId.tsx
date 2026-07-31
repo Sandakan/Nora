@@ -14,6 +14,7 @@ import { songQuery } from '@renderer/queries/songs';
 import { store } from '@renderer/store/store';
 import { songSearchSchema } from '@renderer/utils/zod/songSchema';
 import storage from '@renderer/utils/localStorage';
+import log from '@renderer/utils/log';
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
@@ -223,6 +224,8 @@ function PlaylistInfoPage() {
       if (result) {
         queryClient.invalidateQueries({ queryKey: playlistQuery._def });
       }
+    } catch (error) {
+      log('Failed to sync smart playlist from Last.fm', { error }, 'ERROR');
     } finally {
       setIsSyncing(false);
     }

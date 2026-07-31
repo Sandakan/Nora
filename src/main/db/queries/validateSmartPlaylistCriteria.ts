@@ -82,7 +82,11 @@ export const validateSmartPlaylistRule = (
   }
 
   if (STRING_FIELDS.has(r.field)) {
-    if (typeof r.value !== 'string' || r.value.length > MAX_STRING_LENGTH) {
+    if (
+      typeof r.value !== 'string' ||
+      r.value.trim().length === 0 ||
+      r.value.length > MAX_STRING_LENGTH
+    ) {
       return { success: false, reason: 'invalid-string-value' };
     }
   }

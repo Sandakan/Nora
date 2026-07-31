@@ -85,14 +85,12 @@ export const syncLastFmToSmartPlaylist = async (
       limit
     };
 
-    const dedupedIds = uniqueIds;
-
     await db.transaction(async (trx) => {
       await trx.delete(playlistsSongs).where(eq(playlistsSongs.playlistId, playlistId));
 
-      if (dedupedIds.length > 0) {
+      if (uniqueIds.length > 0) {
         await trx.insert(playlistsSongs).values(
-          dedupedIds.map((songId, idx) => ({
+          uniqueIds.map((songId, idx) => ({
             playlistId,
             songId,
             createdAt: new Date(Date.now() + idx),
@@ -107,8 +105,8 @@ export const syncLastFmToSmartPlaylist = async (
         .where(eq(playlists.id, playlistId));
     });
 
-    logger.info('Last.fm sync completed', { playlistId, count: dedupedIds.length });
-    return { success: true, count: dedupedIds.length };
+    logger.info('Last.fm sync completed', { playlistId, count: uniqueIds.length });
+    return { success: true, count: uniqueIds.length };
   } catch (error) {
     logger.error('Failed to sync Last.fm to smart playlist', { playlistId, error });
     return { success: false, count: 0 };

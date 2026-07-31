@@ -5,7 +5,6 @@ import addArtworkToAPlaylist from './core/addArtworkToAPlaylist';
 import addSongsFromFolderStructures from './core/addMusicFolder';
 import addNewPlaylist from './core/addNewPlaylist';
 import addSongsToPlaylist from './core/addSongsToPlaylist';
-import { replaceSmartPlaylistMembership } from './core/replaceSmartPlaylistMembership';
 import { syncLastFmToSmartPlaylist } from './core/syncLastFmToSmartPlaylist';
 import blacklistFolders from './core/blacklistFolders';
 import blacklistSongs from './core/blacklistSongs';
@@ -512,42 +511,6 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     );
 
     ipcMain.handle(
-      'app/replaceSmartPlaylistMembership',
-      async (_, playlistId: number, songIds: number[]) => {
-        if (
-          typeof playlistId !== 'number' || !Number.isFinite(playlistId) || playlistId <= 0 ||
-          !Array.isArray(songIds) || songIds.length === 0
-        ) {
-          logger.error('Invalid replaceSmartPlaylistMembership payload', { playlistId });
-          return { success: false as const, count: 0 };
-        }
-        const uniqueIds = [...new Set(songIds.filter((id) => typeof id === 'number' && Number.isFinite(id) && id > 0))];
-        if (uniqueIds.length === 0) {
-          return { success: false as const, count: 0 };
-        }
-        const playlist = await getPlaylistById(playlistId);
-        if (!playlist?.isSmart) {
-          logger.warn('replaceSmartPlaylistMembership: playlist is not smart', { playlistId });
-          return { success: false as const, count: 0 };
-        }
-        const prev = smartPlaylistLocks.get(playlistId) ?? Promise.resolve();
-        const locked = prev
-          .then(() => replaceSmartPlaylistMembership(playlistId, uniqueIds))
-          .catch((error) => {
-            logger.error('replaceSmartPlaylistMembership failed', { playlistId, error });
-            return { success: false as const, count: 0 };
-          })
-          .finally(() => {
-            if (smartPlaylistLocks.get(playlistId) === locked) {
-              smartPlaylistLocks.delete(playlistId);
-            }
-          });
-        smartPlaylistLocks.set(playlistId, locked);
-        return locked;
-      }
-    );
-
-    ipcMain.handle(
       'app/syncLastFmToSmartPlaylist',
       (_, playlistId: number, songIds: number[], source: { username: string; type: 'top' | 'recent' | 'loved'; period?: string; limit?: number }) => {
         if (typeof playlistId !== 'number' || !Number.isSafeInteger(playlistId) || playlistId <= 0) {
@@ -623,7 +586,7 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       const validation = validateSmartPlaylistCriteria(criteria);
       if (!validation.success) {
         logger.error('Invalid smart playlist criteria', { playlistId, reason: validation.reason });
-        return { songIds: [], success: false as const, reason: validation.reason as 'invalid-payload' };
+        return { songIds: [], success: false as const, reason: validation.reason };
       }
       const prev = smartPlaylistLocks.get(playlistId) ?? Promise.resolve();
       const locked = prev.then(async () => {

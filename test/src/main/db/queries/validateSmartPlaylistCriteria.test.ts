@@ -69,6 +69,18 @@ describe('validateSmartPlaylistRule', () => {
     expect(result.success).toBe(false);
     if (!result.success) expect(result.reason).toBe('invalid-string-value');
   });
+
+  test('rejects empty string values', () => {
+    const result = validateSmartPlaylistRule({ field: 'genre', operator: 'eq', value: '' });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.reason).toBe('invalid-string-value');
+  });
+
+  test('rejects whitespace-only string values', () => {
+    const result = validateSmartPlaylistRule({ field: 'genre', operator: 'eq', value: '   ' });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.reason).toBe('invalid-string-value');
+  });
 });
 
 describe('validateSmartPlaylistCriteria', () => {

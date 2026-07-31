@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import PlaylistDefaultCover from '../../assets/images/webp/playlist_cover_default.webp';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import log from '../../utils/log';
 import Button from '../Button';
 import Img from '../Img';
 
@@ -75,7 +76,7 @@ const NewPlaylistPrompt = (props: NewPlaylistPromptProp) => {
         ]);
       }
     } catch (error) {
-      console.error(error);
+      log('Failed to create playlist', { error }, 'ERROR');
       addNewNotifications([
         {
           id: 'playlistCreateFailed',
