@@ -19,7 +19,7 @@ export const syncLastFmToSmartPlaylist = async (
   songIds: number[],
   source: LastFmSource
 ): Promise<{ success: boolean; count: number }> => {
-  if (typeof playlistId !== 'number' || !Number.isFinite(playlistId) || playlistId <= 0) {
+  if (typeof playlistId !== 'number' || !Number.isSafeInteger(playlistId) || playlistId <= 0) {
     logger.warn('syncLastFmToSmartPlaylist: invalid playlistId', { playlistId });
     return { success: false, count: 0 };
   }
@@ -29,8 +29,13 @@ export const syncLastFmToSmartPlaylist = async (
     return { success: false, count: 0 };
   }
 
-  const uniqueIds = [...new Set(songIds.filter((id) => typeof id === 'number' && Number.isFinite(id) && id > 0))];
+  const uniqueIds = [...new Set(songIds.filter((id) => typeof id === 'number' && Number.isSafeInteger(id) && id > 0))];
   if (uniqueIds.length === 0) {
+    return { success: false, count: 0 };
+  }
+
+  if (!source || typeof source !== 'object') {
+    logger.warn('syncLastFmToSmartPlaylist: invalid source', { playlistId });
     return { success: false, count: 0 };
   }
 

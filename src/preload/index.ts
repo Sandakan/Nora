@@ -478,10 +478,6 @@ const playlistsData = {
     songIds: number[]
   ): Promise<{ success: boolean; count: number }> =>
     ipcRenderer.invoke('app/replaceSmartPlaylistMembership', playlistId, songIds),
-  setLastFmSource: (
-    playlistId: number,
-    source: { username: string; type: string; period?: string; limit?: number }
-  ): Promise<boolean> => ipcRenderer.invoke('app/setLastFmSource', playlistId, source),
   syncLastFmToSmartPlaylist: (
     playlistId: number,
     songIds: number[],

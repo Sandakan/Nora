@@ -6,7 +6,6 @@ import addSongsFromFolderStructures from './core/addMusicFolder';
 import addNewPlaylist from './core/addNewPlaylist';
 import addSongsToPlaylist from './core/addSongsToPlaylist';
 import { replaceSmartPlaylistMembership } from './core/replaceSmartPlaylistMembership';
-import { setLastFmSource } from './core/setLastFmSource';
 import { syncLastFmToSmartPlaylist } from './core/syncLastFmToSmartPlaylist';
 import blacklistFolders from './core/blacklistFolders';
 import blacklistSongs from './core/blacklistSongs';
@@ -75,6 +74,7 @@ import {
 import { removeDefaultAppProtocolFromFilePath } from './fs/resolveFilePaths';
 import { getPlaylistById, updatePlaylistCriteria } from './db/queries/playlists';
 import { refreshSmartPlaylist } from './db/queries/playlist-rules';
+import { validateSmartPlaylistCriteria } from './db/queries/validateSmartPlaylistCriteria';
 import logger, { logFilePath } from './logger';
 import { db } from './db/db';
 import {
@@ -536,6 +536,11 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
           .catch((error) => {
             logger.error('replaceSmartPlaylistMembership failed', { playlistId, error });
             return { success: false as const, count: 0 };
+          })
+          .finally(() => {
+            if (smartPlaylistLocks.get(playlistId) === locked) {
+              smartPlaylistLocks.delete(playlistId);
+            }
           });
         smartPlaylistLocks.set(playlistId, locked);
         return locked;
@@ -543,20 +548,56 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     );
 
     ipcMain.handle(
-      'app/setLastFmSource',
-      (_, playlistId: number, source: { username: string; type: 'top' | 'recent' | 'loved'; period?: string; limit?: number }) =>
-        setLastFmSource(playlistId, source)
-    );
-
-    ipcMain.handle(
       'app/syncLastFmToSmartPlaylist',
       (_, playlistId: number, songIds: number[], source: { username: string; type: 'top' | 'recent' | 'loved'; period?: string; limit?: number }) => {
+        if (typeof playlistId !== 'number' || !Number.isSafeInteger(playlistId) || playlistId <= 0) {
+          logger.error('Invalid syncLastFmToSmartPlaylist payload', { playlistId });
+          return { success: false as const, count: 0 };
+        }
+        if (
+          !Array.isArray(songIds) ||
+          songIds.length === 0 ||
+          !songIds.every((id) => Number.isSafeInteger(id) && id > 0)
+        ) {
+          logger.error('Invalid songIds in syncLastFmToSmartPlaylist', { playlistId });
+          return { success: false as const, count: 0 };
+        }
+        if (!source || typeof source !== 'object') {
+          logger.error('Invalid source in syncLastFmToSmartPlaylist', { playlistId });
+          return { success: false as const, count: 0 };
+        }
+        if (
+          typeof source.username !== 'string' ||
+          !source.username.trim() ||
+          source.username.trim().length > 200
+        ) {
+          logger.error('Invalid source.username in syncLastFmToSmartPlaylist', { playlistId });
+          return { success: false as const, count: 0 };
+        }
+        if (source.type !== 'top' && source.type !== 'recent' && source.type !== 'loved') {
+          logger.error('Invalid source.type in syncLastFmToSmartPlaylist', { playlistId, type: source.type });
+          return { success: false as const, count: 0 };
+        }
+        const VALID_PERIODS = ['overall', '7day', '1month', '3month', '6month', '12month'];
+        if (source.period !== undefined && !VALID_PERIODS.includes(source.period)) {
+          logger.error('Invalid source.period in syncLastFmToSmartPlaylist', { playlistId, period: source.period });
+          return { success: false as const, count: 0 };
+        }
+        if (source.limit !== undefined && (!Number.isSafeInteger(source.limit) || source.limit <= 0 || source.limit > 100)) {
+          logger.error('Invalid source.limit in syncLastFmToSmartPlaylist', { playlistId, limit: source.limit });
+          return { success: false as const, count: 0 };
+        }
         const prev = smartPlaylistLocks.get(playlistId) ?? Promise.resolve();
         const locked = prev
           .then(() => syncLastFmToSmartPlaylist(playlistId, songIds, source))
           .catch((error) => {
             logger.error('syncLastFmToSmartPlaylist failed', { playlistId, error });
             return { success: false as const, count: 0 };
+          })
+          .finally(() => {
+            if (smartPlaylistLocks.get(playlistId) === locked) {
+              smartPlaylistLocks.delete(playlistId);
+            }
           });
         smartPlaylistLocks.set(playlistId, locked);
         return locked;
@@ -575,14 +616,14 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     );
 
     ipcMain.handle('app/saveSmartPlaylistCriteria', async (_, playlistId: number, criteria: SmartPlaylistCriteria) => {
-      if (
-        typeof playlistId !== 'number' || !Number.isFinite(playlistId) || playlistId <= 0 ||
-        !criteria || typeof criteria !== 'object' ||
-        !Array.isArray(criteria.rules) || criteria.rules.length === 0 ||
-        (criteria.matchType !== 'ALL' && criteria.matchType !== 'ANY')
-      ) {
+      if (typeof playlistId !== 'number' || !Number.isFinite(playlistId) || playlistId <= 0) {
         logger.error('Invalid saveSmartPlaylistCriteria payload', { playlistId });
         return { songIds: [], success: false as const, reason: 'invalid-payload' as const };
+      }
+      const validation = validateSmartPlaylistCriteria(criteria);
+      if (!validation.success) {
+        logger.error('Invalid smart playlist criteria', { playlistId, reason: validation.reason });
+        return { songIds: [], success: false as const, reason: validation.reason as 'invalid-payload' };
       }
       const prev = smartPlaylistLocks.get(playlistId) ?? Promise.resolve();
       const locked = prev.then(async () => {
@@ -597,7 +638,12 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
           logger.error('Failed to save smart playlist criteria', { playlistId, error });
           return { songIds: [], success: false as const, reason: 'transaction-failed' as const };
         }
-      });
+      })
+        .finally(() => {
+          if (smartPlaylistLocks.get(playlistId) === locked) {
+            smartPlaylistLocks.delete(playlistId);
+          }
+        });
       smartPlaylistLocks.set(playlistId, locked);
       return locked;
     });
@@ -615,13 +661,9 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
             if (parsed.lastFmSource) {
               return { songIds: [], success: true as const, skipped: 'lastfm-synced' as const };
             }
-            if (
-              !parsed ||
-              typeof parsed !== 'object' ||
-              !Array.isArray(parsed.rules) ||
-              (parsed.matchType !== 'ALL' && parsed.matchType !== 'ANY')
-            ) {
-              logger.error('Smart playlist criteria shape invalid', { playlistId });
+            const validation = validateSmartPlaylistCriteria(parsed);
+            if (!validation.success) {
+              logger.error('Smart playlist criteria shape invalid', { playlistId, reason: validation.reason });
               return { songIds: [], success: false as const, reason: 'invalid-criteria' as const };
             }
             criteria = parsed as SmartPlaylistCriteria;
@@ -635,6 +677,11 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
         .catch((error) => {
           logger.error('Refresh smart playlist failed', { playlistId, error });
           return { songIds: [], success: false as const, reason: 'refresh-failed' as const };
+        })
+        .finally(() => {
+          if (smartPlaylistLocks.get(playlistId) === locked) {
+            smartPlaylistLocks.delete(playlistId);
+          }
         });
       smartPlaylistLocks.set(playlistId, locked);
       return locked;
