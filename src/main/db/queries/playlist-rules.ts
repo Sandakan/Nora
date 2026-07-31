@@ -27,17 +27,18 @@ function buildCondition(rule: SmartPlaylistRule): SQL | undefined {
   const escapeLike = (s: string) =>
     s.replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_');
 
-  const str = (col: SQL) => {
+  // Positive match only — used inside EXISTS/NOT EXISTS. A song must match
+  // "genre is not X" when NO genre row matches X (including untagged songs),
+  // so the subquery must test the positive predicate, not the negated one.
+  const strPositive = (col: SQL) => {
     const s = String(value);
     switch (operator) {
-      // ILIKE for eq/neq matches the case-insensitive behavior of contains and
-      // the citext columns elsewhere. Escape wildcards so `eq` is exact-ish.
-      case 'eq': return sql`${col} ILIKE ${escapeLike(s)} ESCAPE '\\'`;
-      case 'neq': return sql`${col} NOT ILIKE ${escapeLike(s)} ESCAPE '\\'`;
-      case 'contains': {
+      case 'contains':
         return sql`${col} ILIKE ${`%${escapeLike(s)}%`} ESCAPE '\\'`;
-      }
-      default: return undefined;
+      case 'neq':
+      case 'eq':
+      default:
+        return sql`${col} ILIKE ${escapeLike(s)} ESCAPE '\\'`;
     }
   };
 
@@ -67,18 +68,19 @@ function buildCondition(rule: SmartPlaylistRule): SQL | undefined {
       return bool(sql`songs.is_blacklisted`);
 
     case 'genre': {
-      const cond = str(sql`genres.name`);
+      const cond = strPositive(sql`genres.name`);
       if (!cond) return undefined;
       if (operator === 'neq') {
         // "genre is not X" must include songs with no genre rows at all,
-        // not just songs whose genres differ from X.
+        // not just songs whose genres differ from X. NOT EXISTS of the
+        // POSITIVE match is the correct inversion.
         return sql`not exists (select 1 from genres_songs inner join genres on genres_songs.genre_id = genres.id where genres_songs.song_id = songs.id and ${cond})`;
       }
       return sql`exists (select 1 from genres_songs inner join genres on genres_songs.genre_id = genres.id where genres_songs.song_id = songs.id and ${cond})`;
     }
 
     case 'artist': {
-      const cond = str(sql`artists.name`);
+      const cond = strPositive(sql`artists.name`);
       if (!cond) return undefined;
       if (operator === 'neq') {
         return sql`not exists (select 1 from artists_songs inner join artists on artists_songs.artist_id = artists.id where artists_songs.song_id = songs.id and ${cond})`;
@@ -87,7 +89,7 @@ function buildCondition(rule: SmartPlaylistRule): SQL | undefined {
     }
 
     case 'album': {
-      const cond = str(sql`albums.title`);
+      const cond = strPositive(sql`albums.title`);
       if (!cond) return undefined;
       if (operator === 'neq') {
         return sql`not exists (select 1 from album_songs inner join albums on album_songs.album_id = albums.id where album_songs.song_id = songs.id and ${cond})`;

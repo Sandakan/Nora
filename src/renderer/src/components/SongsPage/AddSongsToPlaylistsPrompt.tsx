@@ -102,7 +102,9 @@ const AddSongsToPlaylistsPrompt = (props: AddSongsToPlaylistProp) => {
     });
     Promise.all(promises)
       .then((results) => {
-        const successes = results.filter((r) => r?.success).length;
+        const successes = results.filter(
+          (r) => r && (r.success === true || 'likes' in r || 'dislikes' in r)
+        ).length;
         if (successes === 0) return;
         return addNewNotifications([
           {
