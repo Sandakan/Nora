@@ -33,8 +33,8 @@ const useLastFmConsumer = () => {
       type: 'top' | 'recent' | 'loved',
       period?: string,
       limit?: number
-    ): Promise<MatchResult[]> => {
-      if (!username) return [];
+    ): Promise<MatchResult[] | null> => {
+      if (!username) return null;
 
       const controller = new AbortController();
       abortRef.current = controller;
@@ -102,7 +102,7 @@ const useLastFmConsumer = () => {
             content: t('playlist.lastFmFetchFailed')
           }
         ]);
-        return [];
+        return null;
       }
     },
     [addNewNotifications, t]
@@ -116,13 +116,14 @@ const useLastFmConsumer = () => {
       period?: string,
       limit?: number
     ) => {
-      let matches: MatchResult[];
+      let matches: MatchResult[] | null;
       try {
         matches = await fetchAndMatchTracks(username, type, period, limit);
       } catch (error) {
         if ((error as Error).name === 'AbortError') return;
         throw error;
       }
+      if (matches === null) return;
       const matchedIds = matches
         .filter((m) => m.matchedSongId !== null)
         .map((m) => m.matchedSongId!);

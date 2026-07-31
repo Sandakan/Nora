@@ -128,14 +128,27 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
   }, []);
 
   const saveCriteria = useCallback(async () => {
-    const cleanRules = criteria.rules.filter((r) => String(r.value).length > 0);
+    const cleanRules = criteria.rules
+      .filter((r) => r.value !== undefined && String(r.value).trim().length > 0)
+      .map((r) => {
+        const { id: _key, ...rule } = r as SmartPlaylistRule & { id?: string };
+        void _key;
+        if (typeof rule.value === 'string' && rule.value.trim() !== '' && !needsStringOps(rule.field) && !needsBoolOps(rule.field)) {
+          return { ...rule, value: Number(rule.value) };
+        }
+        return rule;
+      });
     if (cleanRules.length === 0) {
       addNewNotifications([
         { id: 'smartPlaylistNoRules', duration: 3000, content: t('playlist.criteriaSaveFailed') }
       ]);
       return;
     }
-    const cleaned: SmartPlaylistCriteria = { ...criteria, rules: cleanRules };
+    const cleaned: SmartPlaylistCriteria = {
+      matchType: criteria.matchType,
+      rules: cleanRules,
+      ...(criteria.limit !== undefined ? { limit: criteria.limit } : {})
+    };
 
     const result = await window.api.playlistsData
       .saveSmartPlaylistCriteria(playlist.playlistId, cleaned)
@@ -204,7 +217,7 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
         type="number"
         className="mt-1 w-full rounded-lg bg-background-color-2 px-3 py-1.5 text-sm text-font-color-black outline-1 outline-transparent transition-colors focus:outline-font-color-highlight dark:bg-dark-background-color-2 dark:text-font-color-white dark:focus:outline-dark-font-color-highlight"
         value={String(rule.value)}
-        onChange={(e) => onChange(e.target.value === '' ? '' : Number(e.target.value))}
+        onChange={(e) => onChange(e.target.value)}
         placeholder={t('playlist.criteriaValuePlaceholder')}
       />
     );
