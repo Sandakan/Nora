@@ -1,7 +1,7 @@
 import { getPlaylistById, unlinkSongsFromPlaylist } from '@main/db/queries/playlists';
 
 import logger from '../logger';
-import { dataUpdateEvent } from '../main';
+import { dataUpdateEvent, sendMessageToRenderer } from '../main';
 
 const removeSongFromPlaylist = async (playlistId: number, songId: number) => {
   logger.debug(`Requested to remove a song from playlist.`, { playlistId, songId });
@@ -10,6 +10,7 @@ const removeSongFromPlaylist = async (playlistId: number, songId: number) => {
 
   if (playlist?.isSmart) {
     logger.warn(`Cannot remove songs from a smart playlist.`, { playlistId, songId });
+    sendMessageToRenderer({ messageCode: 'CANNOT_MODIFY_SMART_PLAYLIST' });
     return;
   }
 

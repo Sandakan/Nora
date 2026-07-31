@@ -15,6 +15,7 @@ const addSongsToPlaylist = async (playlistId: number, songIds: number[]) => {
 
   if (playlist?.isSmart) {
     logger.warn(`Cannot add songs to a smart playlist.`, { playlistId });
+    sendMessageToRenderer({ messageCode: 'CANNOT_MODIFY_SMART_PLAYLIST' });
     return;
   }
 
