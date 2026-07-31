@@ -7,6 +7,7 @@ import { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import log from '../../utils/log';
 import Button from '../Button';
 import Checkbox from '../Checkbox';
 import Img from '../Img';
@@ -91,14 +92,18 @@ const AddSongsToPlaylistsPrompt = (props: AddSongsToPlaylistProp) => {
         // Special ID for Favorites playlist
         return window.api.playerControls
           .toggleLikeSongs(songIds, true)
-          .catch((err) => console.error(err));
+          .catch((err) => log('Failed to like songs', { error: err }, 'ERROR'));
       return window.api.playlistsData
         .addSongsToPlaylist(playlist.playlistId, songIds)
-        .catch((err) => console.error(err));
+        .catch((err) => {
+          log('Failed to add songs to playlist', { error: err, playlistId: playlist.playlistId }, 'ERROR');
+          return { success: false, addedCount: 0, existingCount: 0 };
+        });
     });
     Promise.all(promises)
-      .then((res) => {
-        console.log(res);
+      .then((results) => {
+        const successes = results.filter((r) => r?.success).length;
+        if (successes === 0) return;
         return addNewNotifications([
           {
             id: 'songAddedtoPlaylists',
@@ -106,12 +111,12 @@ const AddSongsToPlaylistsPrompt = (props: AddSongsToPlaylistProp) => {
             iconName: 'playlist_add',
             content: t('addSongsToPlaylistsPrompt.songsAddedToPlaylists', {
               count: songIds.length,
-              playlistCount: selectedPlaylistsData.length
+              playlistCount: successes
             })
           }
         ]);
       })
-      .catch((err) => console.error(err))
+      .catch((err) => log('Failed to add songs to playlists', { error: err }, 'ERROR'))
       .finally(() => {
         changePromptMenuData(false);
       });

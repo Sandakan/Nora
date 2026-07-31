@@ -176,6 +176,8 @@ function PlaylistInfoPage() {
           return;
         }
         queryClient.invalidateQueries({ queryKey: playlistQuery._def });
+        // A Last.fm-managed playlist is skipped, not refreshed — don't claim success.
+        if (result.skipped === 'lastfm-synced') return;
         addNewNotifications([
           {
             id: 'smartPlaylistRefreshed',
@@ -185,7 +187,7 @@ function PlaylistInfoPage() {
         ]);
       })
       .catch((err) => {
-        console.error(err);
+        log('Failed to refresh smart playlist', { error: err }, 'ERROR');
         addNewNotifications([
           {
             id: 'smartPlaylistRefreshFailed',
@@ -358,7 +360,7 @@ function PlaylistInfoPage() {
                             }
                           ])
                       )
-                      .catch((err) => console.error(err))
+                      .catch((err) => log('Failed to remove song from playlist', { error: err }, 'ERROR'))
                 }
               ]}
             />

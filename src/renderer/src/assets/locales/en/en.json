@@ -1161,7 +1161,8 @@
     "PLAYLIST_RENAME_SUCCESS": "Playlist renamed successfully.",
     "PLAYLIST_NOT_FOUND": "Playlist not found.",
     "SONG_REPARSE_SUCCESS": "Successfully reparsed `{{title}}`.",
-    "SONG_REPARSE_FAILED": "Error occurred when re-parsing the song."
+    "SONG_REPARSE_FAILED": "Error occurred when re-parsing the song.",
+    "CANNOT_MODIFY_SMART_PLAYLIST": "Smart playlists are managed automatically. Edit the criteria instead."
   },
 
   "discordrpc": {

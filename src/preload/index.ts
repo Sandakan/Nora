@@ -471,7 +471,10 @@ const playlistsData = {
     isSmart?: boolean
   ): Promise<{ success: boolean; message?: string; playlist?: Playlist }> =>
     ipcRenderer.invoke('app/addNewPlaylist', playlistName, songIds, artworkPath, isSmart),
-  addSongsToPlaylist: (playlistId: number, songIds: number[]): PromiseFunctionReturn =>
+  addSongsToPlaylist: (
+    playlistId: number,
+    songIds: number[]
+  ): Promise<{ success: boolean; addedCount: number; existingCount: number }> =>
     ipcRenderer.invoke('app/addSongsToPlaylist', playlistId, songIds),
   syncLastFmToSmartPlaylist: (
     playlistId: number,
@@ -486,7 +489,7 @@ const playlistsData = {
     ipcRenderer.invoke('app/addArtworkToAPlaylist', playlistId, artworkPath),
   renameAPlaylist: (playlistId: number, newName: string): Promise<void> =>
     ipcRenderer.invoke('app/renameAPlaylist', playlistId, newName),
-  removeSongFromPlaylist: (playlistId: number, songId: number): PromiseFunctionReturn =>
+  removeSongFromPlaylist: (playlistId: number, songId: number): Promise<{ success: boolean }> =>
     ipcRenderer.invoke('app/removeSongFromPlaylist', playlistId, songId),
   removePlaylists: (playlistIds: number[]) =>
     ipcRenderer.invoke('app/removePlaylists', playlistIds),

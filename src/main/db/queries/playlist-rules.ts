@@ -24,14 +24,18 @@ function buildCondition(rule: SmartPlaylistRule): SQL | undefined {
     }
   };
 
+  const escapeLike = (s: string) =>
+    s.replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_');
+
   const str = (col: SQL) => {
     const s = String(value);
     switch (operator) {
-      case 'eq': return sql`${col} = ${s}`;
-      case 'neq': return sql`${col} != ${s}`;
+      // ILIKE for eq/neq matches the case-insensitive behavior of contains and
+      // the citext columns elsewhere. Escape wildcards so `eq` is exact-ish.
+      case 'eq': return sql`${col} ILIKE ${escapeLike(s)} ESCAPE '\\'`;
+      case 'neq': return sql`${col} NOT ILIKE ${escapeLike(s)} ESCAPE '\\'`;
       case 'contains': {
-        const escaped = s.replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_');
-        return sql`${col} ILIKE ${`%${escaped}%`} ESCAPE '\\'`;
+        return sql`${col} ILIKE ${`%${escapeLike(s)}%`} ESCAPE '\\'`;
       }
       default: return undefined;
     }
@@ -65,18 +69,29 @@ function buildCondition(rule: SmartPlaylistRule): SQL | undefined {
     case 'genre': {
       const cond = str(sql`genres.name`);
       if (!cond) return undefined;
+      if (operator === 'neq') {
+        // "genre is not X" must include songs with no genre rows at all,
+        // not just songs whose genres differ from X.
+        return sql`not exists (select 1 from genres_songs inner join genres on genres_songs.genre_id = genres.id where genres_songs.song_id = songs.id and ${cond})`;
+      }
       return sql`exists (select 1 from genres_songs inner join genres on genres_songs.genre_id = genres.id where genres_songs.song_id = songs.id and ${cond})`;
     }
 
     case 'artist': {
       const cond = str(sql`artists.name`);
       if (!cond) return undefined;
+      if (operator === 'neq') {
+        return sql`not exists (select 1 from artists_songs inner join artists on artists_songs.artist_id = artists.id where artists_songs.song_id = songs.id and ${cond})`;
+      }
       return sql`exists (select 1 from artists_songs inner join artists on artists_songs.artist_id = artists.id where artists_songs.song_id = songs.id and ${cond})`;
     }
 
     case 'album': {
       const cond = str(sql`albums.title`);
       if (!cond) return undefined;
+      if (operator === 'neq') {
+        return sql`not exists (select 1 from album_songs inner join albums on album_songs.album_id = albums.id where album_songs.song_id = songs.id and ${cond})`;
+      }
       return sql`exists (select 1 from album_songs inner join albums on album_songs.album_id = albums.id where album_songs.song_id = songs.id and ${cond})`;
     }
 

@@ -3,7 +3,10 @@ import { getPlaylistById, linkSongsWithPlaylist } from '@main/db/queries/playlis
 import logger from '../logger';
 import { sendMessageToRenderer } from '../main';
 
-const addSongsToPlaylist = async (playlistId: number, songIds: number[]) => {
+const addSongsToPlaylist = async (
+  playlistId: number,
+  songIds: number[]
+): Promise<{ success: boolean; addedCount: number; existingCount: number }> => {
   logger.debug(`Requested to add songs to a playlist.`, {
     playlistId,
     songIds
@@ -16,7 +19,7 @@ const addSongsToPlaylist = async (playlistId: number, songIds: number[]) => {
   if (playlist?.isSmart) {
     logger.warn(`Cannot add songs to a smart playlist.`, { playlistId });
     sendMessageToRenderer({ messageCode: 'CANNOT_MODIFY_SMART_PLAYLIST' });
-    return;
+    return { success: false, addedCount: 0, existingCount: 0 };
   }
 
   if (playlist) {
@@ -35,10 +38,11 @@ const addSongsToPlaylist = async (playlistId: number, songIds: number[]) => {
       existingIds,
       playlistId
     });
-    return sendMessageToRenderer({
+    sendMessageToRenderer({
       messageCode: 'ADDED_SONGS_TO_PLAYLIST',
       data: { count: addedIds.length, name: playlist.name }
     });
+    return { success: true, addedCount: addedIds.length, existingCount: existingIds.length };
   }
 
   const errMessage = 'Request failed because a playlist cannot be found.';
