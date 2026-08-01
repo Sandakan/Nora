@@ -36,6 +36,12 @@ export const validateSmartPlaylistCriteria = (
     return { success: false, reason: 'invalid-match-type' };
   }
 
+  // Rule-driven criteria must not carry the Last.fm ownership marker. That
+  // property is only written by the atomic sync endpoint, which validates it.
+  if (Object.prototype.hasOwnProperty.call(c, 'lastFmSource')) {
+    return { success: false, reason: 'lastfm-source-not-allowed' };
+  }
+
   if (!Array.isArray(c.rules) || c.rules.length === 0) {
     return { success: false, reason: 'empty-rules' };
   }

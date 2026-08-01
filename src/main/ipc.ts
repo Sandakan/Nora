@@ -591,6 +591,13 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       const prev = smartPlaylistLocks.get(playlistId) ?? Promise.resolve();
       const locked = prev.then(async () => {
         try {
+          const playlist = await getPlaylistById(playlistId);
+          if (!playlist) {
+            return { songIds: [], success: false as const, reason: 'playlist-not-found' as const };
+          }
+          if (!playlist.isSmart) {
+            return { songIds: [], success: false as const, reason: 'not-smart-playlist' as const };
+          }
           let songIds: number[] = [];
           await db.transaction(async (trx) => {
             await updatePlaylistCriteria(playlistId, criteria, trx);

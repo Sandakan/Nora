@@ -62,6 +62,7 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
   }, [playlist.criteria]);
 
   const [criteria, setCriteria] = useState<SmartPlaylistCriteria>(initialCriteria);
+  const [isSaving, setIsSaving] = useState(false);
 
   const fieldLabel = useCallback(
     (f: SmartPlaylistRuleField): string => {
@@ -128,6 +129,7 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
   }, []);
 
   const saveCriteria = useCallback(async () => {
+    if (isSaving) return;
     const cleanRules = criteria.rules
       .filter((r) => r.value !== undefined && String(r.value).trim().length > 0)
       .map((r) => {
@@ -150,27 +152,32 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
       ...(criteria.limit !== undefined ? { limit: criteria.limit } : {})
     };
 
-    const result = await window.api.playlistsData
-      .saveSmartPlaylistCriteria(playlist.playlistId, cleaned)
-      .catch((error: unknown) => {
-        void error;
-        return { songIds: [], success: false as const, reason: 'ipc-error' as const };
-      });
-    if (result.success) {
-      addNewNotifications([
-        {
-          id: 'smartPlaylistCriteriaSaved',
-          duration: 5000,
-          content: t('playlist.criteriaSaveSuccess')
-        }
-      ]);
-      changePromptMenuData(false);
-    } else {
-      addNewNotifications([
-        { id: 'smartPlaylistSaveFailed', duration: 5000, content: t('playlist.criteriaSaveFailed') }
-      ]);
+    setIsSaving(true);
+    try {
+      const result = await window.api.playlistsData
+        .saveSmartPlaylistCriteria(playlist.playlistId, cleaned)
+        .catch((error: unknown) => {
+          void error;
+          return { songIds: [], success: false as const, reason: 'ipc-error' as const };
+        });
+      if (result.success) {
+        addNewNotifications([
+          {
+            id: 'smartPlaylistCriteriaSaved',
+            duration: 5000,
+            content: t('playlist.criteriaSaveSuccess')
+          }
+        ]);
+        changePromptMenuData(false);
+      } else {
+        addNewNotifications([
+          { id: 'smartPlaylistSaveFailed', duration: 5000, content: t('playlist.criteriaSaveFailed') }
+        ]);
+      }
+    } finally {
+      setIsSaving(false);
     }
-  }, [addNewNotifications, changePromptMenuData, criteria, playlist.playlistId, t]);
+  }, [addNewNotifications, changePromptMenuData, criteria, isSaving, playlist.playlistId, t]);
 
   const needsBoolOps = (field: SmartPlaylistRuleField) =>
     ['isFavorite', 'isBlacklisted'].includes(field);
@@ -341,6 +348,7 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
           className="rounded-lg! bg-font-color-highlight! px-6! py-2! text-white! dark:bg-dark-font-color-highlight!"
           label={t('common.save')}
           clickHandler={saveCriteria}
+          isDisabled={isSaving}
         />
       </div>
     </div>

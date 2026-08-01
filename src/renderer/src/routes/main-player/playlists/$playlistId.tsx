@@ -161,33 +161,15 @@ function PlaylistInfoPage() {
     [createQueue, playlistData.playlistId, playlistSongs]
   );
 
-  const refreshSmartPlaylist = useCallback(() => {
-    window.api.playlistsData
-      .refreshSmartPlaylist(playlistData.playlistId)
-      .then((result) => {
-        if (!result.success) {
-          addNewNotifications([
-            {
-              id: 'smartPlaylistRefreshFailed',
-              duration: 5000,
-              content: t('playlist.refreshFailed')
-            }
-          ]);
-          return;
-        }
-        queryClient.invalidateQueries({ queryKey: playlistQuery._def });
-        // A Last.fm-managed playlist is skipped, not refreshed — don't claim success.
-        if (result.skipped === 'lastfm-synced') return;
-        addNewNotifications([
-          {
-            id: 'smartPlaylistRefreshed',
-            duration: 5000,
-            content: t('playlist.refreshSuccess')
-          }
-        ]);
-      })
-      .catch((err) => {
-        log('Failed to refresh smart playlist', { error: err }, 'ERROR');
+  const { syncToSmartPlaylist } = useLastFmConsumer();
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const refreshSmartPlaylist = useCallback(async () => {
+    if (isSyncing) return;
+    setIsSyncing(true);
+    try {
+      const result = await window.api.playlistsData.refreshSmartPlaylist(playlistData.playlistId);
+      if (!result.success) {
         addNewNotifications([
           {
             id: 'smartPlaylistRefreshFailed',
@@ -195,15 +177,35 @@ function PlaylistInfoPage() {
             content: t('playlist.refreshFailed')
           }
         ]);
-      });
-  }, [addNewNotifications, playlistData.playlistId, queryClient, t]);
+        return;
+      }
+      queryClient.invalidateQueries({ queryKey: playlistQuery._def });
+      // A Last.fm-managed playlist is skipped, not refreshed — don't claim success.
+      if (result.skipped === 'lastfm-synced') return;
+      addNewNotifications([
+        {
+          id: 'smartPlaylistRefreshed',
+          duration: 5000,
+          content: t('playlist.refreshSuccess')
+        }
+      ]);
+    } catch (error) {
+      log('Failed to refresh smart playlist', { error }, 'ERROR');
+      addNewNotifications([
+        {
+          id: 'smartPlaylistRefreshFailed',
+          duration: 5000,
+          content: t('playlist.refreshFailed')
+        }
+      ]);
+    } finally {
+      setIsSyncing(false);
+    }
+  }, [addNewNotifications, isSyncing, playlistData.playlistId, queryClient, t]);
 
   const openCriteriaEditor = useCallback(() => {
     changePromptMenuData(true, <Suspense><SmartPlaylistCriteriaEditor playlist={playlistData} /></Suspense>);
   }, [changePromptMenuData, playlistData]);
-
-  const { syncToSmartPlaylist } = useLastFmConsumer();
-  const [isSyncing, setIsSyncing] = useState(false);
 
   const syncFromLastFm = useCallback(async () => {
     if (isSyncing) return;

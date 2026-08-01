@@ -160,7 +160,7 @@ const useLastFmConsumer = () => {
         {
           id: 'lastFmSyncSuccess',
           duration: 5000,
-          content: t('playlist.lastFmSyncSuccess', { count: matchedIds.length })
+          content: t('playlist.lastFmSyncSuccess', { count: syncResult.count })
         }
       ]);
 

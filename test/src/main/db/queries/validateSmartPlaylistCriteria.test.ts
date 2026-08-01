@@ -150,6 +150,13 @@ describe('validateSmartPlaylistCriteria', () => {
     if (!result.success) expect(result.reason).toBe('invalid-limit');
   });
 
+  test('rejects criteria carrying lastFmSource (rule-driven mode only)', () => {
+    const criteria = { matchType: 'ALL', rules: [validRule], lastFmSource: { username: 'x' } };
+    const result = validateSmartPlaylistCriteria(criteria);
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.reason).toBe('lastfm-source-not-allowed');
+  });
+
   test('accepts bounded valid limit', () => {
     const criteria = { matchType: 'ALL', rules: [validRule], limit: 50 };
     expect(validateSmartPlaylistCriteria(criteria)).toEqual({ success: true });
