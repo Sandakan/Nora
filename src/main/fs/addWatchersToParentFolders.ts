@@ -31,7 +31,7 @@ const createParentFolderWatcherFunction = (parentFolderPath: string) => {
 
   const runScan = (containingFolder: string) => {
     isScanning = true;
-    checkFolderForUnknownModifications(containingFolder)
+    void checkFolderForUnknownModifications(containingFolder)
       .catch((error) => {
         logger.error('Debounced folder scan failed.', { error, containingFolder });
       })
