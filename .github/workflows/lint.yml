@@ -29,5 +29,8 @@ jobs:
       - name: Run linters
         run: npm run lint --deny-warnings
 
+      - name: Typecheck (node)
+        run: npm run typecheck:node
+
       - name: Run formatters
         run: npm run format

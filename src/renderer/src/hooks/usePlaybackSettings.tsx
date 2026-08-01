@@ -52,6 +52,10 @@ export function usePlaybackSettings(player: HTMLAudioElement, audioPlayer?: Audi
   const { saveEqualizerPresetAsync, equalizerPreset } = useUserPreferences();
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingPresetRef = useRef<Equalizer | null>(null);
+  // Serialize equalizer saves: only one IPC save runs at a time, and each
+  // save always persists the newest preset, so an older save can never
+  // overwrite a newer one that completed first.
+  const saveChainRef = useRef<Promise<void>>(Promise.resolve());
 
   // Hydrate the persisted equalizer preset into the audio graph at startup.
   // The Settings page is not mounted on normal launch, so without this the
@@ -73,9 +77,14 @@ export function usePlaybackSettings(player: HTMLAudioElement, audioPlayer?: Audi
     return () => {
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
       // Flush the latest pending preset so a shutdown within the debounce
-      // window does not silently lose the last equalizer change.
+      // window does not silently lose the last equalizer change. Runs through
+      // the same serialized worker to avoid a duplicate write.
       if (pendingPresetRef.current) {
-        saveEqualizerPresetAsync(pendingPresetRef.current).catch(() => undefined);
+        const flush = pendingPresetRef.current;
+        pendingPresetRef.current = null;
+        saveChainRef.current = saveChainRef.current
+          .then(() => saveEqualizerPresetAsync(flush))
+          .catch(() => undefined);
       }
     };
   }, [saveEqualizerPresetAsync]);
@@ -150,9 +159,18 @@ export function usePlaybackSettings(player: HTMLAudioElement, audioPlayer?: Audi
       pendingPresetRef.current = options;
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
       saveTimeoutRef.current = setTimeout(() => {
-        saveEqualizerPresetAsync(options).catch((err) => {
-          log('Failed to save equalizer preset:', { err }, 'ERROR');
-        });
+        saveTimeoutRef.current = null;
+        const toSave = pendingPresetRef.current;
+        if (!toSave) return;
+        pendingPresetRef.current = null;
+        // Serialize onto the chain so saves never run concurrently; each save
+        // persists the newest preset at fire time, so an older save cannot
+        // overwrite a newer one that completed first.
+        saveChainRef.current = saveChainRef.current
+          .then(() => saveEqualizerPresetAsync(toSave))
+          .catch((err) => {
+            log('Failed to save equalizer preset:', { err }, 'ERROR');
+          });
       }, EQUALIZER_SAVE_DEBOUNCE_MS);
     },
     [saveEqualizerPresetAsync, audioPlayer]
