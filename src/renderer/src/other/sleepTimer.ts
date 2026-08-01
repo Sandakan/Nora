@@ -70,11 +70,13 @@ class SleepTimer {
 
     if (this.mode === 'time') {
       this.clearTimer();
+      this.endTimestamp = null;
     } else {
       this.removeSongEndListener();
     }
 
     this.emit('pause');
+    this.emit('tick', this.getRemainingSeconds());
   }
 
   resume(): void {
@@ -94,9 +96,13 @@ class SleepTimer {
 
   extend(minutes: number): void {
     if (!this.isActive() || this.mode !== 'time') return;
-    const currentRemaining = this.getRemainingSeconds() * 1000;
-    this.endTimestamp = Date.now() + currentRemaining + minutes * 60 * 1000;
-    if (!this._isPaused) this.startTicking();
+    if (this._isPaused) {
+      this.pausedRemainingSeconds += minutes * 60;
+    } else {
+      const currentRemaining = this.getRemainingSeconds() * 1000;
+      this.endTimestamp = Date.now() + currentRemaining + minutes * 60 * 1000;
+      this.startTicking();
+    }
     this.emit('tick', this.getRemainingSeconds());
   }
 
