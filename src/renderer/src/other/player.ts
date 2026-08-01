@@ -192,20 +192,27 @@ class AudioPlayer {
    * play() first (Chromium often auto-reroutes to the new default). If that fails, reloads
    * the audio element to force Chromium to re-establish the audio path. As a last resort,
    * rebuilds the entire AudioContext + EQ chain with a fresh Audio element.
+   *
+   * @param options.shouldResume - Whether recovery should resume playback. For an OS
+   *   devicechange event this defaults to the pre-event playing state (a deliberate pause
+   *   must not be undone). For a failed explicit play() request the caller passes true so a
+   *   rejected playback actually retries instead of silently reporting success while paused.
    */
-  private async handleDeviceChange() {
+  private async handleDeviceChange(options?: { shouldResume?: boolean }) {
     const savedTime = this.audio.currentTime;
     const currentSrc = this.audio.src;
 
     if (!currentSrc) return;
 
-    // Only auto-resume if the user was actively playing before the switch.
-    // A deliberate pause must not be undone by an OS device event.
-    const wasPlaying = !this.audio.paused;
+    // Do not infer user intent from audio.paused AFTER a failed play() — a rejected
+    // play() leaves the element paused even when the user asked for playback. The
+    // caller decides: devicechange keeps paused state, an explicit play request forces
+    // a resume attempt.
+    const shouldResume = options?.shouldResume ?? !this.audio.paused;
 
     const generation = ++this.deviceChangeGeneration;
 
-    if (AudioPlayer.DEBUG) console.log('[AudioPlayer.handleDeviceChange]', { savedTime, wasPlaying });
+    if (AudioPlayer.DEBUG) console.log('[AudioPlayer.handleDeviceChange]', { savedTime, shouldResume });
 
     // Mark recovery in progress so other methods know
     this.isRecoveringFromDeviceChange = true;
@@ -217,11 +224,11 @@ class AudioPlayer {
         await this.currentContext.resume();
       }
 
-      if (await this.trySimplePlay(savedTime, wasPlaying, isStale)) return;
+      if (await this.trySimplePlay(savedTime, shouldResume, isStale)) return;
       if (isStale()) return;
 
       try {
-        await this.reloadSrc(currentSrc, savedTime, wasPlaying, isStale);
+        await this.reloadSrc(currentSrc, savedTime, shouldResume, isStale);
         if (AudioPlayer.DEBUG) console.log('[AudioPlayer.handleDeviceChange] Reload recovery succeeded');
       } catch (err) {
         if (isStale()) return;
@@ -229,7 +236,7 @@ class AudioPlayer {
         console.error('[AudioPlayer.handleDeviceChange] Reload failed, rebuilding AudioContext', err);
 
         try {
-          await this.rebuildAndPlay(currentSrc, savedTime, wasPlaying, isStale);
+          await this.rebuildAndPlay(currentSrc, savedTime, shouldResume, isStale);
           if (AudioPlayer.DEBUG) console.log('[AudioPlayer.handleDeviceChange] AudioContext rebuild recovery succeeded');
         } catch (rebuildErr) {
           console.error('[AudioPlayer.handleDeviceChange] All recovery strategies failed', rebuildErr);
@@ -248,11 +255,11 @@ class AudioPlayer {
   /** Strategy 1: plain play() — Chromium may auto-reroute to the new device. Returns true when handled. */
   private async trySimplePlay(
     savedTime: number,
-    wasPlaying: boolean,
+    shouldResume: boolean,
     isStale: () => boolean
   ): Promise<boolean> {
     try {
-      if (wasPlaying) await this.audio.play();
+      if (shouldResume) await this.audio.play();
       if (isStale()) return true;
       this.audio.currentTime = savedTime;
       if (AudioPlayer.DEBUG) console.log('[AudioPlayer.handleDeviceChange] Simple play() succeeded');
@@ -268,7 +275,7 @@ class AudioPlayer {
   private async reloadSrc(
     currentSrc: string,
     savedTime: number,
-    wasPlaying: boolean,
+    shouldResume: boolean,
     isStale: () => boolean
   ): Promise<void> {
     this.audio.src = '';
@@ -281,14 +288,14 @@ class AudioPlayer {
     if (isStale()) return;
 
     this.audio.currentTime = savedTime;
-    if (wasPlaying) await this.audio.play();
+    if (shouldResume) await this.audio.play();
   }
 
   /** Strategy 3: rebuild the AudioContext + EQ chain with a new Audio element, then resume. */
   private async rebuildAndPlay(
     currentSrc: string,
     savedTime: number,
-    wasPlaying: boolean,
+    shouldResume: boolean,
     isStale: () => boolean
   ): Promise<void> {
     this.rebuildAudioContext();
@@ -703,7 +710,10 @@ class AudioPlayer {
       await this.audio.play();
     } catch (err) {
       if (this.isRecoveringFromDeviceChange) throw err;
-      await this.handleDeviceChange();
+      // A rejected play() leaves the element paused even when the user asked
+      // for playback. Force a resume attempt so recovery doesn't silently
+      // report success while audio stays paused.
+      await this.handleDeviceChange({ shouldResume: true });
       return;
     }
     return this.fadeInAudio();
@@ -740,7 +750,7 @@ class AudioPlayer {
           await this.play();
         } catch {
           if (!this.isRecoveringFromDeviceChange) {
-            await this.handleDeviceChange();
+            await this.handleDeviceChange({ shouldResume: true });
           }
         }
       }

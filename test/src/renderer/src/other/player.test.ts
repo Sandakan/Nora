@@ -149,6 +149,66 @@ describe('AudioPlayer device change recovery', () => {
     });
   });
 
+  describe('play() recovery retries a rejected play request', () => {
+    it('should pass shouldResume: true to recovery when play() rejects while paused', async () => {
+      // A rejected play() leaves the element paused. The caller asked for
+      // playback, so recovery must force a resume attempt instead of silently
+      // succeeding while audio stays paused.
+      (player.audio as any).src = 'http://localhost/test.mp3';
+      (player.audio as any).paused = true;
+
+      vi.spyOn(player.audio, 'play').mockRejectedValueOnce(new Error('dead audio path'));
+
+      const handleSpy = vi.spyOn(player as any, 'handleDeviceChange').mockResolvedValue(undefined);
+
+      await player.play();
+
+      expect(handleSpy).toHaveBeenCalledWith({ shouldResume: true });
+      // The resolved play() must not have left the element silently paused
+      // with no recovery attempt.
+      expect((player as any).isRecoveringFromDeviceChange).toBe(false);
+    });
+
+    it('should not double-recover when recovery is already in flight', async () => {
+      (player.audio as any).src = 'http://localhost/test.mp3';
+
+      (player as any).isRecoveringFromDeviceChange = true;
+      vi.spyOn(player.audio, 'play').mockRejectedValueOnce(new Error('recovery in progress'));
+
+      const handleSpy = vi.spyOn(player as any, 'handleDeviceChange').mockResolvedValue(undefined);
+
+      await expect(player.play()).rejects.toThrow('recovery in progress');
+      expect(handleSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('handleDeviceChange shouldResume behavior', () => {
+    it('should default to preserving paused state on an OS devicechange event', async () => {
+      (player.audio as any).src = 'http://localhost/test.mp3';
+      (player.audio as any).paused = true;
+
+      // Strategy 1 play should NOT be attempted when shouldResume is false.
+      const playSpy = vi.spyOn(player.audio, 'play').mockResolvedValue(undefined as any);
+
+      await (player as any).handleDeviceChange();
+
+      expect(playSpy).not.toHaveBeenCalled();
+      expect((player as any).isRecoveringFromDeviceChange).toBe(false);
+    });
+
+    it('should attempt play when shouldResume is true', async () => {
+      (player.audio as any).src = 'http://localhost/test.mp3';
+      (player.audio as any).paused = true;
+
+      const playSpy = vi.spyOn(player.audio, 'play').mockResolvedValue(undefined as any);
+
+      await (player as any).handleDeviceChange({ shouldResume: true });
+
+      expect(playSpy).toHaveBeenCalled();
+      expect((player as any).isRecoveringFromDeviceChange).toBe(false);
+    });
+  });
+
   describe('destroy cleanup', () => {
     it('should clear ondevicechange handler', () => {
       player.destroy();
