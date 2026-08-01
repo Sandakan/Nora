@@ -36,6 +36,14 @@ const playlistData: Playlist = {
   isArtworkAvailable: true
 };
 
+/**
+ * Render the History playlist details page with controls for playback, queue management, selection, and sorting.
+ *
+ * The page displays saved history songs, provides actions to play, shuffle, and add songs to the queue, supports select-all,
+ * and persists the playlist sorting preference to local storage when it changes.
+ *
+ * @returns A React element representing the History playlist information page.
+ */
 function HistoryPlaylistInfoPage() {
   const { scrollTopOffset } = Route.useSearch();
 
