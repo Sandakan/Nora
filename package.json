@@ -72,7 +72,12 @@
     "sharp": "Using WASM build for cross-platform compatibility. Install with: npm install --cpu=wasm32 sharp",
     "prebuild:wasm": "Creates placeholder directory for Sharp platform compatibility due to package-lock.json references"
   },
+  "workspaces": [
+    "audio-engine"
+  ],
   "scripts": {
+    "build:engine": "cd audio-engine && npx napi build --platform -o dist --release",
+    "build:engine:debug": "cd audio-engine && npx napi build --platform -o dist",
     "test": "vitest run",
     "coverage": "vitest run --coverage",
     "check-types": "tsc --noEmit",
