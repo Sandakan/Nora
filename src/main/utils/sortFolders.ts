@@ -15,11 +15,20 @@ const sortZtoA = <T extends MusicFolder[]>(arr: T) =>
         : 0
   );
 
-const sortFolders = <T extends MusicFolder[]>(musicFolders: T, sortType: FolderSortTypes) => {
+const sortFolders = <T extends MusicFolder[]>(
+  musicFolders: T,
+  sortType: FolderSortTypes,
+  isParentBlacklisted = false
+) => {
   if (musicFolders.length > 0) {
     for (const musicFolder of musicFolders) {
+      const isFolderOrParentBlacklisted = musicFolder.isBlacklisted || isParentBlacklisted;
       if (musicFolder.subFolders.length > 0) {
-        musicFolder.subFolders = sortFolders(musicFolder.subFolders, sortType);
+        musicFolder.subFolders = sortFolders(
+          musicFolder.subFolders,
+          sortType,
+          isFolderOrParentBlacklisted
+        );
       }
     }
 
@@ -34,10 +43,14 @@ const sortFolders = <T extends MusicFolder[]>(musicFolders: T, sortType: FolderS
         a.songIds.length > b.songIds.length ? 1 : a.songIds.length < b.songIds.length ? -1 : 0
       );
     if (sortType === 'blacklistedFolders')
-      return sortAtoZ(musicFolders.filter((folder) => folder.isBlacklisted));
+      return sortAtoZ(
+        musicFolders.filter((folder) => folder.isBlacklisted || isParentBlacklisted)
+      );
 
     if (sortType === 'whitelistedFolders')
-      return sortAtoZ(musicFolders.filter((folder) => !folder.isBlacklisted));
+      return sortAtoZ(
+        musicFolders.filter((folder) => !folder.isBlacklisted && !isParentBlacklisted)
+      );
   }
   return musicFolders;
 };
