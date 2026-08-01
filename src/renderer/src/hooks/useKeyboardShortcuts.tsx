@@ -1,4 +1,5 @@
 import { normalizedKeys } from '@renderer/other/appShortcuts';
+import { LOCAL_STORAGE_DEFAULT_TEMPLATE } from '@renderer/other/appReducer';
 import { store } from '@renderer/store/store';
 import { useNavigate } from '@tanstack/react-router';
 import { useCallback, useEffect, type ReactNode } from 'react';
@@ -9,6 +10,25 @@ import storage from '../utils/localStorage';
 import { useAudioPlayer } from './useAudioPlayer';
 
 const AppShortcutsPrompt = lazy(() => import('../components/SettingsPage/AppShortcutsPrompt'));
+
+// Canonical id lookup for legacy shortcuts. Older stored data can carry
+// fallback ids (e.g. `unknown-0-0`) or human-readable labels instead of the
+// stable action ids used by the dispatch switch below. Resolve via the
+// default template's label mapping so customized legacy shortcuts still fire.
+const legacyShortcutLabelToId = new Map<string, string>(
+  LOCAL_STORAGE_DEFAULT_TEMPLATE.keyboardShortcuts.flatMap((category) =>
+    category.shortcuts.map((shortcut) => [shortcut.label, shortcut.id])
+  )
+);
+
+const canonicalizeShortcutId = (shortcut: Shortcut): string => {
+  // Prefer the canonical action id resolved from the label: legacy entries can
+  // carry meaningless fallback ids (e.g. `unknown-0-0`) that the dispatch
+  // switch doesn't recognize, while their human-readable label is intact.
+  const resolved = legacyShortcutLabelToId.get(shortcut.label);
+  if (resolved) return resolved;
+  return shortcut.id || shortcut.label;
+};
 
 /** Dependencies required by the keyboard shortcuts hook */
 export interface KeyboardShortcutDependencies {
@@ -154,7 +174,7 @@ export function useKeyboardShortcuts(dependencies: KeyboardShortcutDependencies)
       if (matchedShortcut) {
         e.preventDefault();
         let updatedPlaybackRate: number;
-        const shortcutId = (matchedShortcut.id || matchedShortcut.label || '').replace(
+        const shortcutId = canonicalizeShortcutId(matchedShortcut).replace(
           /(_key|Key)$/i,
           ''
         );

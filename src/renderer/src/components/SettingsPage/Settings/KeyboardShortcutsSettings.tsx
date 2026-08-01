@@ -91,7 +91,7 @@ const KeyboardShortcutsSettings = () => {
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [editingShortcut, newShortcut, newKeys, shortcuts, addNewNotifications, t]);
+  }, [editingShortcut, newShortcut, newKeys, shortcuts, addNewNotifications]);
 
   const shortcutCategoryComponents = useMemo(
     () =>
