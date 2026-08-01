@@ -48,30 +48,31 @@ export async function insertScrobble(params: {
 }
 
 export async function claimPendingBatch(
-  batchSize: number,
-  trx: DB | DBTransaction = db
+  batchSize: number
 ): Promise<Array<typeof scrobbleQueue.$inferSelect>> {
-  const items = await trx
-    .select()
-    .from(scrobbleQueue)
-    .where(
-      and(
-        eq(scrobbleQueue.status, 'pending'),
-        lte(scrobbleQueue.retryCount, MAX_RETRY_COUNT - 1)
+  return await db.transaction(async (innerTrx) => {
+    const items = await innerTrx
+      .select()
+      .from(scrobbleQueue)
+      .where(
+        and(
+          eq(scrobbleQueue.status, 'pending'),
+          lte(scrobbleQueue.retryCount, MAX_RETRY_COUNT - 1)
+        )
       )
-    )
-    .orderBy(asc(scrobbleQueue.createdAt))
-    .limit(batchSize);
+      .orderBy(asc(scrobbleQueue.createdAt))
+      .limit(batchSize);
 
-  if (items.length > 0) {
-    const ids = items.map((i) => i.id);
-    await trx
-      .update(scrobbleQueue)
-      .set({ status: 'sending' })
-      .where(inArray(scrobbleQueue.id, ids));
-  }
+    if (items.length > 0) {
+      const ids = items.map((i) => i.id);
+      await innerTrx
+        .update(scrobbleQueue)
+        .set({ status: 'sending' })
+        .where(inArray(scrobbleQueue.id, ids));
+    }
 
-  return items;
+    return items;
+  });
 }
 
 export async function markSent(
