@@ -306,7 +306,7 @@ class AudioPlayer {
     if (isStale()) return;
 
     this.audio.currentTime = savedTime;
-    if (wasPlaying) await this.audio.play();
+    if (shouldResume) await this.audio.play();
   }
 
   /**

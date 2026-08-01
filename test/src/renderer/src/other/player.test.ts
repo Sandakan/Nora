@@ -55,6 +55,12 @@ class MockAudio {
   load() { /* no-op in mock */ }
   setAttribute(_name: string, _value: string) { /* no-op in mock */ }
   removeAttribute(_name: string) { /* no-op in mock */ }
+
+  // Registry so tests can inspect elements created by rebuildAudioContext.
+  static instances: MockAudio[] = [];
+  constructor() {
+    MockAudio.instances.push(this);
+  }
 }
 
 // Injecting mocks for Node environment where AudioContext/Audio don't exist
@@ -206,6 +212,48 @@ describe('AudioPlayer device change recovery', () => {
 
       expect(playSpy).toHaveBeenCalled();
       expect((player as any).isRecoveringFromDeviceChange).toBe(false);
+    });
+  });
+
+  describe('recovery strategies execute play on shouldResume', () => {
+    it('rebuildAndPlay (Strategy 3) resumes when shouldResume is true', async () => {
+      // Executes the real rebuildAndPlay path (not a mocked handleDeviceChange),
+      // covering the regression where line ~309 referenced an undeclared
+      // `wasPlaying` identifier and threw ReferenceError.
+      (player.audio as any).src = 'http://localhost/test.mp3';
+      (player.audio as any).readyState = 4;
+
+      vi.spyOn(player as any, 'waitForCanPlay').mockResolvedValue(undefined);
+
+      await (player as any).rebuildAndPlay(
+        'http://localhost/test.mp3',
+        12,
+        true,
+        () => false
+      );
+
+      // rebuildAudioContext creates a new element; the NEW element must have
+      // played (shouldResume true) and restored the saved position.
+      const newest = MockAudio.instances[MockAudio.instances.length - 1];
+      expect(newest.paused).toBe(false);
+      expect(newest.currentTime).toBe(12);
+    });
+
+    it('rebuildAndPlay (Strategy 3) does not resume when shouldResume is false', async () => {
+      (player.audio as any).src = 'http://localhost/test.mp3';
+      (player.audio as any).readyState = 4;
+
+      vi.spyOn(player as any, 'waitForCanPlay').mockResolvedValue(undefined);
+
+      await (player as any).rebuildAndPlay(
+        'http://localhost/test.mp3',
+        0,
+        false,
+        () => false
+      );
+
+      const newest = MockAudio.instances[MockAudio.instances.length - 1];
+      expect(newest.paused).toBe(true);
     });
   });
 
