@@ -277,6 +277,10 @@ protocol.registerSchemesAsPrivileged([
   }
 ]);
 
+if (process.platform === 'win32') {
+  app.setAppUserModelId('com.sandakannipunajith.nora');
+}
+
 app
   .whenReady()
   .then(async () => {
