@@ -24,14 +24,14 @@ export const getLrcFilePaths = (
   customLrcFilesSaveLocation?: string | null
 ): string[] => {
   const defaultLrcFilePath = `${songPath}.lrc`;
-  const defaultLrcFilePathWithoutExtension = `${songPath.replaceAll(path.extname(songPath), '')}.lrc`;
+  const defaultLrcFilePathWithoutExtension = `${songPath.slice(0, songPath.length - path.extname(songPath).length)}.lrc`;
   const customLrcFilePath = customLrcFilesSaveLocation
     ? path.join(customLrcFilesSaveLocation, `${path.basename(songPath)}.lrc`)
     : undefined;
   const customLrcFilePathWithoutExtension = customLrcFilesSaveLocation
     ? path.join(
         customLrcFilesSaveLocation,
-        `${path.basename(songPath.replaceAll(path.extname(songPath), ''))}.lrc`
+        `${path.basename(songPath, path.extname(songPath))}.lrc`
       )
     : undefined;
 

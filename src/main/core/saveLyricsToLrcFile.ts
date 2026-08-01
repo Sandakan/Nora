@@ -119,12 +119,15 @@ const convertLyricsToLrcFormat = (songLyrics: SongLyrics) => {
   return lyricsArr.join('\n');
 };
 
-const getLrcFileSaveDirectory = async (songPathWithoutProtocol: string, lrcFileName: string) => {
-  const userData = await getUserSettings();
-  const extensionDroppedLrcFileName = lrcFileName.replaceAll(path.extname(lrcFileName), '');
+const getLrcFileSaveDirectory = (
+  songPathWithoutProtocol: string,
+  lrcFileName: string,
+  customLrcFilesSaveLocation?: string | null
+) => {
+  const extensionDroppedLrcFileName = lrcFileName.slice(0, lrcFileName.length - path.extname(lrcFileName).length);
   let saveDirectory: string;
 
-  if (userData.customLrcFilesSaveLocation) saveDirectory = userData.customLrcFilesSaveLocation;
+  if (customLrcFilesSaveLocation) saveDirectory = customLrcFilesSaveLocation;
   else {
     const songContainingFolderPath = path.dirname(songPathWithoutProtocol);
     saveDirectory = songContainingFolderPath;
@@ -134,8 +137,13 @@ const getLrcFileSaveDirectory = async (songPathWithoutProtocol: string, lrcFileN
 };
 
 const saveLyricsToLRCFile = async (songPathWithoutProtocol: string, songLyrics: SongLyrics) => {
+  const userData = await getUserSettings();
   const songFileName = path.basename(songPathWithoutProtocol);
-  const lrcFilePath = await getLrcFileSaveDirectory(songPathWithoutProtocol, songFileName);
+  const lrcFilePath = getLrcFileSaveDirectory(
+    songPathWithoutProtocol,
+    songFileName,
+    userData.customLrcFilesSaveLocation
+  );
 
   const lrcFormattedLyrics = convertLyricsToLrcFormat(songLyrics);
 
@@ -144,9 +152,8 @@ const saveLyricsToLRCFile = async (songPathWithoutProtocol: string, songLyrics: 
 
   const song = await getSongByPath(songPathWithoutProtocol).catch(() => undefined);
   if (song) {
-    const { customLrcFilesSaveLocation } = await getUserSettings();
     const { upsertSongLyrics } = await import('@main/db/queries/lyricsIndex');
-    await upsertSongLyrics(song.id, songPathWithoutProtocol, customLrcFilesSaveLocation).catch(
+    await upsertSongLyrics(song.id, songPathWithoutProtocol, userData.customLrcFilesSaveLocation).catch(
       (error) =>
         logger.error('Failed to re-index lyrics after LRC save', { error, songId: song.id })
     );
