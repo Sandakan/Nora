@@ -50,6 +50,13 @@ class AudioPlayer {
   private repeatMode: 'off' | 'one' | 'all' = 'off';
   private pendingAutoPlay: boolean = false;
 
+  /**
+   * When set, handleSongEnd() stops playback instead of advancing the queue.
+   * Used by the sleep timer's end-of-song mode so the next track cannot start
+   * after the timer completes.
+   */
+  stopAfterCurrentSong: boolean = false;
+
   constructor(queue: PlayerQueue) {
     this.listeners = new Map();
 
@@ -157,7 +164,17 @@ class AudioPlayer {
     // (e.g. sleep timer) can react to every song ending regardless of repeat/queue state.
     this.emit('songEnded', { songId: this.currentSongId });
 
-    console.log('[AudioPlayer.handleSongEnd]', { repeatMode: this.repeatMode });
+    console.log('[AudioPlayer.handleSongEnd]', { repeatMode: this.repeatMode, stopAfterCurrentSong: this.stopAfterCurrentSong });
+
+    // A consumer (sleep timer end-of-song mode) may have requested playback to
+    // stop here. Check BEFORE enabling queue auto-play so the next track is not
+    // loaded or started after the timer completes.
+    if (this.stopAfterCurrentSong) {
+      this.stopAfterCurrentSong = false;
+      this.pendingAutoPlay = false;
+      this.emit('playbackComplete');
+      return;
+    }
 
     if (this.repeatMode === 'one') {
       this.audio.currentTime = 0;
@@ -193,6 +210,10 @@ class AudioPlayer {
     options?: { autoPlay?: boolean; updateStore?: boolean }
   ): Promise<AudioPlayerData> {
     let songData: AudioPlayerData;
+
+    // A new explicit load means the user wants playback to continue; clear any
+    // stop-after-current-song request set by a consumer (e.g. sleep timer).
+    this.stopAfterCurrentSong = false;
 
     try {
       if (typeof songIdOrData === 'number') {

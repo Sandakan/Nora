@@ -21,6 +21,13 @@ class SleepTimer {
 
   private pausedRemainingSeconds = 0;
 
+  /** Incremented on start/stop so a stale async completion cannot clear a newer timer. */
+  private completionGeneration = 0;
+
+  private isValidDuration(minutes: number): boolean {
+    return Number.isFinite(minutes) && minutes > 0;
+  }
+
   setPlayer(player: AudioPlayer) {
     if (this.playerRef && this.songEndedHandler) {
       this.playerRef.off('songEnded', this.songEndedHandler);
@@ -36,6 +43,12 @@ class SleepTimer {
   start(mode: SleepTimerMode, minutes?: number): void {
     if (this.isActive()) this.stop();
 
+    // Reject invalid durations at the engine boundary (NaN, Infinity, <= 0).
+    if (mode === 'time' && (minutes === undefined || !this.isValidDuration(minutes))) {
+      return;
+    }
+
+    this.completionGeneration += 1;
     this.mode = mode;
     this._isPaused = false;
 
@@ -53,6 +66,7 @@ class SleepTimer {
   }
 
   stop(): void {
+    this.completionGeneration += 1;
     this.clearTimer();
     this.removeSongEndListener();
     this.mode = null;
@@ -65,8 +79,10 @@ class SleepTimer {
 
   pause(): void {
     if (!this.isActive() || this._isPaused) return;
-    this._isPaused = true;
+    // Capture remaining BEFORE flipping the paused flag: getRemainingSeconds()
+    // reads pausedRemainingSeconds once paused, so ordering matters.
     this.pausedRemainingSeconds = this.getRemainingSeconds();
+    this._isPaused = true;
 
     if (this.mode === 'time') {
       this.clearTimer();
@@ -96,6 +112,7 @@ class SleepTimer {
 
   extend(minutes: number): void {
     if (!this.isActive() || this.mode !== 'time') return;
+    if (!this.isValidDuration(minutes)) return;
     if (this._isPaused) {
       this.pausedRemainingSeconds += minutes * 60;
     } else {
@@ -165,7 +182,12 @@ class SleepTimer {
 
     this.songEndedHandler = () => {
       if (this.mode === 'endOfSong') {
-        this.fireTimer();
+        // Mark playback to stop BEFORE any await so the player's
+        // handleSongEnd() sees it synchronously and skips queue auto-play.
+        // Without this, the queue advances and can start the next track
+        // while the fade-out below is still awaiting.
+        if (this.playerRef) this.playerRef.stopAfterCurrentSong = true;
+        void this.fireTimer();
       }
     };
     this.playerRef.on('songEnded', this.songEndedHandler);
@@ -179,6 +201,7 @@ class SleepTimer {
   }
 
   private async fireTimer(): Promise<void> {
+    const generation = this.completionGeneration;
     this.clearTimer();
     this.removeSongEndListener();
 
@@ -186,10 +209,16 @@ class SleepTimer {
       await this.playerRef.pause();
     }
 
+    // A newer timer may have started during the fade. Only complete this one
+    // if it is still the current timer, so an old completion cannot reset a
+    // newly started timer's state.
+    if (generation !== this.completionGeneration) return;
+
     const firedMode = this.mode;
     this.mode = null;
     this.endTimestamp = null;
     this._isPaused = false;
+    this.pausedRemainingSeconds = 0;
 
     this.emit('complete', { mode: firedMode });
   }
