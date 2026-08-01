@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 import ListeningDataSession from '../other/listeningDataSession';
 
@@ -30,6 +30,29 @@ import ListeningDataSession from '../other/listeningDataSession';
 export function useListeningData(player: HTMLAudioElement) {
   // Track the current listening session
   const recordRef = useRef<ListeningDataSession>(undefined);
+  // Track the element the current session's listeners are attached to. Strategy
+  // 3 (audio-device recovery) replaces this.audio with a fresh element, and the
+  // active session's pause/play/seeked listeners must move to the replacement.
+  const elementRef = useRef<HTMLAudioElement>(player);
+
+  // Re-attach the active session's native-element listeners when the audio
+  // element is replaced (device-change rebuild). The session itself persists;
+  // only the element its listeners observe changes.
+  useEffect(() => {
+    if (elementRef.current === player) return;
+    const session = recordRef.current;
+    if (!session) {
+      elementRef.current = player;
+      return;
+    }
+    const attach = (element: HTMLAudioElement) => {
+      element.addEventListener('pause', () => { session.isPaused = true; }, { signal: session.abortController.signal });
+      element.addEventListener('play', () => { session.isPaused = false; }, { signal: session.abortController.signal });
+      element.addEventListener('seeked', () => { session.addSeekPosition = element.currentTime; }, { signal: session.abortController.signal });
+    };
+    attach(player);
+    elementRef.current = player;
+  }, [player]);
 
   /**
    * Records listening data for a song.

@@ -68,7 +68,11 @@ class AudioPlayer {
     this.equalizerBands = new Map();
     this.gainNode = this.currentContext.createGain();
 
-    this.currentVolume = this.audio.volume;
+    // Store volume is 0-100 (default 50). The element volume is 0-1 and stays 1
+    // until a store notification, so initializing from this.audio.volume would
+    // leave currentVolume at 1 and Strategy 3 rebuilds would restore ~1% gain.
+    this.currentVolume = store.state.player.volume.value;
+    this.audio.volume = this.currentVolume / 100;
 
     this.unsubscribeFunc = this.subscribeToStoreEvents();
     this.initializeEqualizer();

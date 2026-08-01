@@ -255,6 +255,27 @@ describe('AudioPlayer device change recovery', () => {
       const newest = MockAudio.instances[MockAudio.instances.length - 1];
       expect(newest.paused).toBe(true);
     });
+
+    it('rebuildAndPlay (Strategy 3) restores gain from the store volume, not the raw element volume', async () => {
+      // The store mock default volume is 50 (0-100). The constructor must
+      // initialize currentVolume from the store so a rebuild without any store
+      // notification restores 50% gain (0.5) instead of 1% (0.01).
+      expect(player.currentVolume).toBe(50);
+      (player.audio as any).src = 'http://localhost/test.mp3';
+      (player.audio as any).readyState = 4;
+      vi.spyOn(player as any, 'waitForCanPlay').mockResolvedValue(undefined);
+
+      await (player as any).rebuildAndPlay(
+        'http://localhost/test.mp3',
+        0,
+        false,
+        () => false
+      );
+
+      // After the rebuild, the gain node must reflect the store default (50%),
+      // not the raw element volume (1 -> 0.01).
+      expect(player.gainNode.gain.value).toBeCloseTo(0.5);
+    });
   });
 
   describe('destroy cleanup', () => {
