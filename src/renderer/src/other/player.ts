@@ -199,74 +199,107 @@ class AudioPlayer {
 
     if (!currentSrc) return;
 
+    // Only auto-resume if the user was actively playing before the switch.
+    // A deliberate pause must not be undone by an OS device event.
+    const wasPlaying = !this.audio.paused;
+
     const generation = ++this.deviceChangeGeneration;
 
-    if (AudioPlayer.DEBUG) console.log('[AudioPlayer.handleDeviceChange]', { savedTime });
+    if (AudioPlayer.DEBUG) console.log('[AudioPlayer.handleDeviceChange]', { savedTime, wasPlaying });
 
     // Mark recovery in progress so other methods know
     this.isRecoveringFromDeviceChange = true;
 
+    const isStale = () => generation !== this.deviceChangeGeneration;
+
     try {
-      // Resume AudioContext if it got suspended during the device switch
       if (this.currentContext.state === 'suspended') {
         await this.currentContext.resume();
       }
 
-      // Strategy 1: Simple play() — Chromium may auto-reroute to the new default device
+      if (await this.trySimplePlay(savedTime, wasPlaying, isStale)) return;
+      if (isStale()) return;
+
       try {
-        await this.audio.play();
-        if (generation !== this.deviceChangeGeneration) return;
-        this.audio.currentTime = savedTime;
-        if (AudioPlayer.DEBUG) console.log('[AudioPlayer.handleDeviceChange] Simple play() succeeded');
-        return;
-      } catch {
-        if (generation !== this.deviceChangeGeneration) return;
-        if (AudioPlayer.DEBUG) console.log('[AudioPlayer.handleDeviceChange] Simple play() failed, reloading src');
-      }
+        await this.reloadSrc(currentSrc, savedTime, wasPlaying, isStale);
+        if (AudioPlayer.DEBUG) console.log('[AudioPlayer.handleDeviceChange] Reload recovery succeeded');
+      } catch (err) {
+        if (isStale()) return;
 
-      if (generation !== this.deviceChangeGeneration) return;
+        console.error('[AudioPlayer.handleDeviceChange] Reload failed, rebuilding AudioContext', err);
 
-      // Strategy 2: Reload the src with fresh cache-busting to force a new audio path
-      this.audio.src = '';
-      const url = new URL(currentSrc.split('?')[0]);
-      url.searchParams.set('ts', `${Date.now()}`);
-      this.audio.src = url.toString();
-      this.audio.load();
-
-      await this.waitForCanPlay();
-      if (generation !== this.deviceChangeGeneration) return;
-
-      this.audio.currentTime = savedTime;
-      await this.audio.play();
-      if (AudioPlayer.DEBUG) console.log('[AudioPlayer.handleDeviceChange] Reload recovery succeeded');
-    } catch (err) {
-      if (generation !== this.deviceChangeGeneration) return;
-
-      console.error('[AudioPlayer.handleDeviceChange] Reload failed, rebuilding AudioContext', err);
-
-      // Strategy 3: Nuclear — rebuild the entire AudioContext + EQ chain with a new Audio element
-      try {
-        this.rebuildAudioContext();
-        this.audio.src = currentSrc;
-        this.audio.load();
-
-        await this.waitForCanPlay();
-        if (generation !== this.deviceChangeGeneration) return;
-
-        this.audio.currentTime = savedTime;
-        await this.audio.play();
-        if (AudioPlayer.DEBUG) console.log('[AudioPlayer.handleDeviceChange] AudioContext rebuild recovery succeeded');
-      } catch (rebuildErr) {
-        console.error('[AudioPlayer.handleDeviceChange] All recovery strategies failed', rebuildErr);
-        this.emit('error', rebuildErr);
-        // Dispatch native error event so the app's playback-error UI picks it up
-        this.audio.dispatchEvent(new Event('error'));
+        try {
+          await this.rebuildAndPlay(currentSrc, savedTime, wasPlaying, isStale);
+          if (AudioPlayer.DEBUG) console.log('[AudioPlayer.handleDeviceChange] AudioContext rebuild recovery succeeded');
+        } catch (rebuildErr) {
+          console.error('[AudioPlayer.handleDeviceChange] All recovery strategies failed', rebuildErr);
+          this.emit('error', rebuildErr);
+          // Dispatch native error event so the app's playback-error UI picks it up
+          this.audio.dispatchEvent(new Event('error'));
+        }
       }
     } finally {
-      if (generation === this.deviceChangeGeneration) {
+      if (!isStale()) {
         this.isRecoveringFromDeviceChange = false;
       }
     }
+  }
+
+  /** Strategy 1: plain play() — Chromium may auto-reroute to the new device. Returns true when handled. */
+  private async trySimplePlay(
+    savedTime: number,
+    wasPlaying: boolean,
+    isStale: () => boolean
+  ): Promise<boolean> {
+    try {
+      if (wasPlaying) await this.audio.play();
+      if (isStale()) return true;
+      this.audio.currentTime = savedTime;
+      if (AudioPlayer.DEBUG) console.log('[AudioPlayer.handleDeviceChange] Simple play() succeeded');
+      return true;
+    } catch {
+      if (isStale()) return true;
+      if (AudioPlayer.DEBUG) console.log('[AudioPlayer.handleDeviceChange] Simple play() failed, reloading src');
+      return false;
+    }
+  }
+
+  /** Strategy 2: cache-busting src reload to force a fresh audio path. */
+  private async reloadSrc(
+    currentSrc: string,
+    savedTime: number,
+    wasPlaying: boolean,
+    isStale: () => boolean
+  ): Promise<void> {
+    this.audio.src = '';
+    const url = new URL(currentSrc.split('?')[0]);
+    url.searchParams.set('ts', `${Date.now()}`);
+    this.audio.src = url.toString();
+    this.audio.load();
+
+    await this.waitForCanPlay();
+    if (isStale()) return;
+
+    this.audio.currentTime = savedTime;
+    if (wasPlaying) await this.audio.play();
+  }
+
+  /** Strategy 3: rebuild the AudioContext + EQ chain with a new Audio element, then resume. */
+  private async rebuildAndPlay(
+    currentSrc: string,
+    savedTime: number,
+    wasPlaying: boolean,
+    isStale: () => boolean
+  ): Promise<void> {
+    this.rebuildAudioContext();
+    this.audio.src = currentSrc;
+    this.audio.load();
+
+    await this.waitForCanPlay();
+    if (isStale()) return;
+
+    this.audio.currentTime = savedTime;
+    if (wasPlaying) await this.audio.play();
   }
 
   /**
@@ -379,13 +412,7 @@ class AudioPlayer {
 
     if (this.repeatMode === 'one') {
       this.audio.currentTime = 0;
-      try {
-        await this.play();
-      } catch {
-        if (!this.isRecoveringFromDeviceChange) {
-          await this.handleDeviceChange();
-        }
-      }
+      await this.play();
       this.emit('repeatOne');
       return;
     }
@@ -503,6 +530,11 @@ class AudioPlayer {
   /** Cleans up resources and event listeners. Should be called when player is no longer needed. */
   destroy() {
     if (this.unsubscribeFunc) this.unsubscribeFunc.unsubscribe();
+    // Cancel any in-flight device-change recovery so pending continuations
+    // bail at their next generation checkpoint instead of touching a torn-
+    // down context or dispatching errors after teardown.
+    ++this.deviceChangeGeneration;
+    this.isRecoveringFromDeviceChange = false;
     this.queue.removeAllListeners();
     this.removeAllListeners();
     this.audio.pause();
@@ -667,7 +699,13 @@ class AudioPlayer {
     if (this.currentContext.state === 'suspended') {
       await this.currentContext.resume();
     }
-    await this.audio.play();
+    try {
+      await this.audio.play();
+    } catch (err) {
+      if (this.isRecoveringFromDeviceChange) throw err;
+      await this.handleDeviceChange();
+      return;
+    }
     return this.fadeInAudio();
   }
 
@@ -690,18 +728,21 @@ class AudioPlayer {
         try {
           await this.play();
         } catch {
-          // Play failed, likely a dead audio path from device change. Try recovery.
-          if (!this.isRecoveringFromDeviceChange) {
-            await this.handleDeviceChange();
-          } else {
-            // Recovery already in progress, surface the failure to the UI
-            this.emit('error', new Error('Play failed while recovery is in progress'));
-            this.audio.dispatchEvent(new Event('error'));
-          }
+          // Play failed and recovery already ran (or is in flight). Surface it.
+          this.emit('error', new Error('Play failed while recovery is in progress'));
+          this.audio.dispatchEvent(new Event('error'));
         }
       } else if (this.audio.src) {
-        // readyState is 0 but src exists — audio path may be dead. Attempt recovery.
-        await this.handleDeviceChange();
+        // readyState is 0 but src exists — try a normal play first; only
+        // escalate to device recovery if that fails. This avoids treating a
+        // still-buffering song as a dead audio path.
+        try {
+          await this.play();
+        } catch {
+          if (!this.isRecoveringFromDeviceChange) {
+            await this.handleDeviceChange();
+          }
+        }
       }
     } else {
       await this.pause();
@@ -777,13 +818,7 @@ class AudioPlayer {
     // Handle repeat-one mode (only auto-repeat, not on user skip)
     if (this.repeatMode === 'one' && reason !== 'USER_SKIP') {
       this.audio.currentTime = 0;
-      try {
-        await this.play();
-      } catch {
-        if (!this.isRecoveringFromDeviceChange) {
-          await this.handleDeviceChange();
-        }
-      }
+      await this.play();
 
       // Emit event for listening data recording (repetition)
       if (store.state.currentSongData?.songId) {

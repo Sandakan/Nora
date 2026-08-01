@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // Mock dependencies before importing the module under test
 vi.mock('../../../../../src/renderer/src/store/store', () => ({
@@ -95,10 +95,14 @@ describe('AudioPlayer device change recovery', () => {
     player = new AudioPlayer(mockQueue as any);
   });
 
+  afterEach(() => {
+    (player as any).destroy?.();
+  });
+
   describe('setupDeviceChangeListener', () => {
     it('should register ondevicechange handler when supported', () => {
       // The constructor calls setupDeviceChangeListener
-      expect(navigator.mediaDevices?.ondevicechange).toBeDefined();
+      expect(navigator.mediaDevices?.ondevicechange).toBeTypeOf('function');
     });
   });
 
