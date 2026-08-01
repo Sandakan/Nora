@@ -131,6 +131,12 @@ const notificationsFromMainConfig: AppNotificationConfig[] = [
     iconClassName: 'material-icons-round-outlined'
   },
   {
+    trigger: ['RESYNC_PARTIAL'],
+    duration: 8000,
+    iconName: 'warning',
+    iconClassName: 'material-icons-round-outlined'
+  },
+  {
     trigger: ['PARSE_FAILED'],
     duration: 15000,
     buttons: [

@@ -7,7 +7,7 @@ import { getAllFolderStructures } from '@main/db/queries/folders';
 import { supportedMusicExtensions } from '../filesystem';
 import checkFolderForUnknownModifications from './checkFolderForUnknownContentModifications';
 import checkForFolderModifications from './checkForFolderModifications';
-import { saveAbortController } from './controlAbortControllers';
+import { saveAbortController, registerWatcherCleanup } from './controlAbortControllers';
 import getParentFolderPaths from './getParentFolderPaths';
 import logger from '../logger';
 
@@ -60,40 +60,50 @@ const createParentFolderWatcherFunction = (parentFolderPath: string) => {
     }, 1500);
   };
 
-  return async (eventType: WatchEventType, filename?: string | null) => {
-    if (filename) {
-      if (eventType === 'rename') {
-        const fullPath = path.normalize(path.join(parentFolderPath, filename));
-        const fullPathStat = await stat(fullPath).catch(() => null);
+  return {
+    handler: async (eventType: WatchEventType, filename?: string | null) => {
+      if (filename) {
+        if (eventType === 'rename') {
+          const fullPath = path.normalize(path.join(parentFolderPath, filename));
+          const fullPathStat = await stat(fullPath).catch(() => null);
 
-        if (fullPathStat?.isDirectory()) {
-          const containingFolder = await findContainingMusicFolder(fullPath);
-          if (containingFolder) {
-            logger.debug(`New directory detected inside music folder.`, {
-              path: fullPath,
-              musicFolder: containingFolder
-            });
-            scheduleScan(containingFolder);
-            return;
-          }
-          await checkForFolderModifications(filename);
-        } else if (fullPathStat === null) {
-          await checkForFolderModifications(filename);
-        } else if (
-          fullPathStat.isFile() &&
-          supportedMusicExtensions.includes(path.extname(fullPath))
-        ) {
-          const containingFolder = await findContainingMusicFolder(fullPath);
-          if (containingFolder) {
-            scheduleScan(containingFolder);
+          if (fullPathStat?.isDirectory()) {
+            const containingFolder = await findContainingMusicFolder(fullPath);
+            if (containingFolder) {
+              logger.debug(`New directory detected inside music folder.`, {
+                path: fullPath,
+                musicFolder: containingFolder
+              });
+              scheduleScan(containingFolder);
+              return;
+            }
+            await checkForFolderModifications(filename);
+          } else if (fullPathStat === null) {
+            await checkForFolderModifications(filename);
+          } else if (
+            fullPathStat.isFile() &&
+            supportedMusicExtensions.includes(path.extname(fullPath))
+          ) {
+            const containingFolder = await findContainingMusicFolder(fullPath);
+            if (containingFolder) {
+              scheduleScan(containingFolder);
+            }
           }
         }
+      } else {
+        logger.warn('Failed to watch parent folders because watcher sent an undefined filename', {
+          eventType,
+          filename
+        });
       }
-    } else {
-      logger.warn('Failed to watch parent folders because watcher sent an undefined filename', {
-        eventType,
-        filename
-      });
+    },
+    // Cancel a pending debounced scan so a watcher reset cannot run a stale
+    // scan with outdated event state after the watcher is closed.
+    cleanup: () => {
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+        debounceTimer = null;
+      }
     }
   };
 };
@@ -109,16 +119,26 @@ const getAllPathsFromStructures = (structures: FolderStructure[], paths: string[
 const addWatcherToParentFolder = (parentFolderPath: string) => {
   try {
     const abortController = new AbortController();
-    const watcherFunction = createParentFolderWatcherFunction(parentFolderPath);
+    const watcherFunctions = createParentFolderWatcherFunction(parentFolderPath);
+    // fs.watch recursive mode is not supported on Linux (ENOSYS or silently
+    // non-recursive depending on kernel/backend). Fall back to a non-recursive
+    // watch on Linux and rely on the top-level scan / manual resync for nested
+    // discovery, while logging the limitation once per folder.
+    const isRecursiveSupported = process.platform !== 'linux';
+    if (!isRecursiveSupported) {
+      logger.warn(
+        'Recursive parent-folder watching is not supported on Linux; nested discovery falls back to the library scan / manual resync.',
+        { parentFolderPath }
+      );
+    }
     const watcher = fsSync.watch(
       parentFolderPath,
       {
         signal: abortController.signal,
-        // TODO - recursive mode won't work on linux
-        recursive: true
+        recursive: isRecursiveSupported
       },
       (eventType, filename) => {
-        void watcherFunction(eventType, filename).catch((error) => {
+        void watcherFunctions.handler(eventType, filename).catch((error) => {
           logger.error('Failed to process parent-folder watcher event.', {
             error,
             parentFolderPath,
@@ -137,6 +157,7 @@ const addWatcherToParentFolder = (parentFolderPath: string) => {
       logger.debug(`Successfully closed the parent folder watcher.`, { parentFolderPath })
     );
     saveAbortController(parentFolderPath, abortController);
+    registerWatcherCleanup(parentFolderPath, watcherFunctions.cleanup);
   } catch (error) {
     logger.error(`Error occurred when watching a folder.`, { error, parentFolderPath });
   }

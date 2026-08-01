@@ -8,7 +8,12 @@ const getTopLevelFolderPaths = async (): Promise<string[]> => {
   return structures.map((s) => s.path);
 };
 
-const checkForNewSongs = async () => {
+// Single-flight guard: the full library scan must not run concurrently from
+// IPC resync, startup, or future callers. Concurrent callers join the active
+// scan instead of starting a second one.
+let activeScanPromise: Promise<Awaited<ReturnType<typeof runCheckForNewSongs>>> | null = null;
+
+const runCheckForNewSongs = async () => {
   const topLevelFolders = await getTopLevelFolderPaths();
   const failedFolders: string[] = [];
   const failedSongPaths: string[] = [];
@@ -40,6 +45,16 @@ const checkForNewSongs = async () => {
     failedFolders.length > 0 || failedSongPaths.length > 0 || deletionFailures.length > 0 || scanFailed;
 
   return { failedFolders, failedSongPaths, deletionFailures, hasFailures, scanFailed };
+};
+
+const checkForNewSongs = async () => {
+  if (activeScanPromise) return activeScanPromise;
+
+  activeScanPromise = runCheckForNewSongs().finally(() => {
+    activeScanPromise = null;
+  });
+
+  return activeScanPromise;
 };
 
 export default checkForNewSongs;

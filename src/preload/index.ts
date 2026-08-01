@@ -103,7 +103,7 @@ const audioLibraryControls = {
     dataUpdateType: number
   ): Promise<void> =>
     ipcRenderer.invoke('app/updateSongListeningData', songId, dataType, dataUpdateType),
-  resyncSongsLibrary: (): Promise<true> => ipcRenderer.invoke('app/resyncSongsLibrary'),
+  resyncSongsLibrary: (): Promise<void> => ipcRenderer.invoke('app/resyncSongsLibrary'),
 
   getBlacklistData: (): Promise<Blacklist> => ipcRenderer.invoke('app/getBlacklistData'),
   blacklistSongs: (songIds: number[]): Promise<void> =>

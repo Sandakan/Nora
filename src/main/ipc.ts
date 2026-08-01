@@ -125,7 +125,6 @@ import { compare } from './utils/safeStorage';
  */
 export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSignal) {
   if (mainWindow) {
-    let resyncPromise: Promise<void> | null = null;
     ipcMain.on('app/close', () => app.quit());
 
     ipcMain.on('app/minimize', () => mainWindow.minimize());
@@ -476,22 +475,14 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     );
 
     ipcMain.handle('app/resyncSongsLibrary', async () => {
-      if (resyncPromise) {
-        await resyncPromise;
-        return;
+      // checkForNewSongs is single-flight internally, so a concurrent IPC,
+      // startup, or watcher scan joins the active scan instead of overlapping.
+      const { hasFailures } = await checkForNewSongs();
+      if (hasFailures) {
+        sendMessageToRenderer({ messageCode: 'RESYNC_PARTIAL' });
+      } else {
+        sendMessageToRenderer({ messageCode: 'RESYNC_SUCCESSFUL' });
       }
-      resyncPromise = checkForNewSongs()
-        .then(({ hasFailures }) => {
-          if (hasFailures) {
-            sendMessageToRenderer({ messageCode: 'RESYNC_PARTIAL' });
-          } else {
-            sendMessageToRenderer({ messageCode: 'RESYNC_SUCCESSFUL' });
-          }
-        })
-        .finally(() => {
-          resyncPromise = null;
-        });
-      await resyncPromise;
     });
 
     ipcMain.handle('app/getBlacklistData', getBlacklistData);
