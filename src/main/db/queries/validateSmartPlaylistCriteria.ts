@@ -114,6 +114,38 @@ const isKnownField = (field: string): field is SmartPlaylistRuleField => {
   );
 };
 
+const VALID_PERIODS = ['overall', '7day', '1month', '3month', '6month', '12month'];
+const MAX_USERNAME_LENGTH = 200;
+
+export type LastFmSourceValidationResult =
+  | { success: true }
+  | { success: false; reason: string };
+
+export const validateLastFmSource = (source: unknown): LastFmSourceValidationResult => {
+  if (!source || typeof source !== 'object') {
+    return { success: false, reason: 'lastfm-source-not-object' };
+  }
+  const s = source as Record<string, unknown>;
+
+  if (typeof s.username !== 'string' || s.username.trim().length === 0 || s.username.trim().length > MAX_USERNAME_LENGTH) {
+    return { success: false, reason: 'invalid-lastfm-username' };
+  }
+
+  if (s.type !== 'top' && s.type !== 'recent' && s.type !== 'loved') {
+    return { success: false, reason: 'invalid-lastfm-type' };
+  }
+
+  if (s.period !== undefined && typeof s.period === 'string' && !VALID_PERIODS.includes(s.period)) {
+    return { success: false, reason: 'invalid-lastfm-period' };
+  }
+
+  if (s.limit !== undefined && (typeof s.limit !== 'number' || !Number.isSafeInteger(s.limit) || s.limit <= 0 || s.limit > MAX_LIMIT)) {
+    return { success: false, reason: 'invalid-lastfm-limit' };
+  }
+
+  return { success: true };
+};
+
 const isValidOperator = (field: SmartPlaylistRuleField, operator: string): boolean => {
   if (STRING_FIELDS.has(field)) {
     return operator === 'eq' || operator === 'neq' || operator === 'contains';

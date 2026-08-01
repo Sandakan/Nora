@@ -73,7 +73,7 @@ import {
 import { removeDefaultAppProtocolFromFilePath } from './fs/resolveFilePaths';
 import { getPlaylistById, updatePlaylistCriteria } from './db/queries/playlists';
 import { refreshSmartPlaylist } from './db/queries/playlist-rules';
-import { validateSmartPlaylistCriteria } from './db/queries/validateSmartPlaylistCriteria';
+import { validateLastFmSource, validateSmartPlaylistCriteria } from './db/queries/validateSmartPlaylistCriteria';
 import logger, { logFilePath } from './logger';
 import { db } from './db/db';
 import {
@@ -122,6 +122,7 @@ import romanizeLyrics from './utils/romanizeLyrics';
 import { compare } from './utils/safeStorage';
 
 const smartPlaylistLocks = new Map<number, Promise<unknown>>();
+const MAX_LASTFM_MATCH_IDS = 100;
 
 /**
  * Registers Electron IPC listeners and main-window event handlers for the provided window.
@@ -520,9 +521,10 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
         if (
           !Array.isArray(songIds) ||
           songIds.length === 0 ||
+          songIds.length > MAX_LASTFM_MATCH_IDS ||
           !songIds.every((id) => Number.isSafeInteger(id) && id > 0)
         ) {
-          logger.error('Invalid songIds in syncLastFmToSmartPlaylist', { playlistId });
+          logger.error('Invalid songIds in syncLastFmToSmartPlaylist', { playlistId, count: songIds.length });
           return { success: false as const, count: 0 };
         }
         if (!source || typeof source !== 'object') {
@@ -628,7 +630,12 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
           let criteria: SmartPlaylistCriteria;
           try {
             const parsed = JSON.parse(playlist.criteria);
-            if (parsed.lastFmSource) {
+            if (parsed.lastFmSource !== undefined) {
+              const sourceValidation = validateLastFmSource(parsed.lastFmSource);
+              if (!sourceValidation.success) {
+                logger.error('Smart playlist lastFmSource shape invalid', { playlistId, reason: sourceValidation.reason });
+                return { songIds: [], success: false as const, reason: 'invalid-lastfm-source' as const };
+              }
               return { songIds: [], success: true as const, skipped: 'lastfm-synced' as const };
             }
             const validation = validateSmartPlaylistCriteria(parsed);

@@ -115,7 +115,7 @@ function PlaylistInfoPage() {
                     }
                   ])
               )
-              .catch((err) => console.error(err))
+              .catch((err) => log('Failed to clear song history', { error: err }, 'ERROR'))
         }}
       />
     );

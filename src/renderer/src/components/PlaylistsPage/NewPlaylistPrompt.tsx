@@ -107,7 +107,7 @@ const NewPlaylistPrompt = (props: NewPlaylistPromptProp) => {
               .getImgFileLocation()
               .then((res) => setArtworkPath(res))
 
-              .catch((err) => console.error(err))
+              .catch((err) => log('Failed to pick playlist artwork', { error: err }, 'ERROR'))
           }
         />
       </div>

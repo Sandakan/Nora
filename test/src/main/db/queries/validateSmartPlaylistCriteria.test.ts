@@ -1,6 +1,7 @@
 import { describe, test, expect } from 'vitest';
 
 import {
+  validateLastFmSource,
   validateSmartPlaylistCriteria,
   validateSmartPlaylistRule
 } from '@main/db/queries/validateSmartPlaylistCriteria';
@@ -160,5 +161,57 @@ describe('validateSmartPlaylistCriteria', () => {
   test('accepts bounded valid limit', () => {
     const criteria = { matchType: 'ALL', rules: [validRule], limit: 50 };
     expect(validateSmartPlaylistCriteria(criteria)).toEqual({ success: true });
+  });
+});
+
+describe('validateLastFmSource', () => {
+  test('accepts a valid source', () => {
+    const source = { username: 'nora', type: 'top', period: 'overall', limit: 50 };
+    expect(validateLastFmSource(source)).toEqual({ success: true });
+  });
+
+  test('accepts a source without optional fields', () => {
+    const source = { username: 'nora', type: 'recent' };
+    expect(validateLastFmSource(source)).toEqual({ success: true });
+  });
+
+  test('rejects non-object source', () => {
+    expect(validateLastFmSource(null).success).toBe(false);
+    expect(validateLastFmSource(true).success).toBe(false);
+  });
+
+  test('rejects empty or whitespace username', () => {
+    expect(validateLastFmSource({ username: '', type: 'top' }).success).toBe(false);
+    expect(validateLastFmSource({ username: '   ', type: 'top' }).success).toBe(false);
+  });
+
+  test('rejects oversize username', () => {
+    const source = { username: 'x'.repeat(201), type: 'top' };
+    expect(validateLastFmSource(source).success).toBe(false);
+  });
+
+  test('rejects invalid type', () => {
+    const source = { username: 'nora', type: 'weekly' };
+    expect(validateLastFmSource(source).success).toBe(false);
+  });
+
+  test('rejects invalid period', () => {
+    const source = { username: 'nora', type: 'top', period: 'year' };
+    expect(validateLastFmSource(source).success).toBe(false);
+  });
+
+  test('rejects fractional limit', () => {
+    const source = { username: 'nora', type: 'top', limit: 2.5 };
+    expect(validateLastFmSource(source).success).toBe(false);
+  });
+
+  test('rejects excessive limit', () => {
+    const source = { username: 'nora', type: 'top', limit: 101 };
+    expect(validateLastFmSource(source).success).toBe(false);
+  });
+
+  test('accepts boundary limit', () => {
+    const source = { username: 'nora', type: 'top', limit: 100 };
+    expect(validateLastFmSource(source)).toEqual({ success: true });
   });
 });
