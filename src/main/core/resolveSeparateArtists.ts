@@ -68,8 +68,11 @@ export const resolveSeparateArtists = async (
     artistsData.push(...(newArtists as unknown as (typeof artistsData)[number][]));
 
     // ALBUMS
+    const affectedAlbumIds = new Set<number>();
+
     for (const album of albumsData) {
       if (album?.artists?.some((x) => x.artistId === selectedArtist.artistId)) {
+        affectedAlbumIds.add(album.albumId);
         album.artists = album.artists!.filter((x) => {
           if (x.artistId === selectedArtist.artistId) return false;
           if (availArtists.some((y) => y.artistId === x.artistId)) return false;
@@ -145,21 +148,19 @@ export const resolveSeparateArtists = async (
     const selectedArtistId = selectedArtist.artistId;
     for (const songRef of selectedArtist.songs) {
       const songId = songRef.songId;
-      for (const ta of targetArtists) {
-        const alreadyLinked = await getLinkedSongArtist(songId, ta.id, db);
-        if (!alreadyLinked) await linkSongToArtist(ta.id, songId, db);
+      for (const targetArtist of targetArtists) {
+        const alreadyLinked = await getLinkedSongArtist(songId, targetArtist.id, db);
+        if (!alreadyLinked) await linkSongToArtist(targetArtist.id, songId, db);
       }
       // Unlink from original selected artist
       await unlinkSongFromArtist(selectedArtistId, songId, db);
     }
 
     // Link target artists to albums where selected artist was present
-    for (const album of albumsData) {
-      if (album?.artists?.some((x) => x.artistId === selectedArtist.artistId)) {
-        for (const ta of targetArtists) {
-          const linked = await getLinkedAlbumArtist(album.albumId, ta.id, db);
-          if (!linked) await linkArtistToAlbum(album.albumId, ta.id, db);
-        }
+    for (const albumId of affectedAlbumIds) {
+      for (const targetArtist of targetArtists) {
+        const linked = await getLinkedAlbumArtist(albumId, targetArtist.id, db);
+        if (!linked) await linkArtistToAlbum(albumId, targetArtist.id, db);
       }
     }
 
