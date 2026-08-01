@@ -92,12 +92,29 @@ const scrobbleSong = async (songId: number, startTimeSecs: number) => {
         LASTFM_REQUEST_TIMEOUT_MS
       );
 
-      if (res.status === 200)
-        return logger.debug(`Scrobbled song accepted.`, { songId: song.songId });
+      const json: LastFMScrobblePostResponse = await res.json().catch(() => ({}));
 
-      const json: LastFMScrobblePostResponse = await res.json();
-      await queueScrobbleForRetry(songId, startTimeSecs, fallbackTrack, fallbackArtist);
-      return logger.warn('Failed to scrobble song to LastFM, queued for retry', { json });
+      const hasError = !res.ok || ('error' in json && Boolean(json.error));
+      if (!hasError) {
+        return logger.debug(`Scrobbled song accepted.`, { songId: song.songId });
+      }
+
+      const errorCode = 'error' in json ? json.error : undefined;
+      const isTransient =
+        res.status >= 500 || (errorCode !== undefined && [11, 16, 29].includes(errorCode));
+
+      if (isTransient) {
+        await queueScrobbleForRetry(songId, startTimeSecs, fallbackTrack, fallbackArtist);
+        return logger.warn('Transient failure scrobbling to LastFM, queued for retry', {
+          status: res.status,
+          json
+        });
+      }
+
+      return logger.error('Permanent failure scrobbling to LastFM, not queuing for retry', {
+        status: res.status,
+        json
+      });
     }
   } catch (error) {
     if (fallbackTrack && fallbackArtist) {
