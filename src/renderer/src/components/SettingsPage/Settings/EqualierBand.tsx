@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 
 type Props = {
   value: number;
@@ -8,6 +8,18 @@ type Props = {
 
 const EqualierBand = (props: Props) => {
   const { onChange, value, hertzValue } = props;
+
+  // Keep the raw string while the input is focused so typing decimals like
+  // 1.25 isn't snapped to 1.3 mid-entry. The committed value is rounded to
+  // one decimal place on blur.
+  const [inputValue, setInputValue] = useState(value.toFixed(1));
+  const [isFocused, setIsFocused] = useState(false);
+
+  // Re-sync from the prop when the value changes from outside (preset load,
+  // slider drag) while the number input is not being edited.
+  useEffect(() => {
+    if (!isFocused) setInputValue(value.toFixed(1));
+  }, [value, isFocused]);
 
   const bandWidthStyle: CSSProperties = {};
   bandWidthStyle[`--equalizer-band`] = `${((value + 12) / 24) * 100}%`;
@@ -33,24 +45,26 @@ const EqualierBand = (props: Props) => {
           </span>
           <input
             type="number"
-            className="equalizer-band-input mt-1 w-full rounded border border-background-color-3 bg-background-color px-1 py-0.5 text-center text-xs text-font-color outline-none focus:border-font-color-highlight dark:border-dark-background-color-3 dark:bg-dark-background-color dark:text-dark-font-color dark:focus:border-dark-font-color-highlight"
+            className="equalizer-band-input mt-1 w-full rounded border border-background-color-3 bg-background-color-1 px-1 py-0.5 text-center text-xs text-font-color outline-none focus:border-font-color-highlight dark:border-dark-background-color-3 dark:bg-dark-background-color-1 dark:text-dark-font-color dark:focus:border-dark-font-color-highlight"
             min="-12"
             max="12"
             step="0.1"
-            value={value}
+            value={inputValue}
+            onFocus={() => setIsFocused(true)}
             onChange={(e) => {
+              const text = e.currentTarget.value;
+              setInputValue(text);
               const val = e.currentTarget.valueAsNumber;
               if (!Number.isNaN(val)) {
                 onChange(Math.min(12, Math.max(-12, val)));
               }
             }}
             onBlur={(e) => {
+              setIsFocused(false);
               const val = e.currentTarget.valueAsNumber;
-              if (Number.isNaN(val)) {
-                onChange(0);
-              } else {
-                onChange(Math.min(12, Math.max(-12, Math.round(val * 10) / 10)));
-              }
+              const committed = Number.isNaN(val) ? 0 : Math.min(12, Math.max(-12, Math.round(val * 10) / 10));
+              setInputValue(committed.toFixed(1));
+              onChange(committed);
             }}
           />
         </div>

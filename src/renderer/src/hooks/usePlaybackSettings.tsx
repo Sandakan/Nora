@@ -3,6 +3,7 @@ import type AudioPlayer from '../other/player';
 import toggleSongIsFavorite from '../other/toggleSongIsFavorite';
 import { dispatch, store } from '../store/store';
 import storage from '../utils/localStorage';
+import log from '../utils/log';
 import { useUserPreferences } from './useUserPreferences';
 
 /**
@@ -34,15 +35,50 @@ import { useUserPreferences } from './useUserPreferences';
  */
 const EQUALIZER_SAVE_DEBOUNCE_MS = 300;
 
+const EQUALIZER_BAND_FILTERS: EqualizerBandFilters[] = [
+  'thirtyTwoHertzFilter',
+  'sixtyFourHertzFilter',
+  'hundredTwentyFiveHertzFilter',
+  'twoHundredFiftyHertzFilter',
+  'fiveHundredHertzFilter',
+  'thousandHertzFilter',
+  'twoThousandHertzFilter',
+  'fourThousandHertzFilter',
+  'eightThousandHertzFilter',
+  'sixteenThousandHertzFilter'
+];
+
 export function usePlaybackSettings(player: HTMLAudioElement, audioPlayer?: AudioPlayer) {
-  const { saveEqualizerPresetAsync } = useUserPreferences();
+  const { saveEqualizerPresetAsync, equalizerPreset } = useUserPreferences();
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingPresetRef = useRef<Equalizer | null>(null);
+
+  // Hydrate the persisted equalizer preset into the audio graph at startup.
+  // The Settings page is not mounted on normal launch, so without this the
+  // stored preset never reaches the filter nodes until the user opens
+  // Settings. Applies once per resolved preset; does not trigger a save.
+  useEffect(() => {
+    if (!audioPlayer || !equalizerPreset) return;
+    const { frequencyBands, preAmpValue } = equalizerPreset;
+    if (!Array.isArray(frequencyBands) || frequencyBands.length !== EQUALIZER_BAND_FILTERS.length) return;
+    const preset = {} as Equalizer;
+    EQUALIZER_BAND_FILTERS.forEach((filterName, index) => {
+      preset[filterName] = frequencyBands[index] ?? 0;
+    });
+    preset.preAmpValue = typeof preAmpValue === 'number' ? preAmpValue : 0;
+    audioPlayer.applyEqualizerPreset(preset);
+  }, [audioPlayer, equalizerPreset]);
 
   useEffect(() => {
     return () => {
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+      // Flush the latest pending preset so a shutdown within the debounce
+      // window does not silently lose the last equalizer change.
+      if (pendingPresetRef.current) {
+        saveEqualizerPresetAsync(pendingPresetRef.current).catch(() => undefined);
+      }
     };
-  }, []);
+  }, [saveEqualizerPresetAsync]);
 
   const toggleRepeat = useCallback((newState?: RepeatTypes) => {
     const repeatState =
@@ -111,10 +147,11 @@ export function usePlaybackSettings(player: HTMLAudioElement, audioPlayer?: Audi
   const updateEqualizerOptions = useCallback(
     (options: Equalizer) => {
       audioPlayer?.applyEqualizerPreset(options);
+      pendingPresetRef.current = options;
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
       saveTimeoutRef.current = setTimeout(() => {
         saveEqualizerPresetAsync(options).catch((err) => {
-          console.error('Failed to save equalizer preset:', err);
+          log('Failed to save equalizer preset:', { err }, 'ERROR');
         });
       }, EQUALIZER_SAVE_DEBOUNCE_MS);
     },
