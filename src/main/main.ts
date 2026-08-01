@@ -22,7 +22,6 @@ import {
   type OpenDialogOptions,
   type SaveDialogOptions
 } from 'electron';
-import { installExtension, REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 
 import { version, appPreferences } from '../../package.json';
 import noraAppIcon from '../../resources/logo_light_mode.png?asset';
@@ -151,6 +150,10 @@ function launchExtensionBackgroundWorkers(session = electronSession.defaultSessi
 const installExtensions = async () => {
   try {
     const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
+
+    const { default: installExtension, REACT_DEVELOPER_TOOLS } = await import(
+      'electron-devtools-installer'
+    );
 
     const ext = await installExtension(REACT_DEVELOPER_TOOLS, {
       loadExtensionOptions: { allowFileAccess: true },
