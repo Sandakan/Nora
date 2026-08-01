@@ -902,7 +902,12 @@
   },
   "songUnplayableErrorPrompt": {
     "title": "Couldn't play the song",
-    "description": "Seems like we can't play that song. Please check whether the selected song is available in your system and accessible by the app."
+    "description": "Seems like we can't play that song. Please check whether the selected song is available in your system and accessible by the app.",
+    "formatNotSupportedTitle": "Audio format not supported",
+    "flacNotSupportedDescription": "This song is in FLAC format, which is not supported natively by this app.",
+    "formatNotSupportedDescription": "This song format is not supported by the app.",
+    "supportedFormatsLabel": "Supported Audio Formats:",
+    "flacConversionHint": "Tip: You can convert FLAC audio files to MP3 or WAV format to play them in Nora."
   },
   "unsupportedFileMessagePrompt": {
     "title": "Unsupported audio file",
