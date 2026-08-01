@@ -18,30 +18,32 @@ export async function getPendingCount(trx: DB | DBTransaction = db): Promise<num
   return Number(result[0].count);
 }
 
-export async function insertScrobble(
-  params: {
-    songId?: number;
-    startTimeSecs?: number;
-    operationType: string;
-    trackTitle?: string;
-    artistNames?: string;
-  },
-  trx: DB | DBTransaction = db
-): Promise<void> {
-  const count = await getPendingCount(trx);
-  if (count >= MAX_QUEUE_SIZE) {
-    logger.warn('Scrobble queue at capacity, dropping item', { count: MAX_QUEUE_SIZE });
-    return;
-  }
+export async function insertScrobble(params: {
+  songId?: number;
+  startTimeSecs?: number;
+  operationType: string;
+  trackTitle?: string;
+  artistNames?: string;
+}): Promise<void> {
+  // Wrap capacity check and insert in a single transaction so both run under the
+  // same snapshot, preventing concurrent callers from each observing count < MAX
+  // and inserting past the limit.
+  await db.transaction(async (innerTrx) => {
+    const count = await getPendingCount(innerTrx);
+    if (count >= MAX_QUEUE_SIZE) {
+      logger.warn('Scrobble queue at capacity, dropping item', { count: MAX_QUEUE_SIZE });
+      return;
+    }
 
-  await trx.insert(scrobbleQueue).values({
-    songId: params.songId ?? null,
-    startTimeSecs: params.startTimeSecs != null ? Math.floor(params.startTimeSecs) : null,
-    operationType: params.operationType,
-    trackTitle: params.trackTitle ?? null,
-    artistNames: params.artistNames ?? null,
-    status: 'pending',
-    retryCount: 0
+    await innerTrx.insert(scrobbleQueue).values({
+      songId: params.songId ?? null,
+      startTimeSecs: params.startTimeSecs != null ? Math.floor(params.startTimeSecs) : null,
+      operationType: params.operationType,
+      trackTitle: params.trackTitle ?? null,
+      artistNames: params.artistNames ?? null,
+      status: 'pending',
+      retryCount: 0
+    });
   });
 }
 
