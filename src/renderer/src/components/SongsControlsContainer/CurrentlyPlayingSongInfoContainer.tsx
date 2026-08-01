@@ -171,7 +171,8 @@ const CurrentlyPlayingSongInfoContainer = () => {
           navigate({
             to: '/main-player/songs/$songId/edit',
             params: { songId: String(songId) }
-          })
+          }),
+        isDisabled: !isKnownSource
       },
       {
         label: t('common.saveArtwork'),
@@ -236,6 +237,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
     addNewNotifications,
     changePromptMenuData,
     currentSongData,
+    navigate,
     gotToSongAlbumPage,
     preferences?.doNotShowBlacklistSongConfirm,
     showSongInfoPage,
