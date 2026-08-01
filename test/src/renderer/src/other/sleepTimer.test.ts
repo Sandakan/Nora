@@ -121,6 +121,10 @@ describe('SleepTimer', () => {
     // Old pause resolves
     resolvePause?.();
 
+    // Let the fireTimer() continuation run (it continues after the await).
+    await Promise.resolve();
+    await Promise.resolve();
+
     // Old completion must NOT emit complete for the new timer
     expect(completeSpy).not.toHaveBeenCalled();
     expect(sleepTimer.isActive()).toBe(true);

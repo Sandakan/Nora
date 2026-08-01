@@ -543,7 +543,6 @@ declare global {
     enableImageBasedDynamicThemes: boolean;
     autoTranslateLyrics: boolean;
     autoConvertLyrics: boolean;
-    sleepTimerDurationMinutes: number;
   }
 
   interface CurrentSong {

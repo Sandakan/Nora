@@ -26,19 +26,15 @@
     "folderWithCount_other": "{{count}} টা ফোল্ডাৰ",
     "subFolderWithCount_one": "{{count}} টা উপ-ফোল্ডাৰ",
     "subFolderWithCount_other": "{{count}} টা উপ-ফোল্ডাৰ",
-
     "selectionWithCount_one": "{{count}} টা বাছনি কৰা হৈছে",
     "selectionWithCount_other": "{{count}} টা বাছনি কৰা হৈছে",
-
     "shownWithCount": "{{count}} টা দেখুওৱা হৈছে",
-
     "unknownTitle": "অজ্ঞাত শীৰ্ষক",
     "unknownArtist": "অজ্ঞাত শিল্পী",
     "unknownAlbum": "অজ্ঞাত এলবাম",
     "unknownGenre": "অজ্ঞাত ধাৰা",
     "unknownFolder": "অজ্ঞাত ফোল্ডাৰ",
     "unknownLyricsProvider": "অজ্ঞাত গীতিকাৰ প্ৰদানকাৰী",
-
     "songTitle": "গীতৰ শীৰ্ষক",
     "duration": "সময়সীমা",
     "albumArtists": "গীতৰ এলবামৰ শিল্পীসকল",
@@ -55,7 +51,6 @@
     "lyrics": "গীতৰ কথা",
     "syncedLyrics": "চিনক্ৰ'নাইজ কৰা গীতৰ কথা",
     "unsyncedLyrics": "চিনক্ৰ'নাইজ নকৰা গীতৰ কথা",
-
     "play": "প্লে' কৰক",
     "playNext": "পৰৱৰ্তীটো প্লে' কৰক",
     "playNextAll": "সকলো পৰৱৰ্তী প্লে' কৰিবলৈ যোগ কৰক",
@@ -76,7 +71,6 @@
     "search": "সন্ধান কৰক",
     "help": "সহায়",
     "copy": "কপি কৰক",
-
     "sortBy": "মতে ক্ৰমবদ্ধ কৰক",
     "filterBy": "মতে ফিল্টাৰ কৰক",
     "moreOptions": "অধিক বিকল্প",
@@ -106,18 +100,15 @@
     "ok": "ঠিক আছে",
     "loading": "লোড হৈ আছে"
   },
-
   "titleBar": {
     "changeTheme": "থীম পৰিবৰ্তন কৰক",
     "goBack": "পিছলৈ যাওক (Alt + Left-Arrow)",
     "goHome": "হোমলৈ যাওক (Alt + Home)",
     "goForward": "আগলৈ যাওক (Alt + Right-Arrow)",
-
     "minimize": "সৰু কৰক",
     "maximize": "ডাঙৰ কৰক",
     "close": "বন্ধ কৰক"
   },
-
   "player": {
     "goToMainPlayer": "মূল প্লেয়াৰলৈ যাওক (Ctrl + N)",
     "openInMiniPlayer": "মিনি প্লেয়াৰত খোলক (Ctrl + N)",
@@ -139,12 +130,20 @@
     "upNext": "পৰৱৰ্তী: ",
     "closeUpNext": "'পৰৱৰ্তী' বন্ধ কৰক",
     "by": "ৰ দ্বাৰা",
-
     "errorTitle": "প্লেয়াৰত এটা ত্ৰুটি ঘটিছে।",
     "errorMessage": "$t(player.errorTitle)<br /> এটা নষ্ট গীত প্লে' কৰিবলৈ চেষ্টা কৰাৰ ফলত এনে হ'ব পাৰে। <details/>",
-    "noErrorMessage": "কোনো ত্ৰুটি বাৰ্তা উৎপন্ন হোৱা নাই"
+    "noErrorMessage": "কোনো ত্ৰুটি বাৰ্তা উৎপন্ন হোৱা নাই",
+    "sleepTimer": "Sleep timer",
+    "sleepTimerTitle": "Sleep Timer",
+    "sleepTimer15": "15 minutes",
+    "sleepTimer30": "30 minutes",
+    "sleepTimer45": "45 minutes",
+    "sleepTimer60": "60 minutes",
+    "sleepTimerEndOfSong": "End of song",
+    "sleepTimerExtend15": "+15 minutes",
+    "sleepTimerExtend30": "+30 minutes",
+    "sleepTimerCancel": "Cancel timer"
   },
-
   "sortTypes": {
     "aToZ": "A ৰ পৰা Z",
     "zToA": "Z ৰ পৰা A",
@@ -172,14 +171,12 @@
     "mostSkipped": "Most skipped (All time)",
     "leastSkipped": "Least skipped (All time)"
   },
-
   "filterTypes": {
     "notSelected": "বাছনি কৰা হোৱা নাই",
     "blacklistedSongs": "নিষিদ্ধ গীত",
     "whitelistedSongs": "অনুমোদিত গীত",
     "favorites": "প্ৰিয়"
   },
-
   "equalizerPresets": {
     "custom": "কাষ্টম",
     "flat": "ফ্লেট",
@@ -213,7 +210,6 @@
     "trebleReducer": "ট্ৰেবল ৰিডিউচাৰ",
     "vocalBooster": "ভকেল বুষ্টাৰ"
   },
-
   "song": {
     "showInFileExplorer": "ফাইল এক্সप्लोৰাৰত দেখুৱাওক",
     "artwork": "গীতৰ আৰ্টৱৰ্ক",
@@ -235,7 +231,6 @@
     "likedThisSong": "আপুনি এই গীতটো ভাল পালে",
     "dislikedThisSong": "আপুনি এই গীতটো ভাল নাপালে"
   },
-
   "artist": {
     "playAllSongs": "সকলো গীত প্লে' কৰক",
     "toggleLikeArtists": "প্ৰিয় তালিকাৰ পৰা শিল্পী যোগ/আঁতৰাওক",
@@ -243,7 +238,6 @@
     "dislikeArtist": "শিল্পীক প্ৰিয় তালিকাৰ পৰা আঁতৰাওক",
     "selectedArtistCount": "{{count}} জন বাছনি কৰা $t(common.artist, {\"count\":{{count}}})"
   },
-
   "folder": {
     "toggleBlacklistFolder": "নিষিদ্ধ ফোল্ডাৰ টগল কৰক",
     "blacklistFolder": "নিষিদ্ধ ফোল্ডাৰ",
@@ -255,7 +249,6 @@
     "selectedDirectoryCount_one": "{{count}} টা বাছনি কৰা ডাইৰেকটৰী",
     "selectedDirectoryCount_other": "{{count}} টা বাছনি কৰা ডাইৰেকটৰী"
   },
-
   "playlist": {
     "changeArtwork": "আৰ্টৱৰ্ক পৰিবৰ্তন কৰক",
     "addArtwork": "আৰ্টৱৰ্ক যোগ কৰক",
@@ -268,34 +261,27 @@
     "selectedPlaylistCount": "{{count}} টা বাছনি কৰা $t(common.playlist, {\"count\":{{count}}})",
     "empty": "দেখিছে এই প্লেলিষ্টটো খালী।"
   },
-
   "album": {
     "selectedAlbumCount": "{{count}} খন বাছনি কৰা $t(common.album, {\"count\":{{count}}})"
   },
-
   "genre": {
     "selectedGenreCount": "{{count}} টা বাছনি কৰা $t(common.genre, {\"count\":{{count}}})"
   },
-
   "homePage": {
     "empty": "ইয়াত একো নাই..",
     "loading": "অপেক্ষা কৰক। আমি আপোনাৰ বাবে সকলো সাজু কৰি আছোঁ...",
     "listenMoreToShowMetrics": "অধিক মেট্ৰিক দেখুৱাবলৈ অধিক গীত শুনক।",
-
     "recentlyAddedSongs": "শেহতীয়াকৈ যোগ কৰা গীত",
     "recentlyPlayedSongs": "শেহতীয়াকৈ প্লে' কৰা গীত",
     "recentArtists": "শেহতীয়া শিল্পীসকল",
     "mostLovedSongs": "সৰ্বাধিক ভালপোৱা গীত",
     "mostLovedArtists": "সৰ্বাধিক ভালপোৱা শিল্পীসকল",
-
     "openSongsWithNewestSortOption": "'নতুন' ক্ৰমবদ্ধ বিকল্পৰ সৈতে 'গীত' খোলে।",
     "openPlaybackHistory": "'যোগ কৰা ক্ৰম' ক্ৰমবদ্ধ বিকল্পৰ সৈতে 'ইতিহাস' প্লেলিষ্ট খোলে।",
     "openFavoritesWithAllTimeMostListenedSortOption": "'সকলো সময়ত সৰ্বাধিক শুনা' ক্ৰমবদ্ধ বিকল্পৰ সৈতে 'প্ৰিয়' প্লেলিষ্ট খোলে।",
-
     "noSongsAvailable": "কোনো গীত উপলব্ধ নহয়",
     "stayCalm": "শান্ত থাকক"
   },
-
   "searchPage": {
     "addFolder": "ফোল্ডাৰ যোগ কৰক",
     "enablePredictiveSearch": "ভৱিষ্যদ্বাণীমূলক সন্ধান সক্ষম কৰক",
@@ -312,25 +298,20 @@
     "recentSearchResultTooltipLabel": "'{{value}}'ৰ বাবে সন্ধান কৰক",
     "showingResultsFor": "<span>'{{query}}'</span>ৰ বাবে ফলাফল দেখুওৱা হৈছে",
     "showingResultsForWithFilter": "<span>'{{query}}'</span>ৰ বাবে <span>{{filter}}</span>ত ফলাফল দেখুওৱা হৈছে",
-
     "a": "যিকোনো বস্তুৰ বাবে সন্ধান কৰক"
   },
-
   "songsPage": {
     "loading": "অপেক্ষা কৰক। আমি আপোনাৰ বাবে সকলো সাজু কৰি আছোঁ...",
     "empty": "ইয়াত একো নাই.."
   },
-
   "artistsPage": {
     "empty": "ইয়াত একো নাই..."
   },
-
   "foldersPage": {
     "addFolder": "ফোল্ডাৰ যোগ কৰক",
     "musicFolders": "সংগীত ফোল্ডাৰ",
     "empty": "আপোনাৰ লাইব্ৰেৰীলৈ কোনো ফোল্ডাৰ যোগ কৰা হোৱা নাই।"
   },
-
   "playlistsPage": {
     "createNewPlaylist": "নতুন প্লেলিষ্ট সৃষ্টি কৰক",
     "importPlaylist": "এটা প্লেলিষ্ট আমদানি কৰক",
@@ -342,30 +323,23 @@
     "clearSongHistoryConfirmNotice": "আপুনি নিশ্চিতনে যে আপুনি আপোনাৰ গীতৰ ইতিহাস পৰিষ্কাৰ কৰিব বিচাৰে? এই কাৰ্যটো ওলোটাব নোৱাৰি।",
     "clearSongHistorySuccess": "আপোনাৰ গীতৰ ইতিহাস সফলতাৰে পৰিষ্কাৰ কৰা হৈছে।"
   },
-
   "albumsPage": {
     "empty": "ইয়াত একো নাই..."
   },
-
   "genresPage": {
     "empty": "ইয়াত একো নাই..."
   },
-
   "settingsPage": {
     "settings": "ছেটিংছ",
-
     "appearance": "ৰূপ",
     "changeTheme": "আপোনাৰ পছন্দ অনুসৰি এপ্লিকেচনৰ থীম সলনি কৰক।",
     "lightTheme": "পোহৰ থীম",
     "darkTheme": "আন্ধাৰ থীম",
     "systemTheme": "চিষ্টেম থীম",
-
     "enableImageBasedDynamicThemes": "ডাইনামিক থীম সক্ষম কৰক",
     "enableImageBasedDynamicThemesDescription": "বৰ্তমান চলি থকা গীতৰ ক'ভাৰ ছবিৰ থীমৰ ওপৰত ভিত্তি কৰি এপৰ থীম ডাইনামিকভাৱে সলনি কৰক",
-
     "language": "ভাষা",
     "languageDescription": "আপুনি ন'ৰা কোন ভাষাত প্ৰদৰ্শিত হোৱাটো বিচাৰে সেই ভাষা বাছনি কৰক।",
-
     "audioPlayback": "অডিঅ' প্লে'বেক",
     "showRemainingSongDuration": "গীতৰ বাকী থকা সময়সীমা দেখুৱাওক",
     "showRemainingSongDurationDescription": "ডিফল্ট গীতৰ সময়সীমাৰ পৰিৱৰ্তে গীতৰ বাকী থকা সময়সীমা দেখুৱায়।",
@@ -375,7 +349,6 @@
     "seekbarScrollInterval": "অডিঅ' ছিক বাৰ আৰু ভলিউম ছিক বাৰৰ ওপৰত স্ক্ৰল কৰিলে বৃদ্ধিৰ পৰিমাণ সলনি কৰক।",
     "second": "ছেকেণ্ড",
     "second_other": "ছেকেণ্ড",
-
     "accounts": "একাউণ্টসমূহ",
     "integrateLastFm": "Last.fm ক ন'ৰাৰ সৈতে একত্ৰিত কৰক।",
     "lastFmLogo": "LastFM ল'গ'",
@@ -396,7 +369,6 @@
     "sendNowPlayingToLastFm": "বৰ্তমান চলি থকা গীতৰ ডাটা পঠাওক",
     "enableDiscordRpcDescription": "Discord Rich Presence ক ন'ৰাৰ সৈতে একত্ৰিত কৰক",
     "enableDiscordRpc": "Discord Rich Presence সক্ষম কৰক",
-
     "doNotSaveLyricsAutomatically": "গীতৰ কথা স্বয়ংক্ৰিয়ভাৱে সংৰক্ষণ নকৰিব",
     "syncedLyricsOnly": "কেৱল চিনক্ৰ'নাইজ কৰা গীতৰ কথা",
     "saveEitherLyrics": "চিনক্ৰ'নাইজ কৰা বা নকৰা গীতৰ কথা",
@@ -417,13 +389,10 @@
     "lrcFileCustomSaveLocationDescription": "যদি আপুনি গীতৰ আপেক্ষিক ফোল্ডাৰতে LRC ফাইলসমূহ সংৰক্ষণ কৰিব নিবিচাৰে, তেন্তে এটা কাষ্টম অৱস্থান বাছনি কৰক।",
     "selectedCustomLocation": "বাছনি কৰা কাষ্টম অৱস্থান",
     "setCustomLocation": "কাষ্টম অৱস্থান ছেট কৰক",
-
     "equalizer": "ইকুৱেলাইজাৰ",
     "reset": "ৰিছেট",
-
     "defaultPage": "ডিফল্ট পৃষ্ঠা",
     "changeDefaultPageDescription": "যেতিয়া আপুনি এপটো খোলে তেতিয়া আপুনি চাব বিচৰা ডিফল্ট পৃষ্ঠা সলনি কৰক।",
-
     "preferences": "পছন্দসমূহ",
     "songIndexingDescription": "পৃষ্ঠাসমূহত গীতৰ ইন্ডেক্সিং সক্ষম কৰে, গীত টেবত প্ৰতিটো গীতত এটা নম্বৰ যোগ কৰে।",
     "enableSongIndexing": "গীতৰ ইন্ডেক্সিং সক্ষম কৰক",
@@ -436,17 +405,14 @@
     "playlistArtworksDescription": "গীতৰ ক'ভাৰৰ পৰা তৈয়াৰ কৰা আৰ্টৱৰ্কৰ আচৰণ সলনি কৰক।",
     "enablePlaylistArtworks": "প্লেলিষ্টত গীতৰ ক'ভাৰৰ পৰা তৈয়াৰ কৰা আৰ্টৱৰ্ক সক্ষম কৰক",
     "shuffleArtworkFromSongCovers": "গীতৰ ক'ভাৰৰ পৰা তৈয়াৰ কৰা আৰ্টৱৰ্ক শ্বাফল কৰা সক্ষম কৰক। (পৃষ্ঠা সতেজ হ'লে আৰ্টৱৰ্কবোৰ শ্বাফল হয়।)",
-
     "accessibility": "সুলভতা",
     "reducedMotionDescription": "এপত দেখা দিয়া এনিমেচন আঁতৰাই পেলায়। ই এপৰ মসৃণতাও কমাই দিয়ে।",
     "enableReducedMotion": "হ্ৰাস কৰা গতি সক্ষম কৰক",
-
     "performance": "কাৰ্যক্ষমতা",
     "removeAnimationOnBatteryDescription": "যেতিয়া আপোনাৰ চিষ্টেম বেটাৰী পাৱাৰত থাকে তেতিয়া এপৰ এনিমেচন আঁতৰাই পেলায়।",
     "removeAnimationOnBattery": "বেটাৰী পাৱাৰত থাকোঁতে এনিমেচন আঁতৰাওক।",
     "allowToPreventScreenSleepingDescription": "গীতৰ কথা প্ৰদৰ্শন কৰাৰ দৰে কোনো ব্যৱহাৰকাৰীৰ কাৰ্যকলাপ নথকা পৰিস্থিতিত ন'ৰাক ডিস্প্লে টোপনি যোৱাৰ পৰা ৰোধ কৰিবলৈ অনুমতি দিয়ক।",
     "allowToPreventScreenSleeping": "ডিচপ্লেক টোপনি যোৱাৰ পৰা ৰোধ কৰিবলৈ অনুমতি দিয়ক।",
-
     "startupAndWindowCustomization": "ষ্টাৰ্টআপ আৰু উইণ্ড'জ ছেটিংছ",
     "autoLaunchAtStartDescription": "এই ছেটিং সক্ষম কৰিলে আপুনি আপোনাৰ কম্পিউটাৰত লগইন কৰিলে ন'ৰা স্বয়ংক্ৰিয়ভাৱে আৰম্ভ হ'ব।",
     "autoLaunchAtStart": "ষ্টাৰ্টআপত স্বয়ংক্ৰিয়ভাৱে আৰম্ভ কৰক",
@@ -454,10 +420,8 @@
     "hideWindowAtStart": "ষ্টাৰ্টআপত চিষ্টেম ট্ৰে'ত ন'ৰা আৰম্ভ কৰক",
     "hideWindowOnCloseDescription": "যেতিয়া আপুনি বন্ধ বুটামটো ক্লিক কৰে তেতিয়া ন'ৰাই কেনেদৰে আচৰণ কৰিব লাগে কনফিগাৰ কৰক।",
     "hideWindowOnClose": "বন্ধ বুটামটো ক্লিক কৰিলে ন'ৰাক চিষ্টেম ট্ৰে'লৈ লুকুৱাওক।",
-
     "storage": "সংৰক্ষণ",
     "storageDescription": "ন'ৰাই আপোনাৰ লাইব্ৰেৰী কেনেদৰে পৰিচালনা কৰে আৰু আপোনাৰ সংৰক্ষণ ব্যৱহাৰ কৰে চাওক।",
-
     "fullStorageSpace": "সম্পূৰ্ণ সংৰক্ষণ ব্যৱহাৰ",
     "fullStorageOutOfUsage": "{{total}} ৰ ভিতৰত {{value}}",
     "freeSpace": "খালী ঠাই",
@@ -481,11 +445,9 @@
     "noStorageMetrics": "দেখিছে আপুনি এতিয়াও সংৰক্ষণ মেট্ৰিক উৎপন্ন কৰা নাই।",
     "storageMetricsGenerationDisclaimer": "সংৰক্ষণ মেট্ৰিক উৎপন্ন কৰাটো তুলনামূলকভাৱে এটা দাবীপূৰ্ণ গণনাৰ কাম, ইয়াৰ অৰ্থ হ'ল ন'ৰা অস্থায়ীভাৱে সঁহাৰিহীন হ'ব পাৰে। অনুগ্ৰহ কৰি ধৈৰ্য্য ধৰক...",
     "storageMetricsGenerationError": "দেখিছে আমাৰ ফালৰ পৰা কিবা এটা ভুল হ'ল। অনুগ্ৰহ কৰি এইটো ডেভেলপাৰক জনাওক।",
-
     "advanced": "উন্নত",
     "saveVerboseLogsDescription": "ডিবাগিংৰ উদ্দেশ্যে ভাৰ্ব'জ লগ সংৰক্ষণ কৰক। ই লগৰ আকাৰ বৃদ্ধি কৰিব।",
     "saveVerboseLogs": "ভাৰ্ব'জ লগ সংৰক্ষণ কৰক",
-
     "about": "বিষয়ে",
     "releasedOn": "{{val, datetime}}ত মুক্তিপ্ৰাপ্ত",
     "noraWebsite": "ন'ৰাৰ অফিচিয়েল ৱেবছাইট",
@@ -505,7 +467,6 @@
     "resyncLibrary": "লাইব্ৰেৰী পুনৰ চিনক্ৰ'নাইজ কৰক",
     "generatePalettes": "পেলেট উৎপন্ন কৰক",
     "appShortcuts": "এপ চৰ্টকাট",
-
     "resetApp": "এপ ৰিছেট কৰক",
     "clearOptionalData": "বৈকল্পিক ডাটা পৰিষ্কাৰ কৰক",
     "clearHistory": "ইতিহাস পৰিষ্কাৰ কৰক",
@@ -521,7 +482,6 @@
     "sandakanGithubProfile": "সন্দাকনৰ গিথহাব প্ৰফাইল",
     "beautifulSriLanka": "সুন্দৰ শ্ৰীলংকা"
   },
-
   "artistInfoPage": {
     "likeArtist": "{{name}}ক লাইক কৰক",
     "dislikeArtist": "{{name}}ক ডিছলাইক কৰক",
@@ -531,11 +491,9 @@
     "otherSimilarArtists": "অন্যান্য একেধৰণৰ শিল্পী",
     "viewInLastFm": "Last.fmত `{{name}}` চাওক"
   },
-
   "albumInfoPage": {
     "unavailableTracks": "এই এলবামৰ অনুপলব্ধ ট্ৰেক"
   },
-
   "currentQueuePage": {
     "queue": "বৰ্তমান চলি থকা শাৰী",
     "folderWithName": "{{name}} ফোল্ডাৰ",
@@ -549,7 +507,6 @@
     "durationRemaining": "{{duration}} বাকী",
     "empty": "শাৰী খালী।"
   },
-
   "lyricsEditingPage": {
     "lyricsText": "গীতৰ কথাৰ লিখনী",
     "startInSeconds": "ছেকেণ্ডত আৰম্ভ কৰক",
@@ -575,7 +532,6 @@
     "playLyrics": "গীতৰ কথা প্লে' কৰক",
     "configure": "কনফিগাৰ কৰক"
   },
-
   "lyricsPage": {
     "noLyrics": "গীতৰ কথা পোৱা নগ'ল।",
     "noLyricsDescription": "আমি এই গীতটোৰ বাবে কোনো গীতৰ কথা বিচাৰি নাপালোঁ। আপুনি টেগ এডিটৰত নিজৰ কথা যোগ কৰিব পাৰে।",
@@ -596,7 +552,6 @@
     "showOnlineLyrics": "অনলাইন গীতৰ কথা দেখুৱাওক",
     "refreshOnlineLyrics": "অনলাইন গীতৰ কথা সতেজ কৰক",
     "showSavedLyrics": "সংৰক্ষিত গীতৰ কথা দেখুৱাওক",
-
     "lyricsLoading": "গীতৰ কথা বিচাৰি থকা হৈছে",
     "lyricsLoadingDescription": "অপেক্ষা কৰক... আমি সকলোতে বিচাৰি আছোঁ...",
     "noInternet": "কোনো ইণ্টাৰনেট সংযোগ নাই",
@@ -604,7 +559,6 @@
     "lyricsProvidedBy": "গীতৰ কথা <Hyperlink/>ৰ দ্বাৰা প্ৰদান কৰা হৈছে",
     "lyricsTranslatedBy": "Google Translate ব্যৱহাৰ কৰি গীতৰ কথা অনুবাদ কৰা হৈছে"
   },
-
   "songInfoPage": {
     "listensCount": "{{count}} বাৰ শুনা হৈছে",
     "listeningActivityInLastMonths": "যোৱা {{count}} মাহত শুনাৰ কাৰ্যকলাপ",
@@ -622,7 +576,6 @@
     "unlovedSong": "আপুনি এই গীতটো ভাল নাপালে",
     "byArtists": " <By>ৰ দ্বাৰা</By> <span>{{val, list}}</span>"
   },
-
   "songTagsEditingPage": {
     "editArtwork": "আৰ্টৱৰ্ক সম্পাদনা কৰক",
     "removeArtwork": "আৰ্টৱৰ্ক আঁতৰাওক",
@@ -660,12 +613,10 @@
     "downloadSyncedLyrics": "চিনক্ৰ'নাইজ কৰা গীতৰ কথা ডাউনল'ড কৰক",
     "musixmatchNotEnabled": "এই সুবিধা ব্যৱহাৰ কৰিবলৈ আপুনি ছেটিংছৰ পৰা Musixmatch Lyrics সক্ষম কৰিব লাগিব।"
   },
-
   "miniPlayer": {
     "alwaysOnTopEnabled": "সদায় ওপৰত: অন",
     "alwaysOnTopDisabled": "সদায় ওপৰত: অফ"
   },
-
   "time": {
     "second_one": "ছেকেণ্ড",
     "second_other": "ছেকেণ্ড",
@@ -686,7 +637,6 @@
     "monthWithCount": "{{count}} $t(time.month, {\"count\":{{count}}})",
     "yearWithCount": "{{count}} $t(time.year, {\"count\":{{count}}})"
   },
-
   "elapsedTime": {
     "second_one": "{{count}} ছেকেণ্ড আগতে",
     "second_other": "{{count}} ছেকেণ্ড আগতে",
@@ -701,7 +651,6 @@
     "year_one": "{{count}} বছৰ আগতে",
     "year_other": "{{count}} বছৰ আগতে"
   },
-
   "month": {
     "january": "জানুৱাৰী",
     "february": "ফেব্ৰুৱাৰী",
@@ -716,28 +665,23 @@
     "november": "নৱেম্বৰ",
     "december": "ডিচেম্বৰ"
   },
-
   "data": {
     "byteWithCount_one": "{{count}} বাইট",
     "byteWithCount_other": "{{count}} বাইট"
   },
-
   "sideBar": {
     "home": "হোম",
     "search": "সন্ধান"
   },
-
   "renamePlaylistPrompt": {
     "renamePlaylistWithName": "`{{name}}` প্লেলিষ্টৰ নাম সলনি কৰক",
     "playlistName": "প্লেলিষ্টৰ নাম"
   },
-
   "newPlaylistPrompt": {
     "addPlaylistSuccess": "প্লেলিষ্ট সফলতাৰে যোগ কৰা হ'ল।",
     "playlistNameEmpty": "প্লেলিষ্টৰ নাম প্ৰয়োজন",
     "addNewPlaylist": "নতুন প্লেলিষ্ট যোগ কৰক"
   },
-
   "confirmDeletePlaylistsPrompt": {
     "playlistsDeletedWithCount": "$t(common.playlistWithCount, {\"count\":{{count}}}) মচি পেলোৱা হ'ল।",
     "confirmPlaylistDeleteWithCount": "$t(common.playlistWithCount, {\"count\":{{count}}}) মচি পেলোৱা নিশ্চিত কৰক",
@@ -745,20 +689,17 @@
     "message_other": "এই প্লেলিষ্টবোৰ আঁতৰালে আপুনি এই প্লেলিষ্টবোৰত আয়োজন কৰা গীতবোৰৰ মাজৰ সংযোগ আঁতৰাই পেলাব। যদি আপুনি ইয়াক মচি পেলাবলৈ সিদ্ধান্ত লয়, তেন্তে আপুনি এই প্লেলিষ্টবোৰ পুনৰ ব্যৱহাৰ কৰিব নোৱাৰিব।",
     "modificationNotice": "এই কাৰ্যটোৱে এই ফাইলবোৰক প্ৰভাৱিত কৰিব: "
   },
-
   "resetAppConfirmationPrompt": {
     "confirmAppReset": "এপ ৰিছেট নিশ্চিত কৰক",
     "message": "এপটো ৰিছেট কৰিলে সকলো ব্যৱহাৰকাৰীৰ ডাটা আঁতৰাই পেলায়, যাৰ ভিতৰত আছে গীত, প্ৰিয়, পছন্দ, প্ৰয়োগ কৰা ছেটিংছ আদিৰ সৈতে জড়িত ডাটা, কিন্তু গীতবোৰ নিজে নহয়। অনুগ্ৰহ কৰি মন কৰক যে এই কাৰ্যটো <span>ওলোটাব নোৱাৰি</span>।",
     "restartAfterReset": "ৰিছেটৰ পিছত ন'ৰা পুনৰাম্ভ হ'ব।",
     "systemPlaylistsRemovalProhibited": "আপুনি ইতিহাস বা প্ৰিয়ৰ দৰে প্লেলিষ্ট আঁতৰাব নোৱাৰে।"
   },
-
   "addSongsToPlaylistsPrompt": {
     "songsAddedToPlaylists": "$t(common.songWithCount, {\"count\":{{count}}})ক $t(common.playlistWithCount, {\"count\":{{playlistCount}}})লৈ যোগ কৰা হ'ল",
     "selectPlaylistsToAdd": "$t(common.songWithCount, {\"count\":{{count}}}) যোগ কৰিবলৈ প্লেলিষ্ট বাছনি কৰক",
     "duplicationNotice": "প্লেলিষ্টলৈ একাধিক গীত যোগ কৰিলে, ইতিমধ্যে বাছনি কৰা প্লেলিষ্টত থকা গীতবোৰ অৱজ্ঞা কৰা হ'ব।"
   },
-
   "blacklistSongConfirmPrompt": {
     "title": "লাইব্ৰেৰীৰ পৰা $t(common.songWithCount, {\"count\":{{count}}}) নিষিদ্ধ কৰা নিশ্চিত কৰক",
     "message_one": "আপুনি এই গীতটো লাইব্ৰেৰীৰ পৰা নিষিদ্ধ কৰিবলৈ ওলাইছে। আপুনি ইয়াক সোঁ-ক্লিক কৰি '$t(song.deblacklist)' ক্লিক কৰি পুনৰুদ্ধাৰ কৰিব পাৰে। আপোনাৰ এই গীতটোৰ সৈতে জড়িত ডাটা এই কাৰ্যৰ দ্বাৰা প্ৰভাৱিত নহ'ব।",
@@ -769,7 +710,6 @@
     "effect3": "ডাবল-ক্লিক কৰি, বা <span>'$t(common.play)'</span> বা <span>'$t(common.playNext)'.</span> ব্যৱহাৰ কৰি এতিয়াও প্লে' কৰিব পাৰি।",
     "songsBlacklisted": "$t(common.songWithCount, {\"count\":{{count}}}) নিষিদ্ধ কৰা হ'ল আৰু লাইব্ৰেৰীৰ পৰা আঁতৰোৱা হ'ল"
   },
-
   "blacklistFolderConfirmPrompt": {
     "title": "লাইব্ৰেৰীৰ পৰা $t(common.folderWithCount, {\"count\":{{count}}}) নিষিদ্ধ কৰা নিশ্চিত কৰক",
     "message_one": "আপুনি এই ফোল্ডাৰটো নিষিদ্ধ কৰিবলৈ ওলাইছে। আপুনি ফোল্ডাৰ পৃষ্ঠাৰ পৰা সোঁ-ক্লিক কৰি '$t(song.deblacklist)' বাছনি কৰি ইয়াক পুনৰুদ্ধাৰ কৰিব পাৰে। আপোনাৰ এই ফোল্ডাৰটোৰ সৈতে জড়িত ডাটা এই কাৰ্যৰ দ্বাৰা প্ৰভাৱিত নহ'ব।",
@@ -780,10 +720,8 @@
     "effectTitle2": "এটা নিষিদ্ধ ফোল্ডাৰৰ সৈতে সংযুক্ত গীতৰ কি হয়",
     "folderBlacklisted": "$t(common.folderWithCount, {\"count\":{{count}}}) নিষিদ্ধ কৰা হ'ল।"
   },
-
   "deleteSongFromSystemConfirmPrompt": {
     "title_one": "চিষ্টেমৰ পৰা `{{title}}` মচি পেলাওক",
-
     "title_other": "চিষ্টেমৰ পৰা $t(common.songWithCount, {\"count\":{{count}}}) মচি পেলাওক",
     "permanentlyDeleteFromSystem": "চিষ্টেমৰ পৰা স্থায়ীভাৱে মচি পেলাওক",
     "message_one": "যদি আপুনি '$t(deleteSongFromSystemConfirmPrompt.permanentlyDeleteFromSystem)' বিকল্পটো বাছনি কৰে তেন্তে আপুনি আপোনাৰ চিষ্টেমৰ পৰা এই গীতটো হেৰুৱাব আৰু হয়তো পুনৰুদ্ধাৰ কৰিব নোৱাৰিব।",
@@ -793,7 +731,6 @@
     "songPermanentlyDeleted": "$t(common.songWithCount, {\"count\":{{count}}}) চিষ্টেমৰ পৰা আঁতৰোৱা হ'ল।",
     "songMovedToBin": "$t(common.songWithCount, {\"count\":{{count}}}) ৰিচাইকেল বিনলৈ স্থানান্তৰিত কৰা হ'ল।"
   },
-
   "addMusicFoldersPrompt": {
     "title": "যোগ কৰিবলৈ ফোল্ডাৰ বাছনি কৰক",
     "emptyMessage1": "দেখিছে আপুনি কোনো ফোল্ডাৰ বাছনি কৰা নাই।",
@@ -802,13 +739,11 @@
     "addSelectedFolders": "বাছনি কৰা ফোল্ডাৰ যোগ কৰক",
     "noFoldersSelected": "কোনো ফোল্ডাৰ বাছনি কৰা হোৱা নাই। (এটা পেৰেণ্ট ফোল্ডাৰ থাকিব লাগিব)"
   },
-
   "removeFolderConfirmationPrompt": {
     "title": "`{{folderName}}` ফোল্ডাৰ আঁতৰোৱা নিশ্চিত কৰক",
     "message": "আপুনি নিশ্চিতনে যে আপুনি সংগীত লাইব্ৰেৰীৰ পৰা এই ফোল্ডাৰটো আঁতৰাব বিচাৰে? ই সংগীত লাইব্ৰেৰীৰ পৰা এই ফোল্ডাৰৰ সৈতে জড়িত সকলো ডাটা, গীতৰ ডাটাকে ধৰি, আঁতৰাই পেলাব। আপোনাৰ চিষ্টেমৰ ফাইলবোৰ অক্ষত থাকিব।",
     "removeFolder": "ফোল্ডাৰ আঁতৰাওক"
   },
-
   "lyricsEditorHelpPrompt": {
     "title": "ন'ৰাৰ গীতৰ কথা সম্পাদক কেনেকৈ ব্যৱহাৰ কৰিব",
     "subTitle1": "সম্পাদক কেনেকৈ ব্যৱহাৰ কৰা আৰম্ভ কৰিব?",
@@ -819,7 +754,6 @@
     "subTitle3Message": "<ol><li>গীতটো পজ কৰক।</li><li>প্ৰাসংগিক গীতৰ কথাৰ লাইনটো বিচাৰি উলিয়াওক।</li><li>সেই লাইনটোৰ তলত থকা <ShortcutButton>সম্পাদনা</ShortcutButton> বুটামটো ক্লিক কৰক আৰু প্ৰয়োজনীয় পৰিবৰ্তনসমূহ কৰক।</li><li>পৰিবৰ্তনসমূহৰ পিছত, পৰিবৰ্তনসমূহ সম্পূৰ্ণ কৰিবলৈ <ShortcutButton>$t(lyricsEditingPage.finishEditing)</ShortcutButton> ক্লিক কৰক।</li></ol>",
     "subTitle4": "মই ভুল লাইনত ভুল ডাটা যোগ কৰিলোঁ?"
   },
-
   "lyricsEditorSavePrompt": {
     "lyricsUpdateSuccess": "গীতৰ কথা সফলতাৰে আপডেট কৰা হ'ল।",
     "saveEditedLyrics": "সম্পাদিত গীতৰ কথা সংৰক্ষণ কৰক",
@@ -829,7 +763,6 @@
     "saveLyricsFormatInfo": "* গীতৰ কথা <Hyperlink>LRC ফৰ্মেট</Hyperlink>ত সংৰক্ষণ কৰা হয়।",
     "readAboutLrcFormat": "LRC ফৰ্মেটৰ বিষয়ে অধিক পঢ়ক"
   },
-
   "lyricsEditorSettingsPrompt": {
     "lyricsEditorSettings": "গীতৰ কথা সম্পাদকৰ ছেটিংছ",
     "editNextAndCurrentStartAndEndTagsAutomaticallyDescription": "যেতিয়া আপুনি বৰ্তমানৰ গীতৰ কথাৰ লাইনৰ শেষ সময়ৰ টেগ সম্পাদনা কৰে তেতিয়া পৰৱৰ্তী গীতৰ কথাৰ লাইনৰ আৰম্ভণিৰ সময়ৰ টেগ সলনি কৰক আৰু স্বয়ংক্ৰিয়ভাৱে তাৰ বিপৰীতটো কৰক।",
@@ -837,9 +770,9 @@
     "lyricOffsetInputDescription": "গীতৰ কথাৰ লাইনবোৰ স্বয়ংক্ৰিয়ভাৱে সম্পাদনা কৰোঁতে যোগ কৰিবলৈ এটা ঋণাত্মক বা ধনাত্মক অফছেট বাছনি কৰক।",
     "lyricOffsetInput": "অফছেট (+ বা -)"
   },
-
-  "pageFocusPrompt": { "pageNotFocused": "পৃষ্ঠাত ফ'কাচ কৰা হোৱা নাই।" },
-
+  "pageFocusPrompt": {
+    "pageNotFocused": "পৃষ্ঠাত ফ'কাচ কৰা হোৱা নাই।"
+  },
   "releaseNotesPrompt": {
     "latestVersion": "আপোনাৰ ওচৰত শেহতীয়া সংস্কৰণ আছে।",
     "oldVersion": "<br/><span>আপোনাৰ ওচৰত শেহতীয়া সংস্কৰণ নাই।</span> <Hyperlink>এতিয়াই আপডেট কৰক</Hyperlink>",
@@ -856,10 +789,8 @@
     "issuesAndBugs": "জ্ঞাত সমস্যা আৰু বাগ",
     "developerUpdates": "ডেভেলপাৰ আপডেট"
   },
-
   "appShortcutsPrompt": {
     "inAppShortcuts": "এপৰ ভিতৰৰ চৰ্টকাট",
-
     "mediaPlayback": "মিডিয়া প্লে'বেক",
     "playPause": "প্লে' / পজ",
     "toggleMute": "মিউট টগল কৰক",
@@ -875,7 +806,6 @@
     "upPlaybackRate": "প্লে'বেকৰ হাৰ ০.০৫x বঢ়াওক",
     "downPlaybackRate": "প্লে'বেকৰ হাৰ ০.০৫x কমাওক",
     "resetPlaybackRate": "প্লে'বেকৰ হাৰ ১x লৈ ৰিছেট কৰক",
-
     "navigation": "নেভিগেচন",
     "goHome": "হোমলৈ যাওক",
     "goBack": "পিছলৈ যাওক",
@@ -884,26 +814,21 @@
     "goToLyrics": "গীতৰ কথালৈ যাওক",
     "goToQueue": "বৰ্তমানৰ শাৰীলৈ যাওক",
     "goToSearch": "সন্ধানলৈ যাওক",
-
     "selections": "বাছনিসমূহ",
     "selectMultipleItems": "একাধিক বস্তু বাছনি কৰক",
-
     "lyrics": "গীতৰ কথা",
     "playNextLyricsLine": "পৰৱৰ্তী গীতৰ কথাৰ লাইন প্লে' কৰক",
     "playPrevLyricsLine": "পূৰ্বৱৰ্তী গীতৰ কথাৰ লাইন প্লে' কৰক",
-
     "lyricsEditor": "গীতৰ কথা সম্পাদক",
     "selectNextLyricsLine": "পৰৱৰ্তী গীতৰ কথাৰ লাইন বাছনি কৰক",
     "selectPrevLyricsLine": "পূৰ্বৱৰ্তী গীতৰ কথাৰ লাইন বাছনি কৰক",
     "selectCustomLyricsLine": "এটা কাষ্টম গীতৰ কথাৰ লাইন বাছনি কৰক",
-
     "otherShortcuts": "অন্যান্য চৰ্টকাট",
     "toggleTheme": "এপৰ থীম টগল কৰক",
     "toggleMiniPlayerAlwaysOnTop": "মিনি প্লেয়াৰ সদায় ওপৰত টগল কৰক",
     "reload": "ৰিলোড",
     "openDevtools": "ডেভটুলছ খোলক",
     "openAppShortcutsPrompt": "এপ চৰ্টকাট প্ৰম্পট খোলক",
-
     "enterKey": "এণ্টাৰ",
     "spaceKey": "স্পেচ",
     "ctrlKey": "Ctrl",
@@ -914,18 +839,15 @@
     "leftArrowKey": "বাওঁ এৰ'",
     "upArrowKey": "ওপৰৰ এৰ'",
     "downArrowKey": "তলৰ এৰ'",
-
     "mouseClick": "মাউচ ক্লিক",
     "doubleClick": "ডাবল-ক্লিক"
   },
-
   "clearLocalStoragePrompt": {
     "title": "স্থানীয় সংৰক্ষণ ডাটা পৰিষ্কাৰ কৰা নিশ্চিত কৰক",
     "description": "এই প্ৰক্ৰিয়াটোৱে ন'ৰাত যিকোনো দুৰ্নীতিগ্ৰস্ত স্থানীয় সংৰক্ষণ ডাটা পৰিষ্কাৰ কৰিব আৰু ইয়াক ডিফল্ট ছেটিংছলৈ ঘূৰাই আনিব।",
     "effect": "<p>এই কাৰ্যটোৱে নিম্নলিখিত ডাটাক প্ৰভাৱিত কৰিব: </p><ul><li>ন'ৰাত বেছিভাগ পছন্দৰ ছেটিংছ</li><li>প্লে'বেক ছেটিংছ যেনে বৰ্তমান চলি থকা গীত, ভলিউম ইত্যাদি।</li><li>বৰ্তমানৰ শাৰীৰ ডাটা</li><li>অৱজ্ঞা কৰা পৰামৰ্শৰ ডাটা যেনে ফিচাৰিং শিল্পী, পৃথক শিল্পী আৰু ডুপ্লিকেট</li><li>পৃষ্ঠা ক্ৰমবদ্ধ কৰা ডাটা</li><li>ইকুৱেলাইজাৰ ডাটা</li><li>গীতৰ কথা সম্পাদকৰ ছেটিংছ</li></ul>",
     "restartNotice": "প্ৰক্ৰিয়াটোৰ পিছত ন'ৰা পুনৰাম্ভ হ'ব।"
   },
-
   "musixmatchDisclaimerPrompt": {
     "title": "দায়সত্যাগ - Musixmatch Lyrics",
     "message": "<li> Musixmatch Lyricsক এই চফ্টৱেৰত এটা মূল্যায়ন সুবিধা হিচাপে যোগ কৰা হৈছে আৰু যিকোনো সময়তে আঁতৰাই পেলোৱা হ'ব পাৰে।</li><li>ন'ৰা কোনো ধৰণে Musixmatch Lyrics বা ইয়াৰ কোনো সহযোগী বা সহায়ক কোম্পানীৰ সৈতে সংযুক্ত, অনুমোদিত, তত্বাৱধান কৰা, পৃষ্ঠপোষকতা কৰা বা সমৰ্থিত নহয়।</li><li>এই এপ্লিকেচনৰ তত্বাৱধায়কসকলে ইয়াৰ ব্যৱহাৰকাৰীসকলৰ ব্যক্তিগত দায়িত্বৰ ওপৰত আহ্বান জনায় যাতে তেওঁলোকে এই সুবিধাটো উচিতভাৱে ব্যৱহাৰ কৰে, যিহেতু ইয়াক Musixmatch Lyricsৰ দ্বাৰা প্ৰযোজ্য কপিৰাইট মানি চলিবলৈ ব্যৱহাৰ কৰাৰ উদ্দেশ্যে কৰা হৈছে।</li>",
@@ -933,7 +855,6 @@
     "hyperlinkTitle": "MxLRC গিথহাব ৰিপোজিটৰী",
     "contactAboutComplaints": "যদি আপোনাৰ কোনো অভিযোগ থাকে, আপুনি ন'ৰা ডিস্কৰ্ড চাৰ্ভাৰৰ জৰিয়তে, বা মোৰ <Hyperlink>ইমেইল</Hyperlink>ৰ জৰিয়তে মোৰ সৈতে যোগাযোগ কৰিব পাৰে।"
   },
-
   "musixmatchSettingsPrompt": {
     "title": "Musixmatch ছেটিংছ",
     "message": "<li>Musixmatchক ইয়াৰ সেৱা সঠিকভাৱে প্ৰদান কৰিবলৈ এটা ব্যৱহাৰকাৰী টোকেনৰ প্ৰয়োজন।</li><li>একেটা টোকেনৰ পৰা সেৱাৰ দীৰ্ঘদিনীয়া ব্যৱহাৰৰ বাবে Musixmatchএ কেতিয়াবা গীতৰ কথা দেখুৱাবলৈ বিফল হ'ব পাৰে।</li><li>এটা নতুন Musixmatch টোকেন পাবলৈ <Hyperlink>Spicetify Wiki</Hyperlink>ৰ পৰা নিৰ্দেশনা অনুসৰণ কৰক।</li>",
@@ -946,7 +867,6 @@
     "tokenIncorrectCharacters": "TOKENত কেৱল আখৰ-সাংখ্যিক আখৰ থাকিব লাগে।",
     "savedTokenAvailableMessage": "<Title><span/> এটা সংৰक्षित টোকেন উপলব্ধ।</Title><p> ব্যৱহাৰকাৰীৰ দ্বাৰা সংৰক্ষিত এটা বৈধ Musixmatch টোকেন ইতিমধ্যে ন'ৰাত উপলব্ধ।</p> <p> সেৱাটো সঠিকভাৱে কাম নকৰিলেহে আপুনি টোকেন সলনি কৰিব লাগিব।</p>"
   },
-
   "customizeSelectedMetadataPrompt": {
     "selected": "বাছনি কৰা হৈছে",
     "select": "বাছনি কৰক",
@@ -959,49 +879,40 @@
     "addOnlySelected": "কেৱল বাছনি কৰা যোগ কৰক",
     "addAll": "সকলো যোগ কৰক"
   },
-
   "resetTagsToDefaultPrompt": {
     "changed": "পৰিবৰ্তিত",
     "title": "গীতৰ ডাটা ডিফল্টলৈ ৰিছেট কৰাৰ আগতে নিশ্চিত কৰক",
     "description": "আপুনি নিশ্চিতনে যে আপুনি গীতৰ ডাটা ৰিছেট কৰিব বিচাৰে? আপুনি এই স্ক্ৰীণত সম্পাদনা কৰা ডাটা হেৰুৱাব।",
     "resetToDefault": "ডিফল্টলৈ ৰিছেট কৰক"
   },
-
   "songMetadataResultSelectPrompt": {
     "title": "<span/>ৰ সৈতে জড়িত ফলাফল"
   },
-
   "errorPrompt": {
     "title": "এটা ত্ৰুটি ঘটিছে",
     "sendErrorInfo": "অনুগ্ৰহ কৰি এপটো উন্নত কৰিবলৈ আমাক <Hyperlink1>মতামত</Hyperlink1> পঠাওক বা গিথহাবত <Hyperlink2>এটা ইছ্যু সৃষ্টি কৰক</Hyperlink2>।"
   },
-
   "openLinkConfirmPrompt": {
     "description": "আপুনি এটা লিংক খুলিবলৈ চেষ্টা কৰিছে যি আপোনাক <span/>লৈ লৈ যাব।<br/> এই লিংকটো আপোনাৰ ডিফল্ট ব্ৰাউজাৰৰ পৰা খোলা হ'ব।",
     "doNotVerifyLink": "এটা লিংক খুলিবলৈ চেষ্টা কৰোঁতে পৰীক্ষা নকৰিব।",
     "openLink": "লিংক খোলক"
   },
-
   "songUnplayableErrorPrompt": {
     "title": "গীতটো প্লে' কৰিব নোৱাৰিলোঁ",
     "description": "দেখিছে আমি সেই গীতটো প্লে' কৰিব নোৱাৰোঁ। অনুগ্ৰহ কৰি পৰীক্ষা কৰক যে বাছনি কৰা গীতটো আপোনাৰ চিষ্টেমত উপলব্ধ আৰু এপৰ দ্বাৰা ব্যৱহাৰযোগ্য।"
   },
-
   "unsupportedFileMessagePrompt": {
     "title": "অসমৰ্থিত অডিঅ' ফাইল",
     "description": "আপুনি <span/> এক্সটেনশ্যনৰ এটা ফাইল খুলিবলৈ চেষ্টা কৰিছে, যিটো এই এপে সমৰ্থন নকৰে।<br/> বৰ্তমান, আমি কেৱল নিম্নলিখিত অডিঅ' ফৰ্মেটসমূহ সমৰ্থন কৰোঁ। <div/>"
   },
-
   "duplicateArtistsSuggestion": {
     "message": "<div><p><span/> একেজন শিল্পী নেকি?</p><p>যদি হয়, আপুনি তেওঁলোকৰ সমলক এজন শিল্পীলৈ লিংক কৰিব পাৰে, বা আপুনি এই পৰামৰ্শটো অৱজ্ঞা কৰিব পাৰে।</p></div>",
     "linkToArtist": "{{name}}লৈ লিংক কৰক"
   },
-
   "separateArtistsSuggestion": {
     "message": "<div><p><span/> {{count}} জন পৃথক শিল্পী নেকি?</p><p>যদি হয়, আপুনি তেওঁলোকক পৃথক শিল্পী হিচাপে বাছনি কৰি আয়োজন কৰিব পাৰে, বা আপুনি এই পৰামৰ্শটো অৱজ্ঞা কৰিব পাৰে।</p></div>",
     "separateAsArtists": "{{count}} জন শিল্পী হিচাপে পৃথক কৰক"
   },
-
   "featArtistsSuggestion": {
     "message_one": "<p><span/> এই গীতটোত এজন ফিচাৰিং শিল্পী নেকি?</p><p>যদি হয়, আপুনি সেই শিল্পীক গীতটোৰ এজন শিল্পী হিচাপে যোগ কৰিব পাৰে, বা আপুনি এই পৰামৰ্שটো অৱজ্ঞা কৰিব পাৰে।</p>",
     "message_other": "<p><span/> {{count}} জন শিল্পী এই গীতটোত ফিচাৰিং কৰিছে নেকি?</p><p>যদি হয়, আপুনি সেই শিল্পীসকলক গীতটোৰ শিল্পী হিচাপে যোগ কৰিব পাৰে, বা আপুনি এই পৰামৰ্שটো অৱজ্ঞা কৰিব পাৰে।</p>",
@@ -1010,14 +921,12 @@
     "editInMetadataEditingPage": "মেটাডেটা সম্পাদনা পৃষ্ঠাত সম্পাদনা কৰক",
     "modificationNotice": "মনত ৰাখিব যে গীতত ফিচাৰিং শিল্পী যোগ কৰিলে লাইব্ৰেৰীৰ গীতৰ ডাটাৰ লগতে গীতৰ মেটাডেটাও আপডেট হ'ব।"
   },
-
   "biography": {
     "readMore": "অধিক পঢ়ক...",
     "readMoreInLastFm": "LastFMত অধিক পঢ়ক",
     "aboutName": "<span/>ৰ বিষয়ে",
     "goToTagInLastFm": "LastFMত {{name}} টেগলৈ যাওক"
   },
-
   "notifications": {
     "clearAll": "সকলো পৰিষ্কাৰ কৰক",
     "playingNext": "`{{title}}` পৰৱৰ্তী প্লে' হ'ব।",
@@ -1035,7 +944,6 @@
     "playbackPausedDueToSongDeletion": "গীতটো মচি পেলোৱাৰ বাবে বৰ্তমানৰ গীতৰ প্লে'বেক পজ কৰা হৈছে।",
     "languageChanged": "এপৰ ভাষা সফলতাৰে সলনি কৰা হৈছে।"
   },
-
   "backend": {
     "RESYNC_SUCCESSFUL": "লাইব্ৰেৰী পুনৰ চিনক্ৰ'নাইজ সফল।",
     "RESET_SUCCESSFUL": "এপ সফলতাৰে ৰিছেট কৰা হৈছে, এতিয়া পুনৰাম্ভ হৈছে।",
@@ -1104,7 +1012,6 @@
     "SONG_REPARSE_SUCCESS": "সফলতাৰে `{{title}}` পুনৰ পাৰ্চ কৰা হ'ল।",
     "SONG_REPARSE_FAILED": "গীতটো পুনৰ পাৰ্চ কৰোঁতে ত্ৰুটি ঘটিছে।"
   },
-
   "discordrpc": {
     "noraOnGitHub": "গিথহাবত ন'ৰা",
     "untitledSong": "এটা শীৰ্ষকহীন গীত",
