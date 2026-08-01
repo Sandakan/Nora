@@ -100,28 +100,30 @@ export const resolveArtistDuplicates = async (selectedArtistId: number, duplicat
     }
 
     // Persist changes to the database: link songs/albums to the selected artist and remove duplicates
-    for (const artist of artists) {
-      if (!duplicateIds.includes(artist.artistId)) continue;
+    await db.transaction(async (trx) => {
+      for (const artist of artists) {
+        if (!duplicateIds.includes(artist.artistId)) continue;
 
-      const duplicateArtistId = artist.artistId;
+        const duplicateArtistId = artist.artistId;
 
-      // Link songs from duplicate artist to selected artist and unlink from duplicate
-      for (const artistSong of artist.songs) {
-        const songId = artistSong.songId;
-        const alreadyLinked = await getLinkedSongArtist(songId, selectedArtist.artistId, db);
-        if (!alreadyLinked) await linkSongToArtist(selectedArtist.artistId, songId, db);
-        await unlinkSongFromArtist(duplicateArtistId, songId, db);
+        // Link songs from duplicate artist to selected artist and unlink from duplicate
+        for (const artistSong of artist.songs) {
+          const songId = artistSong.songId;
+          const alreadyLinked = await getLinkedSongArtist(songId, selectedArtist.artistId, trx);
+          if (!alreadyLinked) await linkSongToArtist(selectedArtist.artistId, songId, trx);
+          await unlinkSongFromArtist(duplicateArtistId, songId, trx);
+        }
+
+        // Link albums to selected artist if not already linked
+        for (const album of albums) {
+          const linked = await getLinkedAlbumArtist(album.albumId, selectedArtist.artistId, trx);
+          if (!linked) await linkArtistToAlbum(album.albumId, selectedArtist.artistId, trx);
+        }
+
+        // Delete the duplicate artist row (cascade will remove related rows)
+        await deleteArtist(duplicateArtistId, trx);
       }
-
-      // Link albums to selected artist if not already linked
-      for (const album of albums) {
-        const linked = await getLinkedAlbumArtist(album.albumId, selectedArtist.artistId, db);
-        if (!linked) await linkArtistToAlbum(album.albumId, selectedArtist.artistId, db);
-      }
-
-      // Delete the duplicate artist row (cascade will remove related rows)
-      await deleteArtist(duplicateArtistId, db);
-    }
+    });
 
     // Notify renderer of updates (they should requery DB)
     dataUpdateEvent('artists');
