@@ -37,11 +37,11 @@ const EqualierBand = (props: Props) => {
             min="-12"
             max="12"
             step="0.1"
-            value={Number(value.toFixed(1))}
+            value={value}
             onChange={(e) => {
               const val = e.currentTarget.valueAsNumber;
               if (!Number.isNaN(val)) {
-                onChange(Math.round(Math.min(12, Math.max(-12, val)) * 10) / 10);
+                onChange(Math.min(12, Math.max(-12, val)));
               }
             }}
             onBlur={(e) => {
