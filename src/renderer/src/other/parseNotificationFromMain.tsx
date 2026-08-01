@@ -39,6 +39,7 @@ const notificationsFromMainConfig: AppNotificationConfig[] = [
       'LYRICS_SAVE_QUEUED',
       'LYRICS_SAVED_IN_LRC_FILE',
       'PENDING_LYRICS_SAVED',
+      'LYRICS_SAVE_FAILED',
       'ADDED_SONGS_TO_PLAYLIST',
       'APPDATA_EXPORT_SUCCESS',
       'APPDATA_IMPORT_SUCCESS',

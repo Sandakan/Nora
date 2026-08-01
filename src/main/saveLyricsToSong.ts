@@ -29,7 +29,19 @@ const saveLyricsToSong = async (songPathWithProtocol: string, songLyrics: SongLy
     const shouldSaveLrcFile =
       !isASupportedFormat || saveLyricsInLrcFilesForSupportedSongs || songLyrics.lyrics.isSynced;
 
-    if (shouldSaveLrcFile) saveLyricsToLRCFile(songPath, songLyrics);
+    if (shouldSaveLrcFile) {
+      // Await so a failed LRC write surfaces as an error instead of an
+      // unhandled rejection while the save flow reports success.
+      try {
+        await saveLyricsToLRCFile(songPath, songLyrics);
+      } catch (error) {
+        logger.error(`Failed to save lyrics to LRC file.`, { error, songPath });
+        return sendMessageToRenderer({
+          messageCode: 'LYRICS_SAVE_FAILED',
+          data: { title: songLyrics.title }
+        });
+      }
+    }
 
     if (isASupportedFormat) {
       try {
