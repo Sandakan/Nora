@@ -46,10 +46,14 @@ const AudioPlaybackSettings = () => {
     const interval = storage.preferences.getPreferences('seekbarScrollInterval');
     const playbackRate = storage.playback.getPlaybackOptions('playbackRate');
     const savedCrossfade = storage.playback.getPlaybackOptions('crossfadeDuration');
+    const normalizedCrossfade =
+      typeof savedCrossfade === 'number' && Number.isFinite(savedCrossfade)
+        ? Math.min(12000, Math.max(0, Math.round(savedCrossfade / 500) * 500))
+        : 0;
 
     setPlaybackRateInterval(playbackRate);
     setSeekbarScrollInterval(interval.toString());
-    setCrossfadeDuration(savedCrossfade ?? 0);
+    setCrossfadeDuration(normalizedCrossfade);
   }, []);
 
   const playbackRateSeekBarCssProperties: CSSProperties = {};

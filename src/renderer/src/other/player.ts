@@ -7,6 +7,19 @@ import PlayerQueue from './playerQueue';
 
 const AUDIO_FADE_DURATION = 250;
 const GAIN_FLOOR = 0.001;
+const CROSSFADE_MAX_MS = 12000;
+const CROSSFADE_STEP_MS = 500;
+
+// Persisted crossfadeDuration can contain NaN, negatives, or out-of-range
+// values (imports, older storage). Clamp + round to the slider's step before
+// it reaches gain timing.
+const normalizeCrossfadeDuration = (value: unknown): number => {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return 0;
+  return Math.min(
+    CROSSFADE_MAX_MS,
+    Math.max(0, Math.round(value / CROSSFADE_STEP_MS) * CROSSFADE_STEP_MS)
+  );
+};
 
 type PlayerEventType =
   | 'timeUpdate'
@@ -51,11 +64,13 @@ class AudioPlayer {
   private repeatMode: 'off' | 'one' | 'all' = 'off';
   private pendingAutoPlay: boolean = false;
   private pendingAutoPlayHandler: (() => void) | null = null;
+  private pendingAutoPlayElement: HTMLAudioElement | null = null;
 
   private activeElement: 'primary' | 'secondary' = 'primary';
   private isCrossfading: boolean = false;
   private crossfadeDuration: number = 0;
   private crossfadeTimer: ReturnType<typeof setTimeout> | null = null;
+  private fadeOutTimer: ReturnType<typeof setTimeout> | null = null;
 
   private preloadedSongId: number | null = null;
   private preloadedSongData: AudioPlayerData | null = null;
@@ -94,7 +109,9 @@ class AudioPlayer {
 
     this.currentVolume = this.audio.volume;
 
-    this.crossfadeDuration = storage.playback.getPlaybackOptions('crossfadeDuration') ?? 0;
+    this.crossfadeDuration = normalizeCrossfadeDuration(
+      storage.playback.getPlaybackOptions('crossfadeDuration') ?? 0
+    );
 
     this.unsubscribeFunc = this.subscribeToStoreEvents();
     this.initializeEqualizer();
@@ -157,6 +174,18 @@ class AudioPlayer {
 
     this.queueHandlers.queueChange = (data: unknown) => {
       this.emit('queueChange', data);
+
+      // A queue edit (insert / reorder / remove) can change the effective next
+      // song. If the preloaded song is stale, preload the new next so crossfade
+      // / gapless remain seamless. Skip the position commit that already routed
+      // through the transition path.
+      if (this.suppressNextPositionLoad) return;
+      const nextId = this.getEffectiveNextSongId();
+      if (nextId === null || nextId === this.preloadedSongId) return;
+
+      this.preloadNextSong().catch((err) => {
+        console.error('[AudioPlayer.queueChange] Failed to refresh preload:', err);
+      });
     };
 
     this.queueHandlers.metadataChange = (data: unknown) => {
@@ -412,7 +441,7 @@ class AudioPlayer {
       this.abortCrossfade();
       return;
     }
-    if (this.getEffectiveNextSongId() !== nextSongId) {
+    if (this.queue.currentSongId !== nextSongId && this.getEffectiveNextSongId() !== nextSongId) {
       this.abortCrossfade();
       return;
     }
@@ -426,14 +455,17 @@ class AudioPlayer {
     this.fadeGainPrimary.gain.value = this.activeElement === 'primary' ? 1 : 0;
     this.fadeGainSecondary.gain.value = this.activeElement === 'primary' ? 0 : 1;
 
-    // Re-emit durationChange after element swap — covers edge cases where duration
-    // metadata differs between preload and completion time (e.g. VBR streams).
-    this.emit('durationChange', this.getActiveAudio().duration);
-
+    // Update current-song metadata BEFORE emitting durationChange so consumers
+    // (media session, position sync) never read incoming duration against
+    // outgoing song metadata.
     oldActive.pause();
     dispatch({ type: 'CURRENT_SONG_DATA_CHANGE', data: nextSongData });
     dispatch({ type: 'CURRENT_SONG_PLAYBACK_STATE', data: true });
     storage.playback.setCurrentSongOptions('songId', nextSongId);
+
+    // Re-emit durationChange after element swap — covers edge cases where duration
+    // metadata differs between preload and completion time (e.g. VBR streams).
+    this.emit('durationChange', this.getActiveAudio().duration);
     this.emit('play');
 
     this.suppressNextPositionLoad = true;
@@ -555,6 +587,13 @@ class AudioPlayer {
     songIdOrData: number | AudioPlayerData,
     options?: { autoPlay?: boolean; updateStore?: boolean }
   ): Promise<AudioPlayerData> {
+    // A new load supersedes any pending fade-out: do not let its timer pause
+    // the newly selected track.
+    if (this.fadeOutTimer) {
+      clearTimeout(this.fadeOutTimer);
+      this.fadeOutTimer = null;
+    }
+
     let songData: AudioPlayerData;
 
     try {
@@ -588,17 +627,21 @@ class AudioPlayer {
             console.error('[AudioPlayer] Immediate auto-play failed:', err)
           );
         } else {
-          if (this.pendingAutoPlayHandler) {
-            targetAudio.removeEventListener('canplay', this.pendingAutoPlayHandler);
+          // A new auto-play supersedes any pending one: remove the old handler
+          // from the element that owns it (which may be a stale element).
+          if (this.pendingAutoPlayHandler && this.pendingAutoPlayElement) {
+            this.pendingAutoPlayElement.removeEventListener('canplay', this.pendingAutoPlayHandler);
           }
           const autoPlayHandler = () => {
             this.pendingAutoPlayHandler = null;
+            this.pendingAutoPlayElement = null;
             this.play().catch((err) =>
               console.error('[AudioPlayer] Auto-play on canplay failed:', err)
             );
             targetAudio.removeEventListener('canplay', autoPlayHandler);
           };
           this.pendingAutoPlayHandler = autoPlayHandler;
+          this.pendingAutoPlayElement = targetAudio;
           targetAudio.addEventListener('canplay', autoPlayHandler);
         }
       }
@@ -641,6 +684,17 @@ class AudioPlayer {
       clearTimeout(this.crossfadeTimer);
       this.crossfadeTimer = null;
     }
+    if (this.fadeOutTimer) {
+      clearTimeout(this.fadeOutTimer);
+      this.fadeOutTimer = null;
+    }
+    // Remove a pending auto-play canplay handler so teardown cannot resume a
+    // closed AudioContext.
+    if (this.pendingAutoPlayHandler && this.pendingAutoPlayElement) {
+      this.pendingAutoPlayElement.removeEventListener('canplay', this.pendingAutoPlayHandler);
+      this.pendingAutoPlayHandler = null;
+      this.pendingAutoPlayElement = null;
+    }
 
     for (const [el, handlers] of this.boundListeners) {
       Object.entries(handlers).forEach(([event, fn]) => el.removeEventListener(event, fn));
@@ -680,6 +734,10 @@ class AudioPlayer {
 
   private fadeOutAudio(): Promise<void> {
     return new Promise((resolve) => {
+      // Capture the fading element: the timer callback must pause THIS element,
+      // not whichever element is active when it fires (a resume or new track
+      // could have replaced it within the fade window).
+      const fadingAudio = this.getActiveAudio();
       const fadeGain = this.getActiveFadeGain();
       const currentTime = this.currentContext.currentTime;
       const targetVolume = 0.001;
@@ -688,8 +746,12 @@ class AudioPlayer {
       fadeGain.gain.setValueAtTime(fadeGain.gain.value, currentTime);
       fadeGain.gain.exponentialRampToValueAtTime(targetVolume, currentTime + fadeDuration);
 
-      setTimeout(() => {
-        this.getActiveAudio().pause();
+      if (this.fadeOutTimer) clearTimeout(this.fadeOutTimer);
+      this.fadeOutTimer = setTimeout(() => {
+        this.fadeOutTimer = null;
+        if (this.getActiveAudio() === fadingAudio) {
+          fadingAudio.pause();
+        }
         resolve(undefined);
       }, AUDIO_FADE_DURATION);
     });
@@ -776,8 +838,9 @@ class AudioPlayer {
         this.syncRepeatModeFromStore(player.isRepeating);
 
         const storedCrossfade = ls?.playback?.crossfadeDuration;
-        if (storedCrossfade !== undefined && storedCrossfade !== this.crossfadeDuration) {
-          this.crossfadeDuration = storedCrossfade;
+        const persistedCrossfade = normalizeCrossfadeDuration(storedCrossfade);
+        if (persistedCrossfade !== this.crossfadeDuration) {
+          this.crossfadeDuration = persistedCrossfade;
           if (this.isCrossfading) {
             this.abortCrossfade();
           }
@@ -796,6 +859,12 @@ class AudioPlayer {
   }
 
   async play() {
+    // Resuming supersedes any pending fade-out: its timer must not pause this
+    // play later.
+    if (this.fadeOutTimer) {
+      clearTimeout(this.fadeOutTimer);
+      this.fadeOutTimer = null;
+    }
     await this.currentContext.resume().catch((err) => {
       console.error('[AudioPlayer.play] Failed to resume AudioContext:', err);
     });
