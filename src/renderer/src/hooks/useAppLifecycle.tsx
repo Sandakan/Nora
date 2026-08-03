@@ -280,7 +280,10 @@ export function useAppLifecycle(dependencies: AppLifecycleDependencies): void {
     player.addEventListener('pause', displayDefaultTitleBar);
 
     return () => {
-      toggleSongPlayback(false);
+      // Only remove listeners here. This effect's dependency is the audio
+      // element, which AudioPlayer replaces during device-change recovery
+      // (Strategy 3). Calling toggleSongPlayback(false) in this cleanup would
+      // pause the NEW element after recovery resumed it.
       player.removeEventListener('canplay', playSongIfPlayable);
       player.removeEventListener('play', windowManagement.addSongTitleToTitleBar);
       player.removeEventListener('pause', displayDefaultTitleBar);
