@@ -22,12 +22,15 @@ const restoreBlacklistedFolders = async (blacklistedFolderPaths: string[]) => {
   const foldersByPath = new Map(folders.map((folder) => [path.normalize(folder.path), folder]));
   const blacklistedFolderPathSet = new Set(normalizedBlacklistedFolderPaths);
 
+  const skippedFolderPaths = new Set<string>();
+
   for (const blacklistedFolderPath of normalizedBlacklistedFolderPaths) {
     const parentFolderPath = path.normalize(path.dirname(blacklistedFolderPath));
     const isParentBlacklisted = foldersByPath.get(parentFolderPath)?.isBlacklisted ?? false;
     const isParentNotInFolderPaths = !blacklistedFolderPathSet.has(parentFolderPath);
 
-    if (isParentBlacklisted && isParentNotInFolderPaths)
+    if (isParentBlacklisted && isParentNotInFolderPaths) {
+      skippedFolderPaths.add(blacklistedFolderPath);
       sendMessageToRenderer({
         messageCode: 'WHITELISTING_FOLDER_FAILED_DUE_TO_BLACKLISTED_PARENT_FOLDER',
         data: {
@@ -35,10 +38,17 @@ const restoreBlacklistedFolders = async (blacklistedFolderPaths: string[]) => {
           parentFolderName: parentFolderPath
         }
       });
+    }
   }
 
   const foldersToWhitelist = folders
-    .filter((folder) => blacklistedFolderPathSet.has(path.normalize(folder.path)))
+    .filter((folder) => {
+      const normalizedPath = path.normalize(folder.path);
+      return (
+        blacklistedFolderPathSet.has(normalizedPath) &&
+        !skippedFolderPaths.has(normalizedPath)
+      );
+    })
     .map((folder) => folder.id);
 
   if (foldersToWhitelist.length > 0) await removeFoldersFromBlacklist(foldersToWhitelist);

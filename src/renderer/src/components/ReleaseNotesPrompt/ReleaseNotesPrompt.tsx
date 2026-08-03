@@ -23,7 +23,7 @@ const ReleaseNotesPrompt = () => {
   const { t } = useTranslation();
 
   const { isOnline } = useNetworkConnectivity();
-  const [releaseNotes, setReleaseNotes] = useState<Changelog>(parseChangelog(rawChangelog));
+  const [releaseNotes, setReleaseNotes] = useState<Changelog>(() => parseChangelog(rawChangelog));
 
   const latestUpdatedInfo = useMemo(() => {
     const sortedReleaseNotes = releaseNotes.versions.sort((versionA, versionB) => {
