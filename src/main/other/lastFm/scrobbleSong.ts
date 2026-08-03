@@ -118,7 +118,9 @@ const scrobbleSong = async (songId: number, startTimeSecs: number) => {
     }
   } catch (error) {
     if (fallbackTrack && fallbackArtist) {
-      await queueScrobbleForRetry(songId, startTimeSecs, fallbackTrack, fallbackArtist).catch(() => {});
+      await queueScrobbleForRetry(songId, startTimeSecs, fallbackTrack, fallbackArtist).catch(
+        () => {}
+      );
     }
     return logger.error('Failed to scrobble song data to LastFM, queued for retry.', {
       error

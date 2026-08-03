@@ -1,8 +1,8 @@
 import { and, asc, eq, inArray, lte, sql } from 'drizzle-orm';
 
+import logger from '../../logger';
 import { db } from '../db';
 import { scrobbleQueue } from '../schema';
-import logger from '../../logger';
 
 const MAX_QUEUE_SIZE = 1000;
 const MAX_RETRY_COUNT = 3;
@@ -55,10 +55,7 @@ export async function claimPendingBatch(
       .select()
       .from(scrobbleQueue)
       .where(
-        and(
-          eq(scrobbleQueue.status, 'pending'),
-          lte(scrobbleQueue.retryCount, MAX_RETRY_COUNT - 1)
-        )
+        and(eq(scrobbleQueue.status, 'pending'), lte(scrobbleQueue.retryCount, MAX_RETRY_COUNT - 1))
       )
       .orderBy(asc(scrobbleQueue.createdAt))
       .limit(batchSize);
@@ -75,19 +72,13 @@ export async function claimPendingBatch(
   });
 }
 
-export async function markSent(
-  id: number,
-  trx: DB | DBTransaction = db
-): Promise<void> {
+export async function markSent(id: number, trx: DB | DBTransaction = db): Promise<void> {
   await trx
     .delete(scrobbleQueue)
     .where(and(eq(scrobbleQueue.id, id), eq(scrobbleQueue.status, 'sending')));
 }
 
-export async function markFailed(
-  id: number,
-  trx: DB | DBTransaction = db
-): Promise<void> {
+export async function markFailed(id: number, trx: DB | DBTransaction = db): Promise<void> {
   await trx
     .update(scrobbleQueue)
     .set({

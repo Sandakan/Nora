@@ -45,8 +45,7 @@ const restoreBlacklistedFolders = async (blacklistedFolderPaths: string[]) => {
     .filter((folder) => {
       const normalizedPath = path.normalize(folder.path);
       return (
-        blacklistedFolderPathSet.has(normalizedPath) &&
-        !skippedFolderPaths.has(normalizedPath)
+        blacklistedFolderPathSet.has(normalizedPath) && !skippedFolderPaths.has(normalizedPath)
       );
     })
     .map((folder) => folder.id);

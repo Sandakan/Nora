@@ -42,11 +42,11 @@ import { initializeIPC } from './ipc';
 import logger from './logger';
 import { clearTempArtworkFolder } from './other/artworks';
 import { clearDiscordRpcActivity } from './other/discordRPC';
+import { flushScrobbleQueue } from './other/lastFm/flushScrobbleQueue';
 import resetAppData from './resetAppData';
 import { savePendingSongLyrics } from './saveLyricsToSong';
 import checkForUpdates from './update';
 import { savePendingMetadataUpdates } from './updateSong/updateSongId3Tags';
-import { flushScrobbleQueue } from './other/lastFm/flushScrobbleQueue';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -151,9 +151,8 @@ const installExtensions = async () => {
   try {
     const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
 
-    const { default: installExtension, REACT_DEVELOPER_TOOLS } = await import(
-      'electron-devtools-installer'
-    );
+    const { default: installExtension, REACT_DEVELOPER_TOOLS } =
+      await import('electron-devtools-installer');
 
     const ext = await installExtension(REACT_DEVELOPER_TOOLS, {
       loadExtensionOptions: { allowFileAccess: true },

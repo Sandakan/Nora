@@ -43,9 +43,7 @@ const sortFolders = <T extends MusicFolder[]>(
         a.songIds.length > b.songIds.length ? 1 : a.songIds.length < b.songIds.length ? -1 : 0
       );
     if (sortType === 'blacklistedFolders')
-      return sortAtoZ(
-        musicFolders.filter((folder) => folder.isBlacklisted || isParentBlacklisted)
-      );
+      return sortAtoZ(musicFolders.filter((folder) => folder.isBlacklisted || isParentBlacklisted));
 
     if (sortType === 'whitelistedFolders')
       return sortAtoZ(
