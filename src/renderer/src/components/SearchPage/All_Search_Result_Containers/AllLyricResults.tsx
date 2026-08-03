@@ -1,8 +1,9 @@
 import { store } from '@renderer/store/store';
 import { useStore } from '@tanstack/react-store';
-import { useMemo } from 'react';
+import { useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import Song from '../../SongsPage/Song';
 import HighlightedSnippet from '../HighlightedSnippet';
 
@@ -14,6 +15,19 @@ const AllLyricResults = (props: Props) => {
   const { lyricData } = props;
   const { t } = useTranslation();
   const preferences = useStore(store, (state) => state.localStorage.preferences);
+
+  const { createQueue, playSong } = useContext(AppUpdateContext);
+
+  const handleSongPlayBtnClick = useCallback(
+    (currSongId: number) => {
+      const queueSongIds = lyricData
+        .filter((result) => !result.song.isBlacklisted)
+        .map((result) => result.song.songId);
+      createQueue(queueSongIds, 'songs', false, undefined, false);
+      playSong(currSongId, true);
+    },
+    [createQueue, playSong, lyricData]
+  );
 
   const results = useMemo(
     () =>
@@ -32,11 +46,12 @@ const AllLyricResults = (props: Props) => {
             isAFavorite={result.song.isAFavorite}
             year={result.song.year}
             isBlacklisted={result.song.isBlacklisted}
+            onPlayClick={handleSongPlayBtnClick}
           />
           <HighlightedSnippet snippet={result.matchedLyricSnippet} truncate={false} />
         </div>
       )),
-    [lyricData, preferences?.isSongIndexingEnabled]
+    [lyricData, preferences?.isSongIndexingEnabled, handleSongPlayBtnClick]
   );
 
   if (lyricData.length === 0) {

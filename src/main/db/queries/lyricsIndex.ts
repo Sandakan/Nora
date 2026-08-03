@@ -88,12 +88,38 @@ export const upsertSongLyricsFromText = async (
     });
 };
 
+export type LyricsIndexResult = 'indexed' | 'absent' | 'read-error';
+
+/**
+ * Sums backfill batch results. A fulfilled 'read-error' counts as a failure so
+ * isLyricIndexBuilt is only set when every song was indexed or confirmed absent
+ * (a song with no lyrics is a valid completed state). Pure and unit-testable.
+ */
+export const countBackfillResults = (
+  results: PromiseSettledResult<LyricsIndexResult>[]
+): { processed: number; indexed: number; failed: number } => {
+  let indexed = 0;
+  let processed = 0;
+  let failed = 0;
+  for (const result of results) {
+    if (result.status === 'fulfilled') {
+      processed += 1;
+      if (result.value === 'indexed') indexed += 1;
+      else if (result.value === 'read-error') failed += 1;
+      // 'absent' is a valid completed state - not a failure.
+    } else {
+      failed += 1;
+    }
+  }
+  return { processed, indexed, failed };
+};
+
 export const upsertSongLyrics = async (
   songId: number,
   songPath: string,
   customLrcFilesSaveLocation?: string | null,
   trx: typeof db = db
-): Promise<boolean> => {
+): Promise<LyricsIndexResult> => {
   const [embedded, lrc] = await Promise.all([
     readEmbeddedLyrics(songPath),
     readLrcLyrics(songPath, customLrcFilesSaveLocation)
@@ -102,7 +128,7 @@ export const upsertSongLyrics = async (
   // null = read/parse error on at least one source; keep existing index, don't delete
   if (embedded === null || lrc === null) {
     logger.warn(`Skipping lyrics index update for song ${songId} due to read error; keeping existing entry.`);
-    return false;
+    return 'read-error';
   }
 
   const texts: string[] = [];
@@ -111,7 +137,7 @@ export const upsertSongLyrics = async (
 
   if (texts.length === 0) {
     await removeSongLyrics(songId, trx);
-    return false;
+    return 'absent';
   }
 
   const lyricsText = texts.join('\n');
@@ -121,7 +147,7 @@ export const upsertSongLyrics = async (
   else source = 'LRC';
 
   await upsertSongLyricsFromText(songId, lyricsText, source, trx);
-  return true;
+  return 'indexed';
 };
 
 export const removeSongLyrics = async (songId: number, trx: typeof db = db): Promise<void> => {
@@ -142,14 +168,16 @@ export const indexAllLyrics = async (): Promise<{ allSucceeded: boolean }> => {
     const results = await Promise.allSettled(
       batch.map((song) => upsertSongLyrics(song.id, song.path, customLrcFilesSaveLocation))
     );
+    const counts = countBackfillResults(results);
+    processed += counts.processed;
+    indexed += counts.indexed;
+    failed += counts.failed;
     for (let j = 0; j < results.length; j += 1) {
       const result = results[j];
-      if (result.status === 'fulfilled') {
-        processed += 1;
-        if (result.value) indexed += 1;
-      } else {
-        failed += 1;
+      if (result.status === 'rejected') {
         logger.error(`Failed to index lyrics for song ${batch[j].id}`, { error: result.reason });
+      } else if (result.value === 'read-error') {
+        logger.error(`Failed to index lyrics for song ${batch[j].id} (read error).`);
       }
     }
   }
