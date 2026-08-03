@@ -27,7 +27,8 @@ const StartupSettings = () => {
   });
 
   const { mutate: updateTraySingleClickBehavior } = useMutation({
-    mutationFn: (enable: boolean) => window.api.settings.updateTraySingleClickBehavior(enable),
+    mutationFn: (enable: boolean) =>
+      (globalThis as typeof window).api.settings.updateTraySingleClickBehavior(enable),
     onSettled: () => {
       queryClient.invalidateQueries(settingsQuery.all);
     }
