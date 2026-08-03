@@ -285,10 +285,17 @@ const getKeyboardShortcuts = (): ShortcutCategoryList => {
   const userShortcuts: ShortcutCategory[] = (localData as any)?.keyboardShortcuts || [];
   const defaults: ShortcutCategory[] = LOCAL_STORAGE_DEFAULT_TEMPLATE.keyboardShortcuts;
 
-  const merged: ShortcutCategory[] = defaults.map((defaultCategory) => {
-    const matchingUserCategory = userShortcuts.find(
-      (uc) => uc.shortcutCategoryTitle === defaultCategory.shortcutCategoryTitle
+  // Match saved categories by stable id first, then fall back to the legacy
+  // translated title so a language change cannot orphan a user's categories.
+  const findUserCategory = (defaultCategory: ShortcutCategory) =>
+    userShortcuts.find(
+      (uc) =>
+        uc.id === defaultCategory.id ||
+        uc.shortcutCategoryTitle === defaultCategory.shortcutCategoryTitle
     );
+
+  const merged: ShortcutCategory[] = defaults.map((defaultCategory) => {
+    const matchingUserCategory = findUserCategory(defaultCategory);
 
     if (!matchingUserCategory) return defaultCategory;
 
@@ -305,11 +312,12 @@ const getKeyboardShortcuts = (): ShortcutCategoryList => {
     return { ...defaultCategory, shortcuts: patchedShortcuts };
   });
 
-  const userCategoryTitles = new Set(userShortcuts.map((c) => c.shortcutCategoryTitle));
+  // Categories not matching any default (user-created or orphaned legacy
+  // categories) are appended as-is, preserving their id/title.
+  const defaultCategoryIds = new Set(defaults.map((dc) => dc.id));
+  const defaultCategoryTitles = new Set(defaults.map((dc) => dc.shortcutCategoryTitle));
   const extraUserCategories = userShortcuts.filter(
-    (uc) => !userCategoryTitles.has(uc.shortcutCategoryTitle) || !defaults.some(
-      (dc) => dc.shortcutCategoryTitle === uc.shortcutCategoryTitle
-    )
+    (uc) => !defaultCategoryIds.has(uc.id) && !defaultCategoryTitles.has(uc.shortcutCategoryTitle)
   );
 
   return [...merged, ...extraUserCategories];

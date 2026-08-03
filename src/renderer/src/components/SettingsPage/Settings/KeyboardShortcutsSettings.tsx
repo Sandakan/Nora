@@ -9,9 +9,7 @@ import ShortcutButton from '../ShortcutButton';
 
 const KeyboardShortcutsSettings = () => {
   const { t } = useTranslation();
-  const [shortcuts, setShortcuts] = useState(
-    storage.keyboardShortcuts.getKeyboardShortcuts()
-  );
+  const [shortcuts, setShortcuts] = useState(storage.keyboardShortcuts.getKeyboardShortcuts());
   const [newShortcut, setNewShortcut] = useState<Shortcut | null>(null);
   const [newKeys, setNewKeys] = useState<string[]>([]);
   const [editingShortcut, setEditingShortcut] = useState<string | null>(null);
@@ -37,6 +35,9 @@ const KeyboardShortcutsSettings = () => {
         keys.push(key === ' ' ? 'Space' : key);
       }
 
+      // Reject modifier-only combos (Ctrl / Cmd / Alt / Shift alone).
+      if (keys.length === 0) return;
+
       setNewKeys(keys);
 
       const original = shortcuts
@@ -54,7 +55,9 @@ const KeyboardShortcutsSettings = () => {
 
     const handleClickOutside = (e: MouseEvent) => {
       const shortcutElements = document.querySelectorAll('.shortcut.editing');
-      const clickedOutside = Array.from(shortcutElements).every((el) => !el.contains(e.target as Node));
+      const clickedOutside = Array.from(shortcutElements).every(
+        (el) => !el.contains(e.target as Node)
+      );
 
       const sortKeys = (k: string[]) => [...k].sort();
       const duplicate =
@@ -91,7 +94,7 @@ const KeyboardShortcutsSettings = () => {
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [editingShortcut, newShortcut, newKeys, shortcuts, addNewNotifications]);
+  }, [editingShortcut, newShortcut, newKeys, shortcuts, addNewNotifications, t]);
 
   const shortcutCategoryComponents = useMemo(
     () =>
@@ -187,9 +190,7 @@ const KeyboardShortcutsSettings = () => {
               true,
               <SensitiveActionConfirmPrompt
                 title={t('keyboardShortcutsSettings.resetConfirmTitle')}
-                content={
-                  <div>{t('keyboardShortcutsSettings.resetConfirmContent')}</div>
-                }
+                content={<div>{t('keyboardShortcutsSettings.resetConfirmContent')}</div>}
                 confirmButton={{
                   label: t('keyboardShortcutsSettings.resetToDefaults'),
                   clickHandler: () => {

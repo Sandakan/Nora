@@ -452,6 +452,7 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
   },
   keyboardShortcuts: [
     {
+      id: 'mediaPlayback',
       shortcutCategoryTitle: i18n.t('appShortcutsPrompt.mediaPlayback'),
       shortcuts: [
         {
@@ -532,6 +533,7 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
       ]
     },
     {
+      id: 'navigation',
       shortcutCategoryTitle: i18n.t('appShortcutsPrompt.navigation'),
       shortcuts: [
         {
@@ -572,6 +574,7 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
       ]
     },
     {
+      id: 'selections',
       shortcutCategoryTitle: i18n.t('appShortcutsPrompt.selections'),
       shortcuts: [
         {
@@ -582,6 +585,7 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
       ]
     },
     {
+      id: 'lyrics',
       shortcutCategoryTitle: i18n.t('appShortcutsPrompt.lyrics'),
       shortcuts: [
         {
@@ -597,6 +601,7 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
       ]
     },
     {
+      id: 'lyricsEditor',
       shortcutCategoryTitle: i18n.t('appShortcutsPrompt.lyricsEditor'),
       shortcuts: [
         {
@@ -617,6 +622,7 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
       ]
     },
     {
+      id: 'otherShortcuts',
       shortcutCategoryTitle: i18n.t('appShortcutsPrompt.otherShortcuts'),
       shortcuts: [
         {

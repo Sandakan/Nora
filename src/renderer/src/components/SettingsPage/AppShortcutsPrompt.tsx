@@ -181,9 +181,7 @@ const AppShortcutsPrompt = () => {
               true,
               <SensitiveActionConfirmPrompt
                 title={t('keyboardShortcutsSettings.resetConfirmTitle')}
-                content={
-                  <div>{t('keyboardShortcutsSettings.resetConfirmContent')}</div>
-                }
+                content={<div>{t('keyboardShortcutsSettings.resetConfirmContent')}</div>}
                 confirmButton={{
                   label: t('keyboardShortcutsSettings.resetToDefaults'),
                   clickHandler: () => {

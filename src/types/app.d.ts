@@ -653,6 +653,7 @@ declare global {
   }
 
   interface ShortcutCategory {
+    id: string;
     shortcutCategoryTitle: string;
     shortcuts: Shortcut[];
   }

@@ -49,6 +49,7 @@ class AudioPlayer {
   private repeatMode: 'off' | 'one' | 'all' = 'off';
   private pendingAutoPlay: boolean = false;
   private isEqualizerActive: boolean = false;
+  private lastAppliedEqualizerPreset: Partial<Record<EqualizerBandFilters, number>> | null = null;
 
   constructor(queue: PlayerQueue) {
     this.listeners = new Map();
@@ -638,6 +639,9 @@ class AudioPlayer {
   // ========== EQUALIZER CONTROL ==========
 
   applyEqualizerPreset(preset: Partial<Record<EqualizerBandFilters, number>>) {
+    // Cache the preset so toggleEqualizer can re-apply it without reading
+    // legacy localStorage (the DB-backed settings hook feeds this).
+    this.lastAppliedEqualizerPreset = { ...this.lastAppliedEqualizerPreset, ...preset };
     if (!this.isEqualizerActive) return;
     for (const [filterName, gainValue] of Object.entries(preset)) {
       const band = this.equalizerBands.get(filterName as EqualizerBandFilters);
@@ -647,7 +651,7 @@ class AudioPlayer {
     }
   }
 
-  /** Toggles the equalizer on/off. When toggled on, applies stored preset values. */
+  /** Toggles the equalizer on/off. When toggled on, reapplies the last preset. */
   toggleEqualizer() {
     if (this.isEqualizerActive) {
       this.equalizerBands.forEach((band) => {
@@ -656,9 +660,8 @@ class AudioPlayer {
       this.isEqualizerActive = false;
     } else {
       this.isEqualizerActive = true;
-      const equalizerPreset = storage.getLocalStorage().equalizerPreset;
-      if (equalizerPreset) {
-        this.applyEqualizerPreset(equalizerPreset);
+      if (this.lastAppliedEqualizerPreset) {
+        this.applyEqualizerPreset(this.lastAppliedEqualizerPreset);
       }
     }
   }

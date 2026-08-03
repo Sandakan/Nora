@@ -1,5 +1,5 @@
-import { normalizedKeys } from '@renderer/other/appShortcuts';
 import { LOCAL_STORAGE_DEFAULT_TEMPLATE } from '@renderer/other/appReducer';
+import { normalizedKeys } from '@renderer/other/appShortcuts';
 import { store } from '@renderer/store/store';
 import { useNavigate } from '@tanstack/react-router';
 import { useCallback, useEffect, type ReactNode } from 'react';
@@ -189,10 +189,7 @@ export function useKeyboardShortcuts(dependencies: KeyboardShortcutDependencies)
       if (matchedShortcut) {
         e.preventDefault();
         let updatedPlaybackRate: number;
-        const shortcutId = canonicalizeShortcutId(matchedShortcut).replace(
-          /(_key|Key)$/i,
-          ''
-        );
+        const shortcutId = canonicalizeShortcutId(matchedShortcut).replace(/(_key|Key)$/i, '');
         switch (shortcutId) {
           case 'playPause':
             toggleSongPlayback();
