@@ -129,6 +129,9 @@ Launch in development mode
 npm start
 ```
 
+> [!TIP]
+> If you encounter issues (such as `Error: Electron uninstall`), check out the [Troubleshooting Guide](docs/TROUBLESHOOTING.md).
+
 ## 📊 Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=Sandakan/Nora&type=Date)](https://star-history.com/#Sandakan/Nora&Date)

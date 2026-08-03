@@ -26,14 +26,15 @@ const SongUnplayableErrorPrompt = (props: Props) => {
   }, [addNewNotifications, t]);
 
   const { err, songPath: providedSongPath } = props;
-  const errorMessage = err?.message.split(':').at(-1) ?? 'UNKNOWN';
+  const rawErrorMessage = err?.message ?? '';
+  const errorMessage = rawErrorMessage.split(':').at(-1)?.trim() || 'UNKNOWN';
 
   // Get song path from props or from store's current song data
   const songPath = providedSongPath || store.state.currentSongData?.path || '';
 
   // Detect if this is a codec/format support error (DEMUXER_ERROR suggests format issue)
   const isFormatError =
-    errorMessage.includes('DEMUXER_ERROR') || errorMessage.includes('NotSupportedError');
+    rawErrorMessage.includes('DEMUXER_ERROR') || rawErrorMessage.includes('NotSupportedError');
   const fileExtension = songPath?.split('.').at(-1)?.toLowerCase() ?? '';
   const isFLAC = fileExtension === 'flac';
 

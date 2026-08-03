@@ -1,9 +1,36 @@
 import { resolve } from 'path';
 
+import { transformSync } from '@babel/core';
 import tailwindcss from '@tailwindcss/vite';
 import { tanstackRouter } from '@tanstack/router-plugin/vite';
 import react from '@vitejs/plugin-react';
+import reactCompilerPlugin from 'babel-plugin-react-compiler';
 import { defineConfig } from 'electron-vite';
+import type { Plugin } from 'vite';
+
+function reactCompiler(): Plugin {
+  return {
+    name: 'vite:react-compiler',
+    enforce: 'pre',
+    transform(code: string, id: string) {
+      if (id.includes('node_modules') || !/\.[tj]sx?$/.test(id)) return null;
+      if (!/forwardRef|memo|\b(?:[A-Z]|use[A-Z0-9])/.test(code)) return null;
+
+      const result = transformSync(code, {
+        filename: id,
+        plugins: [reactCompilerPlugin],
+        parserOpts: {
+          plugins: ['jsx', 'typescript']
+        },
+        configFile: false,
+        babelrc: false,
+        sourceMaps: true
+      });
+
+      return result ? { code: result.code ?? code, map: result.map } : null;
+    }
+  };
+}
 
 export default defineConfig({
   main: {
@@ -47,8 +74,8 @@ export default defineConfig({
         generatedRouteTree: 'src/routeTree.gen.ts',
         autoCodeSplitting: true
       }),
+      reactCompiler(),
       react(),
-      // babel({ presets: [reactCompilerPreset()] }),
       tailwindcss()
     ]
   }
