@@ -183,6 +183,13 @@ class AudioPlayer {
       const nextId = this.getEffectiveNextSongId();
       if (nextId === null || nextId === this.preloadedSongId) return;
 
+      // Do not load a new source into the incoming element while it is part of
+      // an active crossfade: that would replace the fade target mid-transition.
+      // Abort the crossfade first, then preload the new next song.
+      if (this.isCrossfading) {
+        this.abortCrossfade();
+      }
+
       this.preloadNextSong().catch((err) => {
         console.error('[AudioPlayer.queueChange] Failed to refresh preload:', err);
       });
