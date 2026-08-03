@@ -1,5 +1,6 @@
 import { getAllFolderStructures } from '@main/db/queries/folders';
 
+import { runFullScan } from '../fs/scanCoordinator';
 import checkFolderForUnknownModifications from '../fs/checkFolderForUnknownContentModifications';
 import logger from '../logger';
 
@@ -7,11 +8,6 @@ const getTopLevelFolderPaths = async (): Promise<string[]> => {
   const structures = await getAllFolderStructures();
   return structures.map((s) => s.path);
 };
-
-// Single-flight guard: the full library scan must not run concurrently from
-// IPC resync, startup, or future callers. Concurrent callers join the active
-// scan instead of starting a second one.
-let activeScanPromise: Promise<Awaited<ReturnType<typeof runCheckForNewSongs>>> | null = null;
 
 const runCheckForNewSongs = async () => {
   const topLevelFolders = await getTopLevelFolderPaths();
@@ -47,14 +43,9 @@ const runCheckForNewSongs = async () => {
   return { failedFolders, failedSongPaths, deletionFailures, hasFailures, scanFailed };
 };
 
-const checkForNewSongs = async () => {
-  if (activeScanPromise) return activeScanPromise;
-
-  activeScanPromise = runCheckForNewSongs().finally(() => {
-    activeScanPromise = null;
-  });
-
-  return activeScanPromise;
-};
+// Full-library scans go through the shared scan coordinator so they cannot
+// overlap per-folder watcher scans (and vice versa). Concurrent callers join
+// the active scan instead of starting a second one.
+const checkForNewSongs = () => runFullScan(runCheckForNewSongs);
 
 export default checkForNewSongs;

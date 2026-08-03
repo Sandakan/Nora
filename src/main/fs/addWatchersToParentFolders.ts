@@ -5,10 +5,10 @@ import path from 'path';
 import { getAllFolderStructures } from '@main/db/queries/folders';
 
 import { supportedMusicExtensions } from '../filesystem';
-import checkFolderForUnknownModifications from './checkFolderForUnknownContentModifications';
 import checkForFolderModifications from './checkForFolderModifications';
 import { saveAbortController, registerWatcherCleanup } from './controlAbortControllers';
 import getParentFolderPaths from './getParentFolderPaths';
+import { runFolderScan } from './scanCoordinator';
 import logger from '../logger';
 
 const createParentFolderWatcherFunction = (parentFolderPath: string) => {
@@ -31,10 +31,7 @@ const createParentFolderWatcherFunction = (parentFolderPath: string) => {
 
   const runScan = (containingFolder: string) => {
     isScanning = true;
-    void checkFolderForUnknownModifications(containingFolder)
-      .catch((error) => {
-        logger.error('Debounced folder scan failed.', { error, containingFolder });
-      })
+    void runFolderScan(containingFolder)
       .finally(() => {
         isScanning = false;
         if (dirtyScan && dirtyPath) {

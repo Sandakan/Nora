@@ -48,4 +48,24 @@ describe('checkForNewSongs single-flight', () => {
     // Two sequential calls produce two scans (no sticky single-flight).
     expect(checkFolderForUnknownModifications).toHaveBeenCalledTimes(2);
   });
+
+  it('clears the single-flight lock after a rejected scan', async () => {
+    // getAllFolderStructures is called outside the per-folder try/catch, so a
+    // DB failure rejects the whole scan. The coordinator must clear its lock
+    // so the next call starts a fresh scan instead of reusing the rejection.
+    const { getAllFolderStructures } = await import(
+      '../../../../src/main/db/queries/folders'
+    );
+    (getAllFolderStructures as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
+      new Error('db unreachable')
+    );
+
+    await expect(checkForNewSongs()).rejects.toThrow('db unreachable');
+
+    // A fresh call after the rejection must start a NEW scan (the lock was
+    // cleared in the coordinator's finally), not reuse the rejected promise.
+    const result = await checkForNewSongs();
+    expect(result.hasFailures).toBe(false);
+    expect(checkFolderForUnknownModifications).toHaveBeenCalledTimes(1);
+  });
 });
