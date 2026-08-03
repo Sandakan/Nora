@@ -125,6 +125,17 @@ export function useKeyboardShortcuts(dependencies: KeyboardShortcutDependencies)
 
   const manageKeyboardShortcuts = useCallback(
     (e: KeyboardEvent) => {
+      // Do not intercept keystrokes while the user edits text: global
+      // shortcuts would preventDefault and break typing/IME composition.
+      const target = e.target as HTMLElement | null;
+      const isEditableTarget =
+        target &&
+        (target.isContentEditable ||
+          target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.tagName === 'SELECT');
+      if (isEditableTarget || e.isComposing) return;
+
       const shortcuts = storage.keyboardShortcuts
         .getKeyboardShortcuts()
         .flatMap((category) => category.shortcuts);
@@ -159,11 +170,15 @@ export function useKeyboardShortcuts(dependencies: KeyboardShortcutDependencies)
       };
 
       const pressedKeys = [
+        e.metaKey ? 'Cmd' : null,
         e.ctrlKey ? 'Ctrl' : null,
         e.shiftKey ? 'Shift' : null,
         e.altKey ? 'Alt' : null,
         formatKey(e.key)
-      ].filter(Boolean);
+      ].filter(Boolean) as string[];
+
+      // Reject modifier-only combos (Ctrl alone, Shift alone, etc.).
+      if (pressedKeys.every((key) => ['Cmd', 'Ctrl', 'Shift', 'Alt'].includes(key))) return;
 
       const matchedShortcut = shortcuts.find((shortcut) => {
         const storedKeys = shortcut.keys.map(formatKey).sort();

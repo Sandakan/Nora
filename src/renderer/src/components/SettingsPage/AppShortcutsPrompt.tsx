@@ -35,6 +35,9 @@ const AppShortcutsPrompt = () => {
         keys.push(key === ' ' ? 'Space' : key);
       }
 
+      // Reject modifier-only combos (Ctrl / Cmd / Alt / Shift alone).
+      if (keys.length === 0) return;
+
       setNewKeys(keys);
       setNewShortcut({ id: editingShortcut, label: editingShortcut, keys });
     };
