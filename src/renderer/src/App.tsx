@@ -28,6 +28,7 @@ import { usePlayerControl } from './hooks/usePlayerControl';
 import { usePlayerNavigation } from './hooks/usePlayerNavigation';
 import { usePromptMenu } from './hooks/usePromptMenu';
 import { useQueueManagement } from './hooks/useQueueManagement';
+import { useUpNextPopup } from './hooks/useUpNextPopup';
 import { useUserPreferences } from './hooks/useUserPreferences';
 import { useWindowManagement } from './hooks/useWindowManagement';
 import { initializeQueue } from './other/queueSingleton';
@@ -126,7 +127,7 @@ export default function App() {
 
   // ? INITIALIZE PLAYBACK ERRORS
   // Playback errors hook handles error management and retry logic
-  const skipForwardRef = useRef<() => void>();
+  const skipForwardRef = useRef<(() => void) | undefined>(undefined);
   const { managePlaybackErrors, resetErrorCount } = usePlaybackErrors(
     player,
     changePromptMenuData,
@@ -190,15 +191,7 @@ export default function App() {
   skipForwardRef.current = handleSkipForwardClick;
 
   // ? UP NEXT POPUP TRIGGER
-  const showUpNextPopupRef = useRef<(() => void) | null>(null);
-
-  const registerUpNextPopupFn = useCallback((fn: () => void) => {
-    showUpNextPopupRef.current = fn;
-  }, []);
-
-  const showUpNextSongPopup = useCallback(() => {
-    showUpNextPopupRef.current?.();
-  }, []);
+  const { registerUpNextPopupFn, showUpNextSongPopup } = useUpNextPopup();
   // ? INITIALIZE APP UPDATES
   // App updates hook handles checking for updates and showing release notes
   const { updateAppUpdatesState } = useAppUpdates({
