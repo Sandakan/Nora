@@ -221,7 +221,12 @@ export default function App() {
         .then((res) => {
           if (res && !res.success) {
             log('Failed to import playlist from path', { code: res.code }, 'ERROR');
-            changePromptMenuData(true, <SongUnplayableErrorPrompt err={res.code} />);
+            changePromptMenuData(
+              true,
+              <SongUnplayableErrorPrompt
+                err={new Error(res.code ? String(res.code) : 'playlistImportFailed')}
+              />
+            );
           }
         })
         .catch((err) => {

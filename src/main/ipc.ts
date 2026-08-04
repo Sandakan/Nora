@@ -1,6 +1,6 @@
 import getBlacklistData from '@main/core/getBlacklistData';
 import { app, BrowserWindow, ipcMain, powerMonitor, shell } from 'electron';
-import { statSync } from 'fs';
+import { stat } from 'node:fs/promises';
 
 import addArtworkToAPlaylist from './core/addArtworkToAPlaylist';
 import addSongsFromFolderStructures from './core/addMusicFolder';
@@ -566,7 +566,7 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
         }
         const trimmedPath = filePath.trim();
         try {
-          const fileStat = statSync(trimmedPath);
+          const fileStat = await stat(trimmedPath);
           if (!fileStat.isFile()) {
             logger.warn('importPlaylistFromPath: path is not a file', { trimmedPath });
             return { success: false as const, code: 'NOT_A_FILE' as const };
