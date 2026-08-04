@@ -2,7 +2,7 @@ import { saveUserSettings } from '@main/db/queries/settings';
 
 import type { LastFMSessionGetResponse } from '../../types/last_fm_api';
 import logger from '../logger';
-import { sendMessageToRenderer } from '../main';
+import { dataUpdateEvent, sendMessageToRenderer } from '../main';
 import hashText from '../utils/hashText';
 import { encrypt } from '../utils/safeStorage';
 
@@ -42,6 +42,7 @@ const manageLastFmAuth = async (token: string) => {
       logger.info('Successfully retrieved user authentication for LastFM', { name });
 
       await saveUserSettings({ lastFmSessionName: name, lastFmSessionKey: encryptedKey });
+      dataUpdateEvent('userData');
 
       return sendMessageToRenderer({ messageCode: 'LASTFM_LOGIN_SUCCESS' });
     }

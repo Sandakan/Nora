@@ -9,11 +9,12 @@ import logger from './logger';
 export const handleFileProtocol = async (req: GlobalRequest) => {
   try {
     const { pathname } = new URL(req.url);
-    const decodedPath = decodeURI(pathname);
+    const decodedPath = decodeURIComponent(pathname);
     const filePath =
       process.platform === 'darwin' ? decodedPath : decodedPath.replace(/^[/\\]{1,2}/gm, '');
 
     if (!existsSync(filePath)) {
+      logger.warn('File not found via nora:// protocol', { url: req.url, filePath });
       return new Response('File not found', { status: 404 });
     }
 

@@ -102,6 +102,7 @@
     "somethingWentWrong": "Something went wrong.",
     "details": "Details",
     "restartApp": "Restart app",
+    "skipSong": "Skip to next song",
     "ok": "Okay",
     "loading": "Loading"
   },
@@ -149,6 +150,8 @@
     "zToA": "Z to A",
     "dateAddedAscending": "Oldest",
     "dateAddedDescending": "Newest",
+    "dateModifiedAscending": "Date modified (Oldest)",
+    "dateModifiedDescending": "Date modified (Newest)",
     "releasedYearAscending": "Released year (Ascending)",
     "releasedYearDescending": "Released year (Descending)",
     "allTimeMostListened": "Most-listened (All time)",
@@ -167,7 +170,9 @@
     "mostLovedAscending": "Least-loved",
     "trackNoAscending": "Track number (Ascending)",
     "trackNoDescending": "Track number (Descending)",
-    "addedOrder": "Added order"
+    "addedOrder": "Added order",
+    "mostSkipped": "Most skipped (All time)",
+    "leastSkipped": "Least skipped (All time)"
   },
 
   "filterTypes": {
@@ -219,6 +224,7 @@
     "likeSong": "Add to favorites",
     "unlikeSong": "Remove from favorites",
     "toggleLikeSongs": "Add/remove songs from favorites",
+    "toggleLikeFailed": "Failed to update favorite. Please try again.",
     "addToPlaylists": "Add to playlist(s)",
     "goToAlbum": "Go to album",
     "editSongTags": "Edit song tags",
@@ -459,6 +465,8 @@
     "hideWindowAtStart": "Launch Nora in the System Tray on startup",
     "hideWindowOnCloseDescription": "Configure how Nora should behave when you click the close button.",
     "hideWindowOnClose": "Hide Nora to the System Tray when the close button is clicked.",
+    "trayClickBehaviorDescription": "Configure how the system tray icon behaves when clicked.",
+    "traySingleClickTogglesWindow": "Single-click tray icon toggles player window.",
 
     "storage": "Storage",
     "storageDescription": "See how Nora manages your library and utilizes your storage.",
@@ -990,7 +998,12 @@
 
   "songUnplayableErrorPrompt": {
     "title": "Couldn't play the song",
-    "description": "Seems like we can't play that song. Please check whether the selected song is available in your system and accessible by the app."
+    "description": "Seems like we can't play that song. Please check whether the selected song is available in your system and accessible by the app.",
+    "formatNotSupportedTitle": "Audio format not supported",
+    "flacNotSupportedDescription": "This song is in FLAC format, which is not supported natively by this app.",
+    "formatNotSupportedDescription": "This song format is not supported by the app.",
+    "supportedFormatsLabel": "Supported Audio Formats:",
+    "flacConversionHint": "Tip: You can convert FLAC audio files to MP3 or WAV format to play them in Nora."
   },
 
   "unsupportedFileMessagePrompt": {

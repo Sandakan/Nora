@@ -115,11 +115,14 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
 
   useEffect(() => {
     setIsSongPlaying(() => currentSongData?.songId === songId && isCurrentSongPlaying);
-    setIsAFavorite((prevState) => {
+  }, [currentSongData?.songId, isCurrentSongPlaying, songId]);
+
+  useEffect(() => {
+    setIsAFavorite(() => {
       if (currentSongData?.songId === songId) return currentSongData.isAFavorite;
-      return prevState;
+      return props.isAFavorite;
     });
-  }, [currentSongData.songId, currentSongData.isAFavorite, isCurrentSongPlaying, songId]);
+  }, [currentSongData?.songId, currentSongData?.isAFavorite, songId, props.isAFavorite]);
 
   const handlePlayBtnClick = useCallback(() => {
     if (onPlayClick) return onPlayClick(songId);
@@ -138,8 +141,26 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
         setIsAFavorite((prevData) => !prevData);
         return undefined;
       })
-      .catch((err) => console.error(err));
-  }, [currentSongData.isAFavorite, currentSongData.songId, isAFavorite, songId, toggleIsFavorite]);
+      .catch((err) => {
+        console.error(err);
+        addNewNotifications([
+          {
+            id: `toggleLikeError-${songId}`,
+            content: t('song.toggleLikeFailed'),
+            iconName: 'error',
+            duration: 5000
+          }
+        ]);
+      });
+  }, [
+    addNewNotifications,
+    currentSongData.isAFavorite,
+    currentSongData.songId,
+    isAFavorite,
+    songId,
+    t,
+    toggleIsFavorite
+  ]);
 
   const { minutes, seconds } = useMemo(() => {
     const addZero = (num: number) => {
@@ -392,14 +413,11 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
         label: t('song.editSongTags'),
         class: 'edit',
         iconName: 'edit',
-        handlerFunction: () => {
-          // TODO: Implement song tags editor navigation
-          // changeCurrentActivePage('SongTagsEditor', {
-          //   songId,
-          //   songArtworkPath: artworkPaths.artworkPath,
-          //   songPath: path
-          // });
-        },
+        handlerFunction: () =>
+          navigate({
+            to: '/main-player/songs/$songId/edit',
+            params: { songId: String(songId) }
+          }),
         isDisabled: isMultipleSelectionsEnabled
       },
       {

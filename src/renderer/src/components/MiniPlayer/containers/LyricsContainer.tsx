@@ -76,6 +76,7 @@ const LyricsContainer = (props: Props) => {
           const { originalText: text, end = 0, start = 0 } = lyric;
           return (
             <LyricLine
+              playerType="mini"
               key={index}
               index={index}
               lyric={text}
@@ -88,6 +89,7 @@ const LyricsContainer = (props: Props) => {
 
         const firstLine = (
           <LyricLine
+            playerType="mini"
             key="..."
             index={0}
             lyric="•••"
@@ -106,6 +108,7 @@ const LyricsContainer = (props: Props) => {
         return parsedLyrics.map((line, index) => {
           return (
             <LyricLine
+              playerType="mini"
               key={index}
               index={index}
               lyric={line.originalText}

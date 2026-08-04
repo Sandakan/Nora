@@ -43,6 +43,17 @@ const PageFocusPrompt = lazy(
   () => import('@renderer/components/LyricsEditingPage/PageFocusPrompt')
 );
 
+/**
+ * Renders the lyrics editor page for a specific song, providing UI for viewing and editing lyric
+ * lines, playback controls, context menu actions, and keyboard shortcuts.
+ *
+ * The component reads song and user settings from global stores, subscribes to player position
+ * updates for syncing timestamps, and manages internal editing state and focus. It exposes controls
+ * to play/stop editing, save or reset lyrics, open settings/help prompts, and displays an overlay
+ * when the editing song does not match the currently playing song.
+ *
+ * @returns The React element representing the lyrics editing route/page.
+ */
 function LyricsEditingPage() {
   const currentSongData = useStore(store, (state) => state.currentSongData);
   const offset = useStore(store, (state) => state.localStorage.lyricsEditorSettings.offset || 0);
@@ -422,7 +433,7 @@ function LyricsEditingPage() {
         </div>
       </div>
       <div
-        className={`lyrics-container flex h-full flex-col items-center overflow-auto py-10 pr-6 transition-[background,opacity] [scrollbar-gutter:stable] ${
+        className={`lyrics-container flex h-full [scrollbar-gutter:stable] flex-col items-center overflow-auto py-10 pr-6 transition-[background,opacity] ${
           !isTheEditingSongTheCurrSong && 'opacity-10'
         }`}
       >

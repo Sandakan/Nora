@@ -87,6 +87,8 @@ export const getAllSongsInHistory = async (
       // Apply sorting based on sortType parameter
       if (sortType === 'aToZ') return [asc(songs.title)];
       if (sortType === 'zToA') return [desc(songs.title)];
+      if (sortType === 'mostSkipped') return [desc(songs.skipCount), asc(songs.title)];
+      if (sortType === 'leastSkipped') return [asc(songs.skipCount), asc(songs.title)];
       // Add other sort types as needed
       return [desc(songs.createdAt)]; // Default sorting
     },

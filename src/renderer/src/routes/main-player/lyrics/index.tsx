@@ -154,6 +154,7 @@ function LyricsPage() {
 
           return (
             <LyricLine
+              playerType="normal"
               key={index}
               index={index}
               lyric={originalText}
@@ -167,6 +168,7 @@ function LyricsPage() {
 
         const firstLine = (
           <LyricLine
+            playerType="normal"
             key="..."
             index={0}
             lyric="•••"
@@ -186,6 +188,7 @@ function LyricsPage() {
         return parsedLyrics.map((line, index) => {
           return (
             <LyricLine
+              playerType="normal"
               key={index}
               index={index}
               lyric={line.originalText}
@@ -587,7 +590,7 @@ function LyricsPage() {
               </div>
             </div>
             <div
-              className="lyrics-lines-container flex h-full w-full! flex-col items-center overflow-y-auto px-8 py-[10vh] [scrollbar-gutter:stable]"
+              className="lyrics-lines-container flex h-full w-full! scrollbar-gutter-stable flex-col items-center overflow-y-auto px-8 py-[10vh]"
               ref={lyricsLinesContainerRef}
               // onScroll={() =>
               //   debounce(() => {

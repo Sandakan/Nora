@@ -4,7 +4,7 @@ Nora is committed to protecting your privacy. This privacy policy outlines our p
 
 - Nora does not collect, store, or share personally-identifiable information.
 - Nora does not require users to create an account, log in, or provide any identifying details.
-- Nora does not sell, share, or disclose personal informastion to third parties.
+- Nora does not sell, share, or disclose personal information to third parties.
 
 ## Changes to This Policy
 

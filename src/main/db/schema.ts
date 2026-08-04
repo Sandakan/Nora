@@ -121,6 +121,7 @@ export const songs = pgTable(
     // Generated column: case-insensitive text for searches (using citext type)
     titleCI: citext('title_ci').generatedAlwaysAs((): SQL => sql`${songs.title}::citext`),
     duration: decimal('duration', { precision: 10, scale: 3 }).notNull(),
+    skipCount: integer('skip_count').notNull().default(0),
     path: text('path').notNull().unique(),
     isFavorite: boolean('is_favorite').notNull().default(false),
     sampleRate: integer('sample_rate'),
@@ -166,6 +167,7 @@ export const songs = pgTable(
     index('idx_songs_is_blacklisted').on(t.isBlacklisted),
 
     // Composite indexes for common sorting patterns
+    index('idx_songs_skip_count_title').on(t.skipCount.desc(), t.title.asc()),
     index('idx_songs_year_title').on(t.year.asc(), t.title.asc()),
     index('idx_songs_track_title').on(t.trackNumber.asc(), t.title.asc()),
     index('idx_songs_created_title').on(t.createdAt.desc(), t.title.asc()),
@@ -422,6 +424,9 @@ export const userSettings = pgTable(
     isMiniPlayerAlwaysOnTop: boolean('is_mini_player_always_on_top').notNull().default(false),
     isMusixmatchLyricsEnabled: boolean('is_musixmatch_lyrics_enabled').notNull().default(true),
     hideWindowOnClose: boolean('hide_window_on_close').notNull().default(false),
+    traySingleClickTogglesWindow: boolean('tray_single_click_toggles_window')
+      .notNull()
+      .default(false),
     sendSongScrobblingDataToLastFM: boolean('send_song_scrobbling_data_to_lastfm')
       .notNull()
       .default(false),
@@ -925,6 +930,36 @@ export const skipEventsRelations = relations(skipEvents, ({ one }) => ({
 export const playHistoryRelations = relations(playHistory, ({ one }) => ({
   song: one(songs, {
     fields: [playHistory.songId],
+    references: [songs.id]
+  })
+}));
+
+export const scrobbleQueue = pgTable(
+  'scrobble_queue',
+  {
+    id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+    songId: integer('song_id').references(() => songs.id, {
+      onDelete: 'set null',
+      onUpdate: 'cascade'
+    }),
+    startTimeSecs: integer('start_time_secs'),
+    operationType: varchar('operation_type', { length: 20 }).notNull(),
+    trackTitle: varchar('track_title', { length: 4096 }),
+    artistNames: text('artist_names'),
+    status: varchar('status', { length: 10 }).notNull().default('pending'),
+    retryCount: integer('retry_count').notNull().default(0),
+    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
+  },
+  (t) => [
+    index('idx_scrobble_queue_status').on(t.status),
+    index('idx_scrobble_queue_created_at').on(t.createdAt.asc())
+  ]
+);
+
+export const scrobbleQueueRelations = relations(scrobbleQueue, ({ one }) => ({
+  song: one(songs, {
+    fields: [scrobbleQueue.songId],
     references: [songs.id]
   })
 }));

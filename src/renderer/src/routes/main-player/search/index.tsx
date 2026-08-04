@@ -46,6 +46,16 @@ const ALBUM_WIDTH = 210;
 const PLAYLIST_WIDTH = 160;
 const GENRE_WIDTH = 300;
 
+/**
+ * Render the main-player search page with input controls, filters, and result sections.
+ *
+ * The component displays a search input with a toggle for similarity/predictive search, a set of
+ * result filters, and conditionally renders various search result containers (songs, artists,
+ * albums, playlists, genres, most relevant) or placeholders based on the current search state.
+ *
+ * @returns The React element tree for the search page, including controls, filters, and conditional
+ *   result containers.
+ */
 function SearchPage() {
   const isSimilaritySearchEnabledInLocalStorage = useStore(
     store,
@@ -118,7 +128,7 @@ function SearchPage() {
   );
 
   return (
-    <MainContainer className="h-full! pb-0! [scrollbar-gutter:stable]" ref={searchContainerRef}>
+    <MainContainer className="h-full! [scrollbar-gutter:stable] pb-0!" ref={searchContainerRef}>
       <div className="search-controls-container">
         <div className="search-input-container appear-from-bottom mb-4 flex items-center">
           <div className="search-bar-container bg-background-color-2 dark:bg-dark-background-color-2 flex w-1/2 max-w-xl min-w-[25rem] items-center rounded-3xl px-2 py-1">

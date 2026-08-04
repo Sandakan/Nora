@@ -803,7 +803,7 @@ const updateSongId3TagsOfUnknownSource = async (
           isAFavorite: false,
           path: songOutsideLibraryData.path,
           isKnownSource: false,
-          isBlacklisted: isSongBlacklisted(
+          isBlacklisted: await isSongBlacklisted(
             songOutsideLibraryData.songId,
             songOutsideLibraryData.path
           )
@@ -1146,7 +1146,7 @@ const updateSongId3Tags = async (
           artworkPath: getSongArtworkPath(songId, !!artworkBuffer).artworkPath,
           duration: parseFloat(updatedSong.duration),
           isAFavorite: updatedSong.isFavorite,
-          isBlacklisted: isSongBlacklisted(songId, updatedSong.path),
+          isBlacklisted: await isSongBlacklisted(songId, updatedSong.path),
           path: updatedSong.path,
           isKnownSource: true
         };
@@ -1156,12 +1156,12 @@ const updateSongId3Tags = async (
 
     logger.debug(`Song data updated successfully`, { songId });
     return result;
-  } catch (err: any) {
-    if ('message' in err) {
-      result.reason = err.message;
+  } catch (err) {
+    if (err && typeof err === 'object' && 'message' in err) {
+      result.reason = String(err.message);
       sendMessageToRenderer({
         messageCode: 'METADATA_UPDATE_FAILED',
-        data: { message: err.message }
+        data: { message: String(err.message) }
       });
     }
     logger.error('Song metadata update failed.', { err });

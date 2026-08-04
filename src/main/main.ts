@@ -20,8 +20,7 @@ import {
   screen,
   session as electronSession,
   type OpenDialogOptions,
-  type SaveDialogOptions,
-  type Display
+  type SaveDialogOptions
 } from 'electron';
 
 import { version, appPreferences } from '../../package.json';
@@ -43,6 +42,7 @@ import { initializeIPC } from './ipc';
 import logger from './logger';
 import { clearTempArtworkFolder } from './other/artworks';
 import { clearDiscordRpcActivity } from './other/discordRPC';
+import { flushScrobbleQueue } from './other/lastFm/flushScrobbleQueue';
 import resetAppData from './resetAppData';
 import { savePendingSongLyrics } from './saveLyricsToSong';
 import checkForUpdates from './update';
@@ -89,6 +89,7 @@ const DEFAULT_SAVE_DIALOG_OPTIONS: SaveDialogOptions = {
 // / / / / / / VARIABLES / / / / / / /
 export let mainWindow: BrowserWindow;
 let tray: Tray;
+let trayContextMenu: Electron.Menu;
 let playerType: PlayerTypes = 'normal';
 // let isConnectedToInternet = false;
 let isAudioPlaying = false;
@@ -148,9 +149,10 @@ function launchExtensionBackgroundWorkers(session = electronSession.defaultSessi
 
 const installExtensions = async () => {
   try {
+    const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
+
     const { default: installExtension, REACT_DEVELOPER_TOOLS } =
       await import('electron-devtools-installer');
-    const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
 
     const ext = await installExtension(REACT_DEVELOPER_TOOLS, {
       loadExtensionOptions: { allowFileAccess: true },
@@ -236,7 +238,7 @@ const createWindow = async () => {
     frame: false,
     backgroundColor: await getBackgroundColor(),
     icon: appIcon,
-    titleBarStyle: 'hidden',
+    titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'hidden',
     show: false
   });
 
@@ -271,15 +273,24 @@ protocol.registerSchemesAsPrivileged([
       standard: true,
       secure: true,
       supportFetchAPI: true,
-      stream: true
+      stream: true,
+      corsEnabled: true
     }
   }
 ]);
 
+if (process.platform === 'win32') {
+  app.setAppUserModelId('com.sandakannipunajith.nora');
+}
+
 app
   .whenReady()
   .then(async () => {
-    const { windowState, zoomFactor } = await getUserSettings();
+    const {
+      windowState,
+      zoomFactor,
+      traySingleClickTogglesWindow = false
+    } = await getUserSettings();
 
     currentWindowZoomFactor = normalizeZoomFactor(zoomFactor);
 
@@ -301,7 +312,7 @@ app
     protocol.handle('nora', handleFileProtocol);
 
     tray = new Tray(appIcon);
-    const trayContextMenu = Menu.buildFromTemplate([
+    trayContextMenu = Menu.buildFromTemplate([
       {
         label: 'Show/Hide Nora',
         type: 'normal',
@@ -315,13 +326,18 @@ app
     tray.setContextMenu(trayContextMenu);
     tray.setToolTip('Nora');
 
-    tray.addListener('click', () => tray.popUpContextMenu(trayContextMenu));
-    tray.addListener('double-click', () => {
-      if (mainWindow.isVisible()) mainWindow.hide();
-      else mainWindow.show();
-    });
-
-    // powerMonitor.addListener('shutdown', (e) => e.preventDefault());
+    if (traySingleClickTogglesWindow) {
+      tray.addListener('click', () => {
+        if (mainWindow.isVisible()) mainWindow.hide();
+        else mainWindow.show();
+      });
+    } else {
+      tray.addListener('click', () => tray.popUpContextMenu(trayContextMenu));
+      tray.addListener('double-click', () => {
+        if (mainWindow.isVisible()) mainWindow.hide();
+        else mainWindow.show();
+      });
+    }
 
     mainWindow.webContents.once('did-finish-load', manageWindowFinishLoad);
 
@@ -366,6 +382,7 @@ app
     // ? / / / / / / / / /  IPC RENDERER EVENTS  / / / / / / / / / / / /
     if (mainWindow) {
       initializeIPC(mainWindow, abortController.signal);
+      flushScrobbleQueue();
       checkForUpdates();
       //  / / / / / / / / / / / GLOBAL SHORTCUTS / / / / / / / / / / / / / /
       // globalShortcut.register('F5', () => {
@@ -730,6 +747,26 @@ export async function resetApp(isRestartApp = true) {
   }
 }
 
+export function updateTraySingleClickBehavior(traySingleClickTogglesWindow: boolean) {
+  tray.removeAllListeners('click');
+  tray.removeAllListeners('double-click');
+
+  if (traySingleClickTogglesWindow) {
+    tray.addListener('click', () => {
+      if (mainWindow.isVisible()) mainWindow.hide();
+      else mainWindow.show();
+    });
+  } else {
+    tray.addListener('click', () => tray.popUpContextMenu(trayContextMenu));
+    tray.addListener('double-click', () => {
+      if (mainWindow.isVisible()) mainWindow.hide();
+      else mainWindow.show();
+    });
+  }
+
+  saveUserSettings({ traySingleClickTogglesWindow });
+}
+
 export function toggleMiniPlayerAlwaysOnTop(isMiniPlayerAlwaysOnTop: boolean) {
   if (mainWindow) {
     if (playerType === 'mini') mainWindow.setAlwaysOnTop(isMiniPlayerAlwaysOnTop);
@@ -820,6 +857,7 @@ export async function changePlayerType(type: PlayerTypes) {
         const [x, y] = mainWindow.getPosition();
         await saveUserSettings({ miniPlayerX: x, miniPlayerY: y });
       }
+      manageWindowOnDisplayMetricsChange();
       mainWindow.setAspectRatio(MINI_PLAYER_ASPECT_RATIO);
     } else if (type === 'normal') {
       mainWindow.setMaximumSize(MAIN_WINDOW_MAX_SIZE_X, MAIN_WINDOW_MAX_SIZE_Y);
@@ -838,6 +876,7 @@ export async function changePlayerType(type: PlayerTypes) {
         const [x, y] = mainWindow.getPosition();
         await saveUserSettings({ mainWindowX: x, mainWindowY: y });
       }
+      manageWindowOnDisplayMetricsChange();
       mainWindow.setAspectRatio(MAIN_WINDOW_ASPECT_RATIO);
     } else {
       mainWindow.setMaximumSize(MAIN_WINDOW_MAX_SIZE_X, MAIN_WINDOW_MAX_SIZE_Y);
@@ -847,20 +886,62 @@ export async function changePlayerType(type: PlayerTypes) {
   }
 }
 
-function manageWindowOnDisplayMetricsChange(primaryDisplay: Display) {
-  const currentDisplay = screen.getDisplayMatching(mainWindow.getBounds());
+function manageWindowOnDisplayMetricsChange() {
+  const bounds = mainWindow.getBounds();
+  const displays = screen.getAllDisplays();
+  // Use rectangle overlap so a partially visible window counts as on-screen
+  // (otherwise a window straddling a display edge gets teleported to the primary).
+  const isOnAnyDisplay = displays.some((display) => {
+    const { x, y, width, height } = display.workArea;
+    return (
+      bounds.x < x + width &&
+      bounds.x + bounds.width > x &&
+      bounds.y < y + height &&
+      bounds.y + bounds.height > y
+    );
+  });
 
-  if (!currentDisplay || currentDisplay.id !== primaryDisplay.id) {
-    mainWindow.setPosition(primaryDisplay.workArea.x, primaryDisplay.workArea.y);
+  if (!isOnAnyDisplay) {
+    const primaryDisplay = screen.getPrimaryDisplay();
+    const newX = primaryDisplay.workArea.x;
+    const newY = primaryDisplay.workArea.y;
+
+    const reposition = () => {
+      mainWindow.setPosition(newX, newY);
+
+      // Persist the corrected coordinates so stale values don't cause a
+      // repeat correction on the next launch (CodeRabbit minor finding).
+      if (playerType === 'mini') {
+        saveUserSettings({ miniPlayerX: newX, miniPlayerY: newY });
+      } else {
+        saveUserSettings({ mainWindowX: newX, mainWindowY: newY });
+      }
+
+      logger.debug('Window was off-screen; moved to primary display', {
+        previousPosition: { x: bounds.x, y: bounds.y },
+        newPosition: { x: newX, y: newY }
+      });
+    };
+
+    if (mainWindow.fullScreen) {
+      // On macOS the fullscreen-exit animation takes ~500 ms; calling
+      // setPosition during the animation is a no-op.  Defer repositioning
+      // until the animation completes (CodeRabbit major finding).
+      mainWindow.setFullScreen(false);
+      mainWindow.once('leave-full-screen', reposition);
+    } else {
+      reposition();
+    }
   }
 }
 
 function manageWindowPositionInMonitor() {
-  const primaryDisplay = screen.getPrimaryDisplay();
-  manageWindowOnDisplayMetricsChange(primaryDisplay);
+  manageWindowOnDisplayMetricsChange();
 
-  // Event listener for display change events
-  screen.on('display-metrics-changed', () => manageWindowOnDisplayMetricsChange(primaryDisplay));
+  screen.on('display-metrics-changed', () => manageWindowOnDisplayMetricsChange());
+  // `display-metrics-changed` is only fired for resolution / scale changes on
+  // existing displays; a hot-unplugged monitor fires `display-removed` instead.
+  screen.on('display-removed', () => manageWindowOnDisplayMetricsChange());
 }
 
 export async function toggleAutoLaunch(autoLaunchState: boolean) {

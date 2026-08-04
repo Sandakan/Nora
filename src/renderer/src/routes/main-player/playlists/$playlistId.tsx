@@ -11,11 +11,12 @@ import { queryClient } from '@renderer/index';
 import { playlistQuery } from '@renderer/queries/playlists';
 import { songQuery } from '@renderer/queries/songs';
 import { store } from '@renderer/store/store';
+import storage from '@renderer/utils/localStorage';
 import { songSearchSchema } from '@renderer/utils/zod/songSchema';
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
-import { lazy, useCallback, useContext } from 'react';
+import { lazy, useCallback, useContext, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 const SensitiveActionConfirmPrompt = lazy(
@@ -32,6 +33,16 @@ export const Route = createFileRoute('/main-player/playlists/$playlistId')({
   }
 });
 
+/**
+ * Render the playlist detail page with playlist metadata, a virtualized list of songs, and controls
+ * for playing, queuing, sorting, filtering, and playlist-specific actions.
+ *
+ * The component reads the current playlist ID and search params, persists the chosen sort order,
+ * loads playlist and song data, and provides UI handlers for play, shuffle, add-to-queue, clear
+ * history, and removing songs from the playlist.
+ *
+ * @returns The JSX element for the playlist detail page.
+ */
 function PlaylistInfoPage() {
   const { playlistId } = Route.useParams({
     select: (params) => ({ playlistId: Number(params.playlistId) })
@@ -41,7 +52,7 @@ function PlaylistInfoPage() {
   const queue = useStore(store, (state) => state.localStorage.queue);
   const playlistSortingState = useStore(
     store,
-    (state) => state.localStorage.sortingStates?.songsPage || 'addedOrder'
+    (state) => state.localStorage.sortingStates?.playlistDetailPage || 'addedOrder'
   );
   const preferences = useStore(store, (state) => state.localStorage.preferences);
   const { updateQueueData, changePromptMenuData, addNewNotifications, createQueue, playSong } =
@@ -49,6 +60,10 @@ function PlaylistInfoPage() {
   const { t } = useTranslation();
   const { sortingOrder = playlistSortingState, filteringOrder = 'notSelected' } = Route.useSearch();
   const navigate = useNavigate({ from: '/main-player/playlists/$playlistId' });
+
+  useEffect(() => {
+    storage.sortingStates.setSortingStates('playlistDetailPage', sortingOrder);
+  }, [sortingOrder]);
 
   const { data: playlistData } = useSuspenseQuery({
     ...playlistQuery.single({ playlistId: playlistId }),

@@ -9,11 +9,12 @@ import useSelectAllHandler from '@renderer/hooks/useSelectAllHandler';
 import { queryClient } from '@renderer/index';
 import { songQuery } from '@renderer/queries/songs';
 import { store } from '@renderer/store/store';
+import storage from '@renderer/utils/localStorage';
 import { songSearchSchema } from '@renderer/utils/zod/songSchema';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
-import { useCallback, useContext } from 'react';
+import { useCallback, useContext, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { SpecialPlaylists } from '../../../../../common/playlists.enum';
@@ -37,13 +38,24 @@ const playlistData: Playlist = {
   isArtworkAvailable: true
 };
 
+/**
+ * Renders the Favorites playlist information and song list UI with controls for playback, queue
+ * management, import, and sorting.
+ *
+ * The component loads the current Favorites songs (respecting the selected sort order), persists
+ * the sort order to local storage, and provides actions to play a single song, play all, shuffle
+ * and play, add songs to the queue, and import favorites. It also supports Ctrl+A to select all
+ * songs and disables controls when there are no favorite songs.
+ *
+ * @returns The React element representing the Favorites playlist info page.
+ */
 function FavoritesPlaylistInfoPage() {
   const { scrollTopOffset } = Route.useSearch();
 
   const queue = useStore(store, (state) => state.localStorage.queue);
   const playlistSortingState = useStore(
     store,
-    (state) => state.localStorage.sortingStates?.songsPage || 'addedOrder'
+    (state) => state.localStorage.sortingStates?.playlistDetailPage || 'addedOrder'
   );
   const preferences = useStore(store, (state) => state.localStorage.preferences);
   const { updateQueueData, addNewNotifications, createQueue, playSong } =
@@ -51,6 +63,10 @@ function FavoritesPlaylistInfoPage() {
   const { t } = useTranslation();
   const { sortingOrder = playlistSortingState } = Route.useSearch();
   const navigate = useNavigate({ from: '/main-player/playlists/favorites' });
+
+  useEffect(() => {
+    storage.sortingStates.setSortingStates('playlistDetailPage', sortingOrder);
+  }, [sortingOrder]);
 
   const { data: favoriteSongs = [] } = useSuspenseQuery({
     ...songQuery.favorites({ sortType: sortingOrder }),

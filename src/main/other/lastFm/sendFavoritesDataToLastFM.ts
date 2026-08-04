@@ -1,3 +1,4 @@
+import { insertScrobble } from '@main/db/queries/scrobble_queue';
 import { getUserSettings } from '@main/db/queries/settings';
 
 import type {
@@ -9,8 +10,11 @@ import logger from '../../logger';
 import { checkIfConnectedToInternet } from '../../main';
 import hashText from '../../utils/hashText';
 import getLastFmAuthData from './getLastFMAuthData';
+import { LASTFM_REQUEST_TIMEOUT_MS, fetchWithTimeout } from './lastFmUtils';
 
 type Method = 'track.love' | 'track.unlove';
+
+const LASTFM_BASE_URL = 'https://ws.audioscrobbler.com/2.0/';
 
 const generateApiSignature = (method: Method, authData: AuthData, params: LoveParams) => {
   const { LAST_FM_API_KEY, LAST_FM_SHARED_SECRET, SESSION_KEY } = authData;
@@ -40,46 +44,89 @@ const generateApiResponseBody = (method: Method, authData: AuthData, params: Lov
 const sendFavoritesDataToLastFM = async (method: Method, title: string, artists: string[] = []) => {
   try {
     const { sendSongFavoritesDataToLastFM: isSendingLoveEnabled } = await getUserSettings();
+
+    if (!isSendingLoveEnabled) {
+      return logger.debug('Love/Unlove request ignored - favorites scrobbling disabled');
+    }
+
     const isConnectedToInternet = checkIfConnectedToInternet();
 
-    if (isSendingLoveEnabled && isConnectedToInternet) {
-      const authData = await getLastFmAuthData();
+    if (!isConnectedToInternet) {
+      await insertScrobble({
+        operationType: method,
+        trackTitle: title,
+        artistNames: artists.join(', ')
+      });
+      return logger.debug('Love/Unlove queued for later - offline', { method, title });
+    }
 
-      const url = new URL('http://ws.audioscrobbler.com/2.0/');
-      url.searchParams.set('format', 'json');
+    const authData = await getLastFmAuthData();
 
-      const params: LoveParams = {
-        track: title,
-        artist: artists.join(', ')
-      };
+    const url = new URL(LASTFM_BASE_URL);
+    url.searchParams.set('format', 'json');
 
-      const body = generateApiResponseBody(method, authData, params);
+    const params: LoveParams = {
+      track: title,
+      artist: artists.join(', ')
+    };
 
-      const res = await fetch(url, {
+    const body = generateApiResponseBody(method, authData, params);
+
+    const res = await fetchWithTimeout(
+      url,
+      {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
         },
         body
+      },
+      LASTFM_REQUEST_TIMEOUT_MS
+    );
+
+    const json: LastFMLoveUnlovePostResponse = await res.json().catch(() => ({}));
+
+    const hasError = !res.ok || ('error' in json && Boolean(json.error));
+    if (!hasError)
+      return logger.debug('Love/Unlove song request accepted.', { method, title, artists });
+
+    const errorCode = 'error' in json ? json.error : undefined;
+    const isTransient =
+      res.status >= 500 || (errorCode !== undefined && [11, 16, 29].includes(errorCode));
+
+    if (isTransient) {
+      await insertScrobble({
+        operationType: method,
+        trackTitle: title,
+        artistNames: artists.join(', ')
       });
-
-      if (res.status === 200)
-        return logger.debug('Love/Unlove song request accepted.', { method, title, artists });
-
-      const json: LastFMLoveUnlovePostResponse = await res.json();
-
-      return logger.warn('Failed the request to LastFM about love/unlove song.', {
+      return logger.warn('Transient failure sending love/unlove to LastFM, queued for retry.', {
         json,
         method,
         title,
         artists
       });
     }
-    return logger.debug('Request to Love/Unlove song ignored', {
-      isSendingLoveEnabled,
-      isConnectedToInternet
+
+    return logger.error('Permanent failure sending love/unlove to LastFM, not queuing for retry.', {
+      json,
+      method,
+      title,
+      artists
     });
   } catch (error) {
+    const isAuthError =
+      error instanceof Error &&
+      (error.message.includes('session key') || error.message.includes('API key'));
+
+    if (title && !isAuthError) {
+      await insertScrobble({
+        operationType: method,
+        trackTitle: title,
+        artistNames: artists.join(', ')
+      }).catch(() => {});
+    }
+
     return logger.error('Failed to send data about making a song a favorite to LastFM.', {
       error,
       method,

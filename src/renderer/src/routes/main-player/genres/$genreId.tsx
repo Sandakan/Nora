@@ -10,11 +10,12 @@ import { queryClient } from '@renderer/index';
 import { genreQuery } from '@renderer/queries/genres';
 import { songQuery } from '@renderer/queries/songs';
 import { store } from '@renderer/store/store';
+import storage from '@renderer/utils/localStorage';
 import { songSearchSchema } from '@renderer/utils/zod/songSchema';
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
-import { useCallback, useContext } from 'react';
+import { useCallback, useContext, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 export const Route = createFileRoute('/main-player/genres/$genreId')({
@@ -25,9 +26,23 @@ export const Route = createFileRoute('/main-player/genres/$genreId')({
   }
 });
 
+/**
+ * Renders the Genre Info page for the main player, showing genre details, a virtualized list of
+ * songs, and controls for playback, queueing, sorting, and filtering.
+ *
+ * The component persists and initializes the sort order from local storage, provides keyboard
+ * selection (Ctrl+A), and exposes actions to play, shuffle, and add genre songs to the queue.
+ *
+ * @returns The page element containing the genre header, action buttons and dropdowns, and a
+ *   virtualized list of songs for the current genre.
+ */
 function GenreInfoPage() {
   const queue = useStore(store, (state) => state.localStorage.queue);
   const preferences = useStore(store, (state) => state.localStorage.preferences);
+  const genreDetailSortingState = useStore(
+    store,
+    (state) => state.localStorage.sortingStates?.genreDetailPage || 'aToZ'
+  );
 
   const { createQueue, updateQueueData, addNewNotifications, playSong } =
     useContext(AppUpdateContext);
@@ -39,9 +54,13 @@ function GenreInfoPage() {
   });
   const {
     scrollTopOffset,
-    sortingOrder = 'aToZ',
+    sortingOrder = genreDetailSortingState,
     filteringOrder = 'notSelected'
   } = Route.useSearch();
+
+  useEffect(() => {
+    storage.sortingStates.setSortingStates('genreDetailPage', sortingOrder);
+  }, [sortingOrder]);
 
   const { data: genreData } = useSuspenseQuery({
     ...genreQuery.single({ genreId }),

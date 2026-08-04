@@ -1,3 +1,4 @@
+import { useLocation } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 import { memo } from 'react';
 
@@ -18,21 +19,26 @@ const appReleasePhase = getVersionInfoFromString(version)?.releasePhase || 'stab
 
 const TitleBar = memo(() => {
   const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
-  const playerType = useStore(store, (state) => state.playerType);
+  const location = useLocation();
+
+  const isFullScreenPlayer = location.href.includes('/fullscreen-player');
+  const isDarwin = window.api.properties.platform === 'darwin';
 
   return (
     <header
       id="title-bar"
-      className={`text-font-color-black dark:text-font-color-white relative top-0 z-40 grid h-10 w-full grid-cols-[clamp(10rem,30%,18rem)_1fr_auto] items-center justify-between overflow-hidden bg-transparent transition-opacity ${
+      className={`text-font-color-black dark:text-font-color-white relative top-0 z-40 grid h-10 w-full items-center justify-between overflow-hidden bg-transparent transition-opacity ${
         bodyBackgroundImage &&
         'bg-background-color-1/50 text-font-color-white! dark:bg-dark-background-color-1/70 backdrop-blur-md'
-      }`}
+      } ${isDarwin ? 'grid-cols-[clamp(10rem,30%,17rem)_1fr_auto] pl-24' : 'grid-cols-[clamp(10rem,30%,18rem)_1fr_auto]'}`}
     >
-      <div className="logo-and-app-name-and-navigation-controls-container ml-2 flex h-full w-fit items-center gap-12">
+      <div
+        className={`logo-and-app-name-and-navigation-controls-container flex h-full w-full items-center justify-between`}
+      >
         <div className="logo-and-app-name-container flex items-center">
           <span className="logo-container">
             <Img
-              className="mr-2 h-7 rounded-md p-1 shadow-md"
+              className={`mr-2 aspect-square h-7 w-7 rounded-md p-1 shadow-md`}
               src={LightModeLogo}
               alt="Nora Logo"
             />
@@ -51,9 +57,13 @@ const TitleBar = memo(() => {
             </span>
           </span>
         </div>
-        {playerType !== 'full' ? <NavigationControlsContainer /> : <div />}
+        {!isFullScreenPlayer ? <NavigationControlsContainer /> : <div />}
       </div>
-      {window.api.properties.isInDevelopment ? <CurrentLocationContainer /> : <div />}
+      {window.api.properties.isInDevelopment ? (
+        <CurrentLocationContainer href={location.href} className={`${isDarwin ? 'pl-4' : ''}`} />
+      ) : (
+        <div />
+      )}
       <div className="window-controls-and-special-controls-and-indicators-container flex h-full flex-row">
         <div className="special-controls-and-indicators-container mr-2 flex items-center justify-between py-1">
           <div className="indicators-container flex flex-row">
@@ -63,10 +73,10 @@ const TitleBar = memo(() => {
           </div>
           <div className="special-controls-container flex flex-row">
             {window.api.properties.isInDevelopment && <ChangeThemeBtn />}
-            {playerType === 'full' && <GoToMainPlayerBtn />}
+            {isFullScreenPlayer && <GoToMainPlayerBtn />}
           </div>
         </div>
-        <WindowControlsContainer />
+        {!isDarwin && <WindowControlsContainer />}
       </div>
     </header>
   );

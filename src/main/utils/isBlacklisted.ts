@@ -1,34 +1,51 @@
 import path from 'path';
 
-import { getBlacklistData } from '../filesystem';
+import { getBlacklistedSongIds } from '@main/db/queries/blacklist';
+import { getBlacklistedFolderPaths } from '@main/db/queries/folders';
 
-export const isParentFolderBlacklisted = (folderPath: string) => {
-  const { folderBlacklist } = getBlacklistData();
+const normalizePath = (folderPath: string) => path.normalize(folderPath);
 
-  const isParentBlacklisted = folderBlacklist.some(
-    (blacklistedFolderPath) => path.dirname(folderPath) === blacklistedFolderPath
-  );
-
-  return isParentBlacklisted;
+const isSubpathOrEqual = (targetPath: string, folderPath: string) => {
+  const normTarget = normalizePath(targetPath);
+  const normFolder = normalizePath(folderPath);
+  const folderWithSep = normFolder.endsWith(path.sep) ? normFolder : normFolder + path.sep;
+  return normTarget === normFolder || normTarget.startsWith(folderWithSep);
 };
 
-export const isFolderBlacklisted = (folderPath: string) => {
-  const { folderBlacklist } = getBlacklistData();
-
-  const isBlacklisted = folderBlacklist.includes(path.normalize(folderPath));
-  const isParentBlacklisted = isParentFolderBlacklisted(folderPath);
-
-  return isBlacklisted || isParentBlacklisted;
+const isStrictSubpath = (targetPath: string, folderPath: string) => {
+  const normTarget = normalizePath(targetPath);
+  const normFolder = normalizePath(folderPath);
+  const folderWithSep = normFolder.endsWith(path.sep) ? normFolder : normFolder + path.sep;
+  return normTarget !== normFolder && normTarget.startsWith(folderWithSep);
 };
 
-export const isSongBlacklisted = (songId: number, songPath: string) => {
-  const { folderBlacklist, songBlacklist } = getBlacklistData();
+export const isParentFolderBlacklisted = async (folderPath: string) => {
+  const blacklistedFolderPaths = await getBlacklistedFolderPaths();
 
-  const isFolderInBlacklist = folderBlacklist.some((folderPath) =>
-    path.normalize(songPath).includes(path.normalize(folderPath))
+  return blacklistedFolderPaths.some((blacklistedFolderPath) =>
+    isStrictSubpath(folderPath, blacklistedFolderPath)
+  );
+};
+
+export const isFolderBlacklisted = async (folderPath: string) => {
+  const blacklistedFolderPaths = await getBlacklistedFolderPaths();
+
+  return blacklistedFolderPaths.some((blacklistedFolderPath) =>
+    isSubpathOrEqual(folderPath, blacklistedFolderPath)
+  );
+};
+
+export const isSongBlacklisted = async (songId: number, songPath: string) => {
+  const [blacklistedFolderPaths, blacklistedSongIds] = await Promise.all([
+    getBlacklistedFolderPaths(),
+    getBlacklistedSongIds()
+  ]);
+
+  const isFolderInBlacklist = blacklistedFolderPaths.some((folderPath) =>
+    isSubpathOrEqual(songPath, folderPath)
   );
 
-  const isSongInBlacklist = songBlacklist.includes(songId);
+  const isSongInBlacklist = blacklistedSongIds.includes(songId);
 
   return isFolderInBlacklist || isSongInBlacklist;
 };

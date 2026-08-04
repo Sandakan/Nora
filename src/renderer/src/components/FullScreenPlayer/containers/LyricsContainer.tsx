@@ -83,6 +83,7 @@ const LyricsContainer = (props: Props) => {
           const { originalText: text, end = 0, start = 0 } = lyric;
           return (
             <LyricLine
+              playerType="full"
               key={index}
               index={index}
               lyric={text}
@@ -95,6 +96,7 @@ const LyricsContainer = (props: Props) => {
 
         const firstLine = (
           <LyricLine
+            playerType="full"
             key="..."
             index={0}
             lyric="•••"
@@ -113,6 +115,7 @@ const LyricsContainer = (props: Props) => {
         return parsedLyrics.map((line, index) => {
           return (
             <LyricLine
+              playerType="full"
               key={index}
               index={index}
               lyric={line.originalText}
@@ -144,7 +147,7 @@ const LyricsContainer = (props: Props) => {
 
   return (
     <div
-      className={`mini-player-lyrics-container appear-from-bottom w-ful absolute top-0 flex h-full !max-h-screen w-full !max-w-full flex-col items-start overflow-auto pt-20 pr-[20%] pb-[25%] pl-20 transition-[filter] delay-200 select-none group-focus-within:brightness-50 group-focus-within/fullScreenPlayer:blur-xs group-hover/fullScreenPlayer:blur-xs group-hover/fullScreenPlayer:brightness-50 ${
+      className={`mini-player-lyrics-container appear-from-bottom w-ful absolute top-0 flex h-full max-h-screen! w-full max-w-full! flex-col items-start overflow-auto pt-20 pr-[20%] pb-[25%] pl-20 transition-[filter] delay-200 select-none group-focus-within:brightness-50 group-focus-within/fullScreenPlayer:blur-xs group-hover/fullScreenPlayer:blur-xs group-hover/fullScreenPlayer:brightness-50 ${
         !isCurrentSongPlaying ? 'blur-xs brightness-50' : ''
       }`}
       id="miniPlayerLyricsContainer"

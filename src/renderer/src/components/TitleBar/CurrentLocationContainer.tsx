@@ -1,11 +1,12 @@
-import { useLocation } from '@tanstack/react-router';
+interface CurrentLocationContainerProps {
+  href: string;
+  className?: string;
+}
 
-const CurrentLocationContainer = () => {
-  const location = useLocation();
-
+const CurrentLocationContainer = ({ href, className = '' }: CurrentLocationContainerProps) => {
   return (
-    <div className="text-font-color-dimmed dark:text-dark-font-color-dimmed text-sm">
-      {location.href}
+    <div className={`text-font-color-dimmed dark:text-dark-font-color-dimmed text-sm ${className}`}>
+      {href}
     </div>
   );
 };

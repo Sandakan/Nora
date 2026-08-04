@@ -208,9 +208,15 @@ export const getAllSongs = async (
       if (sortType === 'releasedYearDescending') return [desc(songs.year), asc(songs.title)];
       if (sortType === 'trackNoAscending') return [asc(songs.trackNumber), asc(songs.title)];
       if (sortType === 'trackNoDescending') return [desc(songs.trackNumber), asc(songs.title)];
-      if (sortType === 'dateAddedAscending') return [asc(songs.fileModifiedAt), asc(songs.title)];
-      if (sortType === 'dateAddedDescending') return [desc(songs.fileModifiedAt), asc(songs.title)];
+      if (sortType === 'dateAddedAscending') return [asc(songs.createdAt), asc(songs.title)];
+      if (sortType === 'dateAddedDescending') return [desc(songs.createdAt), asc(songs.title)];
+      if (sortType === 'dateModifiedAscending')
+        return [asc(songs.fileModifiedAt), asc(songs.title)];
+      if (sortType === 'dateModifiedDescending')
+        return [desc(songs.fileModifiedAt), asc(songs.title)];
       if (sortType === 'addedOrder') return [desc(songs.createdAt), asc(songs.title)];
+      if (sortType === 'mostSkipped') return [desc(songs.skipCount), asc(songs.title)];
+      if (sortType === 'leastSkipped') return [asc(songs.skipCount), asc(songs.title)];
 
       return [];
     },
@@ -643,11 +649,16 @@ export const getAllSongsInFavorite = async (
       if (sortType === 'trackNoDescending')
         return [desc(songs.trackNumber), asc(songs.title), ...orders];
       if (sortType === 'dateAddedAscending')
-        return [asc(songs.fileModifiedAt), asc(songs.title), ...orders];
+        return [asc(songs.createdAt), asc(songs.title), ...orders];
       if (sortType === 'dateAddedDescending')
+        return [desc(songs.createdAt), asc(songs.title), ...orders];
+      if (sortType === 'dateModifiedAscending')
+        return [asc(songs.fileModifiedAt), asc(songs.title), ...orders];
+      if (sortType === 'dateModifiedDescending')
         return [desc(songs.fileModifiedAt), asc(songs.title), ...orders];
       if (sortType === 'addedOrder') return orders;
-      // Add other sort types as needed
+      if (sortType === 'mostSkipped') return [desc(songs.skipCount), asc(songs.title), ...orders];
+      if (sortType === 'leastSkipped') return [asc(songs.skipCount), asc(songs.title), ...orders];
       return orders; // Default sorting
     },
     limit: limit,

@@ -20,7 +20,7 @@ import StorageSettings from './Settings/StorageSettings';
 const SettingsPage = () => {
   const { t } = useTranslation();
   return (
-    <MainContainer className="main-container settings-container appear-from-bottom text-font-color-black dark:text-font-color-white mb-0! h-fit! pr-8 pb-8 [scrollbar-gutter:stable]">
+    <MainContainer className="main-container settings-container appear-from-bottom text-font-color-black dark:text-font-color-white mb-0! h-fit! [scrollbar-gutter:stable] pr-8 pb-8">
       <>
         <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center justify-between text-3xl font-medium">
           {t('settingsPage.settings')}

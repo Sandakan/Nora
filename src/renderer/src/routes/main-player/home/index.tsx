@@ -287,7 +287,7 @@ function HomePage() {
 
   return (
     <MainContainer
-      className="home-page relative h-full! overflow-y-auto pl-0! [scrollbar-gutter:stable]"
+      className="home-page relative h-full! [scrollbar-gutter:stable] overflow-y-auto pl-0!"
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();

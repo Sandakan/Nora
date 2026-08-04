@@ -1,3 +1,4 @@
+import getBlacklistData from '@main/core/getBlacklistData';
 import { app, BrowserWindow, ipcMain, powerMonitor, shell } from 'electron';
 
 import addArtworkToAPlaylist from './core/addArtworkToAPlaylist';
@@ -68,7 +69,6 @@ import {
   getUserEqualizerPreset,
   saveUserEqualizerPreset
 } from './db/queries/userPreferences';
-import { getBlacklistData } from './filesystem';
 import { removeDefaultAppProtocolFromFilePath } from './fs/resolveFilePaths';
 import logger, { logFilePath } from './logger';
 import {
@@ -87,10 +87,12 @@ import {
   toggleAudioPlayingState,
   toggleAutoLaunch,
   toggleMiniPlayerAlwaysOnTop,
-  toggleOnBatteryPower
+  toggleOnBatteryPower,
+  updateTraySingleClickBehavior
 } from './main';
 import { setDiscordRpcActivity } from './other/discordRPC';
 import { generatePalettes } from './other/generatePalette';
+import { flushScrobbleQueue } from './other/lastFm/flushScrobbleQueue';
 import getAlbumInfoFromLastFM from './other/lastFm/getAlbumInfoFromLastFM';
 import getSimilarTracks from './other/lastFm/getSimilarTracks';
 import scrobbleSong from './other/lastFm/scrobbleSong';
@@ -111,6 +113,18 @@ import resetLyrics from './utils/resetLyrics';
 import romanizeLyrics from './utils/romanizeLyrics';
 import { compare } from './utils/safeStorage';
 
+/**
+ * Registers Electron IPC listeners and main-window event handlers for the provided window.
+ *
+ * Sets up a wide set of ipcMain.on and ipcMain.handle endpoints and wires mainWindow focus/blur and
+ * fullscreen events. All listeners that interact with the window are registered only when
+ * `mainWindow` is truthy.
+ *
+ * @param mainWindow - The BrowserWindow to wire IPC and window events to; if falsy, no listeners
+ *   are registered.
+ * @param abortSignal - AbortSignal forwarded to handlers that may cancel long-running actions
+ *   (e.g., deleting songs).
+ */
 export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSignal) {
   if (mainWindow) {
     ipcMain.on('app/close', () => app.quit());
@@ -131,8 +145,8 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       toggleAudioPlayingState(isPlaying)
     );
 
-    ipcMain.on('app/setDiscordRpcActivity', (_: unknown, options: unknown) =>
-      setDiscordRpcActivity(options)
+    ipcMain.on('app/setDiscordRpcActivity', (_: unknown, activity: DiscordActivity) =>
+      setDiscordRpcActivity(activity)
     );
 
     ipcMain.on('app/stopScreenSleeping', stopScreenSleeping);
@@ -206,6 +220,10 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     // );
     ipcMain.handle('app/saveUserSettings', (_, settings: Partial<UserSettings>) =>
       saveUserSettings(settings)
+    );
+
+    ipcMain.handle('app/updateTraySingleClickBehavior', (_, enable: boolean) =>
+      updateTraySingleClickBehavior(enable)
     );
 
     // User Keyboard Shortcuts Handlers
@@ -587,7 +605,7 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
           ? `App connected to the internet successfully`
           : `App disconnected from the internet`
       );
-      // isConnectedToInternet = isConnected;
+      if (isConnected) flushScrobbleQueue();
     });
 
     ipcMain.handle('app/getArtworksForMultipleArtworksCover', (_, songIds: number[]) =>

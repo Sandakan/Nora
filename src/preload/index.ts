@@ -43,8 +43,8 @@ const playerControls = {
   skipBackwardToPreviousSong: (callback: (e: unknown) => void) =>
     ipcRenderer.on('app/player/skipBackward', callback),
   sendSongPosition: (position: number): void => ipcRenderer.send('app/getSongPosition', position),
-  setDiscordRpcActivity: (options: unknown): void =>
-    ipcRenderer.send('app/setDiscordRpcActivity', options),
+  setDiscordRpcActivity: (activity: DiscordActivity): void =>
+    ipcRenderer.send('app/setDiscordRpcActivity', activity),
 
   toggleLikeSongs: (
     songIds: number[],
@@ -345,6 +345,8 @@ const settings = {
     }),
   updateHideWindowOnCloseState: (enable: boolean): Promise<void> =>
     ipcRenderer.invoke('app/saveUserSettings', { hideWindowOnClose: enable }),
+  updateTraySingleClickBehavior: (enable: boolean): Promise<void> =>
+    ipcRenderer.invoke('app/updateTraySingleClickBehavior', enable),
   updateSaveVerboseLogs: (enable: boolean): Promise<void> =>
     ipcRenderer.invoke('app/saveUserSettings', { saveVerboseLogs: enable })
 };

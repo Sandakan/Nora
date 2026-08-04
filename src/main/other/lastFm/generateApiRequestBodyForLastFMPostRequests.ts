@@ -6,7 +6,7 @@ import type {
 } from '../../../types/last_fm_api';
 import hashText from '../../utils/hashText';
 
-type LastFMApi = (
+export type LastFMApi = (
   | { method: 'track.scrobble'; params: ScrobbleParams }
   | { method: 'track.updateNowPlaying'; params: updateNowPlayingParams }
   | {

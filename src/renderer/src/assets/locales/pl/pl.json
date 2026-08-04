@@ -102,6 +102,7 @@
     "somethingWentWrong": "Coś poszło nie tak.",
     "details": "Szczegóły",
     "restartApp": "Uruchom ponownie aplikację",
+    "skipSong": "Pomiń do następnej piosenki",
     "ok": "OK",
     "loading": "Wczytywanie"
   },
@@ -167,7 +168,9 @@
     "mostLovedAscending": "Najmniej lubiane",
     "trackNoAscending": "Numer ścieżki (Rosnąco)",
     "trackNoDescending": "Numer ścieżki (Malejąco)",
-    "addedOrder": "Kolejność dodania"
+    "addedOrder": "Kolejność dodania",
+    "mostSkipped": "Most skipped (All time)",
+    "leastSkipped": "Least skipped (All time)"
   },
 
   "filterTypes": {
@@ -458,6 +461,8 @@
     "hideWindowAtStart": "Uruchamiaj zminimalizowane do zasobnika (Tray)",
     "hideWindowOnCloseDescription": "Zachowanie przycisku zamknięcia okna.",
     "hideWindowOnClose": "Minimalizuj do zasobnika po zamknięciu",
+    "trayClickBehaviorDescription": "Ustaw zachowanie ikony w zasobniku systemowym.",
+    "traySingleClickTogglesWindow": "Pojedyncze kliknięcie przełącza okno odtwarzacza.",
 
     "storage": "Pamięć",
     "storageDescription": "Zobacz jak Nora zarządza biblioteką i wykorzystuje miejsce na Twoim dysku.",
