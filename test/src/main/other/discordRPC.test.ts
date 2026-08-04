@@ -112,7 +112,23 @@ describe('validateDiscordActivity', () => {
     ).toBe(false);
   });
 
-  it('rejects malformed assets', () => {
-    expect(validateDiscordActivity({ assets: { large_image: 123 } }).ok).toBe(false);
+  it('rejects non-plain objects (Date, URL, class instance) at the top level', () => {
+    expect(validateDiscordActivity(new Date()).ok).toBe(false);
+    expect(validateDiscordActivity(new URL('https://example.com')).ok).toBe(false);
+    expect(validateDiscordActivity(new (class {})()).ok).toBe(false);
+  });
+
+  it('rejects non-plain nested timestamps, assets, and button objects', () => {
+    expect(validateDiscordActivity({ timestamps: new Date() }).ok).toBe(false);
+    expect(validateDiscordActivity({ timestamps: new URL('https://x.com') }).ok).toBe(false);
+    expect(validateDiscordActivity({ assets: new Date() }).ok).toBe(false);
+    expect(validateDiscordActivity({ buttons: [new Date() as unknown as object] }).ok).toBe(false);
+  });
+
+  it('rejects a non-plain activity but accepts a null-prototype plain record', () => {
+    const nullProto = Object.create(null);
+    nullProto.details = 'ok';
+    expect(validateDiscordActivity(nullProto).ok).toBe(true);
+    expect(validateDiscordActivity(Object.create({})).ok).toBe(false);
   });
 });

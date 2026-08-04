@@ -12,6 +12,15 @@ const DISCORD_BUTTONS_MAX = 2;
 const isSafeString = (value: unknown): value is string =>
   typeof value === 'string' && value.length > 0 && value.length <= DISCORD_STRING_MAX;
 
+// Reject arrays, null, and non-plain objects (Date, URL, class instances).
+// `typeof new Date() === 'object'` and `Object.getPrototypeOf` for a class
+// instance is the class prototype, not Object.prototype.
+const isPlainRecord = (value: unknown): value is Record<string, unknown> => {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  const prototype = Object.getPrototypeOf(value);
+  return prototype === Object.prototype || prototype === null;
+};
+
 // Discord requires integer (Unix ms) timestamps. Fractional values can come
 // from `now + duration * 1000` when duration is non-integer (VBR tracks), so
 // accept any finite number, round to a safe integer, and verify the full
@@ -39,9 +48,10 @@ type ValidationResult = { ok: true; activity: DiscordActivity } | { ok: false; r
 // client. The preload type is compile-time only; malformed or hostile data
 // must not be combined into a SET_ACTIVITY request.
 export const validateDiscordActivity = (data: unknown): ValidationResult => {
-  // Reject arrays and non-plain objects. `typeof [] === 'object'` so an
-  // explicit Array check is required.
-  if (typeof data !== 'object' || data === null || Array.isArray(data)) {
+  // Reject arrays, non-objects, and non-plain objects (Date, URL, class
+  // instances). `typeof [] === 'object'` and `typeof new Date() === 'object'`,
+  // so an explicit plain-record check is required to keep the IPC contract.
+  if (!isPlainRecord(data)) {
     return { ok: false, reason: 'activity-not-object' };
   }
   const input = data as Record<string, unknown>;
@@ -61,11 +71,7 @@ export const validateDiscordActivity = (data: unknown): ValidationResult => {
   }
 
   if (input.timestamps !== undefined) {
-    if (
-      typeof input.timestamps !== 'object' ||
-      input.timestamps === null ||
-      Array.isArray(input.timestamps)
-    ) {
+    if (!isPlainRecord(input.timestamps)) {
       return { ok: false, reason: 'timestamps-invalid' };
     }
     const tsInput = input.timestamps as Record<string, unknown>;
@@ -83,7 +89,7 @@ export const validateDiscordActivity = (data: unknown): ValidationResult => {
   }
 
   if (input.assets !== undefined) {
-    if (typeof input.assets !== 'object' || input.assets === null || Array.isArray(input.assets)) {
+    if (!isPlainRecord(input.assets)) {
       return { ok: false, reason: 'assets-invalid' };
     }
     const assetsInput = input.assets as Record<string, unknown>;
@@ -104,7 +110,7 @@ export const validateDiscordActivity = (data: unknown): ValidationResult => {
     }
     const buttons: Array<{ label: string; url: string }> = [];
     for (const button of input.buttons) {
-      if (typeof button !== 'object' || button === null || Array.isArray(button)) {
+      if (!isPlainRecord(button)) {
         return { ok: false, reason: 'button-not-object' };
       }
       const btn = button as Record<string, unknown>;

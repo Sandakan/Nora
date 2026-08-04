@@ -40,7 +40,7 @@ const LyricLine = (props: LyricProp) => {
   const { t } = useTranslation();
 
   const lyricsRef = useRef(null as HTMLDivElement | null);
-  const isTheCurrnetLineRef = useRef(false);
+  const isTheCurrentLineRef = useRef(false);
 
   const {
     index,
@@ -60,8 +60,8 @@ const LyricLine = (props: LyricProp) => {
         if (lyricsRef.current && syncedLyrics) {
           const { start, end } = syncedLyrics;
           if (songPosition > start && songPosition < end) {
-            if (!isTheCurrnetLineRef.current) {
-              isTheCurrnetLineRef.current = true;
+            if (!isTheCurrentLineRef.current) {
+              isTheCurrentLineRef.current = true;
               setIsInRange(true);
               if (isAutoScrolling)
                 lyricsRef.current?.scrollIntoView({
@@ -151,6 +151,15 @@ const LyricLine = (props: LyricProp) => {
   // if (!preferences.compactLyrics && translatedLyricString)
   if (translatedLyricString) lyricStringLineSecondaryUpper = convertedLyricString ?? lyricString;
 
+  // When any rendered lyric representation uses EnhancedSyncedLyricWord
+  // controls, make only the word-level controls interactive. Disable the
+  // parent line's button role / keyboard handler to avoid nested ARIA buttons.
+  const hasEnhancedWordControls =
+    Array.isArray(lyric) ||
+    Array.isArray(translatedLyricLines[0]?.text) ||
+    Array.isArray(convertedLyric);
+  const isLineSeekable = syncedLyrics && !hasEnhancedWordControls;
+
   return (
     <div
       style={{
@@ -177,21 +186,21 @@ const LyricLine = (props: LyricProp) => {
         'text-font-color-white/15! mb-6! origin-left items-start! justify-start! text-left! text-7xl!'
       }`}
       ref={lyricsRef}
-      role={syncedLyrics ? 'button' : undefined}
-      tabIndex={syncedLyrics ? 0 : undefined}
+      role={isLineSeekable ? 'button' : undefined}
+      tabIndex={isLineSeekable ? 0 : undefined}
       onClick={() =>
-        syncedLyrics &&
+        isLineSeekable &&
         (typeof lyric === 'string' || translatedLyricString) &&
-        updateSongPosition(syncedLyrics.start)
+        updateSongPosition(syncedLyrics!.start)
       }
       onKeyDown={(e) => {
         if (
-          syncedLyrics &&
+          isLineSeekable &&
           (typeof lyric === 'string' || translatedLyricString) &&
           (e.key === 'Enter' || e.key === ' ')
         ) {
           e.preventDefault();
-          updateSongPosition(syncedLyrics.start);
+          updateSongPosition(syncedLyrics!.start);
         }
       }}
       onContextMenu={(e) => {
