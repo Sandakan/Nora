@@ -53,6 +53,38 @@ describe('validateDiscordActivity', () => {
     expect(result.activity.timestamps?.end).toBe(13);
   });
 
+  it('rejects out-of-range timestamps after rounding', () => {
+    expect(validateDiscordActivity({ timestamps: { start: -1e100 } }).ok).toBe(false);
+    expect(
+      validateDiscordActivity({ timestamps: { start: Number.MIN_SAFE_INTEGER - 1 } }).ok
+    ).toBe(false);
+    expect(
+      validateDiscordActivity({ timestamps: { end: Number.MAX_SAFE_INTEGER + 1 } }).ok
+    ).toBe(false);
+  });
+
+  it('rejects malformed https URLs (no host)', () => {
+    expect(validateDiscordActivity({ buttons: [{ label: 'x', url: 'https://' }] }).ok).toBe(
+      false
+    );
+    expect(validateDiscordActivity({ buttons: [{ label: 'x', url: 'https://?value=x' }] }).ok).toBe(
+      false
+    );
+  });
+
+  it('rejects arrays and non-plain objects as the activity', () => {
+    expect(validateDiscordActivity([]).ok).toBe(false);
+    expect(validateDiscordActivity([{ details: 'd' }]).ok).toBe(false);
+  });
+
+  it('does not mutate the input object', () => {
+    const input = { timestamps: { start: 1.5, end: 12.7 } };
+    const result = validateDiscordActivity(input);
+    if (!result.ok) throw new Error(`expected ok, got ${result.reason}`);
+    expect(input.timestamps.start).toBe(1.5);
+    expect(input.timestamps.end).toBe(12.7);
+  });
+
   it('rejects too many buttons', () => {
     expect(
       validateDiscordActivity({

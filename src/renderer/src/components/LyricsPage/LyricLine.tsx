@@ -177,11 +177,23 @@ const LyricLine = (props: LyricProp) => {
         'text-font-color-white/15! mb-6! origin-left items-start! justify-start! text-left! text-7xl!'
       }`}
       ref={lyricsRef}
+      role={syncedLyrics ? 'button' : undefined}
+      tabIndex={syncedLyrics ? 0 : undefined}
       onClick={() =>
         syncedLyrics &&
         (typeof lyric === 'string' || translatedLyricString) &&
         updateSongPosition(syncedLyrics.start)
       }
+      onKeyDown={(e) => {
+        if (
+          syncedLyrics &&
+          (typeof lyric === 'string' || translatedLyricString) &&
+          (e.key === 'Enter' || e.key === ' ')
+        ) {
+          e.preventDefault();
+          updateSongPosition(syncedLyrics.start);
+        }
+      }}
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();

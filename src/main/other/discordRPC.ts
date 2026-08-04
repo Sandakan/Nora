@@ -14,14 +14,24 @@ const isSafeString = (value: unknown): value is string =>
 
 // Discord requires integer (Unix ms) timestamps. Fractional values can come
 // from `now + duration * 1000` when duration is non-integer (VBR tracks), so
-// accept any finite number and round to a safe integer instead of rejecting.
+// accept any finite number, round to a safe integer, and verify the full
+// safe-integer range (including the lower bound) after rounding.
 const isSafeTimestamp = (value: unknown): value is number =>
-  typeof value === 'number' && Number.isFinite(value) && value <= Number.MAX_SAFE_INTEGER;
+  typeof value === 'number' && Number.isFinite(value) && Number.isSafeInteger(Math.round(value));
 
 const roundTimestamp = (value: unknown): number => Math.round(value as number);
 
-const isHttpsUrl = (value: unknown): boolean =>
-  typeof value === 'string' && value.startsWith('https://');
+// `startsWith('https://')` accepts malformed URLs like 'https://' with no
+// host. Parse and require the HTTPS protocol + a non-empty hostname.
+const isHttpsUrl = (value: unknown): boolean => {
+  if (typeof value !== 'string') return false;
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' && url.hostname.length > 0;
+  } catch {
+    return false;
+  }
+};
 
 type ValidationResult = { ok: true; activity: DiscordActivity } | { ok: false; reason: string };
 
@@ -29,59 +39,80 @@ type ValidationResult = { ok: true; activity: DiscordActivity } | { ok: false; r
 // client. The preload type is compile-time only; malformed or hostile data
 // must not be combined into a SET_ACTIVITY request.
 export const validateDiscordActivity = (data: unknown): ValidationResult => {
-  if (typeof data !== 'object' || data === null) {
+  // Reject arrays and non-plain objects. `typeof [] === 'object'` so an
+  // explicit Array check is required.
+  if (typeof data !== 'object' || data === null || Array.isArray(data)) {
     return { ok: false, reason: 'activity-not-object' };
   }
-  const activity = data as Record<string, unknown>;
+  const input = data as Record<string, unknown>;
 
-  if (activity.details !== undefined && !isSafeString(activity.details)) {
-    return { ok: false, reason: 'details-invalid' };
+  // Build the validated activity from an allow list so unknown fields and the
+  // original input object (which may be mutated by reference elsewhere) do
+  // not reach the Discord client.
+  const activity: Record<string, unknown> = {};
+
+  if (input.details !== undefined) {
+    if (!isSafeString(input.details)) return { ok: false, reason: 'details-invalid' };
+    activity.details = input.details;
   }
-  if (activity.state !== undefined && !isSafeString(activity.state)) {
-    return { ok: false, reason: 'state-invalid' };
+  if (input.state !== undefined) {
+    if (!isSafeString(input.state)) return { ok: false, reason: 'state-invalid' };
+    activity.state = input.state;
   }
 
-  if (activity.timestamps !== undefined) {
-    if (typeof activity.timestamps !== 'object' || activity.timestamps === null) {
+  if (input.timestamps !== undefined) {
+    if (
+      typeof input.timestamps !== 'object' ||
+      input.timestamps === null ||
+      Array.isArray(input.timestamps)
+    ) {
       return { ok: false, reason: 'timestamps-invalid' };
     }
-    const timestamps = activity.timestamps as Record<string, unknown>;
-    if (timestamps.start !== undefined && !isSafeTimestamp(timestamps.start)) {
-      return { ok: false, reason: 'timestamp-start-invalid' };
+    const tsInput = input.timestamps as Record<string, unknown>;
+    const timestamps: Record<string, number> = {};
+
+    if (tsInput.start !== undefined) {
+      if (!isSafeTimestamp(tsInput.start)) return { ok: false, reason: 'timestamp-start-invalid' };
+      timestamps.start = roundTimestamp(tsInput.start);
     }
-    if (timestamps.end !== undefined && !isSafeTimestamp(timestamps.end)) {
-      return { ok: false, reason: 'timestamp-end-invalid' };
+    if (tsInput.end !== undefined) {
+      if (!isSafeTimestamp(tsInput.end)) return { ok: false, reason: 'timestamp-end-invalid' };
+      timestamps.end = roundTimestamp(tsInput.end);
     }
-    // Round fractional timestamps (VBR durations) to integer ms.
-    if (timestamps.start !== undefined) timestamps.start = roundTimestamp(timestamps.start);
-    if (timestamps.end !== undefined) timestamps.end = roundTimestamp(timestamps.end);
+    activity.timestamps = timestamps;
   }
 
-  if (activity.assets !== undefined) {
-    if (typeof activity.assets !== 'object' || activity.assets === null) {
+  if (input.assets !== undefined) {
+    if (typeof input.assets !== 'object' || input.assets === null || Array.isArray(input.assets)) {
       return { ok: false, reason: 'assets-invalid' };
     }
-    const assets = activity.assets as Record<string, unknown>;
+    const assetsInput = input.assets as Record<string, unknown>;
+    const assets: Record<string, string> = {};
     for (const key of ['large_image', 'large_text', 'small_image', 'small_text']) {
-      const value = assets[key];
-      if (value !== undefined && !isSafeString(value)) {
-        return { ok: false, reason: `asset-${key}-invalid` };
+      const value = assetsInput[key];
+      if (value !== undefined) {
+        if (!isSafeString(value)) return { ok: false, reason: `asset-${key}-invalid` };
+        assets[key] = value;
       }
     }
+    activity.assets = assets;
   }
 
-  if (activity.buttons !== undefined) {
-    if (!Array.isArray(activity.buttons) || activity.buttons.length > DISCORD_BUTTONS_MAX) {
+  if (input.buttons !== undefined) {
+    if (!Array.isArray(input.buttons) || input.buttons.length > DISCORD_BUTTONS_MAX) {
       return { ok: false, reason: 'buttons-invalid' };
     }
-    for (const button of activity.buttons) {
-      if (typeof button !== 'object' || button === null) {
+    const buttons: Array<{ label: string; url: string }> = [];
+    for (const button of input.buttons) {
+      if (typeof button !== 'object' || button === null || Array.isArray(button)) {
         return { ok: false, reason: 'button-not-object' };
       }
-      const { label, url } = button as Record<string, unknown>;
-      if (!isSafeString(label)) return { ok: false, reason: 'button-label-invalid' };
-      if (!isHttpsUrl(url)) return { ok: false, reason: 'button-url-invalid' };
+      const btn = button as Record<string, unknown>;
+      if (!isSafeString(btn.label)) return { ok: false, reason: 'button-label-invalid' };
+      if (!isHttpsUrl(btn.url)) return { ok: false, reason: 'button-url-invalid' };
+      buttons.push({ label: btn.label, url: btn.url });
     }
+    activity.buttons = buttons;
   }
 
   return { ok: true, activity: activity as unknown as DiscordActivity };
@@ -89,6 +120,15 @@ export const validateDiscordActivity = (data: unknown): ValidationResult => {
 
 export const setDiscordRpcActivity = async (data: DiscordActivity) => {
   try {
+    // Validate BEFORE initializing the Discord connection so a malformed
+    // payload does not start the connection lifecycle only to be rejected.
+    const validation = validateDiscordActivity(data);
+    if (!validation.ok) {
+      return logger.warn('Discord activity payload rejected.', {
+        reason: validation.reason
+      });
+    }
+
     const userSettings = await getUserSettings();
     const { enableDiscordRPC } = userSettings ?? {};
 
@@ -97,14 +137,6 @@ export const setDiscordRpcActivity = async (data: DiscordActivity) => {
         reason: { enableDiscordRPC }
       });
     Initialize();
-
-    const validation = validateDiscordActivity(data);
-    if (!validation.ok) {
-      // Log a safe reason only; never serialize the unvalidated payload.
-      return logger.warn('Discord activity payload rejected.', {
-        reason: validation.reason
-      });
-    }
 
     if (debounceTimer) {
       latestData = validation.activity;

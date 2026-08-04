@@ -40,7 +40,15 @@ const EnhancedSyncedLyricWord = (props: Props) => {
 
   return (
     <span
+      role="button"
+      tabIndex={0}
       onClick={() => updateSongPosition(start)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          updateSongPosition(start);
+        }
+      }}
       className={`text-font-color-black dark:text-font-color-white mr-2 transition-[color,text-shadow] duration-150 last:mr-0 ${
         isInRange
           ? 'text-font-color-highlight/90 dark:text-dark-font-color-highlight/90 text-glow-sm'
