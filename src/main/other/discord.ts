@@ -65,7 +65,7 @@ let lastPayload: { pid: number; activity: DiscordActivity };
  */
 function Initialize() {
   if (discord) return;
-  discord = new Client({ transport: 'ipc' }) as DiscordRPCClient;
+  discord = new Client({ transport: 'ipc' }) as unknown as DiscordRPCClient;
   discord.on('ready', () => {
     discord?.request('SET_ACTIVITY', lastPayload ?? defaultPayload).catch((error: unknown) => {
       logger.error('Failed to set initial activity on ready', { error });

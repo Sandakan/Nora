@@ -298,10 +298,18 @@ const getKeyboardShortcuts = (): ShortcutCategoryList => {
         uc.shortcutCategoryTitle === defaultCategory.shortcutCategoryTitle
     );
 
-  const merged: ShortcutCategory[] = defaults.map((defaultCategory, index) => {
+  const merged: ShortcutCategory[] = [];
+  const selectedUserCategoryRefs = new Set<ShortcutCategory>();
+
+  defaults.forEach((defaultCategory, index) => {
     const matchingUserCategory = findUserCategory(defaultCategory, index);
 
-    if (!matchingUserCategory) return defaultCategory;
+    if (!matchingUserCategory) {
+      merged.push(defaultCategory);
+      return;
+    }
+
+    selectedUserCategoryRefs.add(matchingUserCategory);
 
     const patchedShortcuts = defaultCategory.shortcuts.map((defaultShortcut) => {
       const matchingUserShortcut = matchingUserCategory.shortcuts.find(
@@ -313,15 +321,19 @@ const getKeyboardShortcuts = (): ShortcutCategoryList => {
       return defaultShortcut;
     });
 
-    return { ...defaultCategory, shortcuts: patchedShortcuts };
+    merged.push({ ...defaultCategory, shortcuts: patchedShortcuts });
   });
 
   // Categories not matching any default (user-created or orphaned legacy
-  // categories) are appended as-is, preserving their id/title.
+  // categories) are appended as-is, preserving their id/title. Categories
+  // already merged above are excluded to avoid duplicates.
   const defaultCategoryIds = new Set(defaults.map((dc) => dc.id));
   const defaultCategoryTitles = new Set(defaults.map((dc) => dc.shortcutCategoryTitle));
   const extraUserCategories = userShortcuts.filter(
-    (uc) => !defaultCategoryIds.has(uc.id) && !defaultCategoryTitles.has(uc.shortcutCategoryTitle)
+    (uc) =>
+      !selectedUserCategoryRefs.has(uc) &&
+      !defaultCategoryIds.has(uc.id) &&
+      !defaultCategoryTitles.has(uc.shortcutCategoryTitle)
   );
 
   return [...merged, ...extraUserCategories];

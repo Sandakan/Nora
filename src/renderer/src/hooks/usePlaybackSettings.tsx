@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 
 import type { AudioPlayer } from '../other/player';
 import toggleSongIsFavorite from '../other/toggleSongIsFavorite';
@@ -109,6 +109,16 @@ export function usePlaybackSettings(player: AudioPlayer) {
     },
     [saveEqualizerPreset, player]
   );
+
+  // Hydrate the player's equalizer cache from the database on startup so
+  // Ctrl+E restores the saved preset even before the user opens Settings.
+  // Apply only (no save) to keep the database as the source of truth.
+  const { equalizerPreset } = useUserPreferences();
+  useEffect(() => {
+    if (equalizerPreset && Object.keys(equalizerPreset).length > 0) {
+      player.applyEqualizerPreset(equalizerPreset as Partial<Record<EqualizerBandFilters, number>>);
+    }
+  }, [equalizerPreset, player]);
 
   return {
     toggleRepeat,
