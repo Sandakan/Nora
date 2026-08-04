@@ -220,7 +220,7 @@
     "showInFileExplorer": "Mostrar no Explorador de Arquivos",
     "artwork": "Imagem do álbum",
     "selectedSongCount_one": "{{count}} $t(common.song, {\"count\":{{count}}}) selecionada",
-        "selectedSongCount_other": "{{count}} $t(common.song, {\"count\":{{count}}}) selecionadas",
+    "selectedSongCount_other": "{{count}} $t(common.song, {\"count\":{{count}}}) selecionadas",
     "likeSong": "Adicionar aos favoritos",
     "unlikeSong": "Remover dos favoritos",
     "toggleLikeSongs": "Adicionar/remover músicas dos favoritos",
