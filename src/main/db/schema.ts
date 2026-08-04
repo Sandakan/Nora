@@ -934,6 +934,36 @@ export const playHistoryRelations = relations(playHistory, ({ one }) => ({
   })
 }));
 
+export const scrobbleQueue = pgTable(
+  'scrobble_queue',
+  {
+    id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+    songId: integer('song_id').references(() => songs.id, {
+      onDelete: 'set null',
+      onUpdate: 'cascade'
+    }),
+    startTimeSecs: integer('start_time_secs'),
+    operationType: varchar('operation_type', { length: 20 }).notNull(),
+    trackTitle: varchar('track_title', { length: 4096 }),
+    artistNames: text('artist_names'),
+    status: varchar('status', { length: 10 }).notNull().default('pending'),
+    retryCount: integer('retry_count').notNull().default(0),
+    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
+  },
+  (t) => [
+    index('idx_scrobble_queue_status').on(t.status),
+    index('idx_scrobble_queue_created_at').on(t.createdAt.asc())
+  ]
+);
+
+export const scrobbleQueueRelations = relations(scrobbleQueue, ({ one }) => ({
+  song: one(songs, {
+    fields: [scrobbleQueue.songId],
+    references: [songs.id]
+  })
+}));
+
 // User settings has no relations as it's a single-row configuration table
 
 // Junction Table Relations

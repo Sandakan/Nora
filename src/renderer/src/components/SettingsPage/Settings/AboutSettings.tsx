@@ -3,10 +3,10 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { lazy, useContext, useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import rawChangelog from '../../../../../../CHANGELOG.md?raw';
 import appLicense from '../../../../../../LICENSE.txt?raw';
 import openSourceLicenses from '../../../../../../open_source_licenses.txt?raw';
 import { version, author, homepage, bugs, urls } from '../../../../../../package.json';
-import localReleaseNotes from '../../../../../../release-notes.json';
 import DiscordLightIcon from '../../../assets/images/svg/discord_dark_mode.svg';
 import DiscordDarkIcon from '../../../assets/images/svg/discord_light_mode.svg';
 import GithubLightIcon from '../../../assets/images/svg/github-white.svg';
@@ -16,6 +16,7 @@ import SLFlag from '../../../assets/images/webp/sl-flag.webp';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import calculateElapsedTime from '../../../utils/calculateElapsedTime';
 import storage from '../../../utils/localStorage';
+import { parseChangelog } from '../../../utils/parseChangelog';
 import Button from '../../Button';
 import Hyperlink from '../../Hyperlink';
 import Img from '../../Img';
@@ -39,7 +40,7 @@ const AboutSettings = () => {
   const { t } = useTranslation();
 
   const currentVersionReleasedDate = useMemo(() => {
-    const { versions } = localReleaseNotes;
+    const { versions } = parseChangelog(rawChangelog);
 
     for (let i = 0; i < versions.length; i += 1) {
       if (versions[i].version === version) {

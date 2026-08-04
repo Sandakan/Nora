@@ -971,7 +971,7 @@ Follow the language-agnostic style guide in `coding_style_guide.instructions.md`
 
 ```tsx
 // ✅ GOOD: Guard clauses flatten logic
-function playSong(songId: string) {
+async function playSong(songId: string) {
   if (!songId) {
     console.error('No song ID provided');
     return;

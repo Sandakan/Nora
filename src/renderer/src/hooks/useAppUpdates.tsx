@@ -6,6 +6,7 @@ import { store } from '../store/store';
 import isLatestVersion from '../utils/isLatestVersion';
 import storage from '../utils/localStorage';
 import log from '../utils/log';
+import { parseChangelog } from '../utils/parseChangelog';
 
 const ReleaseNotesPrompt = lazy(
   () => import('../components/ReleaseNotesPrompt/ReleaseNotesPrompt')
@@ -88,12 +89,13 @@ export function useAppUpdates(dependencies: AppUpdatesDependencies) {
     if (navigator.onLine) {
       updateAppUpdatesState('CHECKING');
 
-      fetch(releaseNotes.json)
+      fetch(releaseNotes.md)
         .then((res) => {
-          if (res.status === 200) return res.json();
+          if (res.status === 200) return res.text();
           throw new Error('response status is not 200');
         })
-        .then((res: Changelog) => {
+        .then((resText) => {
+          const res = parseChangelog(resText);
           const isThereAnAppUpdate = !isLatestVersion(res.latestVersion.version, version);
 
           updateAppUpdatesState(isThereAnAppUpdate ? 'OLD' : 'LATEST');

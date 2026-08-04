@@ -253,7 +253,7 @@ class AudioPlayer {
 
       return songData;
     } catch (error) {
-      const failedSongId = songData?.songId;
+      const failedSongId = typeof songIdOrData === 'number' ? songIdOrData : songIdOrData.songId;
       console.error(
         `Failed to load song (ID: ${failedSongId}):`,
         error instanceof Error ? error.message : error

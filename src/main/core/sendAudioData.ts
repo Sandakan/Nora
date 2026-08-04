@@ -1,4 +1,4 @@
-import { existsSync } from 'fs';
+import { existsSync } from 'node:fs';
 
 import { addSongToPlayHistory } from '@main/db/queries/history';
 import { getPlayableSongById } from '@main/db/queries/songs';
@@ -61,7 +61,9 @@ const sendAudioData = async (songId: number): Promise<AudioPlayerData> => {
       const realFilePath = removeDefaultAppProtocolFromFilePath(resolvedPath);
       if (!existsSync(realFilePath)) {
         logger.warn(`Song file not found on disk`, { songId: song.id, path: realFilePath });
-        throw new Error('SONG_NOT_FOUND' as ErrorCodes);
+        const error = new Error('Song file not found');
+        (error as NodeJS.ErrnoException).code = 'SONG_NOT_FOUND';
+        throw error;
       }
 
       const data: AudioPlayerData = {
@@ -82,9 +84,10 @@ const sendAudioData = async (songId: number): Promise<AudioPlayerData> => {
       await addSongToPlayHistory(songId);
 
       const firstArtist = data.artists?.find((a) => a.onlineArtworkPaths);
-      const artworkLink = firstArtist?.onlineArtworkPaths?.picture_xl
-        ?? firstArtist?.onlineArtworkPaths?.picture_medium
-        ?? firstArtist?.onlineArtworkPaths?.picture_small;
+      const artworkLink =
+        firstArtist?.onlineArtworkPaths?.picture_xl ??
+        firstArtist?.onlineArtworkPaths?.picture_medium ??
+        firstArtist?.onlineArtworkPaths?.picture_small;
       const now = Date.now();
       setDiscordRpcActivity({
         details: data.title,
@@ -95,7 +98,7 @@ const sendAudioData = async (songId: number): Promise<AudioPlayerData> => {
         },
         assets: {
           large_image: artworkLink ?? 'nora_logo',
-          small_image: artworkLink ?? 'song_artwork'
+          small_image: 'song_artwork'
         }
       });
       setCurrentSongPath(song.path);
@@ -103,10 +106,17 @@ const sendAudioData = async (songId: number): Promise<AudioPlayerData> => {
       return data;
     }
     logger.error(`No matching song to send audio data`, { audioId: songId });
-    throw new Error('SONG_NOT_FOUND' as ErrorCodes);
+    const notFoundError = new Error('No matching song found');
+    (notFoundError as NodeJS.ErrnoException).code = 'SONG_NOT_FOUND';
+    throw notFoundError;
   } catch (error) {
+    if ((error as NodeJS.ErrnoException)?.code === 'SONG_NOT_FOUND') {
+      throw error;
+    }
     logger.error(`Failed to send songs data.`, { err: error });
-    throw new Error('SONG_DATA_SEND_FAILED' as ErrorCodes);
+    const sendError = new Error('Failed to send song data');
+    (sendError as NodeJS.ErrnoException).code = 'SONG_DATA_SEND_FAILED';
+    throw sendError;
   }
 };
 

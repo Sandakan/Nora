@@ -23,7 +23,7 @@ export const supportedLanguagesDropdownOptions: DropdownOption<keyof typeof reso
   { label: `Turkish`, value: 'tr' },
   { label: `Vietnamese`, value: 'vi' },
   { label: `Português (Brasil)`, value: 'pt-BR' },
-  { label: `Francais`, value: 'fr' }
+  { label: `Français`, value: 'fr' }
 ];
 
 const { language } = await window.api.settings.getUserSettings();

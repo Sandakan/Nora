@@ -22,7 +22,6 @@ import {
   type OpenDialogOptions,
   type SaveDialogOptions
 } from 'electron';
-import { installExtension, REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 
 import { version, appPreferences } from '../../package.json';
 import noraAppIcon from '../../resources/logo_light_mode.png?asset';
@@ -43,6 +42,7 @@ import { initializeIPC } from './ipc';
 import logger from './logger';
 import { clearTempArtworkFolder } from './other/artworks';
 import { clearDiscordRpcActivity } from './other/discordRPC';
+import { flushScrobbleQueue } from './other/lastFm/flushScrobbleQueue';
 import resetAppData from './resetAppData';
 import { savePendingSongLyrics } from './saveLyricsToSong';
 import checkForUpdates from './update';
@@ -150,6 +150,9 @@ function launchExtensionBackgroundWorkers(session = electronSession.defaultSessi
 const installExtensions = async () => {
   try {
     const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
+
+    const { default: installExtension, REACT_DEVELOPER_TOOLS } =
+      await import('electron-devtools-installer');
 
     const ext = await installExtension(REACT_DEVELOPER_TOOLS, {
       loadExtensionOptions: { allowFileAccess: true },
@@ -276,6 +279,10 @@ protocol.registerSchemesAsPrivileged([
   }
 ]);
 
+if (process.platform === 'win32') {
+  app.setAppUserModelId('com.sandakannipunajith.nora');
+}
+
 app
   .whenReady()
   .then(async () => {
@@ -375,6 +382,7 @@ app
     // ? / / / / / / / / /  IPC RENDERER EVENTS  / / / / / / / / / / / /
     if (mainWindow) {
       initializeIPC(mainWindow, abortController.signal);
+      flushScrobbleQueue();
       checkForUpdates();
       //  / / / / / / / / / / / GLOBAL SHORTCUTS / / / / / / / / / / / / / /
       // globalShortcut.register('F5', () => {
