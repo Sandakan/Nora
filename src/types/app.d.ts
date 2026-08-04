@@ -75,7 +75,8 @@ declare global {
     | 'app/lastfm/getUserRecentTracks'
     | 'app/lastfm/getUserLovedTracks'
     | 'app/saveSmartPlaylistCriteria'
-    | 'app/refreshSmartPlaylist';
+    | 'app/refreshSmartPlaylist'
+    | 'app/syncLastFmToSmartPlaylist';
 
   interface ImageCoverData {
     format: string;

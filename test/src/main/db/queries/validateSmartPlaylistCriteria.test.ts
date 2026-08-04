@@ -1,10 +1,9 @@
-import { describe, test, expect } from 'vitest';
-
 import {
   validateLastFmSource,
   validateSmartPlaylistCriteria,
   validateSmartPlaylistRule
 } from '@main/db/queries/validateSmartPlaylistCriteria';
+import { describe, test, expect } from 'vitest';
 
 const validRule = { field: 'genre', operator: 'eq', value: 'Rock' };
 
@@ -20,9 +19,11 @@ describe('validateSmartPlaylistRule', () => {
   });
 
   test('accepts a valid boolean rule', () => {
-    expect(validateSmartPlaylistRule({ field: 'isFavorite', operator: 'eq', value: true })).toEqual({
-      success: true
-    });
+    expect(validateSmartPlaylistRule({ field: 'isFavorite', operator: 'eq', value: true })).toEqual(
+      {
+        success: true
+      }
+    );
   });
 
   test('rejects null rule objects', () => {
@@ -44,7 +45,11 @@ describe('validateSmartPlaylistRule', () => {
   });
 
   test('rejects non-numeric value for numeric field', () => {
-    const result = validateSmartPlaylistRule({ field: 'year', operator: 'eq', value: 'not-a-number' });
+    const result = validateSmartPlaylistRule({
+      field: 'year',
+      operator: 'eq',
+      value: 'not-a-number'
+    });
     expect(result.success).toBe(false);
     if (!result.success) expect(result.reason).toBe('invalid-numeric-value');
   });
@@ -213,5 +218,25 @@ describe('validateLastFmSource', () => {
   test('accepts boundary limit', () => {
     const source = { username: 'nora', type: 'top', limit: 100 };
     expect(validateLastFmSource(source)).toEqual({ success: true });
+  });
+
+  test('rejects numeric period', () => {
+    const source = { username: 'nora', type: 'top', period: 1 };
+    expect(validateLastFmSource(source).success).toBe(false);
+  });
+
+  test('rejects boolean period', () => {
+    const source = { username: 'nora', type: 'top', period: true };
+    expect(validateLastFmSource(source).success).toBe(false);
+  });
+
+  test('rejects object period', () => {
+    const source = { username: 'nora', type: 'top', period: { value: 'overall' } };
+    expect(validateLastFmSource(source).success).toBe(false);
+  });
+
+  test('rejects null period', () => {
+    const source = { username: 'nora', type: 'top', period: null };
+    expect(validateLastFmSource(source).success).toBe(false);
   });
 });

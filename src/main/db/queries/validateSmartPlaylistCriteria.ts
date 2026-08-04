@@ -1,3 +1,5 @@
+import { MAX_LIMIT, VALID_PERIODS } from './smartPlaylistConstants';
+
 const NUMERIC_FIELDS = new Set([
   'year',
   'playCount',
@@ -17,15 +19,10 @@ const NUMERIC_OPERATORS = new Set(['eq', 'neq', 'gt', 'gte', 'lt', 'lte']);
 
 const MAX_RULES = 20;
 const MAX_STRING_LENGTH = 200;
-const MAX_LIMIT = 100;
 
-export type CriteriaValidationResult =
-  | { success: true }
-  | { success: false; reason: string };
+export type CriteriaValidationResult = { success: true } | { success: false; reason: string };
 
-export const validateSmartPlaylistCriteria = (
-  criteria: unknown
-): CriteriaValidationResult => {
+export const validateSmartPlaylistCriteria = (criteria: unknown): CriteriaValidationResult => {
   if (!criteria || typeof criteria !== 'object') {
     return { success: false, reason: 'criteria-not-object' };
   }
@@ -56,7 +53,12 @@ export const validateSmartPlaylistCriteria = (
   }
 
   if (c.limit !== undefined) {
-    if (typeof c.limit !== 'number' || !Number.isInteger(c.limit) || c.limit <= 0 || c.limit > MAX_LIMIT) {
+    if (
+      typeof c.limit !== 'number' ||
+      !Number.isInteger(c.limit) ||
+      c.limit <= 0 ||
+      c.limit > MAX_LIMIT
+    ) {
       return { success: false, reason: 'invalid-limit' };
     }
   }
@@ -64,9 +66,7 @@ export const validateSmartPlaylistCriteria = (
   return { success: true };
 };
 
-export const validateSmartPlaylistRule = (
-  rule: unknown
-): CriteriaValidationResult => {
+export const validateSmartPlaylistRule = (rule: unknown): CriteriaValidationResult => {
   if (!rule || typeof rule !== 'object') {
     return { success: false, reason: 'rule-not-object' };
   }
@@ -107,19 +107,12 @@ export const validateSmartPlaylistRule = (
 };
 
 const isKnownField = (field: string): field is SmartPlaylistRuleField => {
-  return (
-    NUMERIC_FIELDS.has(field) ||
-    STRING_FIELDS.has(field) ||
-    BOOLEAN_FIELDS.has(field)
-  );
+  return NUMERIC_FIELDS.has(field) || STRING_FIELDS.has(field) || BOOLEAN_FIELDS.has(field);
 };
 
-const VALID_PERIODS = ['overall', '7day', '1month', '3month', '6month', '12month'];
 const MAX_USERNAME_LENGTH = 200;
 
-export type LastFmSourceValidationResult =
-  | { success: true }
-  | { success: false; reason: string };
+export type LastFmSourceValidationResult = { success: true } | { success: false; reason: string };
 
 export const validateLastFmSource = (source: unknown): LastFmSourceValidationResult => {
   if (!source || typeof source !== 'object') {
@@ -127,7 +120,11 @@ export const validateLastFmSource = (source: unknown): LastFmSourceValidationRes
   }
   const s = source as Record<string, unknown>;
 
-  if (typeof s.username !== 'string' || s.username.trim().length === 0 || s.username.trim().length > MAX_USERNAME_LENGTH) {
+  if (
+    typeof s.username !== 'string' ||
+    s.username.trim().length === 0 ||
+    s.username.trim().length > MAX_USERNAME_LENGTH
+  ) {
     return { success: false, reason: 'invalid-lastfm-username' };
   }
 
@@ -135,11 +132,20 @@ export const validateLastFmSource = (source: unknown): LastFmSourceValidationRes
     return { success: false, reason: 'invalid-lastfm-type' };
   }
 
-  if (s.period !== undefined && typeof s.period === 'string' && !VALID_PERIODS.includes(s.period)) {
+  if (
+    s.period !== undefined &&
+    (typeof s.period !== 'string' || !VALID_PERIODS.includes(s.period as (typeof VALID_PERIODS)[number]))
+  ) {
     return { success: false, reason: 'invalid-lastfm-period' };
   }
 
-  if (s.limit !== undefined && (typeof s.limit !== 'number' || !Number.isSafeInteger(s.limit) || s.limit <= 0 || s.limit > MAX_LIMIT)) {
+  if (
+    s.limit !== undefined &&
+    (typeof s.limit !== 'number' ||
+      !Number.isSafeInteger(s.limit) ||
+      s.limit <= 0 ||
+      s.limit > MAX_LIMIT)
+  ) {
     return { success: false, reason: 'invalid-lastfm-limit' };
   }
 

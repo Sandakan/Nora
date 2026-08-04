@@ -2,6 +2,7 @@ import { db } from '@db/db';
 import { playlists, playlistsSongs } from '@db/schema';
 import { eq } from 'drizzle-orm';
 
+import { MAX_LIMIT, VALID_PERIODS } from '../db/queries/smartPlaylistConstants';
 import logger from '../logger';
 
 type LastFmSource = {
@@ -10,9 +11,6 @@ type LastFmSource = {
   period?: string;
   limit?: number;
 };
-
-const VALID_PERIODS = ['overall', '7day', '1month', '3month', '6month', '12month'];
-const MAX_LIMIT = 100;
 
 export const syncLastFmToSmartPlaylist = async (
   playlistId: number,
@@ -29,7 +27,9 @@ export const syncLastFmToSmartPlaylist = async (
     return { success: false, count: 0 };
   }
 
-  const uniqueIds = [...new Set(songIds.filter((id) => typeof id === 'number' && Number.isSafeInteger(id) && id > 0))];
+  const uniqueIds = [
+    ...new Set(songIds.filter((id) => typeof id === 'number' && Number.isSafeInteger(id) && id > 0))
+  ];
   if (uniqueIds.length === 0) {
     return { success: false, count: 0 };
   }
@@ -50,8 +50,11 @@ export const syncLastFmToSmartPlaylist = async (
   }
 
   const trimmedUsername = source.username.trim();
-  const period = source.period && VALID_PERIODS.includes(source.period) ? source.period : undefined;
-  const limit = typeof source.limit === 'number' && source.limit > 0 ? Math.min(source.limit, MAX_LIMIT) : undefined;
+  const period = source.period && VALID_PERIODS.includes(source.period as (typeof VALID_PERIODS)[number]) ? source.period : undefined;
+  const limit =
+    typeof source.limit === 'number' && source.limit > 0
+      ? Math.min(source.limit, MAX_LIMIT)
+      : undefined;
 
   logger.debug('Syncing Last.fm data to smart playlist', {
     playlistId,

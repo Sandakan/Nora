@@ -111,15 +111,12 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
     []
   );
 
-  const removeRule = useCallback(
-    (index: number) => {
-      setCriteria((prev) => {
-        const newRules = prev.rules.filter((_, i) => i !== index);
-        return { ...prev, rules: newRules.length > 0 ? newRules : [defaultRule()] };
-      });
-    },
-    []
-  );
+  const removeRule = useCallback((index: number) => {
+    setCriteria((prev) => {
+      const newRules = prev.rules.filter((_, i) => i !== index);
+      return { ...prev, rules: newRules.length > 0 ? newRules : [defaultRule()] };
+    });
+  }, []);
 
   const addRule = useCallback(() => {
     setCriteria((prev) => ({
@@ -135,7 +132,12 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
       .map((r) => {
         const { id: _key, ...rule } = r as SmartPlaylistRule & { id?: string };
         void _key;
-        if (typeof rule.value === 'string' && rule.value.trim() !== '' && !needsStringOps(rule.field) && !needsBoolOps(rule.field)) {
+        if (
+          typeof rule.value === 'string' &&
+          rule.value.trim() !== '' &&
+          !needsStringOps(rule.field) &&
+          !needsBoolOps(rule.field)
+        ) {
           return { ...rule, value: Number(rule.value) };
         }
         return rule;
@@ -154,12 +156,10 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
 
     setIsSaving(true);
     try {
-      const result = await window.api.playlistsData
-        .saveSmartPlaylistCriteria(playlist.playlistId, cleaned)
-        .catch((error: unknown) => {
-          void error;
-          return { songIds: [], success: false as const, reason: 'ipc-error' as const };
-        });
+      const result = await window.api.playlistsData.saveSmartPlaylistCriteria(
+        playlist.playlistId,
+        cleaned
+      );
       if (result.success) {
         addNewNotifications([
           {
@@ -171,7 +171,11 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
         changePromptMenuData(false);
       } else {
         addNewNotifications([
-          { id: 'smartPlaylistSaveFailed', duration: 5000, content: t('playlist.criteriaSaveFailed') }
+          {
+            id: 'smartPlaylistSaveFailed',
+            duration: 5000,
+            content: t('playlist.criteriaSaveFailed')
+          }
         ]);
       }
     } finally {
@@ -197,7 +201,7 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
     if (needsBoolOps(rule.field)) {
       return (
         <select
-          className="mt-1 w-full rounded-lg bg-background-color-2 px-3 py-1.5 text-sm text-font-color-black outline-1 outline-transparent transition-colors focus:outline-font-color-highlight dark:bg-dark-background-color-2 dark:text-font-color-white dark:focus:outline-dark-font-color-highlight"
+          className="bg-background-color-2 text-font-color-black focus:outline-font-color-highlight dark:bg-dark-background-color-2 dark:text-font-color-white dark:focus:outline-dark-font-color-highlight mt-1 w-full rounded-lg px-3 py-1.5 text-sm outline-1 outline-transparent transition-colors"
           value={String(rule.value)}
           onChange={(e) => onChange(e.target.value === 'true')}
         >
@@ -211,7 +215,7 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
       return (
         <input
           type="text"
-          className="mt-1 w-full rounded-lg bg-background-color-2 px-3 py-1.5 text-sm text-font-color-black outline-1 outline-transparent transition-colors focus:outline-font-color-highlight dark:bg-dark-background-color-2 dark:text-font-color-white dark:focus:outline-dark-font-color-highlight"
+          className="bg-background-color-2 text-font-color-black focus:outline-font-color-highlight dark:bg-dark-background-color-2 dark:text-font-color-white dark:focus:outline-dark-font-color-highlight mt-1 w-full rounded-lg px-3 py-1.5 text-sm outline-1 outline-transparent transition-colors"
           value={String(rule.value)}
           onChange={(e) => onChange(e.target.value)}
           placeholder={t('playlist.criteriaValuePlaceholder')}
@@ -222,7 +226,7 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
     return (
       <input
         type="number"
-        className="mt-1 w-full rounded-lg bg-background-color-2 px-3 py-1.5 text-sm text-font-color-black outline-1 outline-transparent transition-colors focus:outline-font-color-highlight dark:bg-dark-background-color-2 dark:text-font-color-white dark:focus:outline-dark-font-color-highlight"
+        className="bg-background-color-2 text-font-color-black focus:outline-font-color-highlight dark:bg-dark-background-color-2 dark:text-font-color-white dark:focus:outline-dark-font-color-highlight mt-1 w-full rounded-lg px-3 py-1.5 text-sm outline-1 outline-transparent transition-colors"
         value={String(rule.value)}
         onChange={(e) => onChange(e.target.value)}
         placeholder={t('playlist.criteriaValuePlaceholder')}
@@ -231,18 +235,18 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
   };
 
   return (
-    <div className="smart-playlist-criteria-editor flex max-h-[80vh] w-[90vw] max-w-[32rem] flex-col rounded-lg bg-background-color-2 px-6 py-5 shadow-lg dark:bg-dark-background-color-2">
+    <div className="smart-playlist-criteria-editor bg-background-color-2 dark:bg-dark-background-color-2 flex max-h-[80vh] w-[90vw] max-w-[32rem] flex-col rounded-lg px-6 py-5 shadow-lg">
       <div className="title-container mb-4 flex items-center justify-between">
-        <h3 className="text-2xl font-semibold text-font-color-black dark:text-font-color-white">
+        <h3 className="text-font-color-black dark:text-font-color-white text-2xl font-semibold">
           {playlist.name}
         </h3>
-        <span className="material-icons-round text-lg text-font-color-highlight dark:text-dark-font-color-highlight">
+        <span className="material-icons-round text-font-color-highlight dark:text-dark-font-color-highlight text-lg">
           auto_awesome
         </span>
       </div>
 
       <div className="match-type-toggle mb-4 flex items-center gap-3">
-        <label className="flex cursor-pointer items-center gap-2 text-sm text-font-color-black dark:text-font-color-white">
+        <label className="text-font-color-black dark:text-font-color-white flex cursor-pointer items-center gap-2 text-sm">
           <input
             type="radio"
             name="matchType"
@@ -251,7 +255,7 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
           />
           {t('playlist.matchTypeAll')}
         </label>
-        <label className="flex cursor-pointer items-center gap-2 text-sm text-font-color-black dark:text-font-color-white">
+        <label className="text-font-color-black dark:text-font-color-white flex cursor-pointer items-center gap-2 text-sm">
           <input
             type="radio"
             name="matchType"
@@ -266,14 +270,14 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
         {criteria.rules.map((rule, idx) => (
           <div
             key={(rule as SmartPlaylistRule & { id?: string }).id ?? idx}
-            className="rule-row flex flex-wrap items-end gap-2 rounded-lg bg-background-color-1 p-3 dark:bg-dark-background-color-1"
+            className="rule-row bg-background-color-1 dark:bg-dark-background-color-1 flex flex-wrap items-end gap-2 rounded-lg p-3"
           >
             <div className="flex flex-1 flex-col">
-              <label className="text-xs text-font-color-dimmed dark:text-dark-font-color-dimmed">
+              <label className="text-font-color-dimmed dark:text-dark-font-color-dimmed text-xs">
                 {t('playlist.ruleField')}
               </label>
               <select
-                className="mt-1 rounded-lg bg-background-color-2 px-3 py-1.5 text-sm text-font-color-black outline-1 outline-transparent transition-colors focus:outline-font-color-highlight dark:bg-dark-background-color-2 dark:text-font-color-white dark:focus:outline-dark-font-color-highlight"
+                className="bg-background-color-2 text-font-color-black focus:outline-font-color-highlight dark:bg-dark-background-color-2 dark:text-font-color-white dark:focus:outline-dark-font-color-highlight mt-1 rounded-lg px-3 py-1.5 text-sm outline-1 outline-transparent transition-colors"
                 value={rule.field}
                 onChange={(e) => {
                   const field = e.target.value as SmartPlaylistRuleField;
@@ -293,11 +297,11 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
             </div>
 
             <div className="flex flex-1 flex-col">
-              <label className="text-xs text-font-color-dimmed dark:text-dark-font-color-dimmed">
+              <label className="text-font-color-dimmed dark:text-dark-font-color-dimmed text-xs">
                 {t('playlist.ruleOperator')}
               </label>
               <select
-                className="mt-1 rounded-lg bg-background-color-2 px-3 py-1.5 text-sm text-font-color-black outline-1 outline-transparent transition-colors focus:outline-font-color-highlight dark:bg-dark-background-color-2 dark:text-font-color-white dark:focus:outline-dark-font-color-highlight"
+                className="bg-background-color-2 text-font-color-black focus:outline-font-color-highlight dark:bg-dark-background-color-2 dark:text-font-color-white dark:focus:outline-dark-font-color-highlight mt-1 rounded-lg px-3 py-1.5 text-sm outline-1 outline-transparent transition-colors"
                 value={rule.operator}
                 onChange={(e) =>
                   updateRule(idx, 'operator', e.target.value as SmartPlaylistRuleOperator)
@@ -312,14 +316,14 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
             </div>
 
             <div className="flex flex-[1.5] flex-col">
-              <label className="text-xs text-font-color-dimmed dark:text-dark-font-color-dimmed">
+              <label className="text-font-color-dimmed dark:text-dark-font-color-dimmed text-xs">
                 {t('playlist.ruleValue')}
               </label>
               {inputForRule(rule, idx)}
             </div>
 
             <button
-              className="material-icons-round mt-1 flex h-9 w-9 items-center justify-center rounded-lg text-font-color-dimmed outline-1 outline-transparent transition-colors hover:bg-background-color-3 hover:text-font-color-black focus:outline-font-color-highlight dark:text-dark-font-color-dimmed dark:hover:bg-dark-background-color-3 dark:hover:text-font-color-white dark:focus:outline-dark-font-color-highlight"
+              className="material-icons-round text-font-color-dimmed hover:bg-background-color-3 hover:text-font-color-black focus:outline-font-color-highlight dark:text-dark-font-color-dimmed dark:hover:bg-dark-background-color-3 dark:hover:text-font-color-white dark:focus:outline-dark-font-color-highlight mt-1 flex h-9 w-9 items-center justify-center rounded-lg outline-1 outline-transparent transition-colors"
               onClick={() => removeRule(idx)}
               title={t('playlist.removeRule')}
               aria-label={t('playlist.removeRule')}
@@ -331,7 +335,7 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
       </div>
 
       <button
-        className="mt-3 flex items-center justify-center gap-2 rounded-lg bg-background-color-1 px-4 py-2 text-sm text-font-color-black outline-1 outline-transparent transition-colors hover:bg-background-color-3 focus:outline-font-color-highlight dark:bg-dark-background-color-1 dark:text-font-color-white dark:hover:bg-dark-background-color-3 dark:focus:outline-dark-font-color-highlight"
+        className="bg-background-color-1 text-font-color-black hover:bg-background-color-3 focus:outline-font-color-highlight dark:bg-dark-background-color-1 dark:text-font-color-white dark:hover:bg-dark-background-color-3 dark:focus:outline-dark-font-color-highlight mt-3 flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm outline-1 outline-transparent transition-colors"
         onClick={addRule}
       >
         <span className="material-icons-round text-base">add</span>
@@ -343,9 +347,10 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
           className="rounded-lg! px-6! py-2!"
           label={t('common.cancel')}
           clickHandler={() => changePromptMenuData(false)}
+          isDisabled={isSaving}
         />
         <Button
-          className="rounded-lg! bg-font-color-highlight! px-6! py-2! text-white! dark:bg-dark-font-color-highlight!"
+          className="bg-font-color-highlight! dark:bg-dark-font-color-highlight! rounded-lg! px-6! py-2! text-white!"
           label={t('common.save')}
           clickHandler={saveCriteria}
           isDisabled={isSaving}

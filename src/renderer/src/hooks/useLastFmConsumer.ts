@@ -40,9 +40,7 @@ const useLastFmConsumer = () => {
       abortRef.current = controller;
 
       try {
-        let lastFmResult:
-          | { tracks: LastFmTrack[] }
-          | undefined;
+        let lastFmResult: { tracks: LastFmTrack[] } | undefined;
 
         if (type === 'top') {
           lastFmResult = await window.api.lastFmUserData.getUserTopTracks(
@@ -76,9 +74,7 @@ const useLastFmConsumer = () => {
 
           const normalizedArtist = track.artist.toLowerCase().trim();
           const matched = searchResults.find((song) =>
-            song.artists?.some(
-              (a) => a.artist?.name?.toLowerCase().trim() === normalizedArtist
-            )
+            song.artists?.some((a) => a.artist?.name?.toLowerCase().trim() === normalizedArtist)
           );
 
           results.push({
