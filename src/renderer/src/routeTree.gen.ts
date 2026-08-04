@@ -12,8 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as MainPlayerRouteRouteImport } from './routes/main-player/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MiniPlayerIndexRouteImport } from './routes/mini-player/index'
-import { Route as DisplayPlayerIndexRouteImport } from './routes/display-player/index'
 import { Route as FullscreenPlayerIndexRouteImport } from './routes/fullscreen-player/index'
+import { Route as DisplayPlayerIndexRouteImport } from './routes/display-player/index'
 import { Route as MainPlayerSongsIndexRouteImport } from './routes/main-player/songs/index'
 import { Route as MainPlayerSettingsIndexRouteImport } from './routes/main-player/settings/index'
 import { Route as MainPlayerSearchIndexRouteImport } from './routes/main-player/search/index'
@@ -52,14 +52,14 @@ const MiniPlayerIndexRoute = MiniPlayerIndexRouteImport.update({
   path: '/mini-player/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DisplayPlayerIndexRoute = DisplayPlayerIndexRouteImport.update({
-  id: '/display-player/',
-  path: '/display-player/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const FullscreenPlayerIndexRoute = FullscreenPlayerIndexRouteImport.update({
   id: '/fullscreen-player/',
   path: '/fullscreen-player/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DisplayPlayerIndexRoute = DisplayPlayerIndexRouteImport.update({
+  id: '/display-player/',
+  path: '/display-player/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MainPlayerSongsIndexRoute = MainPlayerSongsIndexRouteImport.update({
@@ -384,13 +384,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/display-player/': {
-      id: '/display-player/'
-      path: '/display-player'
-      fullPath: '/display-player/'
-      preLoaderRoute: typeof DisplayPlayerIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/mini-player/': {
       id: '/mini-player/'
       path: '/mini-player'
@@ -403,6 +396,13 @@ declare module '@tanstack/react-router' {
       path: '/fullscreen-player'
       fullPath: '/fullscreen-player/'
       preLoaderRoute: typeof FullscreenPlayerIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/display-player/': {
+      id: '/display-player/'
+      path: '/display-player'
+      fullPath: '/display-player/'
+      preLoaderRoute: typeof DisplayPlayerIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/main-player/songs/': {
