@@ -1156,12 +1156,12 @@ const updateSongId3Tags = async (
 
     logger.debug(`Song data updated successfully`, { songId });
     return result;
-  } catch (err: any) {
-    if ('message' in err) {
-      result.reason = err.message;
+  } catch (err) {
+    if (err && typeof err === 'object' && 'message' in err) {
+      result.reason = String(err.message);
       sendMessageToRenderer({
         messageCode: 'METADATA_UPDATE_FAILED',
-        data: { message: err.message }
+        data: { message: String(err.message) }
       });
     }
     logger.error('Song metadata update failed.', { err });

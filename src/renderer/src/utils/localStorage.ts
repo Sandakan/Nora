@@ -282,7 +282,7 @@ const getSortingStates = <Type extends keyof SortingStates>(type: Type) =>
 
 const getKeyboardShortcuts = (): ShortcutCategoryList => {
   const storage = getLocalStorage();
-  return (storage as any)?.keyboardShortcuts || [];
+  return storage?.keyboardShortcuts || [];
 };
 
 const setKeyboardShortcuts = (label: string, newKeys: string[]): void => {
@@ -299,7 +299,7 @@ const setKeyboardShortcuts = (label: string, newKeys: string[]): void => {
   }));
 
   try {
-    const allItems = getAllItems() as any;
+    const allItems = getAllItems();
     setAllItems({
       ...allItems,
       keyboardShortcuts: updatedData
@@ -310,8 +310,8 @@ const setKeyboardShortcuts = (label: string, newKeys: string[]): void => {
 };
 
 const resetShortcutsToDefaults = (): void => {
-  const allItems = getAllItems() as any;
-  const defaultShortcuts = (LOCAL_STORAGE_DEFAULT_TEMPLATE as any).keyboardShortcuts;
+  const allItems = getAllItems();
+  const defaultShortcuts = LOCAL_STORAGE_DEFAULT_TEMPLATE.keyboardShortcuts;
   if (defaultShortcuts) {
     setAllItems({
       ...allItems,
@@ -325,7 +325,7 @@ const resetShortcutsToDefaults = (): void => {
 
 const setEqualizerPreset = <Data extends Equalizer>(data: Data) => {
   // Store in the local storage root (not under playback)
-  const allItems = getAllItems() as any;
+  const allItems = getAllItems();
   setAllItems({
     ...allItems,
     equalizerPreset: data
@@ -333,7 +333,7 @@ const setEqualizerPreset = <Data extends Equalizer>(data: Data) => {
 };
 
 const getEqualizerPreset = () => {
-  const storage = getLocalStorage() as any;
+  const storage = getLocalStorage();
   return storage?.equalizerPreset as Equalizer | undefined;
 };
 
