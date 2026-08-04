@@ -1,5 +1,3 @@
-import { scrobbleQueue } from '@main/db/schema';
-import { getSongById } from '@main/db/queries/songs';
 import {
   claimPendingBatch,
   deleteOldPending,
@@ -7,12 +5,14 @@ import {
   markSent,
   resetStuckSending
 } from '@main/db/queries/scrobble_queue';
+import { getSongById } from '@main/db/queries/songs';
+import { scrobbleQueue } from '@main/db/schema';
 import { convertToSongData } from '@main/utils/convert';
 
 import type { AuthData, LoveParams, ScrobbleParams } from '../../../types/last_fm_api';
-import type { LastFMApi } from './generateApiRequestBodyForLastFMPostRequests';
 import logger from '../../logger';
 import { checkIfConnectedToInternet } from '../../main';
+import type { LastFMApi } from './generateApiRequestBodyForLastFMPostRequests';
 import generateApiRequestBodyForLastFMPostRequests from './generateApiRequestBodyForLastFMPostRequests';
 import getLastFmAuthData from './getLastFMAuthData';
 import { LASTFM_REQUEST_TIMEOUT_MS, fetchWithTimeout } from './lastFmUtils';
@@ -76,8 +76,7 @@ async function processItem(
 ): Promise<void> {
   switch (item.operationType) {
     case 'scrobble': {
-      if (item.startTimeSecs == null)
-        throw new Error('Missing scrobble timestamp');
+      if (item.startTimeSecs == null) throw new Error('Missing scrobble timestamp');
 
       const songData = item.songId != null ? await getSongById(item.songId) : null;
       // If the song was deleted between queue and flush, fall back to the
@@ -129,7 +128,11 @@ async function postToLastFm<T extends LastFMApi['method']>(
   method: T,
   params: Extract<LastFMApi, { method: T }>['params']
 ): Promise<void> {
-  const body = generateApiRequestBodyForLastFMPostRequests({ method, authData, params } as LastFMApi);
+  const body = generateApiRequestBodyForLastFMPostRequests({
+    method,
+    authData,
+    params
+  } as LastFMApi);
   const res = await fetchWithTimeout(
     url,
     {
