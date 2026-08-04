@@ -19,12 +19,19 @@ const { metadataEditingSupportedExtensions } = appPreferences;
 
 let cachedLyrics = undefined as SongLyrics | undefined;
 
+// Strips the final extension from a full file path while preserving the
+// directory, e.g. `/dir/song.flac` -> `/dir/song`.
+const stripExtension = (filePath: string): string => {
+  const ext = path.extname(filePath);
+  return ext ? filePath.slice(0, filePath.length - ext.length) : filePath;
+};
+
 export const getLrcFilePaths = (
   songPath: string,
   customLrcFilesSaveLocation?: string | null
 ): string[] => {
   const defaultLrcFilePath = `${songPath}.lrc`;
-  const defaultLrcFilePathWithoutExtension = `${songPath.slice(0, songPath.length - path.extname(songPath).length)}.lrc`;
+  const defaultLrcFilePathWithoutExtension = `${stripExtension(songPath)}.lrc`;
   const customLrcFilePath = customLrcFilesSaveLocation
     ? path.join(customLrcFilesSaveLocation, `${path.basename(songPath)}.lrc`)
     : undefined;

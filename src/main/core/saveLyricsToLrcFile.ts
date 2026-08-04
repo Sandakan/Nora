@@ -155,14 +155,22 @@ const saveLyricsToLRCFile = async (songPathWithoutProtocol: string, songLyrics: 
 
   const song = await getSongByPath(songPathWithoutProtocol).catch(() => undefined);
   if (song) {
-    const { upsertSongLyrics } = await import('@main/db/queries/lyricsIndex');
-    await upsertSongLyrics(
+    const { upsertSongLyrics, invalidateLyricsIndex } =
+      await import('@main/db/queries/lyricsIndex');
+    const result = await upsertSongLyrics(
       song.id,
       songPathWithoutProtocol,
       userData.customLrcFilesSaveLocation
-    ).catch((error) =>
-      logger.error('Failed to re-index lyrics after LRC save', { error, songId: song.id })
-    );
+    ).catch((error) => {
+      logger.error('Failed to re-index lyrics after LRC save', { error, songId: song.id });
+      return 'read-error' as const;
+    });
+    if (result === 'read-error') {
+      invalidateLyricsIndex();
+      logger.warn('Lyric re-index after LRC save failed; will retry on next startup.', {
+        songId: song.id
+      });
+    }
   } else {
     logger.warn(`LRC written but song not found for re-index.`, {
       songPath: songPathWithoutProtocol

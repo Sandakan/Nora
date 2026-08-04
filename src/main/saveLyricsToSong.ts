@@ -120,13 +120,25 @@ export const savePendingSongLyrics = async (currentSongPath = '', forceSave = fa
         });
         dataUpdateEvent('songs/lyrics');
 
-        const { upsertSongLyrics } = await import('@main/db/queries/lyricsIndex');
+        const { upsertSongLyrics, invalidateLyricsIndex } =
+          await import('@main/db/queries/lyricsIndex');
         const { getSongByPath } = await import('@main/db/queries/songs');
         const song = await getSongByPath(songPath).catch(() => undefined);
         if (song) {
-          await upsertSongLyrics(song.id, songPath, customLrcFilesSaveLocation).catch((err) =>
-            logger.error('Failed to re-index lyrics after save', { err, songId: song.id })
-          );
+          const result = await upsertSongLyrics(
+            song.id,
+            songPath,
+            customLrcFilesSaveLocation
+          ).catch((err) => {
+            logger.error('Failed to re-index lyrics after save', { err, songId: song.id });
+            return 'read-error' as const;
+          });
+          if (result === 'read-error') {
+            invalidateLyricsIndex();
+            logger.warn('Lyric re-index after pending save failed; will retry on next startup.', {
+              songId: song.id
+            });
+          }
         }
         pendingSongLyrics.delete(songPath);
       } catch (error) {

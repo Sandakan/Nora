@@ -94,6 +94,17 @@ export type LyricsIndexResult = 'indexed' | 'absent' | 'read-error';
 // Configurable indexing policy: number of songs processed per backfill batch.
 const LYRICS_BACKFILL_BATCH_SIZE = 10;
 
+// Durable-invalidation generation for the backfill. Every path that can leave
+// a song unindexed (import read-error, post-save re-index read-error) bumps
+// this counter. A backfill only marks the index complete if the generation is
+// unchanged from when it started, so a late concurrent failure cannot be
+// overwritten by an older successful backfill.
+let lyricsIndexGeneration = 0;
+
+export const invalidateLyricsIndex = (): void => {
+  lyricsIndexGeneration += 1;
+};
+
 /**
  * Sums backfill batch results. A fulfilled 'read-error' counts as a failure so isLyricIndexBuilt is
  * only set when every song was indexed or confirmed absent (a song with no lyrics is a valid
@@ -162,6 +173,7 @@ export const removeSongLyrics = async (songId: number, trx: typeof db = db): Pro
 
 export const indexAllLyrics = async (): Promise<{ allSucceeded: boolean }> => {
   logger.info('Starting lyrics index backfill.');
+  const generationAtStart = lyricsIndexGeneration;
   const songs = await db.select({ id: songTable.id, path: songTable.path }).from(songTable);
   const { customLrcFilesSaveLocation } = await getUserSettings();
 
@@ -190,5 +202,5 @@ export const indexAllLyrics = async (): Promise<{ allSucceeded: boolean }> => {
   logger.info(
     `Lyrics index backfill complete. Indexed ${indexed} songs, processed ${processed} of ${songs.length}, failed ${failed}.`
   );
-  return { allSucceeded: failed === 0 };
+  return { allSucceeded: failed === 0 && lyricsIndexGeneration === generationAtStart };
 };

@@ -7,7 +7,7 @@ const HighlightedSnippet = ({
   snippet: string;
   truncate?: boolean;
 }) => {
-  const parts = useMemo(() => snippet.split(/\[NRABEG\]|\[NRAEND\]/), [snippet]);
+  const parts = useMemo(() => snippet.split(/\u0001|\u0002/), [snippet]);
   const highlightedIndices = useMemo(() => {
     const indices = new Set<number>();
     for (let i = 1; i < parts.length; i += 2) indices.add(i);

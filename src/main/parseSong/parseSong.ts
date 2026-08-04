@@ -270,7 +270,7 @@ export const parseSong = async (
       dataUpdateEvent('songs/newSong', [res.songData.id]);
 
       import('@main/db/queries/lyricsIndex')
-        .then(({ upsertSongLyrics }) =>
+        .then(({ upsertSongLyrics, invalidateLyricsIndex }) =>
           import('@main/db/queries/settings')
             .then(({ getUserSettings }) => getUserSettings())
             .then(async ({ customLrcFilesSaveLocation }) => {
@@ -280,11 +280,13 @@ export const parseSong = async (
                 customLrcFilesSaveLocation
               );
               if (result === 'read-error') {
-                // A transient read/parse failure: keep the index incomplete so
-                // the next startup backfill retries this song.
+                // A transient read/parse failure: invalidate any in-flight
+                // backfill generation and keep the index incomplete so the
+                // next startup backfill retries this song.
                 logger.warn('Lyric index read error on import; will retry on next startup.', {
                   songId: res.songData.id
                 });
+                invalidateLyricsIndex();
                 const { saveUserSettings } = await import('@main/db/queries/settings');
                 await saveUserSettings({ isLyricIndexBuilt: false });
                 return;
