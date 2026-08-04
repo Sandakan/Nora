@@ -35,7 +35,13 @@ class MockAudioContext {
   destination = {} as AudioDestinationNode;
   createGain() {
     return {
-      gain: { value: 1, setValueAtTime: vi.fn(), exponentialRampToValueAtTime: vi.fn() },
+      gain: {
+        value: 1,
+        setValueAtTime: vi.fn(),
+        exponentialRampToValueAtTime: vi.fn(),
+        cancelScheduledValues: vi.fn(),
+        linearRampToValueAtTime: vi.fn()
+      },
       connect: vi.fn(),
       disconnect: vi.fn()
     };
@@ -190,5 +196,38 @@ describe('AudioPlayer: crossfade + queue change', () => {
     asAny.queueHandlers.queueChange({ type: 'queueChange' });
 
     expect(abortSpy).not.toHaveBeenCalled();
+  });
+});
+
+describe('AudioPlayer: loadExternalSong preload cleanup', () => {
+  it('clears preload state and bumps generation when loading an external source during a crossfade', async () => {
+    const queue = new PlayerQueue([1, 2, 3]);
+    const player = new AudioPlayer(queue);
+
+    const asAny = player as unknown as {
+      isCrossfading: boolean;
+      preloadGeneration: number;
+      preloadedSongId: number | null;
+      preloadedSongData: unknown;
+      abortCrossfade: () => void;
+      getActiveAudio: () => { src: string };
+      loadExternalSong: (data: { path: string }, autoPlay?: boolean) => Promise<void>;
+    };
+
+    const beforeGen = asAny.preloadGeneration;
+    asAny.isCrossfading = true;
+    asAny.preloadedSongId = 2;
+    asAny.preloadedSongData = { songId: 2, path: 'file:///2.mp3' };
+
+    await asAny.loadExternalSong({ path: 'file:///external.mp3' }, false);
+
+    // Generation must advance (abortCrossfade increments once and
+    // loadExternalSong increments again) so any in-flight preload write is
+    // rejected.
+    expect(asAny.preloadGeneration).toBe(beforeGen + 2);
+    // Preload target must be cleared so the external file cannot crossfade
+    // or gaplessly swap into a previously queued song.
+    expect(asAny.preloadedSongId).toBeNull();
+    expect(asAny.preloadedSongData).toBeNull();
   });
 });
