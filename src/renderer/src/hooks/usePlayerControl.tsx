@@ -207,14 +207,22 @@ export function usePlayerControl(
         const { isKnownSource } = audioPlayerData;
         if (isKnownSource) playSong(audioPlayerData.songId);
         else {
-          console.log('playSong', audioPlayerData.path);
+          log('playSong', audioPlayerData.path);
           dispatch({
             type: 'CURRENT_SONG_DATA_CHANGE',
             data: audioPlayerData
           });
-          player.src = `${audioPlayerData.path}?ts=${Date.now()}`;
-          refStartPlay.current = isStartPlay;
-          if (isStartPlay) toggleSongPlayback();
+          if (audioPlayer) {
+            // Route external sources through AudioPlayer so the ACTIVE element
+            // (not the always-primary AudioPlayer.audio) is used after a swap.
+            audioPlayer
+              .loadExternalSong(audioPlayerData, isStartPlay)
+              .catch((err) => managePlaybackErrors(err));
+          } else {
+            player.src = `${audioPlayerData.path}?ts=${Date.now()}`;
+            refStartPlay.current = isStartPlay;
+            if (isStartPlay) toggleSongPlayback();
+          }
 
           recordListeningData(audioPlayerData.songId, audioPlayerData.duration, undefined, false);
         }
@@ -236,8 +244,11 @@ export function usePlayerControl(
   const clearAudioPlayerData = useCallback(() => {
     toggleSongPlayback(false);
 
-    player.currentTime = 0;
-    player.pause();
+    // Reset the ACTIVE element (AudioPlayer.audio can be the inactive primary
+    // after a crossfade/gapless swap and would leave the audible track running).
+    const activeAudio = audioPlayer?.getActiveAudio() ?? player;
+    activeAudio.currentTime = 0;
+    activeAudio.pause();
 
     // Remove current song from queue using PlayerQueue method
     const currentSongId = store.state.currentSongData.songId;

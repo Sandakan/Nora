@@ -2,24 +2,13 @@ import type { Subscription } from '@tanstack/react-store';
 
 import { dispatch, store } from '../store/store';
 import storage from '../utils/localStorage';
+import log from '../utils/log';
+import { normalizeCrossfadeDuration } from '../utils/normalizeCrossfadeDuration';
 import { equalizerBandHertzData } from './equalizerData';
 import PlayerQueue from './playerQueue';
 
 const AUDIO_FADE_DURATION = 250;
 const GAIN_FLOOR = 0.001;
-const CROSSFADE_MAX_MS = 12000;
-const CROSSFADE_STEP_MS = 500;
-
-// Persisted crossfadeDuration can contain NaN, negatives, or out-of-range
-// values (imports, older storage). Clamp + round to the slider's step before
-// it reaches gain timing.
-const normalizeCrossfadeDuration = (value: unknown): number => {
-  if (typeof value !== 'number' || !Number.isFinite(value)) return 0;
-  return Math.min(
-    CROSSFADE_MAX_MS,
-    Math.max(0, Math.round(value / CROSSFADE_STEP_MS) * CROSSFADE_STEP_MS)
-  );
-};
 
 type PlayerEventType =
   | 'timeUpdate'
@@ -139,7 +128,7 @@ class AudioPlayer {
     this.queueHandlers.positionChange = () => {
       const songId = this.queue.currentSongId;
       const willAutoPlay = this.pendingAutoPlay;
-      console.log('[AudioPlayer.positionChange]', {
+      log('[AudioPlayer.positionChange]', {
         position: this.queue.position,
         songId,
         willLoad: !!songId,
@@ -407,10 +396,10 @@ class AudioPlayer {
     // belong to the old active element until the swap completes).
     dispatch({ type: 'CURRENT_SONG_PLAYBACK_STATE', data: true });
 
-    // Emit durationChange for the incoming song — loadedmetadata for the inactive
-    // element was suppressed during preload (correct); manually re-emit now that it
-    // becomes the audio source.
-    this.emit('durationChange', inactiveAudio.duration);
+    // No durationChange here: the incoming element is not active yet, so a
+    // consumer reading getActiveAudio() would pair the incoming duration with
+    // the outgoing song's metadata. completeCrossfade() emits durationChange
+    // once it has swapped the active element and updated song metadata.
 
     const now = this.currentContext.currentTime;
 
@@ -612,7 +601,7 @@ class AudioPlayer {
         songData = songIdOrData;
       }
 
-      console.log('[AudioPlayer.loadSong]', {
+      log('[AudioPlayer.loadSong]', {
         songId: songData.songId,
         options
       });
@@ -659,7 +648,7 @@ class AudioPlayer {
       targetAudio.dispatchEvent(trackChangeEvent);
 
       this.emit('songLoaded', songData);
-      console.log('[AudioPlayer.loadSong.done]', {
+      log('[AudioPlayer.loadSong.done]', {
         songId: songData.songId,
         title: songData.title
       });
@@ -906,6 +895,25 @@ class AudioPlayer {
     this.getActiveAudio().currentTime = time;
   }
 
+  /**
+   * Loads a song from an external (non-library) source onto the ACTIVE element. Unknown-source
+   * playback must not write to AudioPlayer.audio, which is always the primary element and can be
+   * the inactive one after a crossfade/gapless swap.
+   */
+  async loadExternalSong(audioPlayerData: AudioPlayerData, autoPlay = true): Promise<void> {
+    if (this.isCrossfading) this.abortCrossfade();
+
+    const target = this.getActiveAudio();
+    target.src = `${audioPlayerData.path}?ts=${Date.now()}`;
+    this.pendingAutoPlay = autoPlay;
+
+    target.load();
+
+    if (autoPlay) {
+      await this.play();
+    }
+  }
+
   async playSongById(
     songId: number,
     options: {
@@ -917,7 +925,7 @@ class AudioPlayer {
     const { autoPlay = true, recordListening = true, onError } = options;
 
     try {
-      console.log('[AudioPlayer.playSongById]', { songId, autoPlay });
+      log('[AudioPlayer.playSongById]', { songId, autoPlay });
 
       const songData = await window.api.audioLibraryControls.getSong(songId);
 
@@ -936,7 +944,7 @@ class AudioPlayer {
   }
 
   async skipForward(reason: SongSkipReason = 'USER_SKIP'): Promise<void> {
-    console.log('[AudioPlayer.skipForward]', {
+    log('[AudioPlayer.skipForward]', {
       reason,
       position: this.queue.position,
       hasNext: this.queue.hasNext,
@@ -993,12 +1001,12 @@ class AudioPlayer {
       this.pendingAutoPlay = true;
       this.queue.moveToStart();
     } else if (this.queue.isEmpty) {
-      console.log('[AudioPlayer.skipForward] Queue is empty.');
+      log('[AudioPlayer.skipForward] Queue is empty.');
     }
   }
 
   skipBackward(): void {
-    console.log('[AudioPlayer.skipBackward]', {
+    log('[AudioPlayer.skipBackward]', {
       currentTime: this.getActiveAudio().currentTime,
       position: this.queue.position,
       hasPrevious: this.queue.hasPrevious

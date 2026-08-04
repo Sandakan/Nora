@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import i18n from '../../../i18n';
 import storage from '../../../utils/localStorage';
+import { normalizeCrossfadeDuration } from '../../../utils/normalizeCrossfadeDuration';
 import Button from '../../Button';
 import Checkbox from '../../Checkbox';
 import Dropdown, { type DropdownOption } from '../../Dropdown';
@@ -46,10 +47,7 @@ const AudioPlaybackSettings = () => {
     const interval = storage.preferences.getPreferences('seekbarScrollInterval');
     const playbackRate = storage.playback.getPlaybackOptions('playbackRate');
     const savedCrossfade = storage.playback.getPlaybackOptions('crossfadeDuration');
-    const normalizedCrossfade =
-      typeof savedCrossfade === 'number' && Number.isFinite(savedCrossfade)
-        ? Math.min(12000, Math.max(0, Math.round(savedCrossfade / 500) * 500))
-        : 0;
+    const normalizedCrossfade = normalizeCrossfadeDuration(savedCrossfade);
 
     setPlaybackRateInterval(playbackRate);
     setSeekbarScrollInterval(interval.toString());
