@@ -273,9 +273,23 @@ export const parseSong = async (
         .then(({ upsertSongLyrics }) =>
           import('@main/db/queries/settings')
             .then(({ getUserSettings }) => getUserSettings())
-            .then(({ customLrcFilesSaveLocation }) =>
-              upsertSongLyrics(res.songData.id, res.songData.path, customLrcFilesSaveLocation)
-            )
+            .then(async ({ customLrcFilesSaveLocation }) => {
+              const result = await upsertSongLyrics(
+                res.songData.id,
+                res.songData.path,
+                customLrcFilesSaveLocation
+              );
+              if (result === 'read-error') {
+                // A transient read/parse failure: keep the index incomplete so
+                // the next startup backfill retries this song.
+                logger.warn('Lyric index read error on import; will retry on next startup.', {
+                  songId: res.songData.id
+                });
+                const { saveUserSettings } = await import('@main/db/queries/settings');
+                await saveUserSettings({ isLyricIndexBuilt: false });
+                return;
+              }
+            })
         )
         .catch((error) =>
           logger.error('Failed to index lyrics on import', { error, songId: res.songData.id })

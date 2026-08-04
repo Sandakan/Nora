@@ -1,7 +1,13 @@
 import { useMemo } from 'react';
 
-const HighlightedSnippet = ({ snippet, truncate = true }: { snippet: string; truncate?: boolean }) => {
-  const parts = useMemo(() => snippet.split(/<b>|<\/b>/), [snippet]);
+const HighlightedSnippet = ({
+  snippet,
+  truncate = true
+}: {
+  snippet: string;
+  truncate?: boolean;
+}) => {
+  const parts = useMemo(() => snippet.split(/\[NRABEG\]|\[NRAEND\]/), [snippet]);
   const highlightedIndices = useMemo(() => {
     const indices = new Set<number>();
     for (let i = 1; i < parts.length; i += 2) indices.add(i);
@@ -18,7 +24,7 @@ const HighlightedSnippet = ({ snippet, truncate = true }: { snippet: string; tru
         highlightedIndices.has(index) ? (
           <mark
             key={`hl-${index}-${part}`}
-            className="bg-background-color-3 dark:bg-dark-background-color-3 rounded-sm text-black! dark:text-font-color-black!"
+            className="bg-background-color-3 dark:bg-dark-background-color-3 dark:text-font-color-black! rounded-sm text-black!"
           >
             {part}
           </mark>

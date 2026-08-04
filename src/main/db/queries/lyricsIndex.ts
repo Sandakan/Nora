@@ -1,12 +1,13 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
+import { db } from '@db/db';
 import { songLyrics, songs as songTable } from '@db/schema';
 import { getLrcFilePaths } from '@main/core/getSongLyrics';
 import { getUserSettings } from '@main/db/queries/settings';
-import { db } from '@db/db';
-import { eq } from 'drizzle-orm';
 import logger from '@main/logger';
+import { eq } from 'drizzle-orm';
+
 import { appPreferences } from '../../../../package.json';
 import parseLyrics from '../../../common/parseLyrics';
 
@@ -90,10 +91,13 @@ export const upsertSongLyricsFromText = async (
 
 export type LyricsIndexResult = 'indexed' | 'absent' | 'read-error';
 
+// Configurable indexing policy: number of songs processed per backfill batch.
+const LYRICS_BACKFILL_BATCH_SIZE = 10;
+
 /**
- * Sums backfill batch results. A fulfilled 'read-error' counts as a failure so
- * isLyricIndexBuilt is only set when every song was indexed or confirmed absent
- * (a song with no lyrics is a valid completed state). Pure and unit-testable.
+ * Sums backfill batch results. A fulfilled 'read-error' counts as a failure so isLyricIndexBuilt is
+ * only set when every song was indexed or confirmed absent (a song with no lyrics is a valid
+ * completed state). Pure and unit-testable.
  */
 export const countBackfillResults = (
   results: PromiseSettledResult<LyricsIndexResult>[]
@@ -127,7 +131,9 @@ export const upsertSongLyrics = async (
 
   // null = read/parse error on at least one source; keep existing index, don't delete
   if (embedded === null || lrc === null) {
-    logger.warn(`Skipping lyrics index update for song ${songId} due to read error; keeping existing entry.`);
+    logger.warn(
+      `Skipping lyrics index update for song ${songId} due to read error; keeping existing entry.`
+    );
     return 'read-error';
   }
 
@@ -162,9 +168,8 @@ export const indexAllLyrics = async (): Promise<{ allSucceeded: boolean }> => {
   let indexed = 0;
   let processed = 0;
   let failed = 0;
-  const BATCH_SIZE = 10;
-  for (let i = 0; i < songs.length; i += BATCH_SIZE) {
-    const batch = songs.slice(i, i + BATCH_SIZE);
+  for (let i = 0; i < songs.length; i += LYRICS_BACKFILL_BATCH_SIZE) {
+    const batch = songs.slice(i, i + LYRICS_BACKFILL_BATCH_SIZE);
     const results = await Promise.allSettled(
       batch.map((song) => upsertSongLyrics(song.id, song.path, customLrcFilesSaveLocation))
     );

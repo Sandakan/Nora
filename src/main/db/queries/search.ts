@@ -1,8 +1,8 @@
 import { db } from '@db/db';
 import { albums, artists, genres, playlists, songs, songLyrics } from '@db/schema';
-import { convertToSongData } from '@main/utils/convert';
 import type { GetAllSongsReturnType } from '@main/db/queries/songs';
 import logger from '@main/logger';
+import { convertToSongData } from '@main/utils/convert';
 import { timeEnd, timeStart } from '@main/utils/measureTimeUsage';
 import { asc, eq, ilike, sql } from 'drizzle-orm';
 
@@ -223,10 +223,7 @@ export const searchGenresByName = async (options: SearchOptions, trx: DB | DBTra
   return results;
 };
 
-export const searchSongsByLyrics = async (
-  options: SearchOptions,
-  trx: DB | DBTransaction = db
-) => {
+export const searchSongsByLyrics = async (options: SearchOptions, trx: DB | DBTransaction = db) => {
   const { keyword } = options;
   const timer = timeStart();
 
@@ -234,13 +231,15 @@ export const searchSongsByLyrics = async (
     const results = await trx
       .select({
         song: songs,
-        snippet: sql<string>`ts_headline('simple', ${songLyrics.lyricsText}, phraseto_tsquery('simple', ${keyword}), 'MaxWords=12, MinWords=4, ShortWord=2')`,
+        snippet: sql<string>`ts_headline('simple', ${songLyrics.lyricsText}, phraseto_tsquery('simple', ${keyword}), 'StartSel=[NRABEG], StopSel=[NRAEND], MaxWords=12, MinWords=4, ShortWord=2')`,
         source: songLyrics.source
       })
       .from(songLyrics)
       .innerJoin(songs, eq(songLyrics.songId, songs.id))
       .where(sql`${songLyrics.lyricsVector} @@ phraseto_tsquery('simple', ${keyword})`)
-      .orderBy(sql`ts_rank(${songLyrics.lyricsVector}, phraseto_tsquery('simple', ${keyword})) DESC`)
+      .orderBy(
+        sql`ts_rank(${songLyrics.lyricsVector}, phraseto_tsquery('simple', ${keyword})) DESC`
+      )
       .limit(100);
 
     timeEnd(timer, 'Search Songs By Lyrics');

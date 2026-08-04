@@ -51,7 +51,13 @@ const search = async (
     keyword,
     filter,
     isSimilaritySearchEnabled,
-    totalResults: songs.length + artists.length + albums.length + playlists.length,
+    totalResults:
+      songs.length +
+      artists.length +
+      albums.length +
+      playlists.length +
+      genres.length +
+      lyrics.length,
     songsResults: songs.length,
     artistsResults: artists.length,
     albumsResults: albums.length,

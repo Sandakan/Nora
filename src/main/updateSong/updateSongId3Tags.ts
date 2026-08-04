@@ -138,13 +138,17 @@ export const savePendingMetadataUpdates = async (currentSongPath = '', forceSave
           if (lyrics) {
             const parsedLyrics = parseLyrics(lyrics);
             if (parsedLyrics) {
-              saveLyricsToLRCFile(songPath, {
-                title,
-                source: 'IN_SONG_LYRICS',
-                isOfflineLyricsAvailable: true,
-                lyricsType: parsedLyrics.isSynced ? 'SYNCED' : 'UN_SYNCED',
-                lyrics: parsedLyrics
-              });
+              try {
+                await saveLyricsToLRCFile(songPath, {
+                  title,
+                  source: 'IN_SONG_LYRICS',
+                  isOfflineLyricsAvailable: true,
+                  lyricsType: parsedLyrics.isSynced ? 'SYNCED' : 'UN_SYNCED',
+                  lyrics: parsedLyrics
+                });
+              } catch (error) {
+                logger.error(`Failed to save lyrics to LRC file.`, { error, songPath });
+              }
             }
           }
         }
@@ -774,13 +778,17 @@ const updateSongId3TagsOfUnknownSource = async (
 
       // Save synced lyrics to LRC file
       if (parsedSyncedLyrics) {
-        saveLyricsToLRCFile(songPath, {
-          title: newSongTags.title,
-          source: 'IN_SONG_LYRICS',
-          isOfflineLyricsAvailable: true,
-          lyricsType: 'SYNCED',
-          lyrics: parsedSyncedLyrics
-        });
+        try {
+          await saveLyricsToLRCFile(songPath, {
+            title: newSongTags.title,
+            source: 'IN_SONG_LYRICS',
+            isOfflineLyricsAvailable: true,
+            lyricsType: 'SYNCED',
+            lyrics: parsedSyncedLyrics
+          });
+        } catch (error) {
+          logger.error(`Failed to save lyrics to LRC file.`, { error, songPath });
+        }
       }
 
       if (sendUpdatedData) {
@@ -1097,13 +1105,17 @@ const updateSongId3Tags = async (
 
     // Save synced lyrics to LRC file
     if (parsedSyncedLyrics) {
-      saveLyricsToLRCFile(song.path, {
-        title: tags.title,
-        source: 'IN_SONG_LYRICS',
-        isOfflineLyricsAvailable: true,
-        lyricsType: 'SYNCED',
-        lyrics: parsedSyncedLyrics
-      });
+      try {
+        await saveLyricsToLRCFile(song.path, {
+          title: tags.title,
+          source: 'IN_SONG_LYRICS',
+          isOfflineLyricsAvailable: true,
+          lyricsType: 'SYNCED',
+          lyrics: parsedSyncedLyrics
+        });
+      } catch (error) {
+        logger.error(`Failed to save lyrics to LRC file.`, { error, songPath: song.path });
+      }
     }
 
     if (updatedData && 'modifiedDate' in updatedData) {

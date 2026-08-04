@@ -39,7 +39,6 @@ const notificationsFromMainConfig: AppNotificationConfig[] = [
       'LYRICS_SAVE_QUEUED',
       'LYRICS_SAVED_IN_LRC_FILE',
       'PENDING_LYRICS_SAVED',
-      'LYRICS_SAVE_FAILED',
       'ADDED_SONGS_TO_PLAYLIST',
       'APPDATA_EXPORT_SUCCESS',
       'APPDATA_IMPORT_SUCCESS',
@@ -69,7 +68,8 @@ const notificationsFromMainConfig: AppNotificationConfig[] = [
       'PLAYLIST_IMPORT_FAILED_DUE_TO_SONGS_OUTSIDE_LIBRARY',
       'PLAYLIST_IMPORT_TO_EXISTING_PLAYLIST_FAILED',
       'PLAYLIST_CREATION_FAILED',
-      'SONG_REPARSE_FAILED'
+      'SONG_REPARSE_FAILED',
+      'LYRICS_SAVE_FAILED'
     ],
     iconName: 'error',
     iconClassName: 'material-icons-round-outlined'
