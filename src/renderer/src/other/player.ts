@@ -736,7 +736,7 @@ class AudioPlayer {
       const fadingAudio = this.getActiveAudio();
       const fadeGain = this.getActiveFadeGain();
       const currentTime = this.currentContext.currentTime;
-      const targetVolume = 0.001;
+      const targetVolume = GAIN_FLOOR;
       const fadeDuration = AUDIO_FADE_DURATION / 1000;
 
       fadeGain.gain.setValueAtTime(fadeGain.gain.value, currentTime);
@@ -902,6 +902,18 @@ class AudioPlayer {
    */
   async loadExternalSong(audioPlayerData: AudioPlayerData, autoPlay = true): Promise<void> {
     if (this.isCrossfading) this.abortCrossfade();
+
+    // External-source playback does not belong to the library queue. Clear any
+    // stale preload so the external file cannot crossfade or gaplessly swap
+    // into a previously queued song after the active element is replaced.
+    this.preloadGeneration += 1;
+    this.preloadedSongId = null;
+    this.preloadedSongData = null;
+    const inactive = this.getInactiveAudio();
+    inactive.pause();
+    inactive.currentTime = 0;
+    inactive.removeAttribute('src');
+    inactive.load();
 
     const target = this.getActiveAudio();
     target.src = `${audioPlayerData.path}?ts=${Date.now()}`;
