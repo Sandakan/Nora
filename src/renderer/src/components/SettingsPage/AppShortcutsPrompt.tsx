@@ -68,7 +68,25 @@ const AppShortcutsPrompt = () => {
 
       const editingElement = document.querySelector(`.shortcut.editing`);
 
-      if (duplicate && newKeys.length > 0) {
+      if (clickedOutside) {
+        if (duplicate && newKeys.length > 0) {
+          editingElement?.classList.add('bg-font-color-crimson', 'dark:bg-font-color-crimson');
+          addNewNotifications([
+            {
+              id: 'duplicateShortcut',
+              content: t('keyboardShortcutsSettings.duplicateShortcut')
+            }
+          ]);
+        } else {
+          editingElement?.classList.remove('bg-font-color-crimson', 'dark:bg-font-color-crimson');
+          if (newShortcut && !duplicate) {
+            storage.keyboardShortcuts.setKeyboardShortcuts(newShortcut.id, newShortcut.keys);
+            setShortcuts(storage.keyboardShortcuts.getKeyboardShortcuts());
+          }
+        }
+        // Always exit edit mode on click-away, even for a duplicate combination.
+        setEditingShortcut(null);
+      } else if (duplicate && newKeys.length > 0) {
         editingElement?.classList.add('bg-font-color-crimson', 'dark:bg-font-color-crimson');
         addNewNotifications([
           {
@@ -76,17 +94,8 @@ const AppShortcutsPrompt = () => {
             content: t('keyboardShortcutsSettings.duplicateShortcut')
           }
         ]);
-        return;
       } else {
         editingElement?.classList.remove('bg-font-color-crimson', 'dark:bg-font-color-crimson');
-      }
-
-      if (clickedOutside) {
-        if (newShortcut && !duplicate) {
-          storage.keyboardShortcuts.setKeyboardShortcuts(newShortcut.id, newShortcut.keys);
-          setShortcuts(storage.keyboardShortcuts.getKeyboardShortcuts());
-        }
-        setEditingShortcut(null);
       }
     };
 
