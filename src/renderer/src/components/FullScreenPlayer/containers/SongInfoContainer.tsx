@@ -36,7 +36,14 @@ const SongInfoContainer = (props: Props) => {
   } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const { songPos, isLyricsVisible, setIsLyricsVisible, isLyricsAvailable, isMouseActive, isShowLyricsWithSongInfo } = props;
+  const {
+    songPos,
+    isLyricsVisible,
+    setIsLyricsVisible,
+    isLyricsAvailable,
+    isMouseActive,
+    isShowLyricsWithSongInfo
+  } = props;
 
   const [isNextSongPopupVisible, setIsNextSongPopupVisible] = useState(false);
 

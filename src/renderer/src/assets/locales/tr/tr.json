@@ -939,6 +939,7 @@
     "LYRICS_SAVED_IN_LRC_FILE": "'{{ ext }}' uzantılı bu şarkının sözleri bir LRC dosyasına kaydedilecek.",
     "PENDING_LYRICS_SAVED": "'{{ title }}' için bekleyen şarkı sözleri başarıyla kaydedildi.",
     "ADDED_SONGS_TO_PLAYLIST": "$t(common.songWithCount, {{count \":{{ count}}}) öğesi '{{ name }}' öğesine başarıyla eklendi.",
+    "ADD_SONGS_TO_PLAYLIST_FAILED": "Failed to add songs to `{{name}}`.",
     "APPDATA_IMPORT_STARTED": "Uygulama verileri içe aktarılmaya başlandı. Lütfen bekleyin...",
     "APPDATA_IMPORT_SUCCESS": "Uygulama verileri başarıyla içe aktarıldı.",
     "APPDATA_IMPORT_SUCCESS_WITH_PENDING_RESTART": "$t(backend.APPDATA_IMPORT_UCCESS) Uygulama 5 saniye içinde yeniden başlatılıyor.",

@@ -41,8 +41,8 @@ const addSongsToPlaylist = async (playlistId: number, songIds: number[]) => {
 
     if (linkError) {
       return sendMessageToRenderer({
-        messageCode: 'ADDED_SONGS_TO_PLAYLIST',
-        data: { count: addedIds.length, name: playlist.name, partialFailure: true }
+        messageCode: 'ADD_SONGS_TO_PLAYLIST_FAILED',
+        data: { count: 0, name: playlist.name }
       });
     }
 

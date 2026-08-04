@@ -1096,6 +1096,7 @@
     "LYRICS_SAVED_IN_LRC_FILE": "As letras desta música com extensão '{{ext}}' serão salvas em um arquivo LRC.",
     "PENDING_LYRICS_SAVED": "Letras pendentes de `{{title}}` salvas com sucesso.",
     "ADDED_SONGS_TO_PLAYLIST": "Adicionada(s) $t(common.songWithCount, {\"count\":{{count}}}) a `{{name}}` com sucesso.",
+    "ADD_SONGS_TO_PLAYLIST_FAILED": "Failed to add songs to `{{name}}`.",
     "APPDATA_IMPORT_STARTED": "Importação de dados do aplicativo iniciada. Por favor, aguarde...",
     "APPDATA_IMPORT_SUCCESS": "Dados do aplicativo importados com sucesso.",
     "APPDATA_IMPORT_SUCCESS_WITH_PENDING_RESTART": "$t(backend.APPDATA_IMPORT_SUCCESS) Reiniciando o aplicativo em 5 segundos.",

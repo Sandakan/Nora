@@ -1102,6 +1102,7 @@
     "LYRICS_SAVED_IN_LRC_FILE": "`Lyrics for this song with '{{ext}}' extension will be saved in an LRC file.",
     "PENDING_LYRICS_SAVED": "Successfully saved pending lyrics of `{{title}}`.",
     "ADDED_SONGS_TO_PLAYLIST": "Added $t(common.songWithCount, {\"count\":{{count}}}) to `{{name}}` successfully.",
+    "ADD_SONGS_TO_PLAYLIST_FAILED": "Failed to add songs to `{{name}}`.",
     "APPDATA_IMPORT_STARTED": "Started to import app data. Please wait...",
     "APPDATA_IMPORT_SUCCESS": "Imported app data successfully.",
     "APPDATA_IMPORT_SUCCESS_WITH_PENDING_RESTART": "$t(backend.APPDATA_IMPORT_SUCCESS) Restarting app in 5 seconds.",
