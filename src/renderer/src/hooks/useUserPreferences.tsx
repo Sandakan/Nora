@@ -65,7 +65,9 @@ export function useUserPreferences() {
           preAmpValue: presetData.preAmpValue
         });
       }
-      return window.api.settingsHelpers.saveUserEqualizerPreset(presetData as any);
+      return window.api.settingsHelpers.saveUserEqualizerPreset(
+        presetData as { frequencyBands?: number[]; isEnabled?: boolean }
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: userPreferencesQuery.equalizerPreset.queryKey });
