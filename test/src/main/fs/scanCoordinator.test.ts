@@ -37,7 +37,7 @@ describe('scanCoordinator', () => {
   test('serializes a folder scan behind an active full scan', async () => {
     const fullScanPromise = runFullScan(async () => {
       order.push('full-start');
-      await new Promise((r) => setTimeout(r, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
       order.push('full-end');
       return 'done';
     });
@@ -55,12 +55,23 @@ describe('scanCoordinator', () => {
     expect(subCheckIdx).toBeGreaterThan(fullEndIdx);
   });
 
-  test('follow-up pass runs after a full scan and covers top-level folders', async () => {
-    await runFullScan(async () => 'ok');
+  test('follow-up pass runs after a full scan when a folder event arrived mid-scan', async () => {
+    const fullScanPromise = runFullScan(async () => 'ok');
+    // A watcher folder event arrives during the active full scan. This must
+    // schedule the deferred follow-up pass (which re-scans top-level folders).
+    const folderPromise = runFolderScan('C:/music/sub');
+    await Promise.all([fullScanPromise, folderPromise]);
 
-    // The follow-up queries top-level folder paths and scans each.
+    // The follow-up queried top-level folder paths and scanned the top-level folder.
     expect(mockedGetAllFolderStructures).toHaveBeenCalled();
     expect(mockedCheck).toHaveBeenCalledWith('C:/music');
+  });
+
+  test('no follow-up pass runs when no folder event arrived during the full scan', async () => {
+    await runFullScan(async () => 'ok');
+
+    // Without a concurrent folder event, the follow-up pass must NOT run.
+    expect(mockedGetAllFolderStructures).not.toHaveBeenCalled();
   });
 
   test('a rejected follow-up root query does not leak an unhandled rejection', async () => {

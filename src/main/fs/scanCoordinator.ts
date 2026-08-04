@@ -15,7 +15,9 @@ import logger from '../logger';
  * - A folder scan started while any scan is active is serialized behind it.
  *   Because the full scan already covers every registered folder, a single
  *   follow-up pass runs after the active scan (and its follow-up) completes to
- *   pick up events that arrived mid-scan.
+ *   pick up events that arrived mid-scan. The follow-up only runs when a folder
+ *   event actually arrived during the active scan, so a manual resync does not
+ *   scan every folder a second time unnecessarily.
  * - The follow-up pass is part of the serialized state: the coordinator stays
  *   "active" until the follow-up finishes, so a new scan cannot race it.
  * - Every scan failure is observed and logged here, so callers cannot leak
@@ -23,6 +25,7 @@ import logger from '../logger';
  */
 
 let activeScanPromise: Promise<unknown> | null = null;
+let activeFullScanPromise: Promise<unknown> | null = null;
 let pendingScanCount = 0;
 let followUpAfterFullScan = false;
 
@@ -53,9 +56,9 @@ const enqueue = <T>(work: () => Promise<T>): Promise<T> => {
     try {
       return await work();
     } finally {
-      // After a full scan settles, run the deferred follow-up (if a full scan ran)
-      // while the coordinator is still considered active, so a new scan cannot
-      // start until the follow-up completes.
+      // After a full scan settles, run the deferred follow-up (if a folder event
+      // arrived during the scan) while the coordinator is still considered
+      // active, so a new scan cannot start until the follow-up completes.
       if (followUpAfterFullScan) {
         followUpAfterFullScan = false;
         await runFollowUpScan().catch((error) =>
@@ -75,18 +78,28 @@ const enqueue = <T>(work: () => Promise<T>): Promise<T> => {
   return chained as Promise<T>;
 };
 
-export const isFullScanActive = (): boolean => activeScanPromise !== null;
+export const isFullScanActive = (): boolean => activeFullScanPromise !== null;
 
 export const runFullScan = <T>(scan: () => Promise<T>): Promise<T> => {
-  followUpAfterFullScan = true;
-  return enqueue(scan);
+  // Coalesce concurrent full-library scans: every caller joins the same promise.
+  if (activeFullScanPromise) return activeFullScanPromise as Promise<T>;
+
+  const full = enqueue(scan).finally(() => {
+    activeFullScanPromise = null;
+  });
+  activeFullScanPromise = full;
+  return full;
 };
 
-export const runFolderScan = (folderPath: string): Promise<void> =>
-  enqueue(async () => {
+export const runFolderScan = (folderPath: string): Promise<void> => {
+  // A folder event during an active full scan means the follow-up pass must
+  // re-check folders to pick up the change, since the full-scan snapshot is stale.
+  if (activeFullScanPromise) followUpAfterFullScan = true;
+  return enqueue(async () => {
     try {
       await checkFolderForUnknownModifications(folderPath);
     } catch (error) {
       logger.error(`Folder scan failed.`, { error, folderPath });
     }
   });
+};
