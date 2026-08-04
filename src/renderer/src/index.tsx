@@ -75,15 +75,17 @@ const root = createRoot(container);
 router.subscribe('onRendered', () => {
   if (location.href.includes('/display-player')) {
     dispatch({ type: 'UPDATE_PLAYER_TYPE', data: 'display' });
+    // The reducer intentionally skips 'display' (and 'full'), so the IPC call
+    // must be issued here to switch the window player type for display mode.
     return window.api.windowControls.changePlayerType('display');
   }
   if (location.href.includes('/mini-player')) {
     dispatch({ type: 'UPDATE_PLAYER_TYPE', data: 'mini' });
-    return window.api.windowControls.changePlayerType('mini');
+    return;
   }
 
   dispatch({ type: 'UPDATE_PLAYER_TYPE', data: 'normal' });
-  return window.api.windowControls.changePlayerType('normal');
+  return;
 });
 
 root.render(

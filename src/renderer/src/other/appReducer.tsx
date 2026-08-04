@@ -410,7 +410,7 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
     showSongTitleInDisplayMode: true,
     showArtistNameInDisplayMode: true,
     showControlsInDisplayMode: true,
-    displayModeIdleTimeout: 4000,
+    displayModeIdleTimeout: 4000
   },
   playback: {
     currentSong: {

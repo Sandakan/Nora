@@ -32,7 +32,7 @@ import getSongInfo from './core/getSongInfo';
 import getSongLyrics from './core/getSongLyrics';
 import getStorageUsage from './core/getStorageUsage';
 import importAppData from './core/importAppData';
-import importPlaylist, { processPlaylistImport } from './core/importPlaylist';
+import importPlaylist from './core/importPlaylist';
 import removeMusicFolder from './core/removeMusicFolder';
 import removePlaylists from './core/removePlaylists';
 import removeSongFromPlaylist from './core/removeSongFromPlaylist';
@@ -546,11 +546,6 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     ipcMain.handle('app/importPlaylist', (_, targetPlaylistId?: number) =>
       importPlaylist(targetPlaylistId)
     );
-
-    ipcMain.handle('app/importPlaylistFromPath', (_, filePath: string, targetPlaylistId?: number) => {
-      if (!filePath) return;
-      return processPlaylistImport(filePath, targetPlaylistId);
-    });
 
     ipcMain.handle(
       'app/getRendererLogs',

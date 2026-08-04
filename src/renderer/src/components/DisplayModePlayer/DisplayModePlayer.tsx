@@ -72,7 +72,7 @@ const DisplayModePlayer = () => {
           src={imgPath}
           fallbackSrc={DefaultSongCover}
           loading="eager"
-          alt="Song Cover"
+          alt={t('common.artwork')}
           className="h-full w-full object-cover blur-[2rem] brightness-[.25]"
         />
       </div>
@@ -83,7 +83,7 @@ const DisplayModePlayer = () => {
             src={currentSongData?.artworkPath}
             fallbackSrc={DefaultSongCover}
             loading="eager"
-            alt="Song Cover"
+            alt={t('common.artwork')}
             className="h-full w-full rounded-2xl object-cover shadow-2xl"
           />
         </div>
