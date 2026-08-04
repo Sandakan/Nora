@@ -3,8 +3,8 @@ import { useStore } from '@tanstack/react-store';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { version, releaseNotes as currentReleaseNotes, urls } from '../../../../../package.json';
 import rawChangelog from '../../../../../CHANGELOG.md?raw';
+import { version, releaseNotes as currentReleaseNotes, urls } from '../../../../../package.json';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import useNetworkConnectivity from '../../hooks/useNetworkConnectivity';
 import isLatestVersion from '../../utils/isLatestVersion';
@@ -23,7 +23,7 @@ const ReleaseNotesPrompt = () => {
   const { t } = useTranslation();
 
   const { isOnline } = useNetworkConnectivity();
-  const [releaseNotes, setReleaseNotes] = useState<Changelog>(parseChangelog(rawChangelog));
+  const [releaseNotes, setReleaseNotes] = useState<Changelog>(() => parseChangelog(rawChangelog));
 
   const latestUpdatedInfo = useMemo(() => {
     const sortedReleaseNotes = releaseNotes.versions.sort((versionA, versionB) => {

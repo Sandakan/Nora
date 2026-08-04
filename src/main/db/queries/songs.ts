@@ -210,8 +210,10 @@ export const getAllSongs = async (
       if (sortType === 'trackNoDescending') return [desc(songs.trackNumber), asc(songs.title)];
       if (sortType === 'dateAddedAscending') return [asc(songs.createdAt), asc(songs.title)];
       if (sortType === 'dateAddedDescending') return [desc(songs.createdAt), asc(songs.title)];
-      if (sortType === 'dateModifiedAscending') return [asc(songs.fileModifiedAt), asc(songs.title)];
-      if (sortType === 'dateModifiedDescending') return [desc(songs.fileModifiedAt), asc(songs.title)];
+      if (sortType === 'dateModifiedAscending')
+        return [asc(songs.fileModifiedAt), asc(songs.title)];
+      if (sortType === 'dateModifiedDescending')
+        return [desc(songs.fileModifiedAt), asc(songs.title)];
       if (sortType === 'addedOrder') return [desc(songs.createdAt), asc(songs.title)];
       if (sortType === 'mostSkipped') return [desc(songs.skipCount), asc(songs.title)];
       if (sortType === 'leastSkipped') return [asc(songs.skipCount), asc(songs.title)];

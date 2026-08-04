@@ -9,8 +9,8 @@ import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
 import useSelectAllHandler from '@renderer/hooks/useSelectAllHandler';
 import { songQuery } from '@renderer/queries/songs';
 import { store } from '@renderer/store/store';
-import { songSearchSchema } from '@renderer/utils/zod/songSchema';
 import storage from '@renderer/utils/localStorage';
+import { songSearchSchema } from '@renderer/utils/zod/songSchema';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
@@ -36,6 +36,16 @@ const playlistData: Playlist = {
   isArtworkAvailable: true
 };
 
+/**
+ * Render the History playlist details page with controls for playback, queue management, selection,
+ * and sorting.
+ *
+ * The page displays saved history songs, provides actions to play, shuffle, and add songs to the
+ * queue, supports select-all, and persists the playlist sorting preference to local storage when it
+ * changes.
+ *
+ * @returns A React element representing the History playlist information page.
+ */
 function HistoryPlaylistInfoPage() {
   const { scrollTopOffset } = Route.useSearch();
 
