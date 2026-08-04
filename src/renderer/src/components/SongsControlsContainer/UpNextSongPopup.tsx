@@ -4,8 +4,8 @@ import { useStore } from '@tanstack/react-store';
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { store } from '../../store/store';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import { store } from '../../store/store';
 import Button from '../Button';
 
 type Props = {

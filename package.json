@@ -72,7 +72,8 @@
     "phin": "^3.7.1",
     "esbuild": "^0.28.0",
     "cross-spawn": "^7.0.6",
-    "jpeg-js": "^0.4.4"
+    "jpeg-js": "^0.4.4",
+    "uuid": "^12.0.0"
   },
   "_comments": {
     "sharp": "Using WASM build for cross-platform compatibility. Install with: npm install --cpu=wasm32 sharp",
@@ -82,8 +83,8 @@
     "test": "vitest run",
     "coverage": "vitest run --coverage",
     "check-types": "tsc --noEmit",
-    "husky-test": "npm run format-check && npm run test",
-    "prepare": "husky install",
+    "husky-test": "npm run format && npm run lint && npm test",
+    "prepare": "husky",
     "format-check": "oxfmt --check",
     "format-write": "oxfmt",
     "format": "oxfmt",
@@ -163,7 +164,6 @@
   "devDependencies": {
     "@babel/core": "^7.29.0",
     "@electron-toolkit/tsconfig": "^2.0.0",
-    "@rolldown/plugin-babel": "^0.2.3",
     "@tailwindcss/vite": "^4.2.2",
     "@tanstack/react-router-devtools": "^1.166.11",
     "@tanstack/router-cli": "^1.166.25",
@@ -177,7 +177,7 @@
     "@vitest/coverage-v8": "^4.1.2",
     "babel-plugin-react-compiler": "^1.0.0",
     "drizzle-kit": "^0.31.1",
-    "electron": "^41.7.1",
+    "electron": "^43.2.0",
     "electron-builder": "^26.8.1",
     "electron-devtools-installer": "^4.0.0",
     "electron-vite": "^6.0.0-beta.1",

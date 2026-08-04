@@ -134,18 +134,25 @@ function SongTagsEditingPage({ routeParams }: SongTagsEditingPageProps = {}) {
 
   // Fetch song path when using new route params
   useEffect(() => {
-    if (routeParams?.songId && !fetchedSongPath) {
-      window.api.audioLibraryControls
-        .getSongInfo([routeParams.songId])
-        .then((songs) => {
-          if (songs && songs.length > 0) {
-            setFetchedSongPath(songs[0].path);
-          }
-          return undefined;
-        })
-        .catch((err) => console.error('Failed to fetch song path:', err));
-    }
-  }, [routeParams?.songId, fetchedSongPath]);
+    if (!routeParams?.songId) return;
+
+    let isMounted = true;
+    setFetchedSongPath('');
+
+    window.api.audioLibraryControls
+      .getSongInfo([routeParams.songId])
+      .then((songs) => {
+        if (isMounted && songs && songs.length > 0) {
+          setFetchedSongPath(songs[0].path);
+        }
+        return undefined;
+      })
+      .catch((err) => console.error('Failed to fetch song path:', err));
+
+    return () => {
+      isMounted = false;
+    };
+  }, [routeParams?.songId]);
 
   useEffect(() => {
     const manageMetadataUpdatesInSongsTagsEditingPage = (e: Event) => {
