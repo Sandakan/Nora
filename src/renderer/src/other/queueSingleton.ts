@@ -145,6 +145,12 @@ function setupQueueStoreSync(queue: PlayerQueue) {
           ? storeQueue.position
           : 0;
 
+      // When the clamp changed the position, persist the corrected value back to
+      // the store and localStorage. Otherwise every later store update sees
+      // queue.position !== storeQueue.position and calls replaceQueue() again,
+      // looping and leaving state.localStorage.queue.position invalid.
+      const positionWasClamped = safePosition !== storeQueue.position;
+
       // Set flag to prevent handlers from updating store
       isSyncingFromStore = true;
 
@@ -156,6 +162,20 @@ function setupQueueStoreSync(queue: PlayerQueue) {
           false, // Don't clear shuffle history
           storeQueue.metadata
         );
+
+        if (positionWasClamped) {
+          store.setState((state) => ({
+            ...state,
+            localStorage: {
+              ...state.localStorage,
+              queue: {
+                ...state.localStorage.queue,
+                position: safePosition
+              }
+            }
+          }));
+          storage.queue.setQueue(queue.toJSON());
+        }
       } finally {
         // Reset flag
         isSyncingFromStore = false;
