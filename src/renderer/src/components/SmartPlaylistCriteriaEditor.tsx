@@ -1,4 +1,5 @@
 import { MAX_LIMIT } from '@main/db/queries/smartPlaylistConstants';
+import { MAX_RULES } from '@main/db/queries/validateSmartPlaylistCriteria';
 import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
 import { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -121,10 +122,13 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
   }, []);
 
   const addRule = useCallback(() => {
-    setCriteria((prev) => ({
-      ...prev,
-      rules: [...prev.rules, defaultRule()]
-    }));
+    setCriteria((prev) => {
+      if (prev.rules.length >= MAX_RULES) return prev;
+      return {
+        ...prev,
+        rules: [...prev.rules, defaultRule()]
+      };
+    });
   }, []);
 
   const saveCriteria = useCallback(async () => {
@@ -396,6 +400,7 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
       <button
         className="bg-background-color-1 text-font-color-black hover:bg-background-color-3 focus:outline-font-color-highlight dark:bg-dark-background-color-1 dark:text-font-color-white dark:hover:bg-dark-background-color-3 dark:focus:outline-dark-font-color-highlight mt-3 flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm outline-1 outline-transparent transition-colors"
         onClick={addRule}
+        disabled={criteria.rules.length >= MAX_RULES}
       >
         <span className="material-icons-round text-base">add</span>
         {t('playlist.addRule')}

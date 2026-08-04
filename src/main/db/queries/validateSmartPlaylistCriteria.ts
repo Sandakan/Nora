@@ -17,7 +17,7 @@ const EQ_OPERATORS = new Set(['eq', 'neq']);
 
 const NUMERIC_OPERATORS = new Set(['eq', 'neq', 'gt', 'gte', 'lt', 'lte']);
 
-const MAX_RULES = 20;
+export const MAX_RULES = 20;
 const MAX_STRING_LENGTH = 200;
 
 export type CriteriaValidationResult = { success: true } | { success: false; reason: string };
