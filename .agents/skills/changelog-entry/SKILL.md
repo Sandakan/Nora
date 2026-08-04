@@ -10,6 +10,7 @@ This skill guides you through the process of adding a new entry to `CHANGELOG.md
 The changelog tracks changes chronologically in reverse order (newest at the top) and groups changes under descriptive category sections.
 
 ### Key Rules
+
 1. **ISO 8601 Date Format**: Version dates must use the `YYYY-MM-DD` format.
 2. **Bracketed Version Header**: The version header must be formatted as `## [Version] - YYYY-MM-DD`.
 3. **Artwork Image**: If a version release artwork is available, embed it as a Markdown image directly below the version header.
@@ -29,9 +30,11 @@ The changelog tracks changes chronologically in reverse order (newest at the top
 ## Step-by-Step Guide to Adding a New Version
 
 ### Step 1: Open CHANGELOG.md
+
 Open `CHANGELOG.md` in the root of the project.
 
 ### Step 2: Insert the Version Header
+
 Locate the top version header (below the introduction block and the tip note). Insert your new version header:
 
 ```markdown
@@ -40,13 +43,16 @@ Locate the top version header (below the introduction block and the tip note). I
 ![Nora v3.2.0-stable version artwork](resources/other/release%20artworks/whats-new-v3.2.0-stable.webp)
 
 ### Added
+
 - Added support for dynamic changelog parsing in the app.
 
 ### Fixed
+
 - Fixed an issue where the sidebar icons were misaligned.
 ```
 
 ### Step 3: Add Comparison Link at the Bottom
+
 Go to the bottom of `CHANGELOG.md` and add the comparison link in alphabetical/version order:
 
 ```markdown
