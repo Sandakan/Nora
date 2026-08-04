@@ -110,7 +110,7 @@ export const validateDiscordActivity = (data: unknown): ValidationResult => {
       const btn = button as Record<string, unknown>;
       if (!isSafeString(btn.label)) return { ok: false, reason: 'button-label-invalid' };
       if (!isHttpsUrl(btn.url)) return { ok: false, reason: 'button-url-invalid' };
-      buttons.push({ label: btn.label, url: btn.url });
+      buttons.push({ label: btn.label as string, url: btn.url as string });
     }
     activity.buttons = buttons;
   }

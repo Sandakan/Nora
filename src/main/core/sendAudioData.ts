@@ -111,21 +111,11 @@ const sendAudioData = async (songId: number): Promise<AudioPlayerData> => {
     throw notFoundError;
   } catch (error) {
     if ((error as NodeJS.ErrnoException)?.code === 'SONG_NOT_FOUND') {
+      // Preserve the explicit not-found error (thrown above for a missing DB
+      // record or a missing file on disk) so callers can branch on it.
       throw error;
     }
     logger.error(`Failed to send songs data.`, { err: error });
-
-    // Preserve the SONG_NOT_FOUND marker so callers can distinguish a missing
-    // song from an internal audio-data failure.
-    if (
-      error &&
-      typeof error === 'object' &&
-      'code' in error &&
-      (error as NodeJS.ErrnoException).code === 'SONG_NOT_FOUND'
-    ) {
-      throw error;
-    }
-
     const sendError = new Error('Failed to send song data');
     (sendError as NodeJS.ErrnoException).code = 'SONG_DATA_SEND_FAILED';
     throw sendError;
