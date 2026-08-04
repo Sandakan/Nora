@@ -72,7 +72,7 @@ const LyricLine = (props: LyricProp) => {
               document.dispatchEvent(lyricsScrollIntoViewEvent);
             }
           } else {
-            isTheCurrnetLineRef.current = false;
+            isTheCurrentLineRef.current = false;
             setIsInRange(false);
           }
         }
