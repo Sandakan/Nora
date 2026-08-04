@@ -534,7 +534,7 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
         ) {
           logger.error('Invalid songIds in syncLastFmToSmartPlaylist', {
             playlistId,
-            count: songIds.length
+            count: Array.isArray(songIds) ? songIds.length : undefined
           });
           return { success: false as const, count: 0 };
         }

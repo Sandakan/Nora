@@ -329,7 +329,12 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
                 onChange={(e) => {
                   const field = e.target.value as SmartPlaylistRuleField;
                   const ops = availableOps(field);
+                  // Reset the value to match the new field's type so a stale value
+                  // from the previous field (e.g. a string left on a boolean field)
+                  // does not survive the change and get silently dropped on save.
+                  const defaultValue = field === 'isFavorite' || field === 'isBlacklisted' ? true : '';
                   updateRule(idx, 'field', field);
+                  updateRule(idx, 'value', defaultValue);
                   if (!ops.includes(rule.operator)) {
                     updateRule(idx, 'operator', 'eq');
                   }
