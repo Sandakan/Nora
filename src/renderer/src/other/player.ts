@@ -917,7 +917,6 @@ class AudioPlayer {
 
     const target = this.getActiveAudio();
     target.src = `${audioPlayerData.path}?ts=${Date.now()}`;
-    this.pendingAutoPlay = autoPlay;
 
     target.load();
 
