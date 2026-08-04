@@ -157,7 +157,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
         content: t('notifications.suggestionIgnored')
       }
     ]);
-  }, [addNewNotifications, songId, t]);
+  }, [addNewNotifications, songId, t, addIgnoredFeaturingArtistMutation]);
 
   return (
     <>
@@ -234,6 +234,8 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
                   iconClassName="material-icons-round-outlined"
                   label={t('featArtistsSuggestion.editInMetadataEditingPage')}
                   clickHandler={() => {
+                    if (!songId) return;
+
                     navigate({
                       to: '/main-player/songs/$songId/edit',
                       params: { songId: String(songId) }

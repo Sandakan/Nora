@@ -28,7 +28,7 @@ import { usePlayerControl } from './hooks/usePlayerControl';
 import { usePlayerNavigation } from './hooks/usePlayerNavigation';
 import { usePromptMenu } from './hooks/usePromptMenu';
 import { useQueueManagement } from './hooks/useQueueManagement';
-import { useSleepTimer } from './hooks/useSleepTimer';
+import { useUpNextPopup } from './hooks/useUpNextPopup';
 import { useUserPreferences } from './hooks/useUserPreferences';
 import { useWindowManagement } from './hooks/useWindowManagement';
 import { initializeQueue } from './other/queueSingleton';
@@ -59,9 +59,13 @@ window.addEventListener('online', updateNetworkStatus);
 window.addEventListener('offline', updateNetworkStatus);
 
 /**
- * Root application component that bootstraps the audio player/queue, initializes app-wide hooks and integrations, and provides update/context values to the UI tree.
+ * Root application component that bootstraps the audio player/queue, initializes app-wide hooks and
+ * integrations, and provides update/context values to the UI tree.
  *
- * Initializes the queue singleton, audio player and queue wiring, playback/error handling, window and queue management, media session and OS integrations, keyboard shortcuts, app lifecycle, and other global hooks (network, theme, notifications, preferences, data sync). Wraps the routed UI in an ErrorBoundary and supplies AppUpdateContext to descendants.
+ * Initializes the queue singleton, audio player and queue wiring, playback/error handling, window
+ * and queue management, media session and OS integrations, keyboard shortcuts, app lifecycle, and
+ * other global hooks (network, theme, notifications, preferences, data sync). Wraps the routed UI
+ * in an ErrorBoundary and supplies AppUpdateContext to descendants.
  *
  * @returns The top-level React element containing the application UI and providers
  */
@@ -124,7 +128,7 @@ export default function App() {
 
   // ? INITIALIZE PLAYBACK ERRORS
   // Playback errors hook handles error management and retry logic
-  const skipForwardRef = useRef<() => void>();
+  const skipForwardRef = useRef<(() => void) | undefined>(undefined);
   const { managePlaybackErrors, resetErrorCount } = usePlaybackErrors(
     audio,
     changePromptMenuData,
@@ -188,15 +192,7 @@ export default function App() {
   skipForwardRef.current = handleSkipForwardClick;
 
   // ? UP NEXT POPUP TRIGGER
-  const showUpNextPopupRef = useRef<(() => void) | null>(null);
-
-  const registerUpNextPopupFn = useCallback((fn: () => void) => {
-    showUpNextPopupRef.current = fn;
-  }, []);
-
-  const showUpNextSongPopup = useCallback(() => {
-    showUpNextPopupRef.current?.();
-  }, []);
+  const { registerUpNextPopupFn, showUpNextSongPopup } = useUpNextPopup();
   // ? INITIALIZE APP UPDATES
   // App updates hook handles checking for updates and showing release notes
   const { updateAppUpdatesState } = useAppUpdates({
@@ -293,17 +289,6 @@ export default function App() {
     windowManagement
   });
 
-  // ? INITIALIZE SLEEP TIMER
-  // Sleep timer hook wires the singleton engine to the store for UI reactivity
-  const {
-    startTimer,
-    startTimerForSongEnd,
-    stopTimer,
-    pauseTimer,
-    resumeTimer,
-    extendTimer
-  } = useSleepTimer(player);
-
   const appUpdateContextValues = useMemo<AppUpdateContextType>(() => {
     const contextValue: AppUpdateContextType = {
       updateCurrentSongData,
@@ -336,13 +321,7 @@ export default function App() {
       updateMultipleSelections,
       toggleMultipleSelections,
       updateAppUpdatesState,
-      updateEqualizerOptions,
-      startSleepTimer: startTimer,
-      startSleepTimerForSongEnd: startTimerForSongEnd,
-      stopSleepTimer: stopTimer,
-      pauseSleepTimer: pauseTimer,
-      resumeSleepTimer: resumeTimer,
-      extendSleepTimer: extendTimer
+      updateEqualizerOptions
     };
     return contextValue;
   }, [
@@ -376,13 +355,7 @@ export default function App() {
     updateMultipleSelections,
     toggleMultipleSelections,
     updateAppUpdatesState,
-    updateEqualizerOptions,
-    startTimer,
-    startTimerForSongEnd,
-    stopTimer,
-    pauseTimer,
-    resumeTimer,
-    extendTimer
+    updateEqualizerOptions
   ]);
 
   return (

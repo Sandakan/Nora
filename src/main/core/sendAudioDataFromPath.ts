@@ -16,7 +16,7 @@ const toNoraLocalFileUrl = (filePath: string) => {
   const encodedPath = normalizedPath
     .split('/')
     .filter(Boolean)
-    .map((segment) => encodeURIComponent(segment))
+    .map((segment) => encodeURIComponent(segment).replace(/%3A/gi, ':'))
     .join('/');
 
   return `${DEFAULT_FILE_URL}${encodedPath}`;
