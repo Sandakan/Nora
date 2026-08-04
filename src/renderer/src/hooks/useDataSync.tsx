@@ -77,6 +77,7 @@ export function useDataSync(): void {
         if (artistEvents.includes(dataEvent.dataType)) {
           queryClient.invalidateQueries({ queryKey: artistQuery._def });
           queryClient.invalidateQueries({ queryKey: searchQuery.query._def });
+          queryClient.invalidateQueries({ queryKey: homeQuery._def });
         }
 
         // Album events
@@ -103,6 +104,7 @@ export function useDataSync(): void {
         if (playlistEvents.includes(dataEvent.dataType)) {
           queryClient.invalidateQueries({ queryKey: playlistQuery._def });
           queryClient.invalidateQueries({ queryKey: searchQuery.query._def });
+          queryClient.invalidateQueries({ queryKey: homeQuery._def });
         }
 
         // Genre events

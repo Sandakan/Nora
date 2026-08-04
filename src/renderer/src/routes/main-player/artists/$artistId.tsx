@@ -38,11 +38,12 @@ export const Route = createFileRoute('/main-player/artists/$artistId')({
 });
 
 /**
- * Renders the artist detail page with artist metadata, albums, songs, and related online information.
+ * Renders the artist detail page with artist metadata, albums, songs, and related online
+ * information.
  *
- * The component reads the `artistId` from the route, derives the songs sorting order from the URL search,
- * persists sorting state to local storage, and provides UI for liking the artist, multi-selection, queueing,
- * playback controls, and context menus for artwork and song actions.
+ * The component reads the `artistId` from the route, derives the songs sorting order from the URL
+ * search, persists sorting state to local storage, and provides UI for liking the artist,
+ * multi-selection, queueing, playback controls, and context menus for artwork and song actions.
  *
  * @returns The artist detail page React element.
  */

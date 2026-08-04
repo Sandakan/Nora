@@ -71,7 +71,10 @@ export const deleteSongSeekEvents = (songId: number, trx: DB | DBTransaction = d
 };
 
 export const incrementSongSkipCount = (songId: number, trx: DB | DBTransaction = db) => {
-  return trx.update(songs).set({ skipCount: sql`${songs.skipCount} + 1` }).where(eq(songs.id, songId));
+  return trx
+    .update(songs)
+    .set({ skipCount: sql`${songs.skipCount} + 1` })
+    .where(eq(songs.id, songId));
 };
 
 export const deleteSongSkipEvents = (songId: number) => {

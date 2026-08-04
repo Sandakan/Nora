@@ -50,11 +50,12 @@ const GENRE_WIDTH = 300;
 /**
  * Render the main-player search page with input controls, filters, and result sections.
  *
- * The component displays a search input with a toggle for similarity/predictive search, a set of result filters,
- * and conditionally renders various search result containers (songs, artists, albums, playlists, genres, most relevant)
- * or placeholders based on the current search state.
+ * The component displays a search input with a toggle for similarity/predictive search, a set of
+ * result filters, and conditionally renders various search result containers (songs, artists,
+ * albums, playlists, genres, most relevant) or placeholders based on the current search state.
  *
- * @returns The React element tree for the search page, including controls, filters, and conditional result containers.
+ * @returns The React element tree for the search page, including controls, filters, and conditional
+ *   result containers.
  */
 function SearchPage() {
   const isSimilaritySearchEnabledInLocalStorage = useStore(
