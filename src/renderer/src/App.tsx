@@ -26,6 +26,7 @@ import { usePlaybackErrors } from './hooks/usePlaybackErrors';
 import { usePlaybackSettings } from './hooks/usePlaybackSettings';
 import { usePlayerControl } from './hooks/usePlayerControl';
 import { usePlayerNavigation } from './hooks/usePlayerNavigation';
+import { useSleepTimer } from './hooks/useSleepTimer';
 import { usePromptMenu } from './hooks/usePromptMenu';
 import { useQueueManagement } from './hooks/useQueueManagement';
 import { useUpNextPopup } from './hooks/useUpNextPopup';
@@ -81,6 +82,14 @@ export default function App() {
   const player = useAudioPlayer();
   const audio = player.audio;
   const playerQueue = player.queue; // Access properties directly from AudioPlayer instance
+  const {
+    startTimer: startSleepTimer,
+    startTimerForSongEnd: startSleepTimerForSongEnd,
+    stopTimer: stopSleepTimer,
+    pauseTimer: pauseSleepTimer,
+    resumeTimer: resumeSleepTimer,
+    extendTimer: extendSleepTimer
+  } = useSleepTimer(player);
 
   // const [content, dispatch] = useReducer(reducer, DEFAULT_REDUCER_DATA);
   // // Had to use a Ref in parallel with the Reducer to avoid an issue that happens when using content.* not giving the intended data in useCallback functions even though it was added as a dependency of that function.
@@ -321,7 +330,13 @@ export default function App() {
       updateMultipleSelections,
       toggleMultipleSelections,
       updateAppUpdatesState,
-      updateEqualizerOptions
+      updateEqualizerOptions,
+      startSleepTimer,
+      startSleepTimerForSongEnd,
+      stopSleepTimer,
+      pauseSleepTimer,
+      resumeSleepTimer,
+      extendSleepTimer
     };
     return contextValue;
   }, [
@@ -355,7 +370,13 @@ export default function App() {
     updateMultipleSelections,
     toggleMultipleSelections,
     updateAppUpdatesState,
-    updateEqualizerOptions
+    updateEqualizerOptions,
+    startSleepTimer,
+    startSleepTimerForSongEnd,
+    stopSleepTimer,
+    pauseSleepTimer,
+    resumeSleepTimer,
+    extendSleepTimer
   ]);
 
   return (

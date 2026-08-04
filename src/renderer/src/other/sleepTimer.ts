@@ -41,12 +41,13 @@ class SleepTimer {
   start(mode: 'time', minutes: number): void;
   start(mode: 'endOfSong'): void;
   start(mode: SleepTimerMode, minutes?: number): void {
-    if (this.isActive()) this.stop();
-
     // Reject invalid durations at the engine boundary (NaN, Infinity, <= 0).
     if (mode === 'time' && (minutes === undefined || !this.isValidDuration(minutes))) {
       return;
     }
+
+    // Only tear down an existing timer for a valid start request.
+    if (this.isActive()) this.stop();
 
     this.completionGeneration += 1;
     this.mode = mode;
