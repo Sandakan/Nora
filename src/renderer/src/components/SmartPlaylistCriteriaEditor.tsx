@@ -2,6 +2,7 @@ import { MAX_LIMIT } from '@main/db/queries/smartPlaylistConstants';
 import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
 import { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import log from '@renderer/utils/log';
 
 import Button from './Button';
 
@@ -179,6 +180,15 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
           }
         ]);
       }
+    } catch (error) {
+      log('Failed to save smart playlist criteria', { error });
+      addNewNotifications([
+        {
+          id: 'smartPlaylistSaveFailed',
+          duration: 5000,
+          content: t('playlist.criteriaSaveFailed')
+        }
+      ]);
     } finally {
       setIsSaving(false);
     }

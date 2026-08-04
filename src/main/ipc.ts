@@ -67,7 +67,7 @@ import { getDatabaseMetrics } from './db/queries/other';
 import { refreshSmartPlaylist } from './db/queries/playlist-rules';
 import { getPlaylistById, updatePlaylistCriteria } from './db/queries/playlists';
 import { getUserSettings, saveUserSettings } from './db/queries/settings';
-import { MAX_LASTFM_MATCH_IDS } from './db/queries/smartPlaylistConstants';
+import { MAX_LASTFM_MATCH_IDS, MAX_LIMIT, VALID_PERIODS } from './db/queries/smartPlaylistConstants';
 import {
   getUserKeyboardShortcuts,
   saveUserKeyboardShortcuts,
@@ -361,10 +361,10 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       getAlbumInfoFromLastFM(albumId)
     );
 
-    const allowedPeriods = new Set(['overall', '7day', '1month', '3month', '6month', '12month']);
+    const allowedPeriods = new Set<string>(VALID_PERIODS);
     const clampLimit = (n: number | undefined): number => {
       if (typeof n !== 'number' || !Number.isFinite(n)) return 50;
-      return Math.min(100, Math.max(1, Math.floor(n)));
+      return Math.min(MAX_LIMIT, Math.max(1, Math.floor(n)));
     };
 
     ipcMain.handle(
@@ -375,7 +375,7 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
         period?: 'overall' | '7day' | '1month' | '3month' | '6month' | '12month',
         limit?: number
       ) => {
-        const cleanUser = (username ?? '').trim();
+        const cleanUser = typeof username === 'string' ? username.trim() : '';
         if (!cleanUser) return undefined;
         const cleanPeriod = period && allowedPeriods.has(period) ? period : 'overall';
         return getUserTopTracks(cleanUser, cleanPeriod, clampLimit(limit));
@@ -383,13 +383,13 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     );
 
     ipcMain.handle('app/lastfm/getUserRecentTracks', (_, username: string, limit?: number) => {
-      const cleanUser = (username ?? '').trim();
+      const cleanUser = typeof username === 'string' ? username.trim() : '';
       if (!cleanUser) return undefined;
       return getUserRecentTracks(cleanUser, clampLimit(limit));
     });
 
     ipcMain.handle('app/lastfm/getUserLovedTracks', (_, username: string, limit?: number) => {
-      const cleanUser = (username ?? '').trim();
+      const cleanUser = typeof username === 'string' ? username.trim() : '';
       if (!cleanUser) return undefined;
       return getUserLovedTracks(cleanUser, clampLimit(limit));
     });
@@ -491,8 +491,10 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
 
     ipcMain.handle(
       'app/addNewPlaylist',
-      (_, playlistName: string, songIds?: string[], artworkPath?: string, isSmart?: boolean) =>
-        addNewPlaylist(playlistName, songIds, artworkPath, isSmart)
+      (_, playlistName: string, songIds?: string[], artworkPath?: string, isSmart?: boolean) => {
+        const safeIsSmart = typeof isSmart === 'boolean' ? isSmart : undefined;
+        return addNewPlaylist(playlistName, songIds, artworkPath, safeIsSmart);
+      }
     );
 
     ipcMain.handle('app/removePlaylists', (_, playlistIds: number[]) =>

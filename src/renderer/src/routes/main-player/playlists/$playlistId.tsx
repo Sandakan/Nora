@@ -290,7 +290,7 @@ function PlaylistInfoPage() {
             isDisabled: isSyncing
           },
           {
-            label: t('playlist.syncFromLastFm') ?? 'Sync from Last.fm',
+            label: t('playlist.syncFromLastFm'),
             iconName: 'auto_awesome',
             clickHandler: syncFromLastFm,
             isVisible: playlistData.isSmart,

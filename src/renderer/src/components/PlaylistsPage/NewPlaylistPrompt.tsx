@@ -117,7 +117,7 @@ const NewPlaylistPrompt = (props: NewPlaylistPromptProp) => {
       <input
         type="text"
         name="playlistName"
-        className="playlist-name-input bg-background-color-2! text-font-color-black dark:bg-dark-background-color-2! dark:text-font-color-white w-fit max-w-[75%] min-w-[400px] rounded-2xl border-[transparent] px-6 py-3 text-lg outline-hidden"
+        className="playlist-name-input bg-background-color-2! text-font-color-black dark:bg-dark-background-color-2! dark:text-font-color-white w-full max-w-[75%] min-w-0 rounded-2xl border-[transparent] px-6 py-3 text-lg outline-hidden"
         placeholder={t('renamePlaylistPrompt.playlistName')}
         value={input}
         disabled={isCreating}
