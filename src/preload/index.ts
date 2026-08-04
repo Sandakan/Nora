@@ -489,7 +489,10 @@ const playlistsData = {
     ipcRenderer.invoke('app/exportPlaylist', playlistId),
   importPlaylist: (targetPlaylistId?: number): Promise<void> =>
     ipcRenderer.invoke('app/importPlaylist', targetPlaylistId),
-  importPlaylistFromPath: (filePath: string, targetPlaylistId?: number): Promise<void> =>
+  importPlaylistFromPath: (
+    filePath: string,
+    targetPlaylistId?: number
+  ): Promise<{ success: boolean; code?: string } | undefined> =>
     ipcRenderer.invoke('app/importPlaylistFromPath', filePath, targetPlaylistId)
 };
 

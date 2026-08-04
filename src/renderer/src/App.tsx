@@ -218,6 +218,12 @@ export default function App() {
     (playlistPath: string) => {
       window.api.playlistsData
         .importPlaylistFromPath(playlistPath)
+        .then((res) => {
+          if (res && !res.success) {
+            log('Failed to import playlist from path', { code: res.code }, 'ERROR');
+            changePromptMenuData(true, <SongUnplayableErrorPrompt err={res.code} />);
+          }
+        })
         .catch((err) => {
           log('Failed to import playlist from path', { err }, 'ERROR');
           changePromptMenuData(true, <SongUnplayableErrorPrompt err={err} />);

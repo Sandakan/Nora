@@ -548,24 +548,37 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       importPlaylist(targetPlaylistId)
     );
 
-    ipcMain.handle('app/importPlaylistFromPath', (_, filePath: string, targetPlaylistId?: number) => {
-      if (!filePath || typeof filePath !== 'string' || !filePath.trim()) {
-        logger.warn('Invalid filePath received in app/importPlaylistFromPath', { filePath });
-        return;
-      }
-      const trimmedPath = filePath.trim();
-      try {
-        const stat = statSync(trimmedPath);
-        if (!stat.isFile()) {
-          logger.warn('importPlaylistFromPath: path is not a file', { trimmedPath });
-          return;
+    ipcMain.handle(
+      'app/importPlaylistFromPath',
+      async (_, filePath: unknown, targetPlaylistId?: unknown) => {
+        if (typeof filePath !== 'string' || !filePath.trim()) {
+          logger.warn('Invalid filePath received in app/importPlaylistFromPath', { filePath });
+          return { success: false as const, code: 'INVALID_PATH' as const };
         }
-      } catch {
-        logger.warn('importPlaylistFromPath: file not accessible', { trimmedPath });
-        return;
+        if (
+          targetPlaylistId !== undefined &&
+          (typeof targetPlaylistId !== 'number' || !Number.isSafeInteger(targetPlaylistId))
+        ) {
+          logger.warn('Invalid targetPlaylistId received in app/importPlaylistFromPath', {
+            targetPlaylistId
+          });
+          return { success: false as const, code: 'INVALID_TARGET_PLAYLIST' as const };
+        }
+        const trimmedPath = filePath.trim();
+        try {
+          const fileStat = statSync(trimmedPath);
+          if (!fileStat.isFile()) {
+            logger.warn('importPlaylistFromPath: path is not a file', { trimmedPath });
+            return { success: false as const, code: 'NOT_A_FILE' as const };
+          }
+        } catch {
+          logger.warn('importPlaylistFromPath: file not accessible', { trimmedPath });
+          return { success: false as const, code: 'FILE_NOT_ACCESSIBLE' as const };
+        }
+        const result = await processPlaylistImport(trimmedPath, targetPlaylistId as number | undefined);
+        return { success: true as const, result };
       }
-      return processPlaylistImport(trimmedPath, targetPlaylistId);
-    });
+    );
 
     ipcMain.handle(
       'app/getRendererLogs',
