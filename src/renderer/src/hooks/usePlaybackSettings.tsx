@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react';
+
 import type AudioPlayer from '../other/player';
 import toggleSongIsFavorite from '../other/toggleSongIsFavorite';
 import { dispatch, store } from '../store/store';
@@ -27,10 +28,10 @@ import { useUserPreferences } from './useUserPreferences';
  *   // Use in UI controls
  *   <button onClick={() => toggleRepeat()}>Repeat</button>
  *   <input onChange={(e) => updateVolume(e.target.value)} />
- *   updateEqualizerOptions({ preset: 'rock', bands: [...] });
+ *   updateEqualizerOptions({ '60': 1, preAmpValue: -2 });
  *   ```;
  *
- * @param player - The HTMLAudioElement instance
+ * @param player - The AudioPlayer instance (owns the audio graph, filters, and pre-amplification).
  * @returns Object containing playback setting functions
  */
 const EQUALIZER_SAVE_DEBOUNCE_MS = 300;
@@ -60,17 +61,23 @@ export function usePlaybackSettings(player: HTMLAudioElement, audioPlayer?: Audi
   // Hydrate the persisted equalizer preset into the audio graph at startup.
   // The Settings page is not mounted on normal launch, so without this the
   // stored preset never reaches the filter nodes until the user opens
-  // Settings. Applies once per resolved preset; does not trigger a save.
+  // Settings. Applies only while no local change has happened yet: live
+  // edits go through updateEqualizerOptions, so a query refetch (from a
+  // completed save) must never roll back the audio graph to an older value.
+  const equalizerLocalEditCountRef = useRef(0);
   useEffect(() => {
     if (!audioPlayer || !equalizerPreset) return;
     const { frequencyBands, preAmpValue } = equalizerPreset;
-    if (!Array.isArray(frequencyBands) || frequencyBands.length !== EQUALIZER_BAND_FILTERS.length) return;
+    if (!Array.isArray(frequencyBands) || frequencyBands.length !== EQUALIZER_BAND_FILTERS.length)
+      return;
     const preset = {} as Equalizer;
     EQUALIZER_BAND_FILTERS.forEach((filterName, index) => {
       preset[filterName] = frequencyBands[index] ?? 0;
     });
     preset.preAmpValue = typeof preAmpValue === 'number' ? preAmpValue : 0;
-    audioPlayer.applyEqualizerPreset(preset);
+    if (equalizerLocalEditCountRef.current === 0) {
+      audioPlayer.applyEqualizerPreset(preset);
+    }
   }, [audioPlayer, equalizerPreset]);
 
   useEffect(() => {
@@ -156,6 +163,7 @@ export function usePlaybackSettings(player: HTMLAudioElement, audioPlayer?: Audi
   const updateEqualizerOptions = useCallback(
     (options: Equalizer) => {
       audioPlayer?.applyEqualizerPreset(options);
+      equalizerLocalEditCountRef.current += 1;
       pendingPresetRef.current = options;
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
       saveTimeoutRef.current = setTimeout(() => {

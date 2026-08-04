@@ -50,12 +50,18 @@ const EQUALIZER_MAX = 12;
 
 const clamp = (value: number) => Math.min(EQUALIZER_MAX, Math.max(EQUALIZER_MIN, value));
 
+// The UI steps bands in 0.1 dB. Round persisted values to one decimal so a
+// focused input's raw dispatch (e.g. 1.25) cannot be stored outside the step.
+const normalizeEqualizerValue = (value: number) => Math.round(clamp(value) * 10) / 10;
+
 const validateEqualizerPresetData = (presetData: {
   presetName?: string;
   frequencyBands?: number[];
   preAmpValue?: number;
   isEnabled?: boolean;
-}): { valid: true; data: Required<Pick<typeof presetData, 'frequencyBands' | 'preAmpValue'>> } | { valid: false } => {
+}):
+  | { valid: true; data: Required<Pick<typeof presetData, 'frequencyBands' | 'preAmpValue'>> }
+  | { valid: false } => {
   const { frequencyBands, preAmpValue } = presetData;
 
   if (
@@ -73,8 +79,8 @@ const validateEqualizerPresetData = (presetData: {
   return {
     valid: true,
     data: {
-      frequencyBands: frequencyBands.map(clamp),
-      preAmpValue: clamp(preAmpValue)
+      frequencyBands: frequencyBands.map(normalizeEqualizerValue),
+      preAmpValue: normalizeEqualizerValue(preAmpValue)
     }
   };
 };
@@ -87,7 +93,9 @@ export const saveUserEqualizerPreset = async (presetData: {
 }) => {
   const validation = validateEqualizerPresetData(presetData);
   if (!validation.valid) {
-    throw new Error('Invalid equalizer preset payload: expected 10 finite band values and one finite pre-amp value');
+    throw new Error(
+      'Invalid equalizer preset payload: expected 10 finite band values and one finite pre-amp value'
+    );
   }
   const { frequencyBands, preAmpValue } = validation.data;
 

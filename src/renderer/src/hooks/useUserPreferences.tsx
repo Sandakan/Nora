@@ -43,6 +43,7 @@ export function useUserPreferences() {
         | {
             presetName?: string;
             frequencyBands?: number[];
+            preAmpValue?: number;
             isEnabled?: boolean;
           }
     ) => {
@@ -66,7 +67,7 @@ export function useUserPreferences() {
         });
       }
       return window.api.settingsHelpers.saveUserEqualizerPreset(
-        presetData as { frequencyBands?: number[]; isEnabled?: boolean }
+        presetData as { frequencyBands?: number[]; preAmpValue?: number; isEnabled?: boolean }
       );
     },
     onSuccess: () => {
