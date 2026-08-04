@@ -2,12 +2,10 @@ import { Client } from 'discord-rpc';
 
 import logger from '../logger';
 
-interface DiscordRPCClient {
+type DiscordRPCClient = Client & {
   user?: { id: string };
-  on(event: string, handler: (...args: unknown[]) => void): void;
-  login(options: { clientId: string }): Promise<void>;
   request(cmd: string, args: Record<string, unknown>): Promise<unknown>;
-}
+};
 
 interface DiscordActivity {
   details?: string;
