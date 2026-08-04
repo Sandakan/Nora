@@ -84,9 +84,10 @@ const sendAudioData = async (songId: number): Promise<AudioPlayerData> => {
       await addSongToPlayHistory(songId);
 
       const firstArtist = data.artists?.find((a) => a.onlineArtworkPaths);
-      const artworkLink = firstArtist?.onlineArtworkPaths?.picture_xl
-        ?? firstArtist?.onlineArtworkPaths?.picture_medium
-        ?? firstArtist?.onlineArtworkPaths?.picture_small;
+      const artworkLink =
+        firstArtist?.onlineArtworkPaths?.picture_xl ??
+        firstArtist?.onlineArtworkPaths?.picture_medium ??
+        firstArtist?.onlineArtworkPaths?.picture_small;
       const now = Date.now();
       setDiscordRpcActivity({
         details: data.title,
@@ -109,6 +110,9 @@ const sendAudioData = async (songId: number): Promise<AudioPlayerData> => {
     (notFoundError as NodeJS.ErrnoException).code = 'SONG_NOT_FOUND';
     throw notFoundError;
   } catch (error) {
+    if ((error as NodeJS.ErrnoException)?.code === 'SONG_NOT_FOUND') {
+      throw error;
+    }
     logger.error(`Failed to send songs data.`, { err: error });
 
     if (

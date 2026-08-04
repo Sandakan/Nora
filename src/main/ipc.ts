@@ -117,12 +117,14 @@ import { compare } from './utils/safeStorage';
 /**
  * Registers Electron IPC listeners and main-window event handlers for the provided window.
  *
- * Sets up a wide set of ipcMain.on and ipcMain.handle endpoints and wires mainWindow focus/blur
- * and fullscreen events. All listeners that interact with the window are registered only when
+ * Sets up a wide set of ipcMain.on and ipcMain.handle endpoints and wires mainWindow focus/blur and
+ * fullscreen events. All listeners that interact with the window are registered only when
  * `mainWindow` is truthy.
  *
- * @param mainWindow - The BrowserWindow to wire IPC and window events to; if falsy, no listeners are registered.
- * @param abortSignal - AbortSignal forwarded to handlers that may cancel long-running actions (e.g., deleting songs).
+ * @param mainWindow - The BrowserWindow to wire IPC and window events to; if falsy, no listeners
+ *   are registered.
+ * @param abortSignal - AbortSignal forwarded to handlers that may cancel long-running actions
+ *   (e.g., deleting songs).
  */
 export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSignal) {
   if (mainWindow) {

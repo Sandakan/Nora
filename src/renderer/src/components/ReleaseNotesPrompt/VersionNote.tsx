@@ -1,7 +1,7 @@
 import { useId } from 'react';
 
-import Img from '../Img';
 import Hyperlink from '../Hyperlink';
+import Img from '../Img';
 
 export interface VersionNoteProps {
   note: string;
@@ -23,7 +23,10 @@ export const parseBold = (text: string) => {
     }
 
     elements.push(
-      <strong key={`bold-${matchIndex}`} className="text-font-color-highlight dark:text-dark-font-color-highlight font-semibold">
+      <strong
+        key={`bold-${matchIndex}`}
+        className="text-font-color-highlight dark:text-dark-font-color-highlight font-semibold"
+      >
         {boldText}
       </strong>
     );

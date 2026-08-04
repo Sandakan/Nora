@@ -16,9 +16,14 @@ export function parseChangelog(markdown: string): Changelog {
       const rawText = token.text || '';
       const lines = rawText
         .split('\n')
-        .map(line => line.replace(/^[>\s#*!-]*\[!(TIP|NOTE|IMPORTANT|WARNING|CAUTION)\]\s*/i, '').replace(/<br\s*\/?>/gi, '').trim())
-        .filter(line => line.length > 0);
-      
+        .map((line) =>
+          line
+            .replace(/^[>\s#*!-]*\[!(TIP|NOTE|IMPORTANT|WARNING|CAUTION)\]\s*/i, '')
+            .replace(/<br\s*\/?>/gi, '')
+            .trim()
+        )
+        .filter((line) => line.length > 0);
+
       if (lines.length > 0) {
         topImportantNotes.push(lines.join(' '));
       }
@@ -39,7 +44,7 @@ export function parseChangelog(markdown: string): Changelog {
         }
 
         // Check if version already exists to merge it
-        const existing = versions.find(v => v.version === vTag);
+        const existing = versions.find((v) => v.version === vTag);
         if (existing) {
           currentVersion = existing;
           if (!currentVersion.releaseDate && vDate) {
@@ -65,7 +70,7 @@ export function parseChangelog(markdown: string): Changelog {
 
     // Capture last seen artwork image in paragraph tokens
     if (token.type === 'paragraph') {
-      const imgToken = token.tokens?.find(t => t.type === 'image');
+      const imgToken = token.tokens?.find((t) => t.type === 'image');
       if (imgToken && 'href' in imgToken) {
         let href = imgToken.href;
         if (href && !href.startsWith('http') && !href.startsWith('/')) {
@@ -94,7 +99,9 @@ export function parseChangelog(markdown: string): Changelog {
     // 3. Collect List Items
     if (token.type === 'list' && currentCategory) {
       for (const item of token.items) {
-        currentVersion.notes[currentCategory].push({ note: item.text.replace(/<br\s*\/?>/gi, '').trim() });
+        currentVersion.notes[currentCategory].push({
+          note: item.text.replace(/<br\s*\/?>/gi, '').trim()
+        });
       }
     }
   }
