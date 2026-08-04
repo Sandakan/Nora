@@ -90,7 +90,7 @@ import {
   toggleOnBatteryPower,
   updateTraySingleClickBehavior
 } from './main';
-import { setDiscordRpcActivity } from './other/discordRPC';
+import { setDiscordRpcActivity, validateDiscordActivity } from './other/discordRPC';
 import { generatePalettes } from './other/generatePalette';
 import { flushScrobbleQueue } from './other/lastFm/flushScrobbleQueue';
 import getAlbumInfoFromLastFM from './other/lastFm/getAlbumInfoFromLastFM';
@@ -143,9 +143,19 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       toggleAudioPlayingState(isPlaying)
     );
 
-    ipcMain.on('app/setDiscordRpcActivity', (_: unknown, activity: DiscordActivity) =>
-      setDiscordRpcActivity(activity)
-    );
+    ipcMain.on('app/setDiscordRpcActivity', (_: unknown, activity: DiscordActivity) => {
+      // Validate the runtime payload at the IPC trust boundary before forwarding
+      // to Discord RPC. The preload type is compile-time only; malformed or
+      // hostile renderer data must not reach the client.
+      const validation = validateDiscordActivity(activity);
+      if (!validation.ok) {
+        logger.warn('Discord activity payload rejected at IPC boundary.', {
+          reason: validation.reason
+        });
+        return;
+      }
+      setDiscordRpcActivity(validation.activity);
+    });
 
     ipcMain.on('app/stopScreenSleeping', stopScreenSleeping);
     ipcMain.on('app/allowScreenSleeping', allowScreenSleeping);
