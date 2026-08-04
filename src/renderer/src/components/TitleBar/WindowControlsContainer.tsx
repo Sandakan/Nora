@@ -20,12 +20,24 @@ const WindowControlsContainer = () => {
   const [isMaximized, setIsMaximized] = useState(false);
 
   useEffect(() => {
+    // Guards against the initial query resolving after a real maximize/unmaximize
+    // event has already applied a newer value. Once an event arrives we ignore
+    // the (stale) initial query result.
+    const hasReceivedWindowStateEvent = { current: false };
     window.api.windowControls
       .isMaximized()
-      .then(setIsMaximized)
+      .then((value) => {
+        if (!hasReceivedWindowStateEvent.current) setIsMaximized(value);
+      })
       .catch((err) => console.warn('Failed to read maximize state', err));
-    const unsubMax = window.api.windowControls.onMaximized(() => setIsMaximized(true));
-    const unsubUnmax = window.api.windowControls.onUnmaximized(() => setIsMaximized(false));
+    const unsubMax = window.api.windowControls.onMaximized(() => {
+      hasReceivedWindowStateEvent.current = true;
+      setIsMaximized(true);
+    });
+    const unsubUnmax = window.api.windowControls.onUnmaximized(() => {
+      hasReceivedWindowStateEvent.current = true;
+      setIsMaximized(false);
+    });
     return () => {
       unsubMax();
       unsubUnmax();

@@ -65,7 +65,7 @@ function RouteComponent() {
   const { t } = useTranslation();
   const { scrollTopOffset } = Route.useSearch();
 
-  const { data: queuedSongs } = useQuery({
+  const { data: queuedSongs, isPending } = useQuery({
     ...songQuery.queue(currentQueue),
     enabled: currentQueue.length > 0
   });
@@ -322,6 +322,11 @@ function RouteComponent() {
                 </div>
                 {/* <div className="queue-buttons mt-4 flex"></div> */}
               </div>
+            </div>
+          )}
+          {currentQueue.length > 0 && isPending && (
+            <div className="songs-container overflow-auto h-full">
+              <SongListSkeleton />
             </div>
           )}
           {queuedSongs && queuedSongs.length > 0 && (

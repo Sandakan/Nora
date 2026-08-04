@@ -1,5 +1,5 @@
 const shimmer =
-  'animate-[shimmer_2s_infinite] bg-[length:200%_100%] bg-gradient-to-r from-transparent via-white/5 to-transparent dark:via-white/10';
+  'animate-[shimmer_2s_infinite] bg-[length:200%_100%] bg-gradient-to-r from-transparent via-white/5 to-transparent dark:via-white/10 motion-reduce:animate-none';
 
 function SongSkeletonRow({ index }: { index: number }) {
   return (
