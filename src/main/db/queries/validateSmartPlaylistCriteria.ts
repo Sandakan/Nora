@@ -112,7 +112,12 @@ const isKnownField = (field: string): field is SmartPlaylistRuleField => {
 
 const MAX_USERNAME_LENGTH = 200;
 
-export type LastFmSourceValidationResult = { success: true } | { success: false; reason: string };
+export type LastFmSourceValidationResult =
+  | {
+      success: true;
+      source: { username: string; type: 'top' | 'recent' | 'loved'; period?: string; limit?: number };
+    }
+  | { success: false; reason: string };
 
 export const validateLastFmSource = (source: unknown): LastFmSourceValidationResult => {
   if (!source || typeof source !== 'object') {
@@ -134,7 +139,8 @@ export const validateLastFmSource = (source: unknown): LastFmSourceValidationRes
 
   if (
     s.period !== undefined &&
-    (typeof s.period !== 'string' || !VALID_PERIODS.includes(s.period as (typeof VALID_PERIODS)[number]))
+    (typeof s.period !== 'string' ||
+      !VALID_PERIODS.includes(s.period as (typeof VALID_PERIODS)[number]))
   ) {
     return { success: false, reason: 'invalid-lastfm-period' };
   }
@@ -149,7 +155,15 @@ export const validateLastFmSource = (source: unknown): LastFmSourceValidationRes
     return { success: false, reason: 'invalid-lastfm-limit' };
   }
 
-  return { success: true };
+  return {
+    success: true,
+    source: {
+      username: s.username.trim(),
+      type: s.type,
+      period: s.period !== undefined ? (s.period as string) : undefined,
+      limit: s.limit !== undefined ? (s.limit as number) : undefined
+    }
+  };
 };
 
 const isValidOperator = (field: SmartPlaylistRuleField, operator: string): boolean => {

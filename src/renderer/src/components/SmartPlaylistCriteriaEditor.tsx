@@ -1,3 +1,4 @@
+import { MAX_LIMIT } from '@main/db/queries/smartPlaylistConstants';
 import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
 import { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -201,6 +202,7 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
     if (needsBoolOps(rule.field)) {
       return (
         <select
+          id={`rule-value-${idx}`}
           className="bg-background-color-2 text-font-color-black focus:outline-font-color-highlight dark:bg-dark-background-color-2 dark:text-font-color-white dark:focus:outline-dark-font-color-highlight mt-1 w-full rounded-lg px-3 py-1.5 text-sm outline-1 outline-transparent transition-colors"
           value={String(rule.value)}
           onChange={(e) => onChange(e.target.value === 'true')}
@@ -214,6 +216,7 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
     if (needsStringOps(rule.field)) {
       return (
         <input
+          id={`rule-value-${idx}`}
           type="text"
           className="bg-background-color-2 text-font-color-black focus:outline-font-color-highlight dark:bg-dark-background-color-2 dark:text-font-color-white dark:focus:outline-dark-font-color-highlight mt-1 w-full rounded-lg px-3 py-1.5 text-sm outline-1 outline-transparent transition-colors"
           value={String(rule.value)}
@@ -225,6 +228,7 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
 
     return (
       <input
+        id={`rule-value-${idx}`}
         type="number"
         className="bg-background-color-2 text-font-color-black focus:outline-font-color-highlight dark:bg-dark-background-color-2 dark:text-font-color-white dark:focus:outline-dark-font-color-highlight mt-1 w-full rounded-lg px-3 py-1.5 text-sm outline-1 outline-transparent transition-colors"
         value={String(rule.value)}
@@ -266,6 +270,35 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
         </label>
       </div>
 
+      <div className="limit-row mb-4 flex items-center gap-2">
+        <label
+          htmlFor="smart-playlist-limit"
+          className="text-font-color-dimmed dark:text-dark-font-color-dimmed text-xs"
+        >
+          {t('playlist.limit')}
+        </label>
+        <input
+          id="smart-playlist-limit"
+          type="number"
+          min={1}
+          max={MAX_LIMIT}
+          className="bg-background-color-2 text-font-color-black focus:outline-font-color-highlight dark:bg-dark-background-color-2 dark:text-font-color-white dark:focus:outline-dark-font-color-highlight mt-1 w-24 rounded-lg px-3 py-1.5 text-sm outline-1 outline-transparent transition-colors"
+          value={criteria.limit ?? ''}
+          placeholder={t('playlist.limitPlaceholder')}
+          onChange={(e) => {
+            const raw = e.target.value;
+            if (raw === '') {
+              setCriteria((prev) => ({ ...prev, limit: undefined }));
+              return;
+            }
+            const num = Number(raw);
+            if (Number.isSafeInteger(num) && num > 0) {
+              setCriteria((prev) => ({ ...prev, limit: Math.min(num, MAX_LIMIT) }));
+            }
+          }}
+        />
+      </div>
+
       <div className="rules-list flex max-h-[50vh] flex-col gap-3 overflow-y-auto">
         {criteria.rules.map((rule, idx) => (
           <div
@@ -273,10 +306,14 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
             className="rule-row bg-background-color-1 dark:bg-dark-background-color-1 flex flex-wrap items-end gap-2 rounded-lg p-3"
           >
             <div className="flex flex-1 flex-col">
-              <label className="text-font-color-dimmed dark:text-dark-font-color-dimmed text-xs">
+              <label
+                htmlFor={`rule-field-${idx}`}
+                className="text-font-color-dimmed dark:text-dark-font-color-dimmed text-xs"
+              >
                 {t('playlist.ruleField')}
               </label>
               <select
+                id={`rule-field-${idx}`}
                 className="bg-background-color-2 text-font-color-black focus:outline-font-color-highlight dark:bg-dark-background-color-2 dark:text-font-color-white dark:focus:outline-dark-font-color-highlight mt-1 rounded-lg px-3 py-1.5 text-sm outline-1 outline-transparent transition-colors"
                 value={rule.field}
                 onChange={(e) => {
@@ -297,10 +334,14 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
             </div>
 
             <div className="flex flex-1 flex-col">
-              <label className="text-font-color-dimmed dark:text-dark-font-color-dimmed text-xs">
+              <label
+                htmlFor={`rule-operator-${idx}`}
+                className="text-font-color-dimmed dark:text-dark-font-color-dimmed text-xs"
+              >
                 {t('playlist.ruleOperator')}
               </label>
               <select
+                id={`rule-operator-${idx}`}
                 className="bg-background-color-2 text-font-color-black focus:outline-font-color-highlight dark:bg-dark-background-color-2 dark:text-font-color-white dark:focus:outline-dark-font-color-highlight mt-1 rounded-lg px-3 py-1.5 text-sm outline-1 outline-transparent transition-colors"
                 value={rule.operator}
                 onChange={(e) =>
@@ -316,7 +357,10 @@ const SmartPlaylistCriteriaEditor = (props: SmartPlaylistCriteriaEditorProps) =>
             </div>
 
             <div className="flex flex-[1.5] flex-col">
-              <label className="text-font-color-dimmed dark:text-dark-font-color-dimmed text-xs">
+              <label
+                htmlFor={`rule-value-${idx}`}
+                className="text-font-color-dimmed dark:text-dark-font-color-dimmed text-xs"
+              >
                 {t('playlist.ruleValue')}
               </label>
               {inputForRule(rule, idx)}

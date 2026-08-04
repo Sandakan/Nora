@@ -172,12 +172,20 @@ describe('validateSmartPlaylistCriteria', () => {
 describe('validateLastFmSource', () => {
   test('accepts a valid source', () => {
     const source = { username: 'nora', type: 'top', period: 'overall', limit: 50 };
-    expect(validateLastFmSource(source)).toEqual({ success: true });
+    const result = validateLastFmSource(source);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.source).toEqual({ username: 'nora', type: 'top', period: 'overall', limit: 50 });
+    }
   });
 
   test('accepts a source without optional fields', () => {
     const source = { username: 'nora', type: 'recent' };
-    expect(validateLastFmSource(source)).toEqual({ success: true });
+    const result = validateLastFmSource(source);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.source).toEqual({ username: 'nora', type: 'recent', period: undefined, limit: undefined });
+    }
   });
 
   test('rejects non-object source', () => {
@@ -217,7 +225,11 @@ describe('validateLastFmSource', () => {
 
   test('accepts boundary limit', () => {
     const source = { username: 'nora', type: 'top', limit: 100 };
-    expect(validateLastFmSource(source)).toEqual({ success: true });
+    const result = validateLastFmSource(source);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.source.limit).toBe(100);
+    }
   });
 
   test('rejects numeric period', () => {

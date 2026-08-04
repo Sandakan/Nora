@@ -313,7 +313,9 @@
     "ruleOperator": "Operator",
     "ruleValue": "Value",
     "valueTrue": "true",
-    "valueFalse": "false"
+    "valueFalse": "false",
+    "limit": "Result limit",
+    "limitPlaceholder": "no limit"
   },
 
   "album": {

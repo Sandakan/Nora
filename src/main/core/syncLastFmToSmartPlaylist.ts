@@ -2,7 +2,10 @@ import { db } from '@db/db';
 import { playlists, playlistsSongs } from '@db/schema';
 import { eq } from 'drizzle-orm';
 
-import { MAX_LIMIT, VALID_PERIODS } from '../db/queries/smartPlaylistConstants';
+import {
+  MAX_LASTFM_MATCH_IDS
+} from '../db/queries/smartPlaylistConstants';
+import { validateLastFmSource } from '../db/queries/validateSmartPlaylistCriteria';
 import logger from '../logger';
 
 type LastFmSource = {
@@ -27,6 +30,14 @@ export const syncLastFmToSmartPlaylist = async (
     return { success: false, count: 0 };
   }
 
+  if (songIds.length > MAX_LASTFM_MATCH_IDS) {
+    logger.warn('syncLastFmToSmartPlaylist: songIds exceed bound', {
+      playlistId,
+      count: songIds.length
+    });
+    return { success: false, count: 0 };
+  }
+
   const uniqueIds = [
     ...new Set(songIds.filter((id) => typeof id === 'number' && Number.isSafeInteger(id) && id > 0))
   ];
@@ -39,22 +50,18 @@ export const syncLastFmToSmartPlaylist = async (
     return { success: false, count: 0 };
   }
 
-  if (!source.username || typeof source.username !== 'string' || !source.username.trim()) {
-    logger.warn('syncLastFmToSmartPlaylist: invalid username', { playlistId });
+  const validation = validateLastFmSource(source);
+  if (!validation.success) {
+    logger.warn('syncLastFmToSmartPlaylist: invalid source', {
+      playlistId,
+      reason: validation.reason
+    });
     return { success: false, count: 0 };
   }
 
-  if (!['top', 'recent', 'loved'].includes(source.type)) {
-    logger.warn('syncLastFmToSmartPlaylist: invalid type', { playlistId, type: source.type });
-    return { success: false, count: 0 };
-  }
-
-  const trimmedUsername = source.username.trim();
-  const period = source.period && VALID_PERIODS.includes(source.period as (typeof VALID_PERIODS)[number]) ? source.period : undefined;
-  const limit =
-    typeof source.limit === 'number' && source.limit > 0
-      ? Math.min(source.limit, MAX_LIMIT)
-      : undefined;
+  const trimmedUsername = validation.source.username;
+  const period = validation.source.period;
+  const limit = validation.source.limit;
 
   logger.debug('Syncing Last.fm data to smart playlist', {
     playlistId,
@@ -83,7 +90,7 @@ export const syncLastFmToSmartPlaylist = async (
 
     criteria.lastFmSource = {
       username: trimmedUsername,
-      type: source.type,
+      type: validation.source.type,
       period,
       limit
     };

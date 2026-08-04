@@ -433,17 +433,28 @@ const lastFmUserData = {
     username: string,
     period?: 'overall' | '7day' | '1month' | '3month' | '6month' | '12month',
     limit?: number
-  ): Promise<{ tracks: { name: string; artist: string; url: string; playCount: number }[] }> =>
-    ipcRenderer.invoke('app/lastfm/getUserTopTracks', username, period, limit),
+  ): Promise<
+    { tracks: { name: string; artist: string; url: string; playCount: number }[] } | undefined
+  > => ipcRenderer.invoke('app/lastfm/getUserTopTracks', username, period, limit),
   getUserRecentTracks: (
     username: string,
     limit?: number
-  ): Promise<{ tracks: { name: string; artist: string; url: string; playedAt: number | null; isNowPlaying?: boolean }[] }> =>
-    ipcRenderer.invoke('app/lastfm/getUserRecentTracks', username, limit),
+  ): Promise<
+    | {
+        tracks: {
+          name: string;
+          artist: string;
+          url: string;
+          playedAt: number | null;
+          isNowPlaying?: boolean;
+        }[];
+      }
+    | undefined
+  > => ipcRenderer.invoke('app/lastfm/getUserRecentTracks', username, limit),
   getUserLovedTracks: (
     username: string,
     limit?: number
-  ): Promise<{ tracks: { name: string; artist: string; url: string }[] }> =>
+  ): Promise<{ tracks: { name: string; artist: string; url: string }[] } | undefined> =>
     ipcRenderer.invoke('app/lastfm/getUserLovedTracks', username, limit)
 };
 
@@ -501,9 +512,14 @@ const playlistsData = {
     ipcRenderer.invoke('app/exportPlaylist', playlistId),
   importPlaylist: (targetPlaylistId?: number): Promise<void> =>
     ipcRenderer.invoke('app/importPlaylist', targetPlaylistId),
-  saveSmartPlaylistCriteria: (playlistId: number, criteria: SmartPlaylistCriteria): Promise<{ success: boolean; songIds: number[]; reason?: string }> =>
+  saveSmartPlaylistCriteria: (
+    playlistId: number,
+    criteria: SmartPlaylistCriteria
+  ): Promise<{ success: boolean; songIds: number[]; reason?: string }> =>
     ipcRenderer.invoke('app/saveSmartPlaylistCriteria', playlistId, criteria),
-  refreshSmartPlaylist: (playlistId: number): Promise<{ success: boolean; songIds: number[]; reason?: string; skipped?: string }> =>
+  refreshSmartPlaylist: (
+    playlistId: number
+  ): Promise<{ success: boolean; songIds: number[]; reason?: string; skipped?: string }> =>
     ipcRenderer.invoke('app/refreshSmartPlaylist', playlistId)
 };
 

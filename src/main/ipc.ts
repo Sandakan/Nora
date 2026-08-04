@@ -67,6 +67,7 @@ import { getDatabaseMetrics } from './db/queries/other';
 import { refreshSmartPlaylist } from './db/queries/playlist-rules';
 import { getPlaylistById, updatePlaylistCriteria } from './db/queries/playlists';
 import { getUserSettings, saveUserSettings } from './db/queries/settings';
+import { MAX_LASTFM_MATCH_IDS } from './db/queries/smartPlaylistConstants';
 import {
   getUserKeyboardShortcuts,
   saveUserKeyboardShortcuts,
@@ -125,7 +126,6 @@ import romanizeLyrics from './utils/romanizeLyrics';
 import { compare } from './utils/safeStorage';
 
 const smartPlaylistLocks = new Map<number, Promise<unknown>>();
-const MAX_LASTFM_MATCH_IDS = 100;
 
 /**
  * Registers Electron IPC listeners and main-window event handlers for the provided window.
