@@ -1,5 +1,10 @@
-import { addSongPlayEvent, addSongSeekEvent, addSongSkipEvent, incrementSongSkipCount } from '@main/db/queries/listens';
 import { db } from '@main/db/db';
+import {
+  addSongPlayEvent,
+  addSongSeekEvent,
+  addSongSkipEvent,
+  incrementSongSkipCount
+} from '@main/db/queries/listens';
 
 import logger from '../logger';
 import { dataUpdateEvent } from '../main';
