@@ -1,4 +1,4 @@
-import { readFile } from 'fs/promises';
+import { readFile, stat } from 'fs/promises';
 import path from 'path';
 
 import { SpecialPlaylists } from '@common/playlists.enum';
@@ -11,7 +11,7 @@ import logger from '../logger';
 import { dataUpdateEvent, sendMessageToRenderer, showOpenDialog } from '../main';
 import addNewPlaylist from './addNewPlaylist';
 
-const DEFAULT_EXPORT_DIALOG_OPTIONS: OpenDialogOptions = {
+const DEFAULT_IMPORT_DIALOG_OPTIONS: OpenDialogOptions = {
   title: `Select a Destination where your M3U8/M3U file is`,
   buttonLabel: 'Select M3U8/M3U file',
   properties: ['openFile', 'multiSelections'],
@@ -54,6 +54,22 @@ const validatePlaylistFile = async (
   }
 
   const fileName = path.basename(filePath).replace(/\.m3u8?$/gim, '');
+
+  // Reject oversized files before reading the whole thing into memory. Playlist
+  // files are small text; anything past a few tens of MB is almost certainly
+  // not a real playlist and would needlessly pressure memory.
+  const MAX_PLAYLIST_FILE_SIZE = 25 * 1024 * 1024;
+  try {
+    const stats = await stat(filePath);
+    if (stats.size > MAX_PLAYLIST_FILE_SIZE) {
+      logger.warn('Rejected oversized playlist file.', { filePath, size: stats.size });
+      sendMessageToRenderer({ messageCode: 'PLAYLIST_IMPORT_FAILED' });
+      return null;
+    }
+  } catch {
+    return null;
+  }
+
   const text = await readFile(filePath, 'utf-8');
   const textArr = text.replaceAll('\r', '').split('\n');
 
@@ -227,7 +243,7 @@ const importPlaylist = async (targetPlaylistId?: number, playlistPath?: string) 
       return processPlaylistImport(playlistPath, targetPlaylistId);
     }
 
-    const destinations = await showOpenDialog(DEFAULT_EXPORT_DIALOG_OPTIONS);
+    const destinations = await showOpenDialog(DEFAULT_IMPORT_DIALOG_OPTIONS);
 
     if (destinations) {
       for (const filePath of destinations) {

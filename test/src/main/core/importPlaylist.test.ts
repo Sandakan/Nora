@@ -12,7 +12,8 @@ vi.mock('@main/db/queries/songs', () => ({
 }));
 
 vi.mock('fs/promises', () => ({
-  readFile: vi.fn()
+  readFile: vi.fn(),
+  stat: vi.fn()
 }));
 
 vi.mock('../../../../src/main/logger', () => ({
@@ -34,7 +35,7 @@ vi.mock('../../../../src/main/core/addNewPlaylist', () => ({
   default: vi.fn()
 }));
 
-import { readFile } from 'fs/promises';
+import { readFile, stat } from 'fs/promises';
 import { getPlaylistByName, linkSongsWithPlaylist } from '@main/db/queries/playlists';
 import { getSongsInPathList, updateSongFavoriteStatuses } from '@main/db/queries/songs';
 
@@ -44,6 +45,7 @@ import logger from '../../../../src/main/logger';
 import { dataUpdateEvent, sendMessageToRenderer } from '../../../../src/main/main';
 
 const mockedReadFile = vi.mocked(readFile);
+const mockedStat = vi.mocked(stat);
 const mockedGetPlaylistByName = vi.mocked(getPlaylistByName);
 const mockedLinkSongsWithPlaylist = vi.mocked(linkSongsWithPlaylist);
 const mockedGetSongsInPathList = vi.mocked(getSongsInPathList);
@@ -73,6 +75,8 @@ describe('processPlaylistImport', () => {
     mockedReadFile.mockResolvedValue(
       makeM3u8([M3U_HEADER, SONG1_PATH, SONG2_PATH])
     );
+    // Default: file is well within the size limit so the guard does not reject.
+    mockedStat.mockResolvedValue({ size: 1024 } as never);
     // Default: all songs available in the library
     mockedGetSongsInPathList.mockResolvedValue([
       { id: SONG1_ID, path: SONG1_PATH } as never,
@@ -235,6 +239,30 @@ describe('processPlaylistImport', () => {
       expect(mockedSendMessageToRenderer).toHaveBeenCalledWith({
         messageCode: 'PLAYLIST_IMPORT_FAILED'
       });
+    });
+
+    test('rejects an oversized playlist file before reading it', async () => {
+      mockedStat.mockResolvedValue({ size: 100 * 1024 * 1024 } as never);
+
+      await processPlaylistImport('C:/import/huge.m3u8');
+
+      // The file must not be read; the import fails fast with the size guard.
+      expect(mockedReadFile).not.toHaveBeenCalled();
+      expect(mockedSendMessageToRenderer).toHaveBeenCalledWith({
+        messageCode: 'PLAYLIST_IMPORT_FAILED'
+      });
+    });
+
+    test('proceeds when the playlist file is within the size limit', async () => {
+      mockedStat.mockResolvedValue({ size: 1024 } as never);
+      mockedReadFile.mockResolvedValue('#EXTM3U\n/music/song1.mp3\n' as never);
+      mockedGetSongsInPathList.mockResolvedValue([] as never);
+      mockedGetPlaylistByName.mockResolvedValue(null);
+      mockedAddNewPlaylist.mockResolvedValue({ success: true, message: 'created' });
+
+      await processPlaylistImport('C:/import/ok.m3u8');
+
+      expect(mockedReadFile).toHaveBeenCalledWith('C:/import/ok.m3u8', 'utf-8');
     });
   });
 });
