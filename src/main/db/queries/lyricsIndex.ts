@@ -94,11 +94,12 @@ export type LyricsIndexResult = 'indexed' | 'absent' | 'read-error';
 // Configurable indexing policy: number of songs processed per backfill batch.
 const LYRICS_BACKFILL_BATCH_SIZE = 10;
 
-// Durable-invalidation generation for the backfill. Every path that can leave
-// a song unindexed (import read-error, post-save re-index read-error) bumps
-// this counter. A backfill only marks the index complete if the generation is
-// unchanged from when it started, so a late concurrent failure cannot be
-// overwritten by an older successful backfill.
+// In-process invalidation generation for the backfill. Every path that can
+// leave a song unindexed (import read-error, post-save re-index read-error)
+// bumps this counter AND persists isLyricIndexBuilt: false. The persisted
+// setting covers cross-restart retry; this counter additionally stops an
+// older in-flight backfill from marking the index complete after a late
+// concurrent failure.
 let lyricsIndexGeneration = 0;
 
 export const invalidateLyricsIndex = (): void => {
@@ -199,8 +200,11 @@ export const indexAllLyrics = async (): Promise<{ allSucceeded: boolean }> => {
     }
   }
 
+  const generationChanged = lyricsIndexGeneration !== generationAtStart;
   logger.info(
-    `Lyrics index backfill complete. Indexed ${indexed} songs, processed ${processed} of ${songs.length}, failed ${failed}.`
+    `Lyrics index backfill complete. Indexed ${indexed} songs, processed ${processed} of ${songs.length}, failed ${failed}${
+      generationChanged ? ' (invalidated during backfill; will retry on next startup)' : ''
+    }.`
   );
-  return { allSucceeded: failed === 0 && lyricsIndexGeneration === generationAtStart };
+  return { allSucceeded: failed === 0 && !generationChanged };
 };
