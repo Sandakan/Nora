@@ -1,6 +1,5 @@
-import { describe, test, expect } from 'vitest';
-
 import addMissingPropsToAnObject from '@renderer/utils/addMissingPropsToAnObject';
+import { describe, test, expect } from 'vitest';
 
 const TEMPLATE: LocalStorage = {
   preferences: {
@@ -31,7 +30,7 @@ const TEMPLATE: LocalStorage = {
     isRepeating: 'false',
     isShuffling: false,
     volume: { isMuted: false, value: 50 },
-    playbackRate: 1.0
+    playbackRate: 1
   },
   queue: { position: 0, songIds: [] },
   sortingStates: {
@@ -80,7 +79,12 @@ describe('addMissingPropsToAnObject with sortingStates', () => {
     };
 
     const onMissing = (key: string) => {
-      expect(['playlistDetailPage', 'albumDetailPage', 'genreDetailPage', 'artistDetailPage']).toContain(key);
+      expect([
+        'playlistDetailPage',
+        'albumDetailPage',
+        'genreDetailPage',
+        'artistDetailPage'
+      ]).toContain(key);
     };
 
     const result = addMissingPropsToAnObject(TEMPLATE, oldStorage, onMissing);
@@ -134,7 +138,9 @@ describe('addMissingPropsToAnObject with sortingStates', () => {
     };
 
     const missingKeys: string[] = [];
-    const onMissing = (key: string) => { missingKeys.push(key); };
+    const onMissing = (key: string) => {
+      missingKeys.push(key);
+    };
 
     const result = addMissingPropsToAnObject(TEMPLATE, partialStorage, onMissing);
     expect(result.sortingStates).toHaveProperty('playlistDetailPage', 'addedOrder');
@@ -168,7 +174,7 @@ describe('addMissingPropsToAnObject with sortingStates', () => {
       sortingStates: undefined
     };
 
-    const result = addMissingPropsToAnObject(TEMPLATE, storageWithNullSorting as any);
+    const result = addMissingPropsToAnObject(TEMPLATE, storageWithNullSorting);
     expect(result.sortingStates).toBeDefined();
     expect(result.sortingStates).toHaveProperty('playlistDetailPage', 'addedOrder');
     expect(Object.keys(result.sortingStates)).toHaveLength(10);

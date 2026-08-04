@@ -175,10 +175,7 @@ const LyricLine = (props: LyricProp) => {
                 : 'scale-75!'
             }`
           : 'text-font-color-black! dark:text-font-color-white! scale-100! text-4xl! font-medium blur-none! [&>div>span]:mr-3'
-      } ${playerType === 'mini' && 'text-font-color-white/20! mb-2! text-2xl!'} ${
-        playerType === 'full' &&
-        'text-font-color-white/20! mb-6! origin-left items-start! justify-start! text-left! text-7xl!'
-      }`}
+      } ${playerType === 'mini' ? 'text-font-color-white/20! mb-2! text-2xl!' : ''} ${playerType === 'full' ? 'text-font-color-white/20! mb-6! origin-left items-start! justify-start! text-left! text-7xl!' : ''}`}
       ref={lyricsRef}
       onClick={() =>
         syncedLyrics &&
@@ -211,13 +208,13 @@ const LyricLine = (props: LyricProp) => {
     >
       {lyricStringLineSecondaryUpper && (
         <div
-          className={`flex flex-row flex-wrap ${playerType !== 'full' && 'items-center justify-center'} ${syncedLyrics && isInRange ? 'text-font-color-black/50! dark:text-font-color-white/50! text-xl!' : 'text-xl!'}`}
+          className={`flex flex-row flex-wrap ${playerType !== 'full' ? 'items-center justify-center' : ''} ${syncedLyrics && isInRange ? 'text-font-color-black/50! dark:text-font-color-white/50! text-xl!' : 'text-xl!'}`}
         >
           {lyricStringLineSecondaryUpper}
         </div>
       )}
       <div
-        className={`flex flex-row flex-wrap ${playerType !== 'full' && 'items-center justify-center'}`}
+        className={`flex flex-row flex-wrap ${playerType !== 'full' ? 'items-center justify-center' : ''}`}
       >
         {lyricStringLinePrimary}
       </div>
