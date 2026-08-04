@@ -31,12 +31,14 @@ const AppShortcutsPrompt = () => {
       if (e.shiftKey) keys.push('Shift');
 
       const key = e.key;
-      if (!['Control', 'Shift', 'Alt', 'Meta'].includes(key)) {
+      const isModifierOnly = ['Control', 'Shift', 'Alt', 'Meta'].includes(key);
+      if (!isModifierOnly) {
         keys.push(key === ' ' ? 'Space' : key);
       }
 
-      // Reject modifier-only combos (Ctrl / Cmd / Alt / Shift alone).
-      if (keys.length === 0) return;
+      // Reject modifier-only combos (Ctrl / Cmd / Alt / Shift alone) — a
+      // non-modifier key must be present for the shortcut to be actionable.
+      if (isModifierOnly || keys.length === 0) return;
 
       setNewKeys(keys);
       setNewShortcut({ id: editingShortcut, label: editingShortcut, keys });

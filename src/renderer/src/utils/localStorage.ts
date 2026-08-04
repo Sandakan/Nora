@@ -285,17 +285,21 @@ const getKeyboardShortcuts = (): ShortcutCategoryList => {
   const userShortcuts: ShortcutCategory[] = (localData as any)?.keyboardShortcuts || [];
   const defaults: ShortcutCategory[] = LOCAL_STORAGE_DEFAULT_TEMPLATE.keyboardShortcuts;
 
-  // Match saved categories by stable id first, then fall back to the legacy
-  // translated title so a language change cannot orphan a user's categories.
-  const findUserCategory = (defaultCategory: ShortcutCategory) =>
+  // Match saved categories by stable id first. Legacy data saved before
+  // category ids existed has no id and used a translated title; match it by
+  // array position (the default categories are always in the same order) so
+  // a language change cannot orphan a user's categories. Title matching is a
+  // last resort for non-default user categories.
+  const findUserCategory = (defaultCategory: ShortcutCategory, index: number) =>
     userShortcuts.find(
       (uc) =>
         uc.id === defaultCategory.id ||
+        (uc.id === undefined && userShortcuts.indexOf(uc) === index) ||
         uc.shortcutCategoryTitle === defaultCategory.shortcutCategoryTitle
     );
 
-  const merged: ShortcutCategory[] = defaults.map((defaultCategory) => {
-    const matchingUserCategory = findUserCategory(defaultCategory);
+  const merged: ShortcutCategory[] = defaults.map((defaultCategory, index) => {
+    const matchingUserCategory = findUserCategory(defaultCategory, index);
 
     if (!matchingUserCategory) return defaultCategory;
 

@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 
+import type { AudioPlayer } from '../other/player';
 import toggleSongIsFavorite from '../other/toggleSongIsFavorite';
 import { dispatch, store } from '../store/store';
 import storage from '../utils/localStorage';
@@ -29,10 +30,10 @@ import { useUserPreferences } from './useUserPreferences';
  *   updateEqualizerOptions({ preset: 'rock', bands: [...] });
  *   ```;
  *
- * @param player - The HTMLAudioElement instance
+ * @param player - The AudioPlayer instance
  * @returns Object containing playback setting functions
  */
-export function usePlaybackSettings(player: HTMLAudioElement) {
+export function usePlaybackSettings(player: AudioPlayer) {
   const { saveEqualizerPreset } = useUserPreferences();
 
   const toggleRepeat = useCallback((newState?: RepeatTypes) => {
@@ -102,8 +103,11 @@ export function usePlaybackSettings(player: HTMLAudioElement) {
   const updateEqualizerOptions = useCallback(
     (options: Equalizer) => {
       saveEqualizerPreset(options);
+      // Feed the DB-backed preset into the player so toggleEqualizer can
+      // re-apply it and the bands are live without a separate save path.
+      player.applyEqualizerPreset(options);
     },
-    [saveEqualizerPreset]
+    [saveEqualizerPreset, player]
   );
 
   return {
