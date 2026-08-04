@@ -65,9 +65,10 @@ describe('addSongsToPlaylist', () => {
     );
   });
 
-  test('throws when the playlist does not exist', async () => {
+  test('returns a discriminated failure when the playlist does not exist', async () => {
     mockedGetPlaylistById.mockResolvedValue(undefined);
 
-    await expect(addSongsToPlaylist(99, [1])).rejects.toThrow(/cannot be found/);
+    const result = await addSongsToPlaylist(99, [1]);
+    expect(result).toEqual({ success: false, reason: 'PLAYLIST_NOT_FOUND' });
   });
 });

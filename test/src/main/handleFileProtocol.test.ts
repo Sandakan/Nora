@@ -23,6 +23,17 @@ import { realpathSync, existsSync, statSync } from 'fs';
 import { getAllFolderStructures } from '@main/db/queries/folders';
 import { handleFileProtocol } from '../../../../src/main/handleFileProtocol';
 
+// Build platform-appropriate fixtures so the positive-path tests pass on both
+// Windows and Linux CI. On POSIX, C:/music is not an absolute path, so the
+// protocol would reject it before the root check.
+const IS_WIN = process.platform === 'win32';
+const MUSIC = IS_WIN ? 'C:/music' : '/music';
+const SUB = IS_WIN ? 'C:/music/rock' : '/music/rock';
+const SONG = `${MUSIC}/song.flac`;
+const SUBSONG = `${SUB}/song.flac`;
+const TRAVERSAL = `${MUSIC}/../../etc/passwd`;
+const OUTSIDE = IS_WIN ? 'C:/Windows/system32/cmd.exe' : '/usr/bin/cmd';
+
 const mockedGetAllFolderStructures = vi.mocked(getAllFolderStructures);
 
 // Resolve requested paths to a real-ish absolute path. Anything pointing outside
@@ -46,31 +57,31 @@ describe('handleFileProtocol', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockedGetAllFolderStructures.mockResolvedValue([
-      { path: 'C:/music', subFolders: [{ path: 'C:/music/rock' }] }
+      { path: MUSIC, subFolders: [{ path: SUB }] }
     ] as never);
   });
 
   test('serves a file inside an approved music folder root', async () => {
-    const res = await handleFileProtocol(makeReq('nora://localfiles/C:/music/song.flac'));
+    const res = await handleFileProtocol(makeReq(`nora://localfiles/${SONG}`));
     expect(res.status).not.toBe(403);
     expect(res.status).not.toBe(404);
   });
 
   test('serves a file inside an approved subfolder', async () => {
-    const res = await handleFileProtocol(makeReq('nora://localfiles/C:/music/rock/song.flac'));
+    const res = await handleFileProtocol(makeReq(`nora://localfiles/${SUBSONG}`));
     expect(res.status).not.toBe(403);
   });
 
   test('rejects a path traversal attempt outside approved roots', async () => {
     mockedRealpathSync.mockImplementation((p: string) => {
-      // Simulate realpath collapsing the traversal to /etc/passwd.
-      if (p.includes('..')) return 'C:/etc/passwd';
+      // Simulate realpath collapsing the traversal to an outside path.
+      if (p.includes('..')) return IS_WIN ? 'C:/etc/passwd' : '/etc/passwd';
       return p;
     });
     mockedExistsSync.mockReturnValue(true);
 
     const res = await handleFileProtocol(
-      makeReq('nora://localfiles/C:/music/../../etc/passwd')
+      makeReq(`nora://localfiles/${TRAVERSAL}`)
     );
     expect(res.status).toBe(403);
   });
@@ -79,7 +90,7 @@ describe('handleFileProtocol', () => {
     mockedRealpathSync.mockImplementation((p: string) => p);
     mockedExistsSync.mockReturnValue(true);
 
-    const res = await handleFileProtocol(makeReq('nora://localfiles/C:/Windows/system32/cmd.exe'));
+    const res = await handleFileProtocol(makeReq(`nora://localfiles/${OUTSIDE}`));
     expect(res.status).toBe(403);
   });
 });

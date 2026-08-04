@@ -60,7 +60,16 @@ export const handleFileProtocol = async (req: GlobalRequest) => {
     // different slash style). `resolve` also strips any trailing separator.
     const normalizedRealPath = resolve(realPath);
     const isAllowed = approvedRoots.some((root) => {
-      const normalizedRoot = resolve(root);
+      // Canonicalize the approved root too, so a selected root that is a symlink
+      // (e.g. /home/user/MusicLink -> /mnt/music) still authorizes files beneath
+      // its real target. Skip roots that no longer exist on disk.
+      let realRoot: string;
+      try {
+        realRoot = realpathSync(root);
+      } catch {
+        return false;
+      }
+      const normalizedRoot = resolve(realRoot);
       return (
         normalizedRealPath === normalizedRoot ||
         normalizedRealPath.startsWith(`${normalizedRoot}${sep}`)
