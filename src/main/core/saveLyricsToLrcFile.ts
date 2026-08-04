@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 
-import { getUserSettings } from '@main/db/queries/settings';
+import { getUserSettings, saveUserSettings } from '@main/db/queries/settings';
 import { getSongByPath } from '@main/db/queries/songs';
 
 import { version } from '../../../package.json';
@@ -167,6 +167,12 @@ const saveLyricsToLRCFile = async (songPathWithoutProtocol: string, songLyrics: 
     });
     if (result === 'read-error') {
       invalidateLyricsIndex();
+      await saveUserSettings({ isLyricIndexBuilt: false }).catch((error) =>
+        logger.error('Failed to persist lyric index retry state after LRC save', {
+          error,
+          songId: song.id
+        })
+      );
       logger.warn('Lyric re-index after LRC save failed; will retry on next startup.', {
         songId: song.id
       });

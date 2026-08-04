@@ -231,7 +231,7 @@ export const searchSongsByLyrics = async (options: SearchOptions, trx: DB | DBTr
     const results = await trx
       .select({
         song: songs,
-        snippet: sql<string>`ts_headline('simple', ${songLyrics.lyricsText}, phraseto_tsquery('simple', ${keyword}), 'StartSel=[NRABEG], StopSel=[NRAEND], MaxWords=12, MinWords=4, ShortWord=2')`,
+        snippet: sql<string>`ts_headline('simple', ${songLyrics.lyricsText}, phraseto_tsquery('simple', ${keyword}), 'StartSel=' || E'\x01' || ', StopSel=' || E'\x02' || ', MaxWords=12, MinWords=4, ShortWord=2')`,
         source: songLyrics.source
       })
       .from(songLyrics)

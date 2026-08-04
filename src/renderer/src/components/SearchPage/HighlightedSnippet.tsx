@@ -13,13 +13,11 @@ const HighlightedSnippet = ({
   const parts = useMemo(() => {
     const result: string[] = [];
     let current = '';
-    let isHighlight = false;
     for (const char of snippet) {
       const code = char.codePointAt(0);
       if (code === 0x0001 || code === 0x0002) {
         result.push(current);
         current = '';
-        isHighlight = !isHighlight;
       } else {
         current += char;
       }

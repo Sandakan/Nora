@@ -3,7 +3,7 @@ import path from 'path';
 import { appPreferences } from '../../package.json';
 import { updateCachedLyrics } from './core/getSongLyrics';
 import saveLyricsToLRCFile from './core/saveLyricsToLrcFile';
-import { getUserSettings } from './db/queries/settings';
+import { getUserSettings, saveUserSettings } from './db/queries/settings';
 import { removeDefaultAppProtocolFromFilePath } from './fs/resolveFilePaths';
 import logger from './logger';
 import { dataUpdateEvent, sendMessageToRenderer } from './main';
@@ -135,6 +135,12 @@ export const savePendingSongLyrics = async (currentSongPath = '', forceSave = fa
           });
           if (result === 'read-error') {
             invalidateLyricsIndex();
+            await saveUserSettings({ isLyricIndexBuilt: false }).catch((err) =>
+              logger.error('Failed to persist lyric index retry state after save', {
+                err,
+                songId: song.id
+              })
+            );
             logger.warn('Lyric re-index after pending save failed; will retry on next startup.', {
               songId: song.id
             });
