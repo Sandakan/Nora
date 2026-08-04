@@ -100,7 +100,7 @@ export const theme = {
       'inner-2xl': 'inset 0 25px 50px -12px rgb(0 0 0 / 0.25)'
     },
     transitionDuration: {
-      '250': '250ms'
+      250: '250ms'
     }
   }
 };

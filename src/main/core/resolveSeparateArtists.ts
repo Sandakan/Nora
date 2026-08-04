@@ -68,8 +68,11 @@ export const resolveSeparateArtists = async (
     artistsData.push(...(newArtists as unknown as (typeof artistsData)[number][]));
 
     // ALBUMS
+    const affectedAlbumIds = new Set<number>();
+
     for (const album of albumsData) {
       if (album?.artists?.some((x) => x.artistId === selectedArtist.artistId)) {
+        affectedAlbumIds.add(album.albumId);
         album.artists = album.artists!.filter((x) => {
           if (x.artistId === selectedArtist.artistId) return false;
           if (availArtists.some((y) => y.artistId === x.artistId)) return false;
@@ -127,44 +130,45 @@ export const resolveSeparateArtists = async (
       }
     }
 
-    // Persist changes to DB: create/link new artists, move songs, update album links, and remove original artist
-    const targetArtists: { name: string; id: number }[] = [];
+    // Persist changes to DB in a single atomic transaction to prevent partial state corruption
+    // (e.g. orphan song links or incomplete artist deletions) if a query fails or process exits midway.
+    await db.transaction(async (trx) => {
+      const targetArtists: { name: string; id: number }[] = [];
 
-    // Existing artists (availArtists) are already in artistsData and will be used
-    for (const a of availArtists) {
-      targetArtists.push({ name: a.name, id: a.artistId });
-    }
-
-    // Create artists for newArtists and collect their DB ids
-    for (const na of newArtists) {
-      const created = await createArtist({ name: na.name, isFavorite: na.isAFavorite }, db);
-      targetArtists.push({ name: na.name, id: created.id });
-    }
-
-    // For each song that belonged to the selected artist, link to all target artists and unlink from selected
-    const selectedArtistId = selectedArtist.artistId;
-    for (const songRef of selectedArtist.songs) {
-      const songId = songRef.songId;
-      for (const ta of targetArtists) {
-        const alreadyLinked = await getLinkedSongArtist(songId, ta.id, db);
-        if (!alreadyLinked) await linkSongToArtist(ta.id, songId, db);
+      // Existing artists (availArtists) are already in artistsData and will be used
+      for (const a of availArtists) {
+        targetArtists.push({ name: a.name, id: a.artistId });
       }
-      // Unlink from original selected artist
-      await unlinkSongFromArtist(selectedArtistId, songId, db);
-    }
 
-    // Link target artists to albums where selected artist was present
-    for (const album of albumsData) {
-      if (album?.artists?.some((x) => x.artistId === selectedArtist.artistId)) {
-        for (const ta of targetArtists) {
-          const linked = await getLinkedAlbumArtist(album.albumId, ta.id, db);
-          if (!linked) await linkArtistToAlbum(album.albumId, ta.id, db);
+      // Create artists for newArtists and collect their DB ids
+      for (const na of newArtists) {
+        const created = await createArtist({ name: na.name, isFavorite: na.isAFavorite }, trx);
+        targetArtists.push({ name: na.name, id: created.id });
+      }
+
+      // For each song that belonged to the selected artist, link to all target artists and unlink from selected
+      const selectedArtistId = selectedArtist.artistId;
+      for (const songRef of selectedArtist.songs) {
+        const songId = songRef.songId;
+        for (const targetArtist of targetArtists) {
+          const alreadyLinked = await getLinkedSongArtist(songId, targetArtist.id, trx);
+          if (!alreadyLinked) await linkSongToArtist(targetArtist.id, songId, trx);
+        }
+        // Unlink from original selected artist
+        await unlinkSongFromArtist(selectedArtistId, songId, trx);
+      }
+
+      // Link target artists to albums where selected artist was present
+      for (const albumId of affectedAlbumIds) {
+        for (const targetArtist of targetArtists) {
+          const linked = await getLinkedAlbumArtist(albumId, targetArtist.id, trx);
+          if (!linked) await linkArtistToAlbum(albumId, targetArtist.id, trx);
         }
       }
-    }
 
-    // Delete the original artist
-    await deleteArtist(selectedArtistId, db);
+      // Delete the original artist
+      await deleteArtist(selectedArtistId, trx);
+    });
 
     // Notify renderer to refresh from DB
     dataUpdateEvent('artists');
