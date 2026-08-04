@@ -1,5 +1,18 @@
 import { LOCAL_STORAGE_DEFAULT_TEMPLATE } from './appReducer';
 
+export const equalizerBandKeys: (keyof Equalizer)[] = [
+  'thirtyTwoHertzFilter',
+  'sixtyFourHertzFilter',
+  'hundredTwentyFiveHertzFilter',
+  'twoHundredFiftyHertzFilter',
+  'fiveHundredHertzFilter',
+  'thousandHertzFilter',
+  'twoThousandHertzFilter',
+  'fourThousandHertzFilter',
+  'eightThousandHertzFilter',
+  'sixteenThousandHertzFilter'
+];
+
 export const equalizerBandHertzData: Record<EqualizerBandFilters, number> = {
   thirtyTwoHertzFilter: 32,
   sixtyFourHertzFilter: 64,

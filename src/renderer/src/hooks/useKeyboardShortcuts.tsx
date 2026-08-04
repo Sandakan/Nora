@@ -285,6 +285,7 @@ export function useKeyboardShortcuts(dependencies: KeyboardShortcutDependencies)
             updatePlayerType(store.state.playerType === 'mini' ? 'normal' : 'mini');
             break;
           case 'toggleFullscreenPlayer': {
+            if (e.repeat) break;
             const isCurrentlyFull = store.state.playerType === 'full';
             updatePlayerType(isCurrentlyFull ? 'normal' : 'full');
             navigate({
@@ -314,6 +315,7 @@ export function useKeyboardShortcuts(dependencies: KeyboardShortcutDependencies)
             window.api.theme.changeAppTheme();
             break;
           case 'toggleEqualizer':
+            if (e.repeat) break;
             player.toggleEqualizer();
             break;
           case 'toggleMiniPlayerAlwaysOnTop':

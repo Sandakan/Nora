@@ -311,10 +311,21 @@ const getKeyboardShortcuts = (): ShortcutCategoryList => {
 
     selectedUserCategoryRefs.add(matchingUserCategory);
 
-    const patchedShortcuts = defaultCategory.shortcuts.map((defaultShortcut) => {
-      const matchingUserShortcut = matchingUserCategory.shortcuts.find(
-        (us) => us.id === defaultShortcut.id || us.label === defaultShortcut.label
-      );
+    const matchedByPosition = matchingUserCategory.id === undefined;
+
+    const patchedShortcuts = defaultCategory.shortcuts.map((defaultShortcut, shortcutIndex) => {
+      let matchingUserShortcut: ShortcutCategory['shortcuts'][number] | undefined;
+
+      if (!matchedByPosition) {
+        matchingUserShortcut = matchingUserCategory.shortcuts.find(
+          (us) => us.id === defaultShortcut.id || us.label === defaultShortcut.label
+        );
+      } else {
+        // Legacy category with no stable id: match by position in the known
+        // default category so a prior language change cannot orphan custom keys.
+        matchingUserShortcut = matchingUserCategory.shortcuts[shortcutIndex];
+      }
+
       if (matchingUserShortcut) {
         return { ...defaultShortcut, keys: matchingUserShortcut.keys };
       }
