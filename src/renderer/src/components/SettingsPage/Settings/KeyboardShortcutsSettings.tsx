@@ -74,18 +74,15 @@ const KeyboardShortcutsSettings = () => {
 
       setHasDuplicate(duplicate);
 
-      if (duplicate && newKeys.length > 0) {
-        addNewNotifications([
-          {
-            id: 'duplicateShortcut',
-            content: t('keyboardShortcutsSettings.duplicateShortcut')
-          }
-        ]);
-        return;
-      }
-
       if (clickedOutside) {
-        if (newShortcut && !duplicate) {
+        if (duplicate) {
+          addNewNotifications([
+            {
+              id: 'duplicateShortcut',
+              content: t('keyboardShortcutsSettings.duplicateShortcut')
+            }
+          ]);
+        } else if (newShortcut) {
           storage.keyboardShortcuts.setKeyboardShortcuts(newShortcut.id, newShortcut.keys);
           setShortcuts(storage.keyboardShortcuts.getKeyboardShortcuts());
         }
