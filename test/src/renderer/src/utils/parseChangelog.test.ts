@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+
 import { parseChangelog } from '../../../../../src/renderer/src/utils/parseChangelog';
 
 describe('parseChangelog', () => {
