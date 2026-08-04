@@ -1,8 +1,7 @@
 import path from 'path';
 
 import { getSongByIdForSongMetadata } from '@main/db/queries/songs';
-import { File } from 'node-taglib-sharp';
-import { withTagFile } from '../utils/createTagFile';
+import { Tag } from 'node-taglib-sharp';
 
 import { appPreferences } from '../../../package.json';
 // import { parseSyncedLyricsFromAudioDataSource } from '../../common/parseLyrics';
@@ -18,6 +17,7 @@ import logger from '../logger';
 import { getSongsOutsideLibraryData } from '../main';
 import { isLyricsSavePending } from '../saveLyricsToSong';
 import { isMetadataUpdatesPending } from '../updateSong/updateSongId3Tags';
+import { withTagFile } from '../utils/createTagFile';
 
 const { metadataEditingSupportedExtensions } = appPreferences;
 
@@ -58,7 +58,7 @@ const sendSongMetadata = async (
       if (!isASupporedFormat)
         throw new Error(`No support for editing song metadata in '${pathExt}' format.`);
 
-      const songMetadata: ReturnType<typeof File.prototype.tag> | undefined = await withTagFile(song.path, (file) => file.tag);
+      const songMetadata: Tag | undefined = await withTagFile(song.path, (file) => file.tag);
 
       const songAlbums: SongTags['albums'] =
         song.albums.length > 0
@@ -164,7 +164,7 @@ const sendSongMetadata = async (
       const songsOutsideLibraryData = getSongsOutsideLibraryData();
       for (const songOutsideLibraryData of songsOutsideLibraryData) {
         if (songOutsideLibraryData.path === songPathWithDefaultUrl) {
-          const songMetadata: ReturnType<typeof File.prototype.tag> | undefined = await withTagFile(songPath, (file) => file.tag);
+          const songMetadata: Tag | undefined = await withTagFile(songPath, (file) => file.tag);
 
           const res: SongTags = {
             title: songMetadata?.title || '',
