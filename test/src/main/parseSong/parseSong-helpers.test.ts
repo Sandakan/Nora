@@ -285,6 +285,26 @@ describe('parseSong Helper Functions', () => {
       expect(result).toEqual(['Japanese', 'Anime']);
     });
 
+    test('should deduplicate repeated names from split entries', () => {
+      const result = getGenreInfoFromSong(['Japanese, Anime', 'Anime']);
+      expect(result).toEqual(['Japanese', 'Anime']);
+    });
+
+    test('should deduplicate repeated values within one string', () => {
+      const result = getGenreInfoFromSong(['Anime, Anime']);
+      expect(result).toEqual(['Anime']);
+    });
+
+    test('should deduplicate case-insensitively while preserving first-seen casing', () => {
+      const result = getGenreInfoFromSong(['Rock', 'rock', 'ROCK']);
+      expect(result).toEqual(['Rock']);
+    });
+
+    test('should keep distinct genres after dedup of a duplicate', () => {
+      const result = getGenreInfoFromSong(['J-Pop', 'Anime', 'J-Pop']);
+      expect(result).toEqual(['J-Pop', 'Anime']);
+    });
+
     test('should filter empty strings from splitting', () => {
       const result = getGenreInfoFromSong([',,,']);
       expect(result).toEqual([]);
