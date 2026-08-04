@@ -12,8 +12,13 @@ const DISCORD_BUTTONS_MAX = 2;
 const isSafeString = (value: unknown): value is string =>
   typeof value === 'string' && value.length > 0 && value.length <= DISCORD_STRING_MAX;
 
+// Discord requires integer (Unix ms) timestamps. Fractional values can come
+// from `now + duration * 1000` when duration is non-integer (VBR tracks), so
+// accept any finite number and round to a safe integer instead of rejecting.
 const isSafeTimestamp = (value: unknown): value is number =>
-  typeof value === 'number' && Number.isFinite(value) && Number.isSafeInteger(value);
+  typeof value === 'number' && Number.isFinite(value) && value <= Number.MAX_SAFE_INTEGER;
+
+const roundTimestamp = (value: unknown): number => Math.round(value as number);
 
 const isHttpsUrl = (value: unknown): boolean =>
   typeof value === 'string' && value.startsWith('https://');
@@ -47,6 +52,9 @@ export const validateDiscordActivity = (data: unknown): ValidationResult => {
     if (timestamps.end !== undefined && !isSafeTimestamp(timestamps.end)) {
       return { ok: false, reason: 'timestamp-end-invalid' };
     }
+    // Round fractional timestamps (VBR durations) to integer ms.
+    if (timestamps.start !== undefined) timestamps.start = roundTimestamp(timestamps.start);
+    if (timestamps.end !== undefined) timestamps.end = roundTimestamp(timestamps.end);
   }
 
   if (activity.assets !== undefined) {

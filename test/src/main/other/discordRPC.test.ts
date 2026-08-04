@@ -43,10 +43,14 @@ describe('validateDiscordActivity', () => {
     expect(validateDiscordActivity({ details: 'd', state: 'y'.repeat(200) }).ok).toBe(false);
   });
 
-  it('rejects non-finite or non-safe-integer timestamps', () => {
+  it('rejects non-finite timestamps and rounds fractional ones', () => {
     expect(validateDiscordActivity({ timestamps: { start: NaN } }).ok).toBe(false);
-    expect(validateDiscordActivity({ timestamps: { start: 1.5 } }).ok).toBe(false);
     expect(validateDiscordActivity({ timestamps: { end: Infinity } }).ok).toBe(false);
+
+    const result = validateDiscordActivity({ timestamps: { start: 1.5, end: 12.7 } });
+    if (!result.ok) throw new Error(`expected ok, got ${result.reason}`);
+    expect(result.activity.timestamps?.start).toBe(2);
+    expect(result.activity.timestamps?.end).toBe(13);
   });
 
   it('rejects too many buttons', () => {
