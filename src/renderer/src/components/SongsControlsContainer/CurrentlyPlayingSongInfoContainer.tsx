@@ -249,7 +249,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
   return (
     <div className="current-playing-song-info-container grid w-full max-w-full grid-cols-[6rem_minmax(0,1fr)] items-center gap-2 lg:grid-cols-[minmax(0,1fr)]">
       <div
-        className="song-cover-container relative flex aspect-square h-full cursor-pointer items-center justify-center overflow-hidden p-2 lg:hidden"
+        className="song-cover-container relative flex aspect-square h-full cursor-pointer items-center justify-center overflow-hidden p-2 outline-offset-1 focus-visible:outline! lg:hidden"
         id="currentSongCover"
         role="button"
         tabIndex={0}
