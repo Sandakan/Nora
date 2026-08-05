@@ -1,7 +1,8 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import BugImg from '../assets/images/svg/Bug Fixed_Monochromatic.svg';
+import BugImg from '../assets/images/svg/Bug Fixed_Monochromatic.svg'?react;
+import ThemeableIllustration from '@renderer/components/ThemeableIllustration';
 import log from '../utils/log';
 import Button from './Button';
 
@@ -22,7 +23,7 @@ const ErrorBoundaryFallbackUi = (props: ErrorBoundaryStates) => {
 
   return (
     <div className="text-font-color-black dark:text-font-color-white flex h-full w-full flex-col items-center justify-center overflow-x-hidden">
-      <img src={BugImg} alt="App bug found." className="w-48" />
+      <ThemeableIllustration illustration={BugImg} alt="App bug found." className="w-48" />
       <br />
       <h2>{t('common.somethingWentWrong')}</h2>
       {isInDevelopment && (

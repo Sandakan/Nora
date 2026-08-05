@@ -1,4 +1,5 @@
-import NoSongsImage from '@assets/images/svg/Empty Inbox _Monochromatic.svg';
+import NoSongsImage from '@assets/images/svg/Empty Inbox _Monochromatic.svg'?react;
+import ThemeableIllustration from '@renderer/components/ThemeableIllustration';
 import Button from '@renderer/components/Button';
 import Dropdown from '@renderer/components/Dropdown';
 import Img from '@renderer/components/Img';
@@ -368,7 +369,7 @@ function SongsPage() {
       </div>
       {songData === null && (
         <div className="no-songs-container text-font-color-black dark:text-font-color-white my-[8%] flex h-full w-full flex-col items-center justify-center text-center text-xl">
-          <Img src={NoSongsImage} alt="" className="mb-8 w-60" />
+          <ThemeableIllustration illustration={NoSongsImage} alt="" className="mb-8 w-60" />
           <span>{t('songsPage.empty')}</span>
           <div className="flex items-center justify-between">
             <Button

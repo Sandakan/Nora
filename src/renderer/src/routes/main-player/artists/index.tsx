@@ -1,4 +1,5 @@
-import NoArtistImage from '@assets/images/svg/Sun_Monochromatic.svg';
+import NoArtistImage from '@assets/images/svg/Sun_Monochromatic.svg'?react;
+import ThemeableIllustration from '@renderer/components/ThemeableIllustration';
 import { Artist } from '@renderer/components/ArtistPage/Artist';
 import {
   artistFilterOptions,
@@ -199,7 +200,7 @@ function ArtistPage() {
         )} */}
         {artistsData && artistsData.length === 0 && (
           <div className="no-songs-container text-font-color-black dark:text-font-color-white my-[10%] flex h-full w-full flex-col items-center justify-center text-center text-xl">
-            <Img src={NoArtistImage} alt="Sun in a desert" className="mb-8 w-60" />
+            <ThemeableIllustration illustration={NoArtistImage} alt="Sun in a desert" className="mb-8 w-60" />
             <div>{t('artistsPage.empty')}</div>
           </div>
         )}

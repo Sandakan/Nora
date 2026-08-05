@@ -4,7 +4,8 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import SearchSomethingImage from '../../assets/images/svg/Flying kite_Monochromatic.svg';
+import SearchSomethingImage from '../../assets/images/svg/Flying kite_Monochromatic.svg'?react;
+import ThemeableIllustration from '@renderer/components/ThemeableIllustration';
 import Button from '../Button';
 import Img from '../Img';
 import RecentSearchResult from './RecentSearchResult';

@@ -1,4 +1,5 @@
-import NoFoldersImage from '@assets/images/svg/Empty Inbox _Monochromatic.svg';
+import NoFoldersImage from '@assets/images/svg/Empty Inbox _Monochromatic.svg'?react;
+import ThemeableIllustration from '@renderer/components/ThemeableIllustration';
 import Button from '@renderer/components/Button';
 import Dropdown from '@renderer/components/Dropdown';
 import Img from '@renderer/components/Img';
@@ -216,7 +217,7 @@ function MusicFoldersPage() {
 
         {musicFolders.length === 0 && (
           <div className="no-folders-container text-font-color-black dark:text-font-color-white flex h-full flex-col items-center justify-center text-lg">
-            <Img src={NoFoldersImage} className="w-60" />
+            <ThemeableIllustration illustration={NoFoldersImage} className="w-60" />
             <br />
             <p> {t('foldersPage.empty')}</p>
 

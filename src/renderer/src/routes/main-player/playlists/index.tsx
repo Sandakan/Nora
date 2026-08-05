@@ -1,4 +1,5 @@
-import NoPlaylistsImage from '@assets/images/svg/Empty Inbox _Monochromatic.svg';
+import NoPlaylistsImage from '@assets/images/svg/Empty Inbox _Monochromatic.svg'?react;
+import ThemeableIllustration from '@renderer/components/ThemeableIllustration';
 import Button from '@renderer/components/Button';
 import Dropdown from '@renderer/components/Dropdown';
 import Img from '@renderer/components/Img';
@@ -256,7 +257,7 @@ function PlaylistsPage() {
         )}
         {playlists.length === 0 && (
           <div className="no-playlists-container text-font-color-black dark:text-font-color-white my-[10%] flex h-full w-full flex-col items-center justify-center text-center text-xl">
-            <Img src={NoPlaylistsImage} alt="" className="mb-8 w-60" />
+            <ThemeableIllustration illustration={NoPlaylistsImage} alt="" className="mb-8 w-60" />
             <span>{t('playlistsPage.empty')}</span>
           </div>
         )}

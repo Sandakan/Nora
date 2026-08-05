@@ -1,4 +1,5 @@
-import NoAlbumsImage from '@assets/images/svg/Easter bunny_Monochromatic.svg';
+import NoAlbumsImage from '@assets/images/svg/Easter bunny_Monochromatic.svg'?react;
+import ThemeableIllustration from '@renderer/components/ThemeableIllustration';
 import { Album } from '@renderer/components/AlbumsPage/Album';
 import { albumSortOptions } from '@renderer/components/AlbumsPage/AlbumOptions';
 import Button from '@renderer/components/Button';
@@ -180,7 +181,7 @@ function AlbumsPage() {
         )} */}
         {albumsData && albumsData.length === 0 && (
           <div className="no-songs-container text-font-color-black dark:text-font-color-white my-[10%] flex h-full w-full flex-col items-center justify-center text-center text-xl">
-            <Img src={NoAlbumsImage} alt="No songs available." className="mb-8 w-60" />
+            <ThemeableIllustration illustration={NoAlbumsImage} alt="No songs available." className="mb-8 w-60" />
             <div>{t('albumsPage.empty')}</div>
           </div>
         )}
