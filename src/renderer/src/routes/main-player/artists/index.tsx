@@ -1,4 +1,4 @@
-import NoArtistImage from '@assets/images/svg/Sun_Monochromatic.svg'?react;
+import NoArtistImage from '@assets/images/svg/Sun_Monochromatic.svg?react';
 import ThemeableIllustration from '@renderer/components/ThemeableIllustration';
 import { Artist } from '@renderer/components/ArtistPage/Artist';
 import {

@@ -1,7 +1,7 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import BugImg from '../assets/images/svg/Bug Fixed_Monochromatic.svg'?react;
+import BugImg from '../assets/images/svg/Bug Fixed_Monochromatic.svg?react';
 import ThemeableIllustration from '@renderer/components/ThemeableIllustration';
 import log from '../utils/log';
 import Button from './Button';

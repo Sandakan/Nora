@@ -2,7 +2,7 @@ import { Draggable, Droppable, DragDropContext, type DropResult } from '@hello-p
 // import DefaultSongCover from '@renderer/assets/images/webp/song_cover_default.webp';
 // import DefaultPlaylistCover from '@renderer/assets/images/webp/playlist_cover_default.webp';
 // import FolderImg from '@renderer/assets/images/webp/empty-folder.webp';
-import NoSongsImage from '@renderer/assets/images/svg/Sun_Monochromatic.svg'?react;
+import NoSongsImage from '@renderer/assets/images/svg/Sun_Monochromatic.svg?react';
 import ThemeableIllustration from '@renderer/components/ThemeableIllustration';
 import Button from '@renderer/components/Button';
 import Img from '@renderer/components/Img';

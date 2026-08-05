@@ -1,4 +1,4 @@
-import NoAlbumsImage from '@assets/images/svg/Easter bunny_Monochromatic.svg'?react;
+import NoAlbumsImage from '@assets/images/svg/Easter bunny_Monochromatic.svg?react';
 import ThemeableIllustration from '@renderer/components/ThemeableIllustration';
 import { Album } from '@renderer/components/AlbumsPage/Album';
 import { albumSortOptions } from '@renderer/components/AlbumsPage/AlbumOptions';

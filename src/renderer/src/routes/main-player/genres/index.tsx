@@ -1,4 +1,4 @@
-import NoSongsImage from '@assets/images/svg/Summer landscape_Monochromatic.svg'?react;
+import NoSongsImage from '@assets/images/svg/Summer landscape_Monochromatic.svg?react';
 import ThemeableIllustration from '@renderer/components/ThemeableIllustration';
 import Button from '@renderer/components/Button';
 import Dropdown from '@renderer/components/Dropdown';

@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import NoResultsImage from '../../assets/images/svg/Sad face_Monochromatic.svg'?react;
+import NoResultsImage from '../../assets/images/svg/Sad face_Monochromatic.svg?react';
 import ThemeableIllustration from '@renderer/components/ThemeableIllustration';
 import Img from '../Img';
 import RecentSearchResult from './RecentSearchResult';

@@ -1,4 +1,4 @@
-import NoPlaylistsImage from '@assets/images/svg/Empty Inbox _Monochromatic.svg'?react;
+import NoPlaylistsImage from '@assets/images/svg/Empty Inbox _Monochromatic.svg?react';
 import ThemeableIllustration from '@renderer/components/ThemeableIllustration';
 import Button from '@renderer/components/Button';
 import Dropdown from '@renderer/components/Dropdown';
