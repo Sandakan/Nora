@@ -492,9 +492,20 @@ const playlistsData = {
   importPlaylistFromPath: (
     filePath: string,
     targetPlaylistId?: number
-  ): Promise<{ success: boolean; code?: string }> =>
+  ): Promise<PlaylistImportFromPathResult> =>
     ipcRenderer.invoke('app/importPlaylistFromPath', filePath, targetPlaylistId)
 };
+
+type PlaylistImportFromPathResult =
+  | { success: true; result?: unknown }
+  | {
+      success: false;
+      code:
+        | 'INVALID_PATH'
+        | 'INVALID_TARGET_PLAYLIST'
+        | 'NOT_A_FILE'
+        | 'FILE_NOT_ACCESSIBLE';
+    };
 
 const queue = {
   getQueueInfo: (queueType: QueueTypes, id: string): Promise<QueueInfo | undefined> =>

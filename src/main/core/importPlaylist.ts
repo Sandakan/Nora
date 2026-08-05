@@ -67,6 +67,8 @@ const validatePlaylistFile = async (
       return null;
     }
   } catch {
+    logger.warn('Failed to access playlist file during validation.', { filePath });
+    sendMessageToRenderer({ messageCode: 'PLAYLIST_IMPORT_FAILED' });
     return null;
   }
 
