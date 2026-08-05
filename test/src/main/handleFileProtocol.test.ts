@@ -51,7 +51,7 @@ vi.mock('fs', async (importOriginal) => {
 const mockedRealpathSync = vi.mocked(realpathSync);
 const mockedExistsSync = vi.mocked(existsSync);
 
-const makeReq = (url: string) => ({ url } as never);
+const makeReq = (pathname: string) => ({ url: `nora://localfiles/${pathname}` } as never);
 
 describe('handleFileProtocol', () => {
   beforeEach(() => {
@@ -62,13 +62,13 @@ describe('handleFileProtocol', () => {
   });
 
   test('serves a file inside an approved music folder root', async () => {
-    const res = await handleFileProtocol(makeReq(`nora://localfiles/${SONG}`));
+    const res = await handleFileProtocol(makeReq(SONG));
     expect(res.status).not.toBe(403);
     expect(res.status).not.toBe(404);
   });
 
   test('serves a file inside an approved subfolder', async () => {
-    const res = await handleFileProtocol(makeReq(`nora://localfiles/${SUBSONG}`));
+    const res = await handleFileProtocol(makeReq(SUBSONG));
     expect(res.status).not.toBe(403);
   });
 
@@ -81,7 +81,7 @@ describe('handleFileProtocol', () => {
     mockedExistsSync.mockReturnValue(true);
 
     const res = await handleFileProtocol(
-      makeReq(`nora://localfiles/${TRAVERSAL}`)
+      makeReq(TRAVERSAL)
     );
     expect(res.status).toBe(403);
   });
@@ -90,7 +90,7 @@ describe('handleFileProtocol', () => {
     mockedRealpathSync.mockImplementation((p: string) => p);
     mockedExistsSync.mockReturnValue(true);
 
-    const res = await handleFileProtocol(makeReq(`nora://localfiles/${OUTSIDE}`));
+    const res = await handleFileProtocol(makeReq(OUTSIDE));
     expect(res.status).toBe(403);
   });
 });

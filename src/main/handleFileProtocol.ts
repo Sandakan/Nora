@@ -35,7 +35,9 @@ export const handleFileProtocol = async (req: GlobalRequest) => {
     const { pathname } = new URL(req.url);
     const decodedPath = decodeURIComponent(pathname);
     const filePath =
-      process.platform === 'darwin' ? decodedPath : decodedPath.replace(/^[/\\]{1,2}/gm, '');
+      process.platform === 'win32'
+        ? decodedPath.replace(/^[/\\]+/, '')
+        : decodedPath;
 
     if (!isAbsolute(filePath)) {
       logger.warn('Rejected relative path in nora:// protocol', { url: req.url, filePath });
