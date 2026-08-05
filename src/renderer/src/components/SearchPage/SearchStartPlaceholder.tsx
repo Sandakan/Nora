@@ -59,8 +59,8 @@ const SearchStartPlaceholder = (props: Props) => {
     <>
       {searchInput.trim() === '' && (
         <div className="search-start-placeholder active appear-from-bottom relative flex h-full! w-full flex-col items-center justify-center text-center">
-          <Img
-            src={SearchSomethingImage}
+          <ThemeableIllustration
+            illustration={SearchSomethingImage}
             className={
               searchResults?.songs.length === 0 &&
               searchResults?.artists.length === 0 &&

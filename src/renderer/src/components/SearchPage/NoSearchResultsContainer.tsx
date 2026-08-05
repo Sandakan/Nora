@@ -44,8 +44,8 @@ const NoSearchResultsContainer = (props: Props) => {
         genres.length === 0 &&
         searchInput.trim() !== '' && (
           <div className="no-search-results-container active appear-from-bottom relative mt-16 flex w-full flex-col items-center justify-center text-center">
-            <Img
-              src={NoResultsImage}
+            <ThemeableIllustration
+              illustration={NoResultsImage}
               className={
                 songs.length === 0 &&
                 artists.length === 0 &&
