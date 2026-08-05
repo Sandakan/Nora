@@ -80,7 +80,7 @@ const SongControlsAndSeekbarContainer = () => {
         />
 
         <Button
-          className={`play-pause-btn relative !m-0 !rounded-none !border-0 bg-transparent !p-0 outline-offset-1 hover:bg-transparent focus-visible:!outline dark:bg-transparent dark:hover:bg-transparent ${            isPlayerStalled &&             `after:animate-spin-ease after:border-t-font-color-black dark:after:border-t-font-color-white after:absolute after:h-5 after:w-5 after:rounded-full after:border-2 after:border-[transparent] after:content-['']`          }`}
+          className={`play-pause-btn relative !m-0 !rounded-none !border-0 bg-transparent !p-0 outline-offset-1 hover:bg-transparent focus-visible:!outline dark:bg-transparent dark:hover:bg-transparent ${isPlayerStalled ? "after:animate-spin-ease after:border-t-font-color-black dark:after:border-t-font-color-white after:absolute after:h-5 after:w-5 after:rounded-full after:border-2 after:border-[transparent] after:content-['']" : ""}`}
           tooltipLabel={t('player.playPause')}
           iconName={isCurrentSongPlaying ? 'pause_circle' : 'play_circle'}
           iconClassName={`material-icons-round !text-5xl opacity-80 transition-opacity hover:opacity-80 ${            isPlayerStalled && 'opacity-10!'          }`}
