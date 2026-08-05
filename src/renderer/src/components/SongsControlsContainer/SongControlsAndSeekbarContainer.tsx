@@ -28,7 +28,7 @@ const SongControlsAndSeekbarContainer = () => {
   const { t } = useTranslation();
   const { history, navigate } = useRouter();
   const routerState = useRouterState();
-  const canGoBack = history.length > 0;
+  const canGoBack = history.length > 1;
   const isLyricsActive = routerState.location.pathname === '/main-player/lyrics';
 
   const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
