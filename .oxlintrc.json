@@ -33,9 +33,17 @@
     ".github/plans/",
     "prettier.config.cjs",
     "postcss.config.cjs",
-    "eslint.config.mjs"
+    "eslint.config.mjs",
+    "src/renderer/src/routeTree.gen.ts"
   ],
   "rules": {
+    "react/only-export-components": [
+      "warn",
+      {
+        "allowConstantExport": true,
+        "allowExportNames": ["Route"]
+      }
+    ],
     "constructor-super": "error",
     "for-direction": "error",
     "no-async-promise-executor": "error",
@@ -161,7 +169,6 @@
     ],
     "react/rules-of-hooks": "error",
     "react/exhaustive-deps": "warn",
-    "react/only-export-components": "warn",
     "typescript/ban-ts-comment": [
       "error",
       {
