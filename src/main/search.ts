@@ -4,7 +4,8 @@ import {
   searchForAvailableResults,
   searchGenresByName,
   searchPlaylistsByName,
-  searchSongsByName
+  searchSongsByName,
+  searchSongsByLyrics
 } from './db/queries/search';
 import { getUserSettings, saveUserSettings } from './db/queries/settings';
 import logger from './logger';
@@ -26,7 +27,7 @@ const search = async (
   isSimilaritySearchEnabled = true
 ): Promise<SearchResult> => {
   const timer = timeStart();
-  const [songs, artists, albums, playlists, genres] = await Promise.all([
+  const [songs, artists, albums, playlists, genres, lyrics] = await Promise.all([
     searchSongsByName({ keyword, isSimilaritySearchEnabled }).then((data) =>
       data.map((song) => convertToSongData(song))
     ),
@@ -41,7 +42,8 @@ const search = async (
     ),
     searchGenresByName({ keyword, isSimilaritySearchEnabled }).then((data) =>
       data.map((genre) => convertToGenre(genre))
-    )
+    ),
+    searchSongsByLyrics({ keyword, isSimilaritySearchEnabled })
   ]);
   timeEnd(timer, 'Total Search');
 
@@ -49,12 +51,19 @@ const search = async (
     keyword,
     filter,
     isSimilaritySearchEnabled,
-    totalResults: songs.length + artists.length + albums.length + playlists.length,
+    totalResults:
+      songs.length +
+      artists.length +
+      albums.length +
+      playlists.length +
+      genres.length +
+      lyrics.length,
     songsResults: songs.length,
     artistsResults: artists.length,
     albumsResults: albums.length,
     playlistsResults: playlists.length,
-    genresResults: genres.length
+    genresResults: genres.length,
+    lyricsResults: lyrics.length
   });
 
   if (updateSearchHistory) {
@@ -80,7 +89,8 @@ const search = async (
     artists.length === 0 &&
     albums.length === 0 &&
     playlists.length === 0 &&
-    genres.length === 0
+    genres.length === 0 &&
+    lyrics.length === 0
   ) {
     let input = keyword;
     while (availableResults.size < 5 && input.length > 0) {
@@ -103,6 +113,7 @@ const search = async (
     albums,
     playlists,
     genres,
+    lyrics,
     availableResults: Array.from(availableResults)
   };
 };

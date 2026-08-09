@@ -1,7 +1,10 @@
 import { db } from '@db/db';
-import { albums, artists, genres, playlists, songs } from '@db/schema';
+import { albums, artists, genres, playlists, songs, songLyrics } from '@db/schema';
+import type { GetAllSongsReturnType } from '@main/db/queries/songs';
+import logger from '@main/logger';
+import { convertToSongData } from '@main/utils/convert';
 import { timeEnd, timeStart } from '@main/utils/measureTimeUsage';
-import { asc, ilike, sql } from 'drizzle-orm';
+import { asc, ilike, inArray, sql } from 'drizzle-orm';
 
 type SearchOptions = { keyword: string; isSimilaritySearchEnabled: boolean };
 
@@ -218,6 +221,104 @@ export const searchGenresByName = async (options: SearchOptions, trx: DB | DBTra
 
   timeEnd(timer, 'Search Genres');
   return results;
+};
+
+export const searchSongsByLyrics = async (options: SearchOptions, trx: DB | DBTransaction = db) => {
+  const { keyword } = options;
+  const timer = timeStart();
+
+  try {
+    const matches = await trx
+      .select({
+        songId: songLyrics.songId,
+        snippet: sql<string>`ts_headline('simple', ${songLyrics.lyricsText}, phraseto_tsquery('simple', ${keyword}), 'StartSel=' || E'\x01' || ', StopSel=' || E'\x02' || ', MaxWords=12, MinWords=4, ShortWord=2')`,
+        source: songLyrics.source
+      })
+      .from(songLyrics)
+      .where(sql`${songLyrics.lyricsVector} @@ phraseto_tsquery('simple', ${keyword})`)
+      .orderBy(
+        sql`ts_rank(${songLyrics.lyricsVector}, phraseto_tsquery('simple', ${keyword})) DESC`
+      )
+      .limit(100);
+
+    if (matches.length === 0) {
+      timeEnd(timer, 'Search Songs By Lyrics');
+      return [];
+    }
+
+    const songRows = await trx.query.songs.findMany({
+      where: inArray(songs.id, matches.map((match) => match.songId)),
+      with: {
+        artists: {
+          with: {
+            artist: {
+              columns: { id: true, name: true }
+            }
+          }
+        },
+        albums: {
+          with: {
+            album: {
+              columns: { id: true, title: true },
+              with: {
+                artists: {
+                  with: {
+                    artist: {
+                      columns: { id: true, name: true }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        genres: {
+          with: {
+            genre: {
+              columns: { id: true, name: true }
+            }
+          }
+        },
+        artworks: {
+          with: {
+            artwork: {
+              with: {
+                palette: {
+                  columns: { id: true },
+                  with: {
+                    swatches: {}
+                  }
+                }
+              }
+            }
+          }
+        },
+        playlists: {
+          with: {
+            playlist: {
+              columns: { id: true, name: true }
+            }
+          }
+        }
+      }
+    });
+
+    const songById = new Map(songRows.map((song) => [song.id, song]));
+
+    timeEnd(timer, 'Search Songs By Lyrics');
+
+    return matches
+      .filter((match) => songById.has(match.songId))
+      .map((match) => ({
+        song: convertToSongData(songById.get(match.songId)! as GetAllSongsReturnType[number]),
+        matchedLyricSnippet: match.snippet,
+        source: match.source as 'LRC' | 'EMBEDDED' | 'BOTH'
+      }));
+  } catch (error) {
+    logger.error('Lyrics search failed', { error, keyword });
+    timeEnd(timer, 'Search Songs By Lyrics (failed)');
+    return [];
+  }
 };
 
 const songSearchPreparedQuery = db

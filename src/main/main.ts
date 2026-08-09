@@ -289,10 +289,23 @@ app
     const {
       windowState,
       zoomFactor,
-      traySingleClickTogglesWindow = false
+      traySingleClickTogglesWindow = false,
+      isLyricIndexBuilt = false
     } = await getUserSettings();
 
     currentWindowZoomFactor = normalizeZoomFactor(zoomFactor);
+
+    // Background lyrics index backfill (runs once per library, non-blocking)
+    if (!isLyricIndexBuilt) {
+      import('@main/db/queries/lyricsIndex')
+        .then(({ indexAllLyrics }) => indexAllLyrics())
+        .then(({ allSucceeded }) => {
+          if (allSucceeded) return saveUserSettings({ isLyricIndexBuilt: true });
+          logger.warn('Lyrics backfill had failures, will retry on next launch');
+          return undefined;
+        })
+        .catch((error) => logger.error('Lyrics index backfill failed', { error }));
+    }
 
     if (BrowserWindow.getAllWindows().length === 0) await createWindow();
 

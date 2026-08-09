@@ -7,6 +7,7 @@ import GenreSearchResultsContainer from '@renderer/components/SearchPage/Result_
 import MostRelevantSearchResultsContainer from '@renderer/components/SearchPage/Result_Containers/MostRelevantSearchResultsContainer';
 import PlaylistSearchResultsContainer from '@renderer/components/SearchPage/Result_Containers/PlaylistSearchResultsContainer';
 import SongSearchResultsContainer from '@renderer/components/SearchPage/Result_Containers/SongSearchResultsContainer';
+import LyricSearchResultsContainer from '@renderer/components/SearchPage/Result_Containers/LyricSearchResultsContainer';
 import { searchFilter } from '@renderer/components/SearchPage/SearchOptions';
 import SearchResultsFilter from '@renderer/components/SearchPage/SearchResultsFilter';
 import SearchStartPlaceholder from '@renderer/components/SearchPage/SearchStartPlaceholder';
@@ -222,6 +223,12 @@ function SearchPage() {
               genres={searchResults.genres}
               searchInput={keyword}
               noOfVisibleGenres={noOfGenres}
+              isSimilaritySearchEnabled={isSimilaritySearchEnabled}
+            />
+            {/* LYRIC SEARCH RESULTS */}
+            <LyricSearchResultsContainer
+              results={searchResults.lyrics}
+              searchInput={keyword}
               isSimilaritySearchEnabled={isSimilaritySearchEnabled}
             />
             {/* NO SEARCH RESULTS PLACEHOLDER */}

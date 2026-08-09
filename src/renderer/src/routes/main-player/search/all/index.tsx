@@ -3,6 +3,7 @@ import MainContainer from '@renderer/components/MainContainer';
 import AllAlbumResults from '@renderer/components/SearchPage/All_Search_Result_Containers/AllAlbumResults';
 import AllArtistResults from '@renderer/components/SearchPage/All_Search_Result_Containers/AllArtistResults';
 import AllGenreResults from '@renderer/components/SearchPage/All_Search_Result_Containers/AllGenreResults';
+import AllLyricResults from '@renderer/components/SearchPage/All_Search_Result_Containers/AllLyricResults';
 import AllPlaylistResults from '@renderer/components/SearchPage/All_Search_Result_Containers/AllPlaylistResults';
 import AllSongResults from '@renderer/components/SearchPage/All_Search_Result_Containers/AllSongResults';
 import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
@@ -73,22 +74,19 @@ function RouteComponent() {
               values={{
                 query: keyword,
                 filter: (() => {
-                  switch (selectedType) {
-                    case 'artist':
+                  switch (filterBy) {
+                    case 'Artists':
                       return t('common.artist_other');
-                    case 'playlist':
+                    case 'Playlists':
                       return t('common.playlist_other');
-                    case 'album':
+                    case 'Albums':
                       return t('common.album_other');
-                    case 'genre':
+                    case 'Genres':
                       return t('common.genre_other');
-                    case 'folder':
-                      return t('common.folder_other');
-                    case 'favorites':
-                      return t('playlistsPage.favorites');
-                    case 'history':
-                      return t('playlistsPage.history');
-
+                    case 'Lyrics':
+                      return t('common.lyric_other');
+                    case 'All':
+                      return t('searchPage.allFilter');
                     // For song and other types
                     default:
                       return t('common.song_other');
@@ -121,6 +119,7 @@ function RouteComponent() {
         {filterBy === 'Playlists' && <AllPlaylistResults playlistData={searchResults.playlists} />}
         {filterBy === 'Albums' && <AllAlbumResults albumData={searchResults.albums} />}
         {filterBy === 'Genres' && <AllGenreResults genreData={searchResults.genres} />}
+        {filterBy === 'Lyrics' && <AllLyricResults lyricData={searchResults.lyrics} />}
       </>
     </MainContainer>
   );

@@ -19,6 +19,37 @@ const { metadataEditingSupportedExtensions } = appPreferences;
 
 let cachedLyrics = undefined as SongLyrics | undefined;
 
+// Strips the final extension from a full file path while preserving the
+// directory, e.g. `/dir/song.flac` -> `/dir/song`.
+const stripExtension = (filePath: string): string => {
+  const ext = path.extname(filePath);
+  return ext ? filePath.slice(0, filePath.length - ext.length) : filePath;
+};
+
+export const getLrcFilePaths = (
+  songPath: string,
+  customLrcFilesSaveLocation?: string | null
+): string[] => {
+  const defaultLrcFilePath = `${songPath}.lrc`;
+  const defaultLrcFilePathWithoutExtension = `${stripExtension(songPath)}.lrc`;
+  const customLrcFilePath = customLrcFilesSaveLocation
+    ? path.join(customLrcFilesSaveLocation, `${path.basename(songPath)}.lrc`)
+    : undefined;
+  const customLrcFilePathWithoutExtension = customLrcFilesSaveLocation
+    ? path.join(
+        customLrcFilesSaveLocation,
+        `${path.basename(songPath, path.extname(songPath))}.lrc`
+      )
+    : undefined;
+
+  return [
+    defaultLrcFilePath,
+    defaultLrcFilePathWithoutExtension,
+    ...(customLrcFilePath ? [customLrcFilePath] : []),
+    ...(customLrcFilePathWithoutExtension ? [customLrcFilePathWithoutExtension] : [])
+  ];
+};
+
 export const getCachedLyrics = () => cachedLyrics;
 
 export const updateCachedLyrics = async (
@@ -68,27 +99,17 @@ const readFileData = async (path?: string) => {
 const fetchLyricsFromLRCFile = async (songPath: string) => {
   const userData = await getUserSettings();
 
-  const defaultLrcFilePath = `${songPath}.lrc`;
-  const defaultLrcFilePathWithoutExtension = `${songPath.replaceAll(path.extname(songPath), '')}.lrc`;
-  const customLrcFilePath = userData.customLrcFilesSaveLocation
-    ? path.join(userData.customLrcFilesSaveLocation, `${path.basename(songPath)}.lrc`)
-    : undefined;
-  const customLrcFilePathWithoutExtension = userData.customLrcFilesSaveLocation
-    ? path.join(
-        userData.customLrcFilesSaveLocation,
-        `${path.basename(songPath.replaceAll(path.extname(songPath), ''))}.lrc`
-      )
-    : undefined;
+  const lrcFilePaths = getLrcFilePaths(songPath, userData.customLrcFilesSaveLocation);
 
   try {
-    let lyricsInLrcFormat =
-      (await readFileData(defaultLrcFilePath)) ??
-      (await readFileData(defaultLrcFilePathWithoutExtension));
+    let lyricsInLrcFormat: string | undefined;
 
-    if (!lyricsInLrcFormat && userData.customLrcFilesSaveLocation) {
-      lyricsInLrcFormat =
-        (await readFileData(customLrcFilePath)) ??
-        (await readFileData(customLrcFilePathWithoutExtension));
+    for (const lrcPath of lrcFilePaths) {
+      const data = await readFileData(lrcPath);
+      if (data) {
+        lyricsInLrcFormat = data;
+        break;
+      }
     }
 
     if (!lyricsInLrcFormat) {
@@ -102,10 +123,7 @@ const fetchLyricsFromLRCFile = async (songPath: string) => {
     return logger.info(`LRC file for ${path.basename(songPath)} didn't exist.`, {
       error,
       songPath,
-      defaultLrcFilePath,
-      defaultLrcFilePathWithoutExtension,
-      customLrcFilePath,
-      customLrcFilePathWithoutExtension
+      lrcFilePaths
     });
   }
 };

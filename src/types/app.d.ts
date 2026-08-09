@@ -553,6 +553,7 @@ declare global {
     currentSong: CurrentSong;
     volume: Volume;
     playbackRate: number;
+    crossfadeDuration: number;
   }
 
   type EqualizerBandFilters =
@@ -851,7 +852,7 @@ declare global {
 
   // ? Search related types
 
-  type SearchFilters = 'All' | 'Artists' | 'Albums' | 'Songs' | 'Playlists' | 'Genres';
+  type SearchFilters = 'All' | 'Artists' | 'Albums' | 'Songs' | 'Playlists' | 'Genres' | 'Lyrics';
 
   interface SearchResult {
     songs: SongData[];
@@ -859,7 +860,14 @@ declare global {
     albums: Album[];
     playlists: Playlist[];
     genres: Genre[];
+    lyrics: LyricsSearchResult[];
     availableResults: string[];
+  }
+
+  interface LyricsSearchResult {
+    song: SongData;
+    matchedLyricSnippet: string;
+    source: 'LRC' | 'EMBEDDED' | 'BOTH';
   }
 
   // ? Prompt menu related types
@@ -951,6 +959,7 @@ declare global {
     | 'LYRICS_SAVE_QUEUED'
     | 'LYRICS_SAVED_IN_LRC_FILE'
     | 'PENDING_LYRICS_SAVED'
+    | 'LYRICS_SAVE_FAILED'
     | 'LYRICS_TRANSLATION_SUCCESS'
     | 'LYRICS_TRANSLATION_TO_SAME_SOURCE_LANGUAGE'
     | 'LYRICS_CONVERT_SUCCESS'

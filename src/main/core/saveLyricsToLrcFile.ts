@@ -1,7 +1,8 @@
 import fs from 'fs/promises';
 import path from 'path';
 
-import { getUserSettings } from '@main/db/queries/settings';
+import { getUserSettings, saveUserSettings } from '@main/db/queries/settings';
+import { getSongByPath } from '@main/db/queries/songs';
 
 import { version } from '../../../package.json';
 import {
@@ -118,12 +119,18 @@ const convertLyricsToLrcFormat = (songLyrics: SongLyrics) => {
   return lyricsArr.join('\n');
 };
 
-const getLrcFileSaveDirectory = async (songPathWithoutProtocol: string, lrcFileName: string) => {
-  const userData = await getUserSettings();
-  const extensionDroppedLrcFileName = lrcFileName.replaceAll(path.extname(lrcFileName), '');
+const getLrcFileSaveDirectory = (
+  songPathWithoutProtocol: string,
+  lrcFileName: string,
+  customLrcFilesSaveLocation?: string | null
+) => {
+  const extensionDroppedLrcFileName = lrcFileName.slice(
+    0,
+    lrcFileName.length - path.extname(lrcFileName).length
+  );
   let saveDirectory: string;
 
-  if (userData.customLrcFilesSaveLocation) saveDirectory = userData.customLrcFilesSaveLocation;
+  if (customLrcFilesSaveLocation) saveDirectory = customLrcFilesSaveLocation;
   else {
     const songContainingFolderPath = path.dirname(songPathWithoutProtocol);
     saveDirectory = songContainingFolderPath;
@@ -133,13 +140,48 @@ const getLrcFileSaveDirectory = async (songPathWithoutProtocol: string, lrcFileN
 };
 
 const saveLyricsToLRCFile = async (songPathWithoutProtocol: string, songLyrics: SongLyrics) => {
+  const userData = await getUserSettings();
   const songFileName = path.basename(songPathWithoutProtocol);
-  const lrcFilePath = await getLrcFileSaveDirectory(songPathWithoutProtocol, songFileName);
+  const lrcFilePath = getLrcFileSaveDirectory(
+    songPathWithoutProtocol,
+    songFileName,
+    userData.customLrcFilesSaveLocation
+  );
 
   const lrcFormattedLyrics = convertLyricsToLrcFormat(songLyrics);
 
   await fs.writeFile(lrcFilePath, lrcFormattedLyrics);
   logger.debug(`Lyrics saved in LRC file successfully.`, { title: songLyrics.title, lrcFilePath });
+
+  const song = await getSongByPath(songPathWithoutProtocol).catch(() => undefined);
+  if (song) {
+    const { upsertSongLyrics, invalidateLyricsIndex } =
+      await import('@main/db/queries/lyricsIndex');
+    const result = await upsertSongLyrics(
+      song.id,
+      songPathWithoutProtocol,
+      userData.customLrcFilesSaveLocation
+    ).catch((error) => {
+      logger.error('Failed to re-index lyrics after LRC save', { error, songId: song.id });
+      return 'read-error' as const;
+    });
+    if (result === 'read-error') {
+      invalidateLyricsIndex();
+      await saveUserSettings({ isLyricIndexBuilt: false }).catch((error) =>
+        logger.error('Failed to persist lyric index retry state after LRC save', {
+          error,
+          songId: song.id
+        })
+      );
+      logger.warn('Lyric re-index after LRC save failed; will retry on next startup.', {
+        songId: song.id
+      });
+    }
+  } else {
+    logger.warn(`LRC written but song not found for re-index.`, {
+      songPath: songPathWithoutProtocol
+    });
+  }
 };
 
 export default saveLyricsToLRCFile;

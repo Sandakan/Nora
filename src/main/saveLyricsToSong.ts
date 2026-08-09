@@ -3,7 +3,7 @@ import path from 'path';
 import { appPreferences } from '../../package.json';
 import { updateCachedLyrics } from './core/getSongLyrics';
 import saveLyricsToLRCFile from './core/saveLyricsToLrcFile';
-import { getUserSettings } from './db/queries/settings';
+import { getUserSettings, saveUserSettings } from './db/queries/settings';
 import { removeDefaultAppProtocolFromFilePath } from './fs/resolveFilePaths';
 import logger from './logger';
 import { dataUpdateEvent, sendMessageToRenderer } from './main';
@@ -29,7 +29,19 @@ const saveLyricsToSong = async (songPathWithProtocol: string, songLyrics: SongLy
     const shouldSaveLrcFile =
       !isASupportedFormat || saveLyricsInLrcFilesForSupportedSongs || songLyrics.lyrics.isSynced;
 
-    if (shouldSaveLrcFile) saveLyricsToLRCFile(songPath, songLyrics);
+    if (shouldSaveLrcFile) {
+      // Await so a failed LRC write surfaces as an error instead of an
+      // unhandled rejection while the save flow reports success.
+      try {
+        await saveLyricsToLRCFile(songPath, songLyrics);
+      } catch (error) {
+        logger.error(`Failed to save lyrics to LRC file.`, { error, songPath });
+        return sendMessageToRenderer({
+          messageCode: 'LYRICS_SAVE_FAILED',
+          data: { title: songLyrics.title }
+        });
+      }
+    }
 
     if (isASupportedFormat) {
       try {
@@ -88,6 +100,7 @@ export const savePendingSongLyrics = async (currentSongPath = '', forceSave = fa
     pendingSongs: pendingSongLyrics.keys
   });
 
+  const { customLrcFilesSaveLocation } = await getUserSettings();
   const entries = pendingSongLyrics.entries();
 
   for (const [songPath, updatingTags] of entries) {
@@ -106,6 +119,33 @@ export const savePendingSongLyrics = async (currentSongPath = '', forceSave = fa
           data: { title: updatingTags.title }
         });
         dataUpdateEvent('songs/lyrics');
+
+        const { upsertSongLyrics, invalidateLyricsIndex } =
+          await import('@main/db/queries/lyricsIndex');
+        const { getSongByPath } = await import('@main/db/queries/songs');
+        const song = await getSongByPath(songPath).catch(() => undefined);
+        if (song) {
+          const result = await upsertSongLyrics(
+            song.id,
+            songPath,
+            customLrcFilesSaveLocation
+          ).catch((err) => {
+            logger.error('Failed to re-index lyrics after save', { err, songId: song.id });
+            return 'read-error' as const;
+          });
+          if (result === 'read-error') {
+            invalidateLyricsIndex();
+            await saveUserSettings({ isLyricIndexBuilt: false }).catch((err) =>
+              logger.error('Failed to persist lyric index retry state after save', {
+                err,
+                songId: song.id
+              })
+            );
+            logger.warn('Lyric re-index after pending save failed; will retry on next startup.', {
+              songId: song.id
+            });
+          }
+        }
         pendingSongLyrics.delete(songPath);
       } catch (error) {
         logger.error(`Failed to save pending song lyrics of a song. `, { error, songPath });
