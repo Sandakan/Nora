@@ -13,6 +13,7 @@ export interface ExportedUserPreferences {
     presetName: string;
     frequencyBands: number[];
     isEnabled: boolean;
+    preAmpValue: number;
   };
   ignoredArtists: number[];
   ignoredFeaturingArtists: number[];
@@ -36,7 +37,8 @@ export const exportUserPreferences = async (): Promise<ExportedUserPreferences> 
     equalizerPreset: equalizer[0] || {
       presetName: 'Default',
       frequencyBands: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      isEnabled: false
+      isEnabled: false,
+      preAmpValue: 0
     },
     ignoredArtists: ignored.map((item) => item.artistId),
     ignoredFeaturingArtists: ignoredFeating.map((item) => item.artistId),
@@ -65,7 +67,8 @@ export const importUserPreferences = async (preferences: ExportedUserPreferences
       await trx.insert(userEqualizerPreset).values({
         presetName: preferences.equalizerPreset.presetName,
         frequencyBands: preferences.equalizerPreset.frequencyBands,
-        isEnabled: preferences.equalizerPreset.isEnabled
+        isEnabled: preferences.equalizerPreset.isEnabled,
+        preAmpValue: preferences.equalizerPreset.preAmpValue ?? 0
       });
     }
 

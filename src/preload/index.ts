@@ -528,11 +528,12 @@ const settingsHelpers = {
     ipcRenderer.invoke('app/saveUserKeyboardShortcuts', shortcuts),
 
   // User Equalizer Preset
-  getUserEqualizerPreset: (): Promise<{ frequencyBands: number[] }> =>
+  getUserEqualizerPreset: (): Promise<{ frequencyBands: number[]; preAmpValue: number }> =>
     ipcRenderer.invoke('app/getUserEqualizerPreset'),
   saveUserEqualizerPreset: (presetData: {
     presetName?: string;
     frequencyBands?: number[];
+    preAmpValue?: number;
     isEnabled?: boolean;
   }): Promise<void> => ipcRenderer.invoke('app/saveUserEqualizerPreset', presetData),
 

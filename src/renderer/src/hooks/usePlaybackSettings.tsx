@@ -1,8 +1,10 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
+import type AudioPlayer from '../other/player';
 import toggleSongIsFavorite from '../other/toggleSongIsFavorite';
 import { dispatch, store } from '../store/store';
 import storage from '../utils/localStorage';
+import log from '../utils/log';
 import { useUserPreferences } from './useUserPreferences';
 
 /**
@@ -26,14 +28,73 @@ import { useUserPreferences } from './useUserPreferences';
  *   // Use in UI controls
  *   <button onClick={() => toggleRepeat()}>Repeat</button>
  *   <input onChange={(e) => updateVolume(e.target.value)} />
- *   updateEqualizerOptions({ preset: 'rock', bands: [...] });
+ *   updateEqualizerOptions({ '60': 1, preAmpValue: -2 });
  *   ```;
  *
- * @param player - The HTMLAudioElement instance
+ * @param player - The AudioPlayer instance (owns the audio graph, filters, and pre-amplification).
  * @returns Object containing playback setting functions
  */
-export function usePlaybackSettings(player: HTMLAudioElement) {
-  const { saveEqualizerPreset } = useUserPreferences();
+const EQUALIZER_SAVE_DEBOUNCE_MS = 300;
+
+const EQUALIZER_BAND_FILTERS: EqualizerBandFilters[] = [
+  'thirtyTwoHertzFilter',
+  'sixtyFourHertzFilter',
+  'hundredTwentyFiveHertzFilter',
+  'twoHundredFiftyHertzFilter',
+  'fiveHundredHertzFilter',
+  'thousandHertzFilter',
+  'twoThousandHertzFilter',
+  'fourThousandHertzFilter',
+  'eightThousandHertzFilter',
+  'sixteenThousandHertzFilter'
+];
+
+export function usePlaybackSettings(player: HTMLAudioElement, audioPlayer?: AudioPlayer) {
+  const { saveEqualizerPresetAsync, equalizerPreset } = useUserPreferences();
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingPresetRef = useRef<Equalizer | null>(null);
+  // Serialize equalizer saves: only one IPC save runs at a time, and each
+  // save always persists the newest preset, so an older save can never
+  // overwrite a newer one that completed first.
+  const saveChainRef = useRef<Promise<void>>(Promise.resolve());
+
+  // Hydrate the persisted equalizer preset into the audio graph at startup.
+  // The Settings page is not mounted on normal launch, so without this the
+  // stored preset never reaches the filter nodes until the user opens
+  // Settings. Applies only while no local change has happened yet: live
+  // edits go through updateEqualizerOptions, so a query refetch (from a
+  // completed save) must never roll back the audio graph to an older value.
+  const equalizerLocalEditCountRef = useRef(0);
+  useEffect(() => {
+    if (!audioPlayer || !equalizerPreset) return;
+    const { frequencyBands, preAmpValue } = equalizerPreset;
+    if (!Array.isArray(frequencyBands) || frequencyBands.length !== EQUALIZER_BAND_FILTERS.length)
+      return;
+    const preset = {} as Equalizer;
+    EQUALIZER_BAND_FILTERS.forEach((filterName, index) => {
+      preset[filterName] = frequencyBands[index] ?? 0;
+    });
+    preset.preAmpValue = typeof preAmpValue === 'number' ? preAmpValue : 0;
+    if (equalizerLocalEditCountRef.current === 0) {
+      audioPlayer.applyEqualizerPreset(preset);
+    }
+  }, [audioPlayer, equalizerPreset]);
+
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+      // Flush the latest pending preset so a shutdown within the debounce
+      // window does not silently lose the last equalizer change. Runs through
+      // the same serialized worker to avoid a duplicate write.
+      if (pendingPresetRef.current) {
+        const flush = pendingPresetRef.current;
+        pendingPresetRef.current = null;
+        saveChainRef.current = saveChainRef.current
+          .then(() => saveEqualizerPresetAsync(flush))
+          .catch(() => undefined);
+      }
+    };
+  }, [saveEqualizerPresetAsync]);
 
   const toggleRepeat = useCallback((newState?: RepeatTypes) => {
     const repeatState =
@@ -101,9 +162,26 @@ export function usePlaybackSettings(player: HTMLAudioElement) {
 
   const updateEqualizerOptions = useCallback(
     (options: Equalizer) => {
-      saveEqualizerPreset(options);
+      audioPlayer?.applyEqualizerPreset(options);
+      equalizerLocalEditCountRef.current += 1;
+      pendingPresetRef.current = options;
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+      saveTimeoutRef.current = setTimeout(() => {
+        saveTimeoutRef.current = null;
+        const toSave = pendingPresetRef.current;
+        if (!toSave) return;
+        pendingPresetRef.current = null;
+        // Serialize onto the chain so saves never run concurrently; each save
+        // persists the newest preset at fire time, so an older save cannot
+        // overwrite a newer one that completed first.
+        saveChainRef.current = saveChainRef.current
+          .then(() => saveEqualizerPresetAsync(toSave))
+          .catch((err) => {
+            log('Failed to save equalizer preset:', { err }, 'ERROR');
+          });
+      }, EQUALIZER_SAVE_DEBOUNCE_MS);
     },
-    [saveEqualizerPreset]
+    [saveEqualizerPresetAsync, audioPlayer]
   );
 
   return {

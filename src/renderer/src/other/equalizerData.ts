@@ -30,7 +30,8 @@ export const equalizerPresetsData: EqualizerPresetsData = [
       twoThousandHertzFilter: 3.3,
       fourThousandHertzFilter: 3.8,
       eightThousandHertzFilter: 3.3,
-      sixteenThousandHertzFilter: 1.3
+      sixteenThousandHertzFilter: 1.3,
+      preAmpValue: 0
     }
   },
   {
@@ -45,7 +46,8 @@ export const equalizerPresetsData: EqualizerPresetsData = [
       twoThousandHertzFilter: -0.4,
       fourThousandHertzFilter: -0.4,
       eightThousandHertzFilter: -0.4,
-      sixteenThousandHertzFilter: -0.4
+      sixteenThousandHertzFilter: -0.4,
+      preAmpValue: 0
     }
   },
   {
@@ -60,7 +62,8 @@ export const equalizerPresetsData: EqualizerPresetsData = [
       twoThousandHertzFilter: -0.4,
       fourThousandHertzFilter: -0.4,
       eightThousandHertzFilter: -0.4,
-      sixteenThousandHertzFilter: -0.4
+      sixteenThousandHertzFilter: -0.4,
+      preAmpValue: 0
     }
   },
   {
@@ -75,7 +78,8 @@ export const equalizerPresetsData: EqualizerPresetsData = [
       twoThousandHertzFilter: 0,
       fourThousandHertzFilter: -1.5,
       eightThousandHertzFilter: -3.7,
-      sixteenThousandHertzFilter: -5.3
+      sixteenThousandHertzFilter: -5.3,
+      preAmpValue: 0
     }
   },
   {
@@ -90,7 +94,8 @@ export const equalizerPresetsData: EqualizerPresetsData = [
       twoThousandHertzFilter: 2.6,
       fourThousandHertzFilter: 0.1,
       eightThousandHertzFilter: 0.1,
-      sixteenThousandHertzFilter: 0.2
+      sixteenThousandHertzFilter: 0.2,
+      preAmpValue: 0
     }
   },
   {
@@ -105,7 +110,8 @@ export const equalizerPresetsData: EqualizerPresetsData = [
       twoThousandHertzFilter: 0,
       fourThousandHertzFilter: -3.1,
       eightThousandHertzFilter: -3.1,
-      sixteenThousandHertzFilter: 0
+      sixteenThousandHertzFilter: 0,
+      preAmpValue: 0
     }
   },
   {
@@ -120,7 +126,8 @@ export const equalizerPresetsData: EqualizerPresetsData = [
       twoThousandHertzFilter: 1.1,
       fourThousandHertzFilter: -2.8,
       eightThousandHertzFilter: -4,
-      sixteenThousandHertzFilter: -5
+      sixteenThousandHertzFilter: -5,
+      preAmpValue: 0
     }
   },
   {
@@ -135,7 +142,8 @@ export const equalizerPresetsData: EqualizerPresetsData = [
       twoThousandHertzFilter: 0.4,
       fourThousandHertzFilter: 0.9,
       eightThousandHertzFilter: 3.5,
-      sixteenThousandHertzFilter: 4.3
+      sixteenThousandHertzFilter: 4.3,
+      preAmpValue: 0
     }
   },
   {
@@ -150,7 +158,8 @@ export const equalizerPresetsData: EqualizerPresetsData = [
       twoThousandHertzFilter: 1.1,
       fourThousandHertzFilter: -1.3,
       eightThousandHertzFilter: 1.8,
-      sixteenThousandHertzFilter: 2.3
+      sixteenThousandHertzFilter: 2.3,
+      preAmpValue: 0
     }
   },
   {
@@ -165,7 +174,8 @@ export const equalizerPresetsData: EqualizerPresetsData = [
       twoThousandHertzFilter: -0.6,
       fourThousandHertzFilter: 1.1,
       eightThousandHertzFilter: 2.6,
-      sixteenThousandHertzFilter: 3.5
+      sixteenThousandHertzFilter: 3.5,
+      preAmpValue: 0
     }
   },
   {
@@ -180,7 +190,8 @@ export const equalizerPresetsData: EqualizerPresetsData = [
       twoThousandHertzFilter: -1.8,
       fourThousandHertzFilter: -0.4,
       eightThousandHertzFilter: 2.6,
-      sixteenThousandHertzFilter: 4
+      sixteenThousandHertzFilter: 4,
+      preAmpValue: 0
     }
   },
   {
@@ -195,7 +206,8 @@ export const equalizerPresetsData: EqualizerPresetsData = [
       twoThousandHertzFilter: 3.7,
       fourThousandHertzFilter: 2.6,
       eightThousandHertzFilter: 1.3,
-      sixteenThousandHertzFilter: 0.4
+      sixteenThousandHertzFilter: 0.4,
+      preAmpValue: 0
     }
   },
   {
@@ -210,7 +222,8 @@ export const equalizerPresetsData: EqualizerPresetsData = [
       twoThousandHertzFilter: -1.6,
       fourThousandHertzFilter: -5.5,
       eightThousandHertzFilter: 4.5,
-      sixteenThousandHertzFilter: 0.4
+      sixteenThousandHertzFilter: 0.4,
+      preAmpValue: 0
     }
   },
   {
@@ -225,7 +238,8 @@ export const equalizerPresetsData: EqualizerPresetsData = [
       twoThousandHertzFilter: -0.4,
       fourThousandHertzFilter: -1.8,
       eightThousandHertzFilter: 1.8,
-      sixteenThousandHertzFilter: 0.4
+      sixteenThousandHertzFilter: 0.4,
+      preAmpValue: 0
     }
   },
   {
@@ -240,7 +254,8 @@ export const equalizerPresetsData: EqualizerPresetsData = [
       twoThousandHertzFilter: 0,
       fourThousandHertzFilter: 3.1,
       eightThousandHertzFilter: 5.7,
-      sixteenThousandHertzFilter: 2.9
+      sixteenThousandHertzFilter: 2.9,
+      preAmpValue: 0
     }
   },
   {
@@ -255,7 +270,8 @@ export const equalizerPresetsData: EqualizerPresetsData = [
       twoThousandHertzFilter: 3.3,
       fourThousandHertzFilter: 4,
       eightThousandHertzFilter: 2.3,
-      sixteenThousandHertzFilter: 3
+      sixteenThousandHertzFilter: 3,
+      preAmpValue: 0
     }
   },
   {
@@ -270,7 +286,8 @@ export const equalizerPresetsData: EqualizerPresetsData = [
       twoThousandHertzFilter: 1.5,
       fourThousandHertzFilter: 0,
       eightThousandHertzFilter: -0.9,
-      sixteenThousandHertzFilter: -1.1
+      sixteenThousandHertzFilter: -1.1,
+      preAmpValue: 0
     }
   },
   {
@@ -285,7 +302,8 @@ export const equalizerPresetsData: EqualizerPresetsData = [
       twoThousandHertzFilter: 2,
       fourThousandHertzFilter: 3.3,
       eightThousandHertzFilter: 1.8,
-      sixteenThousandHertzFilter: 0
+      sixteenThousandHertzFilter: 0,
+      preAmpValue: 0
     }
   },
   {
@@ -300,7 +318,8 @@ export const equalizerPresetsData: EqualizerPresetsData = [
       twoThousandHertzFilter: 2.1,
       fourThousandHertzFilter: 2.6,
       eightThousandHertzFilter: 2.3,
-      sixteenThousandHertzFilter: 3.5
+      sixteenThousandHertzFilter: 3.5,
+      preAmpValue: 0
     }
   },
   {
@@ -315,7 +334,8 @@ export const equalizerPresetsData: EqualizerPresetsData = [
       twoThousandHertzFilter: 2.6,
       fourThousandHertzFilter: 5.5,
       eightThousandHertzFilter: 6.6,
-      sixteenThousandHertzFilter: 7
+      sixteenThousandHertzFilter: 7,
+      preAmpValue: 0
     }
   },
   {
@@ -330,7 +350,8 @@ export const equalizerPresetsData: EqualizerPresetsData = [
       twoThousandHertzFilter: 5.5,
       fourThousandHertzFilter: 6,
       eightThousandHertzFilter: 6.5,
-      sixteenThousandHertzFilter: 6
+      sixteenThousandHertzFilter: 6,
+      preAmpValue: 0
     }
   },
   {
@@ -345,7 +366,8 @@ export const equalizerPresetsData: EqualizerPresetsData = [
       twoThousandHertzFilter: -1.6,
       fourThousandHertzFilter: -3,
       eightThousandHertzFilter: -4,
-      sixteenThousandHertzFilter: -4.5
+      sixteenThousandHertzFilter: -4.5,
+      preAmpValue: 0
     }
   },
   {
@@ -360,7 +382,8 @@ export const equalizerPresetsData: EqualizerPresetsData = [
       twoThousandHertzFilter: 5.2,
       fourThousandHertzFilter: 6,
       eightThousandHertzFilter: 6.5,
-      sixteenThousandHertzFilter: 7.2
+      sixteenThousandHertzFilter: 7.2,
+      preAmpValue: 0
     }
   },
   {
@@ -375,7 +398,8 @@ export const equalizerPresetsData: EqualizerPresetsData = [
       twoThousandHertzFilter: -2.6,
       fourThousandHertzFilter: -0.4,
       eightThousandHertzFilter: 1.8,
-      sixteenThousandHertzFilter: 2.6
+      sixteenThousandHertzFilter: 2.6,
+      preAmpValue: 0
     }
   },
   {
@@ -390,7 +414,8 @@ export const equalizerPresetsData: EqualizerPresetsData = [
       twoThousandHertzFilter: 4.8,
       fourThousandHertzFilter: 3.8,
       eightThousandHertzFilter: 1.8,
-      sixteenThousandHertzFilter: -0.6
+      sixteenThousandHertzFilter: -0.6,
+      preAmpValue: 0
     }
   },
   {
@@ -405,7 +430,8 @@ export const equalizerPresetsData: EqualizerPresetsData = [
       twoThousandHertzFilter: 4.8,
       fourThousandHertzFilter: 6,
       eightThousandHertzFilter: 6,
-      sixteenThousandHertzFilter: 5.7
+      sixteenThousandHertzFilter: 5.7,
+      preAmpValue: 0
     }
   },
   {
@@ -420,7 +446,8 @@ export const equalizerPresetsData: EqualizerPresetsData = [
       twoThousandHertzFilter: 2.1,
       fourThousandHertzFilter: 3.3,
       eightThousandHertzFilter: 3.8,
-      sixteenThousandHertzFilter: 5.2
+      sixteenThousandHertzFilter: 5.2,
+      preAmpValue: 0
     }
   },
   {
@@ -435,7 +462,8 @@ export const equalizerPresetsData: EqualizerPresetsData = [
       twoThousandHertzFilter: -3,
       fourThousandHertzFilter: -4,
       eightThousandHertzFilter: -4.8,
-      sixteenThousandHertzFilter: -5.5
+      sixteenThousandHertzFilter: -5.5,
+      preAmpValue: 0
     }
   },
   {
@@ -450,7 +478,8 @@ export const equalizerPresetsData: EqualizerPresetsData = [
       twoThousandHertzFilter: 2.6,
       fourThousandHertzFilter: 1,
       eightThousandHertzFilter: -0.3,
-      sixteenThousandHertzFilter: -2.1
+      sixteenThousandHertzFilter: -2.1,
+      preAmpValue: 0
     }
   }
 ];

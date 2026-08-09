@@ -611,6 +611,7 @@ declare global {
     fourThousandHertzFilter: number;
     eightThousandHertzFilter: number;
     sixteenThousandHertzFilter: number;
+    preAmpValue: number;
   }
 
   type EqualizerPresetsData = {

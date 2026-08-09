@@ -43,6 +43,7 @@ export function useUserPreferences() {
         | {
             presetName?: string;
             frequencyBands?: number[];
+            preAmpValue?: number;
             isEnabled?: boolean;
           }
     ) => {
@@ -60,10 +61,13 @@ export function useUserPreferences() {
           presetData.eightThousandHertzFilter,
           presetData.sixteenThousandHertzFilter
         ];
-        return window.api.settingsHelpers.saveUserEqualizerPreset({ frequencyBands });
+        return window.api.settingsHelpers.saveUserEqualizerPreset({
+          frequencyBands,
+          preAmpValue: presetData.preAmpValue
+        });
       }
       return window.api.settingsHelpers.saveUserEqualizerPreset(
-        presetData as { frequencyBands?: number[]; isEnabled?: boolean }
+        presetData as { frequencyBands?: number[]; preAmpValue?: number; isEnabled?: boolean }
       );
     },
     onSuccess: () => {
@@ -160,6 +164,7 @@ export function useUserPreferences() {
     // Shortcut mutate functions
     saveKeyboardShortcuts: saveKeyboardShortcutsMutation.mutate,
     saveEqualizerPreset: saveEqualizerPresetMutation.mutate,
+    saveEqualizerPresetAsync: saveEqualizerPresetMutation.mutateAsync,
     addIgnoredArtist: addIgnoredArtistMutation.mutate,
     removeIgnoredArtist: removeIgnoredArtistMutation.mutate,
     addIgnoredFeaturingArtist: addIgnoredFeaturingArtistMutation.mutate,
