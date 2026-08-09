@@ -1,18 +1,28 @@
 import { getPlaylistById, unlinkSongsFromPlaylist } from '@main/db/queries/playlists';
 
 import logger from '../logger';
-import { dataUpdateEvent } from '../main';
+import { dataUpdateEvent, sendMessageToRenderer } from '../main';
 
-const removeSongFromPlaylist = async (playlistId: number, songId: number) => {
+const removeSongFromPlaylist = async (
+  playlistId: number,
+  songId: number
+): Promise<{ success: boolean }> => {
   logger.debug(`Requested to remove a song from playlist.`, { playlistId, songId });
 
   const playlist = await getPlaylistById(playlistId);
+
+  if (playlist?.isSmart) {
+    logger.warn(`Cannot remove songs from a smart playlist.`, { playlistId, songId });
+    sendMessageToRenderer({ messageCode: 'CANNOT_MODIFY_SMART_PLAYLIST' });
+    return { success: false };
+  }
 
   if (playlist) {
     await unlinkSongsFromPlaylist([songId], playlist.id);
 
     dataUpdateEvent('playlists/deletedSong');
-    return logger.info(`song removed from playlist successfully.`, { playlistId, songId });
+    logger.info(`song removed from playlist successfully.`, { playlistId, songId });
+    return { success: true };
   }
   logger.error(`Failed to remove a song from playlist because playlist not found.`, { playlistId });
   throw new Error(`Playlist not found with the provided ID. ${playlistId}`);

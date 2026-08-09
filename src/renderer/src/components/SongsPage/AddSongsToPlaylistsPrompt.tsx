@@ -7,6 +7,7 @@ import { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import log from '../../utils/log';
 import Button from '../Button';
 import Checkbox from '../Checkbox';
 import Img from '../Img';
@@ -91,14 +92,20 @@ const AddSongsToPlaylistsPrompt = (props: AddSongsToPlaylistProp) => {
         // Special ID for Favorites playlist
         return window.api.playerControls
           .toggleLikeSongs(songIds, true)
-          .catch((err) => console.error(err));
+          .catch((err) => log('Failed to like songs', { error: err }, 'ERROR'));
       return window.api.playlistsData
         .addSongsToPlaylist(playlist.playlistId, songIds)
-        .catch((err) => console.error(err));
+        .catch((err) => {
+          log('Failed to add songs to playlist', { error: err, playlistId: playlist.playlistId }, 'ERROR');
+          return { success: false, addedCount: 0, existingCount: 0 };
+        });
     });
     Promise.all(promises)
-      .then((res) => {
-        console.log(res);
+      .then((results) => {
+        const successes = results.filter(
+          (r) => r && (r.success === true || 'likes' in r || 'dislikes' in r)
+        ).length;
+        if (successes === 0) return;
         return addNewNotifications([
           {
             id: 'songAddedtoPlaylists',
@@ -106,12 +113,12 @@ const AddSongsToPlaylistsPrompt = (props: AddSongsToPlaylistProp) => {
             iconName: 'playlist_add',
             content: t('addSongsToPlaylistsPrompt.songsAddedToPlaylists', {
               count: songIds.length,
-              playlistCount: selectedPlaylistsData.length
+              playlistCount: successes
             })
           }
         ]);
       })
-      .catch((err) => console.error(err))
+      .catch((err) => log('Failed to add songs to playlists', { error: err }, 'ERROR'))
       .finally(() => {
         changePromptMenuData(false);
       });
@@ -120,7 +127,9 @@ const AddSongsToPlaylistsPrompt = (props: AddSongsToPlaylistProp) => {
   const playlistComponents = useMemo(
     () =>
       playlists.length > 0
-        ? playlists.map((playlist) => {
+        ? playlists
+            .filter((p) => !p.isSmart)
+            .map((playlist) => {
             return (
               <SelectablePlaylist
                 name={playlist.name}
@@ -129,6 +138,8 @@ const AddSongsToPlaylistsPrompt = (props: AddSongsToPlaylistProp) => {
                 songs={playlist.songs}
                 artworkPaths={playlist.artworkPaths}
                 isArtworkAvailable={playlist.isArtworkAvailable}
+                isSmart={playlist.isSmart ?? false}
+                criteria={playlist.criteria ?? null}
                 isChecked={selectedPlaylistIds.includes(playlist.playlistId)}
                 playlistCheckedStateUpdateFunc={(state) => {
                   setSelectedPlaylistIds((prevData) => {

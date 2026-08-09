@@ -70,7 +70,13 @@ declare global {
     | 'app/player/skipForward'
     | 'app/player/skipBackward'
     | 'app/player/toggleSongPlaybackState'
-    | 'app/player/skipBackward';
+    | 'app/player/skipBackward'
+    | 'app/lastfm/getUserTopTracks'
+    | 'app/lastfm/getUserRecentTracks'
+    | 'app/lastfm/getUserLovedTracks'
+    | 'app/saveSmartPlaylistCriteria'
+    | 'app/refreshSmartPlaylist'
+    | 'app/syncLastFmToSmartPlaylist';
 
   interface ImageCoverData {
     format: string;
@@ -717,6 +723,35 @@ declare global {
     keyboardShortcuts: ShortcutCategoryList;
   }
 
+  // ? Smart Playlist types
+
+  type SmartPlaylistRuleField =
+    | 'genre'
+    | 'artist'
+    | 'album'
+    | 'year'
+    | 'playCount'
+    | 'skipCount'
+    | 'lastPlayed'
+    | 'isFavorite'
+    | 'isBlacklisted'
+    | 'duration'
+    | 'bitRate';
+
+  type SmartPlaylistRuleOperator = 'eq' | 'neq' | 'gt' | 'gte' | 'lt' | 'lte' | 'contains';
+
+  interface SmartPlaylistRule {
+    field: SmartPlaylistRuleField;
+    operator: SmartPlaylistRuleOperator;
+    value: unknown;
+  }
+
+  interface SmartPlaylistCriteria {
+    matchType: 'ALL' | 'ANY';
+    rules: SmartPlaylistRule[];
+    limit?: number;
+  }
+
   // ? Playlists related types
 
   interface SavablePlaylist {
@@ -726,6 +761,8 @@ declare global {
     songs: number[];
     createdDate: Date;
     isArtworkAvailable: boolean;
+    isSmart: boolean;
+    criteria: string | null;
   }
 
   interface Playlist extends SavablePlaylist {
@@ -942,6 +979,7 @@ declare global {
     | 'NO_MORE_SONG_PALETTES'
     | 'NO_MORE_GENRE_PALETTES'
     | 'SONG_BLACKLISTED'
+    | 'CANNOT_MODIFY_SMART_PLAYLIST'
     | 'SONG_WHITELISTED'
     | 'FOLDER_BLACKLISTED'
     | 'FOLDER_WHITELISTED'

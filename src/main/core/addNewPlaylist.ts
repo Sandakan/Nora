@@ -13,14 +13,14 @@ import { dataUpdateEvent } from '../main';
 import { storeArtworks } from '../other/artworks';
 import { convertToPlaylist } from '../utils/convert';
 
-const createNewPlaylist = async (name: string, songIds?: string[], artworkPath?: string) => {
+const createNewPlaylist = async (name: string, songIds?: string[], artworkPath?: string, isSmart = false) => {
   try {
     const buffer = await generateLocalArtworkBuffer(artworkPath || '');
 
     const { playlist: newPlaylist, artworks: newArtworks } = await db.transaction(async (trx) => {
       const artworks = await storeArtworks('playlist', buffer, trx);
 
-      const playlist = await createPlaylist(name, trx);
+      const playlist = await createPlaylist(name, isSmart, trx);
 
       if (artworks && artworks.length > 0) {
         await linkArtworkToPlaylist(playlist.id, artworks[0].id, trx);
@@ -48,7 +48,8 @@ const createNewPlaylist = async (name: string, songIds?: string[], artworkPath?:
 const addNewPlaylist = async (
   name: string,
   songIds?: string[],
-  artworkPath?: string
+  artworkPath?: string,
+  isSmart?: boolean
 ): Promise<{ success: boolean; message?: string; playlist?: Playlist }> => {
   logger.debug(`Requested a creation of new playlist with a name ${name}`);
   const playlist = await getPlaylistByName(name);
@@ -63,7 +64,7 @@ const addNewPlaylist = async (
     };
   }
 
-  const newPlaylistData = await createNewPlaylist(name, songIds, artworkPath);
+  const newPlaylistData = await createNewPlaylist(name, songIds, artworkPath, isSmart);
   if (!newPlaylistData) return { success: false };
 
   const newPlaylist = await getPlaylistById(newPlaylistData.newPlaylist.id);

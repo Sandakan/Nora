@@ -427,6 +427,37 @@ const albumsData = {
     ipcRenderer.invoke('app/getAlbumInfoFromLastFM', albumId)
 };
 
+// $ LAST.FM USER DATA
+const lastFmUserData = {
+  getUserTopTracks: (
+    username: string,
+    period?: 'overall' | '7day' | '1month' | '3month' | '6month' | '12month',
+    limit?: number
+  ): Promise<
+    { tracks: { name: string; artist: string; url: string; playCount: number }[] } | undefined
+  > => ipcRenderer.invoke('app/lastfm/getUserTopTracks', username, period, limit),
+  getUserRecentTracks: (
+    username: string,
+    limit?: number
+  ): Promise<
+    | {
+        tracks: {
+          name: string;
+          artist: string;
+          url: string;
+          playedAt: number | null;
+          isNowPlaying?: boolean;
+        }[];
+      }
+    | undefined
+  > => ipcRenderer.invoke('app/lastfm/getUserRecentTracks', username, limit),
+  getUserLovedTracks: (
+    username: string,
+    limit?: number
+  ): Promise<{ tracks: { name: string; artist: string; url: string }[] } | undefined> =>
+    ipcRenderer.invoke('app/lastfm/getUserLovedTracks', username, limit)
+};
+
 // $ PLAYLIST DATA AND CONTROLS
 const playlistsData = {
   getPlaylistData: (
@@ -447,11 +478,21 @@ const playlistsData = {
   addNewPlaylist: (
     playlistName: string,
     songIds?: number[],
-    artworkPath?: string
+    artworkPath?: string,
+    isSmart?: boolean
   ): Promise<{ success: boolean; message?: string; playlist?: Playlist }> =>
-    ipcRenderer.invoke('app/addNewPlaylist', playlistName, songIds, artworkPath),
-  addSongsToPlaylist: (playlistId: number, songIds: number[]): PromiseFunctionReturn =>
+    ipcRenderer.invoke('app/addNewPlaylist', playlistName, songIds, artworkPath, isSmart),
+  addSongsToPlaylist: (
+    playlistId: number,
+    songIds: number[]
+  ): Promise<{ success: boolean; addedCount: number; existingCount: number }> =>
     ipcRenderer.invoke('app/addSongsToPlaylist', playlistId, songIds),
+  syncLastFmToSmartPlaylist: (
+    playlistId: number,
+    songIds: number[],
+    source: { username: string; type: 'top' | 'recent' | 'loved'; period?: string; limit?: number }
+  ): Promise<{ success: boolean; count: number }> =>
+    ipcRenderer.invoke('app/syncLastFmToSmartPlaylist', playlistId, songIds, source),
   addArtworkToAPlaylist: (
     playlistId: number,
     artworkPath: string
@@ -459,7 +500,7 @@ const playlistsData = {
     ipcRenderer.invoke('app/addArtworkToAPlaylist', playlistId, artworkPath),
   renameAPlaylist: (playlistId: number, newName: string): Promise<void> =>
     ipcRenderer.invoke('app/renameAPlaylist', playlistId, newName),
-  removeSongFromPlaylist: (playlistId: number, songId: number): PromiseFunctionReturn =>
+  removeSongFromPlaylist: (playlistId: number, songId: number): Promise<{ success: boolean }> =>
     ipcRenderer.invoke('app/removeSongFromPlaylist', playlistId, songId),
   removePlaylists: (playlistIds: number[]) =>
     ipcRenderer.invoke('app/removePlaylists', playlistIds),
@@ -470,7 +511,16 @@ const playlistsData = {
   exportPlaylist: (playlistId: number): Promise<void> =>
     ipcRenderer.invoke('app/exportPlaylist', playlistId),
   importPlaylist: (targetPlaylistId?: number): Promise<void> =>
-    ipcRenderer.invoke('app/importPlaylist', targetPlaylistId)
+    ipcRenderer.invoke('app/importPlaylist', targetPlaylistId),
+  saveSmartPlaylistCriteria: (
+    playlistId: number,
+    criteria: SmartPlaylistCriteria
+  ): Promise<{ success: boolean; songIds: number[]; reason?: string }> =>
+    ipcRenderer.invoke('app/saveSmartPlaylistCriteria', playlistId, criteria),
+  refreshSmartPlaylist: (
+    playlistId: number
+  ): Promise<{ success: boolean; songIds: number[]; reason?: string; skipped?: string }> =>
+    ipcRenderer.invoke('app/refreshSmartPlaylist', playlistId)
 };
 
 const queue = {
@@ -621,6 +671,7 @@ export const api = {
   genresData,
   albumsData,
   playlistsData,
+  lastFmUserData,
   log,
   miniPlayer,
   settings,

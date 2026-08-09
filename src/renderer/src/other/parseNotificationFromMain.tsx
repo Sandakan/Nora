@@ -68,7 +68,8 @@ const notificationsFromMainConfig: AppNotificationConfig[] = [
       'PLAYLIST_IMPORT_FAILED_DUE_TO_SONGS_OUTSIDE_LIBRARY',
       'PLAYLIST_IMPORT_TO_EXISTING_PLAYLIST_FAILED',
       'PLAYLIST_CREATION_FAILED',
-      'SONG_REPARSE_FAILED'
+      'SONG_REPARSE_FAILED',
+      'CANNOT_MODIFY_SMART_PLAYLIST'
     ],
     iconName: 'error',
     iconClassName: 'material-icons-round-outlined'

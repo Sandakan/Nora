@@ -47,10 +47,12 @@ import sendAudioData from './core/sendAudioData';
 import sendAudioDataFromPath from './core/sendAudioDataFromPath';
 import sendPlaylistData from './core/sendPlaylistData';
 import sendSongID3Tags from './core/sendSongMetadata';
+import { syncLastFmToSmartPlaylist } from './core/syncLastFmToSmartPlaylist';
 import toggleBlacklistFolders from './core/toggleBlacklistFolders';
 import toggleLikeArtists from './core/toggleLikeArtists';
 import toggleLikeSongs from './core/toggleLikeSongs';
 import updateSongListeningData from './core/updateSongListeningData';
+import { db } from './db/db';
 import {
   addIgnoredArtist,
   addIgnoredDuplicate,
@@ -62,13 +64,20 @@ import {
   removeIgnoredFeaturingArtist
 } from './db/queries/ignoredItems';
 import { getDatabaseMetrics } from './db/queries/other';
+import { refreshSmartPlaylist } from './db/queries/playlist-rules';
+import { getPlaylistById, updatePlaylistCriteria } from './db/queries/playlists';
 import { getUserSettings, saveUserSettings } from './db/queries/settings';
+import { MAX_LASTFM_MATCH_IDS, MAX_LIMIT, VALID_PERIODS } from './db/queries/smartPlaylistConstants';
 import {
   getUserKeyboardShortcuts,
   saveUserKeyboardShortcuts,
   getUserEqualizerPreset,
   saveUserEqualizerPreset
 } from './db/queries/userPreferences';
+import {
+  validateLastFmSource,
+  validateSmartPlaylistCriteria
+} from './db/queries/validateSmartPlaylistCriteria';
 import { removeDefaultAppProtocolFromFilePath } from './fs/resolveFilePaths';
 import logger, { logFilePath } from './logger';
 import {
@@ -95,6 +104,9 @@ import { generatePalettes } from './other/generatePalette';
 import { flushScrobbleQueue } from './other/lastFm/flushScrobbleQueue';
 import getAlbumInfoFromLastFM from './other/lastFm/getAlbumInfoFromLastFM';
 import getSimilarTracks from './other/lastFm/getSimilarTracks';
+import getUserLovedTracks from './other/lastFm/getUserLovedTracks';
+import getUserRecentTracks from './other/lastFm/getUserRecentTracks';
+import getUserTopTracks from './other/lastFm/getUserTopTracks';
 import scrobbleSong from './other/lastFm/scrobbleSong';
 import sendNowPlayingSongDataToLastFM from './other/lastFm/sendNowPlayingSongDataToLastFM';
 import reParseSong from './parseSong/reParseSong';
@@ -112,6 +124,8 @@ import getTranslatedLyrics from './utils/getTranslatedLyrics';
 import resetLyrics from './utils/resetLyrics';
 import romanizeLyrics from './utils/romanizeLyrics';
 import { compare } from './utils/safeStorage';
+
+const smartPlaylistLocks = new Map<number, Promise<unknown>>();
 
 /**
  * Registers Electron IPC listeners and main-window event handlers for the provided window.
@@ -347,6 +361,39 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       getAlbumInfoFromLastFM(albumId)
     );
 
+    const allowedPeriods = new Set<string>(VALID_PERIODS);
+    const clampLimit = (n: number | undefined): number => {
+      if (typeof n !== 'number' || !Number.isFinite(n)) return 50;
+      return Math.min(MAX_LIMIT, Math.max(1, Math.floor(n)));
+    };
+
+    ipcMain.handle(
+      'app/lastfm/getUserTopTracks',
+      (
+        _,
+        username: string,
+        period?: 'overall' | '7day' | '1month' | '3month' | '6month' | '12month',
+        limit?: number
+      ) => {
+        const cleanUser = typeof username === 'string' ? username.trim() : '';
+        if (!cleanUser) return undefined;
+        const cleanPeriod = period && allowedPeriods.has(period) ? period : 'overall';
+        return getUserTopTracks(cleanUser, cleanPeriod, clampLimit(limit));
+      }
+    );
+
+    ipcMain.handle('app/lastfm/getUserRecentTracks', (_, username: string, limit?: number) => {
+      const cleanUser = typeof username === 'string' ? username.trim() : '';
+      if (!cleanUser) return undefined;
+      return getUserRecentTracks(cleanUser, clampLimit(limit));
+    });
+
+    ipcMain.handle('app/lastfm/getUserLovedTracks', (_, username: string, limit?: number) => {
+      const cleanUser = typeof username === 'string' ? username.trim() : '';
+      if (!cleanUser) return undefined;
+      return getUserLovedTracks(cleanUser, clampLimit(limit));
+    });
+
     ipcMain.handle('app/getSongListeningData', (_, songIds: number[]) => getListeningData(songIds));
 
     ipcMain.handle(
@@ -444,8 +491,10 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
 
     ipcMain.handle(
       'app/addNewPlaylist',
-      (_, playlistName: string, songIds?: string[], artworkPath?: string) =>
-        addNewPlaylist(playlistName, songIds, artworkPath)
+      (_, playlistName: string, songIds?: string[], artworkPath?: string, isSmart?: boolean) => {
+        const safeIsSmart = typeof isSmart === 'boolean' ? isSmart : undefined;
+        return addNewPlaylist(playlistName, songIds, artworkPath, safeIsSmart);
+      }
     );
 
     ipcMain.handle('app/removePlaylists', (_, playlistIds: number[]) =>
@@ -456,6 +505,67 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       addSongsToPlaylist(playlistId, songIds)
     );
 
+    ipcMain.handle(
+      'app/syncLastFmToSmartPlaylist',
+      (
+        _,
+        playlistId: number,
+        songIds: number[],
+        source: {
+          username: string;
+          type: 'top' | 'recent' | 'loved';
+          period?: string;
+          limit?: number;
+        }
+      ) => {
+        if (
+          typeof playlistId !== 'number' ||
+          !Number.isSafeInteger(playlistId) ||
+          playlistId <= 0
+        ) {
+          logger.error('Invalid syncLastFmToSmartPlaylist payload', { playlistId });
+          return { success: false as const, count: 0 };
+        }
+        if (
+          !Array.isArray(songIds) ||
+          songIds.length === 0 ||
+          songIds.length > MAX_LASTFM_MATCH_IDS ||
+          !songIds.every((id) => Number.isSafeInteger(id) && id > 0)
+        ) {
+          logger.error('Invalid songIds in syncLastFmToSmartPlaylist', {
+            playlistId,
+            count: Array.isArray(songIds) ? songIds.length : undefined
+          });
+          return { success: false as const, count: 0 };
+        }
+        if (!source || typeof source !== 'object') {
+          logger.error('Invalid source in syncLastFmToSmartPlaylist', { playlistId });
+          return { success: false as const, count: 0 };
+        }
+        const sourceValidation = validateLastFmSource(source);
+        if (!sourceValidation.success) {
+          logger.error('Invalid source in syncLastFmToSmartPlaylist', {
+            playlistId,
+            reason: sourceValidation.reason
+          });
+          return { success: false as const, count: 0 };
+        }
+        const prev = smartPlaylistLocks.get(playlistId) ?? Promise.resolve();
+        const locked = prev
+          .then(() => syncLastFmToSmartPlaylist(playlistId, songIds, source))
+          .catch((error) => {
+            logger.error('syncLastFmToSmartPlaylist failed', { playlistId, error });
+            return { success: false as const, count: 0 };
+          })
+          .finally(() => {
+            if (smartPlaylistLocks.get(playlistId) === locked) {
+              smartPlaylistLocks.delete(playlistId);
+            }
+          });
+        smartPlaylistLocks.set(playlistId, locked);
+        return locked;
+      }
+    );
     ipcMain.handle('app/removeSongFromPlaylist', (_, playlistId: number, songId: number) =>
       removeSongFromPlaylist(playlistId, songId)
     );
@@ -467,6 +577,127 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     ipcMain.handle('app/renameAPlaylist', (_, playlistId: number, newName: string) =>
       renameAPlaylist(playlistId, newName)
     );
+
+    ipcMain.handle(
+      'app/saveSmartPlaylistCriteria',
+      async (_, playlistId: number, criteria: SmartPlaylistCriteria) => {
+        if (
+          typeof playlistId !== 'number' ||
+          !Number.isSafeInteger(playlistId) ||
+          playlistId <= 0
+        ) {
+          logger.error('Invalid saveSmartPlaylistCriteria payload', { playlistId });
+          return { songIds: [], success: false as const, reason: 'invalid-payload' as const };
+        }
+        const validation = validateSmartPlaylistCriteria(criteria);
+        if (!validation.success) {
+          logger.error('Invalid smart playlist criteria', {
+            playlistId,
+            reason: validation.reason
+          });
+          return { songIds: [], success: false as const, reason: validation.reason };
+        }
+        const prev = smartPlaylistLocks.get(playlistId) ?? Promise.resolve();
+        const locked = prev
+          .then(async () => {
+            try {
+              const playlist = await getPlaylistById(playlistId);
+              if (!playlist) {
+                return {
+                  songIds: [],
+                  success: false as const,
+                  reason: 'playlist-not-found' as const
+                };
+              }
+              if (!playlist.isSmart) {
+                return {
+                  songIds: [],
+                  success: false as const,
+                  reason: 'not-smart-playlist' as const
+                };
+              }
+              let songIds: number[] = [];
+              await db.transaction(async (trx) => {
+                await updatePlaylistCriteria(playlistId, criteria, trx);
+                songIds = await refreshSmartPlaylist(playlistId, criteria, trx);
+              });
+              return { songIds, success: true as const };
+            } catch (error) {
+              logger.error('Failed to save smart playlist criteria', { playlistId, error });
+              return {
+                songIds: [],
+                success: false as const,
+                reason: 'transaction-failed' as const
+              };
+            }
+          })
+          .finally(() => {
+            if (smartPlaylistLocks.get(playlistId) === locked) {
+              smartPlaylistLocks.delete(playlistId);
+            }
+          });
+        smartPlaylistLocks.set(playlistId, locked);
+        return locked;
+      }
+    );
+
+    ipcMain.handle('app/refreshSmartPlaylist', async (_, playlistId: number) => {
+      if (typeof playlistId !== 'number' || !Number.isSafeInteger(playlistId) || playlistId <= 0) {
+        logger.error('Invalid refreshSmartPlaylist payload', { playlistId });
+        return { songIds: [], success: false as const, reason: 'invalid-payload' as const };
+      }
+      const prev = smartPlaylistLocks.get(playlistId) ?? Promise.resolve();
+      const locked = prev
+        .then(async () => {
+          const playlist = await getPlaylistById(playlistId);
+          if (!playlist?.criteria)
+            return { songIds: [], success: false as const, reason: 'no-criteria' as const };
+          let criteria: SmartPlaylistCriteria;
+          try {
+            const parsed = JSON.parse(playlist.criteria);
+            if (parsed.lastFmSource !== undefined) {
+              const sourceValidation = validateLastFmSource(parsed.lastFmSource);
+              if (!sourceValidation.success) {
+                logger.error('Smart playlist lastFmSource shape invalid', {
+                  playlistId,
+                  reason: sourceValidation.reason
+                });
+                return {
+                  songIds: [],
+                  success: false as const,
+                  reason: 'invalid-lastfm-source' as const
+                };
+              }
+              return { songIds: [], success: true as const, skipped: 'lastfm-synced' as const };
+            }
+            const validation = validateSmartPlaylistCriteria(parsed);
+            if (!validation.success) {
+              logger.error('Smart playlist criteria shape invalid', {
+                playlistId,
+                reason: validation.reason
+              });
+              return { songIds: [], success: false as const, reason: 'invalid-criteria' as const };
+            }
+            criteria = parsed as SmartPlaylistCriteria;
+          } catch (error) {
+            logger.error('Invalid smart playlist criteria JSON', { playlistId, error });
+            return { songIds: [], success: false as const, reason: 'corrupt-json' as const };
+          }
+          const songIds = await refreshSmartPlaylist(playlistId, criteria);
+          return { songIds, success: true as const };
+        })
+        .catch((error) => {
+          logger.error('Refresh smart playlist failed', { playlistId, error });
+          return { songIds: [], success: false as const, reason: 'refresh-failed' as const };
+        })
+        .finally(() => {
+          if (smartPlaylistLocks.get(playlistId) === locked) {
+            smartPlaylistLocks.delete(playlistId);
+          }
+        });
+      smartPlaylistLocks.set(playlistId, locked);
+      return locked;
+    });
 
     ipcMain.handle('app/clearSongHistory', () => clearSongHistory());
 

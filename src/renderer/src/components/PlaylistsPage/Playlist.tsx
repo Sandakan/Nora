@@ -2,7 +2,7 @@ import { SpecialPlaylists } from '@common/playlists.enum';
 import { store } from '@renderer/store/store';
 import { useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
-import { lazy, useCallback, useContext, useMemo } from 'react';
+import { Suspense, lazy, useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import DefaultPlaylistCover from '../../assets/images/webp/playlist_cover_default.webp';
@@ -15,6 +15,7 @@ import MultipleArtworksCover from './MultipleArtworksCover';
 
 const ConfirmDeletePlaylistsPrompt = lazy(() => import('./ConfirmDeletePlaylistsPrompt'));
 const RenamePlaylistPrompt = lazy(() => import('./RenamePlaylistPrompt'));
+const SmartPlaylistCriteriaEditor = lazy(() => import('../SmartPlaylistCriteriaEditor'));
 
 interface PlaylistProp extends Playlist {
   index: number;
@@ -208,6 +209,14 @@ export const Playlist = (props: PlaylistProp) => {
           }
           toggleMultipleSelections(false);
         }
+      },
+      {
+        label: t('playlist.editCriteria'),
+        iconName: 'tune',
+        handlerFunction: () => {
+          changePromptMenuData(true, <Suspense><SmartPlaylistCriteriaEditor playlist={props} /></Suspense>);
+        },
+        isDisabled: isMultipleSelectionsEnabled || !props.isSmart
       },
       {
         label: 'Hr',
@@ -413,7 +422,12 @@ export const Playlist = (props: PlaylistProp) => {
             iconClassName="text-4xl! leading-none! text-inherit!"
           />
         )}
-        <div className="playlist-cover-container h-full cursor-pointer overflow-hidden">
+        <div className="playlist-cover-container relative h-full cursor-pointer overflow-hidden">
+          {props.isSmart && (
+            <span className="material-icons-round absolute right-1.5 top-1.5 z-10 text-xl text-font-color-white drop-shadow-md dark:text-font-color-white">
+              auto_awesome
+            </span>
+          )}
           {preferences?.enableArtworkFromSongCovers && props.songs.length > 2 ? (
             <div className="relative aspect-square w-full">
               <MultipleArtworksCover

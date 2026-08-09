@@ -6,21 +6,26 @@ import { songFilterOptions, songSortOptions } from '@renderer/components/SongsPa
 import TitleContainer from '@renderer/components/TitleContainer';
 import VirtualizedList from '@renderer/components/VirtualizedList';
 import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
+import useLastFmConsumer from '@renderer/hooks/useLastFmConsumer';
 import useSelectAllHandler from '@renderer/hooks/useSelectAllHandler';
 import { queryClient } from '@renderer/index';
 import { playlistQuery } from '@renderer/queries/playlists';
 import { songQuery } from '@renderer/queries/songs';
 import { store } from '@renderer/store/store';
-import storage from '@renderer/utils/localStorage';
 import { songSearchSchema } from '@renderer/utils/zod/songSchema';
+import storage from '@renderer/utils/localStorage';
+import log from '@renderer/utils/log';
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
-import { lazy, useCallback, useContext, useEffect } from 'react';
+import { Suspense, lazy, useCallback, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 const SensitiveActionConfirmPrompt = lazy(
   () => import('@renderer/components/SensitiveActionConfirmPrompt')
+);
+const SmartPlaylistCriteriaEditor = lazy(
+  () => import('@renderer/components/SmartPlaylistCriteriaEditor')
 );
 
 export const Route = createFileRoute('/main-player/playlists/$playlistId')({
@@ -34,12 +39,9 @@ export const Route = createFileRoute('/main-player/playlists/$playlistId')({
 });
 
 /**
- * Render the playlist detail page with playlist metadata, a virtualized list of songs, and controls
- * for playing, queuing, sorting, filtering, and playlist-specific actions.
+ * Render the playlist detail page with playlist metadata, a virtualized list of songs, and controls for playing, queuing, sorting, filtering, and playlist-specific actions.
  *
- * The component reads the current playlist ID and search params, persists the chosen sort order,
- * loads playlist and song data, and provides UI handlers for play, shuffle, add-to-queue, clear
- * history, and removing songs from the playlist.
+ * The component reads the current playlist ID and search params, persists the chosen sort order, loads playlist and song data, and provides UI handlers for play, shuffle, add-to-queue, clear history, and removing songs from the playlist.
  *
  * @returns The JSX element for the playlist detail page.
  */
@@ -113,7 +115,7 @@ function PlaylistInfoPage() {
                     }
                   ])
               )
-              .catch((err) => console.error(err))
+              .catch((err) => log('Failed to clear song history', { error: err }, 'ERROR'))
         }}
       />
     );
@@ -159,6 +161,80 @@ function PlaylistInfoPage() {
     [createQueue, playlistData.playlistId, playlistSongs]
   );
 
+  const { syncToSmartPlaylist } = useLastFmConsumer();
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const refreshSmartPlaylist = useCallback(async () => {
+    if (isSyncing) return;
+    setIsSyncing(true);
+    try {
+      const result = await window.api.playlistsData.refreshSmartPlaylist(playlistData.playlistId);
+      if (!result.success) {
+        addNewNotifications([
+          {
+            id: 'smartPlaylistRefreshFailed',
+            duration: 5000,
+            content: t('playlist.refreshFailed')
+          }
+        ]);
+        return;
+      }
+      queryClient.invalidateQueries({ queryKey: playlistQuery._def });
+      // A Last.fm-managed playlist is skipped, not refreshed — don't claim success.
+      if (result.skipped === 'lastfm-synced') return;
+      addNewNotifications([
+        {
+          id: 'smartPlaylistRefreshed',
+          duration: 5000,
+          content: t('playlist.refreshSuccess')
+        }
+      ]);
+    } catch (error) {
+      log('Failed to refresh smart playlist', { error }, 'ERROR');
+      addNewNotifications([
+        {
+          id: 'smartPlaylistRefreshFailed',
+          duration: 5000,
+          content: t('playlist.refreshFailed')
+        }
+      ]);
+    } finally {
+      setIsSyncing(false);
+    }
+  }, [addNewNotifications, isSyncing, playlistData.playlistId, queryClient, t]);
+
+  const openCriteriaEditor = useCallback(() => {
+    changePromptMenuData(true, <Suspense><SmartPlaylistCriteriaEditor playlist={playlistData} /></Suspense>);
+  }, [changePromptMenuData, playlistData]);
+
+  const syncFromLastFm = useCallback(async () => {
+    if (isSyncing) return;
+    const userSettings = store.getState().localStorage.userSettings;
+    const username = userSettings?.lastFmSessionName;
+    if (!username) {
+      addNewNotifications([
+        {
+          id: 'lastFmNotConnected',
+          duration: 5000,
+          content: t('settingsPage.lastFmNotConnected')
+        }
+      ]);
+      return;
+    }
+
+    setIsSyncing(true);
+    try {
+      const result = await syncToSmartPlaylist(playlistData.playlistId, username, 'top', 'overall', 50);
+      if (result) {
+        queryClient.invalidateQueries({ queryKey: playlistQuery._def });
+      }
+    } catch (error) {
+      log('Failed to sync smart playlist from Last.fm', { error }, 'ERROR');
+    } finally {
+      setIsSyncing(false);
+    }
+  }, [addNewNotifications, isSyncing, playlistData.playlistId, queryClient, syncToSmartPlaylist, t]);
+
   return (
     <MainContainer
       className="main-container playlist-info-page-container h-full! px-8 pr-0! pb-0!"
@@ -198,6 +274,27 @@ function PlaylistInfoPage() {
             iconName: 'add',
             clickHandler: addSongsToQueue,
             isDisabled: !(playlistData.songs && playlistData.songs.length > 0)
+          },
+          {
+            label: t('playlist.refreshPlaylist'),
+            iconName: 'refresh',
+            clickHandler: refreshSmartPlaylist,
+            isVisible: playlistData.isSmart,
+            isDisabled: isSyncing
+          },
+          {
+            label: t('playlist.editCriteria'),
+            iconName: 'tune',
+            clickHandler: openCriteriaEditor,
+            isVisible: playlistData.isSmart,
+            isDisabled: isSyncing
+          },
+          {
+            label: t('playlist.syncFromLastFm'),
+            iconName: 'auto_awesome',
+            clickHandler: syncFromLastFm,
+            isVisible: playlistData.isSmart,
+            isDisabled: isSyncing
           }
         ]}
         dropdowns={[
@@ -247,6 +344,7 @@ function PlaylistInfoPage() {
                 {
                   label: t('playlistsPage.removeFromThisPlaylist'),
                   iconName: 'playlist_remove',
+                  isDisabled: playlistData.isSmart,
                   handlerFunction: () =>
                     window.api.playlistsData
                       .removeSongFromPlaylist(playlistData.playlistId, item.songId)
@@ -264,7 +362,7 @@ function PlaylistInfoPage() {
                             }
                           ])
                       )
-                      .catch((err) => console.error(err))
+                      .catch((err) => log('Failed to remove song from playlist', { error: err }, 'ERROR'))
                 }
               ]}
             />

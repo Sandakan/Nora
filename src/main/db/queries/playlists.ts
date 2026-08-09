@@ -250,10 +250,21 @@ export const getHistoryPlaylistWithSongPaths = async (trx: DB | DBTransaction = 
   };
 };
 
-export const createPlaylist = async (name: string, trx: DB | DBTransaction = db) => {
-  const [newPlaylist] = await trx.insert(playlists).values({ name }).returning();
+export const createPlaylist = async (name: string, isSmart = false, trx: DB | DBTransaction = db) => {
+  const [newPlaylist] = await trx.insert(playlists).values({ name, isSmart }).returning();
 
   return newPlaylist;
+};
+
+export const updatePlaylistCriteria = async (
+  playlistId: number,
+  criteria: SmartPlaylistCriteria,
+  trx: DB | DBTransaction = db
+) => {
+  return await trx
+    .update(playlists)
+    .set({ criteria: JSON.stringify(criteria), isSmart: true })
+    .where(eq(playlists.id, playlistId));
 };
 
 export const updatePlaylistName = async (
