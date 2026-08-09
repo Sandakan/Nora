@@ -27,7 +27,7 @@ export const convertToSongData = (song: GetAllSongsReturnType[number]): SongData
   // Added date
   const addedDate = song.createdAt ? new Date(song.createdAt).getTime() : 0;
 
-  const artworks = song.artworks.map((a) => a.artwork);
+  const artworks = song.artworks?.map((a) => a.artwork) ?? [];
 
   const albumArtists = albumObj
     ? (albumObj.artists?.map((a) => ({ artistId: a.artist.id, name: a.artist.name })) ?? [])
