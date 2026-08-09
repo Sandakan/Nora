@@ -135,6 +135,8 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       mainWindow.isMaximized() ? mainWindow.unmaximize() : mainWindow.maximize()
     );
 
+    ipcMain.handle('app/isMaximized', () => mainWindow.isMaximized());
+
     ipcMain.on('app/hide', () => mainWindow.hide());
 
     ipcMain.on('app/show', () => mainWindow.show());

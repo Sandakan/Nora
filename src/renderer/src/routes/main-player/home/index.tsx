@@ -17,6 +17,7 @@ import { homeQuery } from '@renderer/queries/home';
 import { songQuery } from '@renderer/queries/songs';
 import storage from '@renderer/utils/localStorage';
 // import DataFetchingImage from '../../../assets/images/svg/Umbrella_Monochromatic.svg';
+import SongListSkeleton from '@renderer/components/SongListSkeleton';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { lazy, useCallback, useContext, useMemo, useRef } from 'react';
@@ -27,6 +28,7 @@ import historyPlaylistCoverImage from '../../../assets/images/webp/history-playl
 
 export const Route = createFileRoute('/main-player/home/')({
   component: HomePage,
+  pendingComponent: SongListSkeleton,
   loader: async () => {
     await queryClient.ensureQueryData(
       songQuery.all({ sortType: 'dateAddedDescending', start: 0, end: 30 })

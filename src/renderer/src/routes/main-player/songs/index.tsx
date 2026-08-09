@@ -13,6 +13,7 @@ import { songQuery } from '@renderer/queries/songs';
 import { store } from '@renderer/store/store';
 import storage from '@renderer/utils/localStorage';
 import { songSearchSchema } from '@renderer/utils/zod/songSchema';
+import SongListSkeleton from '@renderer/components/SongListSkeleton';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
@@ -35,7 +36,8 @@ export const Route = createFileRoute('/main-player/songs/')({
       })
     );
   },
-  component: SongsPage
+  component: SongsPage,
+  pendingComponent: SongListSkeleton
 });
 
 const AddMusicFoldersPrompt = lazy(
@@ -175,7 +177,7 @@ function SongsPage() {
       <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-8 flex items-center pr-4 text-3xl font-medium">
         <div className="container flex">
           {t('common.song_other')}{' '}
-          <div className="other-stats-container text-font-color-black dark:text-font-color-white ml-12 flex items-center text-xs">
+          <div className="other-stats-container text-font-color-black dark:text-font-color-white ml-4 flex shrink-0 items-center text-xs sm:ml-12">
             {isMultipleSelectionEnabled ? (
               <div className="text-font-color-highlight dark:text-dark-font-color-highlight text-sm">
                 {t('common.selectionWithCount', {

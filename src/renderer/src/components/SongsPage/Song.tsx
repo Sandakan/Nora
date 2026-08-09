@@ -640,7 +640,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
             src={artworkPaths?.optimizedArtworkPath || DefaultSongCover}
             loading="eager"
             alt="Song cover"
-            className={`aspect-square max-h-full min-w-full object-contain py-[0.1rem] transition-[filter]! duration-300 group-focus-within:brightness-50 group-hover:brightness-50 ${
+            className={`max-h-full min-w-full object-contain py-[0.1rem] transition-[filter]! duration-300 group-focus-within:brightness-50 group-hover:brightness-50 ${
               isSongPlaying ? 'brightness-50' : ''
             }`}
             enableImgFadeIns={false}

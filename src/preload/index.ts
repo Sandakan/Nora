@@ -20,7 +20,16 @@ const windowControls = {
   changePlayerType: (type: PlayerTypes): Promise<void> =>
     ipcRenderer.invoke('app/changePlayerType', type),
   onWindowFocus: (callback: (e: unknown) => void) => ipcRenderer.on('app/focused', callback),
-  onWindowBlur: (callback: (e: unknown) => void) => ipcRenderer.on('app/blurred', callback)
+  onWindowBlur: (callback: (e: unknown) => void) => ipcRenderer.on('app/blurred', callback),
+  onMaximized: (callback: (e: unknown) => void) => {
+    ipcRenderer.on('app/maximized', callback);
+    return () => { ipcRenderer.removeListener('app/maximized', callback); };
+  },
+  onUnmaximized: (callback: (e: unknown) => void) => {
+    ipcRenderer.on('app/unmaximized', callback);
+    return () => { ipcRenderer.removeListener('app/unmaximized', callback); };
+  },
+  isMaximized: (): Promise<boolean> => ipcRenderer.invoke('app/isMaximized')
 };
 
 const theme = {

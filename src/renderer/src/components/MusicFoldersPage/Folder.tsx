@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Button from '../Button';
-import Img from '../Img';
 
 const RemoveFolderConfirmationPrompt = lazy(() => import('./RemoveFolderConfirmationPrompt'));
 const BlacklistFolderConfrimPrompt = lazy(() => import('./BlacklistFolderConfirmPrompt'));
@@ -184,7 +183,7 @@ const Folder = (props: FolderProps) => {
           <div className="bg-background-color-1 text-font-color-highlight group-even:bg-background-color-2/75 group-hover:bg-background-color-1 dark:bg-dark-background-color-1 dark:text-dark-background-color-3 dark:group-even:bg-dark-background-color-2/50 dark:group-hover:bg-dark-background-color-1 relative mr-4 ml-1 h-fit rounded-2xl px-3">
             {index + 1}
           </div>
-          <Img src={FolderImg} loading="eager" className="w-8 self-center" />
+          <span className="material-icons-round text-3xl self-center">folder</span>
           <div className="folder-info ml-6 flex flex-col">
             <span className="folder-name" title={`${prevDir}\${folderName}`}>
               {folderName}

@@ -139,6 +139,18 @@ function setupQueueStoreSync(queue: PlayerQueue) {
     const positionChanged = queue.position !== storeQueue.position;
 
     if (queueChanged || positionChanged) {
+      // Clamp position to valid range to prevent stale state after clear+repopulate
+      const safePosition =
+        storeQueue.position >= 0 && storeQueue.position < storeSongIds.length
+          ? storeQueue.position
+          : 0;
+
+      // When the clamp changed the position, persist the corrected value back to
+      // the store and localStorage. Otherwise every later store update sees
+      // queue.position !== storeQueue.position and calls replaceQueue() again,
+      // looping and leaving state.localStorage.queue.position invalid.
+      const positionWasClamped = safePosition !== storeQueue.position;
+
       // Set flag to prevent handlers from updating store
       isSyncingFromStore = true;
 
@@ -146,10 +158,24 @@ function setupQueueStoreSync(queue: PlayerQueue) {
         // Update queue from store
         queue.replaceQueue(
           storeSongIds,
-          storeQueue.position,
+          safePosition,
           false, // Don't clear shuffle history
           storeQueue.metadata
         );
+
+        if (positionWasClamped) {
+          store.setState((state) => ({
+            ...state,
+            localStorage: {
+              ...state.localStorage,
+              queue: {
+                ...state.localStorage.queue,
+                position: safePosition
+              }
+            }
+          }));
+          storage.queue.setQueue(queue.toJSON());
+        }
       } finally {
         // Reset flag
         isSyncingFromStore = false;

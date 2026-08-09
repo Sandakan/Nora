@@ -7,6 +7,7 @@ import Button from '@renderer/components/Button';
 import Img from '@renderer/components/Img';
 import MainContainer from '@renderer/components/MainContainer';
 import Song from '@renderer/components/SongsPage/Song';
+import SongListSkeleton from '@renderer/components/SongListSkeleton';
 import VirtualizedList from '@renderer/components/VirtualizedList';
 import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
 import useSelectAllHandler from '@renderer/hooks/useSelectAllHandler';
@@ -34,7 +35,8 @@ import { type VirtuosoHandle } from 'react-virtuoso';
 // eslint-disable-next-line react/only-export-components
 export const Route = createFileRoute('/main-player/queue/')({
   component: RouteComponent,
-  validateSearch: baseInfoPageSearchParamsSchema
+  validateSearch: baseInfoPageSearchParamsSchema,
+  pendingComponent: SongListSkeleton
 });
 
 /**
@@ -63,7 +65,7 @@ function RouteComponent() {
   const { t } = useTranslation();
   const { scrollTopOffset } = Route.useSearch();
 
-  const { data: queuedSongs } = useQuery({
+  const { data: queuedSongs, isPending } = useQuery({
     ...songQuery.queue(currentQueue),
     enabled: currentQueue.length > 0
   });
@@ -322,11 +324,15 @@ function RouteComponent() {
               </div>
             </div>
           )}
-          <div
-            className={`songs-container overflow-auto ${queuedSongs && queuedSongs?.length > 0 ? 'h-full' : 'h-0'}`}
-          >
-            {queuedSongs &&
-              queuedSongs.length > 0 && (
+          {currentQueue.length > 0 && isPending && (
+            <div className="songs-container overflow-auto h-full">
+              <SongListSkeleton />
+            </div>
+          )}
+          {queuedSongs && queuedSongs.length > 0 && (
+            <div
+              className="songs-container overflow-auto h-full"
+            >
                 // $ Enabling StrictMode throws an error in the CurrentQueuePage when using react-beautiful-dnd for drag and drop.
 
                 <DragDropContext onDragEnd={handleDragEnd}>
@@ -424,8 +430,8 @@ function RouteComponent() {
                     )}
                   </Droppable>
                 </DragDropContext>
-              )}
-          </div>
+              </div>
+          )}
           {currentQueue.length === 0 && (
             <div className="no-songs-container flex h-full w-full flex-col items-center justify-center text-center text-2xl text-[#ccc]">
               <Img src={NoSongsImage} className="mb-8 w-60" alt="" /> {t('currentQueuePage.empty')}
