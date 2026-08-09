@@ -250,9 +250,17 @@ const createWindow = async () => {
   mainWindow.once('ready-to-show', () => {
     if (app.hasSingleInstanceLock()) {
       logger.info('Started checking for new songs during the application start.');
-      checkForNewSongs();
-      addWatchersToFolders();
-      addWatchersToParentFolders();
+      // Observe scan promises: startup must not produce unhandled rejections
+      // if a DB query or folder scan fails.
+      void checkForNewSongs().catch((error) =>
+        logger.error('Startup library scan failed.', { error })
+      );
+      void addWatchersToFolders().catch((error) =>
+        logger.error('Failed to add folder watchers.', { error })
+      );
+      void addWatchersToParentFolders().catch((error) =>
+        logger.error('Failed to add parent folder watchers.', { error })
+      );
     }
   });
   mainWindow.webContents.setWindowOpenHandler((data: { url: string }) => {

@@ -477,8 +477,14 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     );
 
     ipcMain.handle('app/resyncSongsLibrary', async () => {
-      await checkForNewSongs();
-      sendMessageToRenderer({ messageCode: 'RESYNC_SUCCESSFUL' });
+      // checkForNewSongs is single-flight internally, so a concurrent IPC,
+      // startup, or watcher scan joins the active scan instead of overlapping.
+      const { hasFailures } = await checkForNewSongs();
+      if (hasFailures) {
+        sendMessageToRenderer({ messageCode: 'RESYNC_PARTIAL' });
+      } else {
+        sendMessageToRenderer({ messageCode: 'RESYNC_SUCCESSFUL' });
+      }
     });
 
     ipcMain.handle('app/getBlacklistData', getBlacklistData);

@@ -1,9 +1,10 @@
 import { store } from '@renderer/store/store';
 import { linkOptions } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
-import { memo, useEffect, useMemo, useState } from 'react';
+import { memo, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import ErrorBoundary from '../ErrorBoundary';
 import SideBarItem from './SideBarItem';
 
@@ -12,6 +13,28 @@ const Sidebar = memo(() => {
   // const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
 
   const { t } = useTranslation();
+  const [isSyncing, setIsSyncing] = useState(false);
+  const { addNewNotifications } = useContext(AppUpdateContext);
+
+  const handleResyncClick = async () => {
+    if (isSyncing) return;
+    setIsSyncing(true);
+    try {
+      await window.api.audioLibraryControls.resyncSongsLibrary();
+    } catch (err) {
+      console.error('Failed to resync songs library.', err);
+      addNewNotifications([
+        {
+          id: 'resyncLibraryFailed',
+          content: t('notifications.songDataUpdateFailed'),
+          iconName: 'error',
+          duration: 5000
+        }
+      ]);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   const linkData = useMemo(
     () =>
@@ -123,9 +146,24 @@ const Sidebar = memo(() => {
       } delay-200 md:hover:w-60 lg:absolute lg:w-14 lg:hover:w-[30%] lg:hover:shadow-2xl`}
     >
       <ErrorBoundary>
-        <ul className="relative flex h-full! flex-col gap-1 overflow-x-hidden pt-4 pb-2">
+        <ul className="relative flex flex-1 min-h-0 flex-col gap-1 overflow-x-hidden overflow-y-auto pt-4 pb-2">
           {sideBarItems}
         </ul>
+        <div className="mb-2 flex justify-center px-2">
+          <button
+            type="button"
+            onClick={handleResyncClick}
+            disabled={isSyncing}
+            aria-label={t('settingsPage.resyncLibrary')}
+            className={`flex w-full items-center justify-center gap-2 rounded-lg p-2 text-sm text-font-color-black outline-offset-2 transition-[colors,opacity] duration-200 hover:bg-background-color-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 dark:text-font-color-white dark:hover:bg-dark-background-color-3 active:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed ${
+              isSyncing ? 'animate-pulse' : ''
+            }`}
+            title={t('settingsPage.resyncLibrary')}
+          >
+            <span className="material-icons-round icon text-xl">sync</span>
+            <span className="sidebar-item-label">{t('settingsPage.resyncLibrary')}</span>
+          </button>
+        </div>
       </ErrorBoundary>
     </nav>
   );

@@ -8,10 +8,10 @@ import { supportedMusicExtensions } from '../filesystem';
 import logger from '../logger';
 import { dirExistsSync } from '../utils/dirExists';
 import checkFolderForContentModifications from './checkFolderForContentModifications';
-import checkFolderForUnknownModifications from './checkFolderForUnknownContentModifications';
 import checkForFolderModifications from './checkForFolderModifications';
 import { saveAbortController } from './controlAbortControllers';
 import { saveFolderStructures } from './parseFolderStructuresForSongPaths';
+import { runFolderScan } from './scanCoordinator';
 
 const checkForFolderUpdates = async (folder: FolderStructure) => {
   try {
@@ -26,8 +26,14 @@ const checkForFolderUpdates = async (folder: FolderStructure) => {
 
       folder.stats.lastModifiedDate = folderStats.mtime;
 
-      saveFolderStructures([folder]);
-      checkFolderForUnknownModifications(folder.path);
+      // Both operations go through observed promises: a DB write or scan
+      // failure must be logged, never an unhandled rejection. The folder scan
+      // routes through the shared coordinator so it cannot overlap a full
+      // library resync.
+      await saveFolderStructures([folder]).catch((error) => {
+        logger.error(`Failed to save folder structures.`, { error, path: folder.path });
+      });
+      await runFolderScan(folder.path);
     } else
       logger.debug(`'${path.basename(folder.path)}' folder has no modifications.`, {
         path: folder.path
@@ -74,8 +80,16 @@ export const addWatcherToFolder = async (folder: MusicFolderData) => {
       {
         signal: abortController.signal
       },
-      (eventType, filename) =>
-        folderWatcherFunction(eventType, filename, folder, abortController.signal)
+      (eventType, filename) => {
+        void folderWatcherFunction(eventType, filename, folder, abortController.signal).catch(
+          (error) => {
+            logger.error('Failed to process folder watcher event.', {
+              error,
+              folderPath: folder.path
+            });
+          }
+        );
+      }
     );
 
     logger.debug('Added watcher to a folder successfully.', { folderPath: folder.path });

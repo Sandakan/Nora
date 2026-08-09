@@ -960,6 +960,7 @@
     "PLAYLIST_RENAME_SUCCESS": "Oynatma listesi başarıyla yeniden adlandırıldı.",
     "PLAYLIST_NOT_FOUND": "Oynatma listesi bulunamadı.",
     "SONG_REPARSE_SUCCESS": "'{{ title }}' başarıyla onarıldı.",
-    "SONG_REPARSE_FAILED": "Şarkı yeniden ayrıştırılırken hata oluştu."
+    "SONG_REPARSE_FAILED": "Şarkı yeniden ayrıştırılırken hata oluştu.",
+    "RESYNC_PARTIAL": "Library resync completed with some failures."
   }
 }
