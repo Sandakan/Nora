@@ -31,3 +31,24 @@ jobs:
 
       - name: Run formatters
         run: npm run format
+
+  typecheck-node:
+    name: Typecheck (node)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 'lts/*'
+          check-latest: true
+          cache: npm
+
+      - name: Install Node.js dependencies
+        run: npm ci
+
+      - name: Run Node typecheck
+        run: npm run typecheck:node

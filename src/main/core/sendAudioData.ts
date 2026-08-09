@@ -114,6 +114,7 @@ const sendAudioData = async (songId: number): Promise<AudioPlayerData> => {
       throw error;
     }
     logger.error(`Failed to send songs data.`, { err: error });
+
     const sendError = new Error('Failed to send song data');
     (sendError as NodeJS.ErrnoException).code = 'SONG_DATA_SEND_FAILED';
     throw sendError;

@@ -36,7 +36,7 @@ export function usePlaybackErrors(
   const managePlaybackErrors = useCallback(
     (appError: unknown) => {
       const playerErrorData = player.error;
-      console.error(appError, playerErrorData);
+      log('Playback error occurred', { appError, playerErrorData }, 'ERROR');
 
       const playerErrorCode = playerErrorData?.code;
 
@@ -77,7 +77,20 @@ export function usePlaybackErrors(
       log(`Error occurred in the player.`, { appError, playerErrorData }, 'ERROR');
 
       if (player.src && playerErrorData) {
-        if (playerErrorCode === MEDIA_ERR_SRC_NOT_SUPPORTED) {
+        if (
+          appError &&
+          typeof appError === 'object' &&
+          'code' in (appError as object) &&
+          (appError as Record<string, unknown>).code === 'SONG_NOT_FOUND'
+        ) {
+          log('Song file not found (IPC), skipping to next song.', {}, 'WARN');
+          skipSongRef?.current?.();
+          return undefined;
+        }
+        if (
+          playerErrorCode === MEDIA_ERR_SRC_NOT_SUPPORTED &&
+          player.src.startsWith('nora://')
+        ) {
           log('Song file not found, skipping to next song.', {}, 'WARN');
           skipSongRef?.current?.();
           return undefined;

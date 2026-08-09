@@ -18,6 +18,7 @@ import { useDynamicTheme } from './hooks/useDynamicTheme';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useListeningData } from './hooks/useListeningData';
 import { useMediaSession } from './hooks/useMediaSession';
+import log from './utils/log';
 import { useMultiSelection } from './hooks/useMultiSelection';
 // ? HOOKS
 import useNetworkConnectivity from './hooks/useNetworkConnectivity';
@@ -206,18 +207,42 @@ export default function App() {
         .getSongFromUnknownSource(songPath)
         .then((res) => playSongFromUnknownSource(res, true))
         .catch((err) => {
-          console.error(err);
+          log('Failed to fetch song from unknown source', { err }, 'ERROR');
           changePromptMenuData(true, <SongUnplayableErrorPrompt err={err} />);
         });
     },
     [playSongFromUnknownSource, changePromptMenuData]
   );
 
+  const importPlaylistFromPath = useCallback(
+    (playlistPath: string) => {
+      window.api.playlistsData
+        .importPlaylistFromPath(playlistPath)
+        .then((res) => {
+          if (res && !res.success) {
+            log('Failed to import playlist from path', { code: res.code }, 'ERROR');
+            changePromptMenuData(
+              true,
+              <SongUnplayableErrorPrompt
+                err={new Error(res.code ? String(res.code) : 'playlistImportFailed')}
+              />
+            );
+          }
+        })
+        .catch((err) => {
+          log('Failed to import playlist from path', { err }, 'ERROR');
+          changePromptMenuData(true, <SongUnplayableErrorPrompt err={err} />);
+        });
+    },
+    [changePromptMenuData]
+  );
+
   // ? INITIALIZE WINDOW MANAGEMENT
   // Window management hook handles blur/focus, fullscreen, drag-and-drop, and title bar updates
   const windowManagement = useWindowManagement(AppRef, {
     changePromptMenuData,
-    fetchSongFromUnknownSource
+    fetchSongFromUnknownSource,
+    importPlaylistFromPath
   });
 
   // ? INITIALIZE QUEUE MANAGEMENT

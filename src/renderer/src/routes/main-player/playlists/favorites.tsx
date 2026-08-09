@@ -55,7 +55,7 @@ function FavoritesPlaylistInfoPage() {
   const queue = useStore(store, (state) => state.localStorage.queue);
   const playlistSortingState = useStore(
     store,
-    (state) => state.localStorage.sortingStates?.playlistDetailPage || 'addedOrder'
+    (state) => state.localStorage.sortingStates?.favoritesDetailPage || 'addedOrder'
   );
   const preferences = useStore(store, (state) => state.localStorage.preferences);
   const { updateQueueData, addNewNotifications, createQueue, playSong } =
@@ -65,7 +65,7 @@ function FavoritesPlaylistInfoPage() {
   const navigate = useNavigate({ from: '/main-player/playlists/favorites' });
 
   useEffect(() => {
-    storage.sortingStates.setSortingStates('playlistDetailPage', sortingOrder);
+    storage.sortingStates.setSortingStates('favoritesDetailPage', sortingOrder);
   }, [sortingOrder]);
 
   const { data: favoriteSongs = [] } = useSuspenseQuery({

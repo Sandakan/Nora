@@ -19,8 +19,18 @@ const windowControls = {
   showApp: (): void => ipcRenderer.send('app/show'),
   changePlayerType: (type: PlayerTypes): Promise<void> =>
     ipcRenderer.invoke('app/changePlayerType', type),
-  onWindowFocus: (callback: (e: unknown) => void) => ipcRenderer.on('app/focused', callback),
-  onWindowBlur: (callback: (e: unknown) => void) => ipcRenderer.on('app/blurred', callback)
+  onWindowFocus: (callback: (e: unknown) => void) => {
+    ipcRenderer.on('app/focused', callback);
+    return () => {
+      ipcRenderer.removeListener('app/focused', callback);
+    };
+  },
+  onWindowBlur: (callback: (e: unknown) => void) => {
+    ipcRenderer.on('app/blurred', callback);
+    return () => {
+      ipcRenderer.removeListener('app/blurred', callback);
+    };
+  }
 };
 
 const theme = {
@@ -184,10 +194,18 @@ const battery = {
 
 // $ APP FULL-SCREEN EVENTS
 const fullscreen = {
-  onEnterFullscreen: (callback: (e: unknown) => void) =>
-    ipcRenderer.on('app/enteredFullscreen', callback),
-  onLeaveFullscreen: (callback: (e: unknown) => void) =>
-    ipcRenderer.on('app/leftFullscreen', callback)
+  onEnterFullscreen: (callback: (e: unknown) => void) => {
+    ipcRenderer.on('app/enteredFullscreen', callback);
+    return () => {
+      ipcRenderer.removeListener('app/enteredFullscreen', callback);
+    };
+  },
+  onLeaveFullscreen: (callback: (e: unknown) => void) => {
+    ipcRenderer.on('app/leftFullscreen', callback);
+    return () => {
+      ipcRenderer.removeListener('app/leftFullscreen', callback);
+    };
+  }
 };
 
 // $ APP SEARCH
@@ -470,8 +488,24 @@ const playlistsData = {
   exportPlaylist: (playlistId: number): Promise<void> =>
     ipcRenderer.invoke('app/exportPlaylist', playlistId),
   importPlaylist: (targetPlaylistId?: number): Promise<void> =>
-    ipcRenderer.invoke('app/importPlaylist', targetPlaylistId)
+    ipcRenderer.invoke('app/importPlaylist', targetPlaylistId),
+  importPlaylistFromPath: (
+    filePath: string,
+    targetPlaylistId?: number
+  ): Promise<PlaylistImportFromPathResult> =>
+    ipcRenderer.invoke('app/importPlaylistFromPath', filePath, targetPlaylistId)
 };
+
+type PlaylistImportFromPathResult =
+  | { success: true; result?: unknown }
+  | {
+      success: false;
+      code:
+        | 'INVALID_PATH'
+        | 'INVALID_TARGET_PLAYLIST'
+        | 'NOT_A_FILE'
+        | 'FILE_NOT_ACCESSIBLE';
+    };
 
 const queue = {
   getQueueInfo: (queueType: QueueTypes, id: string): Promise<QueueInfo | undefined> =>

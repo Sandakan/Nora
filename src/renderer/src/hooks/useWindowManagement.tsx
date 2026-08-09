@@ -12,6 +12,7 @@ const UnsupportedFileMessagePrompt = lazy(
 export interface UseWindowManagementOptions {
   changePromptMenuData?: (isVisible: boolean, prompt?: React.ReactNode, className?: string) => void;
   fetchSongFromUnknownSource?: (filePath: string) => void;
+  importPlaylistFromPath?: (filePath: string) => void;
 }
 
 /**
@@ -56,7 +57,7 @@ export function useWindowManagement(
   appRef: RefObject<HTMLDivElement | null>,
   options: UseWindowManagementOptions = {}
 ) {
-  const { changePromptMenuData, fetchSongFromUnknownSource } = options;
+  const { changePromptMenuData, fetchSongFromUnknownSource, importPlaylistFromPath } = options;
 
   /**
    * Manages window blur and focus states by adding/removing CSS classes.
@@ -118,23 +119,31 @@ export function useWindowManagement(
   );
 
   /**
-   * Handles file drop events, validating and processing dropped audio files.
+   * Handles file drop events, validating and processing dropped audio files and playlists.
    *
    * @param e - React drag event containing dropped files
    */
   const onSongDrop = useCallback(
     (e: DragEvent<HTMLDivElement>) => {
-      console.log(e.dataTransfer.files);
-      if (e.dataTransfer.files.length > 0) {
-        const file = e.dataTransfer.files.item(0);
-        if (file) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      try {
+        const files = Array.from(e.dataTransfer.files);
+
+        for (const file of files) {
           const filePath = window.api.utils.showFilePath(file);
-          console.log('Dropped file path:', filePath);
+
+          const ext = filePath.toLowerCase().split('.').pop() || '';
+          const isPlaylistFile = ext === 'm3u8' || ext === 'm3u';
+
           const isASupportedAudioFormat = appPreferences.supportedMusicExtensions.some((type) =>
-            file?.webkitRelativePath.endsWith(type)
+            filePath.toLowerCase().endsWith(type.toLowerCase())
           );
 
-          if (isASupportedAudioFormat && fetchSongFromUnknownSource) {
+          if (isPlaylistFile && importPlaylistFromPath) {
+            importPlaylistFromPath(filePath);
+          } else if (isASupportedAudioFormat && fetchSongFromUnknownSource) {
             fetchSongFromUnknownSource(filePath);
           } else if (changePromptMenuData) {
             changePromptMenuData(
@@ -143,10 +152,11 @@ export function useWindowManagement(
             );
           }
         }
+      } finally {
+        if (appRef.current) appRef.current.classList.remove('song-drop');
       }
-      if (appRef.current) appRef.current.classList.remove('song-drop');
     },
-    [appRef, changePromptMenuData, fetchSongFromUnknownSource]
+    [appRef, changePromptMenuData, fetchSongFromUnknownSource, importPlaylistFromPath]
   );
 
   /**
@@ -171,15 +181,18 @@ export function useWindowManagement(
    * cleans up listeners on unmount.
    */
   useEffect(() => {
-    // Setup window state listeners
-    window.api.windowControls.onWindowBlur(() => manageWindowBlurOrFocus('blur-sm'));
-    window.api.windowControls.onWindowFocus(() => manageWindowBlurOrFocus('focus'));
+    const unsubBlur = window.api.windowControls.onWindowBlur(() => manageWindowBlurOrFocus('blur-sm'));
+    const unsubFocus = window.api.windowControls.onWindowFocus(() => manageWindowBlurOrFocus('focus'));
 
-    window.api.fullscreen.onEnterFullscreen(() => manageWindowFullscreen('fullscreen'));
-    window.api.fullscreen.onLeaveFullscreen(() => manageWindowFullscreen('windowed'));
+    const unsubFullscreenEnter = window.api.fullscreen.onEnterFullscreen(() => manageWindowFullscreen('fullscreen'));
+    const unsubFullscreenLeave = window.api.fullscreen.onLeaveFullscreen(() => manageWindowFullscreen('windowed'));
 
-    // Note: Cleanup is handled by the individual IPC listeners in Electron
-    // If explicit cleanup is needed, return a cleanup function here
+    return () => {
+      unsubBlur();
+      unsubFocus();
+      unsubFullscreenEnter();
+      unsubFullscreenLeave();
+    };
   }, [manageWindowBlurOrFocus, manageWindowFullscreen]);
 
   return {

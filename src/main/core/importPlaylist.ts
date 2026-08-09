@@ -1,4 +1,4 @@
-import { readFile } from 'fs/promises';
+import { readFile, stat } from 'fs/promises';
 import path from 'path';
 
 import { SpecialPlaylists } from '@common/playlists.enum';
@@ -8,190 +8,256 @@ import type { OpenDialogOptions } from 'electron';
 
 import { appPreferences } from '../../../package.json';
 import logger from '../logger';
-import { sendMessageToRenderer, showOpenDialog } from '../main';
+import { dataUpdateEvent, sendMessageToRenderer, showOpenDialog } from '../main';
 import addNewPlaylist from './addNewPlaylist';
 
-const DEFAULT_EXPORT_DIALOG_OPTIONS: OpenDialogOptions = {
-  title: `Select a Destination where your M3U8 file is`,
-  buttonLabel: 'Select M3U8 file',
-  properties: ['openFile'],
+const DEFAULT_IMPORT_DIALOG_OPTIONS: OpenDialogOptions = {
+  title: `Select a Destination where your M3U8/M3U file is`,
+  buttonLabel: 'Select M3U8/M3U file',
+  properties: ['openFile', 'multiSelections'],
   filters: [
-    { name: 'M3U8 Files', extensions: ['m3u8'] },
+    { name: 'M3U8/M3U Files', extensions: ['m3u8', 'm3u'] },
     { name: 'All Files', extensions: ['*'] }
   ]
 };
 
-const isASongPath = (text: string) => {
+const isASongPath = (text: string, playlistDir?: string) => {
   const textLine = text.trim();
-  const isTextLineAPath = path.isAbsolute(textLine);
+  const resolvedPath = path.isAbsolute(textLine)
+    ? textLine
+    : (playlistDir && path.resolve(playlistDir, textLine)) || '';
 
-  if (isTextLineAPath) {
-    const textLinePath = textLine;
-    const textLinePathExt =
-      path.extname(textLinePath).split('.').pop() || path.extname(textLinePath);
-    const isPathToASong = appPreferences.supportedMusicExtensions.includes(textLinePathExt);
-    return isPathToASong;
-  }
-  return false;
+  if (!resolvedPath) return false;
+
+  const ext = (path.extname(resolvedPath).split('.').pop() || path.extname(resolvedPath)).toLowerCase();
+  return appPreferences.supportedMusicExtensions.includes(ext);
 };
 
-const importPlaylist = async (targetPlaylistId?: number) => {
+type ResolvedSongIds = {
+  availableIds: number[];
+  unavailablePaths: string[];
+  deduplicatedCount: number;
+  totalExtracted: number;
+};
+
+const validatePlaylistFile = async (
+  filePath: string
+): Promise<{ fileName: string; textArr: string[] } | null> => {
+  const ext = path.extname(filePath).toLowerCase();
+  if (ext !== '.m3u8' && ext !== '.m3u') {
+    logger.warn(
+      `Failed to import the playlist because user selected a file with a different extension other than 'm3u8' or 'm3u'.`,
+      { filePath }
+    );
+    sendMessageToRenderer({ messageCode: 'PLAYLIST_IMPORT_FAILED_DUE_TO_INVALID_FILE_EXTENSION' });
+    return null;
+  }
+
+  const fileName = path.basename(filePath).replace(/\.m3u8?$/gim, '');
+
+  // Reject oversized files before reading the whole thing into memory. Playlist
+  // files are small text; anything past a few tens of MB is almost certainly
+  // not a real playlist and would needlessly pressure memory.
+  const MAX_PLAYLIST_FILE_SIZE = 25 * 1024 * 1024;
   try {
-    const destinations = await showOpenDialog(DEFAULT_EXPORT_DIALOG_OPTIONS);
+    const stats = await stat(filePath);
+    if (stats.size > MAX_PLAYLIST_FILE_SIZE) {
+      logger.warn('Rejected oversized playlist file.', { filePath, size: stats.size });
+      sendMessageToRenderer({ messageCode: 'PLAYLIST_IMPORT_FAILED' });
+      return null;
+    }
+  } catch {
+    logger.warn('Failed to access playlist file during validation.', { filePath });
+    sendMessageToRenderer({ messageCode: 'PLAYLIST_IMPORT_FAILED' });
+    return null;
+  }
 
-    if (destinations) {
-      const [filePath] = destinations;
+  const text = await readFile(filePath, 'utf-8');
+  const textArr = text.replaceAll('\r', '').split('\n');
 
-      if (path.extname(filePath) === '.m3u8') {
-        const fileName = path.basename(filePath).replace(/\.m3u8$/gim, '');
-        const text = await readFile(filePath, 'utf-8');
-        const textArr = text.replaceAll('\r', '').split('\n');
+  // .m3u8 is the extended format and requires the #EXTM3U header. A basic
+  // .m3u file may be a plain list of media paths with no header, so only
+  // reject it after parsing finds no valid media paths (handled downstream).
+  if (ext === '.m3u8' && textArr[0].replace(/^\uFEFF/, '').trim() !== '#EXTM3U') {
+    logger.warn(
+      `Failed to import the playlist because user selected a file with invalid file data.`,
+      { filePath, firstLine: textArr[0] }
+    );
+    sendMessageToRenderer({ messageCode: 'PLAYLIST_IMPORT_FAILED_DUE_TO_INVALID_FILE_DATA' });
+    return null;
+  }
 
-        if (textArr[0] === '#EXTM3U') {
-          const unavailableSongPaths: string[] = [];
-          const availSongIdsForPlaylist: string[] = [];
+  return { fileName, textArr };
+};
 
-          // Extract song paths and deduplicate
-          const songPathsRaw = textArr.filter((line) => isASongPath(line));
-          const songPaths = Array.from(new Set(songPathsRaw));
+const resolveSongIds = async (textArr: string[], playlistDir?: string): Promise<ResolvedSongIds> => {
+  const resolvePath = (line: string): string | null => {
+    const textLine = line.trim();
+    if (path.isAbsolute(textLine)) return textLine;
+    if (playlistDir) return path.resolve(playlistDir, textLine);
+    return null;
+  };
 
-          const availableSongs = await getSongsInPathList(songPaths);
+  const songPathsRaw: string[] = [];
+  for (const line of textArr) {
+    const resolved = resolvePath(line);
+    if (resolved && isASongPath(line, playlistDir)) {
+      songPathsRaw.push(resolved);
+    }
+  }
+  const songPaths = Array.from(new Set(songPathsRaw));
+  const availableSongs = await getSongsInPathList(songPaths);
+  const songsByPath = new Map(availableSongs.map((song) => [song.path, song]));
 
-          for (const songPath of songPaths) {
-            const songData = availableSongs.find((song) => song.path === songPath);
+  const availableIds: number[] = [];
+  const unavailablePaths: string[] = [];
 
-            if (songData) availSongIdsForPlaylist.push(songData.id.toString());
-            else unavailableSongPaths.push(songPath);
-          }
+  for (const songPath of songPaths) {
+    const songData = songsByPath.get(songPath);
+    if (songData) availableIds.push(Number(songData.id));
+    else unavailablePaths.push(songPath);
+  }
 
-          // Determine import mode: explicit target takes precedence, then auto-detect by filename
-          const isImportingToFavorites =
-            targetPlaylistId === SpecialPlaylists.Favorites ||
-            fileName.toLowerCase().includes('Favorites');
+  return {
+    availableIds,
+    unavailablePaths,
+    deduplicatedCount: songPathsRaw.length - songPaths.length,
+    totalExtracted: songPaths.length
+  };
+};
 
-          if (unavailableSongPaths.length > 0) {
-            logger.debug(
-              `Found ${unavailableSongPaths.length} songs outside the library when importing a playlist.`,
-              {
-                unavailableSongPaths
-              }
-            );
-            sendMessageToRenderer({
-              messageCode: 'PLAYLIST_IMPORT_SUCCESS',
-              data: { count: availSongIdsForPlaylist.length }
-            });
-          }
+const importToFavorites = async (
+  songIdNumbers: number[],
+  fileName: string,
+  unavailableCount: number,
+  deduplicatedCount: number
+) => {
+  try {
+    await updateSongFavoriteStatuses(songIdNumbers, true);
+    dataUpdateEvent('songs/likes', songIdNumbers);
 
-          if (availSongIdsForPlaylist.length > 0) {
-            const songIdNumbers = availSongIdsForPlaylist.map((id) => Number(id));
+    logger.info(`Imported ${songIdNumbers.length} songs to Favorites playlist.`, {
+      fileName,
+      importedCount: songIdNumbers.length,
+      unavailableCount,
+      deduplicatedCount
+    });
 
-            // Favorites special playlist mode: mark songs as favorite instead of creating playlist
-            if (isImportingToFavorites) {
-              try {
-                await updateSongFavoriteStatuses(songIdNumbers, true);
+    return sendMessageToRenderer({
+      messageCode: 'PLAYLIST_IMPORT_SUCCESS',
+      data: { name: 'Favorites', count: songIdNumbers.length }
+    });
+  } catch (error) {
+    logger.error('Failed to mark songs as favorite during Favorites import.', { fileName, error });
+    return sendMessageToRenderer({ messageCode: 'PLAYLIST_IMPORT_FAILED' });
+  }
+};
 
-                logger.info(`Imported ${songIdNumbers.length} songs to Favorites playlist.`, {
-                  fileName,
-                  importedCount: songIdNumbers.length,
-                  unavailableCount: unavailableSongPaths.length,
-                  deduplicatedCount: songPathsRaw.length - songPaths.length
-                });
+const importToPlaylist = async (songIdNumbers: number[], playlistName: string) => {
+  const availablePlaylist = await getPlaylistByName(playlistName);
 
-                return sendMessageToRenderer({
-                  messageCode: 'PLAYLIST_IMPORT_SUCCESS',
-                  data: {
-                    name: 'Favorites',
-                    count: songIdNumbers.length
-                  }
-                });
-              } catch (error) {
-                logger.error('Failed to mark songs as favorite during Favorites import.', {
-                  fileName,
-                  error
-                });
-                return sendMessageToRenderer({
-                  messageCode: 'PLAYLIST_IMPORT_FAILED'
-                });
-              }
-            } else {
-              // Normal playlist import mode: create new or link to existing playlist
-              const playlistName = fileName;
+  if (availablePlaylist) {
+    try {
+      await linkSongsWithPlaylist(songIdNumbers, availablePlaylist.id);
+      dataUpdateEvent('playlists/newSong', songIdNumbers);
 
-              const availablePlaylist = await getPlaylistByName(playlistName);
-
-              if (availablePlaylist) {
-                try {
-                  await linkSongsWithPlaylist(songIdNumbers, availablePlaylist.id);
-
-                  logger.debug(
-                    `Imported ${songIdNumbers.length} songs to the existing '${availablePlaylist.name}' playlist.`,
-                    {
-                      playlistName,
-                      availSongIdsForPlaylistCount: songIdNumbers.length,
-                      availablePlaylistName: availablePlaylist.name
-                    }
-                  );
-
-                  return sendMessageToRenderer({
-                    messageCode: 'PLAYLIST_IMPORT_TO_EXISTING_PLAYLIST',
-                    data: { count: songIdNumbers.length, name: availablePlaylist.name }
-                  });
-                } catch (error) {
-                  logger.error('Failed to import songs to an existing playlist.', {
-                    playlistName,
-                    error
-                  });
-                  return sendMessageToRenderer({
-                    messageCode: 'PLAYLIST_IMPORT_TO_EXISTING_PLAYLIST_FAILED'
-                  });
-                }
-              } else {
-                // Convert number array back to strings for addNewPlaylist API
-                const res = await addNewPlaylist(
-                  playlistName,
-                  songIdNumbers.map((id) => id.toString())
-                );
-
-                if (res.success) {
-                  logger.info(`Imported '${fileName}' playlist successfully.`, { fileName });
-                  return sendMessageToRenderer({
-                    messageCode: 'PLAYLIST_IMPORT_SUCCESS',
-                    data: { name: fileName }
-                  });
-                }
-
-                logger.debug('Failed to create a playlist', { res });
-                return sendMessageToRenderer({
-                  messageCode: 'PLAYLIST_IMPORT_FAILED'
-                });
-              }
-            }
-          }
+      logger.debug(
+        `Imported ${songIdNumbers.length} songs to the existing '${availablePlaylist.name}' playlist.`,
+        {
+          playlistName,
+          availSongIdsForPlaylistCount: songIdNumbers.length,
+          availablePlaylistName: availablePlaylist.name
         }
-        logger.warn(
-          `Failed to import the playlist because user selected a file with invalid file data.`,
-          {
-            filePath,
-            firstLine: textArr[0]
-          }
-        );
+      );
+
+      return sendMessageToRenderer({
+        messageCode: 'PLAYLIST_IMPORT_TO_EXISTING_PLAYLIST',
+        data: { count: songIdNumbers.length, name: availablePlaylist.name }
+      });
+    } catch (error) {
+      logger.error('Failed to import songs to an existing playlist.', { playlistName, error });
+      return sendMessageToRenderer({ messageCode: 'PLAYLIST_IMPORT_TO_EXISTING_PLAYLIST_FAILED' });
+    }
+  }
+
+  const res = await addNewPlaylist(
+    playlistName,
+    songIdNumbers.map((id) => id.toString())
+  );
+
+  if (res.success) {
+    logger.info(`Imported '${playlistName}' playlist successfully.`, { fileName: playlistName });
+    return sendMessageToRenderer({
+      messageCode: 'PLAYLIST_IMPORT_SUCCESS',
+      data: { name: playlistName }
+    });
+  }
+
+  logger.debug('Failed to create a playlist', { res });
+  return sendMessageToRenderer({ messageCode: 'PLAYLIST_IMPORT_FAILED' });
+};
+
+export const processPlaylistImport = async (filePath: string, targetPlaylistId?: number) => {
+  try {
+    const validated = await validatePlaylistFile(filePath);
+    if (!validated) return;
+
+    const { fileName, textArr } = validated;
+    const playlistDir = path.dirname(filePath);
+    const { availableIds, unavailablePaths, deduplicatedCount, totalExtracted } =
+      await resolveSongIds(textArr, playlistDir);
+
+    if (unavailablePaths.length > 0) {
+      logger.debug(
+        `Found ${unavailablePaths.length} songs outside the library when importing a playlist.`,
+        { unavailablePaths }
+      );
+    }
+
+    if (availableIds.length === 0) {
+      if (totalExtracted === 0) {
         return sendMessageToRenderer({
           messageCode: 'PLAYLIST_IMPORT_FAILED_DUE_TO_INVALID_FILE_DATA'
         });
       }
-      logger.warn(
-        `Failed to import the playlist because user selected a file with a different extension other than 'm3u8'.`,
-        { filePath }
-      );
       return sendMessageToRenderer({
-        messageCode: 'PLAYLIST_IMPORT_FAILED_DUE_TO_INVALID_FILE_EXTENSION'
+        messageCode: 'PLAYLIST_IMPORT_FAILED_DUE_TO_SONGS_OUTSIDE_LIBRARY'
       });
     }
-    logger.warn(`Failed to export a playlist because user didn't select a file.`);
-    return sendMessageToRenderer({ messageCode: 'DESTINATION_NOT_SELECTED' });
+
+    const isImportingToFavorites =
+      targetPlaylistId === SpecialPlaylists.Favorites || fileName.toLowerCase().includes('favorites');
+
+    if (isImportingToFavorites) {
+      return importToFavorites(availableIds, fileName, unavailablePaths.length, deduplicatedCount);
+    }
+
+    return importToPlaylist(availableIds, fileName);
+  } catch (error) {
+    logger.error(`Failed to import the playlist from path.`, { error, filePath });
+    return sendMessageToRenderer({ messageCode: 'PLAYLIST_IMPORT_FAILED' });
+  }
+};
+
+const importPlaylist = async (targetPlaylistId?: number, playlistPath?: string) => {
+  try {
+    if (playlistPath) {
+      return processPlaylistImport(playlistPath, targetPlaylistId);
+    }
+
+    const destinations = await showOpenDialog(DEFAULT_IMPORT_DIALOG_OPTIONS);
+
+    if (destinations) {
+      for (const filePath of destinations) {
+        await processPlaylistImport(filePath, targetPlaylistId);
+      }
+    } else {
+      logger.warn(`Failed to export a playlist because user didn't select a file.`);
+      sendMessageToRenderer({ messageCode: 'DESTINATION_NOT_SELECTED' });
+    }
   } catch (error) {
     logger.error(`Failed to import the playlist.`, { error });
-    return sendMessageToRenderer({ messageCode: 'PLAYLIST_IMPORT_FAILED' });
+    sendMessageToRenderer({ messageCode: 'PLAYLIST_IMPORT_FAILED' });
   }
 };
 
