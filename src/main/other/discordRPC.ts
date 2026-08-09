@@ -6,6 +6,111 @@ import { Initialize, setDiscordRPC } from './discord';
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 let latestData: DiscordActivity | null = null;
 
+const DISCORD_STRING_MAX = 128;
+const DISCORD_BUTTONS_MAX = 2;
+
+const isSafeString = (value: unknown): value is string =>
+  typeof value === 'string' && value.length > 0 && value.length <= DISCORD_STRING_MAX;
+
+// Reject arrays, null, and non-plain objects (Date, URL, class instances).
+// `typeof new Date() === 'object'` and `Object.getPrototypeOf` for a class
+// instance is the class prototype, not Object.prototype.
+const isPlainRecord = (value: unknown): value is Record<string, unknown> => {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  const prototype = Object.getPrototypeOf(value);
+  return prototype === Object.prototype || prototype === null;
+};
+
+const isSafeTimestamp = (value: unknown): value is number =>
+  typeof value === 'number' && Number.isFinite(value) && Number.isSafeInteger(Math.round(value));
+
+const roundTimestamp = (value: unknown): number => Math.round(value as number);
+
+const isHttpsUrl = (value: unknown): boolean => {
+  if (typeof value !== 'string') return false;
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' && url.hostname.length > 0;
+  } catch {
+    return false;
+  }
+};
+
+type ValidationResult = { ok: true; activity: DiscordActivity } | { ok: false; reason: string };
+
+// Runtime validation of the IPC payload before it reaches the Discord RPC
+// client. The preload type is compile-time only; malformed or hostile data
+// must not be combined into a SET_ACTIVITY request.
+export const validateDiscordActivity = (data: unknown): ValidationResult => {
+  if (!isPlainRecord(data)) {
+    return { ok: false, reason: 'activity-not-object' };
+  }
+  const input = data as Record<string, unknown>;
+
+  const activity: Record<string, unknown> = {};
+
+  if (input.details !== undefined) {
+    if (!isSafeString(input.details)) return { ok: false, reason: 'details-invalid' };
+    activity.details = input.details;
+  }
+  if (input.state !== undefined) {
+    if (!isSafeString(input.state)) return { ok: false, reason: 'state-invalid' };
+    activity.state = input.state;
+  }
+
+  if (input.timestamps !== undefined) {
+    if (!isPlainRecord(input.timestamps)) {
+      return { ok: false, reason: 'timestamps-invalid' };
+    }
+    const tsInput = input.timestamps as Record<string, unknown>;
+    const timestamps: Record<string, number> = {};
+    if (tsInput.start !== undefined) {
+      if (!isSafeTimestamp(tsInput.start)) return { ok: false, reason: 'timestamp-start-invalid' };
+      timestamps.start = roundTimestamp(tsInput.start);
+    }
+    if (tsInput.end !== undefined) {
+      if (!isSafeTimestamp(tsInput.end)) return { ok: false, reason: 'timestamp-end-invalid' };
+      timestamps.end = roundTimestamp(tsInput.end);
+    }
+    activity.timestamps = timestamps;
+  }
+
+  if (input.assets !== undefined) {
+    if (!isPlainRecord(input.assets)) {
+      return { ok: false, reason: 'assets-invalid' };
+    }
+    const assetsInput = input.assets as Record<string, unknown>;
+    const assets: Record<string, string> = {};
+    for (const key of ['large_image', 'large_text', 'small_image', 'small_text']) {
+      const value = assetsInput[key];
+      if (value !== undefined) {
+        if (!isSafeString(value)) return { ok: false, reason: `asset-${key}-invalid` };
+        assets[key] = value;
+      }
+    }
+    activity.assets = assets;
+  }
+
+  if (input.buttons !== undefined) {
+    if (!Array.isArray(input.buttons) || input.buttons.length > DISCORD_BUTTONS_MAX) {
+      return { ok: false, reason: 'buttons-invalid' };
+    }
+    const buttons: Array<{ label: string; url: string }> = [];
+    for (const button of input.buttons) {
+      if (!isPlainRecord(button)) {
+        return { ok: false, reason: 'button-not-object' };
+      }
+      const btn = button as Record<string, unknown>;
+      if (!isSafeString(btn.label)) return { ok: false, reason: 'button-label-invalid' };
+      if (!isHttpsUrl(btn.url)) return { ok: false, reason: 'button-url-invalid' };
+      buttons.push({ label: btn.label as string, url: btn.url as string });
+    }
+    activity.buttons = buttons;
+  }
+
+  return { ok: true, activity: activity as unknown as DiscordActivity };
+};
+
 export const setDiscordRpcActivity = async (data: DiscordActivity) => {
   try {
     const userSettings = await getUserSettings();

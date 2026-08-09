@@ -128,7 +128,17 @@
     "by": "tarafından",
     "errorTitle": "Oyuncuda bir hata oluştu.",
     "errorMessage": "$t(player.errorTitle)<br> Bu, bozuk bir şarkıyı çalmaya çalışmanın bir sonucu olabilir. <details></details>",
-    "noErrorMessage": "Hata mesajı oluşturulmadı"
+    "noErrorMessage": "Hata mesajı oluşturulmadı",
+    "sleepTimer": "Sleep timer",
+    "sleepTimerTitle": "Sleep Timer",
+    "sleepTimer15": "15 minutes",
+    "sleepTimer30": "30 minutes",
+    "sleepTimer45": "45 minutes",
+    "sleepTimer60": "60 minutes",
+    "sleepTimerEndOfSong": "End of song",
+    "sleepTimerExtend15": "+15 minutes",
+    "sleepTimerExtend30": "+30 minutes",
+    "sleepTimerCancel": "Cancel timer"
   },
   "sortTypes": {
     "aToZ": "A'dan Z'ye",

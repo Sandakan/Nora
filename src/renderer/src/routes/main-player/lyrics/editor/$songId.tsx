@@ -44,13 +44,9 @@ const PageFocusPrompt = lazy(
 );
 
 /**
- * Renders the lyrics editor page for a specific song, providing UI for viewing and editing lyric
- * lines, playback controls, context menu actions, and keyboard shortcuts.
+ * Renders the lyrics editor page for a specific song, providing UI for viewing and editing lyric lines, playback controls, context menu actions, and keyboard shortcuts.
  *
- * The component reads song and user settings from global stores, subscribes to player position
- * updates for syncing timestamps, and manages internal editing state and focus. It exposes controls
- * to play/stop editing, save or reset lyrics, open settings/help prompts, and displays an overlay
- * when the editing song does not match the currently playing song.
+ * The component reads song and user settings from global stores, subscribes to player position updates for syncing timestamps, and manages internal editing state and focus. It exposes controls to play/stop editing, save or reset lyrics, open settings/help prompts, and displays an overlay when the editing song does not match the currently playing song.
  *
  * @returns The React element representing the lyrics editing route/page.
  */

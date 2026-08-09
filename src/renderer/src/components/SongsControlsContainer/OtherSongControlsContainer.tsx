@@ -12,6 +12,7 @@ import NavLink from '../NavLink';
 import VolumeSlider from '../VolumeSlider';
 
 const AppShortcutsPrompt = lazy(() => import('../SettingsPage/AppShortcutsPrompt'));
+const SleepTimerPrompt = lazy(() => import('../SleepTimerPrompt'));
 
 const OtherSongControlsContainer = () => {
   const isMuted = useSelector(store, (state) => state.player.volume.isMuted);
@@ -47,6 +48,12 @@ const OtherSongControlsContainer = () => {
             iconClassName: 'material-icons-round-outlined mr-2',
             handlerFunction: () =>
               navigate({ to: '/main-player/settings', hash: 'audio-playback-settings-container' })
+          },
+          {
+            label: t('player.sleepTimer'),
+            iconName: 'bedtime',
+            iconClassName: 'material-icons-round-outlined mr-2',
+            handlerFunction: () => changePromptMenuData(true, <SleepTimerPrompt />)
           },
           { label: '', isContextMenuItemSeperator: true, handlerFunction: () => true },
           {

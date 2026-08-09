@@ -234,6 +234,15 @@ declare global {
     playbackRate: number;
   }
 
+  type TimerMode = 'time' | 'endOfSong' | null;
+
+  interface SleepTimerState {
+    mode: TimerMode;
+    remainingSeconds: number;
+    isActive: boolean;
+    endTimestamp: number | null;
+  }
+
   type SongSkipReason = 'USER_SKIP' | 'PLAYER_SKIP';
 
   type AutomaticallySaveLyricsTypes = 'SYNCED' | 'SYNCED_OR_UN_SYNCED' | 'NONE';

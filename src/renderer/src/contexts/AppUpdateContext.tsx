@@ -60,6 +60,12 @@ export interface AppUpdateContextType {
     replaceSelections?: boolean
   ) => void;
   updateAppUpdatesState: (state: AppUpdatesState) => void;
+  startSleepTimer: (minutes: number) => void;
+  startSleepTimerForSongEnd: () => void;
+  stopSleepTimer: () => void;
+  pauseSleepTimer: () => void;
+  resumeSleepTimer: () => void;
+  extendSleepTimer: (minutes: number) => void;
 }
 
 export const AppUpdateContext = createContext({} as AppUpdateContextType);

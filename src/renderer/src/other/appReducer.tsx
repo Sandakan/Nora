@@ -8,6 +8,7 @@ export interface AppReducer {
   localStorage: LocalStorage;
   currentSongData: AudioPlayerData;
   upNextSongData?: AudioPlayerData;
+  sleepTimer: SleepTimerState;
   promptMenuNavigationData: PromptMenuNavigationHistoryData;
   promptMenuData: {
     prompt?: ReactNode;
@@ -67,7 +68,8 @@ export type AppReducerStateActions =
       type: 'UPDATE_LOCAL_STORAGE_PREFERENCE_ITEM';
       data: { item: string; value: LocalStorage['preferences'] };
     }
-  | { type: 'UPDATE_PLAYBACK_RATE'; data: number };
+  | { type: 'UPDATE_PLAYBACK_RATE'; data: number }
+  | { type: 'UPDATE_SLEEP_TIMER_STATE'; data: Partial<SleepTimerState> };
 
 export const reducer = (state: AppReducer, action: AppReducerStateActions): AppReducer => {
   switch (action.type) {
@@ -379,6 +381,11 @@ export const reducer = (state: AppReducer, action: AppReducerStateActions): AppR
           playbackRate: action.data ?? state.player.playbackRate
         }
       };
+    case 'UPDATE_SLEEP_TIMER_STATE':
+      return {
+        ...state,
+        sleepTimer: { ...state.sleepTimer, ...action.data }
+      };
     default:
       return state;
   }
@@ -660,6 +667,12 @@ export const DEFAULT_REDUCER_DATA: AppReducer = {
   },
   currentSongData: {} as AudioPlayerData,
   upNextSongData: {} as AudioPlayerData,
+  sleepTimer: {
+    mode: null,
+    remainingSeconds: 0,
+    isActive: false,
+    endTimestamp: null
+  },
   localStorage,
   navigationHistory: {
     pageHistoryIndex: 0,
