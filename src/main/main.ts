@@ -89,6 +89,7 @@ const DEFAULT_SAVE_DIALOG_OPTIONS: SaveDialogOptions = {
 // / / / / / / VARIABLES / / / / / / /
 export let mainWindow: BrowserWindow;
 let tray: Tray;
+let cleanupDisplayListeners: (() => void) | undefined;
 let trayContextMenu: Electron.Menu;
 let playerType: PlayerTypes = 'normal';
 // let isConnectedToInternet = false;
@@ -461,6 +462,7 @@ async function handleBeforeQuit() {
       await Promise.all([promise1, promise2, promise3, promise4]);
 
       mainWindow.webContents.send('app/beforeQuitEvent');
+      cleanupDisplayListeners?.();
       await closeDatabaseInstance();
 
       logger.debug(`Quiting Nora`, { uptime: `${Math.floor(process.uptime())} seconds` });
@@ -879,6 +881,8 @@ export async function changePlayerType(type: PlayerTypes) {
       manageWindowOnDisplayMetricsChange();
       mainWindow.setAspectRatio(MAIN_WINDOW_ASPECT_RATIO);
     } else {
+      // Handles both 'full' and 'display' player types (kept separate above
+      // for clarity of intent and easier future divergence).
       mainWindow.setMaximumSize(MAIN_WINDOW_MAX_SIZE_X, MAIN_WINDOW_MAX_SIZE_Y);
       mainWindow.setMinimumSize(MAIN_WINDOW_MIN_SIZE_X, MAIN_WINDOW_MIN_SIZE_Y);
       mainWindow.setFullScreen(true);
@@ -887,61 +891,82 @@ export async function changePlayerType(type: PlayerTypes) {
 }
 
 function manageWindowOnDisplayMetricsChange() {
-  const bounds = mainWindow.getBounds();
-  const displays = screen.getAllDisplays();
-  // Use rectangle overlap so a partially visible window counts as on-screen
-  // (otherwise a window straddling a display edge gets teleported to the primary).
-  const isOnAnyDisplay = displays.some((display) => {
-    const { x, y, width, height } = display.workArea;
-    return (
-      bounds.x < x + width &&
-      bounds.x + bounds.width > x &&
-      bounds.y < y + height &&
-      bounds.y + bounds.height > y
-    );
-  });
-
-  if (!isOnAnyDisplay) {
-    const primaryDisplay = screen.getPrimaryDisplay();
-    const newX = primaryDisplay.workArea.x;
-    const newY = primaryDisplay.workArea.y;
-
-    const reposition = () => {
-      mainWindow.setPosition(newX, newY);
-
-      // Persist the corrected coordinates so stale values don't cause a
-      // repeat correction on the next launch (CodeRabbit minor finding).
-      if (playerType === 'mini') {
-        saveUserSettings({ miniPlayerX: newX, miniPlayerY: newY });
-      } else {
-        saveUserSettings({ mainWindowX: newX, mainWindowY: newY });
-      }
-
-      logger.debug('Window was off-screen; moved to primary display', {
-        previousPosition: { x: bounds.x, y: bounds.y },
-        newPosition: { x: newX, y: newY }
-      });
-    };
-
-    if (mainWindow.fullScreen) {
-      // On macOS the fullscreen-exit animation takes ~500 ms; calling
-      // setPosition during the animation is a no-op.  Defer repositioning
-      // until the animation completes (CodeRabbit major finding).
-      mainWindow.setFullScreen(false);
-      mainWindow.once('leave-full-screen', reposition);
-    } else {
-      reposition();
+  try {
+    if (!mainWindow) {
+      logger.warn('mainWindow not initialized in manageWindowOnDisplayMetricsChange');
+      return;
     }
+    const bounds = mainWindow.getBounds();
+    const displays = screen.getAllDisplays();
+    // Use rectangle overlap so a partially visible window counts as on-screen
+    // (otherwise a window straddling a display edge gets teleported to the primary).
+    const isOnAnyDisplay = displays.some((display) => {
+      const { x, y, width, height } = display.workArea;
+      return (
+        bounds.x < x + width &&
+        bounds.x + bounds.width > x &&
+        bounds.y < y + height &&
+        bounds.y + bounds.height > y
+      );
+    });
+
+    if (!isOnAnyDisplay) {
+      const primaryDisplay = screen.getPrimaryDisplay();
+      const newX = primaryDisplay.workArea.x;
+      const newY = primaryDisplay.workArea.y;
+
+      const reposition = () => {
+        mainWindow.setPosition(newX, newY);
+
+        // Persist the corrected coordinates so stale values don't cause a
+        // repeat correction on the next launch (CodeRabbit minor finding).
+        if (playerType === 'mini') {
+          saveUserSettings({ miniPlayerX: newX, miniPlayerY: newY });
+        } else {
+          saveUserSettings({ mainWindowX: newX, mainWindowY: newY });
+        }
+
+        logger.debug('Window was off-screen; moved to primary display', {
+          previousPosition: { x: bounds.x, y: bounds.y },
+          newPosition: { x: newX, y: newY }
+        });
+      };
+
+      if (mainWindow.fullScreen) {
+        // On macOS the fullscreen-exit animation takes ~500 ms; calling
+        // setPosition during the animation is a no-op.  Defer repositioning
+        // until the animation completes (CodeRabbit major finding).
+        mainWindow.setFullScreen(false);
+        mainWindow.once('leave-full-screen', reposition);
+      } else {
+        reposition();
+      }
+    }
+  } catch (error) {
+    logger.error('Failed to manage window position on display metrics change', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      bounds: mainWindow?.getBounds?.(),
+      displays: screen.getAllDisplays?.()
+    });
   }
 }
 
 function manageWindowPositionInMonitor() {
   manageWindowOnDisplayMetricsChange();
 
-  screen.on('display-metrics-changed', () => manageWindowOnDisplayMetricsChange());
+  const onDisplayMetricsChanged = () => manageWindowOnDisplayMetricsChange();
+  const onDisplayRemoved = () => manageWindowOnDisplayMetricsChange();
+
+  screen.on('display-metrics-changed', onDisplayMetricsChanged);
   // `display-metrics-changed` is only fired for resolution / scale changes on
   // existing displays; a hot-unplugged monitor fires `display-removed` instead.
-  screen.on('display-removed', () => manageWindowOnDisplayMetricsChange());
+  screen.on('display-removed', onDisplayRemoved);
+
+  cleanupDisplayListeners = () => {
+    screen.removeListener('display-metrics-changed', onDisplayMetricsChanged);
+    screen.removeListener('display-removed', onDisplayRemoved);
+  };
 }
 
 export async function toggleAutoLaunch(autoLaunchState: boolean) {

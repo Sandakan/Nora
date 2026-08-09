@@ -140,6 +140,9 @@
     "closeUpNext": "Fermer 'SUIVANT'",
     "by": "par",
 
+    "backToPlayer": "Retour au lecteur",
+    "openInDisplayMode": "Ouvrir en mode affichage",
+
     "errorTitle": "Une erreur s'est produite dans le lecteur.",
     "errorMessage": "$t(player.errorTitle)<br /> Cela peut être dû à une chanson corrompue. <details/>",
     "noErrorMessage": "Aucun message d'erreur généré"

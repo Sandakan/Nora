@@ -140,6 +140,8 @@
     "closeUpNext": "Close 'UP NEXT'",
     "by": "by",
 
+    "backToPlayer": "Back to Player",
+    "openInDisplayMode": "Open in Display Mode",
     "errorTitle": "An error ocurred in the player.",
     "errorMessage": "$t(player.errorTitle)<br /> This could be a result of trying to play a corrupted song. <details/>",
     "noErrorMessage": "No error message generated"

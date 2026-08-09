@@ -140,6 +140,9 @@
     "closeUpNext": "Zamknij 'NASTĘPNE'",
     "by": "autorstwa",
 
+    "backToPlayer": "Powrót do odtwarzacza",
+    "openInDisplayMode": "Otwórz w trybie wyświetlania",
+
     "errorTitle": "Wystąpił błąd w odtwarzaczu.",
     "errorMessage": "$t(player.errorTitle)<br /> Może to być wynik próby odtworzenia uszkodzonego utworu. <details/>",
     "noErrorMessage": "Nie wygenerowano komunikatu o błędzie"

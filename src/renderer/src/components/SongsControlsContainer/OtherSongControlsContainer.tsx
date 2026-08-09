@@ -63,6 +63,12 @@ const OtherSongControlsContainer = () => {
             handlerFunction: () => updatePlayerType('mini')
           },
           {
+            label: t('player.openInDisplayMode'),
+            iconName: 'gallery_thumbnail',
+            iconClassName: 'material-icons-round-outlined mr-2',
+            handlerFunction: () => navigate({ to: '/display-player' })
+          },
+          {
             label: t('player.openInFullScreen'),
             iconName: 'fullscreen',
             iconClassName: 'material-icons-round-outlined mr-2',
@@ -105,6 +111,22 @@ const OtherSongControlsContainer = () => {
               className={`${isActive ? 'material-icons-round' : 'material-icons-round-outlined'} group-[.active]:text-font-color-highlight! dark:group-[.active]:text-dark-font-color-highlight! text-xl! opacity-60 transition-[color,opacity] group-[.active]:opacity-100! hover:opacity-80`}
             >
               pip
+            </span>
+          );
+        }}
+      </NavLink>
+
+      <NavLink
+        to="/display-player"
+        className={`display-mode-btn text-font-color-black text-opacity-60 after:bg-font-color-highlight dark:text-font-color-white dark:after:bg-dark-font-color-highlight mr-6! rounded-none! border-0! bg-transparent p-0! outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:opacity-0 after:transition-opacity hover:bg-transparent focus-visible:outline! lg:hidden dark:bg-transparent dark:hover:bg-transparent`}
+        title={t('player.openInDisplayMode')}
+      >
+        {({ isActive }) => {
+          return (
+            <span
+              className={`${isActive ? 'material-icons-round' : 'material-icons-round-outlined'} group-[.active]:text-font-color-highlight! dark:group-[.active]:text-dark-font-color-highlight! text-xl! opacity-60 transition-[color,opacity] group-[.active]:opacity-100! hover:opacity-80`}
+            >
+              gallery_thumbnail
             </span>
           );
         }}

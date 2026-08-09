@@ -140,6 +140,9 @@
     "closeUpNext": "'পৰৱৰ্তী' বন্ধ কৰক",
     "by": "ৰ দ্বাৰা",
 
+    "backToPlayer": "Back to Player",
+    "openInDisplayMode": "Open in Display Mode",
+
     "errorTitle": "প্লেয়াৰত এটা ত্ৰুটি ঘটিছে।",
     "errorMessage": "$t(player.errorTitle)<br /> এটা নষ্ট গীত প্লে' কৰিবলৈ চেষ্টা কৰাৰ ফলত এনে হ'ব পাৰে। <details/>",
     "noErrorMessage": "কোনো ত্ৰুটি বাৰ্তা উৎপন্ন হোৱা নাই"
