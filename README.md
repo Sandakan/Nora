@@ -134,7 +134,7 @@ npm start
 
 ## 📊 Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=Sandakan/Nora&type=Date)](https://star-history.com/#Sandakan/Nora&Date)
+[![Star History Chart](https://star-history.dera.page/svg?repos=Sandakan/Nora&type=Date)](https://star-history.dera.page/#Sandakan/Nora&Date)
 
 ## 🤝 Feedback & Contributing
 
