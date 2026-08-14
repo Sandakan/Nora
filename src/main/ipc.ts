@@ -88,6 +88,7 @@ import {
   toggleAutoLaunch,
   toggleMiniPlayerAlwaysOnTop,
   toggleOnBatteryPower,
+  updateHideWindowOnClose,
   updateTraySingleClickBehavior
 } from './main';
 import { setDiscordRpcActivity } from './other/discordRPC';
@@ -218,9 +219,12 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     // ipcMain.handle('app/saveUserData', (_, dataType: UserDataTypes, data: string) =>
     //   saveUserData(dataType, data)
     // );
-    ipcMain.handle('app/saveUserSettings', (_, settings: Partial<UserSettings>) =>
-      saveUserSettings(settings)
-    );
+    ipcMain.handle('app/saveUserSettings', (_, settings: Partial<UserSettings>) => {
+      if (typeof settings.hideWindowOnClose === 'boolean') {
+        updateHideWindowOnClose(settings.hideWindowOnClose);
+      }
+      return saveUserSettings(settings);
+    });
 
     ipcMain.handle('app/updateTraySingleClickBehavior', (_, enable: boolean) =>
       updateTraySingleClickBehavior(enable)
