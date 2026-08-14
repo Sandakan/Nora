@@ -78,7 +78,7 @@
     "coverage": "vitest run --coverage",
     "check-types": "tsc --noEmit",
     "husky-test": "npm run format && npm run lint && npm test",
-    "prepare": "husky",
+    "prepare": "husky && npm run electron-install",
     "format-check": "oxfmt --check",
     "format-write": "oxfmt",
     "format": "oxfmt",
@@ -112,7 +112,8 @@
     "renderer:generate-routes": "tsr generate",
     "renderer:watch-routes": "tsr watch",
     "preversion": "npm test",
-    "version": "npm install && npm run build"
+    "version": "npm install && npm run build",
+    "electron-install": "node node_modules/electron/install.js"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.1",
@@ -177,8 +178,8 @@
     "electron-vite": "^6.0.0-beta.1",
     "globals": "^17.4.0",
     "husky": "^9.1.7",
-    "material-symbols": "^0.45.1",
-    "oxfmt": "^0.62.0",
+    "material-symbols": "^0.46.0",
+    "oxfmt": "^0.63.0",
     "oxlint": "^1.65.0",
     "oxlint-tsgolint": "^7.0.2001",
     "react": "^19.2.4",

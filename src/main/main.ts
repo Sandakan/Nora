@@ -283,15 +283,24 @@ if (process.platform === 'win32') {
   app.setAppUserModelId('com.sandakannipunajith.nora');
 }
 
+let hideWindowOnClose = false;
+let isAppQuitting = false;
+
+export function updateHideWindowOnClose(value: boolean) {
+  hideWindowOnClose = value;
+}
+
 app
   .whenReady()
   .then(async () => {
     const {
       windowState,
       zoomFactor,
-      traySingleClickTogglesWindow = false
+      traySingleClickTogglesWindow = false,
+      hideWindowOnClose: userHideWindowOnClose = false
     } = await getUserSettings();
 
+    hideWindowOnClose = userHideWindowOnClose;
     currentWindowZoomFactor = normalizeZoomFactor(zoomFactor);
 
     if (BrowserWindow.getAllWindows().length === 0) await createWindow();
@@ -341,9 +350,19 @@ app
 
     mainWindow.webContents.once('did-finish-load', manageWindowFinishLoad);
 
+    app.on('before-quit', () => {
+      isAppQuitting = true;
+    });
     app.on('before-quit', handleBeforeQuit);
 
     app.on('will-quit', closeDatabaseInstance);
+
+    mainWindow.on('close', (event) => {
+      if (!isAppQuitting && hideWindowOnClose) {
+        event.preventDefault();
+        mainWindow.hide();
+      }
+    });
 
     mainWindow.on('moved', manageAppMoveEvent);
 
@@ -402,8 +421,15 @@ app
   })
   .catch((error) => logger.error('Error occurred when starting the app.', { error }));
 
+app.on('activate', () => {
+  if (mainWindow) {
+    if (!mainWindow.isVisible()) mainWindow.show();
+    mainWindow.focus();
+  }
+});
+
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
+  app.quit();
 });
 
 // / / / / / / / / / / / / / / / / / / / / / / / / / / / /
