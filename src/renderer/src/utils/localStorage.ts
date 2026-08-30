@@ -281,17 +281,82 @@ const getSortingStates = <Type extends keyof SortingStates>(type: Type) =>
 // Note: These read/write from the store's initial keyboardShortcuts, not database
 
 const getKeyboardShortcuts = (): ShortcutCategoryList => {
-  const storage = getLocalStorage();
-  return storage?.keyboardShortcuts || [];
+  const localData = getLocalStorage();
+  const userShortcuts: ShortcutCategory[] = (localData as any)?.keyboardShortcuts || [];
+  const defaults: ShortcutCategory[] = LOCAL_STORAGE_DEFAULT_TEMPLATE.keyboardShortcuts;
+
+  // Match saved categories by stable id first. Legacy data saved before
+  // category ids existed has no id and used a translated title; match it by
+  // array position (the default categories are always in the same order) so
+  // a language change cannot orphan a user's categories. Title matching is a
+  // last resort for non-default user categories.
+  const findUserCategory = (defaultCategory: ShortcutCategory, index: number) =>
+    userShortcuts.find(
+      (uc) =>
+        uc.id === defaultCategory.id ||
+        (uc.id === undefined && userShortcuts.indexOf(uc) === index) ||
+        uc.shortcutCategoryTitle === defaultCategory.shortcutCategoryTitle
+    );
+
+  const merged: ShortcutCategory[] = [];
+  const selectedUserCategoryRefs = new Set<ShortcutCategory>();
+
+  defaults.forEach((defaultCategory, index) => {
+    const matchingUserCategory = findUserCategory(defaultCategory, index);
+
+    if (!matchingUserCategory) {
+      merged.push(defaultCategory);
+      return;
+    }
+
+    selectedUserCategoryRefs.add(matchingUserCategory);
+
+    const matchedByPosition = matchingUserCategory.id === undefined;
+
+    const patchedShortcuts = defaultCategory.shortcuts.map((defaultShortcut, shortcutIndex) => {
+      let matchingUserShortcut: ShortcutCategory['shortcuts'][number] | undefined;
+
+      if (!matchedByPosition) {
+        matchingUserShortcut = matchingUserCategory.shortcuts.find(
+          (us) => us.id === defaultShortcut.id || us.label === defaultShortcut.label
+        );
+      } else {
+        // Legacy category with no stable id: match by position in the known
+        // default category so a prior language change cannot orphan custom keys.
+        matchingUserShortcut = matchingUserCategory.shortcuts[shortcutIndex];
+      }
+
+      if (matchingUserShortcut) {
+        return { ...defaultShortcut, keys: matchingUserShortcut.keys };
+      }
+      return defaultShortcut;
+    });
+
+    merged.push({ ...defaultCategory, shortcuts: patchedShortcuts });
+  });
+
+  // Categories not matching any default (user-created or orphaned legacy
+  // categories) are appended as-is, preserving their id/title. Categories
+  // already merged above are excluded to avoid duplicates.
+  const defaultCategoryIds = new Set(defaults.map((dc) => dc.id));
+  const defaultCategoryTitles = new Set(defaults.map((dc) => dc.shortcutCategoryTitle));
+  const extraUserCategories = userShortcuts.filter(
+    (uc) =>
+      !selectedUserCategoryRefs.has(uc) &&
+      !defaultCategoryIds.has(uc.id) &&
+      !defaultCategoryTitles.has(uc.shortcutCategoryTitle)
+  );
+
+  return [...merged, ...extraUserCategories];
 };
 
-const setKeyboardShortcuts = (label: string, newKeys: string[]): void => {
+const setKeyboardShortcuts = (idOrLabel: string, newKeys: string[]): void => {
   const currentData: ShortcutCategoryList = getKeyboardShortcuts();
 
   const updatedData = currentData.map((category) => ({
     ...category,
     shortcuts: category.shortcuts.map((shortcut) => {
-      if (shortcut.label === label) {
+      if (shortcut.id === idOrLabel || shortcut.label === idOrLabel) {
         return { ...shortcut, keys: newKeys };
       }
       return shortcut;
@@ -299,7 +364,7 @@ const setKeyboardShortcuts = (label: string, newKeys: string[]): void => {
   }));
 
   try {
-    const allItems = getAllItems();
+    const allItems = getAllItems() as any;
     setAllItems({
       ...allItems,
       keyboardShortcuts: updatedData
@@ -310,8 +375,8 @@ const setKeyboardShortcuts = (label: string, newKeys: string[]): void => {
 };
 
 const resetShortcutsToDefaults = (): void => {
-  const allItems = getAllItems();
-  const defaultShortcuts = LOCAL_STORAGE_DEFAULT_TEMPLATE.keyboardShortcuts;
+  const allItems = getAllItems() as any;
+  const defaultShortcuts = (LOCAL_STORAGE_DEFAULT_TEMPLATE as any).keyboardShortcuts;
   if (defaultShortcuts) {
     setAllItems({
       ...allItems,
@@ -325,7 +390,7 @@ const resetShortcutsToDefaults = (): void => {
 
 const setEqualizerPreset = <Data extends Equalizer>(data: Data) => {
   // Store in the local storage root (not under playback)
-  const allItems = getAllItems();
+  const allItems = getAllItems() as any;
   setAllItems({
     ...allItems,
     equalizerPreset: data
@@ -333,7 +398,7 @@ const setEqualizerPreset = <Data extends Equalizer>(data: Data) => {
 };
 
 const getEqualizerPreset = () => {
-  const storage = getLocalStorage();
+  const storage = getLocalStorage() as any;
   return storage?.equalizerPreset as Equalizer | undefined;
 };
 

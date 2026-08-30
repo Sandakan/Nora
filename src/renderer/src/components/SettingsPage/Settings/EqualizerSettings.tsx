@@ -13,7 +13,11 @@ import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import { useUserPreferences } from '../../../hooks/useUserPreferences';
 import i18n from '../../../i18n';
-import { equalizerBandHertzData, equalizerPresetsData } from '../../../other/equalizerData';
+import {
+  equalizerBandHertzData,
+  equalizerBandKeys,
+  equalizerPresetsData
+} from '../../../other/equalizerData';
 import { isDataChanged } from '../../../utils/hasDataChanged';
 import Button from '../../Button';
 import Dropdown from '../../Dropdown';
@@ -34,19 +38,6 @@ const equalizerPresets: EqualizerPresetDropdownOptions[] = [
     isDisabled: true
   },
   ...presets
-];
-
-const equalizerBandKeys: (keyof Equalizer)[] = [
-  'thirtyTwoHertzFilter',
-  'sixtyFourHertzFilter',
-  'hundredTwentyFiveHertzFilter',
-  'twoHundredFiftyHertzFilter',
-  'fiveHundredHertzFilter',
-  'thousandHertzFilter',
-  'twoThousandHertzFilter',
-  'fourThousandHertzFilter',
-  'eightThousandHertzFilter',
-  'sixteenThousandHertzFilter'
 ];
 
 type Action = { type: undefined; data: Equalizer } | { type: keyof Equalizer; data: number };

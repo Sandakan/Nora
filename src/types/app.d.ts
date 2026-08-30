@@ -647,11 +647,13 @@ declare global {
   }
 
   interface Shortcut {
+    id: string;
     label: string;
     keys: string[];
   }
 
   interface ShortcutCategory {
+    id: string;
     shortcutCategoryTitle: string;
     shortcuts: Shortcut[];
   }

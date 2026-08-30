@@ -1,4 +1,4 @@
-import i18n from '@renderer/i18n';
+import { LOCAL_STORAGE_DEFAULT_TEMPLATE } from '@renderer/other/appReducer';
 import { normalizedKeys } from '@renderer/other/appShortcuts';
 import { store } from '@renderer/store/store';
 import { useNavigate } from '@tanstack/react-router';
@@ -10,6 +10,25 @@ import storage from '../utils/localStorage';
 import { useAudioPlayer } from './useAudioPlayer';
 
 const AppShortcutsPrompt = lazy(() => import('../components/SettingsPage/AppShortcutsPrompt'));
+
+// Canonical id lookup for legacy shortcuts. Older stored data can carry
+// fallback ids (e.g. `unknown-0-0`) or human-readable labels instead of the
+// stable action ids used by the dispatch switch below. Resolve via the
+// default template's label mapping so customized legacy shortcuts still fire.
+const legacyShortcutLabelToId = new Map<string, string>(
+  LOCAL_STORAGE_DEFAULT_TEMPLATE.keyboardShortcuts.flatMap((category) =>
+    category.shortcuts.map((shortcut) => [shortcut.label, shortcut.id])
+  )
+);
+
+const canonicalizeShortcutId = (shortcut: Shortcut): string => {
+  // Prefer the canonical action id resolved from the label: legacy entries can
+  // carry meaningless fallback ids (e.g. `unknown-0-0`) that the dispatch
+  // switch doesn't recognize, while their human-readable label is intact.
+  const resolved = legacyShortcutLabelToId.get(shortcut.label);
+  if (resolved) return resolved;
+  return shortcut.id || shortcut.label;
+};
 
 /** Dependencies required by the keyboard shortcuts hook */
 export interface KeyboardShortcutDependencies {
@@ -106,6 +125,17 @@ export function useKeyboardShortcuts(dependencies: KeyboardShortcutDependencies)
 
   const manageKeyboardShortcuts = useCallback(
     (e: KeyboardEvent) => {
+      // Do not intercept keystrokes while the user edits text: global
+      // shortcuts would preventDefault and break typing/IME composition.
+      const target = e.target as HTMLElement | null;
+      const isEditableTarget =
+        target &&
+        (target.isContentEditable ||
+          target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.tagName === 'SELECT');
+      if (isEditableTarget || e.isComposing) return;
+
       const shortcuts = storage.keyboardShortcuts
         .getKeyboardShortcuts()
         .flatMap((category) => category.shortcuts);
@@ -140,11 +170,15 @@ export function useKeyboardShortcuts(dependencies: KeyboardShortcutDependencies)
       };
 
       const pressedKeys = [
+        e.metaKey ? 'Cmd' : null,
         e.ctrlKey ? 'Ctrl' : null,
         e.shiftKey ? 'Shift' : null,
         e.altKey ? 'Alt' : null,
         formatKey(e.key)
-      ].filter(Boolean);
+      ].filter(Boolean) as string[];
+
+      // Reject modifier-only combos (Ctrl alone, Shift alone, etc.).
+      if (pressedKeys.every((key) => ['Cmd', 'Ctrl', 'Shift', 'Alt'].includes(key))) return;
 
       const matchedShortcut = shortcuts.find((shortcut) => {
         const storedKeys = shortcut.keys.map(formatKey).sort();
@@ -155,42 +189,43 @@ export function useKeyboardShortcuts(dependencies: KeyboardShortcutDependencies)
       if (matchedShortcut) {
         e.preventDefault();
         let updatedPlaybackRate: number;
-        switch (matchedShortcut.label) {
-          case i18n.t('appShortcutsPrompt.playPause'):
+        const shortcutId = canonicalizeShortcutId(matchedShortcut).replace(/(_key|Key)$/i, '');
+        switch (shortcutId) {
+          case 'playPause':
             toggleSongPlayback();
             break;
-          case i18n.t('appShortcutsPrompt.toggleMute'):
+          case 'toggleMute':
             toggleMutedState(!store.state.player.volume.isMuted);
             break;
-          case i18n.t('appShortcutsPrompt.nextSong'):
+          case 'nextSong':
             handleSkipForwardClick();
             break;
-          case i18n.t('appShortcutsPrompt.prevSong'):
+          case 'prevSong':
             handleSkipBackwardClick();
             break;
-          case i18n.t('appShortcutsPrompt.tenSecondsForward'):
+          case 'tenSecondsForward':
             if (player.currentTime + 10 < player.duration) player.currentTime += 10;
             break;
-          case i18n.t('appShortcutsPrompt.tenSecondsBackward'):
+          case 'tenSecondsBackward':
             if (player.currentTime - 10 >= 0) player.currentTime -= 10;
             else player.currentTime = 0;
             break;
-          case i18n.t('appShortcutsPrompt.upVolume'):
+          case 'upVolume':
             updateVolume(player.volume + 0.05 <= 1 ? player.volume * 100 + 5 : 100);
             break;
-          case i18n.t('appShortcutsPrompt.downVolume'):
+          case 'downVolume':
             updateVolume(player.volume - 0.05 >= 0 ? player.volume * 100 - 5 : 0);
             break;
-          case i18n.t('appShortcutsPrompt.toggleShuffle'):
+          case 'toggleShuffle':
             toggleShuffling();
             break;
-          case i18n.t('appShortcutsPrompt.toggleRepeat'):
+          case 'toggleRepeat':
             toggleRepeat();
             break;
-          case i18n.t('appShortcutsPrompt.toggleFavorite'):
+          case 'toggleFavorite':
             toggleIsFavorite();
             break;
-          case i18n.t('appShortcutsPrompt.upPlaybackRate'):
+          case 'upPlaybackRate':
             updatedPlaybackRate = store.state.localStorage.playback.playbackRate || 1;
             if (updatedPlaybackRate + 0.05 > 4) updatedPlaybackRate = 4;
             else updatedPlaybackRate += 0.05;
@@ -204,7 +239,7 @@ export function useKeyboardShortcuts(dependencies: KeyboardShortcutDependencies)
               }
             ]);
             break;
-          case i18n.t('appShortcutsPrompt.downPlaybackRate'):
+          case 'downPlaybackRate':
             updatedPlaybackRate = store.state.localStorage.playback.playbackRate || 1;
             if (updatedPlaybackRate - 0.05 < 0.25) updatedPlaybackRate = 0.25;
             else updatedPlaybackRate -= 0.05;
@@ -218,7 +253,7 @@ export function useKeyboardShortcuts(dependencies: KeyboardShortcutDependencies)
               }
             ]);
             break;
-          case i18n.t('appShortcutsPrompt.resetPlaybackRate'):
+          case 'resetPlaybackRate':
             storage.setItem('playback', 'playbackRate', 1);
             addNewNotifications([
               {
@@ -228,64 +263,77 @@ export function useKeyboardShortcuts(dependencies: KeyboardShortcutDependencies)
               }
             ]);
             break;
-          case i18n.t('appShortcutsPrompt.goToSearch'):
+          case 'goToSearch':
             navigate({ to: '/main-player/search' });
             break;
-          case i18n.t('appShortcutsPrompt.goToLyrics'):
+          case 'goToLyrics':
             navigate({ to: '/main-player/lyrics' });
             break;
-          case i18n.t('appShortcutsPrompt.goToQueue'):
+          case 'goToQueue':
             navigate({ to: '/main-player/queue' });
             break;
-          case i18n.t('appShortcutsPrompt.goHome'):
+          case 'goHome':
             navigate({ to: '/main-player/home' });
             break;
-          case i18n.t('appShortcutsPrompt.goBack'):
+          case 'goBack':
             // TODO: Implement page history back navigation.
             break;
-          case i18n.t('appShortcutsPrompt.goForward'):
+          case 'goForward':
             // TODO: Implement page history forward navigation.
             break;
-          case i18n.t('appShortcutsPrompt.openMiniPlayer'):
+          case 'openMiniPlayer':
             updatePlayerType(store.state.playerType === 'mini' ? 'normal' : 'mini');
             break;
-          case i18n.t('appShortcutsPrompt.selectMultipleItems'):
+          case 'toggleFullscreenPlayer': {
+            if (e.repeat) break;
+            const isCurrentlyFull = store.state.playerType === 'full';
+            updatePlayerType(isCurrentlyFull ? 'normal' : 'full');
+            navigate({
+              to: isCurrentlyFull ? '/main-player/home' : '/fullscreen-player'
+            });
+            break;
+          }
+          case 'selectMultipleItems':
             toggleMultipleSelections(true);
             break;
-          case i18n.t('appShortcutsPrompt.selectNextLyricsLine'):
+          case 'selectNextLyricsLine':
             // TODO: Implement logic to select next lyrics line.
             break;
-          case i18n.t('appShortcutsPrompt.selectPrevLyricsLine'):
+          case 'selectPrevLyricsLine':
             // TODO: Implement logic to select previous lyrics line.
             break;
-          case i18n.t('appShortcutsPrompt.selectCustomLyricsLine'):
+          case 'selectCustomLyricsLine':
             // TODO: Implement logic to select custom lyrics line.
             break;
-          case i18n.t('appShortcutsPrompt.playNextLyricsLine'):
+          case 'playNextLyricsLine':
             // TODO: Implement logic to jump to next lyrics line.
             break;
-          case i18n.t('appShortcutsPrompt.playPrevLyricsLine'):
+          case 'playPrevLyricsLine':
             // TODO: Implement logic to jump to previous lyrics line.
             break;
-          case i18n.t('appShortcutsPrompt.toggleTheme'):
+          case 'toggleTheme':
             window.api.theme.changeAppTheme();
             break;
-          case i18n.t('appShortcutsPrompt.toggleMiniPlayerAlwaysOnTop'):
+          case 'toggleEqualizer':
+            if (e.repeat) break;
+            player.toggleEqualizer();
+            break;
+          case 'toggleMiniPlayerAlwaysOnTop':
             // TODO: Implement logic to jump to to trigger mini player always on top.
             break;
-          case i18n.t('appShortcutsPrompt.reload'):
+          case 'reload':
             window.api.appControls.restartRenderer?.('Shortcut: Ctrl+R');
             break;
-          case i18n.t('appShortcutsPrompt.openAppShortcutsPrompt'):
+          case 'openAppShortcutsPrompt':
             changePromptMenuData(true, <AppShortcutsPrompt />);
             break;
-          case i18n.t('appShortcutsPrompt.openDevtools'):
+          case 'openDevtools':
             if (!window.api.properties.isInDevelopment) {
               window.api.settingsHelpers.openDevtools();
             }
             break;
           default:
-            console.warn(`Unhandled shortcut action: ${matchedShortcut.label}`);
+            console.warn(`Unhandled shortcut action: ${shortcutId}`);
         }
       }
     },

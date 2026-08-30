@@ -1,5 +1,7 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 
+import { equalizerBandKeys } from '../other/equalizerData';
+import type { AudioPlayer } from '../other/player';
 import toggleSongIsFavorite from '../other/toggleSongIsFavorite';
 import { dispatch, store } from '../store/store';
 import storage from '../utils/localStorage';
@@ -29,11 +31,11 @@ import { useUserPreferences } from './useUserPreferences';
  *   updateEqualizerOptions({ preset: 'rock', bands: [...] });
  *   ```;
  *
- * @param player - The HTMLAudioElement instance
+ * @param player - The AudioPlayer instance
  * @returns Object containing playback setting functions
  */
-export function usePlaybackSettings(player: HTMLAudioElement) {
-  const { saveEqualizerPreset } = useUserPreferences();
+export function usePlaybackSettings(player: AudioPlayer) {
+  const { saveEqualizerPreset, equalizerPreset } = useUserPreferences();
 
   const toggleRepeat = useCallback((newState?: RepeatTypes) => {
     const repeatState =
@@ -102,9 +104,31 @@ export function usePlaybackSettings(player: HTMLAudioElement) {
   const updateEqualizerOptions = useCallback(
     (options: Equalizer) => {
       saveEqualizerPreset(options);
+      // Feed the DB-backed preset into the player so toggleEqualizer can
+      // re-apply it and the bands are live without a separate save path.
+      player.applyEqualizerPreset(options);
     },
-    [saveEqualizerPreset]
+    [saveEqualizerPreset, player]
   );
+
+  // Hydrate the player's equalizer cache from the database on startup so
+  // Ctrl+E restores the saved preset even before the user opens Settings.
+  // Apply only (no save) to keep the database as the source of truth.
+  useEffect(() => {
+    const bands = equalizerPreset?.frequencyBands;
+    if (!Array.isArray(bands) || bands.length !== equalizerBandKeys.length) return;
+
+    const preset = equalizerBandKeys.reduce<Partial<Record<EqualizerBandFilters, number>>>(
+      (acc, key, index) => {
+        const value = bands[index];
+        acc[key] = typeof value === 'number' && Number.isFinite(value) ? value : 0;
+        return acc;
+      },
+      {}
+    );
+
+    player.applyEqualizerPreset(preset);
+  }, [equalizerPreset, player]);
 
   return {
     toggleRepeat,
