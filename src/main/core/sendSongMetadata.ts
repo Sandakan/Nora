@@ -1,7 +1,7 @@
 import path from 'path';
 
 import { getSongByIdForSongMetadata } from '@main/db/queries/songs';
-import { File } from 'node-taglib-sharp';
+import { Tag } from 'node-taglib-sharp';
 
 import { appPreferences } from '../../../package.json';
 // import { parseSyncedLyricsFromAudioDataSource } from '../../common/parseLyrics';
@@ -17,10 +17,9 @@ import logger from '../logger';
 import { getSongsOutsideLibraryData } from '../main';
 import { isLyricsSavePending } from '../saveLyricsToSong';
 import { isMetadataUpdatesPending } from '../updateSong/updateSongId3Tags';
+import { withTagFile } from '../utils/createTagFile';
 
 const { metadataEditingSupportedExtensions } = appPreferences;
-
-const getSongFileObject = (songPath: string) => File.createFromPath(songPath);
 
 // const getUnsynchronizedLyricsFromSongID3Tags = (songID3Tags: SongTags) => {
 //   const { unsynchronisedLyrics } = songID3Tags;
@@ -59,8 +58,7 @@ const sendSongMetadata = async (
       if (!isASupporedFormat)
         throw new Error(`No support for editing song metadata in '${pathExt}' format.`);
 
-      const songFile = getSongFileObject(song.path);
-      const songMetadata = songFile.tag;
+      const songMetadata: Tag | undefined = await withTagFile(song.path, (file) => file.tag);
 
       const songAlbums: SongTags['albums'] =
         song.albums.length > 0
@@ -72,7 +70,7 @@ const sendSongMetadata = async (
               artworkPath: parseAlbumArtworks(a.album.artworks.map((artwork) => artwork.artwork))
                 .artworkPath
             }))
-          : songMetadata.album
+          : songMetadata?.album
             ? [
                 {
                   title: songMetadata.album ?? 'Unknown Album',
@@ -166,26 +164,25 @@ const sendSongMetadata = async (
       const songsOutsideLibraryData = getSongsOutsideLibraryData();
       for (const songOutsideLibraryData of songsOutsideLibraryData) {
         if (songOutsideLibraryData.path === songPathWithDefaultUrl) {
-          const songFile = getSongFileObject(songPath);
-          const songMetadata = songFile.tag;
+          const songMetadata: Tag | undefined = await withTagFile(songPath, (file) => file.tag);
 
           const res: SongTags = {
-            title: songMetadata.title || '',
-            artists: songMetadata.performers
+            title: songMetadata?.title || '',
+            artists: songMetadata?.performers
               ? songMetadata.performers.map((performer) => ({ name: performer }))
               : undefined,
-            albums: songMetadata.album
+            albums: songMetadata?.album
               ? [
                   {
                     title: songMetadata.album ?? 'Unknown Album'
                   }
                 ]
               : undefined,
-            genres: songMetadata.genres
+            genres: songMetadata?.genres
               ? songMetadata.genres.map((genre) => ({ name: genre }))
               : undefined,
-            releasedYear: Number(songMetadata.year) || undefined,
-            composer: songMetadata.composers ? songMetadata.composers.join(', ') : undefined,
+            releasedYear: Number(songMetadata?.year) || undefined,
+            composer: songMetadata?.composers ? songMetadata.composers.join(', ') : undefined,
             // synchronizedLyrics: getSynchronizedLyricsFromSongID3Tags(songTags),
             // unsynchronizedLyrics: getUnsynchronizedLyricsFromSongID3Tags(songTags),
             artworkPath: songOutsideLibraryData.artworkPath,

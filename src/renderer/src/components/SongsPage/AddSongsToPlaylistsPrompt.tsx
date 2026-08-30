@@ -91,14 +91,36 @@ const AddSongsToPlaylistsPrompt = (props: AddSongsToPlaylistProp) => {
         // Special ID for Favorites playlist
         return window.api.playerControls
           .toggleLikeSongs(songIds, true)
-          .catch((err) => console.error(err));
+          .then(() => ({ success: true }) as { success: boolean })
+          .catch((err) => {
+            console.error(err);
+            return { success: false } as { success: boolean };
+          });
       return window.api.playlistsData
         .addSongsToPlaylist(playlist.playlistId, songIds)
-        .catch((err) => console.error(err));
+        .catch((err) => {
+          console.error(err);
+          return { success: false } as { success: boolean };
+        });
     });
     Promise.all(promises)
       .then((res) => {
-        console.log(res);
+        const allSucceeded = res.every(
+          (r) => r && typeof r === 'object' && (r as { success?: boolean }).success === true
+        );
+        if (!allSucceeded) {
+          addNewNotifications([
+            {
+              id: 'songAddedtoPlaylistsFailed',
+              duration: 5000,
+              iconName: 'error',
+              content: t('addSongsToPlaylistsPrompt.songsAddedToPlaylistsFailed', {
+                playlistCount: selectedPlaylistsData.length
+              })
+            }
+          ]);
+          return;
+        }
         return addNewNotifications([
           {
             id: 'songAddedtoPlaylists',

@@ -1,5 +1,4 @@
-import { useCallback, useEffect } from 'react';
-import { lazy } from 'react';
+import { lazy, useCallback, useEffect } from 'react';
 
 import { releaseNotes, version } from '../../../../package.json';
 import { store } from '../store/store';
