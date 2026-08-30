@@ -152,5 +152,21 @@ export const plugins = [
       },
       { values: theme('transitionDelay') }
     );
+  }),
+  plugin(({ addUtilities }) => {
+    addUtilities({
+      '.text-glow-sm': {
+        textShadow: '0 0 4px hsl(var(--text-color-highlight) / 0.4), 0 0 8px hsl(var(--text-color-highlight) / 0.2)'
+      },
+      '.text-glow-md': {
+        textShadow: '0 0 8px hsl(var(--text-color-highlight) / 0.5), 0 0 16px hsl(var(--text-color-highlight) / 0.25)'
+      },
+      '.dark .text-glow-sm': {
+        textShadow: '0 0 4px hsl(var(--dark-text-color-highlight) / 0.4), 0 0 8px hsl(var(--dark-text-color-highlight) / 0.2)'
+      },
+      '.dark .text-glow-md': {
+        textShadow: '0 0 8px hsl(var(--dark-text-color-highlight) / 0.5), 0 0 16px hsl(var(--dark-text-color-highlight) / 0.25)'
+      }
+    });
   })
 ];

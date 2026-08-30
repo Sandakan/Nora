@@ -7,7 +7,6 @@ import { useTranslation } from 'react-i18next';
 import roundTo from '../../../../common/roundTo';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import EnhancedSyncedLyricWord from '../LyricsEditingPage/EnhancedSyncedLyricWord';
-import LyricsProgressBar from './LyricsProgressBar';
 
 interface LyricProp {
   lyric: string | SyncedLyricsLineWord[];
@@ -41,7 +40,7 @@ const LyricLine = (props: LyricProp) => {
   const { t } = useTranslation();
 
   const lyricsRef = useRef(null as HTMLDivElement | null);
-  const isTheCurrnetLineRef = useRef(false);
+  const isTheCurrentLineRef = useRef(false);
 
   const {
     index,
@@ -61,8 +60,8 @@ const LyricLine = (props: LyricProp) => {
         if (lyricsRef.current && syncedLyrics) {
           const { start, end } = syncedLyrics;
           if (songPosition > start && songPosition < end) {
-            if (!isTheCurrnetLineRef.current) {
-              isTheCurrnetLineRef.current = true;
+            if (!isTheCurrentLineRef.current) {
+              isTheCurrentLineRef.current = true;
               setIsInRange(true);
               if (isAutoScrolling)
                 lyricsRef.current?.scrollIntoView({
@@ -73,7 +72,7 @@ const LyricLine = (props: LyricProp) => {
               document.dispatchEvent(lyricsScrollIntoViewEvent);
             }
           } else {
-            isTheCurrnetLineRef.current = false;
+            isTheCurrentLineRef.current = false;
             setIsInRange(false);
           }
         }
@@ -83,10 +82,11 @@ const LyricLine = (props: LyricProp) => {
   );
 
   useEffect(() => {
+    if (!syncedLyrics) return;
     document.addEventListener('player/positionChange', handleLyricsActivity);
 
     return () => document.removeEventListener('player/positionChange', handleLyricsActivity);
-  }, [handleLyricsActivity]);
+  }, [handleLyricsActivity, syncedLyrics]);
 
   const lyricString = useMemo(() => {
     if (typeof lyric === 'string') return getLyricText(lyric);
@@ -99,7 +99,6 @@ const LyricLine = (props: LyricProp) => {
           start={extendedText.start}
           end={extendedText.end}
           text={extendedText.text}
-          delay={0}
         />
       );
     });
@@ -121,7 +120,6 @@ const LyricLine = (props: LyricProp) => {
           start={extendedText.start}
           end={extendedText.end}
           text={extendedText.text}
-          delay={0}
         />
       );
     });
@@ -141,7 +139,6 @@ const LyricLine = (props: LyricProp) => {
           start={extendedText.start}
           end={extendedText.end}
           text={extendedText.text}
-          delay={0}
         />
       );
     });
@@ -153,6 +150,15 @@ const LyricLine = (props: LyricProp) => {
   let lyricStringLineSecondaryUpper;
   // if (!preferences.compactLyrics && translatedLyricString)
   if (translatedLyricString) lyricStringLineSecondaryUpper = convertedLyricString ?? lyricString;
+
+  // When any rendered lyric representation uses EnhancedSyncedLyricWord
+  // controls, make only the word-level controls interactive. Disable the
+  // parent line's button role / keyboard handler to avoid nested ARIA buttons.
+  const hasEnhancedWordControls =
+    Array.isArray(lyric) ||
+    Array.isArray(translatedLyricLines[0]?.text) ||
+    Array.isArray(convertedLyric);
+  const isLineSeekable = syncedLyrics && !hasEnhancedWordControls;
 
   return (
     <div
@@ -167,21 +173,36 @@ const LyricLine = (props: LyricProp) => {
             })
           : undefined
       }
-      className={`highlight text-font-color-black/20 dark:text-font-color-white/20 z-0 mb-5 flex w-fit flex-col items-center justify-center text-center text-5xl font-medium text-balance transition-[transform,translate,scale,color,filter] duration-250 select-none first:mt-8 last:mb-4 empty:mb-16 ${
+      className={`highlight text-font-color-black/15 dark:text-font-color-white/15 z-0 mb-5 flex w-fit flex-col items-center justify-center text-center text-5xl font-medium text-balance transition-[transform,translate,scale,color,filter,opacity,text-shadow] duration-250 select-none first:mt-8 last:mb-4 empty:mb-16 ${
         syncedLyrics
-          ? `cursor-pointer blur-[1px] ${
+          ? `cursor-pointer blur-[2px] ${
               isInRange
-                ? 'text-font-color-highlight! dark:text-dark-font-color-highlight! scale-100! font-medium blur-none! [&>div>span]:mr-3!'
-                : 'scale-75!'
+                ? `text-font-color-highlight! dark:text-dark-font-color-highlight! scale-105! font-medium blur-none! ${playerType !== 'mini' ? 'text-glow-md!' : ''} [&>div>span]:mr-3!`
+                : 'scale-75! opacity-80!'
             }`
           : 'text-font-color-black! dark:text-font-color-white! scale-100! text-4xl! font-medium blur-none! [&>div>span]:mr-3'
-      } ${playerType === 'mini' ? 'text-font-color-white/20! mb-2! text-2xl!' : ''} ${playerType === 'full' ? 'text-font-color-white/20! mb-6! origin-left items-start! justify-start! text-left! text-7xl!' : ''}`}
+      } ${playerType === 'mini' && 'text-font-color-white/15! mb-2! text-2xl!'} ${
+        playerType === 'full' &&
+        'text-font-color-white/15! mb-6! origin-left items-start! justify-start! text-left! text-7xl!'
+      }`}
       ref={lyricsRef}
+      role={isLineSeekable ? 'button' : undefined}
+      tabIndex={isLineSeekable ? 0 : undefined}
       onClick={() =>
-        syncedLyrics &&
+        isLineSeekable &&
         (typeof lyric === 'string' || translatedLyricString) &&
-        updateSongPosition(syncedLyrics.start)
+        updateSongPosition(syncedLyrics!.start)
       }
+      onKeyDown={(e) => {
+        if (
+          isLineSeekable &&
+          (typeof lyric === 'string' || translatedLyricString) &&
+          (e.key === 'Enter' || e.key === ' ')
+        ) {
+          e.preventDefault();
+          updateSongPosition(syncedLyrics!.start);
+        }
+      }}
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -208,17 +229,16 @@ const LyricLine = (props: LyricProp) => {
     >
       {lyricStringLineSecondaryUpper && (
         <div
-          className={`flex flex-row flex-wrap ${playerType !== 'full' ? 'items-center justify-center' : ''} ${syncedLyrics && isInRange ? 'text-font-color-black/50! dark:text-font-color-white/50! text-xl!' : 'text-xl!'}`}
+          className={`flex flex-row flex-wrap ${playerType !== 'full' && 'items-center justify-center'} ${syncedLyrics && isInRange ? 'text-font-color-black/50! dark:text-font-color-white/50! text-xl!' : 'text-xl!'}`}
         >
           {lyricStringLineSecondaryUpper}
         </div>
       )}
       <div
-        className={`flex flex-row flex-wrap ${playerType !== 'full' ? 'items-center justify-center' : ''}`}
+        className={`flex flex-row flex-wrap ${playerType !== 'full' && 'items-center justify-center'}`}
       >
         {lyricStringLinePrimary}
       </div>
-      {syncedLyrics && isInRange && <LyricsProgressBar delay={0} syncedLyrics={syncedLyrics} />}
     </div>
   );
 };
