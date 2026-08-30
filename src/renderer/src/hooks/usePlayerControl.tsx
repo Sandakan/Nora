@@ -116,12 +116,12 @@ export function usePlayerControl(
         ]);
       return undefined;
     },
-    [addNewNotifications, t, managePlaybackErrors, player]
+    [addNewNotifications, t, managePlaybackErrors, player, audioPlayer]
   );
 
   const playSong = useCallback(
     (songId: number, isStartPlay = true, playAsCurrentSongIndex = false) => {
-      console.log('[playSong]', { songId, isStartPlay, playAsCurrentSongIndex });
+      log('[playSong]', { songId, isStartPlay, playAsCurrentSongIndex });
 
       if (typeof songId === 'number') {
         // Use AudioPlayer's playSongById if available (preferred path)
@@ -137,14 +137,11 @@ export function usePlayerControl(
         }
 
         // Fallback to legacy direct control (deprecated)
-        console.time('timeForSongFetch');
-
         return window.api.audioLibraryControls
           .getSong(songId)
           .then((songData) => {
-            console.timeEnd('timeForSongFetch');
             if (songData) {
-              console.log('[playSong.received]', {
+              log('[playSong.received]', {
                 songId,
                 title: songData.title,
                 path: songData.path
@@ -155,7 +152,7 @@ export function usePlayerControl(
               storage.playback.setCurrentSongOptions('songId', songData.songId);
 
               const newSrc = `${songData.path}?ts=${Date.now()}`;
-              console.log('[playSong.src]', { src: newSrc });
+              log('[playSong.src]', { src: newSrc });
               player.src = newSrc;
 
               const trackChangeEvent = new CustomEvent('player/trackchange', {
@@ -166,18 +163,17 @@ export function usePlayerControl(
               refStartPlay.current = isStartPlay;
 
               if (isStartPlay) {
-                console.log('[playSong.autoStart]', { isStartPlay: true });
                 toggleSongPlayback();
               }
 
               // Dynamic theme is now handled automatically by useDynamicTheme hook
 
               recordListeningData(songId, songData.duration);
-            } else console.log(songData);
+            }
             return undefined;
           })
           .catch((err) => {
-            console.error(err);
+            log('Failed to play song via legacy fallback', { error: err });
             changePromptMenuData(true, <SongUnplayableErrorPrompt err={err} />);
           });
       }
@@ -207,20 +203,28 @@ export function usePlayerControl(
         const { isKnownSource } = audioPlayerData;
         if (isKnownSource) playSong(audioPlayerData.songId);
         else {
-          console.log('playSong', audioPlayerData.path);
+          log('playSong', audioPlayerData.path);
           dispatch({
             type: 'CURRENT_SONG_DATA_CHANGE',
             data: audioPlayerData
           });
-          player.src = `${audioPlayerData.path}?ts=${Date.now()}`;
-          refStartPlay.current = isStartPlay;
-          if (isStartPlay) toggleSongPlayback();
+          if (audioPlayer) {
+            // Route external sources through AudioPlayer so the ACTIVE element
+            // (not the always-primary AudioPlayer.audio) is used after a swap.
+            audioPlayer
+              .loadExternalSong(audioPlayerData, isStartPlay)
+              .catch((err) => managePlaybackErrors(err));
+          } else {
+            player.src = `${audioPlayerData.path}?ts=${Date.now()}`;
+            refStartPlay.current = isStartPlay;
+            if (isStartPlay) toggleSongPlayback();
+          }
 
           recordListeningData(audioPlayerData.songId, audioPlayerData.duration, undefined, false);
         }
       }
     },
-    [playSong, recordListeningData, toggleSongPlayback, player]
+    [playSong, recordListeningData, toggleSongPlayback, player, audioPlayer, managePlaybackErrors]
   );
 
   const updateCurrentSongData = useCallback(
@@ -236,8 +240,11 @@ export function usePlayerControl(
   const clearAudioPlayerData = useCallback(() => {
     toggleSongPlayback(false);
 
-    player.currentTime = 0;
-    player.pause();
+    // Reset the ACTIVE element (AudioPlayer.audio can be the inactive primary
+    // after a crossfade/gapless swap and would leave the audible track running).
+    const activeAudio = audioPlayer?.getActiveAudio() ?? player;
+    activeAudio.currentTime = 0;
+    activeAudio.pause();
 
     // Remove current song from queue using PlayerQueue method
     const currentSongId = store.state.currentSongData.songId;
@@ -255,7 +262,7 @@ export function usePlayerControl(
         content: t('notifications.playbackPausedDueToSongDeletion')
       }
     ]);
-  }, [addNewNotifications, t, toggleSongPlayback, player, playerQueue]);
+  }, [addNewNotifications, t, toggleSongPlayback, player, playerQueue, audioPlayer]);
 
   const updateCurrentSongPlaybackState = useCallback((isPlaying: boolean) => {
     if (isPlaying !== store.state.player.isCurrentSongPlaying) {

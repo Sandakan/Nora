@@ -1,18 +1,23 @@
 import { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import type AudioPlayer from '../other/player';
 import { store } from '../store/store';
 
 /**
- * Synchronizes Discord Rich Presence with the provided audio element's current song.
+ * Synchronizes Discord Rich Presence with the provided audio player or audio element.
  *
- * Registers listeners on the audio player to update Discord activity (song title, artists, artwork,
- * action button) and to set playback timestamps while the player is actively playing.
+ * Accepts either an AudioPlayer instance (preferred) or a bare HTMLAudioElement. When an
+ * AudioPlayer is provided, the hook subscribes through its event emitter and reads playback state
+ * via AudioPlayer getters that delegate to getActiveAudio(), ensuring correct timestamps after
+ * crossfade swaps.
  *
- * @param player - The HTMLAudioElement whose playback state and metadata drive the presence updates
+ * @param playerInput - The AudioPlayer instance or HTMLAudioElement for Discord presence
  */
-export function useDiscordRpc(player: HTMLAudioElement) {
+export function useDiscordRpc(playerInput: AudioPlayer | HTMLAudioElement) {
   const { t } = useTranslation();
+
+  const audioPlayer = playerInput instanceof HTMLAudioElement ? null : (playerInput as AudioPlayer);
 
   const setDiscordRpcActivity = useCallback(() => {
     const currentSong = store.state.currentSongData;
@@ -20,6 +25,9 @@ export function useDiscordRpc(player: HTMLAudioElement) {
     if (!currentSong) {
       return;
     }
+
+    // Determine which audio element to read state from
+    const activeEl = audioPlayer?.getActiveAudio() ?? (playerInput as HTMLAudioElement);
 
     // Truncate text to Discord's character limit
     const truncateText = (text: string, maxLength: number) => {
@@ -64,9 +72,9 @@ export function useDiscordRpc(player: HTMLAudioElement) {
       ]
     };
 
-    if (!player.paused) {
-      const currentTime = player.currentTime ?? 0;
-      const duration = player.duration ?? 0;
+    if (!activeEl.paused) {
+      const currentTime = activeEl.currentTime ?? 0;
+      const duration = activeEl.duration ?? 0;
       if (Number.isFinite(currentTime) && Number.isFinite(duration) && duration > 0) {
         activity.timestamps = {
           start: now - currentTime * 1000,
@@ -80,16 +88,28 @@ export function useDiscordRpc(player: HTMLAudioElement) {
   }, []);
 
   useEffect(() => {
-    // Update Discord RPC on playback events
-    player.addEventListener('play', setDiscordRpcActivity);
-    player.addEventListener('pause', setDiscordRpcActivity);
-    player.addEventListener('seeked', setDiscordRpcActivity);
+    if (audioPlayer) {
+      audioPlayer.on('play', setDiscordRpcActivity);
+      audioPlayer.on('pause', setDiscordRpcActivity);
+      audioPlayer.on('seeked', setDiscordRpcActivity);
+    } else {
+      const player = playerInput as HTMLAudioElement;
+      player.addEventListener('play', setDiscordRpcActivity);
+      player.addEventListener('pause', setDiscordRpcActivity);
+      player.addEventListener('seeked', setDiscordRpcActivity);
+    }
 
     return () => {
-      // Clean up event listeners
-      player.removeEventListener('play', setDiscordRpcActivity);
-      player.removeEventListener('pause', setDiscordRpcActivity);
-      player.removeEventListener('seeked', setDiscordRpcActivity);
+      if (audioPlayer) {
+        audioPlayer.off('play', setDiscordRpcActivity);
+        audioPlayer.off('pause', setDiscordRpcActivity);
+        audioPlayer.off('seeked', setDiscordRpcActivity);
+      } else {
+        const player = playerInput as HTMLAudioElement;
+        player.removeEventListener('play', setDiscordRpcActivity);
+        player.removeEventListener('pause', setDiscordRpcActivity);
+        player.removeEventListener('seeked', setDiscordRpcActivity);
+      }
     };
-  }, [setDiscordRpcActivity, player]);
+  }, [audioPlayer, playerInput, setDiscordRpcActivity]);
 }
