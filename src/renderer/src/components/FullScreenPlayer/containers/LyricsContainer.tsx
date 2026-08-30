@@ -1,6 +1,8 @@
+import { lyricsQuery } from '@renderer/queries/lyrics';
 import { store } from '@renderer/store/store';
+import { useQuery } from '@tanstack/react-query';
 import { useStore } from '@tanstack/react-store';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import useSkipLyricsLines from '../../../hooks/useSkipLyricsLines';
@@ -11,6 +13,7 @@ import LyricsMetadata from '../../LyricsPage/LyricsMetadata';
 type Props = {
   isLyricsVisible: boolean;
   setIsLyricsAvailable: (state: boolean) => void;
+  isShowLyricsWithSongInfo?: boolean;
 };
 
 const LyricsContainer = (props: Props) => {
@@ -18,61 +21,31 @@ const LyricsContainer = (props: Props) => {
   const currentSongData = useStore(store, (state) => state.currentSongData);
   const preferences = useStore(store, (state) => state.localStorage.preferences);
 
-  const { isLyricsVisible, setIsLyricsAvailable } = props;
+  const { isLyricsVisible, setIsLyricsAvailable, isShowLyricsWithSongInfo } = props;
   const { t } = useTranslation();
 
-  const [lyrics, setLyrics] = useState<SongLyrics | null | undefined>(null);
-  useSkipLyricsLines(lyrics);
+  const { data: lyrics, isPending } = useQuery({
+    ...lyricsQuery.fullScreenPlayer({
+      title: currentSongData.title,
+      artists: Array.isArray(currentSongData.artists)
+        ? currentSongData.artists.map((artist) => artist.name)
+        : [],
+      album: currentSongData.album?.name,
+      path: currentSongData.path,
+      duration: currentSongData.duration,
+      language: i18n.language,
+      autoTranslate: !!preferences.autoTranslateLyrics,
+      autoConvert: !!preferences.autoConvertLyrics
+    }),
+    enabled: isLyricsVisible || !!isShowLyricsWithSongInfo,
+    staleTime: Infinity
+  });
+
+  useSkipLyricsLines(lyrics ?? null);
 
   useEffect(() => {
-    if (isLyricsVisible) {
-      setLyrics(null);
-      window.api.lyrics
-        .getSongLyrics({
-          songTitle: currentSongData.title,
-          songArtists: Array.isArray(currentSongData.artists)
-            ? currentSongData.artists.map((artist) => artist.name)
-            : [],
-          album: currentSongData.album?.name,
-          songPath: currentSongData.path,
-          duration: currentSongData.duration
-        })
-        .then(async (res) => {
-          setIsLyricsAvailable(res?.lyrics?.isSynced ?? false);
-          setLyrics(res);
-
-          if (
-            preferences.autoTranslateLyrics &&
-            !res?.lyrics.isReset &&
-            !res?.lyrics.isTranslated
-          ) {
-            setLyrics(await window.api.lyrics.getTranslatedLyrics(i18n.language as LanguageCodes));
-          }
-          if (preferences.autoConvertLyrics && !res?.lyrics.isReset && !res?.lyrics.isRomanized) {
-            if (res?.lyrics.originalLanguage == 'zh')
-              setLyrics(await window.api.lyrics.convertLyricsToPinyin());
-            else if (res?.lyrics.originalLanguage == 'ja')
-              setLyrics(await window.api.lyrics.romanizeLyrics());
-            else if (res?.lyrics.originalLanguage == 'ko')
-              setLyrics(await window.api.lyrics.convertLyricsToRomaja());
-          }
-
-          return undefined;
-        })
-        .catch((err) => console.error(err));
-    }
-  }, [
-    currentSongData.album?.name,
-    currentSongData.artists,
-    currentSongData.duration,
-    currentSongData.path,
-    currentSongData.songId,
-    currentSongData.title,
-    isLyricsVisible,
-    preferences.autoTranslateLyrics,
-    preferences.autoConvertLyrics,
-    setIsLyricsAvailable
-  ]);
+    setIsLyricsAvailable(!!lyrics?.lyrics?.isSynced);
+  }, [lyrics, setIsLyricsAvailable]);
 
   const lyricsComponents = useMemo(() => {
     if (lyrics && lyrics?.lyrics) {
@@ -147,25 +120,33 @@ const LyricsContainer = (props: Props) => {
 
   return (
     <div
-      className={`mini-player-lyrics-container appear-from-bottom w-ful absolute top-0 flex h-full max-h-screen! w-full max-w-full! flex-col items-start overflow-auto pt-20 pr-[20%] pb-[25%] pl-20 transition-[filter] delay-200 select-none group-focus-within:brightness-50 group-focus-within/fullScreenPlayer:blur-xs group-hover/fullScreenPlayer:blur-xs group-hover/fullScreenPlayer:brightness-50 ${
-        !isCurrentSongPlaying ? 'blur-xs brightness-50' : ''
+      className={`mini-player-lyrics-container appear-from-bottom ${
+        isShowLyricsWithSongInfo
+          ? 'relative flex h-full w-full flex-col items-start overflow-auto p-4'
+          : 'absolute top-0 flex h-full max-h-screen! w-full max-w-full! flex-col items-start overflow-auto pt-20 pr-[20%] pb-[25%] pl-20'
+      } transition-[filter] delay-200 select-none ${
+        !isShowLyricsWithSongInfo
+          ? 'group-focus-within:brightness-50 group-focus-within/fullScreenPlayer:blur-xs group-hover/fullScreenPlayer:blur-xs group-hover/fullScreenPlayer:brightness-50'
+          : ''
+      } ${
+        !isCurrentSongPlaying && !isShowLyricsWithSongInfo ? 'blur-xs brightness-50' : ''
       }`}
       id="miniPlayerLyricsContainer"
     >
-      {isLyricsVisible && lyricsComponents.length > 0 && lyrics && lyrics.lyrics.isSynced && (
+      {(isShowLyricsWithSongInfo || isLyricsVisible) && lyrics && lyricsComponents.length > 0 && lyrics.lyrics.isSynced && (
         <>
           {lyricsComponents}
           {lyricsSource}
         </>
       )}
-      {isLyricsVisible && lyrics && !lyrics.lyrics.isSynced && (
+      {(isShowLyricsWithSongInfo || isLyricsVisible) && lyrics && !lyrics.lyrics.isSynced && (
         <div className="text-font-color-highlight flex h-full w-full flex-col justify-center text-2xl opacity-50">
           <span className="material-icons-round-outlined mb-2 text-5xl">brightness_alert</span>
           {t('lyricsPage.noSyncedLyrics')}
           <p className="mt-4 text-base">{t('lyricsPage.noSyncedLyricsDescription')}</p>
         </div>
       )}
-      {isLyricsVisible && lyrics === undefined && (
+      {(isShowLyricsWithSongInfo || isLyricsVisible) && !isPending && lyrics === null && (
         <div className="text-font-color-highlight flex h-full w-full flex-col justify-center text-2xl opacity-50">
           <span className="material-icons-round-outlined mb-2 text-5xl">brightness_alert</span>
           <p>{t('lyricsPage.noLyrics')}</p>
