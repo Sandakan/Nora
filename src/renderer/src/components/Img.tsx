@@ -110,16 +110,27 @@ const Img = memo((props: ImgProps) => {
       onError={(e) => {
         if (errorCountRef.current < 3) {
           errorCountRef.current += 1;
-          if (!noFallbacks && e.currentTarget.src !== fallbackSrc)
+          if (noFallbacks) {
+            // No fallback artwork should render: hide the broken image rather
+            // than assigning DefaultImage, which would stretch into the
+            // background container for body-background usage.
+            e.currentTarget.style.visibility = 'hidden';
+          } else if (e.currentTarget.src !== fallbackSrc) {
             e.currentTarget.src = fallbackSrc;
-          else e.currentTarget.src = DefaultImage;
+          } else {
+            e.currentTarget.src = DefaultImage;
+          }
         } else {
           log(
             'maximum img fetch error count reached.',
             { src, fallbackSrc, props: imgPropsRef.current },
             'WARN'
           );
-          e.currentTarget.src = DefaultImage;
+          if (noFallbacks) {
+            e.currentTarget.style.visibility = 'hidden';
+          } else {
+            e.currentTarget.src = DefaultImage;
+          }
         }
       }}
       onClick={onClick}
