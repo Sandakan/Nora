@@ -593,7 +593,7 @@ const utils = {
     return base;
   },
   removeDefaultAppProtocolFromFilePath: (filePath: string) => {
-    return filePath.replace(/nora:[/\\]{1,2}localfiles[/\\]{1,2}|\?[\w+=\w+&?]+$/gm, '');
+    return filePath.replace(/nora:[/\\]{1,2}localfiles[/\\]{1,2}|\?.*$/g, '');
   }
 };
 

@@ -362,7 +362,7 @@ export const removeDefaultAppProtocolFromFilePath = (
   currentPlatform: NodeJS.Platform = platform
 ) => {
   const strippedPath = filePath.replaceAll(
-    /nora:[/\\]{1,2}localfiles[/\\]{1,2}|\?[\w+=\w+&?]+$/gm,
+    /nora:[/\\]{1,2}localfiles[/\\]{1,2}|\?.*$/g,
     ''
   );
 
