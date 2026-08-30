@@ -50,6 +50,8 @@ const resetStyles = () => {
     root.style.removeProperty('--seekbar-track-background-color');
     root.style.removeProperty('--dark-seekbar-track-background-color');
     root.style.removeProperty('--text-color-highlight-2');
+    root.style.removeProperty('--illustration-accent-color');
+    root.style.removeProperty('--dark-illustration-accent-color');
     root.style.removeProperty('--dark-text-color-highlight-2');
     root.style.removeProperty('--slider-opacity');
     root.style.removeProperty('--dark-slider-opacity');
@@ -165,6 +167,8 @@ export function useDynamicTheme(): UseDynamicThemeReturn {
 
           root.style.setProperty('--text-color-highlight-2', darkVibrant, 'important');
           root.style.setProperty('--dark-text-color-highlight-2', lightVibrant, 'important');
+          root.style.setProperty('--illustration-accent-color', darkVibrant, 'important');
+          root.style.setProperty('--dark-illustration-accent-color', lightVibrant, 'important');
         }
       } else {
         resetStyles();

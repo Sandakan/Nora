@@ -18,6 +18,8 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 import { lazy, useCallback, useContext, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import ThemeableIllustration from '@renderer/components/ThemeableIllustration';
+import EmptyStateImage from '../../../assets/images/svg/Empty Inbox _Monochromatic.svg?react';
 
 const SensitiveActionConfirmPrompt = lazy(
   () => import('@renderer/components/SensitiveActionConfirmPrompt')
@@ -273,7 +275,7 @@ function PlaylistInfoPage() {
       />
       {playlistSongs.length === 0 && (
         <div className="no-songs-container appear-from-bottom text-font-color-black dark:text-font-color-white relative flex h-full grow flex-col items-center justify-center text-center text-lg font-light opacity-80!">
-          <span className="material-icons-round-outlined mb-4 text-5xl">brightness_empty</span>
+          <ThemeableIllustration illustration={EmptyStateImage} className="mb-4 w-60" />
           {t('playlist.empty')}
         </div>
       )}
