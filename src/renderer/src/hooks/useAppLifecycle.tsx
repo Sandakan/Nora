@@ -261,8 +261,7 @@ export function useAppLifecycle(dependencies: AppLifecycleDependencies): void {
       player.removeEventListener('pause', handlePlayerPauseEvent);
       window.api.quitEvent.removeBeforeQuitEventListener(handleBeforeQuitEvent);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [managePlaybackErrors]);
+  }, [managePlaybackErrors, player]);
 
   // Setup player lifecycle event listeners for canplay and title bar updates
   useEffect(() => {
@@ -281,13 +280,15 @@ export function useAppLifecycle(dependencies: AppLifecycleDependencies): void {
     player.addEventListener('pause', displayDefaultTitleBar);
 
     return () => {
-      toggleSongPlayback(false);
+      // Only remove listeners here. This effect's dependency is the audio
+      // element, which AudioPlayer replaces during device-change recovery
+      // (Strategy 3). Calling toggleSongPlayback(false) in this cleanup would
+      // pause the NEW element after recovery resumed it.
       player.removeEventListener('canplay', playSongIfPlayable);
       player.removeEventListener('play', windowManagement.addSongTitleToTitleBar);
       player.removeEventListener('pause', displayDefaultTitleBar);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [player]);
 
   // Setup IPC control listeners from main process
   useEffect(() => {
@@ -307,7 +308,7 @@ export function useAppLifecycle(dependencies: AppLifecycleDependencies): void {
       );
       window.api.playerControls.removeTogglePlaybackStateEvent(handleToggleSongPlayback);
       window.api.playerControls.removeSkipBackwardToPreviousSongEvent(handleSkipBackwardClick);
-      window.api.playerControls.removeSkipForwardToNextSongEvent(handleSkipForwardClickListener);
+      (globalThis as typeof window).api.playerControls.removeSkipForwardToNextSongEvent(handleSkipForwardClickListener);
       window.api.dataUpdates.removeDataUpdateEventListeners();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

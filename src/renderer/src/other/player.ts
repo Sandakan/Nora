@@ -48,13 +48,16 @@ class AudioPlayer {
 
   private repeatMode: 'off' | 'one' | 'all' = 'off';
   private pendingAutoPlay: boolean = false;
+  private boundDeviceChangeHandler: (() => void) | null = null;
+  private isRecoveringFromDeviceChange = false;
+  private deviceChangeGeneration = 0;
+  private static readonly DEBUG = false;
 
   constructor(queue: PlayerQueue) {
     this.listeners = new Map();
 
     this.audio = new Audio();
     this.queue = queue;
-
     // MediaElementAudioSourceNode requires a CORS-enabled media fetch.
     this.audio.crossOrigin = 'anonymous';
 
@@ -65,12 +68,17 @@ class AudioPlayer {
     this.equalizerBands = new Map();
     this.gainNode = this.currentContext.createGain();
 
-    this.currentVolume = this.audio.volume;
+    // Store volume is 0-100 (default 50). The element volume is 0-1 and stays 1
+    // until a store notification, so initializing from this.audio.volume would
+    // leave currentVolume at 1 and Strategy 3 rebuilds would restore ~1% gain.
+    this.currentVolume = store.state.player.volume.value;
+    this.audio.volume = this.currentVolume / 100;
 
     this.unsubscribeFunc = this.subscribeToStoreEvents();
     this.initializeEqualizer();
     this.setupQueueIntegration();
     this.setupAudioEventListeners();
+    this.setupDeviceChangeListener();
   }
 
   /**
@@ -148,6 +156,265 @@ class AudioPlayer {
   }
 
   /**
+   * Listens for OS audio output device changes (Bluetooth connect/disconnect, USB, FxSound).
+   * When the active device drops, Chromium's AudioContext sink dies silently. This handler
+   * detects the change and recovers playback by reloading the audio source on the new device.
+   */
+  private setupDeviceChangeListener() {
+    if (!navigator.mediaDevices || !('ondevicechange' in navigator.mediaDevices)) return;
+
+    this.boundDeviceChangeHandler = () => {
+      if (this.isRecoveringFromDeviceChange) return;
+      this.handleDeviceChange().catch((err) => {
+        console.error('[AudioPlayer] Device change recovery failed:', err);
+      });
+    };
+    navigator.mediaDevices.ondevicechange = this.boundDeviceChangeHandler;
+  }
+
+  private waitForCanPlay(timeoutMs = 5000): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      let timer: ReturnType<typeof setTimeout> | null = null;
+      const cleanup = () => {
+        if (timer) clearTimeout(timer);
+        this.audio.removeEventListener('canplay', onCanPlay);
+        this.audio.removeEventListener('error', onError);
+      };
+      const onCanPlay = () => { cleanup(); resolve(); };
+      const onError = (e: Event) => { cleanup(); reject(e); };
+      this.audio.addEventListener('canplay', onCanPlay);
+      this.audio.addEventListener('error', onError);
+      timer = setTimeout(() => {
+        cleanup();
+        reject(new Error('Timeout waiting for canplay'));
+      }, timeoutMs);
+    });
+  }
+
+  /**
+   * Recovers playback after an audio output device change. Saves position, attempts a simple
+   * play() first (Chromium often auto-reroutes to the new default). If that fails, reloads
+   * the audio element to force Chromium to re-establish the audio path. As a last resort,
+   * rebuilds the entire AudioContext + EQ chain with a fresh Audio element.
+   *
+   * @param options.shouldResume - Whether recovery should resume playback. For an OS
+   *   devicechange event this defaults to the pre-event playing state (a deliberate pause
+   *   must not be undone). For a failed explicit play() request the caller passes true so a
+   *   rejected playback actually retries instead of silently reporting success while paused.
+   */
+  private async handleDeviceChange(options?: { shouldResume?: boolean }) {
+    const savedTime = this.audio.currentTime;
+    const currentSrc = this.audio.src;
+
+    if (!currentSrc) return;
+
+    // Do not infer user intent from audio.paused AFTER a failed play() — a rejected
+    // play() leaves the element paused even when the user asked for playback. The
+    // caller decides: devicechange keeps paused state, an explicit play request forces
+    // a resume attempt.
+    const shouldResume = options?.shouldResume ?? !this.audio.paused;
+
+    const generation = ++this.deviceChangeGeneration;
+
+    if (AudioPlayer.DEBUG) console.log('[AudioPlayer.handleDeviceChange]', { savedTime, shouldResume });
+
+    // Mark recovery in progress so other methods know
+    this.isRecoveringFromDeviceChange = true;
+
+    const isStale = () => generation !== this.deviceChangeGeneration;
+
+    try {
+      if (this.currentContext.state === 'suspended') {
+        await this.currentContext.resume();
+      }
+
+      if (await this.trySimplePlay(savedTime, shouldResume, isStale)) return;
+      if (isStale()) return;
+
+      try {
+        await this.reloadSrc(currentSrc, savedTime, shouldResume, isStale);
+        if (AudioPlayer.DEBUG) console.log('[AudioPlayer.handleDeviceChange] Reload recovery succeeded');
+      } catch (err) {
+        if (isStale()) return;
+
+        console.error('[AudioPlayer.handleDeviceChange] Reload failed, rebuilding AudioContext', err);
+
+        try {
+          await this.rebuildAndPlay(currentSrc, savedTime, shouldResume, isStale);
+          if (AudioPlayer.DEBUG) console.log('[AudioPlayer.handleDeviceChange] AudioContext rebuild recovery succeeded');
+        } catch (rebuildErr) {
+          console.error('[AudioPlayer.handleDeviceChange] All recovery strategies failed', rebuildErr);
+          this.emit('error', rebuildErr);
+          // Dispatch native error event so the app's playback-error UI picks it up
+          this.audio.dispatchEvent(new Event('error'));
+        }
+      }
+    } finally {
+      if (!isStale()) {
+        this.isRecoveringFromDeviceChange = false;
+      }
+    }
+  }
+
+  /** Strategy 1: plain play() — Chromium may auto-reroute to the new device. Returns true when handled. */
+  private async trySimplePlay(
+    savedTime: number,
+    shouldResume: boolean,
+    isStale: () => boolean
+  ): Promise<boolean> {
+    try {
+      if (shouldResume) await this.audio.play();
+      if (isStale()) return true;
+      this.audio.currentTime = savedTime;
+      if (AudioPlayer.DEBUG) console.log('[AudioPlayer.handleDeviceChange] Simple play() succeeded');
+      return true;
+    } catch {
+      if (isStale()) return true;
+      if (AudioPlayer.DEBUG) console.log('[AudioPlayer.handleDeviceChange] Simple play() failed, reloading src');
+      return false;
+    }
+  }
+
+  /** Strategy 2: cache-busting src reload to force a fresh audio path. */
+  private async reloadSrc(
+    currentSrc: string,
+    savedTime: number,
+    shouldResume: boolean,
+    isStale: () => boolean
+  ): Promise<void> {
+    this.audio.src = '';
+    const url = new URL(currentSrc.split('?')[0]);
+    url.searchParams.set('ts', `${Date.now()}`);
+    this.audio.src = url.toString();
+    this.audio.load();
+
+    await this.waitForCanPlay();
+    if (isStale()) return;
+
+    this.audio.currentTime = savedTime;
+    if (shouldResume) await this.audio.play();
+  }
+
+  /** Strategy 3: rebuild the AudioContext + EQ chain with a new Audio element, then resume. */
+  private async rebuildAndPlay(
+    currentSrc: string,
+    savedTime: number,
+    shouldResume: boolean,
+    isStale: () => boolean
+  ): Promise<void> {
+    this.rebuildAudioContext();
+    this.audio.src = currentSrc;
+    this.audio.load();
+
+    await this.waitForCanPlay();
+    if (isStale()) return;
+
+    this.audio.currentTime = savedTime;
+    if (shouldResume) await this.audio.play();
+  }
+
+  /**
+   * Tears down and rebuilds the entire Web Audio graph (AudioContext, EQ chain, gain, destination).
+   * Creates a new Audio element because Chromium permanently binds an element to its first
+   * MediaElementSourceNode — reusing the same element after closing the old context throws
+   * InvalidStateError. Restores EQ band values, volume, mute state, and re-attaches all event
+   * listeners to the new element.
+   */
+  private rebuildAudioContext() {
+    if (AudioPlayer.DEBUG) console.log('[AudioPlayer.rebuildAudioContext]');
+
+    // Save current state from old element
+    const savedSrc = this.audio.src;
+    const savedTime = this.audio.currentTime;
+    const savedVolume = this.audio.volume;
+    const savedMuted = this.audio.muted;
+    const savedPlaybackRate = this.audio.playbackRate;
+
+    // Disconnect and close old context
+    try {
+      this.gainNode.disconnect();
+    } catch {
+      // Already disconnected
+    }
+    this.equalizerBands.forEach((filter) => {
+      try {
+        filter.disconnect();
+      } catch {
+        // Already disconnected
+      }
+    });
+    try {
+      this.currentContext.close();
+    } catch {
+      // Already closed
+    }
+
+    // Release the old audio element to free media resources
+    const oldAudio = this.audio;
+    oldAudio.pause();
+    oldAudio.removeAttribute('src');
+    oldAudio.load();
+
+    // Create a new Audio element (Chromium requires this — see Critical #2)
+    const newAudio = new Audio();
+    newAudio.crossOrigin = 'anonymous';
+    newAudio.preload = 'auto';
+    newAudio.src = savedSrc;
+    newAudio.volume = savedVolume;
+    newAudio.muted = savedMuted;
+    newAudio.defaultPlaybackRate = 1.0;
+    newAudio.playbackRate = savedPlaybackRate;
+
+    // Replace the old element
+    this.audio = newAudio;
+
+    // Re-attach all event listeners to the new element
+    this.setupAudioEventListeners();
+
+    // Create fresh context
+    this.currentContext = new window.AudioContext();
+    this.gainNode = this.currentContext.createGain();
+
+    // Rebuild EQ chain with saved values
+    for (const [filterName, hertzValue] of Object.entries(equalizerBandHertzData)) {
+      const filter = this.currentContext.createBiquadFilter();
+      filter.type = 'peaking';
+      filter.frequency.value = hertzValue;
+      filter.Q.value = 1;
+      const oldBand = this.equalizerBands.get(filterName as EqualizerBandFilters);
+      filter.gain.value = oldBand?.gain?.value ?? 0;
+      this.equalizerBands.set(filterName as EqualizerBandFilters, filter);
+    }
+
+    // Re-wire: source -> EQ filters -> gain -> destination
+    const source = this.currentContext.createMediaElementSource(this.audio);
+    const filterMapKeys = [...this.equalizerBands.keys()];
+
+    this.equalizerBands.forEach((filter, key, map) => {
+      const idx = filterMapKeys.indexOf(key);
+      if (idx === 0) {
+        source.connect(filter);
+      } else {
+        const prev = map.get(filterMapKeys[idx - 1]);
+        if (prev) prev.connect(filter);
+        if (idx === filterMapKeys.length - 1) filter.connect(this.gainNode);
+      }
+    });
+
+    this.gainNode.connect(this.currentContext.destination);
+
+    // Restore volume and mute state on the gain node
+    this.gainNode.gain.value = this.audio.muted ? 0 : this.currentVolume / 100;
+
+    // Restore position after load
+    this.audio.currentTime = savedTime;
+
+    // Force React re-render so hooks re-read this.audio and get the new element.
+    // Without this, hooks like useAppLifecycle hold stale references to the old element.
+    dispatch({ type: 'CURRENT_SONG_PLAYBACK_STATE', data: false });
+  }
+
+  /**
    * Handles song end based on repeat mode. Automatically advances queue or repeats as configured.
    * Auto-resumes playback for the next song.
    */
@@ -187,6 +454,9 @@ class AudioPlayer {
     songIdOrData: number | AudioPlayerData,
     options?: { autoPlay?: boolean; updateStore?: boolean }
   ): Promise<AudioPlayerData> {
+    // Cancel any in-flight device-change recovery when loading a new track
+    ++this.deviceChangeGeneration;
+    this.isRecoveringFromDeviceChange = false;
     let songData: AudioPlayerData;
 
     try {
@@ -212,6 +482,11 @@ class AudioPlayer {
       }
 
       // Set audio source with a single cache-busting timestamp.
+      // Bump generation again to cancel any device-change recovery that started
+      // during the getSong() fetch window (before we set the new src).
+      ++this.deviceChangeGeneration;
+      this.isRecoveringFromDeviceChange = false;
+
       const audioSourceUrl = new URL(songData.path);
       audioSourceUrl.searchParams.set('ts', `${Date.now()}`);
       this.audio.src = audioSourceUrl.toString();
@@ -266,11 +541,22 @@ class AudioPlayer {
   /** Cleans up resources and event listeners. Should be called when player is no longer needed. */
   destroy() {
     if (this.unsubscribeFunc) this.unsubscribeFunc.unsubscribe();
+    // Cancel any in-flight device-change recovery so pending continuations
+    // bail at their next generation checkpoint instead of touching a torn-
+    // down context or dispatching errors after teardown.
+    ++this.deviceChangeGeneration;
+    this.isRecoveringFromDeviceChange = false;
     this.queue.removeAllListeners();
     this.removeAllListeners();
     this.audio.pause();
     this.audio.src = '';
     this.currentContext.close();
+
+    // Clean up device change listener
+    if (this.boundDeviceChangeHandler && navigator.mediaDevices?.ondevicechange) {
+      navigator.mediaDevices.ondevicechange = null;
+      this.boundDeviceChangeHandler = null;
+    }
   }
 
   /**
@@ -420,8 +706,20 @@ class AudioPlayer {
   // ========== PUBLIC PLAYBACK CONTROLS ==========
 
   /** Starts or resumes audio playback with fade-in effect. */
-  play() {
-    this.audio.play();
+  async play() {
+    if (this.currentContext.state === 'suspended') {
+      await this.currentContext.resume();
+    }
+    try {
+      await this.audio.play();
+    } catch (err) {
+      if (this.isRecoveringFromDeviceChange) throw err;
+      // A rejected play() leaves the element paused even when the user asked
+      // for playback. Force a resume attempt so recovery doesn't silently
+      // report success while audio stays paused.
+      await this.handleDeviceChange({ shouldResume: true });
+      return;
+    }
     return this.fadeInAudio();
   }
 
@@ -441,7 +739,24 @@ class AudioPlayer {
 
     if (shouldPlay) {
       if (this.audio.readyState > 0) {
-        await this.play();
+        try {
+          await this.play();
+        } catch {
+          // Play failed and recovery already ran (or is in flight). Surface it.
+          this.emit('error', new Error('Play failed while recovery is in progress'));
+          this.audio.dispatchEvent(new Event('error'));
+        }
+      } else if (this.audio.src) {
+        // readyState is 0 but src exists — try a normal play first; only
+        // escalate to device recovery if that fails. This avoids treating a
+        // still-buffering song as a dead audio path.
+        try {
+          await this.play();
+        } catch {
+          if (!this.isRecoveringFromDeviceChange) {
+            await this.handleDeviceChange({ shouldResume: true });
+          }
+        }
       }
     } else {
       await this.pause();
