@@ -330,7 +330,7 @@ describe('PlayerQueue', () => {
       });
 
       test('should work on empty queue', () => {
-        const queue = new PlayerQueue();
+        const queue = new PlayerQueue<string>();
         queue.addSongIdsToEnd(['song1', 'song2']);
         expect(queue.songIds).toEqual(['song1', 'song2']);
       });
@@ -385,6 +385,19 @@ describe('PlayerQueue', () => {
         expect(queue.songIds).toEqual([]);
         expect(queue.position).toBe(0);
       });
+
+      test('should emit positionChange when removing currently playing song', () => {
+        const queue = new PlayerQueue(['song1', 'song2', 'song3'], 0);
+        const positionChangeSpy = vi.fn();
+        queue.on('positionChange', positionChangeSpy);
+
+        queue.removeSongId('song1');
+        expect(positionChangeSpy).toHaveBeenCalledWith({
+          oldPosition: 0,
+          newPosition: 0,
+          currentSongId: 'song2'
+        });
+      });
     });
 
     describe('removeSongAtPosition', () => {
@@ -411,6 +424,19 @@ describe('PlayerQueue', () => {
         const queue = new PlayerQueue(['song1', 'song2', 'song3'], 2);
         queue.removeSongAtPosition(2);
         expect(queue.position).toBe(1);
+      });
+
+      test('should emit positionChange when removing current song position', () => {
+        const queue = new PlayerQueue(['song1', 'song2', 'song3'], 0);
+        const positionChangeSpy = vi.fn();
+        queue.on('positionChange', positionChangeSpy);
+
+        queue.removeSongAtPosition(0);
+        expect(positionChangeSpy).toHaveBeenCalledWith({
+          oldPosition: 0,
+          newPosition: 0,
+          currentSongId: 'song2'
+        });
       });
     });
 
@@ -463,7 +489,7 @@ describe('PlayerQueue', () => {
       });
 
       test('should handle invalid position gracefully', () => {
-        const queue = new PlayerQueue();
+        const queue = new PlayerQueue<string>();
         queue.replaceQueue(['song1', 'song2'], 10);
         expect(queue.position).toBe(0);
       });
@@ -714,7 +740,7 @@ describe('PlayerQueue', () => {
       });
 
       test('should return false for empty queue', () => {
-        const queue = new PlayerQueue();
+        const queue = new PlayerQueue<string>();
         expect(queue.hasSongId('song1')).toBe(false);
       });
     });
@@ -959,7 +985,7 @@ describe('PlayerQueue', () => {
 
       test('should handle missing songIds with empty array', () => {
         const json = {
-          songIds: undefined as any,
+          songIds: undefined as unknown as string[],
           position: 5
         };
         const queue = PlayerQueue.fromJSON(json);
@@ -971,7 +997,7 @@ describe('PlayerQueue', () => {
       test('should handle missing position with 0', () => {
         const json = {
           songIds: ['song1', 'song2'],
-          position: undefined as any
+          position: undefined as unknown as number
         };
         const queue = PlayerQueue.fromJSON(json);
 
