@@ -170,6 +170,30 @@ describe('resolveFilePaths', () => {
     expect(elapsed).toBeLessThan(50); // Should execute in sub-millisecond time
   });
 
+  test('removeDefaultAppProtocolFromFilePath handles strings starting with question marks safely', () => {
+    const maliciousString = `?${'?'.repeat(10000)}`;
+    const startTime = performance.now();
+    const output = removeDefaultAppProtocolFromFilePath(maliciousString, 'win32');
+    const elapsed = performance.now() - startTime;
+
+    expect(output).toBe('');
+    expect(elapsed).toBeLessThan(50);
+  });
+
+  test('removeDefaultAppProtocolFromFilePath handles windows backslash protocols', () => {
+    const input = 'nora:\\localfiles\\C:\\Music\\Song.flac?ts=1234';
+    const output = removeDefaultAppProtocolFromFilePath(input, 'win32');
+
+    expect(output).toBe('C:\\Music\\Song.flac');
+  });
+
+  test('removeDefaultAppProtocolFromFilePath handles plain paths without query strings', () => {
+    const input = 'nora://localfiles/C:/Music/Song.flac';
+    const output = removeDefaultAppProtocolFromFilePath(input, 'win32');
+
+    expect(output).toBe('C:/Music/Song.flac');
+  });
+
   test('addDefaultAppProtocolToFilePath prefixes nora localfiles path', () => {
     const output = addDefaultAppProtocolToFilePath('C:/Music/Song.flac');
 
