@@ -55,7 +55,7 @@ const createArtworks = async (
 
       // const start1 = timeEnd(start, 'Time to save optimized artwork.');
 
-      sharp(artwork, { animated: true })
+      await sharp(artwork, { animated: true })
         .webp()
         .toFile(imgPath)
         // .then(() => timeEnd(start1, 'Time to save full-resolution artwork.'))
