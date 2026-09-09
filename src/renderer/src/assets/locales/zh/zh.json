@@ -137,8 +137,8 @@
   "sortTypes": {
     "aToZ": "A 到 Z",
     "zToA": "Z 到 A",
-    "dateAddedAscending": "最新",
-    "dateAddedDescending": "最早",
+    "dateAddedAscending": "最早",
+    "dateAddedDescending": "最新",
     "releasedYearAscending": "发行年份 (升序)",
     "releasedYearDescending": "发行年份 (降序)",
     "allTimeMostListened": "最多播放 (全部时间)",
@@ -614,7 +614,7 @@
     "pendingLyricsSavesAvailable": "此歌曲有待保存的歌词。它们将在当前歌曲播放结束后保存并在此处显示。",
     "downloadLyrics": "下载歌词",
     "downloadSyncedLyrics": "下载同步歌词",
-    "musixmatchNotEnabled": "'您需要在设置中启用 Musixmatch 歌词才能使用此功能。"
+    "musixmatchNotEnabled": "您需要在设置中启用 Musixmatch 歌词才能使用此功能。"
   },
   "miniPlayer": {
     "alwaysOnTopEnabled": "始终置顶：开启",
