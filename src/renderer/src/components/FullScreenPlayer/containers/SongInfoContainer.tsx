@@ -124,7 +124,7 @@ const SongInfoContainer = (props: Props) => {
               iconClassName={`!text-4xl ${
                 isCurrentSongPlaying ? 'material-icons-round' : 'material-icons-round-outlined'
               }`}
-              clickHandler={toggleSongPlayback}
+              clickHandler={() => toggleSongPlayback()}
               iconName={isCurrentSongPlaying ? 'pause' : 'play_arrow'}
               removeFocusOnClick
             />

@@ -73,13 +73,15 @@ export function usePlayerControl(
   const toggleSongPlayback = useCallback(
     (startPlay?: boolean) => {
       if (store.state.currentSongData?.songId) {
+        const forcePlay = typeof startPlay === 'boolean' ? startPlay : undefined;
+
         // Use AudioPlayer's togglePlayback if available
         if (audioPlayer) {
-          return audioPlayer.togglePlayback(startPlay).catch((err) => managePlaybackErrors(err));
+          return audioPlayer.togglePlayback(forcePlay).catch((err) => managePlaybackErrors(err));
         }
 
         // Fallback to direct audio element control
-        if (typeof startPlay !== 'boolean' || startPlay === player.paused) {
+        if (forcePlay === undefined || forcePlay === player.paused) {
           if (player.readyState > 0) {
             if (player.paused) {
               return player
