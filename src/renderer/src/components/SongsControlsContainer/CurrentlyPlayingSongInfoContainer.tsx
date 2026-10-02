@@ -26,12 +26,16 @@ const CurrentlyPlayingSongInfoContainer = () => {
     updateContextMenuData,
     changePromptMenuData,
     toggleMultipleSelections,
-    addNewNotifications,
-    updatePlayerType
+    addNewNotifications
   } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const [isNextSongPopupVisible, setIsNextSongPopupVisible] = useState(false);
+
+  // The full screen player is a router route. `updatePlayerType('full')` only
+  // flips a store flag (the reducer ignores it for 'full'), so navigate the
+  // same way the existing full screen button does.
+  const openFullScreenPlayer = () => navigate({ to: '/fullscreen-player' });
 
   const songArtistsImages = useMemo(() => {
     if (
@@ -255,11 +259,11 @@ const CurrentlyPlayingSongInfoContainer = () => {
         tabIndex={0}
         title={t('player.openInFullScreen')}
         aria-label={t('player.openInFullScreen')}
-        onClick={() => updatePlayerType('full')}
+        onClick={() => openFullScreenPlayer()}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            updatePlayerType('full');
+            openFullScreenPlayer();
           }
         }}
       >
