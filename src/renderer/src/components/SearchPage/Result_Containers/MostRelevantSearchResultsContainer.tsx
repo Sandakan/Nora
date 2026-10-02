@@ -1,6 +1,5 @@
-import { store } from '@renderer/store/store';
+import { useQueueOperations } from '@renderer/hooks/useQueueOperations';
 import { useNavigate } from '@tanstack/react-router';
-import { useStore } from '@tanstack/react-store';
 import { type ReactNode, useContext, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -14,14 +13,11 @@ type Props = { searchResults: SearchResult };
 const MostRelevantSearchResultsContainer = (props: Props) => {
   const { searchResults } = props;
 
-  const currentSongData = useStore(store, (state) => state.currentSongData);
-  const queue = useStore(store, (state) => state.localStorage.queue);
-
+  const { addToNext, addToEnd } = useQueueOperations();
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const { playSong, updateQueueData, createQueue, addNewNotifications } =
-    useContext(AppUpdateContext);
+  const { playSong, createQueue, addNewNotifications } = useContext(AppUpdateContext);
 
   const MostRelevantResults: ReactNode[] = [];
 
@@ -68,22 +64,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             label: t('common.playNext'),
             iconName: 'shortcut',
             handlerFunction: () => {
-              const newQueue = queue.songIds.filter((id) => id !== firstResult.songId);
-              const duplicateSongIndex = queue.songIds.indexOf(firstResult.songId);
-
-              const currentSongIndex =
-                queue.position !== undefined &&
-                duplicateSongIndex !== -1 &&
-                duplicateSongIndex < queue.position
-                  ? queue.position - 1
-                  : undefined;
-
-              newQueue.splice(
-                newQueue.indexOf(currentSongData.songId) + 1 || 0,
-                0,
-                firstResult.songId
-              );
-              updateQueueData(currentSongIndex, newQueue, undefined, false);
+              addToNext([firstResult.songId], { removeDuplicates: false });
               addNewNotifications([
                 {
                   id: `${firstResult.title}PlayNext`,
@@ -104,24 +85,21 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             label: t('common.addToQueue'),
             iconName: 'queue',
             handlerFunction: () => {
-              updateQueueData(undefined, [...queue.songIds, firstResult.songId]);
-              addNewNotifications(
-                [
-                  {
-                    id: `${firstResult.title}AddedToQueue`,
-                    duration: 5000,
-                    content: <span>{t('notifications.addedToQueue', { count: 1 })}</span>,
-                    icon: (
-                      <Img
-                        src={firstResult.artworkPaths?.artworkPath}
-                        alt={t('song.artwork')}
-                        loading="eager"
-                      />
-                    )
-                  }
-                ]
-                // <span className="material-icons-round icon">playlist_add</span>
-              );
+              addToEnd([firstResult.songId], { removeDuplicates: false });
+              addNewNotifications([
+                {
+                  id: `${firstResult.title}AddedToQueue`,
+                  duration: 5000,
+                  content: <span>{t('notifications.addedToQueue', { count: 1 })}</span>,
+                  icon: (
+                    <Img
+                      src={firstResult.artworkPaths?.artworkPath}
+                      alt={t('song.artwork')}
+                      loading="eager"
+                    />
+                  )
+                }
+              ]);
             }
           },
           {
@@ -199,10 +177,10 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             label: t('common.addToQueue'),
             iconName: 'queue',
             handlerFunction: () => {
-              updateQueueData(undefined, [
-                ...queue.songIds,
-                ...firstResult.songs.map((song) => song.songId)
-              ]);
+              addToEnd(
+                firstResult.songs.map((song) => song.songId),
+                { removeDuplicates: false }
+              );
               addNewNotifications([
                 {
                   id: `${firstResult.name}AddedToQueue`,
@@ -269,8 +247,10 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             label: t('common.addToQueue'),
             iconName: 'queue',
             handlerFunction: () => {
-              queue.songIds.push(...firstResult.songs.map((song) => song.songId));
-              updateQueueData(undefined, queue.songIds, false);
+              addToEnd(
+                firstResult.songs.map((song) => song.songId),
+                { removeDuplicates: false }
+              );
               addNewNotifications([
                 {
                   id: 'addedToQueue',

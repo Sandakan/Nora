@@ -48,6 +48,7 @@ class AudioPlayer {
 
   private repeatMode: 'off' | 'one' | 'all' = 'off';
   private pendingAutoPlay: boolean = false;
+  private currentLoadedSongId: number | null = null;
 
   constructor(queue: PlayerQueue) {
     this.listeners = new Map();
@@ -85,10 +86,18 @@ class AudioPlayer {
       console.log('[AudioPlayer.positionChange]', {
         position: this.queue.position,
         songId,
+        currentLoadedSongId: this.currentLoadedSongId,
         willLoad: !!songId,
         pendingAutoPlay: willAutoPlay
       });
+
       if (songId) {
+        // If the song is already loaded in the audio element, avoid reloading and pausing it
+        if (songId === this.currentLoadedSongId && this.audio.src) {
+          this.pendingAutoPlay = false;
+          return;
+        }
+
         this.loadSong(songId, { autoPlay: willAutoPlay }).catch((err) => {
           console.error('[AudioPlayer.positionChange] Failed to load song:', err);
           if (this.queue.hasNext) {
@@ -245,6 +254,7 @@ class AudioPlayer {
       });
       this.audio.dispatchEvent(trackChangeEvent);
 
+      this.currentLoadedSongId = songData.songId;
       this.emit('songLoaded', songData);
       console.log('[AudioPlayer.loadSong.done]', {
         songId: songData.songId,
@@ -270,6 +280,7 @@ class AudioPlayer {
     this.removeAllListeners();
     this.audio.pause();
     this.audio.src = '';
+    this.currentLoadedSongId = null;
     this.currentContext.close();
   }
 
