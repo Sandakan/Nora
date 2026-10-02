@@ -32,6 +32,11 @@ const CurrentlyPlayingSongInfoContainer = () => {
 
   const [isNextSongPopupVisible, setIsNextSongPopupVisible] = useState(false);
 
+  // The full screen player is a router route. `updatePlayerType('full')` only
+  // flips a store flag (the reducer ignores it for 'full'), so navigate the
+  // same way the existing full screen button does.
+  const openFullScreenPlayer = () => navigate({ to: '/fullscreen-player' });
+
   const songArtistsImages = useMemo(() => {
     if (
       currentSongData.songId &&
@@ -248,15 +253,26 @@ const CurrentlyPlayingSongInfoContainer = () => {
   return (
     <div className="current-playing-song-info-container grid w-full max-w-full grid-cols-[6rem_minmax(0,1fr)] items-center gap-2 lg:grid-cols-[minmax(0,1fr)]">
       <div
-        className="song-cover-container relativeflex aspect-square h-full items-center justify-center overflow-hidden p-2 lg:hidden"
+        className="song-cover-container group/cover relative flex aspect-square h-full cursor-pointer items-center justify-center overflow-hidden p-2 outline-offset-1 focus-visible:outline! lg:hidden"
         id="currentSongCover"
+        role="button"
+        tabIndex={0}
+        title={t('player.openInFullScreen')}
+        aria-label={t('player.openInFullScreen')}
+        onClick={() => openFullScreenPlayer()}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openFullScreenPlayer();
+          }
+        }}
       >
         {/* ${
                !currentSongData.artworkPath &&
                `before:absolute before:h-[85%] before:w-[85%] before:rounded-md before:bg-background-color-2 before:bg-dark-background-color-2 before:content-[''] after:absolute after:h-5 after:w-5 after:animate-spin-ease after:rounded-full after:border-2 after:border-[transparent] after:border-t-font-color-black after:content-[''] dark:after:border-t-font-color-white`
              } */}
         <Img
-          className="aspect-square h-full max-w-full rounded-lg object-cover object-center shadow-xl"
+          className="aspect-square h-full max-w-full rounded-lg object-cover object-center shadow-xl group-hover/cover:brightness-75"
           src={currentSongData.artworkPath}
           fallbackSrc={DefaultSongCover}
           alt="Default song cover"
