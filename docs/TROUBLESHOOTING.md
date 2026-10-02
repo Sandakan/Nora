@@ -30,3 +30,37 @@ Error: Electron uninstall
    ```bash
    node node_modules/electron/install.js
    ```
+
+---
+
+### `npm error code ENOVERSIONS` / `No versions available for napi` when building audio engine
+
+#### Symptom
+
+When executing `npm run build:engine` or `npm run build:engine:debug`, the build fails immediately with:
+
+```text
+npm error code ENOVERSIONS
+npm error No versions available for napi
+```
+
+#### Cause
+
+1. **Uninstalled Workspace Dependencies**: The `audio-engine` directory is configured as an npm workspace. If `npm install` has not been run for the workspace, the `@napi-rs/cli` package and its `napi` binary symlink are missing from `node_modules/.bin`.
+2. **Package Name vs Binary Name Mismatch**: The CLI executable is named `napi`, but the actual npm package is scoped as `@napi-rs/cli`. When `npx napi` is called without local binary availability, `npx` attempts to resolve and download a package named `napi` from the npm registry. The registry contains an empty/unversioned `napi` package, throwing `ENOVERSIONS`.
+
+#### Solution
+
+1. Install the workspace dependencies from the root repository:
+   ```bash
+   npm install -w audio-engine
+   ```
+2. In npm scripts or CLI execution, always qualify the package explicitly using `--package=@napi-rs/cli`:
+   ```bash
+   cd audio-engine && npx --package=@napi-rs/cli napi build --platform -o dist --release
+   ```
+3. Re-run the engine build to verify:
+   ```bash
+   npm run build:engine
+   ```
+

@@ -110,8 +110,11 @@ npm run build:engine:debug
 #### From `audio-engine/` Directory
 
 ```bash
+# Ensure workspace dependencies are installed
+npm install
+
 # Build release binaries into ./dist
-npx napi build --platform -o dist --release
+npx --package=@napi-rs/cli napi build --platform -o dist --release
 
 # Run Rust unit & integration tests
 cargo test
@@ -122,6 +125,9 @@ cargo run --example cli_player -- "path/to/song.mp3"
 # Start web-based interactive test server (HTTP localhost:3333)
 npm run test:ui
 ```
+
+> [!TIP]
+> If you encounter `npm error code ENOVERSIONS` / `No versions available for napi`, ensure workspace dependencies are installed via `npm install -w audio-engine`. See [Troubleshooting Guide](../docs/TROUBLESHOOTING.md) for details.
 
 ---
 
