@@ -26,10 +26,7 @@ import { getQueue } from '../other/queueSingleton';
  *   }
  *   ```;
  */
-export function useQueueOperations() {
-  // Get singleton queue directly - no need for hook dependency
-  const queue = getQueue();
-
+export const useQueueOperations = () => {
   /**
    * Add songs to the queue immediately after the currently playing song.
    *
@@ -38,9 +35,15 @@ export function useQueueOperations() {
    */
   const addToNext = useCallback(
     (songIds: number[], options: { removeDuplicates?: boolean } = { removeDuplicates: true }) => {
+      const queue = getQueue();
       if (options.removeDuplicates) {
-        // Remove existing occurrences first
-        songIds.forEach((id) => queue.removeSongId(id));
+        // Remove existing occurrences first, but protect the currently playing song instance
+        const currentSongId = queue.currentSongId;
+        songIds.forEach((id) => {
+          if (id !== currentSongId) {
+            queue.removeSongId(id);
+          }
+        });
       }
 
       queue.addSongIdsToNext(songIds);
@@ -57,8 +60,14 @@ export function useQueueOperations() {
    */
   const addToEnd = useCallback(
     (songIds: number[], options: { removeDuplicates?: boolean } = { removeDuplicates: false }) => {
+      const queue = getQueue();
       if (options.removeDuplicates) {
-        songIds.forEach((id) => queue.removeSongId(id));
+        const currentSongId = queue.currentSongId;
+        songIds.forEach((id) => {
+          if (id !== currentSongId) {
+            queue.removeSongId(id);
+          }
+        });
       }
 
       queue.addSongIdsToEnd(songIds);
@@ -73,6 +82,7 @@ export function useQueueOperations() {
    * @param songIds - Array of song IDs to remove
    */
   const removeSongs = useCallback((songIds: number[]) => {
+    const queue = getQueue();
     songIds.forEach((id) => queue.removeSongId(id));
     // Store sync happens automatically via queueSingleton event listeners
   }, []);
@@ -86,6 +96,7 @@ export function useQueueOperations() {
    */
   const replaceQueue = useCallback(
     (songIds: number[], startPosition: number = 0, metadata?: PlayerQueueMetadata) => {
+      const queue = getQueue();
       queue.replaceQueue(songIds, startPosition, true, metadata);
       // Store sync happens automatically via queueSingleton event listeners
     },
@@ -94,6 +105,7 @@ export function useQueueOperations() {
 
   /** Clear the entire queue. */
   const clearQueue = useCallback(() => {
+    const queue = getQueue();
     queue.clear();
     // Store sync happens automatically via queueSingleton event listeners
   }, []);
@@ -104,6 +116,7 @@ export function useQueueOperations() {
    * @param isShuffled - Whether to shuffle the queue
    */
   const toggleShuffle = useCallback((isShuffled: boolean) => {
+    const queue = getQueue();
     if (isShuffled) {
       queue.shuffle();
     } else {
@@ -118,6 +131,7 @@ export function useQueueOperations() {
    * @param position - Queue position (0-based index)
    */
   const playSongAtPosition = useCallback((position: number) => {
+    const queue = getQueue();
     queue.moveToPosition(position);
     // Store sync happens automatically via queueSingleton event listeners
   }, []);
@@ -133,4 +147,4 @@ export function useQueueOperations() {
     // ⚠️ State removed - use store selectors instead:
     // const queueData = useStore(store, (state) => state.queue);
   };
-}
+};

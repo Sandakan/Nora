@@ -25,12 +25,10 @@ const SongYearInput = (props: Props) => {
         onKeyDown={(e) => e.stopPropagation()}
         onChange={(e) => {
           const releasedYear = Number(e.currentTarget.value);
-          updateSongInfo(
-            (prevData): SongTags => ({
-              ...prevData,
-              releasedYear: releasedYear ?? prevData.releasedYear
-            })
-          );
+          updateSongInfo((prevData): SongTags => ({
+            ...prevData,
+            releasedYear: releasedYear ?? prevData.releasedYear
+          }));
         }}
       />
     </div>

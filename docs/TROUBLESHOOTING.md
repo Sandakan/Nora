@@ -30,11 +30,3 @@ Error: Electron uninstall
    ```bash
    node node_modules/electron/install.js
    ```
-3. Alternatively, rebuild or force-reinstall Electron:
-   ```bash
-   npm rebuild electron
-   ```
-   or
-   ```bash
-   npm install electron@latest --force
-   ```
