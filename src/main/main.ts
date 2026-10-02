@@ -979,7 +979,7 @@ export async function toggleAutoLaunch(autoLaunchState: boolean) {
   app.setLoginItemSettings({
     openAtLogin: autoLaunchState,
     name: 'Nora',
-    openAsHidden: openWindowAsHiddenOnSystemStart
+    args: openWindowAsHiddenOnSystemStart ? ['--hidden'] : []
   });
 
   await saveUserSettings({ openWindowAsHiddenOnSystemStart });
