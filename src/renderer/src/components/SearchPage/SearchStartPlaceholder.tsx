@@ -4,7 +4,8 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import SearchSomethingImage from '../../assets/images/svg/Flying kite_Monochromatic.svg';
+import SearchSomethingImage from '../../assets/images/svg/Flying kite_Monochromatic.svg?react';
+import ThemeableIllustration from '@renderer/components/ThemeableIllustration';
 import Button from '../Button';
 import Img from '../Img';
 import RecentSearchResult from './RecentSearchResult';
@@ -58,8 +59,8 @@ const SearchStartPlaceholder = (props: Props) => {
     <>
       {searchInput.trim() === '' && (
         <div className="search-start-placeholder active appear-from-bottom relative flex h-full! w-full flex-col items-center justify-center text-center">
-          <Img
-            src={SearchSomethingImage}
+          <ThemeableIllustration
+            illustration={SearchSomethingImage}
             className={
               searchResults?.songs.length === 0 &&
               searchResults?.artists.length === 0 &&

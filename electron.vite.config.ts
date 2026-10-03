@@ -3,6 +3,7 @@ import { resolve } from 'path';
 import tailwindcss from '@tailwindcss/vite';
 import { tanstackRouter } from '@tanstack/router-plugin/vite';
 import react from '@vitejs/plugin-react';
+import svgr from 'vite-plugin-svgr';
 import { defineConfig } from 'electron-vite';
 
 export default defineConfig({
@@ -49,6 +50,15 @@ export default defineConfig({
       }),
       react(),
       // babel({ presets: [reactCompilerPreset()] }),
+      svgr({
+        svgrOptions: {
+          replaceAttrValues: {
+            '#68e1fd': 'currentColor',
+            '#68E1FD': 'currentColor'
+          }
+        },
+        include: '**/*.svg?react'
+      }),
       tailwindcss()
     ]
   }

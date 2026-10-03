@@ -40,6 +40,7 @@ export const theme = {
       'dark-font-color-highlight': 'hsl(var(--dark-text-color-highlight) / <alpha-value>)',
       'font-color-highlight-2': 'hsl(var(--text-color-highlight-2) / <alpha-value>)',
       'dark-font-color-highlight-2': 'hsl(var(--dark-text-color-highlight-2) / <alpha-value>)',
+      'illustration-accent': 'hsl(var(--illustration-accent-color) / <alpha-value>)',
       'context-menu-background': 'hsl(var(--context-menu-background) / <alpha-value>)',
       'context-menu-list-hover': 'hsl(var(--context-menu-list-hover) / <alpha-value>)',
       'foreground-color-1': 'hsl(var(--foreground-color-1) / <alpha-value>)',

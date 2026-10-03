@@ -119,6 +119,7 @@
   --text-color-crimson: 348 83% 47%; /* hsl(348 83% 47%) */
   --text-color-highlight: 203 39% 44%; /* hsl(203 39% 44%) */
   --text-color-highlight-2: 247 74% 63%; /* hsl(247 74% 63%) */
+  --illustration-accent-color: 203 39% 44%; /* hsl(203 39% 44%) */
   --context-menu-background: 0 0% 100%; /* hsl(0 0% 100% / 90%) */
   --context-menu-list-hover: 198 18% 89%; /* hsl(198 18% 89% / 75%) */
   --seekbar-background-color: 0 0% 20%; /* hsl(0 0% 20%) */
@@ -140,6 +141,7 @@
   --dark-text-color-dimmed: 0 0% 50%; /* hsl(0 0% 50%) */
   --dark-text-color-highlight: 213 80% 88%; /* hsl(213 80% 88%) */
   --dark-text-color-highlight-2: 244 98% 80%; /* hsl(244 98% 80%) */
+  --dark-illustration-accent-color: 213 80% 88%; /* hsl(213 80% 88%) */
   --dark-context-menu-background: 228 7% 14%; /* hsla(228 7% 14% / 90%) */
   --dark-context-menu-list-hover: 224 8% 28%; /* hsl(224 8% 28%) */
   --dark-seekbar-background-color: 240 1% 83%; /* hsl(240 1% 83%) */
