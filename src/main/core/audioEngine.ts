@@ -8,21 +8,22 @@ import logger from '../logger';
 
 export interface AudioEngineNative {
   ping(): string;
-  engine_play(path: string): void;
-  engine_pause(): void;
-  engine_resume(): void;
-  engine_stop(): void;
-  engine_seek(positionSecs: number): void;
-  engine_set_volume(volume: number): void;
-  engine_set_volume_with_ramp(target: number, durationMs: number): void;
-  engine_get_position(): number;
-  engine_get_duration(): number;
-  engine_list_devices(): string[];
-  engine_set_device(deviceName: string): void;
-  engine_set_playback_rate(rate: number): void;
-  engine_set_eq_band(frequencyHz: number, gainDb: number): void;
-  engine_reset_eq(): void;
-  engine_destroy(): void;
+  enginePlay(path: string): void;
+  enginePause(): void;
+  engineResume(): void;
+  engineStop(): void;
+  engineSeek(positionSecs: number): void;
+  engineSetVolume(volume: number): void;
+  engineSetVolumeWithRamp(target: number, durationMs: number): void;
+  engineGetPosition(): number;
+  engineGetDuration(): number;
+  engineIsPlaying?(): boolean;
+  engineListDevices(): string[];
+  engineSetDevice(deviceName: string): void;
+  engineSetPlaybackRate(rate: number): void;
+  engineSetEqBand(frequencyHz: number, gainDb: number): void;
+  engineResetEq(): void;
+  engineDestroy(): void;
 }
 
 let nativeModule: AudioEngineNative | null = null;
@@ -97,88 +98,74 @@ export const audioEngine = {
   },
   play: (filePath: string): void => {
     const rawPath = removeDefaultAppProtocolFromFilePath(filePath);
-    const engine = getAudioEngine() as any;
-    if (typeof engine.enginePlay === 'function') engine.enginePlay(rawPath);
-    else if (typeof engine.engine_play === 'function') engine.engine_play(rawPath);
+    getAudioEngine().enginePlay(rawPath);
   },
   pause: (): void => {
-    const engine = getAudioEngine() as any;
-    if (typeof engine.enginePause === 'function') engine.enginePause();
-    else if (typeof engine.engine_pause === 'function') engine.engine_pause();
+    getAudioEngine().enginePause();
   },
   resume: (): void => {
-    const engine = getAudioEngine() as any;
-    if (typeof engine.engineResume === 'function') engine.engineResume();
-    else if (typeof engine.engine_resume === 'function') engine.engine_resume();
+    getAudioEngine().engineResume();
   },
   stop: (): void => {
-    const engine = getAudioEngine() as any;
-    if (typeof engine.engineStop === 'function') engine.engineStop();
-    else if (typeof engine.engine_stop === 'function') engine.engine_stop();
+    getAudioEngine().engineStop();
   },
   seek: (positionSecs: number): void => {
-    const engine = getAudioEngine() as any;
-    if (typeof engine.engineSeek === 'function') engine.engineSeek(positionSecs);
-    else if (typeof engine.engine_seek === 'function') engine.engine_seek(positionSecs);
+    getAudioEngine().engineSeek(positionSecs);
   },
   setVolume: (volume: number): void => {
-    const engine = getAudioEngine() as any;
-    if (typeof engine.engineSetVolume === 'function') engine.engineSetVolume(volume);
-    else if (typeof engine.engine_set_volume === 'function') engine.engine_set_volume(volume);
+    getAudioEngine().engineSetVolume(volume);
   },
   setVolumeWithRamp: (target: number, durationMs: number): void => {
-    const engine = getAudioEngine() as any;
-    if (typeof engine.engineSetVolumeWithRamp === 'function')
-      engine.engineSetVolumeWithRamp(target, durationMs);
-    else if (typeof engine.engine_set_volume_with_ramp === 'function')
-      engine.engine_set_volume_with_ramp(target, durationMs);
+    getAudioEngine().engineSetVolumeWithRamp(target, durationMs);
   },
   getPosition: (): number => {
-    const engine = getAudioEngine() as any;
-    if (typeof engine.engineGetPosition === 'function') return engine.engineGetPosition();
-    if (typeof engine.engine_get_position === 'function') return engine.engine_get_position();
-    return 0;
+    try {
+      return getAudioEngine().engineGetPosition();
+    } catch {
+      return 0;
+    }
   },
   getDuration: (): number => {
-    const engine = getAudioEngine() as any;
-    if (typeof engine.engineGetDuration === 'function') return engine.engineGetDuration();
-    if (typeof engine.engine_get_duration === 'function') return engine.engine_get_duration();
-    return 0;
+    try {
+      return getAudioEngine().engineGetDuration();
+    } catch {
+      return 0;
+    }
+  },
+  isPlaying: (): boolean => {
+    try {
+      const eng = getAudioEngine();
+      if (typeof eng.engineIsPlaying === 'function') {
+        return eng.engineIsPlaying();
+      }
+      return false;
+    } catch {
+      return false;
+    }
   },
   listDevices: (): string[] => {
-    const engine = getAudioEngine() as any;
-    if (typeof engine.engineListDevices === 'function') return engine.engineListDevices();
-    if (typeof engine.engine_list_devices === 'function') return engine.engine_list_devices();
-    return [];
+    try {
+      return getAudioEngine().engineListDevices();
+    } catch {
+      return [];
+    }
   },
   setDevice: (deviceName: string): void => {
-    const engine = getAudioEngine() as any;
-    if (typeof engine.engineSetDevice === 'function') engine.engineSetDevice(deviceName);
-    else if (typeof engine.engine_set_device === 'function') engine.engine_set_device(deviceName);
+    getAudioEngine().engineSetDevice(deviceName);
   },
   setPlaybackRate: (rate: number): void => {
-    const engine = getAudioEngine() as any;
-    if (typeof engine.engineSetPlaybackRate === 'function') engine.engineSetPlaybackRate(rate);
-    else if (typeof engine.engine_set_playback_rate === 'function')
-      engine.engine_set_playback_rate(rate);
+    getAudioEngine().engineSetPlaybackRate(rate);
   },
   setEqBand: (frequencyHz: number, gainDb: number): void => {
-    const engine = getAudioEngine() as any;
-    if (typeof engine.engineSetEqBand === 'function') engine.engineSetEqBand(frequencyHz, gainDb);
-    else if (typeof engine.engine_set_eq_band === 'function')
-      engine.engine_set_eq_band(frequencyHz, gainDb);
+    getAudioEngine().engineSetEqBand(frequencyHz, gainDb);
   },
   resetEq: (): void => {
-    const engine = getAudioEngine() as any;
-    if (typeof engine.engineResetEq === 'function') engine.engineResetEq();
-    else if (typeof engine.engine_reset_eq === 'function') engine.engine_reset_eq();
+    getAudioEngine().engineResetEq();
   },
   destroy: (): void => {
     if (nativeModule) {
       try {
-        const engine = nativeModule as any;
-        if (typeof engine.engineDestroy === 'function') engine.engineDestroy();
-        else if (typeof engine.engine_destroy === 'function') engine.engine_destroy();
+        nativeModule.engineDestroy();
       } catch (err) {
         logger.error('Error destroying native audio-engine instance', { error: String(err) });
       }

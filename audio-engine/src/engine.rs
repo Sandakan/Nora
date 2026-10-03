@@ -7,14 +7,12 @@ use std::sync::{
 
 use cpal::traits::{DeviceTrait, StreamTrait};
 use cpal::{OutputCallbackInfo, SampleFormat, Stream, StreamConfig};
-use symphonia::core::audio::SampleBuffer;
-use symphonia::core::codecs::{Decoder, DecoderOptions};
+use symphonia::core::codecs::audio::{AudioDecoder, AudioDecoderOptions};
 use symphonia::core::errors::Error as SymphoniaError;
-use symphonia::core::formats::{FormatOptions, FormatReader, SeekMode, SeekTo};
+use symphonia::core::formats::probe::Hint;
+use symphonia::core::formats::{FormatReader, SeekMode, SeekTo, TrackType};
 use symphonia::core::io::MediaSourceStream;
-use symphonia::core::meta::MetadataOptions;
-use symphonia::core::probe::Hint;
-use symphonia::core::units::Time;
+use symphonia::core::units::{Time, Timestamp};
 use symphonia::default::get_probe;
 
 use crate::devices::DeviceManager;
@@ -103,37 +101,38 @@ impl PlayerEngine {
         let file = File::open(path).map_err(|e| format!("Failed to open file '{}': {}", file_path, e))?;
         let mss = MediaSourceStream::new(Box::new(file), Default::default());
 
-        let format_opts = FormatOptions {
-            enable_gapless: true,
-            ..Default::default()
-        };
-        let metadata_opts: MetadataOptions = Default::default();
-        let decoder_opts: DecoderOptions = Default::default();
-
         let mut hint = Hint::new();
         if let Some(ext) = path.extension().and_then(|e| e.to_str()) {
             hint.with_extension(ext);
         }
 
-        let probed = get_probe()
-            .format(&hint, mss, &format_opts, &metadata_opts)
+        let format_reader = get_probe()
+            .probe(&hint, mss, Default::default(), Default::default())
             .map_err(|e| format!("Failed to probe audio format: {}", e))?;
 
-        let format_reader = probed.format;
         let track = format_reader
-            .default_track()
+            .default_track(TrackType::Audio)
             .ok_or_else(|| "No default audio track found in file".to_string())?;
 
+        let codec_params = track
+            .codec_params
+            .as_ref()
+            .and_then(|cp| cp.audio())
+            .ok_or_else(|| "No audio codec parameters found in track".to_string())?;
+
         let track_id = track.id;
+        let decoder_opts: AudioDecoderOptions = Default::default();
         let decoder = symphonia::default::get_codecs()
-            .make(&track.codec_params, &decoder_opts)
+            .make_audio_decoder(codec_params, &decoder_opts)
             .map_err(|e| format!("Failed to create codec decoder: {}", e))?;
 
-        let sample_rate = track.codec_params.sample_rate.unwrap_or(44100);
-        let channels = track.codec_params.channels.map(|c| c.count() as u16).unwrap_or(2);
+        let sample_rate = codec_params.sample_rate.unwrap_or(44100);
+        let channels = codec_params.channels.as_ref().map(|c| c.count() as u16).unwrap_or(2);
 
-        let duration_secs = if let Some(n_frames) = track.codec_params.n_frames {
+        let duration_secs = if let Some(n_frames) = track.num_frames {
             n_frames as f64 / sample_rate as f64
+        } else if let (Some(tb), Some(dur)) = (track.time_base, track.duration) {
+            tb.calc_duration(dur).map(|t| t.as_secs_f64()).unwrap_or(0.0)
         } else {
             0.0
         };
@@ -168,7 +167,7 @@ impl PlayerEngine {
 
         let sample_format = supported_config.sample_format();
         let config: StreamConfig = supported_config.into();
-        let output_sample_rate = config.sample_rate.0;
+        let output_sample_rate = config.sample_rate;
 
         let state_clone = self.state.clone();
         let eq_clone = self.eq_chain.clone();
@@ -216,7 +215,7 @@ impl PlayerEngine {
         device: &cpal::Device,
         config: &StreamConfig,
         mut format_reader: Box<dyn FormatReader>,
-        mut decoder: Box<dyn Decoder>,
+        mut decoder: Box<dyn AudioDecoder>,
         track_id: u32,
         state: Arc<Mutex<DecoderState>>,
         eq_chain: Arc<Mutex<EqChain>>,
@@ -229,9 +228,9 @@ impl PlayerEngine {
         S: cpal::Sample + cpal::FromSample<f32> + cpal::SizedSample,
     {
         let channels = config.channels as usize;
-        let mut sample_buf: Option<SampleBuffer<f32>> = None;
         let mut sample_index = 0;
         let mut current_frame_samples: Vec<f32> = Vec::new();
+        let mut raw_samples_buf: Vec<f32> = Vec::new();
 
         let err_fn = move |err| {
             log::error!("Audio stream error: {}", err);
@@ -242,7 +241,7 @@ impl PlayerEngine {
 
         let stream = device
             .build_output_stream(
-                config,
+                *config,
                 move |data: &mut [S], _: &OutputCallbackInfo| {
                     if stop_signal.load(Ordering::Relaxed) {
                         for sample in data.iter_mut() {
@@ -258,7 +257,7 @@ impl PlayerEngine {
 
                     // Handle seek request (processed even if currently paused)
                     if let Some(target_secs) = seek_target {
-                        let time = Time::from(target_secs);
+                        let time = Time::try_from_secs_f64(target_secs).unwrap_or(Time::ZERO);
                         let seek_accurate = format_reader.seek(
                             SeekMode::Accurate,
                             SeekTo::Time {
@@ -275,7 +274,24 @@ impl PlayerEngine {
                                         track_id: Some(track_id),
                                     },
                                 )
-                                .is_ok();
+                                .is_ok()
+                            || {
+                                let sample_rate = state.lock().unwrap().sample_rate as f64;
+                                if let Ok(ts) = Timestamp::try_from((target_secs * sample_rate).round() as u64) {
+                                    format_reader
+                                        .seek(
+                                            SeekMode::Coarse,
+                                            SeekTo::Timestamp {
+                                                ts,
+                                                track_id,
+                                            },
+                                        )
+                                        .is_ok()
+                                } else {
+                                    false
+                                }
+                            };
+
                         if seek_ok {
                             decoder.reset();
                             current_frame_samples.clear();
@@ -314,46 +330,42 @@ impl PlayerEngine {
                                 }
 
                                 match format_reader.next_packet() {
-                                    Ok(packet) => {
-                                        if packet.track_id() != track_id {
+                                    Ok(Some(packet)) => {
+                                        if packet.track_id != track_id {
                                             continue;
                                         }
 
                                         match decoder.decode(&packet) {
                                             Ok(decoded) => {
-                                                if sample_buf.is_none() {
-                                                    let spec = *decoded.spec();
-                                                    let duration = decoded.capacity() as u64;
-                                                    sample_buf = Some(SampleBuffer::new(duration, spec));
+                                                let num_samples = decoded.samples_interleaved();
+                                                if raw_samples_buf.len() < num_samples {
+                                                    raw_samples_buf.resize(num_samples, 0.0);
                                                 }
+                                                let slice = &mut raw_samples_buf[..num_samples];
+                                                decoded.copy_to_slice_interleaved(&mut *slice);
 
-                                                if let Some(ref mut buf) = sample_buf {
-                                                    buf.copy_interleaved_ref(decoded);
-                                                    let raw_samples = buf.samples();
-
-                                                    let processed = match resampler.process_interleaved(raw_samples) {
-                                                        Ok(s) => s,
-                                                        Err(e) => {
-                                                            log::error!("Resampler error: {}", e);
-                                                            raw_samples.to_vec()
-                                                        }
-                                                    };
-
-                                                    // Always track position using the raw (pre-OLA) frame count
-                                                    {
-                                                        let mut st = state.lock().unwrap();
-                                                        let sample_rate = st.sample_rate as f64;
-                                                        if sample_rate > 0.0 {
-                                                            let added_secs = (raw_samples.len() / channels) as f64 / sample_rate;
-                                                            st.position_secs += added_secs;
-                                                        }
+                                                let processed = match resampler.process_interleaved(slice) {
+                                                    Ok(s) => s,
+                                                    Err(e) => {
+                                                        log::error!("Resampler error: {}", e);
+                                                        slice.to_vec()
                                                     }
+                                                };
 
-                                                    current_frame_samples.extend_from_slice(&processed);
-                                                    // If processed was empty the OLA is still accumulating;
-                                                    // keep looping to decode the next packet.
-                                                    packets_read += 1;
+                                                // Always track position using the raw (pre-OLA) frame count
+                                                {
+                                                    let mut st = state.lock().unwrap();
+                                                    let sample_rate = st.sample_rate as f64;
+                                                    if sample_rate > 0.0 {
+                                                        let added_secs = (slice.len() / channels) as f64 / sample_rate;
+                                                        st.position_secs += added_secs;
+                                                    }
                                                 }
+
+                                                current_frame_samples.extend_from_slice(&processed);
+                                                // If processed was empty the OLA is still accumulating;
+                                                // keep looping to decode the next packet.
+                                                packets_read += 1;
                                             }
                                             Err(SymphoniaError::DecodeError(msg)) => {
                                                 log::warn!("Decode error: {}", msg);
@@ -367,9 +379,7 @@ impl PlayerEngine {
                                             }
                                         }
                                     }
-                                    Err(SymphoniaError::IoError(e))
-                                        if e.kind() == std::io::ErrorKind::UnexpectedEof =>
-                                    {
+                                    Ok(None) => {
                                         let mut st = state.lock().unwrap();
                                         st.is_playing = false;
                                         st.is_ended = true;

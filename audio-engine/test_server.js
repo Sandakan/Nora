@@ -447,7 +447,10 @@ const server = http.createServer((req, res) => {
         position: engine.engineGetPosition(),
         duration: engine.engineGetDuration(),
         isPlaying:
-          engine.engineGetDuration() > 0 && engine.engineGetPosition() < engine.engineGetDuration()
+          typeof engine.engineIsPlaying === 'function'
+            ? engine.engineIsPlaying()
+            : engine.engineGetDuration() > 0 &&
+              engine.engineGetPosition() < engine.engineGetDuration()
       })
     );
     return;

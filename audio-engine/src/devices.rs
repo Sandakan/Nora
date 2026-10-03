@@ -17,8 +17,8 @@ impl DeviceManager {
         let mut device_names = Vec::new();
         if let Ok(devices) = self.host.output_devices() {
             for device in devices {
-                if let Ok(name) = device.name() {
-                    device_names.push(name);
+                if let Ok(desc) = device.description() {
+                    device_names.push(desc.name().to_string());
                 }
             }
         }
@@ -33,8 +33,8 @@ impl DeviceManager {
         if let Some(ref target_name) = self.selected_device_name {
             if let Ok(devices) = self.host.output_devices() {
                 for device in devices {
-                    if let Ok(name) = device.name() {
-                        if &name == target_name {
+                    if let Ok(desc) = device.description() {
+                        if desc.name() == target_name {
                             return Some(device);
                         }
                     }

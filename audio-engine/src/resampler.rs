@@ -1,5 +1,6 @@
+use rubato::audioadapter_buffers::direct::InterleavedSlice;
 use rubato::{
-    Resampler, SincFixedIn, SincInterpolationParameters, SincInterpolationType, WindowFunction,
+    Async, FixedAsync, Resampler, SincInterpolationParameters, SincInterpolationType, WindowFunction,
 };
 
 // ─── OLA parameters ──────────────────────────────────────────────────────────
@@ -130,15 +131,15 @@ impl OlaStretcher {
 // ─── Public SpeedResampler ───────────────────────────────────────────────────
 /// Two-stage audio pipeline:
 ///   1. OLA time-stretcher  → changes speed, preserves pitch (only active when speed ≠ 1×)
-///   2. SincFixedIn resampler → corrects device sample-rate mismatch at a fixed ratio
+///   2. Rubato 5 Async resampler → corrects device sample-rate mismatch at a fixed ratio
 ///      (e.g. 44100 Hz file → 48000 Hz hardware), never changes ratio.
 pub struct SpeedResampler {
     ola: OlaStretcher,
     speed_rate: f32,
 
-    sinc: Option<SincFixedIn<f32>>,
+    sinc: Option<Async<f32>>,
     channels: usize,
-    sinc_in_buffers: Vec<Vec<f32>>,
+    interleaved_in_buffer: Vec<f32>,
     sinc_chunk_size: usize,
 }
 
@@ -157,20 +158,21 @@ impl SpeedResampler {
             let ratio = output_sample_rate as f64 / file_sample_rate as f64;
             let params = SincInterpolationParameters {
                 sinc_len: 64,
-                f_cutoff: 0.95,
+                f_cutoff: Some(0.95),
                 interpolation: SincInterpolationType::Linear,
                 oversampling_factor: 128,
                 window: WindowFunction::BlackmanHarris2,
             };
             Some(
-                SincFixedIn::<f32>::new(
+                Async::<f32>::new_sinc(
                     ratio,
                     1.1, // fixed ratio ± 10% jitter tolerance
-                    params,
+                    &params,
                     chunk_size,
                     channels,
+                    FixedAsync::Input,
                 )
-                .expect("Failed to create device-rate SincFixedIn resampler"),
+                .expect("Failed to create device-rate Sinc resampler"),
             )
         } else {
             None
@@ -181,7 +183,7 @@ impl SpeedResampler {
             speed_rate: 1.0,
             sinc,
             channels,
-            sinc_in_buffers: vec![Vec::new(); channels],
+            interleaved_in_buffer: Vec::new(),
             sinc_chunk_size: chunk_size,
         }
     }
@@ -214,37 +216,21 @@ impl SpeedResampler {
     }
 
     fn run_sinc_resample(&mut self, interleaved: &[f32]) -> Result<Vec<f32>, String> {
-        // Deinterleave into per-channel buffers
-        let frames = interleaved.len() / self.channels;
-        for i in 0..frames {
-            for ch in 0..self.channels {
-                self.sinc_in_buffers[ch].push(interleaved[i * self.channels + ch]);
-            }
-        }
+        self.interleaved_in_buffer.extend_from_slice(interleaved);
 
+        let chunk_samples = self.sinc_chunk_size * self.channels;
         let mut output = Vec::new();
 
-        while self.sinc_in_buffers[0].len() >= self.sinc_chunk_size {
-            let chunk: Vec<Vec<f32>> = (0..self.channels)
-                .map(|ch| {
-                    self.sinc_in_buffers[ch]
-                        .drain(0..self.sinc_chunk_size)
-                        .collect()
-                })
-                .collect();
+        while self.interleaved_in_buffer.len() >= chunk_samples {
+            let chunk: Vec<f32> = self.interleaved_in_buffer.drain(0..chunk_samples).collect();
 
             if let Some(ref mut sinc) = self.sinc {
-                let mut out_buf =
-                    vec![vec![0f32; sinc.output_frames_max()]; self.channels];
-                let (_in_used, out_frames) = sinc
-                    .process_into_buffer(&chunk, &mut out_buf, None)
+                let in_adapter = InterleavedSlice::new(&chunk, self.channels, self.sinc_chunk_size)
+                    .map_err(|e| format!("Resampling buffer error: {}", e))?;
+                let out_owned = sinc
+                    .process(&in_adapter, None)
                     .map_err(|e| format!("Device resampling error: {}", e))?;
-
-                for f in 0..out_frames {
-                    for ch in 0..self.channels {
-                        output.push(out_buf[ch][f]);
-                    }
-                }
+                output.extend(out_owned.take_data());
             }
         }
 
