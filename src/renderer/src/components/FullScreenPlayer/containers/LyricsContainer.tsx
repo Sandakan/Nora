@@ -10,6 +10,7 @@ import LyricsMetadata from '../../LyricsPage/LyricsMetadata';
 
 type Props = {
   isLyricsVisible: boolean;
+  isPinned: boolean;
   setIsLyricsAvailable: (state: boolean) => void;
 };
 
@@ -18,7 +19,7 @@ const LyricsContainer = (props: Props) => {
   const currentSongData = useStore(store, (state) => state.currentSongData);
   const preferences = useStore(store, (state) => state.localStorage.preferences);
 
-  const { isLyricsVisible, setIsLyricsAvailable } = props;
+  const { isLyricsVisible, isPinned, setIsLyricsAvailable } = props;
   const { t } = useTranslation();
 
   const [lyrics, setLyrics] = useState<SongLyrics | null | undefined>(null);
@@ -147,8 +148,8 @@ const LyricsContainer = (props: Props) => {
 
   return (
     <div
-      className={`mini-player-lyrics-container appear-from-bottom w-ful absolute top-0 flex h-full max-h-screen! w-full max-w-full! flex-col items-start overflow-auto pt-20 pr-[20%] pb-[25%] pl-20 transition-[filter] delay-200 select-none group-focus-within:brightness-50 group-focus-within/fullScreenPlayer:blur-xs group-hover/fullScreenPlayer:blur-xs group-hover/fullScreenPlayer:brightness-50 ${
-        !isCurrentSongPlaying ? 'blur-xs brightness-50' : ''
+      className={`mini-player-lyrics-container appear-from-bottom absolute top-0 flex h-full max-h-screen! w-full max-w-full! flex-col items-start overflow-auto pt-20 pr-[20%] pb-[25%] pl-20 transition-[filter] delay-200 select-none group-focus-within:brightness-50 group-focus-within/fullScreenPlayer:blur-xs group-hover/fullScreenPlayer:blur-xs group-hover/fullScreenPlayer:brightness-50 ${
+        !isCurrentSongPlaying || isPinned ? 'blur-xs brightness-50' : ''
       }`}
       id="miniPlayerLyricsContainer"
     >

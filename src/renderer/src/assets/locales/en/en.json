@@ -1129,5 +1129,10 @@
     "untitledSong": "An untitled song",
     "unknownArtist": "an unknown artist",
     "playingASong": "Playing a song"
+  },
+
+  "fullScreenPlayer": {
+    "pinOverlay": "Pin overlay",
+    "unpinOverlay": "Unpin overlay"
   }
 }
