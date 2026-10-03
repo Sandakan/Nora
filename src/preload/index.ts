@@ -60,6 +60,30 @@ const playerControls = {
     ipcRenderer.removeListener('app/player/skipForward', callback)
 };
 
+const audioEngine = {
+  ping: (): Promise<string> => ipcRenderer.invoke('app/audioEngine/ping'),
+  play: (filePath: string): Promise<void> => ipcRenderer.invoke('app/audioEngine/play', filePath),
+  pause: (): Promise<void> => ipcRenderer.invoke('app/audioEngine/pause'),
+  resume: (): Promise<void> => ipcRenderer.invoke('app/audioEngine/resume'),
+  stop: (): Promise<void> => ipcRenderer.invoke('app/audioEngine/stop'),
+  seek: (positionSecs: number): Promise<void> =>
+    ipcRenderer.invoke('app/audioEngine/seek', positionSecs),
+  setVolume: (volume: number): Promise<void> =>
+    ipcRenderer.invoke('app/audioEngine/setVolume', volume),
+  setVolumeWithRamp: (target: number, durationMs: number): Promise<void> =>
+    ipcRenderer.invoke('app/audioEngine/setVolumeWithRamp', target, durationMs),
+  getPosition: (): Promise<number> => ipcRenderer.invoke('app/audioEngine/getPosition'),
+  getDuration: (): Promise<number> => ipcRenderer.invoke('app/audioEngine/getDuration'),
+  listDevices: (): Promise<string[]> => ipcRenderer.invoke('app/audioEngine/listDevices'),
+  setDevice: (deviceName: string): Promise<void> =>
+    ipcRenderer.invoke('app/audioEngine/setDevice', deviceName),
+  setPlaybackRate: (rate: number): Promise<void> =>
+    ipcRenderer.invoke('app/audioEngine/setPlaybackRate', rate),
+  setEqBand: (frequencyHz: number, gainDb: number): Promise<void> =>
+    ipcRenderer.invoke('app/audioEngine/setEqBand', frequencyHz, gainDb),
+  resetEq: (): Promise<void> => ipcRenderer.invoke('app/audioEngine/resetEq')
+};
+
 const audioLibraryControls = {
   checkForStartUpSongs: (): Promise<AudioPlayerData | undefined> =>
     ipcRenderer.invoke('app/checkForStartUpSongs'),
@@ -602,6 +626,7 @@ export const api = {
   windowControls,
   theme,
   playerControls,
+  audioEngine,
   audioLibraryControls,
   suggestions,
   unknownSource,

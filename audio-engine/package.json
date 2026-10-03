@@ -4,7 +4,12 @@
   "description": "Native Rust Audio Engine for Nora Music Player",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
+    "build:engine": "npx --package=@napi-rs/cli napi build --platform -o dist --release",
+    "build:engine:debug": "npx --package=@napi-rs/cli napi build --platform -o dist",
     "test:ui": "node test_server.js"
   },
   "napi": {

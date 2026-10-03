@@ -25,6 +25,7 @@ This skill outlines development, testing, and building procedures for Nora's nat
 ## Build Commands
 
 From the repository root:
+
 - **Release Build** (recommended for production / testing performance):
   ```bash
   npm run build:engine
@@ -36,6 +37,7 @@ From the repository root:
   ```
 
 From `audio-engine/` directory:
+
 - **Explicit N-API Build**:
   Always use `--package=@napi-rs/cli` to prevent npm from attempting registry lookups on the unversioned `napi` package:
   ```bash
@@ -45,30 +47,38 @@ From `audio-engine/` directory:
 ## Testing & Diagnostics
 
 ### 1. Rust Unit and Integration Tests
+
 Run engine, DSP filter, and resampler tests:
+
 ```bash
 cd audio-engine
 cargo test
 ```
 
 ### 2. Interactive CLI Player
+
 Test playback of a specific audio file directly through the terminal:
+
 ```bash
 cd audio-engine
 cargo run --example cli_player -- "path/to/song.mp3"
 ```
 
 ### 3. Interactive Web UI Test Server
+
 Launch the test HTTP server to test playback, EQ sliders, volume ramping, and position tracking in a browser interface:
+
 ```bash
 cd audio-engine
 npm run test:ui
 ```
+
 Open `http://localhost:3333` in a web browser.
 
 ## Troubleshooting
 
 ### `npm error code ENOVERSIONS` / `No versions available for napi`
+
 - **Cause**: `@napi-rs/cli` was not installed in `node_modules` or `node_modules/.bin/napi` is missing, causing `npx` to query the npm registry for package `napi`.
 - **Fix**:
   1. Run `npm install -w audio-engine`.

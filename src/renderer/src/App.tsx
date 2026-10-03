@@ -144,7 +144,7 @@ export default function App() {
     updateSongPosition,
     toggleIsFavorite,
     updateEqualizerOptions
-  } = usePlaybackSettings(audio);
+  } = usePlaybackSettings(player);
 
   // ? INITIALIZE LISTENING DATA
   // Listening data hook handles recording song playback sessions for analytics

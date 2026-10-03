@@ -256,27 +256,40 @@ impl PlayerEngine {
                         (st.is_playing, st.playback_rate, st.seek_target.take())
                     };
 
-                    if !is_playing {
-                        for sample in data.iter_mut() {
-                            *sample = S::from_sample(0.0);
-                        }
-                        return;
-                    }
-
-                    // Handle seek request
+                    // Handle seek request (processed even if currently paused)
                     if let Some(target_secs) = seek_target {
                         let time = Time::from(target_secs);
-                        let seek_to = SeekTo::Time {
-                            time,
-                            track_id: Some(track_id),
-                        };
-                        if let Ok(_) = format_reader.seek(SeekMode::Accurate, seek_to) {
+                        let seek_accurate = format_reader.seek(
+                            SeekMode::Accurate,
+                            SeekTo::Time {
+                                time,
+                                track_id: Some(track_id),
+                            },
+                        );
+                        let seek_ok = seek_accurate.is_ok()
+                            || format_reader
+                                .seek(
+                                    SeekMode::Coarse,
+                                    SeekTo::Time {
+                                        time,
+                                        track_id: Some(track_id),
+                                    },
+                                )
+                                .is_ok();
+                        if seek_ok {
                             decoder.reset();
                             current_frame_samples.clear();
                             sample_index = 0;
                             let mut st = state.lock().unwrap();
                             st.position_secs = target_secs;
                         }
+                    }
+
+                    if !is_playing {
+                        for sample in data.iter_mut() {
+                            *sample = S::from_sample(0.0);
+                        }
+                        return;
                     }
 
                     // Update resampler playback rate
@@ -455,6 +468,7 @@ impl PlayerEngine {
     pub fn seek(&self, position_secs: f64) {
         let mut st = self.state.lock().unwrap();
         st.seek_target = Some(position_secs);
+        st.position_secs = position_secs;
     }
 
     pub fn set_volume(&self, volume: f32) {

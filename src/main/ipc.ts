@@ -5,6 +5,7 @@ import addArtworkToAPlaylist from './core/addArtworkToAPlaylist';
 import addSongsFromFolderStructures from './core/addMusicFolder';
 import addNewPlaylist from './core/addNewPlaylist';
 import addSongsToPlaylist from './core/addSongsToPlaylist';
+import audioEngine from './core/audioEngine';
 import blacklistFolders from './core/blacklistFolders';
 import blacklistSongs from './core/blacklistSongs';
 import changeAppTheme from './core/changeAppTheme';
@@ -630,5 +631,34 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     });
 
     ipcMain.on('app/restartApp', (_: unknown, reason: string) => restartApp(reason));
+
+    // Native Audio Engine IPC Handlers
+    ipcMain.handle('app/audioEngine/ping', () => audioEngine.ping());
+    ipcMain.handle('app/audioEngine/play', (_, filePath: string) => audioEngine.play(filePath));
+    ipcMain.handle('app/audioEngine/pause', () => audioEngine.pause());
+    ipcMain.handle('app/audioEngine/resume', () => audioEngine.resume());
+    ipcMain.handle('app/audioEngine/stop', () => audioEngine.stop());
+    ipcMain.handle('app/audioEngine/seek', (_, positionSecs: number) =>
+      audioEngine.seek(positionSecs)
+    );
+    ipcMain.handle('app/audioEngine/setVolume', (_, volume: number) =>
+      audioEngine.setVolume(volume)
+    );
+    ipcMain.handle('app/audioEngine/setVolumeWithRamp', (_, target: number, durationMs: number) =>
+      audioEngine.setVolumeWithRamp(target, durationMs)
+    );
+    ipcMain.handle('app/audioEngine/getPosition', () => audioEngine.getPosition());
+    ipcMain.handle('app/audioEngine/getDuration', () => audioEngine.getDuration());
+    ipcMain.handle('app/audioEngine/listDevices', () => audioEngine.listDevices());
+    ipcMain.handle('app/audioEngine/setDevice', (_, deviceName: string) =>
+      audioEngine.setDevice(deviceName)
+    );
+    ipcMain.handle('app/audioEngine/setPlaybackRate', (_, rate: number) =>
+      audioEngine.setPlaybackRate(rate)
+    );
+    ipcMain.handle('app/audioEngine/setEqBand', (_, frequencyHz: number, gainDb: number) =>
+      audioEngine.setEqBand(frequencyHz, gainDb)
+    );
+    ipcMain.handle('app/audioEngine/resetEq', () => audioEngine.resetEq());
   }
 }

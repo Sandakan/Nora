@@ -442,26 +442,33 @@ const server = http.createServer((req, res) => {
 
   if (req.method === 'GET' && req.url === '/api/status') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
-      position: engine.engineGetPosition(),
-      duration: engine.engineGetDuration(),
-      isPlaying: engine.engineGetDuration() > 0 && engine.engineGetPosition() < engine.engineGetDuration()
-    }));
+    res.end(
+      JSON.stringify({
+        position: engine.engineGetPosition(),
+        duration: engine.engineGetDuration(),
+        isPlaying:
+          engine.engineGetDuration() > 0 && engine.engineGetPosition() < engine.engineGetDuration()
+      })
+    );
     return;
   }
 
   if (req.method === 'POST' && req.url === '/api/upload_play') {
-    const rawFileName = req.headers['x-file-name'] ? decodeURIComponent(req.headers['x-file-name']) : 'temp_song.mp3';
+    const rawFileName = req.headers['x-file-name']
+      ? decodeURIComponent(req.headers['x-file-name'])
+      : 'temp_song.mp3';
     const ext = path.extname(rawFileName) || '.mp3';
     const tempFilePath = path.join(SCRATCH_DIR, `temp_uploaded_play${ext}`);
 
     console.log(`[SERVER] Receiving uploaded file: ${rawFileName} -> saving to ${tempFilePath}`);
     const fileStream = fs.createWriteStream(tempFilePath);
-    
+
     req.pipe(fileStream);
 
     fileStream.on('finish', () => {
-      console.log(`[SERVER] File upload complete (${fs.statSync(tempFilePath).size} bytes). Triggering enginePlay...`);
+      console.log(
+        `[SERVER] File upload complete (${fs.statSync(tempFilePath).size} bytes). Triggering enginePlay...`
+      );
       try {
         engine.enginePlay(tempFilePath);
         const duration = engine.engineGetDuration();
@@ -485,7 +492,7 @@ const server = http.createServer((req, res) => {
 
   if (req.method === 'POST') {
     let body = '';
-    req.on('data', chunk => body += chunk.toString());
+    req.on('data', (chunk) => (body += chunk.toString()));
     req.on('end', () => {
       try {
         const data = body ? JSON.parse(body) : {};
