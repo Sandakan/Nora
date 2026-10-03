@@ -307,7 +307,7 @@ export function useAppLifecycle(dependencies: AppLifecycleDependencies): void {
       );
       window.api.playerControls.removeTogglePlaybackStateEvent(handleToggleSongPlayback);
       window.api.playerControls.removeSkipBackwardToPreviousSongEvent(handleSkipBackwardClick);
-      window.api.playerControls.removeSkipForwardToNextSongEvent(handleSkipForwardClickListener);
+      (globalThis as typeof window).api.playerControls.removeSkipForwardToNextSongEvent(handleSkipForwardClickListener);
       window.api.dataUpdates.removeDataUpdateEventListeners();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

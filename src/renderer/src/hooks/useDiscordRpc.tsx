@@ -6,8 +6,8 @@ import { store } from '../store/store';
 /**
  * Synchronizes Discord Rich Presence with the provided audio element's current song.
  *
- * Registers listeners on the audio player to update Discord activity (song title, artists, artwork,
- * action button) and to set playback timestamps while the player is actively playing.
+ * Registers listeners on the audio player to update Discord activity (song title, artists,
+ * artwork, action button) and to set playback timestamps while the player is actively playing.
  *
  * @param player - The HTMLAudioElement whose playback state and metadata drive the presence updates
  */
@@ -41,10 +41,9 @@ export function useDiscordRpc(player: HTMLAudioElement) {
     const firstArtistWithArtwork = currentSong?.artists?.find(
       (artist) => artist.onlineArtworkPaths?.picture_small
     );
-    const artworkLink =
-      firstArtistWithArtwork?.onlineArtworkPaths?.picture_xl ??
-      firstArtistWithArtwork?.onlineArtworkPaths?.picture_medium ??
-      firstArtistWithArtwork?.onlineArtworkPaths?.picture_small;
+    const artworkLink = firstArtistWithArtwork?.onlineArtworkPaths?.picture_xl
+      ?? firstArtistWithArtwork?.onlineArtworkPaths?.picture_medium
+      ?? firstArtistWithArtwork?.onlineArtworkPaths?.picture_small;
 
     const activity: DiscordActivity = {
       details: title,
@@ -75,7 +74,7 @@ export function useDiscordRpc(player: HTMLAudioElement) {
       }
     }
 
-    window.api.playerControls.setDiscordRpcActivity(activity);
+    (globalThis as typeof window).api?.playerControls?.setDiscordRpcActivity(activity);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
