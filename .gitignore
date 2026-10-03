@@ -9,3 +9,10 @@ coverage/
 *.m3u
 .npmrc
 .github/plans/
+
+# Native Audio Engine
+audio-engine/target/
+audio-engine/*.node
+audio-engine/dist/*.node
+
+

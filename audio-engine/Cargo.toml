@@ -1,0 +1,28 @@
+[package]
+name = "audio-engine"
+version = "0.1.0"
+edition = "2021"
+authors = ["Sandakan Nipunajith <adsandakannipunajith2003@outlook.com>"]
+description = "Native Rust Audio Engine for Nora Music Player (cpal + symphonia + rubato)"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+napi = { version = "3.14", default-features = false, features = ["async", "napi4", "tokio_rt"] }
+napi-derive = "3.6"
+cpal = "0.18"
+symphonia = { version = "0.6", features = ["all"] }
+rubato = "5.0"
+log = "0.4"
+env_logger = "0.11"
+lazy_static = "1.5"
+
+[build-dependencies]
+napi-build = "2.6"
+
+[profile.release]
+lto = true
+opt-level = 3
+codegen-units = 1
+strip = "symbols"

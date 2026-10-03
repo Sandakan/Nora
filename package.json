@@ -73,7 +73,12 @@
     "sharp": "Using WASM build for cross-platform compatibility. Install with: npm install --cpu=wasm32 sharp",
     "prebuild:wasm": "Creates placeholder directory for Sharp platform compatibility due to package-lock.json references"
   },
+  "workspaces": [
+    "audio-engine"
+  ],
   "scripts": {
+    "build:engine": "cd audio-engine && npx --package=@napi-rs/cli napi build --platform -o dist --release",
+    "build:engine:debug": "cd audio-engine && npx --package=@napi-rs/cli napi build --platform -o dist",
     "test": "vitest run",
     "coverage": "vitest run --coverage",
     "check-types": "tsc --noEmit",
@@ -90,8 +95,8 @@
     "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",
     "typecheck": "npm run typecheck:node && npm run typecheck:web",
     "start": "electron-vite preview",
-    "dev": "electron-vite dev --watch --inspect --sourcemap",
-    "build": "electron-vite build",
+    "dev": "npm run build:engine:debug && electron-vite dev --watch --inspect --sourcemap",
+    "build": "npm run build:engine && electron-vite build",
     "prebuild:wasm": "node -e \"const fs = require('fs'); const path = require('path'); const dir = path.join(__dirname, 'node_modules', '@img', 'sharp-darwin-arm64'); if (!fs.existsSync(dir)) { fs.mkdirSync(dir, { recursive: true }); console.log('Created placeholder for Sharp platform compatibility (using WASM build)'); }\"",
     "postinstall": "electron-builder install-app-deps",
     "build:unpack": "npm run prebuild:wasm && npm run build && electron-builder --dir --publish=never",
@@ -116,6 +121,7 @@
     "electron-install": "node node_modules/electron/install.js"
   },
   "dependencies": {
+    "audio-engine": "*",
     "@electric-sql/pglite": "^0.5.1",
     "@electric-sql/pglite-tools": "^0.4.1",
     "@electron-toolkit/preload": "^3.0.2",
@@ -132,6 +138,7 @@
     "@tanstack/react-store": "^0.11.0",
     "@vitalets/google-translate-api": "^9.2.1",
     "@vitejs/plugin-react": "^6.0.1",
+    "content-type": "^2.1.0",
     "didyoumean2": "^7.0.4",
     "discord-rpc": "^4.0.1",
     "dotenv": "^17.3.1",

@@ -49,6 +49,12 @@ class AudioPlayer {
   private repeatMode: 'off' | 'one' | 'all' = 'off';
   private pendingAutoPlay: boolean = false;
   private currentLoadedSongId: number | null = null;
+  private isUsingNativeEngine = false;
+  private nativeCurrentTime = 0;
+  private nativeDuration = 0;
+  private nativeIsPaused = true;
+  private nativeTickerInterval: ReturnType<typeof setInterval> | null = null;
+  private currentSongData: AudioPlayerData | null = null;
 
   constructor(queue: PlayerQueue) {
     this.listeners = new Map();
@@ -92,8 +98,8 @@ class AudioPlayer {
       });
 
       if (songId) {
-        // If the song is already loaded in the audio element, avoid reloading and pausing it
-        if (songId === this.currentLoadedSongId && this.audio.src) {
+        // If the song is already loaded in the audio element or native engine, avoid reloading
+        if (songId === this.currentLoadedSongId && (this.audio.src || this.isUsingNativeEngine)) {
           this.pendingAutoPlay = false;
           return;
         }
@@ -143,7 +149,20 @@ class AudioPlayer {
       this.emit('pause');
     });
 
-    this.audio.addEventListener('error', (e) => {
+    this.audio.addEventListener('error', async (e) => {
+      if (this.isUsingNativeEngine) return;
+      if (window.api?.audioEngine && this.currentSongData) {
+        console.warn(
+          '[AudioPlayer] HTML5 Audio failed to decode track. Falling back to native Rust audio engine...',
+          e
+        );
+        try {
+          await this.playWithNativeEngine(true);
+          return;
+        } catch (fallbackError) {
+          console.error('[AudioPlayer] Native audio engine fallback failed:', fallbackError);
+        }
+      }
       this.emit('error', e);
     });
 
@@ -152,8 +171,72 @@ class AudioPlayer {
     });
 
     this.audio.addEventListener('seeked', () => {
-      this.emit('seeked', this.audio.currentTime);
+      this.emit('seeked', this.currentTime);
     });
+  }
+
+  private startNativeTicker() {
+    this.stopNativeTicker();
+    this.nativeTickerInterval = setInterval(async () => {
+      if (!this.isUsingNativeEngine || this.nativeIsPaused) return;
+      try {
+        const pos = await window.api.audioEngine.getPosition();
+        this.nativeCurrentTime = pos;
+        this.emit('timeUpdate', pos);
+        this.audio.dispatchEvent(new Event('timeupdate'));
+        if (this.nativeDuration > 0 && pos >= this.nativeDuration) {
+          this.handleSongEnd();
+        }
+      } catch (err) {
+        console.error('[AudioPlayer] Error polling native engine position:', err);
+      }
+    }, 250);
+  }
+
+  private stopNativeTicker() {
+    if (this.nativeTickerInterval) {
+      clearInterval(this.nativeTickerInterval);
+      this.nativeTickerInterval = null;
+    }
+  }
+
+  private async playWithNativeEngine(autoPlay = true): Promise<void> {
+    if (!this.currentSongData || !window.api?.audioEngine) return;
+    this.isUsingNativeEngine = true;
+
+    // Silence and detach HTML5 audio element
+    this.audio.pause();
+    this.audio.removeAttribute('src');
+
+    const rawPath = window.api.utils?.removeDefaultAppProtocolFromFilePath
+      ? window.api.utils.removeDefaultAppProtocolFromFilePath(this.currentSongData.path)
+      : this.currentSongData.path
+          .replace(/^nora:[/\\]{1,2}localfiles[/\\]{1,2}/i, '')
+          .replace(/\?.*$/, '');
+
+    console.log('[AudioPlayer.playWithNativeEngine] Playing via Rust audio-engine:', rawPath);
+    await window.api.audioEngine.play(rawPath);
+    await window.api.audioEngine.setVolume(this.volume);
+    await window.api.audioEngine.setPlaybackRate(this.playbackRate);
+
+    const dur = await window.api.audioEngine.getDuration();
+    this.nativeDuration = dur > 0 ? dur : this.currentSongData.duration;
+    this.nativeCurrentTime = 0;
+    this.emit('durationChange', this.nativeDuration);
+    this.audio.dispatchEvent(new Event('loadedmetadata'));
+
+    if (autoPlay) {
+      this.nativeIsPaused = false;
+      await window.api.audioEngine.resume();
+      this.emit('play');
+      this.audio.dispatchEvent(new Event('play'));
+      this.startNativeTicker();
+    } else {
+      this.nativeIsPaused = true;
+      await window.api.audioEngine.pause();
+      this.emit('pause');
+      this.audio.dispatchEvent(new Event('pause'));
+    }
   }
 
   /**
@@ -164,7 +247,7 @@ class AudioPlayer {
     console.log('[AudioPlayer.handleSongEnd]', { repeatMode: this.repeatMode });
 
     if (this.repeatMode === 'one') {
-      this.audio.currentTime = 0;
+      this.currentTime = 0;
       await this.play();
       this.emit('repeatOne');
       return;
@@ -218,6 +301,25 @@ class AudioPlayer {
 
         // Update localStorage
         storage.playback.setCurrentSongOptions('songId', songData.songId);
+      }
+
+      this.currentSongData = songData;
+
+      // Stop previous native playback if running
+      if (this.isUsingNativeEngine) {
+        this.stopNativeTicker();
+        await window.api.audioEngine?.stop();
+        this.isUsingNativeEngine = false;
+      }
+
+      // Proactively route FLAC and other formats that fail in Chromium's FFmpeg to the native engine
+      const isFlac = songData.path.toLowerCase().includes('.flac');
+      if (isFlac && window.api?.audioEngine) {
+        console.log('[AudioPlayer] FLAC format detected - using native Rust audio engine');
+        await this.playWithNativeEngine(options?.autoPlay ?? true);
+        this.currentLoadedSongId = songData.songId;
+        this.emit('songLoaded', songData);
+        return songData;
       }
 
       // Set audio source with a single cache-busting timestamp.
@@ -275,6 +377,11 @@ class AudioPlayer {
 
   /** Cleans up resources and event listeners. Should be called when player is no longer needed. */
   destroy() {
+    this.stopNativeTicker();
+    if (this.isUsingNativeEngine && window.api?.audioEngine) {
+      window.api.audioEngine.stop().catch(() => {});
+      this.isUsingNativeEngine = false;
+    }
     if (this.unsubscribeFunc) this.unsubscribeFunc.unsubscribe();
     this.queue.removeAllListeners();
     this.removeAllListeners();
@@ -397,12 +504,12 @@ class AudioPlayer {
   // ? PLAYER RELATED STORE UPDATES HANDLING
   private updatePlayerVolume(volume: PlayerVolume) {
     this.volume = volume.value / 100;
-    this.audio.muted = volume.isMuted;
+    this.muted = volume.isMuted;
   }
 
   private updatePlaybackRate(playbackRate: number) {
-    if (this.audio.playbackRate !== playbackRate) {
-      this.audio.playbackRate = playbackRate;
+    if (this.playbackRate !== playbackRate) {
+      this.playbackRate = playbackRate;
     }
   }
 
@@ -432,12 +539,26 @@ class AudioPlayer {
 
   /** Starts or resumes audio playback with fade-in effect. */
   play() {
+    if (this.isUsingNativeEngine) {
+      this.nativeIsPaused = false;
+      this.startNativeTicker();
+      this.emit('play');
+      this.audio.dispatchEvent(new Event('play'));
+      return window.api.audioEngine.resume();
+    }
     this.audio.play();
     return this.fadeInAudio();
   }
 
   /** Pauses audio playback with fade-out effect. */
   pause() {
+    if (this.isUsingNativeEngine) {
+      this.nativeIsPaused = true;
+      this.stopNativeTicker();
+      this.emit('pause');
+      this.audio.dispatchEvent(new Event('pause'));
+      return window.api.audioEngine.pause();
+    }
     return this.fadeOutAudio();
   }
 
@@ -448,10 +569,10 @@ class AudioPlayer {
    * @returns Promise that resolves when fade completes
    */
   async togglePlayback(forcePlay?: boolean): Promise<void> {
-    const shouldPlay = forcePlay !== undefined ? forcePlay : this.audio.paused;
+    const shouldPlay = forcePlay !== undefined ? forcePlay : this.paused;
 
     if (shouldPlay) {
-      if (this.audio.readyState > 0) {
+      if (this.isUsingNativeEngine || this.audio.readyState > 0) {
         await this.play();
       }
     } else {
@@ -465,7 +586,7 @@ class AudioPlayer {
    * @param time - Time in seconds to seek to
    */
   seek(time: number) {
-    this.audio.currentTime = time;
+    this.currentTime = time;
   }
 
   /**
@@ -527,7 +648,7 @@ class AudioPlayer {
 
     // Handle repeat-one mode (only auto-repeat, not on user skip)
     if (this.repeatMode === 'one' && reason !== 'USER_SKIP') {
-      this.audio.currentTime = 0;
+      this.currentTime = 0;
       await this.play();
 
       // Emit event for listening data recording (repetition)
@@ -562,14 +683,14 @@ class AudioPlayer {
    */
   skipBackward(): void {
     console.log('[AudioPlayer.skipBackward]', {
-      currentTime: this.audio.currentTime,
+      currentTime: this.currentTime,
       position: this.queue.position,
       hasPrevious: this.queue.hasPrevious
     });
 
     // If more than 5 seconds into song, restart it
-    if (this.audio.currentTime > 5) {
-      this.audio.currentTime = 0;
+    if (this.currentTime > 5) {
+      this.currentTime = 0;
       return;
     }
 
@@ -654,22 +775,39 @@ class AudioPlayer {
 
   /** Gets the current playback time in seconds. */
   get currentTime(): number {
-    return this.audio.currentTime;
+    return this.isUsingNativeEngine ? this.nativeCurrentTime : this.audio.currentTime;
   }
 
   /** Sets the current playback time in seconds. */
   set currentTime(time: number) {
+    if (this.isUsingNativeEngine) {
+      this.nativeCurrentTime = time;
+      this.emit('timeUpdate', time);
+      this.audio.dispatchEvent(new Event('seeking'));
+      this.audio.dispatchEvent(new Event('seeked'));
+      this.audio.dispatchEvent(new Event('timeupdate'));
+
+      const playerPositionChange = new CustomEvent('player/positionChange', {
+        detail: Number(time.toFixed(2))
+      });
+      document.dispatchEvent(playerPositionChange);
+
+      window.api?.audioEngine?.seek(time).catch((err) => {
+        console.error('[AudioPlayer] Error seeking native audio engine:', err);
+      });
+      return;
+    }
     this.audio.currentTime = time;
   }
 
   /** Gets the duration of the current song in seconds. */
   get duration(): number {
-    return this.audio.duration;
+    return this.isUsingNativeEngine ? this.nativeDuration : this.audio.duration;
   }
 
   /** Gets whether the audio is currently paused. */
   get paused(): boolean {
-    return this.audio.paused;
+    return this.isUsingNativeEngine ? this.nativeIsPaused : this.audio.paused;
   }
 
   /** Gets the current volume (0-1). */
@@ -682,6 +820,11 @@ class AudioPlayer {
     this.currentVolume = volume * 100;
     this.audio.volume = volume;
     this.gainNode.gain.value = volume;
+    if (this.isUsingNativeEngine && window.api?.audioEngine) {
+      window.api.audioEngine.setVolume(volume).catch((err) => {
+        console.error('[AudioPlayer] Error setting native audio engine volume:', err);
+      });
+    }
   }
 
   /** Gets the muted state. */
@@ -692,7 +835,13 @@ class AudioPlayer {
   /** Sets the muted state. */
   set muted(value: boolean) {
     this.audio.muted = value;
-    this.gainNode.gain.value = value ? 0 : this.volume;
+    const targetVolume = value ? 0 : this.volume;
+    this.gainNode.gain.value = targetVolume;
+    if (this.isUsingNativeEngine && window.api?.audioEngine) {
+      window.api.audioEngine.setVolume(targetVolume).catch((err) => {
+        console.error('[AudioPlayer] Error muting native audio engine:', err);
+      });
+    }
   }
 
   /** Gets the current playback rate. */
@@ -703,6 +852,11 @@ class AudioPlayer {
   /** Sets the playback rate. */
   set playbackRate(value: number) {
     this.audio.playbackRate = value;
+    if (this.isUsingNativeEngine && window.api?.audioEngine) {
+      window.api.audioEngine.setPlaybackRate(value).catch((err) => {
+        console.error('[AudioPlayer] Error setting native audio engine playback rate:', err);
+      });
+    }
   }
 }
 

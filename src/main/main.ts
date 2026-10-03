@@ -27,6 +27,7 @@ import { version, appPreferences } from '../../package.json';
 import noraAppIcon from '../../resources/logo_light_mode.png?asset';
 import roundTo from '../common/roundTo';
 import manageLastFmAuth from './auth/manageLastFmAuth';
+import audioEngine from './core/audioEngine';
 import changeAppTheme from './core/changeAppTheme';
 import checkForNewSongs from './core/checkForNewSongs';
 import checkForStartUpSongs from './core/checkForStartUpSongs';
@@ -485,6 +486,12 @@ async function handleBeforeQuit() {
       const promise4 = clearTempArtworkFolder();
 
       await Promise.all([promise1, promise2, promise3, promise4]);
+
+      try {
+        audioEngine.destroy();
+      } catch (err) {
+        logger.error('Failed to destroy audio-engine during quit', { err });
+      }
 
       mainWindow.webContents.send('app/beforeQuitEvent');
       await closeDatabaseInstance();
