@@ -6,7 +6,9 @@ vi.mock('@main/db/queries/songs', () => ({
 
 vi.mock('node-taglib-sharp', () => ({
   File: {
-    createFromPath: vi.fn()
+    createFromPath: vi.fn(() => ({
+      dispose: vi.fn()
+    } as never))
   }
 }));
 
@@ -112,7 +114,8 @@ describe('sendAudioDataFromPath', () => {
       },
       properties: {
         durationMilliseconds: 250000
-      }
+      },
+      dispose: vi.fn()
     } as never);
 
     const result = await sendAudioDataFromPath(songPath);
@@ -135,7 +138,7 @@ describe('sendAudioDataFromPath', () => {
 
   test('throws SONG_DATA_SEND_FAILED when metadata cannot be read', async () => {
     mockedGetSongIdFromSongPath.mockResolvedValue(undefined);
-    mockedCreateFromPath.mockReturnValue({ tag: undefined, properties: {} } as never);
+    mockedCreateFromPath.mockReturnValue({ tag: undefined, properties: {}, dispose: vi.fn() } as never);
 
     await expect(sendAudioDataFromPath('C:/music/unknown.flac')).rejects.toThrow(
       'SONG_DATA_SEND_FAILED'

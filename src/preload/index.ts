@@ -1,6 +1,7 @@
 import { contextBridge, ipcRenderer, webUtils } from 'electron';
 
 import type { LastFMAlbumInfo } from '../types/last_fm_album_info_api';
+import type { AddSongsToPlaylistResult } from '../main/core/addSongsToPlaylist';
 // const { contextBridge, ipcRenderer } = require('electron');
 import type { LastFMTrackInfoApi } from '../types/last_fm_api';
 import type { SimilarTracksOutput } from '../types/last_fm_similar_tracks_api';
@@ -450,7 +451,10 @@ const playlistsData = {
     artworkPath?: string
   ): Promise<{ success: boolean; message?: string; playlist?: Playlist }> =>
     ipcRenderer.invoke('app/addNewPlaylist', playlistName, songIds, artworkPath),
-  addSongsToPlaylist: (playlistId: number, songIds: number[]): PromiseFunctionReturn =>
+  addSongsToPlaylist: (
+    playlistId: number,
+    songIds: number[]
+  ): Promise<AddSongsToPlaylistResult> =>
     ipcRenderer.invoke('app/addSongsToPlaylist', playlistId, songIds),
   addArtworkToAPlaylist: (
     playlistId: number,

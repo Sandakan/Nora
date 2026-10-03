@@ -1,6 +1,7 @@
-import { File } from 'node-taglib-sharp';
+import type { File } from 'node-taglib-sharp';
 
 import logger from '../logger';
+import { createTagFile } from './createTagFile';
 
 /**
  * Utility wrapper for node-taglib-sharp File operations Ensures proper file disposal even if errors
@@ -18,7 +19,7 @@ export async function withFileHandle<T>(
   let file: File | undefined;
 
   try {
-    file = File.createFromPath(filePath);
+    file = createTagFile(filePath);
     const result = await callback(file);
     return result;
   } catch (error) {
@@ -40,7 +41,7 @@ export function withFileHandleSync<T>(filePath: string, callback: (file: File) =
   let file: File | undefined;
 
   try {
-    file = File.createFromPath(filePath);
+    file = createTagFile(filePath);
     return callback(file);
   } catch (error) {
     logger.error('Error during file handle operation', { error, filePath });

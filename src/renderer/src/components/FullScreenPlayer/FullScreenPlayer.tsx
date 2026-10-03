@@ -12,15 +12,13 @@ import SongInfoContainer from './containers/SongInfoContainer';
 
 // type Props = {};
 
-const isArtistBackgroundsEnabled = false;
-
 const FullScreenPlayer = () => {
-  // (props: Props)
   const isCurrentSongPlaying = useStore(store, (state) => state.player.isCurrentSongPlaying);
   const currentSongData = useStore(store, (state) => state.currentSongData);
   const preferences = useStore(store, (state) => state.localStorage.preferences);
+  const isShowLyricsWithSongInfo = preferences?.showLyricsWithSongInfo;
 
-  const [isLyricsVisible, setIsLyricsVisible] = useState(false);
+  const [isLyricsVisible, setIsLyricsVisible] = useState(isShowLyricsWithSongInfo);
   const [isLyricsAvailable, setIsLyricsAvailable] = useState(false);
   const [songPos, setSongPos] = useState(0);
 
@@ -39,14 +37,8 @@ const FullScreenPlayer = () => {
   }, [preferences.allowToPreventScreenSleeping, preferences.removeAnimationsOnBatteryPower]);
 
   const imgPath = useMemo(() => {
-    const selectedArtist = currentSongData?.artists?.find(
-      (artist) => !!artist.onlineArtworkPaths?.picture_xl
-    );
-
-    if (isArtistBackgroundsEnabled && selectedArtist)
-      return selectedArtist.onlineArtworkPaths?.picture_xl;
     return currentSongData.artworkPath;
-  }, [currentSongData?.artists, currentSongData?.artworkPath]);
+  }, [currentSongData?.artworkPath]);
 
   return (
     <div
@@ -66,20 +58,44 @@ const FullScreenPlayer = () => {
       </div>
       <TitleBar />
       <div
-        className={`flex max-w-full flex-col justify-end ${isMouseActive && 'group/fullScreenPlayer'}`}
+        className={`flex max-w-full ${isShowLyricsWithSongInfo ? 'flex-row' : 'flex-col'} justify-end ${isMouseActive && 'group/fullScreenPlayer'}`}
         ref={fullScreenPlayerContainerRef}
       >
-        <LyricsContainer
-          isLyricsVisible={isLyricsVisible}
-          setIsLyricsAvailable={setIsLyricsAvailable}
-        />
-        <SongInfoContainer
-          songPos={songPos}
-          isLyricsVisible={isLyricsVisible}
-          setIsLyricsVisible={setIsLyricsVisible}
-          isLyricsAvailable={isLyricsAvailable}
-          isMouseActive={isMouseActive}
-        />
+        {isShowLyricsWithSongInfo ? (
+          <div className="flex h-full w-full flex-row overflow-hidden">
+            <div className="flex w-1/2 items-end">
+              <SongInfoContainer
+                songPos={songPos}
+                isLyricsVisible={isLyricsVisible}
+                setIsLyricsVisible={setIsLyricsVisible}
+                isLyricsAvailable={isLyricsAvailable}
+                isMouseActive={isMouseActive}
+                isShowLyricsWithSongInfo={isShowLyricsWithSongInfo}
+              />
+            </div>
+            <div className="w-1/2 overflow-auto">
+              <LyricsContainer
+                isLyricsVisible={isLyricsVisible}
+                setIsLyricsAvailable={setIsLyricsAvailable}
+                isShowLyricsWithSongInfo={isShowLyricsWithSongInfo}
+              />
+            </div>
+          </div>
+        ) : (
+          <>
+            <LyricsContainer
+              isLyricsVisible={isLyricsVisible}
+              setIsLyricsAvailable={setIsLyricsAvailable}
+            />
+            <SongInfoContainer
+              songPos={songPos}
+              isLyricsVisible={isLyricsVisible}
+              setIsLyricsVisible={setIsLyricsVisible}
+              isLyricsAvailable={isLyricsAvailable}
+              isMouseActive={isMouseActive}
+            />
+          </>
+        )}
         <SeekBarSlider
           name="full-screen-player-seek-slider"
           id="fullScreenPlayerSeekSlider"

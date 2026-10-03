@@ -1075,6 +1075,7 @@
     "LYRICS_SAVED_IN_LRC_FILE": "'Lời cho bài hát này với phần mở rộng '{{ext}}' sẽ được lưu trong một tệp LRC.",
     "PENDING_LYRICS_SAVED": "Đã lưu thành công lời chờ xử lý của '{{title}}'.",
     "ADDED_SONGS_TO_PLAYLIST": "Đã thêm $t(common.songWithCount, {\"count\":{{count}}}) vào danh sách phát '{{name}}' thành công.",
+    "ADD_SONGS_TO_PLAYLIST_FAILED": "Failed to add songs to `{{name}}`.",
     "APPDATA_IMPORT_STARTED": "Bắt đầu nhập dữ liệu ứng dụng. Vui lòng đợi...",
     "APPDATA_IMPORT_SUCCESS": "Nhập dữ liệu ứng dụng thành công.",
     "APPDATA_IMPORT_SUCCESS_WITH_PENDING_RESTART": "$t(backend.APPDATA_IMPORT_SUCCESS) Khởi động lại ứng dụng trong 5 giây.",

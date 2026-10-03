@@ -1081,6 +1081,7 @@
     "LYRICS_SAVED_IN_LRC_FILE": "'{{ext}}' এক্সটেনশ্যনৰ এই গীতটোৰ বাবে গীতৰ কথা এটা LRC ফাইলত সংৰক্ষণ কৰা হ'ব।",
     "PENDING_LYRICS_SAVED": "`{{title}}`ৰ অমীমাংসিত গীতৰ কথা সফলতাৰে সংৰক্ষণ কৰা হৈছে।",
     "ADDED_SONGS_TO_PLAYLIST": "সফলতাৰে `{{name}}`লৈ $t(common.songWithCount, {\"count\":{{count}}}) যোগ কৰা হ'ল।",
+    "ADD_SONGS_TO_PLAYLIST_FAILED": "Failed to add songs to `{{name}}`.",
     "APPDATA_IMPORT_STARTED": "এপ ডাটা আমদানি কৰা আৰম্ভ হৈছে। অনুগ্ৰহ কৰি অপেক্ষা কৰক...",
     "APPDATA_IMPORT_SUCCESS": "সফলতাৰে এপ ডাটা আমদানি কৰা হ'ল।",
     "APPDATA_IMPORT_SUCCESS_WITH_PENDING_RESTART": "$t(backend.APPDATA_IMPORT_SUCCESS) ৫ ছেকেণ্ডত এপ পুনৰাম্ভ হৈছে।",
