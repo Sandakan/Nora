@@ -6,8 +6,21 @@ import { app } from 'electron';
 import { removeDefaultAppProtocolFromFilePath } from '../fs/resolveFilePaths';
 import logger from '../logger';
 
+export interface AudioMetadata {
+  durationSecs: number;
+  sampleRate: number;
+  channels: number;
+}
+
+export interface LoadOptions {
+  autoPlay?: boolean;
+  volume?: number;
+  playbackRate?: number;
+}
+
 export interface AudioEngineNative {
   ping(): string;
+  engineLoad(path: string, options?: LoadOptions): AudioMetadata;
   enginePlay(path: string): void;
   enginePause(): void;
   engineResume(): void;
@@ -18,6 +31,7 @@ export interface AudioEngineNative {
   engineGetPosition(): number;
   engineGetDuration(): number;
   engineIsPlaying?(): boolean;
+  engineIsEnded?(): boolean;
   engineListDevices(): string[];
   engineSetDevice(deviceName: string): void;
   engineSetPlaybackRate(rate: number): void;
@@ -96,6 +110,10 @@ export const audioEngine = {
   ping: (): string => {
     return getAudioEngine().ping();
   },
+  load: (filePath: string, options?: LoadOptions): AudioMetadata => {
+    const rawPath = removeDefaultAppProtocolFromFilePath(filePath);
+    return getAudioEngine().engineLoad(rawPath, options);
+  },
   play: (filePath: string): void => {
     const rawPath = removeDefaultAppProtocolFromFilePath(filePath);
     getAudioEngine().enginePlay(rawPath);
@@ -137,6 +155,17 @@ export const audioEngine = {
       const eng = getAudioEngine();
       if (typeof eng.engineIsPlaying === 'function') {
         return eng.engineIsPlaying();
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  },
+  isEnded: (): boolean => {
+    try {
+      const eng = getAudioEngine();
+      if (typeof eng.engineIsEnded === 'function') {
+        return eng.engineIsEnded();
       }
       return false;
     } catch {

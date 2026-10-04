@@ -62,6 +62,11 @@ const playerControls = {
 
 const audioEngine = {
   ping: (): Promise<string> => ipcRenderer.invoke('app/audioEngine/ping'),
+  load: (
+    filePath: string,
+    options?: { autoPlay?: boolean; volume?: number; playbackRate?: number }
+  ): Promise<{ durationSecs: number; sampleRate: number; channels: number }> =>
+    ipcRenderer.invoke('app/audioEngine/load', filePath, options),
   play: (filePath: string): Promise<void> => ipcRenderer.invoke('app/audioEngine/play', filePath),
   pause: (): Promise<void> => ipcRenderer.invoke('app/audioEngine/pause'),
   resume: (): Promise<void> => ipcRenderer.invoke('app/audioEngine/resume'),
@@ -74,6 +79,7 @@ const audioEngine = {
     ipcRenderer.invoke('app/audioEngine/setVolumeWithRamp', target, durationMs),
   getPosition: (): Promise<number> => ipcRenderer.invoke('app/audioEngine/getPosition'),
   getDuration: (): Promise<number> => ipcRenderer.invoke('app/audioEngine/getDuration'),
+  isEnded: (): Promise<boolean> => ipcRenderer.invoke('app/audioEngine/isEnded'),
   listDevices: (): Promise<string[]> => ipcRenderer.invoke('app/audioEngine/listDevices'),
   setDevice: (deviceName: string): Promise<void> =>
     ipcRenderer.invoke('app/audioEngine/setDevice', deviceName),

@@ -86,7 +86,7 @@ impl BiquadFilter {
 
 pub struct EqChain {
     sample_rate: f32,
-    filters: [BiquadFilter; 10],
+    filters: [[BiquadFilter; 10]; 2],
     gains_db: [f32; 10],
     enabled: bool,
 }
@@ -95,7 +95,7 @@ impl EqChain {
     pub fn new(sample_rate: f32) -> Self {
         let mut chain = Self {
             sample_rate,
-            filters: [BiquadFilter::new(); 10],
+            filters: [[BiquadFilter::new(); 10]; 2],
             gains_db: [0.0; 10],
             enabled: false,
         };
@@ -138,29 +138,65 @@ impl EqChain {
             if gain.abs() >= 0.01 {
                 any_non_zero = true;
             }
-            self.filters[i].set_peaking_eq(self.sample_rate, freq, gain, 1.414);
+            self.filters[0][i].set_peaking_eq(self.sample_rate, freq, gain, 1.414);
+            self.filters[1][i].set_peaking_eq(self.sample_rate, freq, gain, 1.414);
         }
         self.enabled = any_non_zero;
     }
 
     #[inline]
-    pub fn process_buffer(&mut self, buffer: &mut [f32]) {
+    pub fn process_interleaved_stereo(&mut self, buffer: &mut [f32]) {
         if !self.enabled {
             return;
         }
 
-        for sample in buffer.iter_mut() {
-            let mut out = *sample;
-            for filter in self.filters.iter_mut() {
-                out = filter.process_sample(out);
+        for frame in buffer.chunks_exact_mut(2) {
+            let mut l = frame[0];
+            let mut r = frame[1];
+            for i in 0..10 {
+                l = self.filters[0][i].process_sample(l);
+                r = self.filters[1][i].process_sample(r);
             }
-            *sample = out;
+            frame[0] = l;
+            frame[1] = r;
         }
     }
 
+    #[inline]
+    pub fn process_buffer(&mut self, buffer: &mut [f32]) {
+        self.process_interleaved_stereo(buffer);
+    }
+
     pub fn reset_state(&mut self) {
-        for filter in self.filters.iter_mut() {
-            filter.reset_state();
+        for ch in 0..2 {
+            for filter in self.filters[ch].iter_mut() {
+                filter.reset_state();
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_eq_channel_isolation_no_crosstalk() {
+        let mut chain = EqChain::new(48000.0);
+        chain.set_band_gain(1000.0, 6.0);
+
+        // Interleaved stereo buffer: Left has impulse, Right is strictly silence (0.0)
+        let mut buffer = [0.0f32; 32];
+        for i in (0..32).step_by(2) {
+            buffer[i] = 1.0; // Left channel has 1.0
+            buffer[i + 1] = 0.0; // Right channel is 0.0
+        }
+
+        chain.process_buffer(&mut buffer);
+
+        // Verify Right channel remains 100% zero - no crosstalk from Left channel biquad state!
+        for i in (0..32).step_by(2) {
+            assert_eq!(buffer[i + 1], 0.0, "Right channel had crosstalk at frame {}", i / 2);
         }
     }
 }

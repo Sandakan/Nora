@@ -2,6 +2,7 @@ pub mod devices;
 pub mod dsp;
 pub mod engine;
 pub mod resampler;
+pub mod ring_buffer;
 pub mod ticker;
 
 use napi_derive::napi;
@@ -24,6 +25,48 @@ pub struct JsEngineTickPayload {
 #[napi(js_name = "ping")]
 pub fn ping() -> String {
     "pong from audio-engine".to_string()
+}
+
+#[napi(object)]
+pub struct LoadOptions {
+    pub auto_play: Option<bool>,
+    pub volume: Option<f64>,
+    pub playback_rate: Option<f64>,
+}
+
+#[napi(object)]
+pub struct JsAudioMetadata {
+    pub duration_secs: f64,
+    pub sample_rate: u32,
+    pub channels: u32,
+}
+
+#[napi(js_name = "engineLoad")]
+pub fn engine_load(path: String, options: Option<LoadOptions>) -> napi::Result<JsAudioMetadata> {
+    let mut engine = GLOBAL_ENGINE
+        .lock()
+        .map_err(|_| napi::Error::from_reason("Failed to lock engine mutex"))?;
+
+    let auto_play = options.as_ref().and_then(|o| o.auto_play).unwrap_or(true);
+    let volume = options.as_ref().and_then(|o| o.volume).unwrap_or(1.0) as f32;
+    let playback_rate = options.as_ref().and_then(|o| o.playback_rate).unwrap_or(1.0) as f32;
+
+    let meta = engine
+        .load_file::<fn(), fn(String)>(
+            &path,
+            auto_play,
+            volume,
+            playback_rate,
+            None,
+            None,
+        )
+        .map_err(|e| napi::Error::from_reason(e))?;
+
+    Ok(JsAudioMetadata {
+        duration_secs: meta.duration_secs,
+        sample_rate: meta.sample_rate,
+        channels: meta.channels,
+    })
 }
 
 #[napi(js_name = "enginePlay")]
@@ -118,6 +161,14 @@ pub fn engine_is_playing() -> napi::Result<bool> {
         .lock()
         .map_err(|_| napi::Error::from_reason("Failed to lock engine mutex"))?;
     Ok(engine.is_playing())
+}
+
+#[napi(js_name = "engineIsEnded")]
+pub fn engine_is_ended() -> napi::Result<bool> {
+    let engine = GLOBAL_ENGINE
+        .lock()
+        .map_err(|_| napi::Error::from_reason("Failed to lock engine mutex"))?;
+    Ok(engine.is_ended())
 }
 
 #[napi(js_name = "engineListDevices")]

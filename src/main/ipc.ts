@@ -634,6 +634,14 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
 
     // Native Audio Engine IPC Handlers
     ipcMain.handle('app/audioEngine/ping', () => audioEngine.ping());
+    ipcMain.handle(
+      'app/audioEngine/load',
+      (
+        _,
+        filePath: string,
+        options?: { autoPlay?: boolean; volume?: number; playbackRate?: number }
+      ) => audioEngine.load(filePath, options)
+    );
     ipcMain.handle('app/audioEngine/play', (_, filePath: string) => audioEngine.play(filePath));
     ipcMain.handle('app/audioEngine/pause', () => audioEngine.pause());
     ipcMain.handle('app/audioEngine/resume', () => audioEngine.resume());
@@ -649,6 +657,7 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     );
     ipcMain.handle('app/audioEngine/getPosition', () => audioEngine.getPosition());
     ipcMain.handle('app/audioEngine/getDuration', () => audioEngine.getDuration());
+    ipcMain.handle('app/audioEngine/isEnded', () => audioEngine.isEnded());
     ipcMain.handle('app/audioEngine/listDevices', () => audioEngine.listDevices());
     ipcMain.handle('app/audioEngine/setDevice', (_, deviceName: string) =>
       audioEngine.setDevice(deviceName)

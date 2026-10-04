@@ -3,31 +3,27 @@ use rubato::{
     Async, FixedAsync, Resampler, SincInterpolationParameters, SincInterpolationType, WindowFunction,
 };
 
-// ─── OLA parameters ──────────────────────────────────────────────────────────
-// 50% overlap with 2048-sample windows gives clean crossfades up to 4x speed.
+// ─── WSOLA parameters ────────────────────────────────────────────────────────
+// 2048-sample windows with 1024-sample synthesis hops (50% overlap).
 const OLA_WINDOW: usize = 2048;
 const OLA_SYNTH_HOP: usize = OLA_WINDOW / 2; // 1024 samples per output hop
+const WSOLA_SEARCH_DELTA: usize = 256;       // Search window for waveform similarity
 
-// ─── OLA Time-Stretcher ──────────────────────────────────────────────────────
-/// Overlap-Add time-stretcher. Changes playback speed WITHOUT changing pitch.
-///
-/// How it works:
-///   analysis_hop = synthesis_hop × speed_rate
-///   → at 2×, we consume 2048 input samples per 1024 output samples  (2× faster)
-///   → at 0.5×, we consume  512 input samples per 1024 output samples (0.5× faster)
-///   The Hann window is applied to each analysis frame before overlap-add, so
-///   the frequency content (= pitch) of each frame is unchanged.
-struct OlaStretcher {
+// ─── WSOLA Time-Stretcher ────────────────────────────────────────────────────
+/// Waveform Similarity Overlap-Add (WSOLA) time-stretcher.
+/// Changes playback speed WITHOUT changing pitch or causing robotic phase comb filtering.
+struct WsolaStretcher {
     channels: usize,
     speed_rate: f32,
     input_buffer: Vec<Vec<f32>>,
     synthesis_buffer: Vec<Vec<f32>>, // running OLA accumulator (size = OLA_WINDOW)
     output_pending: Vec<Vec<f32>>,
-    analysis_read_pos: usize,        // read offset into input_buffer
+    analysis_read_pos: usize,        // nominal read offset into input_buffer
     hann: Vec<f32>,
+    has_template: bool,
 }
 
-impl OlaStretcher {
+impl WsolaStretcher {
     fn new(channels: usize) -> Self {
         let hann: Vec<f32> = (0..OLA_WINDOW)
             .map(|i| {
@@ -44,11 +40,26 @@ impl OlaStretcher {
             output_pending: vec![Vec::new(); channels],
             analysis_read_pos: 0,
             hann,
+            has_template: false,
         }
     }
 
     fn set_speed(&mut self, rate: f32) {
-        self.speed_rate = rate.clamp(0.25, 4.0);
+        let new_rate = rate.clamp(0.25, 4.0);
+        if (self.speed_rate - new_rate).abs() > 0.001 {
+            self.speed_rate = new_rate;
+            self.reset();
+        }
+    }
+
+    fn reset(&mut self) {
+        for ch in 0..self.channels {
+            self.input_buffer[ch].clear();
+            self.synthesis_buffer[ch].fill(0.0);
+            self.output_pending[ch].clear();
+        }
+        self.analysis_read_pos = 0;
+        self.has_template = false;
     }
 
     fn push_interleaved(&mut self, samples: &[f32]) {
@@ -62,24 +73,52 @@ impl OlaStretcher {
     }
 
     fn process(&mut self) {
-        // analysis_hop controls how fast we consume the input (= speed control).
-        // Larger hop → faster playback → same pitch (OLA preserves frequency content).
         let analysis_hop = ((OLA_SYNTH_HOP as f32 * self.speed_rate) as usize).max(1);
 
         loop {
-            if self.input_buffer[0].len() < self.analysis_read_pos + OLA_WINDOW {
+            // Ensure we have enough samples for the search delta plus window
+            let min_required = self.analysis_read_pos + WSOLA_SEARCH_DELTA + OLA_WINDOW;
+            if self.input_buffer[0].len() < min_required {
                 break;
             }
 
-            let start = self.analysis_read_pos;
+            // Find best candidate start position using cross-correlation with previous synthesis tail
+            let best_start = if self.has_template {
+                let nominal = self.analysis_read_pos;
+                let min_start = nominal.saturating_sub(WSOLA_SEARCH_DELTA);
+                let max_start = (nominal + WSOLA_SEARCH_DELTA).min(self.input_buffer[0].len() - OLA_WINDOW);
+
+                let mut best_score = f32::MIN;
+                let mut best_pos = nominal;
+
+                // Step candidate positions by 2 for computational efficiency in real-time
+                for cand in (min_start..=max_start).step_by(2) {
+                    let mut score = 0.0f32;
+                    for ch in 0..self.channels {
+                        let inp = &self.input_buffer[ch];
+                        let tmpl = &self.synthesis_buffer[ch];
+                        for i in (0..OLA_SYNTH_HOP).step_by(4) {
+                            score += inp[cand + i] * tmpl[i];
+                        }
+                    }
+                    if score > best_score {
+                        best_score = score;
+                        best_pos = cand;
+                    }
+                }
+                best_pos
+            } else {
+                self.analysis_read_pos
+            };
 
             // Overlap-add windowed analysis frame into synthesis accumulator
             for ch in 0..self.channels {
                 for i in 0..OLA_WINDOW {
                     self.synthesis_buffer[ch][i] +=
-                        self.input_buffer[ch][start + i] * self.hann[i];
+                        self.input_buffer[ch][best_start + i] * self.hann[i];
                 }
             }
+            self.has_template = true;
 
             // Emit the first OLA_SYNTH_HOP samples as output
             for ch in 0..self.channels {
@@ -96,11 +135,11 @@ impl OlaStretcher {
                 }
             }
 
-            // Advance the analysis read position
-            self.analysis_read_pos += analysis_hop;
+            // Advance nominal analysis position from best_start
+            self.analysis_read_pos = best_start + analysis_hop;
 
-            // Drain fully consumed input samples to bound memory usage
-            let safe_drain = self.analysis_read_pos.saturating_sub(OLA_WINDOW);
+            // Drain consumed input samples to bound memory usage
+            let safe_drain = self.analysis_read_pos.saturating_sub(WSOLA_SEARCH_DELTA + OLA_WINDOW);
             if safe_drain > 0 {
                 for ch in 0..self.channels {
                     self.input_buffer[ch].drain(0..safe_drain);
@@ -130,11 +169,10 @@ impl OlaStretcher {
 
 // ─── Public SpeedResampler ───────────────────────────────────────────────────
 /// Two-stage audio pipeline:
-///   1. OLA time-stretcher  → changes speed, preserves pitch (only active when speed ≠ 1×)
+///   1. WSOLA time-stretcher → changes speed, preserves pitch with waveform alignment
 ///   2. Rubato 5 Async resampler → corrects device sample-rate mismatch at a fixed ratio
-///      (e.g. 44100 Hz file → 48000 Hz hardware), never changes ratio.
 pub struct SpeedResampler {
-    ola: OlaStretcher,
+    stretcher: WsolaStretcher,
     speed_rate: f32,
 
     sinc: Option<Async<f32>>,
@@ -151,7 +189,7 @@ impl SpeedResampler {
         chunk_size: usize,
     ) -> Self {
         let channels = channels.max(1);
-        let ola = OlaStretcher::new(channels);
+        let stretcher = WsolaStretcher::new(channels);
 
         // Stage 2: fixed-ratio device resampler (only created when rates differ)
         let sinc = if file_sample_rate != output_sample_rate {
@@ -179,7 +217,7 @@ impl SpeedResampler {
         };
 
         Self {
-            ola,
+            stretcher,
             speed_rate: 1.0,
             sinc,
             channels,
@@ -188,31 +226,40 @@ impl SpeedResampler {
         }
     }
 
+    /// Reset all internal buffers, OLA history, and resampler delay.
+    pub fn reset(&mut self) {
+        self.stretcher.reset();
+        self.interleaved_in_buffer.clear();
+        if let Some(ref mut sinc) = self.sinc {
+            let _ = sinc.reset();
+        }
+    }
+
     /// Set playback speed. Range 0.25×–4.0× (pitch is always preserved).
     pub fn set_playback_rate(&mut self, rate: f32) -> Result<(), String> {
         let clamped = rate.clamp(0.25, 4.0);
         self.speed_rate = clamped;
-        self.ola.set_speed(clamped);
+        self.stretcher.set_speed(clamped);
         Ok(())
     }
 
     /// Process interleaved PCM samples.
     /// Returns resampled, time-stretched samples at the hardware output rate.
     pub fn process_interleaved(&mut self, input: &[f32]) -> Result<Vec<f32>, String> {
-        // Stage 1: OLA time-stretch (skip at exactly 1× to avoid artifacts)
-        let after_ola = if (self.speed_rate - 1.0).abs() < 0.001 {
+        // Stage 1: WSOLA time-stretch (skip at exactly 1× to avoid artifacts)
+        let after_stretch = if (self.speed_rate - 1.0).abs() < 0.001 {
             input.to_vec()
         } else {
-            self.ola.push_interleaved(input);
-            self.ola.drain_interleaved()
+            self.stretcher.push_interleaved(input);
+            self.stretcher.drain_interleaved()
         };
 
         // Stage 2: device sample-rate correction
         if self.sinc.is_none() {
-            return Ok(after_ola);
+            return Ok(after_stretch);
         }
 
-        self.run_sinc_resample(&after_ola)
+        self.run_sinc_resample(&after_stretch)
     }
 
     fn run_sinc_resample(&mut self, interleaved: &[f32]) -> Result<Vec<f32>, String> {
@@ -235,5 +282,45 @@ impl SpeedResampler {
         }
 
         Ok(output)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_wsola_speed_change_and_reset() {
+        let mut resampler = SpeedResampler::new(44100, 44100, 2, 1024);
+        assert!(resampler.set_playback_rate(1.5).is_ok());
+
+        // Generate synthetic stereo sine wave
+        let sample_count = 8192;
+        let mut input = Vec::with_capacity(sample_count * 2);
+        for i in 0..sample_count {
+            let s = (i as f32 * 0.1).sin();
+            input.push(s);
+            input.push(s * 0.5);
+        }
+
+        let out = resampler.process_interleaved(&input).unwrap();
+        // At 1.5x speed, output should be produced without NaN
+        for &s in out.iter() {
+            assert!(!s.is_nan(), "Output contained NaN sample");
+        }
+
+        // Test reset on transition back to 1.0x
+        resampler.reset();
+        assert!(resampler.set_playback_rate(1.0).is_ok());
+        let out_1x = resampler.process_interleaved(&input).unwrap();
+        assert_eq!(out_1x.len(), input.len());
+        assert_eq!(out_1x, input);
+
+        // Transition back to 1.25x after reset
+        assert!(resampler.set_playback_rate(1.25).is_ok());
+        let out_fast = resampler.process_interleaved(&input).unwrap();
+        for &s in out_fast.iter() {
+            assert!(!s.is_nan(), "Output contained NaN sample after reset");
+        }
     }
 }

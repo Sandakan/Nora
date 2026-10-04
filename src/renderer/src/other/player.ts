@@ -183,8 +183,9 @@ class AudioPlayer {
         const pos = await window.api.audioEngine.getPosition();
         this.nativeCurrentTime = pos;
         this.emit('timeUpdate', pos);
-        this.audio.dispatchEvent(new Event('timeupdate'));
-        if (this.nativeDuration > 0 && pos >= this.nativeDuration) {
+
+        const isEnded = await window.api.audioEngine.isEnded();
+        if (isEnded) {
           this.handleSongEnd();
         }
       } catch (err) {
@@ -202,7 +203,6 @@ class AudioPlayer {
 
   private async playWithNativeEngine(autoPlay = true): Promise<void> {
     if (!this.currentSongData || !window.api?.audioEngine) return;
-    this.isUsingNativeEngine = true;
 
     // Silence and detach HTML5 audio element
     this.audio.pause();
@@ -214,28 +214,33 @@ class AudioPlayer {
           .replace(/^nora:[/\\]{1,2}localfiles[/\\]{1,2}/i, '')
           .replace(/\?.*$/, '');
 
-    console.log('[AudioPlayer.playWithNativeEngine] Playing via Rust audio-engine:', rawPath);
-    await window.api.audioEngine.play(rawPath);
-    await window.api.audioEngine.setVolume(this.volume);
-    await window.api.audioEngine.setPlaybackRate(this.playbackRate);
+    console.log('[AudioPlayer.playWithNativeEngine] Loading via Rust audio-engine:', rawPath);
 
-    const dur = await window.api.audioEngine.getDuration();
-    this.nativeDuration = dur > 0 ? dur : this.currentSongData.duration;
-    this.nativeCurrentTime = 0;
-    this.emit('durationChange', this.nativeDuration);
-    this.audio.dispatchEvent(new Event('loadedmetadata'));
+    const effectiveVolume = this.muted ? 0 : this.volume;
+    try {
+      const meta = await window.api.audioEngine.load(rawPath, {
+        autoPlay,
+        volume: effectiveVolume,
+        playbackRate: this.playbackRate
+      });
 
-    if (autoPlay) {
-      this.nativeIsPaused = false;
-      await window.api.audioEngine.resume();
-      this.emit('play');
-      this.audio.dispatchEvent(new Event('play'));
-      this.startNativeTicker();
-    } else {
-      this.nativeIsPaused = true;
-      await window.api.audioEngine.pause();
-      this.emit('pause');
-      this.audio.dispatchEvent(new Event('pause'));
+      this.isUsingNativeEngine = true;
+      this.nativeDuration =
+        meta?.durationSecs > 0 ? meta.durationSecs : this.currentSongData.duration;
+      this.nativeCurrentTime = 0;
+      this.emit('durationChange', this.nativeDuration);
+
+      if (autoPlay) {
+        this.nativeIsPaused = false;
+        this.emit('play');
+        this.startNativeTicker();
+      } else {
+        this.nativeIsPaused = true;
+        this.emit('pause');
+      }
+    } catch (err) {
+      console.error('[AudioPlayer.playWithNativeEngine] Failed to load track:', err);
+      this.isUsingNativeEngine = false;
     }
   }
 
@@ -543,7 +548,6 @@ class AudioPlayer {
       this.nativeIsPaused = false;
       this.startNativeTicker();
       this.emit('play');
-      this.audio.dispatchEvent(new Event('play'));
       return window.api.audioEngine.resume();
     }
     this.audio.play();
@@ -556,7 +560,6 @@ class AudioPlayer {
       this.nativeIsPaused = true;
       this.stopNativeTicker();
       this.emit('pause');
-      this.audio.dispatchEvent(new Event('pause'));
       return window.api.audioEngine.pause();
     }
     return this.fadeOutAudio();
@@ -783,18 +786,21 @@ class AudioPlayer {
     if (this.isUsingNativeEngine) {
       this.nativeCurrentTime = time;
       this.emit('timeUpdate', time);
-      this.audio.dispatchEvent(new Event('seeking'));
-      this.audio.dispatchEvent(new Event('seeked'));
-      this.audio.dispatchEvent(new Event('timeupdate'));
+      this.emit('seeking');
 
       const playerPositionChange = new CustomEvent('player/positionChange', {
         detail: Number(time.toFixed(2))
       });
       document.dispatchEvent(playerPositionChange);
 
-      window.api?.audioEngine?.seek(time).catch((err) => {
-        console.error('[AudioPlayer] Error seeking native audio engine:', err);
-      });
+      window.api?.audioEngine
+        ?.seek(time)
+        .then(() => {
+          this.emit('seeked', time);
+        })
+        .catch((err) => {
+          console.error('[AudioPlayer] Error seeking native audio engine:', err);
+        });
       return;
     }
     this.audio.currentTime = time;
@@ -821,7 +827,8 @@ class AudioPlayer {
     this.audio.volume = volume;
     this.gainNode.gain.value = volume;
     if (this.isUsingNativeEngine && window.api?.audioEngine) {
-      window.api.audioEngine.setVolume(volume).catch((err) => {
+      const effectiveVolume = this.muted ? 0 : volume;
+      window.api.audioEngine.setVolume(effectiveVolume).catch((err) => {
         console.error('[AudioPlayer] Error setting native audio engine volume:', err);
       });
     }
