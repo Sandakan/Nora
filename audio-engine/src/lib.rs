@@ -1,6 +1,7 @@
 pub mod devices;
 pub mod dsp;
 pub mod engine;
+pub mod logger;
 pub mod resampler;
 pub mod ring_buffer;
 pub mod ticker;

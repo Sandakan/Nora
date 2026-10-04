@@ -59,6 +59,7 @@ class AudioPlayer extends EventTarget {
   private isTransitioningTracks: boolean = false;
   private consecutiveLoadFailures: number = 0;
   private trackEndedUnsubscribe: (() => void) | null = null;
+  private playbackErrorUnsubscribe: (() => void) | null = null;
 
   constructor(queue: PlayerQueue) {
     super();
@@ -84,6 +85,7 @@ class AudioPlayer extends EventTarget {
     this.setupQueueIntegration();
     this.setupAudioEventListeners();
     this.setupTrackEndedListener();
+    this.setupPlaybackErrorListener();
   }
 
   /**
@@ -199,6 +201,18 @@ class AudioPlayer extends EventTarget {
       this.trackEndedUnsubscribe = window.api.audioEngine.onTrackEnded(() => {
         if (this.isUsingNativeEngine) {
           this.handleSongEnd();
+        }
+      });
+    }
+  }
+
+  private setupPlaybackErrorListener() {
+    if (window.api?.audioEngine?.onPlaybackError) {
+      this.playbackErrorUnsubscribe = window.api.audioEngine.onPlaybackError((err) => {
+        if (this.isUsingNativeEngine) {
+          console.error('[AudioPlayer] Native audio engine error received:', err);
+          this.pause();
+          this.emit('error', new Error(`[NativeAudioEngine] ${err.message}`));
         }
       });
     }
@@ -427,6 +441,10 @@ class AudioPlayer extends EventTarget {
     if (this.trackEndedUnsubscribe) {
       this.trackEndedUnsubscribe();
       this.trackEndedUnsubscribe = null;
+    }
+    if (this.playbackErrorUnsubscribe) {
+      this.playbackErrorUnsubscribe();
+      this.playbackErrorUnsubscribe = null;
     }
     if (this.isUsingNativeEngine && window.api?.audioEngine) {
       window.api.audioEngine.stop().catch(() => {});

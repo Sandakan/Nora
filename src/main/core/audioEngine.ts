@@ -18,6 +18,12 @@ export interface LoadOptions {
   playbackRate?: number;
 }
 
+export interface JsLogRecord {
+  level: string;
+  message: string;
+  target: string;
+}
+
 export interface AudioEngineNative {
   ping(): string;
   engineLoad(path: string, options?: LoadOptions): AudioMetadata;
@@ -32,7 +38,8 @@ export interface AudioEngineNative {
   engineGetDuration(): number;
   engineIsPlaying?(): boolean;
   engineIsEnded?(): boolean;
-  engineOnEnded?(callback: () => void): void;
+  engineOnEnded?(callback: (err: Error | null) => void): void;
+  engineInitLogger?(callback: (err: Error | null, record: JsLogRecord) => void): void;
   engineListDevices(): string[];
   engineSetDevice(deviceName: string): void;
   engineSetPlaybackRate(rate: number): void;
@@ -177,10 +184,28 @@ export const audioEngine = {
     try {
       const eng = getAudioEngine();
       if (typeof eng.engineOnEnded === 'function') {
-        eng.engineOnEnded(callback);
+        eng.engineOnEnded((err) => {
+          if (!err) {
+            callback();
+          }
+        });
       }
     } catch (err) {
       logger.error('Failed to register engineOnEnded callback', { error: String(err) });
+    }
+  },
+  initLogger: (callback: (record: JsLogRecord) => void): void => {
+    try {
+      const eng = getAudioEngine();
+      if (typeof eng.engineInitLogger === 'function') {
+        eng.engineInitLogger((err, record) => {
+          if (!err && record) {
+            callback(record);
+          }
+        });
+      }
+    } catch (err) {
+      logger.error('Failed to initialize engineInitLogger callback', { error: String(err) });
     }
   },
   listDevices: (): string[] => {

@@ -94,6 +94,15 @@ const audioEngine = {
     return () => {
       ipcRenderer.removeListener('app/audioEngine/trackEnded', handler);
     };
+  },
+  onPlaybackError: (
+    callback: (error: { message: string; target: string }) => void
+  ): (() => void) => {
+    const handler = (_event: unknown, data: { message: string; target: string }) => callback(data);
+    ipcRenderer.on('app/audioEngine/playbackError', handler);
+    return () => {
+      ipcRenderer.removeListener('app/audioEngine/playbackError', handler);
+    };
   }
 };
 
