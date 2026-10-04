@@ -116,11 +116,8 @@ export function useAppLifecycle(dependencies: AppLifecycleDependencies): void {
     windowManagement
   } = dependencies;
 
-  // Extract audio element from AudioPlayer or use HTMLAudioElement directly
-  const player =
-    playerInstance instanceof HTMLAudioElement
-      ? playerInstance
-      : (playerInstance as AudioPlayer).audio;
+  // Use playerInstance directly (both AudioPlayer and HTMLAudioElement extend EventTarget)
+  const player = playerInstance;
 
   useEffect(() => {
     // LOCAL STORAGE

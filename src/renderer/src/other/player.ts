@@ -33,7 +33,7 @@ type PlayerEventCallback<T = unknown> = (data: T) => void;
  * event-based architecture for player state changes. Owns a PlayerQueue instance and automatically
  * reacts to queue position changes.
  */
-class AudioPlayer {
+class AudioPlayer extends EventTarget {
   private listeners: Map<PlayerEventType, Set<PlayerEventCallback<unknown>>>;
 
   audio: HTMLAudioElement;
@@ -55,8 +55,10 @@ class AudioPlayer {
   private nativeIsPaused = true;
   private nativeTickerInterval: ReturnType<typeof setInterval> | null = null;
   private currentSongData: AudioPlayerData | null = null;
+  private currentEqualizerSettings: Equalizer | null = null;
 
   constructor(queue: PlayerQueue) {
+    super();
     this.listeners = new Map();
 
     this.audio = new Audio();
@@ -230,6 +232,8 @@ class AudioPlayer {
       this.nativeCurrentTime = 0;
       this.emit('durationChange', this.nativeDuration);
 
+      this.applyEqualizerSettings();
+
       if (autoPlay) {
         this.nativeIsPaused = false;
         this.emit('play');
@@ -317,10 +321,9 @@ class AudioPlayer {
         this.isUsingNativeEngine = false;
       }
 
-      // Proactively route FLAC and other formats that fail in Chromium's FFmpeg to the native engine
-      const isFlac = songData.path.toLowerCase().includes('.flac');
-      if (isFlac && window.api?.audioEngine) {
-        console.log('[AudioPlayer] FLAC format detected - using native Rust audio engine');
+      // Route playback through native Rust audio engine whenever available
+      if (window.api?.audioEngine) {
+        console.log('[AudioPlayer] Routing playback through native Rust audio engine');
         await this.playWithNativeEngine(options?.autoPlay ?? true);
         this.currentLoadedSongId = songData.songId;
         this.emit('songLoaded', songData);
@@ -425,12 +428,30 @@ class AudioPlayer {
    * @param eventType - The type of event to emit
    * @param data - The data to pass to listeners
    */
+  /**
+   * Emit an event to all listeners.
+   *
+   * @param eventType - The type of event to emit
+   * @param data - The data to pass to listeners
+   */
   protected emit<T = unknown>(eventType: PlayerEventType, data?: T): void {
     const callbacks = this.listeners.get(eventType);
     if (callbacks) {
       callbacks.forEach((callback) => {
         callback(data);
       });
+    }
+
+    // Dispatch DOM CustomEvent for standard EventTarget consumers
+    this.dispatchEvent(new CustomEvent(eventType, { detail: data }));
+    if (eventType === 'timeUpdate') {
+      this.dispatchEvent(new CustomEvent('timeupdate', { detail: data }));
+    } else if (eventType === 'durationChange') {
+      this.dispatchEvent(new CustomEvent('loadedmetadata', { detail: data }));
+    } else if (eventType === 'playbackComplete') {
+      this.dispatchEvent(new CustomEvent('ended', { detail: data }));
+    } else if (eventType === 'songLoaded') {
+      this.dispatchEvent(new CustomEvent('canplay', { detail: data }));
     }
   }
 
@@ -472,6 +493,46 @@ class AudioPlayer {
     });
   }
 
+  private fadeOutAudioNative(): Promise<void> {
+    return new Promise((resolve) => {
+      if (!window.api?.audioEngine) {
+        resolve();
+        return;
+      }
+      window.api.audioEngine.setVolumeWithRamp(0, AUDIO_FADE_DURATION).catch((err) => {
+        console.error('[AudioPlayer] Error ramping down native volume:', err);
+      });
+      setTimeout(async () => {
+        try {
+          await window.api.audioEngine.pause();
+        } catch (err) {
+          console.error('[AudioPlayer] Error pausing native engine after fade:', err);
+        }
+        resolve();
+      }, AUDIO_FADE_DURATION);
+    });
+  }
+
+  private fadeInAudioNative(): Promise<void> {
+    return new Promise((resolve) => {
+      if (!window.api?.audioEngine) {
+        resolve();
+        return;
+      }
+      const targetVolume = this.muted ? 0 : this.volume;
+      window.api.audioEngine
+        .setVolume(0)
+        .then(() => window.api.audioEngine.resume())
+        .then(() => window.api.audioEngine.setVolumeWithRamp(targetVolume, AUDIO_FADE_DURATION))
+        .catch((err) => {
+          console.error('[AudioPlayer] Error ramping up native volume:', err);
+        });
+      setTimeout(() => {
+        resolve();
+      }, AUDIO_FADE_DURATION);
+    });
+  }
+
   private initializeEqualizer() {
     for (const [filterName, hertzValue] of Object.entries(equalizerBandHertzData)) {
       const equalizerFilterName = filterName as EqualizerBandFilters;
@@ -504,6 +565,73 @@ class AudioPlayer {
 
     // Connect gain node to destination
     this.gainNode.connect(this.currentContext.destination);
+
+    // Synchronize initial equalizer curves from preferences
+    this.applyEqualizerSettings();
+  }
+
+  /**
+   * Applies equalizer band settings to both Web Audio API nodes and the native Rust audio engine.
+   *
+   * @param equalizer - Optional equalizer configuration. If omitted, reads from localStorage.
+   */
+  applyEqualizerSettings(equalizer?: Equalizer): void {
+    const eq =
+      equalizer || this.currentEqualizerSettings || storage.equalizerPreset.getEqualizerPreset();
+    if (!eq) return;
+    this.currentEqualizerSettings = eq;
+
+    // Apply to Web Audio API filters (for HTML5 fallback)
+    for (const [key, filter] of this.equalizerBands.entries()) {
+      const val = eq[key as keyof Equalizer];
+      if (typeof val === 'number') {
+        filter.gain.value = val;
+      }
+    }
+
+    // Apply to native Rust audio engine if available
+    if (window.api?.audioEngine) {
+      const bandKeys: (keyof Equalizer)[] = [
+        'thirtyTwoHertzFilter',
+        'sixtyFourHertzFilter',
+        'hundredTwentyFiveHertzFilter',
+        'twoHundredFiftyHertzFilter',
+        'fiveHundredHertzFilter',
+        'thousandHertzFilter',
+        'twoThousandHertzFilter',
+        'fourThousandHertzFilter',
+        'eightThousandHertzFilter',
+        'sixteenThousandHertzFilter'
+      ];
+      bandKeys.forEach((key, index) => {
+        const gain = eq[key];
+        if (typeof gain === 'number') {
+          window.api.audioEngine.setEqBand(index, gain).catch((err) => {
+            console.error(`[AudioPlayer] Error setting native EQ band ${index}:`, err);
+          });
+        }
+      });
+    }
+  }
+
+  /** Gets the current MediaError, if any. */
+  get error(): MediaError | null {
+    return this.audio.error;
+  }
+
+  /** Gets the current media source. */
+  get src(): string {
+    return this.audio.src;
+  }
+
+  /** Sets the current media source. */
+  set src(value: string) {
+    this.audio.src = value;
+  }
+
+  /** Reloads the media element (compatibility). */
+  load(): void {
+    this.audio.load();
   }
 
   // ? PLAYER RELATED STORE UPDATES HANDLING
@@ -548,7 +676,7 @@ class AudioPlayer {
       this.nativeIsPaused = false;
       this.startNativeTicker();
       this.emit('play');
-      return window.api.audioEngine.resume();
+      return this.fadeInAudioNative();
     }
     this.audio.play();
     return this.fadeInAudio();
@@ -560,7 +688,7 @@ class AudioPlayer {
       this.nativeIsPaused = true;
       this.stopNativeTicker();
       this.emit('pause');
-      return window.api.audioEngine.pause();
+      return this.fadeOutAudioNative();
     }
     return this.fadeOutAudio();
   }

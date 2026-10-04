@@ -1,6 +1,7 @@
 import { useCallback, useRef } from 'react';
 
 import ListeningDataSession from '../other/listeningDataSession';
+import type AudioPlayer from '../other/player';
 
 /**
  * Custom hook to manage listening data recording sessions.
@@ -24,10 +25,10 @@ import ListeningDataSession from '../other/listeningDataSession';
  *   }
  *   ```;
  *
- * @param player - The HTML audio player element
+ * @param player - The AudioPlayer or HTMLAudioElement instance
  * @returns Object with the recordListeningData function
  */
-export function useListeningData(player: HTMLAudioElement) {
+export function useListeningData(player: AudioPlayer | HTMLAudioElement) {
   // Track the current listening session
   const recordRef = useRef<ListeningDataSession>(undefined);
 

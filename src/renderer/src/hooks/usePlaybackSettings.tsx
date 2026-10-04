@@ -106,8 +106,14 @@ export function usePlaybackSettings(player: AudioPlayer | HTMLAudioElement) {
   const updateEqualizerOptions = useCallback(
     (options: Equalizer) => {
       saveEqualizerPreset(options);
+      if (
+        'applyEqualizerSettings' in player &&
+        typeof player.applyEqualizerSettings === 'function'
+      ) {
+        player.applyEqualizerSettings(options);
+      }
     },
-    [saveEqualizerPreset]
+    [saveEqualizerPreset, player]
   );
 
   return {

@@ -303,13 +303,13 @@ impl PlayerEngine {
         track_time_base: Option<symphonia::core::units::TimeBase>,
         source_sample_rate: u32,
         source_channels: usize,
-        output_sample_rate: u32,
+        _output_sample_rate: u32,
         mut resampler: SpeedResampler,
         ring_buffer: Arc<SpscRingBuffer>,
         stop_signal: Arc<AtomicBool>,
         seek_request: Arc<Mutex<Option<f64>>>,
         playback_rate_lock: Arc<Mutex<f32>>,
-        presented_frames: Arc<AtomicU64>,
+        _presented_frames: Arc<AtomicU64>,
     ) {
         let mut raw_samples_buf = Vec::new();
         let mut stereo_buf = Vec::new();
@@ -330,6 +330,12 @@ impl PlayerEngine {
                     || format_reader
                         .seek(SeekMode::Coarse, SeekTo::Time { time, track_id: Some(track_id) })
                         .is_ok()
+                    || format_reader
+                        .seek(SeekMode::Accurate, SeekTo::Time { time, track_id: None })
+                        .is_ok()
+                    || format_reader
+                        .seek(SeekMode::Coarse, SeekTo::Time { time, track_id: None })
+                        .is_ok()
                     || {
                         let ts_opt = if let Some(tb) = track_time_base {
                             tb.calc_timestamp(time)
@@ -349,9 +355,9 @@ impl PlayerEngine {
                     decoder.reset();
                     resampler.reset();
                     ring_buffer.clear();
-                    let target_frame = (target_secs * output_sample_rate as f64).round() as u64;
-                    presented_frames.store(target_frame, Ordering::Release);
                     eof_reached = false;
+                } else {
+                    log::warn!("Seek to {:.2}s failed on format reader", target_secs);
                 }
             }
 
@@ -591,6 +597,12 @@ impl PlayerEngine {
     pub fn seek(&self, position_secs: f64) {
         let st = self.state.lock().unwrap();
         let target = position_secs.clamp(0.0, st.duration_secs.max(0.0));
+        st.is_ended.store(false, Ordering::Release);
+        let target_frame = (target * st.output_sample_rate as f64).round() as u64;
+        st.presented_frames.store(target_frame, Ordering::Release);
+        if let Some(ref rb) = self.ring_buffer {
+            rb.clear();
+        }
         let mut req = st.seek_request.lock().unwrap();
         *req = Some(target);
     }

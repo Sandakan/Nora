@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import type AudioPlayer from '../other/player';
 import { store } from '../store/store';
 
 /** Dependencies required by the useMediaSession hook. */
@@ -40,10 +41,13 @@ export interface MediaSessionDependencies {
  *   }
  *   ```;
  *
- * @param player - The HTML audio player element
+ * @param player - The AudioPlayer or HTMLAudioElement instance
  * @param dependencies - Object containing required callback functions
  */
-export function useMediaSession(player: HTMLAudioElement, dependencies: MediaSessionDependencies) {
+export function useMediaSession(
+  player: AudioPlayer | HTMLAudioElement,
+  dependencies: MediaSessionDependencies
+) {
   const { t } = useTranslation();
   const {
     toggleSongPlayback,
