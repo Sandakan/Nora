@@ -56,6 +56,9 @@ class AudioPlayer extends EventTarget {
   private nativeTickerInterval: ReturnType<typeof setInterval> | null = null;
   private currentSongData: AudioPlayerData | null = null;
   private currentEqualizerSettings: Equalizer | null = null;
+  private isTransitioningTracks: boolean = false;
+  private consecutiveLoadFailures: number = 0;
+  private trackEndedUnsubscribe: (() => void) | null = null;
 
   constructor(queue: PlayerQueue) {
     super();
@@ -80,6 +83,7 @@ class AudioPlayer extends EventTarget {
     this.initializeEqualizer();
     this.setupQueueIntegration();
     this.setupAudioEventListeners();
+    this.setupTrackEndedListener();
   }
 
   /**
@@ -103,17 +107,30 @@ class AudioPlayer extends EventTarget {
         // If the song is already loaded in the audio element or native engine, avoid reloading
         if (songId === this.currentLoadedSongId && (this.audio.src || this.isUsingNativeEngine)) {
           this.pendingAutoPlay = false;
+          this.isTransitioningTracks = false;
           return;
         }
 
         this.loadSong(songId, { autoPlay: willAutoPlay }).catch((err) => {
           console.error('[AudioPlayer.positionChange] Failed to load song:', err);
-          if (this.queue.hasNext) {
+          this.consecutiveLoadFailures += 1;
+          if (this.consecutiveLoadFailures < 3 && this.queue.hasNext) {
             this.pendingAutoPlay = willAutoPlay;
             setTimeout(() => this.queue.moveToNext(), 0);
+          } else {
+            console.warn(
+              '[AudioPlayer] Consecutive load failures exceeded circuit breaker limit (3). Halting playback.'
+            );
+            this.consecutiveLoadFailures = 0;
+            this.isTransitioningTracks = false;
+            this.pendingAutoPlay = false;
+            this.pause();
+            this.emit('loadError', { songId, error: err });
           }
         });
         this.pendingAutoPlay = false; // Reset after use
+      } else {
+        this.isTransitioningTracks = false;
       }
     });
 
@@ -177,6 +194,16 @@ class AudioPlayer extends EventTarget {
     });
   }
 
+  private setupTrackEndedListener() {
+    if (window.api?.audioEngine?.onTrackEnded) {
+      this.trackEndedUnsubscribe = window.api.audioEngine.onTrackEnded(() => {
+        if (this.isUsingNativeEngine) {
+          this.handleSongEnd();
+        }
+      });
+    }
+  }
+
   private startNativeTicker() {
     this.stopNativeTicker();
     this.nativeTickerInterval = setInterval(async () => {
@@ -185,11 +212,6 @@ class AudioPlayer extends EventTarget {
         const pos = await window.api.audioEngine.getPosition();
         this.nativeCurrentTime = pos;
         this.emit('timeUpdate', pos);
-
-        const isEnded = await window.api.audioEngine.isEnded();
-        if (isEnded) {
-          this.handleSongEnd();
-        }
       } catch (err) {
         console.error('[AudioPlayer] Error polling native engine position:', err);
       }
@@ -253,10 +275,20 @@ class AudioPlayer extends EventTarget {
    * Auto-resumes playback for the next song.
    */
   private async handleSongEnd() {
+    if (this.isTransitioningTracks) {
+      return;
+    }
+    this.isTransitioningTracks = true;
     console.log('[AudioPlayer.handleSongEnd]', { repeatMode: this.repeatMode });
+
+    if (this.isUsingNativeEngine) {
+      this.stopNativeTicker();
+      this.nativeIsPaused = true;
+    }
 
     if (this.repeatMode === 'one') {
       this.currentTime = 0;
+      this.isTransitioningTracks = false;
       await this.play();
       this.emit('repeatOne');
       return;
@@ -272,6 +304,7 @@ class AudioPlayer extends EventTarget {
       this.emit('repeatAll');
       // Song will be auto-loaded via positionChange event with autoPlay
     } else {
+      this.isTransitioningTracks = false;
       this.emit('playbackComplete');
     }
   }
@@ -326,6 +359,8 @@ class AudioPlayer extends EventTarget {
         console.log('[AudioPlayer] Routing playback through native Rust audio engine');
         await this.playWithNativeEngine(options?.autoPlay ?? true);
         this.currentLoadedSongId = songData.songId;
+        this.consecutiveLoadFailures = 0;
+        this.isTransitioningTracks = false;
         this.emit('songLoaded', songData);
         return songData;
       }
@@ -365,6 +400,8 @@ class AudioPlayer extends EventTarget {
       this.audio.dispatchEvent(trackChangeEvent);
 
       this.currentLoadedSongId = songData.songId;
+      this.consecutiveLoadFailures = 0;
+      this.isTransitioningTracks = false;
       this.emit('songLoaded', songData);
       console.log('[AudioPlayer.loadSong.done]', {
         songId: songData.songId,
@@ -373,6 +410,7 @@ class AudioPlayer extends EventTarget {
 
       return songData;
     } catch (error) {
+      this.isTransitioningTracks = false;
       const failedSongId = typeof songIdOrData === 'number' ? songIdOrData : songIdOrData.songId;
       console.error(
         `Failed to load song (ID: ${failedSongId}):`,
@@ -386,6 +424,10 @@ class AudioPlayer extends EventTarget {
   /** Cleans up resources and event listeners. Should be called when player is no longer needed. */
   destroy() {
     this.stopNativeTicker();
+    if (this.trackEndedUnsubscribe) {
+      this.trackEndedUnsubscribe();
+      this.trackEndedUnsubscribe = null;
+    }
     if (this.isUsingNativeEngine && window.api?.audioEngine) {
       window.api.audioEngine.stop().catch(() => {});
       this.isUsingNativeEngine = false;

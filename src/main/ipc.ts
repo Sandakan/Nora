@@ -669,5 +669,11 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       audioEngine.setEqBand(frequencyHz, gainDb)
     );
     ipcMain.handle('app/audioEngine/resetEq', () => audioEngine.resetEq());
+
+    audioEngine.onEnded(() => {
+      if (!mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('app/audioEngine/trackEnded');
+      }
+    });
   }
 }

@@ -5,6 +5,7 @@ pub mod resampler;
 pub mod ring_buffer;
 pub mod ticker;
 
+use napi::threadsafe_function::{ThreadsafeFunction, ThreadsafeFunctionCallMode};
 use napi_derive::napi;
 use std::sync::{Arc, Mutex};
 use lazy_static::lazy_static;
@@ -13,6 +14,16 @@ use engine::PlayerEngine;
 
 lazy_static! {
     static ref GLOBAL_ENGINE: Arc<Mutex<PlayerEngine>> = Arc::new(Mutex::new(PlayerEngine::new()));
+    static ref ON_ENDED_CALLBACK: Arc<Mutex<Option<ThreadsafeFunction<()>>>> = Arc::new(Mutex::new(None));
+}
+
+#[napi(js_name = "engineOnEnded")]
+pub fn engine_on_ended(callback: ThreadsafeFunction<()>) -> napi::Result<()> {
+    let mut cb = ON_ENDED_CALLBACK
+        .lock()
+        .map_err(|_| napi::Error::from_reason("Failed to lock callback mutex"))?;
+    *cb = Some(callback);
+    Ok(())
 }
 
 #[napi(object)]
@@ -51,14 +62,25 @@ pub fn engine_load(path: String, options: Option<LoadOptions>) -> napi::Result<J
     let volume = options.as_ref().and_then(|o| o.volume).unwrap_or(1.0) as f32;
     let playback_rate = options.as_ref().and_then(|o| o.playback_rate).unwrap_or(1.0) as f32;
 
+    let on_end = {
+        let cb_clone = ON_ENDED_CALLBACK.clone();
+        Some(move || {
+            if let Ok(guard) = cb_clone.lock() {
+                if let Some(ref tsfn) = *guard {
+                    let _ = tsfn.call(Ok(()), ThreadsafeFunctionCallMode::NonBlocking);
+                }
+            }
+        })
+    };
+
     let meta = engine
-        .load_file::<fn(), fn(String)>(
+        .load_file(
             &path,
             auto_play,
             volume,
             playback_rate,
-            None,
-            None,
+            on_end,
+            None::<fn(String)>,
         )
         .map_err(|e| napi::Error::from_reason(e))?;
 
@@ -75,11 +97,22 @@ pub fn engine_play(path: String) -> napi::Result<()> {
         .lock()
         .map_err(|_| napi::Error::from_reason("Failed to lock engine mutex"))?;
 
+    let on_end = {
+        let cb_clone = ON_ENDED_CALLBACK.clone();
+        Some(move || {
+            if let Ok(guard) = cb_clone.lock() {
+                if let Some(ref tsfn) = *guard {
+                    let _ = tsfn.call(Ok(()), ThreadsafeFunctionCallMode::NonBlocking);
+                }
+            }
+        })
+    };
+
     engine
-        .play_file::<fn(ticker::EngineTickPayload), fn(), fn(String)>(
+        .play_file::<fn(ticker::EngineTickPayload), _, fn(String)>(
             &path,
             None,
-            None,
+            on_end,
             None,
         )
         .map_err(|e| napi::Error::from_reason(e))

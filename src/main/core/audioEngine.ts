@@ -32,6 +32,7 @@ export interface AudioEngineNative {
   engineGetDuration(): number;
   engineIsPlaying?(): boolean;
   engineIsEnded?(): boolean;
+  engineOnEnded?(callback: () => void): void;
   engineListDevices(): string[];
   engineSetDevice(deviceName: string): void;
   engineSetPlaybackRate(rate: number): void;
@@ -170,6 +171,16 @@ export const audioEngine = {
       return false;
     } catch {
       return false;
+    }
+  },
+  onEnded: (callback: () => void): void => {
+    try {
+      const eng = getAudioEngine();
+      if (typeof eng.engineOnEnded === 'function') {
+        eng.engineOnEnded(callback);
+      }
+    } catch (err) {
+      logger.error('Failed to register engineOnEnded callback', { error: String(err) });
     }
   },
   listDevices: (): string[] => {

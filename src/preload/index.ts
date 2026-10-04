@@ -87,7 +87,14 @@ const audioEngine = {
     ipcRenderer.invoke('app/audioEngine/setPlaybackRate', rate),
   setEqBand: (frequencyHz: number, gainDb: number): Promise<void> =>
     ipcRenderer.invoke('app/audioEngine/setEqBand', frequencyHz, gainDb),
-  resetEq: (): Promise<void> => ipcRenderer.invoke('app/audioEngine/resetEq')
+  resetEq: (): Promise<void> => ipcRenderer.invoke('app/audioEngine/resetEq'),
+  onTrackEnded: (callback: () => void): (() => void) => {
+    const handler = () => callback();
+    ipcRenderer.on('app/audioEngine/trackEnded', handler);
+    return () => {
+      ipcRenderer.removeListener('app/audioEngine/trackEnded', handler);
+    };
+  }
 };
 
 const audioLibraryControls = {

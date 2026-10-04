@@ -590,6 +590,7 @@ impl PlayerEngine {
         }
 
         let st = self.state.lock().unwrap();
+        st.is_ended.store(false, Ordering::Release);
         st.is_playing.store(false, Ordering::Release);
         st.presented_frames.store(0, Ordering::Release);
     }
