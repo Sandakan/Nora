@@ -8,14 +8,83 @@ pub mod ticker;
 
 use napi::threadsafe_function::{ThreadsafeFunction, ThreadsafeFunctionCallMode};
 use napi_derive::napi;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, Weak};
 use lazy_static::lazy_static;
 
 use engine::PlayerEngine;
 
 lazy_static! {
-    static ref GLOBAL_ENGINE: Arc<Mutex<PlayerEngine>> = Arc::new(Mutex::new(PlayerEngine::new()));
+    static ref GLOBAL_ENGINE: Arc<Mutex<PlayerEngine>> = {
+        let engine = Arc::new(Mutex::new(PlayerEngine::new()));
+        let weak_engine = Arc::downgrade(&engine);
+        {
+            let mut eng = engine.lock().unwrap();
+            eng.set_recovery_trigger(move |gen| {
+                let weak_clone = weak_engine.clone();
+                let _ = std::thread::Builder::new()
+                    .name("nora-stream-recovery".into())
+                    .spawn(move || {
+                        run_recovery(weak_clone, gen);
+                    });
+            });
+        }
+        engine
+    };
     static ref ON_ENDED_CALLBACK: Arc<Mutex<Option<ThreadsafeFunction<()>>>> = Arc::new(Mutex::new(None));
+    static ref ON_ERROR_CALLBACK: Arc<Mutex<Option<ThreadsafeFunction<String>>>> = Arc::new(Mutex::new(None));
+}
+
+fn run_recovery(weak_engine: Weak<Mutex<PlayerEngine>>, target_generation: u64) {
+    let delays = [
+        std::time::Duration::from_millis(0),
+        std::time::Duration::from_millis(100),
+        std::time::Duration::from_millis(300),
+    ];
+
+    let mut last_error = String::new();
+
+    for (attempt, delay) in delays.iter().enumerate() {
+        if !delay.is_zero() {
+            std::thread::sleep(*delay);
+        }
+
+        let engine_arc = match weak_engine.upgrade() {
+            Some(arc) => arc,
+            None => return,
+        };
+
+        let mut engine = match engine_arc.lock() {
+            Ok(g) => g,
+            Err(_) => return,
+        };
+
+        if engine.generation() != target_generation || engine.is_stopped() {
+            log::debug!("Aborting stream recovery: playback generation changed or stopped.");
+            engine.reset_recovering();
+            return;
+        }
+
+        log::info!("Attempting audio stream recovery (attempt {}/3)...", attempt + 1);
+        match engine.rebuild_stream() {
+            Ok(()) => {
+                log::info!("Audio stream successfully recovered and rebuilt.");
+                engine.reset_recovering();
+                return;
+            }
+            Err(err) => {
+                log::warn!("Audio stream rebuild attempt {} failed: {}", attempt + 1, err);
+                last_error = err;
+            }
+        }
+    }
+
+    log::error!("Audio stream recovery exhausted all retries. Last error: {}", last_error);
+    if let Some(engine_arc) = weak_engine.upgrade() {
+        if let Ok(engine) = engine_arc.lock() {
+            engine.reset_recovering();
+            engine.trigger_fatal_error(format!("Audio stream error: {}", last_error));
+        }
+    }
 }
 
 #[napi(js_name = "engineOnEnded")]
@@ -23,6 +92,15 @@ pub fn engine_on_ended(callback: ThreadsafeFunction<()>) -> napi::Result<()> {
     let mut cb = ON_ENDED_CALLBACK
         .lock()
         .map_err(|_| napi::Error::from_reason("Failed to lock callback mutex"))?;
+    *cb = Some(callback);
+    Ok(())
+}
+
+#[napi(js_name = "engineOnError")]
+pub fn engine_on_error(callback: ThreadsafeFunction<String>) -> napi::Result<()> {
+    let mut cb = ON_ERROR_CALLBACK
+        .lock()
+        .map_err(|_| napi::Error::from_reason("Failed to lock error callback mutex"))?;
     *cb = Some(callback);
     Ok(())
 }
@@ -74,6 +152,17 @@ pub fn engine_load(path: String, options: Option<LoadOptions>) -> napi::Result<J
         })
     };
 
+    let on_err = {
+        let cb_clone = ON_ERROR_CALLBACK.clone();
+        Some(move |err_msg: String| {
+            if let Ok(guard) = cb_clone.lock() {
+                if let Some(ref tsfn) = *guard {
+                    let _ = tsfn.call(Ok(err_msg), ThreadsafeFunctionCallMode::NonBlocking);
+                }
+            }
+        })
+    };
+
     let meta = engine
         .load_file(
             &path,
@@ -81,7 +170,7 @@ pub fn engine_load(path: String, options: Option<LoadOptions>) -> napi::Result<J
             volume,
             playback_rate,
             on_end,
-            None::<fn(String)>,
+            on_err,
         )
         .map_err(|e| napi::Error::from_reason(e))?;
 
@@ -109,12 +198,23 @@ pub fn engine_play(path: String) -> napi::Result<()> {
         })
     };
 
+    let on_err = {
+        let cb_clone = ON_ERROR_CALLBACK.clone();
+        Some(move |err_msg: String| {
+            if let Ok(guard) = cb_clone.lock() {
+                if let Some(ref tsfn) = *guard {
+                    let _ = tsfn.call(Ok(err_msg), ThreadsafeFunctionCallMode::NonBlocking);
+                }
+            }
+        })
+    };
+
     engine
-        .play_file::<fn(ticker::EngineTickPayload), _, fn(String)>(
+        .play_file::<fn(ticker::EngineTickPayload), _, _>(
             &path,
             None,
             on_end,
-            None,
+            on_err,
         )
         .map_err(|e| napi::Error::from_reason(e))
 }
@@ -215,7 +315,7 @@ pub fn engine_list_devices() -> napi::Result<Vec<String>> {
 
 #[napi(js_name = "engineSetDevice")]
 pub fn engine_set_device(device_name: String) -> napi::Result<()> {
-    let engine = GLOBAL_ENGINE
+    let mut engine = GLOBAL_ENGINE
         .lock()
         .map_err(|_| napi::Error::from_reason("Failed to lock engine mutex"))?;
     engine.set_device(device_name);

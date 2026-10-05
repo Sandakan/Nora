@@ -71,6 +71,12 @@ pub struct PlayerEngine {
     ticker: PositionTicker,
     stop_signal: Arc<AtomicBool>,
     ring_buffer: Option<Arc<SpscRingBuffer>>,
+    current_file_path: Option<String>,
+    generation: u64,
+    is_recovering: Arc<AtomicBool>,
+    on_end_cb: Option<Arc<dyn Fn() + Send + Sync + 'static>>,
+    on_err_cb: Option<Arc<dyn Fn(String) + Send + Sync + 'static>>,
+    recovery_trigger: Option<Arc<dyn Fn(u64) + Send + Sync + 'static>>,
 }
 
 impl PlayerEngine {
@@ -90,6 +96,37 @@ impl PlayerEngine {
             ticker,
             stop_signal,
             ring_buffer: None,
+            current_file_path: None,
+            generation: 0,
+            is_recovering: Arc::new(AtomicBool::new(false)),
+            on_end_cb: None,
+            on_err_cb: None,
+            recovery_trigger: None,
+        }
+    }
+
+    pub fn set_recovery_trigger<F>(&mut self, trigger: F)
+    where
+        F: Fn(u64) + Send + Sync + 'static,
+    {
+        self.recovery_trigger = Some(Arc::new(trigger));
+    }
+
+    pub fn generation(&self) -> u64 {
+        self.generation
+    }
+
+    pub fn is_stopped(&self) -> bool {
+        self.stop_signal.load(Ordering::Acquire)
+    }
+
+    pub fn reset_recovering(&self) {
+        self.is_recovering.store(false, Ordering::Release);
+    }
+
+    pub fn trigger_fatal_error(&self, message: String) {
+        if let Some(ref cb) = self.on_err_cb {
+            cb(message);
         }
     }
 
@@ -107,7 +144,37 @@ impl PlayerEngine {
         FEnd: Fn() + Send + Sync + 'static,
         FErr: Fn(String) + Send + Sync + 'static,
     {
-        self.stop();
+        let on_end_arc: Option<Arc<dyn Fn() + Send + Sync + 'static>> =
+            on_end.map(|cb| Arc::new(cb) as Arc<dyn Fn() + Send + Sync + 'static>);
+        let on_err_arc: Option<Arc<dyn Fn(String) + Send + Sync + 'static>> =
+            on_err.map(|cb| Arc::new(cb) as Arc<dyn Fn(String) + Send + Sync + 'static>);
+
+        self.on_end_cb = on_end_arc.clone();
+        self.on_err_cb = on_err_arc.clone();
+
+        self.load_file_internal(
+            file_path,
+            auto_play,
+            volume,
+            playback_rate,
+            on_end_arc,
+            on_err_arc,
+            true,
+        )
+    }
+
+    fn load_file_internal(
+        &mut self,
+        file_path: &str,
+        auto_play: bool,
+        volume: f32,
+        playback_rate: f32,
+        on_end: Option<Arc<dyn Fn() + Send + Sync + 'static>>,
+        on_err: Option<Arc<dyn Fn(String) + Send + Sync + 'static>>,
+        increment_generation: bool,
+    ) -> Result<AudioMetadata, String> {
+        self.stop_internal(increment_generation);
+        self.current_file_path = Some(file_path.to_string());
 
         let path = Path::new(file_path);
         let file = File::open(path).map_err(|e| format!("Failed to open file '{}': {}", file_path, e))?;
@@ -238,49 +305,29 @@ impl PlayerEngine {
 
         self.worker_handle = Some(worker_handle);
 
-        // Build CPAL real-time output stream
-        let stream_stop = stop_signal.clone();
-        let stream_is_playing = is_playing.clone();
-        let stream_is_ended = is_ended.clone();
-        let stream_presented = presented_frames.clone();
-        let stream_volume = volume_lock.clone();
-        let stream_eq = self.eq_chain.clone();
-        let stream_ring = ring_buffer.clone();
+        let err_fn = Self::create_error_handler(
+            self.generation,
+            stop_signal.clone(),
+            self.is_recovering.clone(),
+            self.recovery_trigger.clone(),
+            on_err,
+        );
 
-        let err_fn = move |err| {
-            log::error!("Audio stream error: {}", err);
-            if let Some(ref cb) = on_err {
-                cb(format!("{}", err));
-            }
-        };
-
-        let send_stream = match sample_format {
-            SampleFormat::F32 => {
-                let stream = device
-                    .build_output_stream(
-                        config,
-                        move |data: &mut [f32], _: &OutputCallbackInfo| {
-                            Self::audio_callback_f32(
-                                data,
-                                device_channels,
-                                &stream_ring,
-                                &stream_stop,
-                                &stream_is_playing,
-                                &stream_is_ended,
-                                &stream_presented,
-                                &stream_volume,
-                                &stream_eq,
-                                &on_end,
-                            );
-                        },
-                        err_fn,
-                        None,
-                    )
-                    .map_err(|e| format!("Failed to build cpal output stream: {}", e))?;
-                SendStream(stream)
-            }
-            _ => return Err("Unsupported sample format on output device".to_string()),
-        };
+        let send_stream = Self::build_cpal_stream(
+            &device,
+            config,
+            sample_format,
+            device_channels,
+            ring_buffer,
+            stop_signal,
+            is_playing,
+            is_ended,
+            presented_frames,
+            volume_lock,
+            self.eq_chain.clone(),
+            on_end,
+            err_fn,
+        )?;
 
         send_stream
             .0
@@ -462,7 +509,7 @@ impl PlayerEngine {
     }
 
     /// Real-time CPAL audio output callback: lock-free, zero allocation, strict deadline.
-    fn audio_callback_f32<FEnd>(
+    fn audio_callback_f32(
         data: &mut [f32],
         device_channels: usize,
         ring_buffer: &Arc<SpscRingBuffer>,
@@ -472,10 +519,8 @@ impl PlayerEngine {
         presented_frames: &Arc<AtomicU64>,
         volume_lock: &Arc<Mutex<f32>>,
         eq_chain: &Arc<Mutex<EqChain>>,
-        on_end: &Option<FEnd>,
-    ) where
-        FEnd: Fn() + Send + Sync + 'static,
-    {
+        on_end: &Option<Arc<dyn Fn() + Send + Sync + 'static>>,
+    ) {
         if stop_signal.load(Ordering::Relaxed) || !is_playing.load(Ordering::Relaxed) {
             data.fill(0.0);
             return;
@@ -573,7 +618,99 @@ impl PlayerEngine {
         st.is_playing.store(true, Ordering::Release);
     }
 
+    fn build_cpal_stream(
+        device: &cpal::Device,
+        config: StreamConfig,
+        sample_format: SampleFormat,
+        device_channels: usize,
+        ring_buffer: Arc<SpscRingBuffer>,
+        stop_signal: Arc<AtomicBool>,
+        is_playing: Arc<AtomicBool>,
+        is_ended: Arc<AtomicBool>,
+        presented_frames: Arc<AtomicU64>,
+        volume_lock: Arc<Mutex<f32>>,
+        eq_chain: Arc<Mutex<EqChain>>,
+        on_end: Option<Arc<dyn Fn() + Send + Sync + 'static>>,
+        err_fn: impl FnMut(cpal::Error) + Send + 'static,
+    ) -> Result<SendStream, String> {
+        let stream = match sample_format {
+            SampleFormat::F32 => device
+                .build_output_stream(
+                    config,
+                    move |data: &mut [f32], _: &OutputCallbackInfo| {
+                        Self::audio_callback_f32(
+                            data,
+                            device_channels,
+                            &ring_buffer,
+                            &stop_signal,
+                            &is_playing,
+                            &is_ended,
+                            &presented_frames,
+                            &volume_lock,
+                            &eq_chain,
+                            &on_end,
+                        );
+                    },
+                    err_fn,
+                    None,
+                )
+                .map_err(|e| format!("Failed to build cpal output stream: {}", e))?,
+            _ => return Err("Unsupported sample format on output device".to_string()),
+        };
+        Ok(SendStream(stream))
+    }
+
+    fn create_error_handler(
+        generation: u64,
+        stop_signal: Arc<AtomicBool>,
+        is_recovering: Arc<AtomicBool>,
+        recovery_trigger: Option<Arc<dyn Fn(u64) + Send + Sync + 'static>>,
+        on_err: Option<Arc<dyn Fn(String) + Send + Sync + 'static>>,
+    ) -> impl FnMut(cpal::Error) + Send + 'static {
+        move |err: cpal::Error| {
+            if stop_signal.load(Ordering::Relaxed) {
+                return;
+            }
+
+            let is_recoverable = match err.kind() {
+                cpal::ErrorKind::StreamInvalidated
+                | cpal::ErrorKind::DeviceNotAvailable
+                | cpal::ErrorKind::DeviceChanged => true,
+                _ => {
+                    let msg = err.to_string();
+                    msg.contains("stream configuration is no longer valid")
+                        || msg.contains("must be rebuilt")
+                        || msg.contains("device is not available")
+                }
+            };
+
+            if is_recoverable {
+                log::warn!(
+                    "Audio stream invalidated by system: {}. Initiating automatic rebuild...",
+                    err
+                );
+                if is_recovering
+                    .compare_exchange(false, true, Ordering::AcqRel, Ordering::Acquire)
+                    .is_ok()
+                {
+                    if let Some(ref trigger) = recovery_trigger {
+                        trigger(generation);
+                    }
+                }
+            } else {
+                log::error!("Audio stream error: {}", err);
+                if let Some(ref cb) = on_err {
+                    cb(format!("{}", err));
+                }
+            }
+        }
+    }
+
     pub fn stop(&mut self) {
+        self.stop_internal(true);
+    }
+
+    fn stop_internal(&mut self, increment_generation: bool) {
         self.stop_signal.store(true, Ordering::Release);
         self.ticker.stop();
 
@@ -593,6 +730,116 @@ impl PlayerEngine {
         st.is_ended.store(false, Ordering::Release);
         st.is_playing.store(false, Ordering::Release);
         st.presented_frames.store(0, Ordering::Release);
+
+        if increment_generation {
+            self.generation = self.generation.wrapping_add(1);
+        }
+        self.is_recovering.store(false, Ordering::Release);
+    }
+
+    pub fn rebuild_stream(&mut self) -> Result<(), String> {
+        if self.stop_signal.load(Ordering::Acquire) {
+            return Ok(());
+        }
+
+        let file_path = match self.current_file_path.as_ref() {
+            Some(p) => p.clone(),
+            None => return Err("No file loaded".to_string()),
+        };
+
+        let device = self
+            .device_manager
+            .lock()
+            .unwrap()
+            .get_selected_device()
+            .ok_or_else(|| "No audio output device available".to_string())?;
+
+        let supported_config = device
+            .default_output_config()
+            .map_err(|e| format!("Failed to get default output config: {}", e))?;
+
+        let sample_format = supported_config.sample_format();
+        let config: StreamConfig = supported_config.into();
+        let new_output_sample_rate = config.sample_rate;
+        let device_channels = config.channels as usize;
+
+        let current_output_sample_rate = {
+            let st = self.state.lock().unwrap();
+            st.output_sample_rate
+        };
+
+        // Release previous stream handle before building new one
+        self.stream = None;
+
+        if new_output_sample_rate == current_output_sample_rate && self.ring_buffer.is_some() {
+            log::info!(
+                "Rebuilding stream with identical sample rate ({} Hz)",
+                new_output_sample_rate
+            );
+
+            {
+                let mut eq = self.eq_chain.lock().unwrap();
+                eq.set_sample_rate(new_output_sample_rate as f32);
+            }
+
+            let st = self.state.lock().unwrap();
+            let err_fn = Self::create_error_handler(
+                self.generation,
+                self.stop_signal.clone(),
+                self.is_recovering.clone(),
+                self.recovery_trigger.clone(),
+                self.on_err_cb.clone(),
+            );
+
+            let send_stream = Self::build_cpal_stream(
+                &device,
+                config,
+                sample_format,
+                device_channels,
+                self.ring_buffer.as_ref().unwrap().clone(),
+                self.stop_signal.clone(),
+                st.is_playing.clone(),
+                st.is_ended.clone(),
+                st.presented_frames.clone(),
+                st.volume.clone(),
+                self.eq_chain.clone(),
+                self.on_end_cb.clone(),
+                err_fn,
+            )?;
+
+            send_stream
+                .0
+                .play()
+                .map_err(|e| format!("Failed to start cpal stream: {}", e))?;
+            self.stream = Some(send_stream);
+            Ok(())
+        } else {
+            log::info!(
+                "Device sample rate changed ({} Hz -> {} Hz). Re-anchoring playback...",
+                current_output_sample_rate,
+                new_output_sample_rate
+            );
+
+            let current_pos = self.get_position();
+            let was_playing = self.is_playing();
+            let volume = *self.state.lock().unwrap().volume.lock().unwrap();
+            let rate = *self.state.lock().unwrap().playback_rate.lock().unwrap();
+            let on_end = self.on_end_cb.clone();
+            let on_err = self.on_err_cb.clone();
+
+            self.load_file_internal(
+                &file_path,
+                was_playing,
+                volume,
+                rate,
+                on_end,
+                on_err,
+                false,
+            )?;
+
+            self.seek(current_pos);
+            Ok(())
+        }
     }
 
     pub fn seek(&self, position_secs: f64) {
@@ -666,7 +913,10 @@ impl PlayerEngine {
         self.device_manager.lock().unwrap().list_output_devices()
     }
 
-    pub fn set_device(&self, device_name: String) {
+    pub fn set_device(&mut self, device_name: String) {
         self.device_manager.lock().unwrap().set_device_name(Some(device_name));
+        if self.stream.is_some() && !self.stop_signal.load(Ordering::Relaxed) {
+            let _ = self.rebuild_stream();
+        }
     }
 }

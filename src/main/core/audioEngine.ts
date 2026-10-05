@@ -39,6 +39,7 @@ export interface AudioEngineNative {
   engineIsPlaying?(): boolean;
   engineIsEnded?(): boolean;
   engineOnEnded?(callback: (err: Error | null) => void): void;
+  engineOnError?(callback: (err: Error | null, message: string) => void): void;
   engineInitLogger?(callback: (err: Error | null, record: JsLogRecord) => void): void;
   engineListDevices(): string[];
   engineSetDevice(deviceName: string): void;
@@ -193,6 +194,20 @@ export const audioEngine = {
       }
     } catch (err) {
       logger.error('Failed to register engineOnEnded callback', { error: String(err) });
+    }
+  },
+  onError: (callback: (message: string) => void): void => {
+    try {
+      const eng = getAudioEngine();
+      if (typeof eng.engineOnError === 'function') {
+        eng.engineOnError((err, message) => {
+          if (!err && message) {
+            callback(message);
+          }
+        });
+      }
+    } catch (err) {
+      logger.error('Failed to register engineOnError callback', { error: String(err) });
     }
   },
   initLogger: (callback: (record: JsLogRecord) => void): void => {

@@ -679,6 +679,15 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       }
     });
 
+    audioEngine.onError((message) => {
+      if (!mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('app/audioEngine/playbackError', {
+          message,
+          target: 'AUDIO_ENGINE'
+        });
+      }
+    });
+
     audioEngine.initLogger((record) => {
       if (!record || typeof record !== 'object' || !record.level) return;
       const { level, message, target } = record;
@@ -686,9 +695,6 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       switch (level) {
         case 'error':
           logger.error(message, meta);
-          if (!mainWindow.isDestroyed()) {
-            mainWindow.webContents.send('app/audioEngine/playbackError', { message, target });
-          }
           break;
         case 'warn':
           logger.warn(message, meta);
