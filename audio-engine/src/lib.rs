@@ -240,6 +240,16 @@ pub fn engine_set_eq_band(frequency_hz: f64, gain_db: f64) -> napi::Result<()> {
     Ok(())
 }
 
+#[napi(js_name = "engineSetEqGains")]
+pub fn engine_set_eq_gains(gains: Vec<f64>) -> napi::Result<()> {
+    let engine = GLOBAL_ENGINE
+        .lock()
+        .map_err(|_| napi::Error::from_reason("Failed to lock engine mutex"))?;
+    let gains_f32: Vec<f32> = gains.into_iter().map(|g| g as f32).collect();
+    engine.set_eq_gains(&gains_f32);
+    Ok(())
+}
+
 #[napi(js_name = "engineResetEq")]
 pub fn engine_reset_eq() -> napi::Result<()> {
     let engine = GLOBAL_ENGINE

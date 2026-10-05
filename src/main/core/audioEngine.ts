@@ -44,6 +44,7 @@ export interface AudioEngineNative {
   engineSetDevice(deviceName: string): void;
   engineSetPlaybackRate(rate: number): void;
   engineSetEqBand(frequencyHz: number, gainDb: number): void;
+  engineSetEqGains(gains: number[]): void;
   engineResetEq(): void;
   engineDestroy(): void;
 }
@@ -223,6 +224,9 @@ export const audioEngine = {
   },
   setEqBand: (frequencyHz: number, gainDb: number): void => {
     getAudioEngine().engineSetEqBand(frequencyHz, gainDb);
+  },
+  setEqGains: (gains: number[]): void => {
+    getAudioEngine().engineSetEqGains(gains);
   },
   resetEq: (): void => {
     getAudioEngine().engineResetEq();

@@ -651,25 +651,20 @@ class AudioPlayer extends EventTarget {
 
     // Apply to native Rust audio engine if available
     if (window.api?.audioEngine) {
-      const bandKeys: (keyof Equalizer)[] = [
-        'thirtyTwoHertzFilter',
-        'sixtyFourHertzFilter',
-        'hundredTwentyFiveHertzFilter',
-        'twoHundredFiftyHertzFilter',
-        'fiveHundredHertzFilter',
-        'thousandHertzFilter',
-        'twoThousandHertzFilter',
-        'fourThousandHertzFilter',
-        'eightThousandHertzFilter',
-        'sixteenThousandHertzFilter'
+      const gains = [
+        eq.thirtyTwoHertzFilter ?? 0,
+        eq.sixtyFourHertzFilter ?? 0,
+        eq.hundredTwentyFiveHertzFilter ?? 0,
+        eq.twoHundredFiftyHertzFilter ?? 0,
+        eq.fiveHundredHertzFilter ?? 0,
+        eq.thousandHertzFilter ?? 0,
+        eq.twoThousandHertzFilter ?? 0,
+        eq.fourThousandHertzFilter ?? 0,
+        eq.eightThousandHertzFilter ?? 0,
+        eq.sixteenThousandHertzFilter ?? 0
       ];
-      bandKeys.forEach((key, index) => {
-        const gain = eq[key];
-        if (typeof gain === 'number') {
-          window.api.audioEngine.setEqBand(index, gain).catch((err) => {
-            console.error(`[AudioPlayer] Error setting native EQ band ${index}:`, err);
-          });
-        }
+      window.api.audioEngine.setEqGains(gains).catch((err) => {
+        console.error('[AudioPlayer] Error setting native EQ gains:', err);
       });
     }
   }

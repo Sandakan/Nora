@@ -668,6 +668,9 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     ipcMain.handle('app/audioEngine/setEqBand', (_, frequencyHz: number, gainDb: number) =>
       audioEngine.setEqBand(frequencyHz, gainDb)
     );
+    ipcMain.handle('app/audioEngine/setEqGains', (_, gains: number[]) =>
+      audioEngine.setEqGains(gains)
+    );
     ipcMain.handle('app/audioEngine/resetEq', () => audioEngine.resetEq());
 
     audioEngine.onEnded(() => {

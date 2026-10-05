@@ -631,6 +631,11 @@ impl PlayerEngine {
         eq.set_band_gain(frequency_hz, gain_db);
     }
 
+    pub fn set_eq_gains(&self, gains: &[f32]) {
+        let mut eq = self.eq_chain.lock().unwrap();
+        eq.set_all_gains(gains);
+    }
+
     pub fn reset_eq(&self) {
         let mut eq = self.eq_chain.lock().unwrap();
         eq.reset_all_gains();

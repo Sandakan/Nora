@@ -87,6 +87,8 @@ const audioEngine = {
     ipcRenderer.invoke('app/audioEngine/setPlaybackRate', rate),
   setEqBand: (frequencyHz: number, gainDb: number): Promise<void> =>
     ipcRenderer.invoke('app/audioEngine/setEqBand', frequencyHz, gainDb),
+  setEqGains: (gains: number[]): Promise<void> =>
+    ipcRenderer.invoke('app/audioEngine/setEqGains', gains),
   resetEq: (): Promise<void> => ipcRenderer.invoke('app/audioEngine/resetEq'),
   onTrackEnded: (callback: () => void): (() => void) => {
     const handler = () => callback();

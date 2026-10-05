@@ -126,6 +126,13 @@ impl EqChain {
         self.update_filters();
     }
 
+    pub fn set_all_gains(&mut self, gains: &[f32]) {
+        for (i, &gain) in gains.iter().take(10).enumerate() {
+            self.gains_db[i] = gain.clamp(-24.0, 24.0);
+        }
+        self.update_filters();
+    }
+
     pub fn reset_all_gains(&mut self) {
         self.gains_db = [0.0; 10];
         self.update_filters();
@@ -198,5 +205,22 @@ mod tests {
         for i in (0..32).step_by(2) {
             assert_eq!(buffer[i + 1], 0.0, "Right channel had crosstalk at frame {}", i / 2);
         }
+    }
+
+    #[test]
+    fn test_eq_chain_batch_gains() {
+        let mut chain = EqChain::new(48000.0);
+        let test_gains = [1.0, 2.0, 3.0, 4.0, 5.0, -1.0, -2.0, -3.0, -4.0, -5.0];
+        chain.set_all_gains(&test_gains);
+        for i in 0..10 {
+            assert_eq!(chain.gains_db[i], test_gains[i]);
+        }
+        assert!(chain.enabled);
+
+        chain.reset_all_gains();
+        for i in 0..10 {
+            assert_eq!(chain.gains_db[i], 0.0);
+        }
+        assert!(!chain.enabled);
     }
 }
