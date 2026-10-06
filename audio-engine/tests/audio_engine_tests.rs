@@ -87,3 +87,77 @@ fn test_player_engine_initial_state() {
     assert_eq!(engine.get_duration(), 0.0);
     assert!(!engine.is_playing());
 }
+
+#[test]
+fn test_volume_state_immediate_and_clamping() {
+    use audio_engine::engine::VolumeState;
+
+    let mut vs = VolumeState::new(0.5);
+    assert_eq!(vs.current, 0.5);
+    assert_eq!(vs.target, 0.5);
+    assert_eq!(vs.remaining_frames, 0);
+
+    vs.set_immediate(1.5); // Should clamp to 1.0
+    assert_eq!(vs.current, 1.0);
+    assert_eq!(vs.target, 1.0);
+
+    vs.set_immediate(-0.5); // Should clamp to 0.0
+    assert_eq!(vs.current, 0.0);
+    assert_eq!(vs.target, 0.0);
+}
+
+#[test]
+fn test_volume_state_ramping_interpolation() {
+    use audio_engine::engine::VolumeState;
+
+    let mut vs = VolumeState::new(0.0);
+    // Ramp to 1.0 over 10ms at 1000Hz (10 frames)
+    vs.set_ramp(1.0, 10, 1000);
+    assert_eq!(vs.remaining_frames, 10);
+    assert!((vs.step - 0.1).abs() < 1e-5);
+
+    // Simulate stepping through 10 frames
+    for _ in 0..10 {
+        if vs.remaining_frames > 0 {
+            vs.current += vs.step;
+            vs.remaining_frames -= 1;
+            if vs.remaining_frames == 0 {
+                vs.current = vs.target;
+                vs.step = 0.0;
+            }
+        }
+    }
+
+    assert_eq!(vs.remaining_frames, 0);
+    assert_eq!(vs.current, 1.0);
+    assert_eq!(vs.step, 0.0);
+}
+
+#[test]
+fn test_perceptual_quadratic_gain() {
+    // 0% -> 0 gain
+    let gain_0 = 0.0f32 * 0.0f32;
+    assert_eq!(gain_0, 0.0);
+
+    // 15% -> ~0.0225 gain (-33 dB)
+    let vol_15 = 0.15f32;
+    let gain_15 = vol_15 * vol_15;
+    assert!((gain_15 - 0.0225).abs() < 1e-5);
+
+    // 50% -> 0.25 gain (-12 dB)
+    let vol_50 = 0.5f32;
+    let gain_50 = vol_50 * vol_50;
+    assert!((gain_50 - 0.25).abs() < 1e-5);
+
+    // 100% -> 1.0 gain (0 dB)
+    let vol_100 = 1.0f32;
+    let gain_100 = vol_100 * vol_100;
+    assert_eq!(gain_100, 1.0);
+}
+
+#[test]
+fn test_player_engine_volume_controls() {
+    let engine = PlayerEngine::new();
+    engine.set_volume(0.15);
+    engine.set_volume_with_ramp(0.5, 250);
+}

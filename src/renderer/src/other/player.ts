@@ -78,7 +78,28 @@ class AudioPlayer extends EventTarget {
     this.equalizerBands = new Map();
     this.gainNode = this.currentContext.createGain();
 
-    this.currentVolume = this.audio.volume;
+    const initialVolume = store?.state?.player?.volume;
+    if (initialVolume) {
+      this.currentVolume = initialVolume.value;
+      this.audio.volume = initialVolume.value / 100;
+      this.audio.muted = initialVolume.isMuted;
+      this.gainNode.gain.value = initialVolume.isMuted ? 0 : initialVolume.value / 100;
+    } else {
+      this.currentVolume = 100;
+      this.audio.volume = 1.0;
+      this.audio.muted = false;
+      this.gainNode.gain.value = 1.0;
+    }
+
+    const initialRate = store?.state?.player?.playbackRate;
+    if (typeof initialRate === 'number') {
+      this.audio.playbackRate = initialRate;
+    }
+
+    const initialRepeat = store?.state?.player?.isRepeating;
+    if (initialRepeat) {
+      this.syncRepeatModeFromStore(initialRepeat);
+    }
 
     this.unsubscribeFunc = this.subscribeToStoreEvents();
     this.initializeEqualizer();
@@ -253,6 +274,12 @@ class AudioPlayer extends EventTarget {
           .replace(/\?.*$/, '');
 
     console.log('[AudioPlayer.playWithNativeEngine] Loading via Rust audio-engine:', rawPath);
+
+    const storeVolume = store?.state?.player?.volume;
+    if (storeVolume) {
+      this.currentVolume = storeVolume.value;
+      this.audio.muted = storeVolume.isMuted;
+    }
 
     const effectiveVolume = this.muted ? 0 : this.volume;
     try {
@@ -691,8 +718,8 @@ class AudioPlayer extends EventTarget {
 
   // ? PLAYER RELATED STORE UPDATES HANDLING
   private updatePlayerVolume(volume: PlayerVolume) {
-    this.volume = volume.value / 100;
     this.muted = volume.isMuted;
+    this.volume = volume.value / 100;
   }
 
   private updatePlaybackRate(playbackRate: number) {

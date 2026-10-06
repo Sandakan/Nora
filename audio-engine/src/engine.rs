@@ -1,7 +1,7 @@
 use std::fs::File;
 use std::path::Path;
 use std::sync::{
-    atomic::{AtomicBool, AtomicU64, Ordering},
+    atomic::{AtomicBool, AtomicU32, AtomicU64, Ordering},
     Arc, Mutex,
 };
 use std::thread::{self, JoinHandle};
@@ -32,6 +32,48 @@ pub struct AudioMetadata {
     pub channels: u32,
 }
 
+#[derive(Clone, Debug)]
+pub struct VolumeState {
+    pub current: f32,
+    pub target: f32,
+    pub step: f32,
+    pub remaining_frames: u64,
+}
+
+impl VolumeState {
+    pub fn new(volume: f32) -> Self {
+        let v = volume.clamp(0.0, 1.0);
+        Self {
+            current: v,
+            target: v,
+            step: 0.0,
+            remaining_frames: 0,
+        }
+    }
+
+    pub fn set_immediate(&mut self, volume: f32) {
+        let v = volume.clamp(0.0, 1.0);
+        self.current = v;
+        self.target = v;
+        self.step = 0.0;
+        self.remaining_frames = 0;
+    }
+
+    pub fn set_ramp(&mut self, target_volume: f32, duration_ms: u32, sample_rate: u32) {
+        let target = target_volume.clamp(0.0, 1.0);
+        self.target = target;
+        let total_frames = (duration_ms as f64 * sample_rate as f64 / 1000.0).round() as u64;
+        if total_frames <= 1 || (self.current - target).abs() < 1e-5 {
+            self.current = target;
+            self.step = 0.0;
+            self.remaining_frames = 0;
+        } else {
+            self.remaining_frames = total_frames;
+            self.step = (target - self.current) / total_frames as f32;
+        }
+    }
+}
+
 pub struct DecoderState {
     pub duration_secs: f64,
     pub source_sample_rate: u32,
@@ -40,7 +82,8 @@ pub struct DecoderState {
     pub is_playing: Arc<AtomicBool>,
     pub is_ended: Arc<AtomicBool>,
     pub presented_frames: Arc<AtomicU64>,
-    pub volume: Arc<Mutex<f32>>,
+    pub volume: Arc<Mutex<VolumeState>>,
+    pub volume_cache: Arc<AtomicU32>,
     pub playback_rate: Arc<Mutex<f32>>,
     pub seek_request: Arc<Mutex<Option<f64>>>,
 }
@@ -55,7 +98,8 @@ impl DecoderState {
             is_playing: Arc::new(AtomicBool::new(false)),
             is_ended: Arc::new(AtomicBool::new(false)),
             presented_frames: Arc::new(AtomicU64::new(0)),
-            volume: Arc::new(Mutex::new(1.0)),
+            volume: Arc::new(Mutex::new(VolumeState::new(1.0))),
+            volume_cache: Arc::new(AtomicU32::new(1.0f32.to_bits())),
             playback_rate: Arc::new(Mutex::new(1.0)),
             seek_request: Arc::new(Mutex::new(None)),
         }
@@ -243,7 +287,9 @@ impl PlayerEngine {
         let is_playing = Arc::new(AtomicBool::new(auto_play));
         let is_ended = Arc::new(AtomicBool::new(false));
         let presented_frames = Arc::new(AtomicU64::new(0));
-        let volume_lock = Arc::new(Mutex::new(volume.clamp(0.0, 1.0)));
+        let clamped_vol = volume.clamp(0.0, 1.0);
+        let volume_lock = Arc::new(Mutex::new(VolumeState::new(clamped_vol)));
+        let volume_cache = Arc::new(AtomicU32::new(clamped_vol.to_bits()));
         let playback_rate_lock = Arc::new(Mutex::new(playback_rate.clamp(0.25, 4.0)));
         let seek_request = Arc::new(Mutex::new(None));
 
@@ -257,6 +303,7 @@ impl PlayerEngine {
             st.is_ended = is_ended.clone();
             st.presented_frames = presented_frames.clone();
             st.volume = volume_lock.clone();
+            st.volume_cache = volume_cache.clone();
             st.playback_rate = playback_rate_lock.clone();
             st.seek_request = seek_request.clone();
         }
@@ -324,6 +371,7 @@ impl PlayerEngine {
             is_ended,
             presented_frames,
             volume_lock,
+            volume_cache,
             self.eq_chain.clone(),
             on_end,
             err_fn,
@@ -517,7 +565,8 @@ impl PlayerEngine {
         is_playing: &Arc<AtomicBool>,
         is_ended: &Arc<AtomicBool>,
         presented_frames: &Arc<AtomicU64>,
-        volume_lock: &Arc<Mutex<f32>>,
+        volume_lock: &Arc<Mutex<VolumeState>>,
+        volume_cache: &Arc<AtomicU32>,
         eq_chain: &Arc<Mutex<EqChain>>,
         on_end: &Option<Arc<dyn Fn() + Send + Sync + 'static>>,
     ) {
@@ -530,6 +579,8 @@ impl PlayerEngine {
         let mut stereo_scratch = [0.0f32; 1024]; // Stack buffer for up to 512 stereo frames
 
         let mut frames_processed = 0;
+        let mut vol_lock = volume_lock.try_lock();
+
         while frames_processed < frames_needed {
             let chunk_frames = (frames_needed - frames_processed).min(512);
             let samples_to_read = chunk_frames * 2;
@@ -553,21 +604,71 @@ impl PlayerEngine {
                 eq.process_interleaved_stereo(&mut stereo_scratch[..samples_to_read]);
             }
 
-            let vol = volume_lock.try_lock().map(|v| *v).unwrap_or(1.0);
-
-            // Write to device channels
+            // Write to device channels with perceptual quadratic volume scaling and smooth ramping
             let data_offset = frames_processed * device_channels;
-            for f in 0..chunk_frames {
-                let l = (stereo_scratch[f * 2] * vol).clamp(-1.0, 1.0);
-                let r = (stereo_scratch[f * 2 + 1] * vol).clamp(-1.0, 1.0);
 
-                let out_frame = &mut data[data_offset + f * device_channels..data_offset + (f + 1) * device_channels];
-                out_frame[0] = l;
-                if device_channels > 1 {
-                    out_frame[1] = r;
+            if let Ok(ref mut v) = vol_lock {
+                if v.remaining_frames > 0 {
+                    // Frame-by-frame interpolation during ramping
+                    for f in 0..chunk_frames {
+                        if v.remaining_frames > 0 {
+                            v.current += v.step;
+                            v.remaining_frames -= 1;
+                            if v.remaining_frames == 0 {
+                                v.current = v.target;
+                                v.step = 0.0;
+                            }
+                        }
+                        let gain = v.current * v.current;
+                        let l = (stereo_scratch[f * 2] * gain).clamp(-1.0, 1.0);
+                        let r = (stereo_scratch[f * 2 + 1] * gain).clamp(-1.0, 1.0);
+
+                        let out_frame = &mut data[data_offset + f * device_channels..data_offset + (f + 1) * device_channels];
+                        out_frame[0] = l;
+                        if device_channels > 1 {
+                            out_frame[1] = r;
+                        }
+                        for ch in 2..device_channels {
+                            out_frame[ch] = 0.0;
+                        }
+                    }
+                    volume_cache.store(v.current.to_bits(), Ordering::Relaxed);
+                } else {
+                    // Constant volume: compute quadratic gain once for the entire chunk
+                    let gain = v.current * v.current;
+                    volume_cache.store(v.current.to_bits(), Ordering::Relaxed);
+
+                    for f in 0..chunk_frames {
+                        let l = (stereo_scratch[f * 2] * gain).clamp(-1.0, 1.0);
+                        let r = (stereo_scratch[f * 2 + 1] * gain).clamp(-1.0, 1.0);
+
+                        let out_frame = &mut data[data_offset + f * device_channels..data_offset + (f + 1) * device_channels];
+                        out_frame[0] = l;
+                        if device_channels > 1 {
+                            out_frame[1] = r;
+                        }
+                        for ch in 2..device_channels {
+                            out_frame[ch] = 0.0;
+                        }
+                    }
                 }
-                for ch in 2..device_channels {
-                    out_frame[ch] = 0.0;
+            } else {
+                // If mutex is contested, fallback to volume_cache to prevent glitches/blasts
+                let fallback_vol = f32::from_bits(volume_cache.load(Ordering::Relaxed));
+                let gain = fallback_vol * fallback_vol;
+
+                for f in 0..chunk_frames {
+                    let l = (stereo_scratch[f * 2] * gain).clamp(-1.0, 1.0);
+                    let r = (stereo_scratch[f * 2 + 1] * gain).clamp(-1.0, 1.0);
+
+                    let out_frame = &mut data[data_offset + f * device_channels..data_offset + (f + 1) * device_channels];
+                    out_frame[0] = l;
+                    if device_channels > 1 {
+                        out_frame[1] = r;
+                    }
+                    for ch in 2..device_channels {
+                        out_frame[ch] = 0.0;
+                    }
                 }
             }
 
@@ -628,7 +729,8 @@ impl PlayerEngine {
         is_playing: Arc<AtomicBool>,
         is_ended: Arc<AtomicBool>,
         presented_frames: Arc<AtomicU64>,
-        volume_lock: Arc<Mutex<f32>>,
+        volume_lock: Arc<Mutex<VolumeState>>,
+        volume_cache: Arc<AtomicU32>,
         eq_chain: Arc<Mutex<EqChain>>,
         on_end: Option<Arc<dyn Fn() + Send + Sync + 'static>>,
         err_fn: impl FnMut(cpal::Error) + Send + 'static,
@@ -647,6 +749,7 @@ impl PlayerEngine {
                             &is_ended,
                             &presented_frames,
                             &volume_lock,
+                            &volume_cache,
                             &eq_chain,
                             &on_end,
                         );
@@ -802,6 +905,7 @@ impl PlayerEngine {
                 st.is_ended.clone(),
                 st.presented_frames.clone(),
                 st.volume.clone(),
+                st.volume_cache.clone(),
                 self.eq_chain.clone(),
                 self.on_end_cb.clone(),
                 err_fn,
@@ -822,7 +926,7 @@ impl PlayerEngine {
 
             let current_pos = self.get_position();
             let was_playing = self.is_playing();
-            let volume = *self.state.lock().unwrap().volume.lock().unwrap();
+            let volume = self.state.lock().unwrap().volume.lock().unwrap().target;
             let rate = *self.state.lock().unwrap().playback_rate.lock().unwrap();
             let on_end = self.on_end_cb.clone();
             let on_err = self.on_err_cb.clone();
@@ -856,14 +960,30 @@ impl PlayerEngine {
     }
 
     pub fn set_volume(&self, volume: f32) {
-        let st = self.state.lock().unwrap();
-        if let Ok(mut v) = st.volume.lock() {
-            *v = volume.clamp(0.0, 1.0);
+        let (volume_cache, volume_lock) = {
+            let st = self.state.lock().unwrap();
+            (st.volume_cache.clone(), st.volume.clone())
+        };
+        let clamped = volume.clamp(0.0, 1.0);
+        volume_cache.store(clamped.to_bits(), Ordering::Release);
+        if let Ok(mut v) = volume_lock.lock() {
+            v.set_immediate(clamped);
         };
     }
 
-    pub fn set_volume_with_ramp(&self, target_volume: f32, _duration_ms: u32) {
-        self.set_volume(target_volume);
+    pub fn set_volume_with_ramp(&self, target_volume: f32, duration_ms: u32) {
+        let (sample_rate, volume_lock) = {
+            let st = self.state.lock().unwrap();
+            let sr = if st.output_sample_rate > 0 {
+                st.output_sample_rate
+            } else {
+                48000
+            };
+            (sr, st.volume.clone())
+        };
+        if let Ok(mut v) = volume_lock.lock() {
+            v.set_ramp(target_volume, duration_ms, sample_rate);
+        };
     }
 
     pub fn set_playback_rate(&self, rate: f32) {
