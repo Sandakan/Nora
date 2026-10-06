@@ -132,26 +132,38 @@ export const toggleVerboseLogs = (isEnabled: boolean) => {
 //   debug: 5,
 //   silly: 6
 
+const getProcessTag = (data: unknown): string => {
+  if (
+    data &&
+    typeof data === 'object' &&
+    'process' in data &&
+    typeof (data as { process?: unknown }).process === 'string'
+  ) {
+    return (data as { process: string }).process;
+  }
+  return 'MAIN';
+};
+
 const logger = {
   info: (message: string, data = {} as object) => {
-    log.info(message, { process: 'MAIN', data });
+    log.info(message, { process: getProcessTag(data), data });
   },
   error: (message: string, data = {} as object, error?: unknown) => {
-    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorMessage = error instanceof Error ? error.message : error ? String(error) : undefined;
 
-    log.error(message, { process: 'MAIN', error: errorMessage, data });
+    log.error(message, { process: getProcessTag(data), error: errorMessage, data });
   },
   warn: (message: string, data = {} as object) => {
-    log.warn(message, { process: 'MAIN', data });
+    log.warn(message, { process: getProcessTag(data), data });
   },
   debug: (message: string, data = {} as object) => {
-    log.debug(message, { process: 'MAIN', data });
+    log.debug(message, { process: getProcessTag(data), data });
   },
   silly: (message: string, data = {} as object) => {
-    log.silly(message, { process: 'MAIN', data });
+    log.silly(message, { process: getProcessTag(data), data });
   },
   verbose: (message: string, data = {} as object) => {
-    log.verbose(message, { process: 'MAIN', data });
+    log.verbose(message, { process: getProcessTag(data), data });
   }
 };
 

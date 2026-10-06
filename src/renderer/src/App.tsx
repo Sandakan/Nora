@@ -79,7 +79,6 @@ export default function App() {
 
   // ? INITIALIZE PLAYER AND QUEUE (singleton instances via custom hooks)
   const player = useAudioPlayer();
-  const audio = player.audio;
   const playerQueue = player.queue; // Access properties directly from AudioPlayer instance
 
   // const [content, dispatch] = useReducer(reducer, DEFAULT_REDUCER_DATA);
@@ -130,7 +129,7 @@ export default function App() {
   // Playback errors hook handles error management and retry logic
   const skipForwardRef = useRef<(() => void) | undefined>(undefined);
   const { managePlaybackErrors, resetErrorCount } = usePlaybackErrors(
-    audio,
+    player,
     changePromptMenuData,
     skipForwardRef
   );
@@ -144,11 +143,11 @@ export default function App() {
     updateSongPosition,
     toggleIsFavorite,
     updateEqualizerOptions
-  } = usePlaybackSettings(audio);
+  } = usePlaybackSettings(player);
 
   // ? INITIALIZE LISTENING DATA
   // Listening data hook handles recording song playback sessions for analytics
-  const { recordListeningData } = useListeningData(audio);
+  const { recordListeningData } = useListeningData(player);
 
   // ? WIRE UP LISTENING DATA RECORDING TO PLAYER EVENTS
   // Listen for songLoaded events from AudioPlayer to record listening data
@@ -241,7 +240,7 @@ export default function App() {
 
   // ? INITIALIZE MEDIA SESSION
   // Media session hook handles OS-level media controls and browser media notifications
-  useMediaSession(audio, {
+  useMediaSession(player, {
     toggleSongPlayback,
     handleSkipBackwardClick,
     handleSkipForwardClick,
@@ -250,7 +249,7 @@ export default function App() {
 
   // ? INITIALIZE DISCORD RPC
   // Discord RPC hook handles Discord Rich Presence integration
-  useDiscordRpc(audio);
+  useDiscordRpc(player);
 
   // Set up keyboard shortcuts with all required dependencies
   useKeyboardShortcuts({

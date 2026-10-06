@@ -1,5 +1,6 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
+import type AudioPlayer from '../other/player';
 import toggleSongIsFavorite from '../other/toggleSongIsFavorite';
 import { dispatch, store } from '../store/store';
 import storage from '../utils/localStorage';
@@ -29,11 +30,24 @@ import { useUserPreferences } from './useUserPreferences';
  *   updateEqualizerOptions({ preset: 'rock', bands: [...] });
  *   ```;
  *
- * @param player - The HTMLAudioElement instance
+ * @param player - The AudioPlayer or HTMLAudioElement instance
  * @returns Object containing playback setting functions
  */
-export function usePlaybackSettings(player: HTMLAudioElement) {
+export function usePlaybackSettings(player: AudioPlayer | HTMLAudioElement) {
   const { saveEqualizerPreset } = useUserPreferences();
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingPresetRef = useRef<Equalizer | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+        if (pendingPresetRef.current) {
+          saveEqualizerPreset(pendingPresetRef.current);
+        }
+      }
+    };
+  }, [saveEqualizerPreset]);
 
   const toggleRepeat = useCallback((newState?: RepeatTypes) => {
     const repeatState =
@@ -71,7 +85,10 @@ export function usePlaybackSettings(player: HTMLAudioElement) {
 
   const updateSongPosition = useCallback(
     (position: number) => {
-      if (position >= 0 && position <= player.duration) player.currentTime = position;
+      const dur = player.duration;
+      if (position >= 0 && (Number.isNaN(dur) || dur === 0 || position <= dur)) {
+        player.currentTime = position;
+      }
     },
     [player]
   );
@@ -101,9 +118,27 @@ export function usePlaybackSettings(player: HTMLAudioElement) {
 
   const updateEqualizerOptions = useCallback(
     (options: Equalizer) => {
-      saveEqualizerPreset(options);
+      // 1. Immediately apply to local storage cache and live audio player (0ms latency)
+      storage.equalizerPreset.setEqualizerPreset(options);
+      if (
+        'applyEqualizerSettings' in player &&
+        typeof player.applyEqualizerSettings === 'function'
+      ) {
+        player.applyEqualizerSettings(options);
+      }
+
+      // 2. Debounce database persistence by 350ms to avoid flooding PostgreSQL transactions
+      pendingPresetRef.current = options;
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+      debounceTimerRef.current = setTimeout(() => {
+        saveEqualizerPreset(options);
+        pendingPresetRef.current = null;
+        debounceTimerRef.current = null;
+      }, 350);
     },
-    [saveEqualizerPreset]
+    [saveEqualizerPreset, player]
   );
 
   return {
