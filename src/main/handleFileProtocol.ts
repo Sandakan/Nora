@@ -10,8 +10,14 @@ export const handleFileProtocol = async (req: GlobalRequest) => {
   try {
     const { pathname } = new URL(req.url);
     const decodedPath = decodeURIComponent(pathname);
+    // Only strip leading slashes on Windows where the drive letter path (e.g. "C:/Users/...")
+    // must not start with a slash. On Linux/macOS the path is absolute and REQUIRES the
+    // leading slash, otherwise it becomes a cwd-relative path and breaks when the app
+    // is not launched from the filesystem root.
     const filePath =
-      process.platform === 'darwin' ? decodedPath : decodedPath.replace(/^[/\\]{1,2}/gm, '');
+      process.platform === 'win32'
+        ? decodedPath.replace(/^[/\\]{1,2}/gm, '')
+        : decodedPath;
 
     if (!existsSync(filePath)) {
       logger.warn('File not found via nora:// protocol', { url: req.url, filePath });
