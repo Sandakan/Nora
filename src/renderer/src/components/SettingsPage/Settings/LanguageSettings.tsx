@@ -39,7 +39,7 @@ const LanguageSettings = () => {
               return i18n
                 .changeLanguage(val, (err) => {
                   if (err) return console.warn(err);
-                  window.api.userData.saveUserData('language', val);
+                  window.api.settings.saveUserSettings({ language: val });
                   return window.api.appControls.restartRenderer(`App language changed to ${val}`);
                 })
                 .then(() =>
