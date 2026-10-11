@@ -304,13 +304,13 @@ function HomePage() {
           <div className="flex gap-4">
             <SpecialPlaylistCard
               playlistId={SpecialPlaylists.Favorites}
-              label="Favorites"
+              label={t('playlistsPage.favorites')}
               to="/main-player/playlists/favorites"
               artworkPath={favoritesPlaylistCoverImage}
             />
             <SpecialPlaylistCard
               playlistId={SpecialPlaylists.History}
-              label="History"
+              label={t('playlistsPage.history')}
               to="/main-player/playlists/history"
               artworkPath={historyPlaylistCoverImage}
             />
