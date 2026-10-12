@@ -2,7 +2,8 @@ import { Draggable, Droppable, DragDropContext, type DropResult } from '@hello-p
 // import DefaultSongCover from '@renderer/assets/images/webp/song_cover_default.webp';
 // import DefaultPlaylistCover from '@renderer/assets/images/webp/playlist_cover_default.webp';
 // import FolderImg from '@renderer/assets/images/webp/empty-folder.webp';
-import NoSongsImage from '@renderer/assets/images/svg/Sun_Monochromatic.svg';
+import NoSongsImage from '@renderer/assets/images/svg/Sun_Monochromatic.svg?react';
+import ThemeableIllustration from '@renderer/components/ThemeableIllustration';
 import Button from '@renderer/components/Button';
 import Img from '@renderer/components/Img';
 import MainContainer from '@renderer/components/MainContainer';
@@ -428,7 +429,7 @@ function RouteComponent() {
           </div>
           {currentQueue.length === 0 && (
             <div className="no-songs-container flex h-full w-full flex-col items-center justify-center text-center text-2xl text-[#ccc]">
-              <Img src={NoSongsImage} className="mb-8 w-60" alt="" /> {t('currentQueuePage.empty')}
+              <ThemeableIllustration illustration={NoSongsImage} className="mb-8 w-60" alt="" /> {t('currentQueuePage.empty')}
             </div>
           )}
         </>

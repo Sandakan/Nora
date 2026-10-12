@@ -1,4 +1,5 @@
-import NoSongsImage from '@assets/images/svg/Summer landscape_Monochromatic.svg';
+import NoSongsImage from '@assets/images/svg/Summer landscape_Monochromatic.svg?react';
+import ThemeableIllustration from '@renderer/components/ThemeableIllustration';
 import Button from '@renderer/components/Button';
 import Dropdown from '@renderer/components/Dropdown';
 import Genre from '@renderer/components/GenresPage/Genre';
@@ -169,7 +170,7 @@ function GenresPage() {
         </div>
         {genresData === null && (
           <div className="no-songs-container text-font-color-black dark:text-font-color-white my-[10%] flex h-full w-full flex-col items-center justify-center text-center text-xl">
-            <Img src={NoSongsImage} alt="No songs available." className="mb-8 w-60" />
+            <ThemeableIllustration illustration={NoSongsImage} alt="No songs available." className="mb-8 w-60" />
             <span>{t('genresPage.empty')}</span>
           </div>
         )}
