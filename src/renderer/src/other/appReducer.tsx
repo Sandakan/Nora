@@ -434,6 +434,9 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
     genreDetailPage: 'aToZ',
     artistDetailPage: 'aToZ'
   },
+  filteringStates: {
+    songsPage: 'notSelected'
+  },
   equalizerPreset: {
     thirtyTwoHertzFilter: 0,
     sixtyFourHertzFilter: 0,

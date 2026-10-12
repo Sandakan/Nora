@@ -641,6 +641,10 @@ declare global {
     artistDetailPage?: SongSortTypes;
   }
 
+  interface FilteringStates {
+    songsPage?: SongFilterTypes;
+  }
+
   interface LyricsEditorSettings {
     offset: number;
     editNextAndCurrentStartAndEndTagsAutomatically: boolean;
@@ -712,6 +716,7 @@ declare global {
     playback: Playback;
     queue: PlayerQueueJson;
     sortingStates: SortingStates;
+    filteringStates: FilteringStates;
     lyricsEditorSettings: LyricsEditorSettings;
     equalizerPreset: Equalizer;
     keyboardShortcuts: ShortcutCategoryList;
