@@ -1,7 +1,7 @@
 import { describe, test, expect, vi } from 'vitest';
 
-// Import helper functions directly to avoid database initialization
-// These are pure functions that don't need mocking
+import { normalizeGenres } from '../../../../src/main/core/normalizeGenres';
+
 const ARTIST_SEPARATOR_REGEX = /[,&]/gm;
 
 const getArtistNamesFromSong = (artists?: string) => {
@@ -29,11 +29,7 @@ const getAlbumInfoFromSong = (album?: string) => {
   return undefined;
 };
 
-const getGenreInfoFromSong = (genres?: string[]) => {
-  if (Array.isArray(genres) && genres.length > 0) return genres;
-
-  return [];
-};
+const getGenreInfoFromSong = normalizeGenres;
 
 describe('parseSong Helper Functions', () => {
   describe('ARTIST_SEPARATOR_REGEX', () => {
@@ -274,25 +270,60 @@ describe('parseSong Helper Functions', () => {
       expect(result).toEqual([]);
     });
 
-    test('should preserve empty strings in array', () => {
-      const result = getGenreInfoFromSong(['Rock', '', 'Pop']);
-      expect(result).toEqual(['Rock', '', 'Pop']);
+    test('should split comma-delimited genres into separate entries', () => {
+      const result = getGenreInfoFromSong(['Japanese, Anime']);
+      expect(result).toEqual(['Japanese', 'Anime']);
     });
 
-    test('should handle array with many genres', () => {
-      const genres = Array.from({ length: 50 }, (_, i) => `Genre${i}`);
-      const result = getGenreInfoFromSong(genres);
-      expect(result).toEqual(genres);
+    test('should split mixed comma-delimited and separate genres', () => {
+      const result = getGenreInfoFromSong(['Japanese, Anime', 'J-Pop']);
+      expect(result).toEqual(['Japanese', 'Anime', 'J-Pop']);
     });
 
-    test('should preserve whitespace in genre names', () => {
-      const result = getGenreInfoFromSong(['  Rock  ', 'Pop']);
-      expect(result).toEqual(['  Rock  ', 'Pop']);
+    test('should trim whitespace around split genres', () => {
+      const result = getGenreInfoFromSong(['Japanese ,  Anime']);
+      expect(result).toEqual(['Japanese', 'Anime']);
+    });
+
+    test('should deduplicate repeated names from split entries', () => {
+      const result = getGenreInfoFromSong(['Japanese, Anime', 'Anime']);
+      expect(result).toEqual(['Japanese', 'Anime']);
+    });
+
+    test('should deduplicate repeated values within one string', () => {
+      const result = getGenreInfoFromSong(['Anime, Anime']);
+      expect(result).toEqual(['Anime']);
+    });
+
+    test('should deduplicate case-insensitively while preserving first-seen casing', () => {
+      const result = getGenreInfoFromSong(['Rock', 'rock', 'ROCK']);
+      expect(result).toEqual(['Rock']);
+    });
+
+    test('should keep distinct genres after dedup of a duplicate', () => {
+      const result = getGenreInfoFromSong(['J-Pop', 'Anime', 'J-Pop']);
+      expect(result).toEqual(['J-Pop', 'Anime']);
+    });
+
+    test('should filter empty strings from splitting', () => {
+      const result = getGenreInfoFromSong([',,,']);
+      expect(result).toEqual([]);
     });
 
     test('should handle genres with numbers', () => {
       const result = getGenreInfoFromSong(['80s Rock', '90s Pop']);
       expect(result).toEqual(['80s Rock', '90s Pop']);
+    });
+
+    test('should not split on forward slash', () => {
+      const result = getGenreInfoFromSong(['R&B/Soul', 'Hip-Hop/Rap']);
+      expect(result).toEqual(['R&B/Soul', 'Hip-Hop/Rap']);
+    });
+
+    test('should handle large array', () => {
+      const genres = Array.from({ length: 50 }, (_, i) => `Genre${i}`);
+      const result = getGenreInfoFromSong(genres);
+      expect(result).toEqual(genres);
     });
   });
 });
