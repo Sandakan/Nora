@@ -30,6 +30,7 @@ export interface ButtonProps {
   onMouseEnter?: (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => void;
   onMouseLeave?: (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => void;
   removeFocusOnClick?: boolean;
+  ariaPressed?: boolean;
   children?: string;
 }
 
@@ -51,7 +52,8 @@ const Button = memo((props: ButtonProps) => {
     isDisabled = false,
     isVisible = true,
     style,
-    removeFocusOnClick = true
+    removeFocusOnClick = true,
+    ariaPressed
   } = props;
 
   const [isButtonDisabled, setIsButtonDisabled] = useState(isDisabled);
@@ -106,6 +108,7 @@ const Button = memo((props: ButtonProps) => {
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       style={style}
+      aria-pressed={ariaPressed}
     >
       {isStatusPending && isButtonDisabled ? (
         <span

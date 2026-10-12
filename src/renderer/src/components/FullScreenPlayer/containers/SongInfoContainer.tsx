@@ -1,6 +1,6 @@
 import { store } from '@renderer/store/store';
 import { useStore } from '@tanstack/react-store';
-import { useCallback, useContext, useMemo, useState } from 'react';
+import { type Dispatch, type SetStateAction, useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import DefaultSongCover from '../../../assets/images/webp/song_cover_default.webp';
@@ -16,7 +16,9 @@ type Props = {
   isLyricsVisible: boolean;
   isLyricsAvailable: boolean;
   isMouseActive: boolean;
-  setIsLyricsVisible: (callback: (state: boolean) => boolean) => void;
+  isPinned: boolean;
+  setIsLyricsVisible: Dispatch<SetStateAction<boolean>>;
+  setIsPinned: Dispatch<SetStateAction<boolean>>;
 };
 
 const SongInfoContainer = (props: Props) => {
@@ -35,7 +37,7 @@ const SongInfoContainer = (props: Props) => {
   } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const { songPos, isLyricsVisible, setIsLyricsVisible, isLyricsAvailable, isMouseActive } = props;
+  const { songPos, isLyricsVisible, setIsLyricsVisible, isLyricsAvailable, isMouseActive, isPinned, setIsPinned } = props;
 
   const [isNextSongPopupVisible, setIsNextSongPopupVisible] = useState(false);
 
@@ -75,8 +77,10 @@ const SongInfoContainer = (props: Props) => {
 
   return (
     <div
-      className={`song-info-container peer/songInfoContainer group/songInfoContainer box-border flex max-h-80 w-full max-w-full flex-col gap-2 px-12 py-16 transition-[visibility,opacity] delay-200 ${
-        isLyricsVisible && isLyricsAvailable
+      className={`song-info-container peer/songInfoContainer group/songInfoContainer box-border flex max-h-80 w-full max-w-full flex-col gap-2 px-12 py-16 ${
+        isPinned ? '' : 'transition-[visibility,opacity] delay-200'
+      } ${
+        isLyricsVisible && isLyricsAvailable && !isPinned
           ? 'invisible opacity-0 group-hover/fullScreenPlayer:visible group-hover/fullScreenPlayer:opacity-100'
           : 'visible opacity-100'
       } ${!isCurrentSongPlaying && isLyricsVisible && 'visible! opacity-100!'}`}
@@ -92,10 +96,23 @@ const SongInfoContainer = (props: Props) => {
         <div className="song-controls-and-info-container flex h-full flex-col justify-between">
           <div className="song-controls-container flex h-fit items-center">
             <Button
+              className="pin-btn bg-background-color-3/15! text-font-color-white hover:bg-background-color-3/30! dark:text-font-color-white dark:after:bg-dark-font-color-highlight h-fit cursor-pointer border-0! p-3! outline-offset-1 backdrop-blur-lg! transition-[background] focus-visible:outline!"
+              iconClassName={`!text-2xl ${
+                isPinned
+                  ? 'material-icons-round text-font-color-highlight! dark:text-dark-font-color-highlight!'
+                  : 'material-icons-round-outlined'
+              }`}
+              tooltipLabel={isPinned ? t('fullScreenPlayer.unpinOverlay') : t('fullScreenPlayer.pinOverlay')}
+              clickHandler={() => setIsPinned((prev) => !prev)}
+              iconName="push_pin"
+              removeFocusOnClick={false}
+              ariaPressed={isPinned}
+            />
+            <Button
               className="favorite-btn bg-background-color-3/15! text-font-color-white hover:bg-background-color-3/30! dark:text-font-color-white dark:after:bg-dark-font-color-highlight h-fit cursor-pointer border-0! p-3! outline-offset-1 backdrop-blur-lg! transition-[background] focus-visible:outline!"
               iconClassName={`!text-2xl ${
                 currentSongData.isAFavorite
-                  ? 'meterial-icons-round text-font-color-highlight! dark:text-dark-font-color-highlight!'
+                  ? 'material-icons-round text-font-color-highlight! dark:text-dark-font-color-highlight!'
                   : 'material-icons-round-outlined'
               }`}
               isDisabled={!currentSongData.isKnownSource}
@@ -157,7 +174,15 @@ const SongInfoContainer = (props: Props) => {
             />
 
             <div
-              className={`volume-slider-container invisible mr-4 max-w-[6rem] min-w-[4rem] opacity-0 transition-[visibility,opacity] delay-150 ease-in-out lg:mr-4 ${isMouseActive && 'group-hover/songInfoContainer:visible group-hover/songInfoContainer:opacity-100'}`}
+              className={`volume-slider-container mr-4 max-w-[6rem] min-w-[4rem] lg:mr-4 ${
+                !isPinned && 'transition-[visibility,opacity] delay-150 ease-in-out'
+              } ${
+                isPinned
+                  ? 'visible opacity-100'
+                  : isMouseActive
+                    ? 'invisible opacity-0 group-hover/songInfoContainer:visible group-hover/songInfoContainer:opacity-100'
+                    : 'invisible opacity-0'
+              }`}
             >
               <VolumeSlider name="player-volume-slider" id="volumeSlider" />
             </div>
