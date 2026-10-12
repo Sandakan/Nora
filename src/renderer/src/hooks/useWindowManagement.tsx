@@ -1,5 +1,4 @@
-import { type DragEvent, type RefObject, useCallback, useEffect } from 'react';
-import { lazy } from 'react';
+import { type DragEvent, type RefObject, lazy, useCallback, useEffect } from 'react';
 
 import { appPreferences } from '../../../../package.json';
 import { store } from '../store/store';

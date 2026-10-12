@@ -68,6 +68,14 @@ const LyricsSettings = () => {
     setAutoConvertLyrics(autoConvertLyrics);
   }, []);
 
+  const [showLyricsWithSongInfo, setShowLyricsWithSongInfo] = useState(false);
+
+  useEffect(() => {
+    const showLyricsWithSongInfo = storage.preferences.getPreferences('showLyricsWithSongInfo');
+
+    setShowLyricsWithSongInfo(showLyricsWithSongInfo);
+  }, []);
+
   return (
     <li
       className="main-container audio-playback-settings-container mb-16"
@@ -166,6 +174,19 @@ const LyricsSettings = () => {
               storage.preferences.setPreferences('autoConvertLyrics', state);
             }}
             labelContent={t('settingsPage.autoConvertLyrics')}
+          />
+        </li>
+
+        <li className="secondary-container show-lyrics-with-song-info mb-4">
+          <div className="description">{t('settingsPage.showLyricsWithSongInfoDescription')}</div>
+          <Checkbox
+            id="showLyricsWithSongInfo"
+            isChecked={showLyricsWithSongInfo}
+            checkedStateUpdateFunction={(state) => {
+              setShowLyricsWithSongInfo(state);
+              storage.preferences.setPreferences('showLyricsWithSongInfo', state);
+            }}
+            labelContent={t('settingsPage.showLyricsWithSongInfo')}
           />
         </li>
       </ul>

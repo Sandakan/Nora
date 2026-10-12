@@ -534,6 +534,7 @@ declare global {
     enableImageBasedDynamicThemes: boolean;
     autoTranslateLyrics: boolean;
     autoConvertLyrics: boolean;
+    showLyricsWithSongInfo: boolean;
   }
 
   interface CurrentSong {
@@ -968,6 +969,7 @@ declare global {
     | 'PLAYLIST_IMPORT_TO_EXISTING_PLAYLIST'
     | 'SONG_REPARSE_SUCCESS'
     | 'ADDED_SONGS_TO_PLAYLIST'
+    | 'ADD_SONGS_TO_PLAYLIST_FAILED'
     | 'ARTWORK_SAVED'
     | 'RESYNC_SUCCESSFUL';
 
