@@ -73,6 +73,7 @@ function SongInfoPage() {
         updateBodyBackgroundImage(true, songInfo.artworkPaths?.artworkPath);
       }
     }
+    return () => updateBodyBackgroundImage(false);
   }, [songInfo, updateBodyBackgroundImage]);
 
   // const updateSongInfo = useCallback((callback: (prevData: SongData) => SongData) => {
