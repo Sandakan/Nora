@@ -16,6 +16,7 @@ type Props = {
   isLyricsVisible: boolean;
   isLyricsAvailable: boolean;
   isMouseActive: boolean;
+  isShowLyricsWithSongInfo?: boolean;
   setIsLyricsVisible: (callback: (state: boolean) => boolean) => void;
 };
 
@@ -35,7 +36,7 @@ const SongInfoContainer = (props: Props) => {
   } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const { songPos, isLyricsVisible, setIsLyricsVisible, isLyricsAvailable, isMouseActive } = props;
+  const { songPos, isLyricsVisible, setIsLyricsVisible, isLyricsAvailable, isMouseActive, isShowLyricsWithSongInfo } = props;
 
   const [isNextSongPopupVisible, setIsNextSongPopupVisible] = useState(false);
 
@@ -76,7 +77,7 @@ const SongInfoContainer = (props: Props) => {
   return (
     <div
       className={`song-info-container peer/songInfoContainer group/songInfoContainer box-border flex max-h-80 w-full max-w-full flex-col gap-2 px-12 py-16 transition-[visibility,opacity] delay-200 ${
-        isLyricsVisible && isLyricsAvailable
+        isLyricsVisible && isLyricsAvailable && !isShowLyricsWithSongInfo
           ? 'invisible opacity-0 group-hover/fullScreenPlayer:visible group-hover/fullScreenPlayer:opacity-100'
           : 'visible opacity-100'
       } ${!isCurrentSongPlaying && isLyricsVisible && 'visible! opacity-100!'}`}
@@ -136,16 +137,18 @@ const SongInfoContainer = (props: Props) => {
               iconName="skip_next"
               removeFocusOnClick
             />
-            <Button
-              className={`lyrics-btn !bg-background-color-3/15 text-font-color-white hover:!bg-background-color-3/30 dark:text-font-color-white h-fit cursor-pointer !border-0 !p-3 outline-offset-1 !backdrop-blur-lg transition-[background] after:absolute after:h-1 focus-visible:!outline ${
-                isLyricsVisible && 'text-dark-background-color-3! after:opacity-100'
-              }`}
-              iconClassName="text-2xl!"
-              clickHandler={() => setIsLyricsVisible((prevState) => !prevState)}
-              iconName="notes"
-              tooltipLabel={t('player.lyrics')}
-              removeFocusOnClick
-            />
+            {!isShowLyricsWithSongInfo && (
+              <Button
+                className={`lyrics-btn !bg-background-color-3/15 text-font-color-white hover:!bg-background-color-3/30 dark:text-font-color-white h-fit cursor-pointer !border-0 !p-3 outline-offset-1 !backdrop-blur-lg transition-[background] after:absolute after:h-1 focus-visible:!outline ${
+                  isLyricsVisible && 'text-dark-background-color-3! after:opacity-100'
+                }`}
+                iconClassName="text-2xl!"
+                clickHandler={() => setIsLyricsVisible((prevState) => !prevState)}
+                iconName="notes"
+                tooltipLabel={t('player.lyrics')}
+                removeFocusOnClick
+              />
+            )}
             <Button
               className={`volume-btn !bg-background-color-3/15 text-font-color-white hover:!bg-background-color-3/30 dark:text-font-color-white h-fit cursor-pointer !border-0 !p-3 outline-offset-1 !backdrop-blur-lg transition-[background] after:absolute after:h-1 focus-visible:!outline ${
                 isMuted && 'text-dark-background-color-3! after:opacity-100'

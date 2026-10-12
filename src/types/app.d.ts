@@ -534,6 +534,7 @@ declare global {
     enableImageBasedDynamicThemes: boolean;
     autoTranslateLyrics: boolean;
     autoConvertLyrics: boolean;
+    showLyricsWithSongInfo: boolean;
   }
 
   interface CurrentSong {
