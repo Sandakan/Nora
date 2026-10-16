@@ -6,6 +6,7 @@ import fr from './assets/locales/fr/fr.json';
 import ptBR from './assets/locales/pt-br/pt-br.json';
 import tr from './assets/locales/tr/tr.json';
 import vi from './assets/locales/vi/vi.json';
+import zh from './assets/locales/zh/zh.json';
 import type { DropdownOption } from './components/Dropdown';
 
 export const resources = {
@@ -13,7 +14,8 @@ export const resources = {
   tr: { translation: tr },
   vi: { translation: vi },
   'pt-BR': { translation: ptBR },
-  fr: { translation: fr }
+  fr: { translation: fr },
+  zh: { translation: zh }
 } as const;
 
 // export type LanguageCodes = keyof typeof resources;
@@ -23,7 +25,8 @@ export const supportedLanguagesDropdownOptions: DropdownOption<keyof typeof reso
   { label: `Turkish`, value: 'tr' },
   { label: `Vietnamese`, value: 'vi' },
   { label: `Português (Brasil)`, value: 'pt-BR' },
-  { label: `Français`, value: 'fr' }
+  { label: `Français`, value: 'fr' },
+  { label: `简体中文`, value: 'zh' }
 ];
 
 const { language } = await window.api.settings.getUserSettings();
