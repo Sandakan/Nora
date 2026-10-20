@@ -1,13 +1,13 @@
 name: Build/release
 
 on:
-  # push:
-  #   branches: ['master']
-
-  # pull_request:
-  #   branches: ['master']
-
   workflow_dispatch:
+    inputs:
+      create_release:
+        description: 'Create draft GitHub release'
+        required: false
+        type: boolean
+        default: true
 
 env:
   MAIN_VITE_LAST_FM_API_KEY: ${{ secrets.LAST_FM_API_KEY }}
@@ -17,14 +17,9 @@ env:
   MAIN_VITE_DISCORD_CLIENT_ID: ${{ secrets.DISCORD_CLIENT_ID }}
 
 jobs:
-  release:
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-
+  test-js:
+    name: Test JS/TS
+    runs-on: ubuntu-latest
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v7
@@ -36,20 +31,25 @@ jobs:
           check-latest: true
           cache: npm
 
-      - name: Install Dependencies
-        run: |
-          npm ci --no-fund --no-audit --include=optional
-          npm rebuild rollup
+      - name: Install dependencies
+        run: npm ci --no-fund --no-audit --include=optional
 
-      # - name: Install correct Sharp Dependencies
-      #   run: |
-      #     npm remove sharp
-      #     npm install --cpu=wasm32 sharp --no-fund --no-audit --include=optional
+      - name: Run TypeScript typecheck
+        run: npm run typecheck
 
-      - name: Set up Rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          cache-workspaces: audio-engine
+      - name: Run Vitest tests
+        run: npm test
+
+  test-rust:
+    name: Test Rust (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v7
 
       - name: Install Linux audio dependencies
         if: matrix.os == 'ubuntu-latest'
@@ -57,26 +57,142 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libasound2-dev pkg-config
 
+      - name: Set up Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v2
+        with:
+          cache-workspaces: audio-engine
+
+      - name: Run Cargo tests
+        run: cargo test --manifest-path audio-engine/Cargo.toml
+
+  build-vite:
+    name: Build Electron/Vite Bundle
+    needs: [test-js]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 'lts/*'
+          check-latest: true
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --no-fund --no-audit --include=optional
+
+      - name: Build Vite bundle
+        run: npx electron-vite build
+
+      - name: Upload Vite build artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: vite-out
+          path: out/
+          retention-days: 1
+
+  build-rust:
+    name: Build Native Audio Engine (${{ matrix.os }})
+    needs: [test-rust]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 'lts/*'
+          check-latest: true
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --no-fund --no-audit --include=optional
+
+      - name: Install Linux audio dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev pkg-config
+
+      - name: Set up Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v2
+        with:
+          cache-workspaces: audio-engine
+
       - name: Build Native Audio Engine
         run: npm run build:engine
 
-      - name: build-linux
+      - name: Upload Audio Engine artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: audio-engine-${{ matrix.os }}
+          path: audio-engine/dist/
+          retention-days: 1
+
+  package-electron:
+    name: Package Electron App (${{ matrix.os }})
+    needs: [build-vite, build-rust]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 'lts/*'
+          check-latest: true
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          npm ci --no-fund --no-audit --include=optional
+          npm rebuild rollup
+
+      - name: Download Vite build artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: vite-out
+          path: out
+
+      - name: Download Audio Engine artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: audio-engine-${{ matrix.os }}
+          path: audio-engine/dist
+
+      - name: Ensure workspace audio-engine dist synchronization
+        run: node -e "const fs = require('fs'); const src = 'audio-engine/dist'; const dest = 'node_modules/audio-engine/dist'; if (fs.existsSync(src) && !fs.existsSync(dest)) { fs.cpSync(src, dest, { recursive: true }); }"
+
+      - name: Package Linux
         if: matrix.os == 'ubuntu-latest'
-        run: npm run build:linux
+        run: npm run package:linux
 
-      - name: build-macos
+      - name: Package macOS
         if: matrix.os == 'macos-latest'
-        run: npm run build:mac-arm64
+        run: npm run package:mac-arm64
 
-      - name: build-win
+      - name: Package Windows
         if: matrix.os == 'windows-latest'
-        run: npm run build:win-x64
+        run: npm run package:win-x64
 
-      - name: release
+      - name: Create draft release
+        if: inputs.create_release == true || inputs.create_release == 'true'
         uses: softprops/action-gh-release@v3
         with:
           draft: true
-          name: Nora Release ${{ github.ref }} ${{ github.sha }}
+          name: Nora Release ${{ github.ref_name }} ${{ github.sha }}
           files: |
             dist/*.exe
             dist/*.zip

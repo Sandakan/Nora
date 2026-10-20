@@ -284,6 +284,8 @@ if (process.platform === 'win32') {
   app.setAppUserModelId('com.sandakannipunajith.nora');
 }
 
+app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
+
 let hideWindowOnClose = false;
 let isAppQuitting = false;
 

@@ -6,6 +6,8 @@ import { equalizerBandHertzData } from './equalizerData';
 import PlayerQueue from './playerQueue';
 
 const AUDIO_FADE_DURATION = 250;
+const SILENT_AUDIO_URI =
+  'data:audio/wav;base64,UklGRkQDAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YSADAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==';
 
 type PlayerEventType =
   | 'timeUpdate'
@@ -43,6 +45,7 @@ class AudioPlayer extends EventTarget {
   currentContext: AudioContext;
   equalizerBands: Map<EqualizerBandFilters, BiquadFilterNode>;
   gainNode: GainNode;
+  private silentMediaStreamNode: MediaStreamAudioDestinationNode | null = null;
 
   unsubscribeFunc: Subscription;
 
@@ -173,33 +176,35 @@ class AudioPlayer extends EventTarget {
    * errors, etc.
    */
   private setupAudioEventListeners() {
-    this.audio.addEventListener('ended', () => this.handleSongEnd());
+    this.audio.addEventListener('ended', () => {
+      if (!this.isUsingNativeEngine) this.handleSongEnd();
+    });
 
     this.audio.addEventListener('timeupdate', () => {
-      this.emit('timeUpdate', this.audio.currentTime);
+      if (!this.isUsingNativeEngine) this.emit('timeUpdate', this.audio.currentTime);
     });
 
     this.audio.addEventListener('loadedmetadata', () => {
-      this.emit('durationChange', this.audio.duration);
+      if (!this.isUsingNativeEngine) this.emit('durationChange', this.audio.duration);
     });
 
     this.audio.addEventListener('play', () => {
-      this.emit('play');
+      if (!this.isUsingNativeEngine) this.emit('play');
     });
 
     this.audio.addEventListener('pause', () => {
-      this.emit('pause');
+      if (!this.isUsingNativeEngine) this.emit('pause');
     });
 
     this.audio.addEventListener('error', async (e) => {
       if (this.isUsingNativeEngine) return;
-      if (window.api?.audioEngine && this.currentSongData) {
+      if (window.api?.audioEngine && this.currentSongData && !this.paused) {
         console.warn(
           '[AudioPlayer] HTML5 Audio failed to decode track. Falling back to native Rust audio engine...',
           e
         );
         try {
-          await this.playWithNativeEngine(true);
+          await this.playWithNativeEngine(false);
           return;
         } catch (fallbackError) {
           console.error('[AudioPlayer] Native audio engine fallback failed:', fallbackError);
@@ -209,11 +214,11 @@ class AudioPlayer extends EventTarget {
     });
 
     this.audio.addEventListener('seeking', () => {
-      this.emit('seeking');
+      if (!this.isUsingNativeEngine) this.emit('seeking');
     });
 
     this.audio.addEventListener('seeked', () => {
-      this.emit('seeked', this.currentTime);
+      if (!this.isUsingNativeEngine) this.emit('seeked', this.currentTime);
     });
   }
 
@@ -260,12 +265,37 @@ class AudioPlayer extends EventTarget {
     }
   }
 
+  private initializeSilentAnchor() {
+    if (this.currentContext.state === 'suspended') {
+      this.currentContext.resume().catch((err) => {
+        console.warn('[AudioPlayer] AudioContext resume failed:', err);
+      });
+    }
+    if (!this.silentMediaStreamNode) {
+      try {
+        this.silentMediaStreamNode = this.currentContext.createMediaStreamDestination();
+        const silence = this.currentContext.createGain();
+        silence.gain.value = 0;
+        silence.connect(this.silentMediaStreamNode);
+        this.audio.srcObject = this.silentMediaStreamNode.stream;
+        this.audio.volume = 0.01;
+      } catch (err) {
+        console.warn(
+          '[AudioPlayer] Failed to create silent MediaStream anchor, falling back to data URI:',
+          err
+        );
+        this.audio.src = SILENT_AUDIO_URI;
+        this.audio.loop = true;
+        this.audio.volume = 0.01;
+      }
+    }
+  }
+
   private async playWithNativeEngine(autoPlay = true): Promise<void> {
     if (!this.currentSongData || !window.api?.audioEngine) return;
 
-    // Silence and detach HTML5 audio element
-    this.audio.pause();
-    this.audio.removeAttribute('src');
+    // Maintain active silent anchor so Chromium links MediaSession with Windows SMTC
+    this.initializeSilentAnchor();
 
     const rawPath = window.api.utils?.removeDefaultAppProtocolFromFilePath
       ? window.api.utils.removeDefaultAppProtocolFromFilePath(this.currentSongData.path)
@@ -300,10 +330,14 @@ class AudioPlayer extends EventTarget {
       if (autoPlay) {
         this.nativeIsPaused = false;
         this.emit('play');
+        this.audio.play().catch((err) => {
+          console.warn('[AudioPlayer] Silent audio anchor play prevented:', err);
+        });
         this.startNativeTicker();
       } else {
         this.nativeIsPaused = true;
         this.emit('pause');
+        this.audio.pause();
       }
     } catch (err) {
       console.error('[AudioPlayer.playWithNativeEngine] Failed to load track:', err);
@@ -325,6 +359,7 @@ class AudioPlayer extends EventTarget {
     if (this.isUsingNativeEngine) {
       this.stopNativeTicker();
       this.nativeIsPaused = true;
+      this.audio.pause();
     }
 
     if (this.repeatMode === 'one') {
@@ -481,6 +516,11 @@ class AudioPlayer extends EventTarget {
     this.queue.removeAllListeners();
     this.removeAllListeners();
     this.audio.pause();
+    if (this.silentMediaStreamNode) {
+      this.silentMediaStreamNode.disconnect();
+      this.silentMediaStreamNode = null;
+    }
+    this.audio.srcObject = null;
     this.audio.src = '';
     this.currentLoadedSongId = null;
     this.currentContext.close();
@@ -755,10 +795,19 @@ class AudioPlayer extends EventTarget {
   /** Starts or resumes audio playback with fade-in effect. */
   play() {
     if (this.isUsingNativeEngine) {
+      if (!this.nativeIsPaused) {
+        return Promise.resolve();
+      }
       this.nativeIsPaused = false;
       this.startNativeTicker();
       this.emit('play');
+      this.audio.play().catch((err) => {
+        console.warn('[AudioPlayer] Silent audio anchor play prevented:', err);
+      });
       return this.fadeInAudioNative();
+    }
+    if (!this.audio.paused) {
+      return Promise.resolve();
     }
     this.audio.play();
     return this.fadeInAudio();
@@ -767,10 +816,17 @@ class AudioPlayer extends EventTarget {
   /** Pauses audio playback with fade-out effect. */
   pause() {
     if (this.isUsingNativeEngine) {
+      if (this.nativeIsPaused) {
+        return Promise.resolve();
+      }
       this.nativeIsPaused = true;
       this.stopNativeTicker();
       this.emit('pause');
+      this.audio.pause();
       return this.fadeOutAudioNative();
+    }
+    if (this.audio.paused) {
+      return Promise.resolve();
     }
     return this.fadeOutAudio();
   }
@@ -782,7 +838,7 @@ class AudioPlayer extends EventTarget {
    * @returns Promise that resolves when fade completes
    */
   async togglePlayback(forcePlay?: boolean): Promise<void> {
-    const shouldPlay = forcePlay !== undefined ? forcePlay : this.paused;
+    const shouldPlay = typeof forcePlay === 'boolean' ? forcePlay : this.paused;
 
     if (shouldPlay) {
       if (this.isUsingNativeEngine || this.audio.readyState > 0) {
@@ -817,7 +873,7 @@ class AudioPlayer extends EventTarget {
       recordListening?: boolean;
       onError?: (error: unknown) => void;
     } = {}
-  ): Promise<void> {
+  ): Promise<AudioPlayerData | void> {
     const { autoPlay = true, recordListening = true, onError } = options;
 
     try {
@@ -834,6 +890,8 @@ class AudioPlayer extends EventTarget {
         // Note: Listening data recording will be handled by the hook until fully migrated
         this.emit('recordListening', { songId, duration: songData.duration });
       }
+
+      return songData;
     } catch (error) {
       if (onError) {
         onError(error);

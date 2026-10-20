@@ -153,15 +153,20 @@ export function useAppLifecycle(dependencies: AppLifecycleDependencies): void {
         if (startUpSongData) {
           playSongFromUnknownSource(startUpSongData, true);
         } else if (playback?.currentSong?.songId) {
-          // Resume previous song
-          playSong(playback.currentSong.songId, false);
-
-          const currSongPosition = Number(playback.currentSong.stoppedPosition);
-          player.currentTime = currSongPosition;
-          dispatch({
-            type: 'UPDATE_SONG_POSITION',
-            data: currSongPosition
-          });
+          // Resume previous song in paused state at saved position
+          const songId = playback.currentSong.songId;
+          const currSongPosition = Number(playback.currentSong.stoppedPosition) || 0;
+          Promise.resolve(playSong(songId, false))
+            .then(() => {
+              player.currentTime = currSongPosition;
+              dispatch({
+                type: 'UPDATE_SONG_POSITION',
+                data: currSongPosition
+              });
+            })
+            .catch((err) => {
+              console.error('[useAppLifecycle] Failed to stage startup song:', err);
+            });
         }
         return undefined;
       })
