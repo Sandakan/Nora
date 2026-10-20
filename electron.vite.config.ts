@@ -102,8 +102,9 @@ export default defineConfig({
         generatedRouteTree: 'src/routeTree.gen.ts',
         autoCodeSplitting: true
       }),
-      react(),
-      // babel({ presets: [reactCompilerPreset()] }),
+      react({
+        compiler: true,
+      }),
       tailwindcss()
     ]
   }
