@@ -4,6 +4,7 @@ pub mod engine;
 pub mod logger;
 pub mod resampler;
 pub mod ring_buffer;
+pub mod media_controls;
 pub mod ticker;
 
 use napi::threadsafe_function::{ThreadsafeFunction, ThreadsafeFunctionCallMode};
@@ -117,11 +118,76 @@ pub fn ping() -> String {
     "pong from audio-engine".to_string()
 }
 
+#[derive(Clone)]
+#[napi(object)]
+pub struct JsMediaMetadata {
+    pub title: Option<String>,
+    pub artist: Option<String>,
+    pub album: Option<String>,
+    pub duration_secs: Option<f64>,
+    pub cover_url: Option<String>,
+}
+
+impl From<JsMediaMetadata> for media_controls::CachedMetadata {
+    fn from(m: JsMediaMetadata) -> Self {
+        Self {
+            title: m.title,
+            artist: m.artist,
+            album: m.album,
+            duration_secs: m.duration_secs,
+            cover_url: m.cover_url,
+        }
+    }
+}
+
+#[napi(js_name = "engineInitMediaControls")]
+pub fn engine_init_media_controls(
+    hwnd_buf: Option<napi::bindgen_prelude::Buffer>,
+    callback: ThreadsafeFunction<String>,
+) -> napi::Result<()> {
+    let hwnd_ptr: Option<*mut std::ffi::c_void> = hwnd_buf.and_then(|buf| {
+        let slice = buf.as_ref();
+        if slice.len() == 8 {
+            let mut arr = [0u8; 8];
+            arr.copy_from_slice(slice);
+            let ptr_val = usize::from_ne_bytes(arr);
+            if ptr_val != 0 {
+                Some(ptr_val as *mut std::ffi::c_void)
+            } else {
+                None
+            }
+        } else if slice.len() == 4 {
+            let mut arr = [0u8; 4];
+            arr.copy_from_slice(slice);
+            let ptr_val = u32::from_ne_bytes(arr) as usize;
+            if ptr_val != 0 {
+                Some(ptr_val as *mut std::ffi::c_void)
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    });
+
+    media_controls::init_media_controls(hwnd_ptr, callback)
+        .map_err(|e| napi::Error::from_reason(e))?;
+    Ok(())
+}
+
+#[napi(js_name = "engineUpdateMetadata")]
+pub fn engine_update_metadata(metadata: JsMediaMetadata) -> napi::Result<()> {
+    media_controls::update_metadata(metadata.into())
+        .map_err(|e| napi::Error::from_reason(e))?;
+    Ok(())
+}
+
 #[napi(object)]
 pub struct LoadOptions {
     pub auto_play: Option<bool>,
     pub volume: Option<f64>,
     pub playback_rate: Option<f64>,
+    pub metadata: Option<JsMediaMetadata>,
 }
 
 #[napi(object)]
@@ -144,6 +210,7 @@ pub fn engine_load(path: String, options: Option<LoadOptions>) -> napi::Result<J
     let on_end = {
         let cb_clone = ON_ENDED_CALLBACK.clone();
         Some(move || {
+            let _ = media_controls::set_playback_stopped();
             if let Ok(guard) = cb_clone.lock() {
                 if let Some(ref tsfn) = *guard {
                     let _ = tsfn.call(Ok(()), ThreadsafeFunctionCallMode::NonBlocking);
@@ -174,6 +241,18 @@ pub fn engine_load(path: String, options: Option<LoadOptions>) -> napi::Result<J
         )
         .map_err(|e| napi::Error::from_reason(e))?;
 
+    if let Some(opts) = options.as_ref() {
+        if let Some(ref m) = opts.metadata {
+            let _ = media_controls::update_metadata(m.clone().into());
+        }
+    }
+
+    if auto_play {
+        let _ = media_controls::set_playback_playing(Some(0.0));
+    } else {
+        let _ = media_controls::set_playback_paused(Some(0.0));
+    }
+
     Ok(JsAudioMetadata {
         duration_secs: meta.duration_secs,
         sample_rate: meta.sample_rate,
@@ -190,6 +269,7 @@ pub fn engine_play(path: String) -> napi::Result<()> {
     let on_end = {
         let cb_clone = ON_ENDED_CALLBACK.clone();
         Some(move || {
+            let _ = media_controls::set_playback_stopped();
             if let Ok(guard) = cb_clone.lock() {
                 if let Some(ref tsfn) = *guard {
                     let _ = tsfn.call(Ok(()), ThreadsafeFunctionCallMode::NonBlocking);
@@ -216,7 +296,10 @@ pub fn engine_play(path: String) -> napi::Result<()> {
             on_end,
             on_err,
         )
-        .map_err(|e| napi::Error::from_reason(e))
+        .map_err(|e| napi::Error::from_reason(e))?;
+
+    let _ = media_controls::set_playback_playing(Some(0.0));
+    Ok(())
 }
 
 #[napi(js_name = "enginePause")]
@@ -224,7 +307,9 @@ pub fn engine_pause() -> napi::Result<()> {
     let engine = GLOBAL_ENGINE
         .lock()
         .map_err(|_| napi::Error::from_reason("Failed to lock engine mutex"))?;
+    let pos = engine.get_position();
     engine.pause();
+    let _ = media_controls::set_playback_paused(Some(pos));
     Ok(())
 }
 
@@ -233,7 +318,9 @@ pub fn engine_resume() -> napi::Result<()> {
     let engine = GLOBAL_ENGINE
         .lock()
         .map_err(|_| napi::Error::from_reason("Failed to lock engine mutex"))?;
+    let pos = engine.get_position();
     engine.resume();
+    let _ = media_controls::set_playback_playing(Some(pos));
     Ok(())
 }
 
@@ -243,6 +330,7 @@ pub fn engine_stop() -> napi::Result<()> {
         .lock()
         .map_err(|_| napi::Error::from_reason("Failed to lock engine mutex"))?;
     engine.stop();
+    let _ = media_controls::set_playback_stopped();
     Ok(())
 }
 
@@ -252,6 +340,11 @@ pub fn engine_seek(position_secs: f64) -> napi::Result<()> {
         .lock()
         .map_err(|_| napi::Error::from_reason("Failed to lock engine mutex"))?;
     engine.seek(position_secs);
+    if engine.is_playing() {
+        let _ = media_controls::set_playback_playing(Some(position_secs));
+    } else {
+        let _ = media_controls::set_playback_paused(Some(position_secs));
+    }
     Ok(())
 }
 
@@ -365,5 +458,6 @@ pub fn engine_destroy() -> napi::Result<()> {
         .lock()
         .map_err(|_| napi::Error::from_reason("Failed to lock engine mutex"))?;
     engine.stop();
+    let _ = media_controls::set_playback_stopped();
     Ok(())
 }

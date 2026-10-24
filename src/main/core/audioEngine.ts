@@ -12,10 +12,19 @@ export interface AudioMetadata {
   channels: number;
 }
 
+export interface JsMediaMetadata {
+  title?: string;
+  artist?: string;
+  album?: string;
+  durationSecs?: number;
+  coverUrl?: string;
+}
+
 export interface LoadOptions {
   autoPlay?: boolean;
   volume?: number;
   playbackRate?: number;
+  metadata?: JsMediaMetadata;
 }
 
 export interface JsLogRecord {
@@ -41,6 +50,11 @@ export interface AudioEngineNative {
   engineOnEnded?(callback: (err: Error | null) => void): void;
   engineOnError?(callback: (err: Error | null, message: string) => void): void;
   engineInitLogger?(callback: (err: Error | null, record: JsLogRecord) => void): void;
+  engineInitMediaControls?(
+    hwndBuf: Buffer | null,
+    callback: (err: Error | null, event: string) => void
+  ): void;
+  engineUpdateMetadata?(metadata: JsMediaMetadata): void;
   engineListDevices(): string[];
   engineSetDevice(deviceName: string): void;
   engineSetPlaybackRate(rate: number): void;
@@ -222,6 +236,31 @@ export const audioEngine = {
       }
     } catch (err) {
       logger.error('Failed to initialize engineInitLogger callback', { error: String(err) });
+    }
+  },
+  initMediaControls: (hwnd?: Buffer, onEvent?: (event: string) => void): void => {
+    try {
+      const eng = getAudioEngine();
+      if (typeof eng.engineInitMediaControls === 'function') {
+        eng.engineInitMediaControls(hwnd ?? null, (err, event) => {
+          if (!err && event && onEvent) {
+            onEvent(event);
+          }
+        });
+        logger.info('Native media controls initialized via audioEngine');
+      }
+    } catch (err) {
+      logger.error('Failed to initialize native media controls', { error: String(err) });
+    }
+  },
+  updateMetadata: (metadata: JsMediaMetadata): void => {
+    try {
+      const eng = getAudioEngine();
+      if (typeof eng.engineUpdateMetadata === 'function') {
+        eng.engineUpdateMetadata(metadata);
+      }
+    } catch (err) {
+      logger.error('Failed to update media controls metadata', { error: String(err) });
     }
   },
   listDevices: (): string[] => {

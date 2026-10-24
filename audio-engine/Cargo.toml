@@ -17,6 +17,7 @@ rubato = "5.0"
 log = "0.4"
 env_logger = "0.11"
 lazy_static = "1.5"
+souvlaki = { version = "0.8", default-features = false, features = ["use_zbus"] }
 
 [build-dependencies]
 napi-build = "2.6"

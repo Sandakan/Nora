@@ -639,8 +639,32 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       (
         _,
         filePath: string,
-        options?: { autoPlay?: boolean; volume?: number; playbackRate?: number }
+        options?: {
+          autoPlay?: boolean;
+          volume?: number;
+          playbackRate?: number;
+          metadata?: {
+            title?: string;
+            artist?: string;
+            album?: string;
+            durationSecs?: number;
+            coverUrl?: string;
+          };
+        }
       ) => audioEngine.load(filePath, options)
+    );
+    ipcMain.handle(
+      'app/audioEngine/updateMetadata',
+      (
+        _,
+        metadata: {
+          title?: string;
+          artist?: string;
+          album?: string;
+          durationSecs?: number;
+          coverUrl?: string;
+        }
+      ) => audioEngine.updateMetadata(metadata)
     );
     ipcMain.handle('app/audioEngine/play', (_, filePath: string) => audioEngine.play(filePath));
     ipcMain.handle('app/audioEngine/pause', () => audioEngine.pause());

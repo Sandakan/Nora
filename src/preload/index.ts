@@ -1,3 +1,5 @@
+import { pathToFileURL } from 'url';
+
 import { contextBridge, ipcRenderer, webUtils } from 'electron';
 
 import type { LastFMAlbumInfo } from '../types/last_fm_album_info_api';
@@ -64,9 +66,27 @@ const audioEngine = {
   ping: (): Promise<string> => ipcRenderer.invoke('app/audioEngine/ping'),
   load: (
     filePath: string,
-    options?: { autoPlay?: boolean; volume?: number; playbackRate?: number }
+    options?: {
+      autoPlay?: boolean;
+      volume?: number;
+      playbackRate?: number;
+      metadata?: {
+        title?: string;
+        artist?: string;
+        album?: string;
+        durationSecs?: number;
+        coverUrl?: string;
+      };
+    }
   ): Promise<{ durationSecs: number; sampleRate: number; channels: number }> =>
     ipcRenderer.invoke('app/audioEngine/load', filePath, options),
+  updateMetadata: (metadata: {
+    title?: string;
+    artist?: string;
+    album?: string;
+    durationSecs?: number;
+    coverUrl?: string;
+  }): Promise<void> => ipcRenderer.invoke('app/audioEngine/updateMetadata', metadata),
   play: (filePath: string): Promise<void> => ipcRenderer.invoke('app/audioEngine/play', filePath),
   pause: (): Promise<void> => ipcRenderer.invoke('app/audioEngine/pause'),
   resume: (): Promise<void> => ipcRenderer.invoke('app/audioEngine/resume'),
@@ -642,6 +662,9 @@ const utils = {
   },
   removeDefaultAppProtocolFromFilePath: (filePath: string) => {
     return filePath.replace(/nora:[/\\]{1,2}localfiles[/\\]{1,2}|\?.*$/g, '');
+  },
+  pathToFileURL: (filePath: string) => {
+    return pathToFileURL(filePath).href;
   }
 };
 

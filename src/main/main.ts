@@ -261,6 +261,22 @@ const createWindow = async () => {
     return { action: 'deny' };
   });
 
+  const hwnd = process.platform === 'win32' ? mainWindow.getNativeWindowHandle() : undefined;
+  audioEngine.initMediaControls(hwnd, (event) => {
+    logger.debug(`OS Media Control Event received: ${event}`);
+    if (!mainWindow || mainWindow.isDestroyed()) return;
+
+    if (event === 'toggle' || event === 'play' || event === 'pause') {
+      mainWindow.webContents.send('app/player/toggleSongPlaybackState');
+    } else if (event === 'next') {
+      mainWindow.webContents.send('app/player/skipForward');
+    } else if (event === 'previous') {
+      mainWindow.webContents.send('app/player/skipBackward');
+    } else if (event === 'stop') {
+      mainWindow.webContents.send('app/player/toggleSongPlaybackState');
+    }
+  });
+
   // mainWindow.on('closed', () => {
   //   // Dereference the window object
   //   mainWindow = null;
@@ -285,6 +301,7 @@ if (process.platform === 'win32') {
 }
 
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
+app.commandLine.appendSwitch('disable-features', 'HardwareMediaKeyHandling');
 
 let hideWindowOnClose = false;
 let isAppQuitting = false;

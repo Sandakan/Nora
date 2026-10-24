@@ -17,7 +17,6 @@ import { useDiscordRpc } from './hooks/useDiscordRpc';
 import { useDynamicTheme } from './hooks/useDynamicTheme';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useListeningData } from './hooks/useListeningData';
-import { useMediaSession } from './hooks/useMediaSession';
 import { useMultiSelection } from './hooks/useMultiSelection';
 // ? HOOKS
 import useNetworkConnectivity from './hooks/useNetworkConnectivity';
@@ -237,15 +236,6 @@ export default function App() {
       dispatch({ type: 'UPDATE_PLAYER_TYPE', data: type });
     }
   }, []);
-
-  // ? INITIALIZE MEDIA SESSION
-  // Media session hook handles OS-level media controls and browser media notifications
-  useMediaSession(player, {
-    toggleSongPlayback,
-    handleSkipBackwardClick,
-    handleSkipForwardClick,
-    updateSongPosition
-  });
 
   // ? INITIALIZE DISCORD RPC
   // Discord RPC hook handles Discord Rich Presence integration

@@ -6,9 +6,6 @@ import { equalizerBandHertzData } from './equalizerData';
 import PlayerQueue from './playerQueue';
 
 const AUDIO_FADE_DURATION = 250;
-const SILENT_AUDIO_URI =
-  'data:audio/wav;base64,UklGRkQDAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YSADAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==';
-
 type PlayerEventType =
   | 'timeUpdate'
   | 'durationChange'
@@ -45,7 +42,6 @@ class AudioPlayer extends EventTarget {
   currentContext: AudioContext;
   equalizerBands: Map<EqualizerBandFilters, BiquadFilterNode>;
   gainNode: GainNode;
-  private silentMediaStreamNode: MediaStreamAudioDestinationNode | null = null;
 
   unsubscribeFunc: Subscription;
 
@@ -265,37 +261,10 @@ class AudioPlayer extends EventTarget {
     }
   }
 
-  private initializeSilentAnchor() {
-    if (this.currentContext.state === 'suspended') {
-      this.currentContext.resume().catch((err) => {
-        console.warn('[AudioPlayer] AudioContext resume failed:', err);
-      });
-    }
-    if (!this.silentMediaStreamNode) {
-      try {
-        this.silentMediaStreamNode = this.currentContext.createMediaStreamDestination();
-        const silence = this.currentContext.createGain();
-        silence.gain.value = 0;
-        silence.connect(this.silentMediaStreamNode);
-        this.audio.srcObject = this.silentMediaStreamNode.stream;
-        this.audio.volume = 0.01;
-      } catch (err) {
-        console.warn(
-          '[AudioPlayer] Failed to create silent MediaStream anchor, falling back to data URI:',
-          err
-        );
-        this.audio.src = SILENT_AUDIO_URI;
-        this.audio.loop = true;
-        this.audio.volume = 0.01;
-      }
-    }
-  }
+
 
   private async playWithNativeEngine(autoPlay = true): Promise<void> {
     if (!this.currentSongData || !window.api?.audioEngine) return;
-
-    // Maintain active silent anchor so Chromium links MediaSession with Windows SMTC
-    this.initializeSilentAnchor();
 
     const rawPath = window.api.utils?.removeDefaultAppProtocolFromFilePath
       ? window.api.utils.removeDefaultAppProtocolFromFilePath(this.currentSongData.path)
@@ -312,11 +281,24 @@ class AudioPlayer extends EventTarget {
     }
 
     const effectiveVolume = this.muted ? 0 : this.volume;
+    const coverUrl = this.currentSongData.artworkPath
+      ? window.api.utils?.pathToFileURL
+        ? window.api.utils.pathToFileURL(this.currentSongData.artworkPath)
+        : `file:///${this.currentSongData.artworkPath.replace(/\\/g, '/')}`
+      : undefined;
+
     try {
       const meta = await window.api.audioEngine.load(rawPath, {
         autoPlay,
         volume: effectiveVolume,
-        playbackRate: this.playbackRate
+        playbackRate: this.playbackRate,
+        metadata: {
+          title: this.currentSongData.title,
+          artist: this.currentSongData.artists?.map((a) => a.name).join(', ') || 'Unknown Artist',
+          album: this.currentSongData.album?.name || 'Unknown Album',
+          durationSecs: this.currentSongData.duration,
+          coverUrl
+        }
       });
 
       this.isUsingNativeEngine = true;
@@ -330,14 +312,10 @@ class AudioPlayer extends EventTarget {
       if (autoPlay) {
         this.nativeIsPaused = false;
         this.emit('play');
-        this.audio.play().catch((err) => {
-          console.warn('[AudioPlayer] Silent audio anchor play prevented:', err);
-        });
         this.startNativeTicker();
       } else {
         this.nativeIsPaused = true;
         this.emit('pause');
-        this.audio.pause();
       }
     } catch (err) {
       console.error('[AudioPlayer.playWithNativeEngine] Failed to load track:', err);
@@ -359,7 +337,6 @@ class AudioPlayer extends EventTarget {
     if (this.isUsingNativeEngine) {
       this.stopNativeTicker();
       this.nativeIsPaused = true;
-      this.audio.pause();
     }
 
     if (this.repeatMode === 'one') {
@@ -516,10 +493,6 @@ class AudioPlayer extends EventTarget {
     this.queue.removeAllListeners();
     this.removeAllListeners();
     this.audio.pause();
-    if (this.silentMediaStreamNode) {
-      this.silentMediaStreamNode.disconnect();
-      this.silentMediaStreamNode = null;
-    }
     this.audio.srcObject = null;
     this.audio.src = '';
     this.currentLoadedSongId = null;
@@ -801,9 +774,6 @@ class AudioPlayer extends EventTarget {
       this.nativeIsPaused = false;
       this.startNativeTicker();
       this.emit('play');
-      this.audio.play().catch((err) => {
-        console.warn('[AudioPlayer] Silent audio anchor play prevented:', err);
-      });
       return this.fadeInAudioNative();
     }
     if (!this.audio.paused) {
@@ -822,7 +792,6 @@ class AudioPlayer extends EventTarget {
       this.nativeIsPaused = true;
       this.stopNativeTicker();
       this.emit('pause');
-      this.audio.pause();
       return this.fadeOutAudioNative();
     }
     if (this.audio.paused) {
