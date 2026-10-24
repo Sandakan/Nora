@@ -27,6 +27,7 @@ import { version, appPreferences } from '../../package.json';
 import noraAppIcon from '../../resources/logo_light_mode.png?asset';
 import roundTo from '../common/roundTo';
 import manageLastFmAuth from './auth/manageLastFmAuth';
+import audioEngine from './core/audioEngine';
 import changeAppTheme from './core/changeAppTheme';
 import checkForNewSongs from './core/checkForNewSongs';
 import checkForStartUpSongs from './core/checkForStartUpSongs';
@@ -260,6 +261,22 @@ const createWindow = async () => {
     return { action: 'deny' };
   });
 
+  const hwnd = process.platform === 'win32' ? mainWindow.getNativeWindowHandle() : undefined;
+  audioEngine.initMediaControls(hwnd, (event) => {
+    logger.debug(`OS Media Control Event received: ${event}`);
+    if (!mainWindow || mainWindow.isDestroyed()) return;
+
+    if (event === 'toggle' || event === 'play' || event === 'pause') {
+      mainWindow.webContents.send('app/player/toggleSongPlaybackState');
+    } else if (event === 'next') {
+      mainWindow.webContents.send('app/player/skipForward');
+    } else if (event === 'previous') {
+      mainWindow.webContents.send('app/player/skipBackward');
+    } else if (event === 'stop') {
+      mainWindow.webContents.send('app/player/toggleSongPlaybackState');
+    }
+  });
+
   // mainWindow.on('closed', () => {
   //   // Dereference the window object
   //   mainWindow = null;
@@ -282,6 +299,9 @@ protocol.registerSchemesAsPrivileged([
 if (process.platform === 'win32') {
   app.setAppUserModelId('com.sandakannipunajith.nora');
 }
+
+app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
+app.commandLine.appendSwitch('disable-features', 'HardwareMediaKeyHandling');
 
 let hideWindowOnClose = false;
 let isAppQuitting = false;
@@ -485,6 +505,12 @@ async function handleBeforeQuit() {
       const promise4 = clearTempArtworkFolder();
 
       await Promise.all([promise1, promise2, promise3, promise4]);
+
+      try {
+        audioEngine.destroy();
+      } catch (err) {
+        logger.error('Failed to destroy audio-engine during quit', { err });
+      }
 
       mainWindow.webContents.send('app/beforeQuitEvent');
       await closeDatabaseInstance();

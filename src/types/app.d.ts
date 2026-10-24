@@ -70,7 +70,22 @@ declare global {
     | 'app/player/skipForward'
     | 'app/player/skipBackward'
     | 'app/player/toggleSongPlaybackState'
-    | 'app/player/skipBackward';
+    | 'app/player/skipBackward'
+    | 'app/audioEngine/ping'
+    | 'app/audioEngine/play'
+    | 'app/audioEngine/pause'
+    | 'app/audioEngine/resume'
+    | 'app/audioEngine/stop'
+    | 'app/audioEngine/seek'
+    | 'app/audioEngine/setVolume'
+    | 'app/audioEngine/setVolumeWithRamp'
+    | 'app/audioEngine/getPosition'
+    | 'app/audioEngine/getDuration'
+    | 'app/audioEngine/listDevices'
+    | 'app/audioEngine/setDevice'
+    | 'app/audioEngine/setPlaybackRate'
+    | 'app/audioEngine/setEqBand'
+    | 'app/audioEngine/resetEq';
 
   interface ImageCoverData {
     format: string;

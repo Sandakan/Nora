@@ -1,6 +1,7 @@
 import { lazy, useCallback, useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import type AudioPlayer from '../other/player';
 import log from '../utils/log';
 
 const ErrorPrompt = lazy(() => import('../components/ErrorPrompt'));
@@ -8,13 +9,13 @@ const ErrorPrompt = lazy(() => import('../components/ErrorPrompt'));
 const MEDIA_ERR_SRC_NOT_SUPPORTED = 4;
 
 /**
- * Provides handlers to manage and recover from HTMLAudioElement playback errors.
+ * Provides handlers to manage and recover from player playback errors.
  *
  * The hook returns a recovery function that attempts automatic retries, skips tracks for
  * unsupported sources, and shows a user-facing error prompt after repeated failures, plus a reset
  * function for the internal consecutive-error counter.
  *
- * @param player - The audio element to monitor and control when playback errors occur.
+ * @param player - The audio player to monitor and control when playback errors occur.
  * @param changePromptMenuData - Callback to display or hide a prompt; receives (isVisible?,
  *   prompt?).
  * @param skipSongRef - Optional ref containing a function to skip the current track; used by the
@@ -26,7 +27,7 @@ const MEDIA_ERR_SRC_NOT_SUPPORTED = 4;
  *   - `resetErrorCount`: a function that resets the internal consecutive-error counter to zero.
  */
 export function usePlaybackErrors(
-  player: HTMLAudioElement,
+  player: AudioPlayer | HTMLAudioElement,
   changePromptMenuData: (isVisible?: boolean, prompt?: React.ReactNode | null) => void,
   skipSongRef?: React.MutableRefObject<(() => void) | undefined>
 ) {

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import type AudioPlayer from '../other/player';
 import { store } from '../store/store';
 
 /** Dependencies required by the useMediaSession hook. */
@@ -40,20 +41,21 @@ export interface MediaSessionDependencies {
  *   }
  *   ```;
  *
- * @param player - The HTML audio player element
+ * @param player - The AudioPlayer or HTMLAudioElement instance
  * @param dependencies - Object containing required callback functions
  */
-export function useMediaSession(player: HTMLAudioElement, dependencies: MediaSessionDependencies) {
+export function useMediaSession(
+  player: AudioPlayer | HTMLAudioElement,
+  dependencies: MediaSessionDependencies
+) {
   const { t } = useTranslation();
-  const {
-    toggleSongPlayback,
-    handleSkipBackwardClick,
-    handleSkipForwardClick,
-    updateSongPosition
-  } = dependencies;
+  const depsRef = useRef(dependencies);
+  depsRef.current = dependencies;
 
-  // Track artwork URL for cleanup
+  // Track artwork URL and song ID for cleanup & caching
   const artworkPathRef = useRef<string | undefined>(undefined);
+  const currentSongIdRef = useRef<number | undefined>(undefined);
+  const lastArtworkDataRef = useRef<unknown>(undefined);
 
   useEffect(() => {
     if (typeof navigator === 'undefined' || !('mediaSession' in navigator)) {
@@ -63,18 +65,23 @@ export function useMediaSession(player: HTMLAudioElement, dependencies: MediaSes
     const mediaSession = navigator.mediaSession;
 
     const safeSetPositionState = () => {
-      if (
-        Number.isFinite(player.duration) &&
-        player.duration > 0 &&
-        Number.isFinite(player.currentTime)
-      ) {
-        mediaSession.setPositionState({
-          duration: player.duration,
-          playbackRate: player.playbackRate,
-          position: player.currentTime
-        });
-      } else {
-        mediaSession.setPositionState(undefined);
+      try {
+        if (
+          Number.isFinite(player.duration) &&
+          player.duration > 0 &&
+          Number.isFinite(player.currentTime)
+        ) {
+          const pos = Math.min(Math.max(0, player.currentTime), player.duration);
+          mediaSession.setPositionState({
+            duration: player.duration,
+            playbackRate: player.playbackRate > 0 ? player.playbackRate : 1.0,
+            position: pos
+          });
+        } else {
+          mediaSession.setPositionState(undefined);
+        }
+      } catch {
+        // Some platforms throw for position boundary errors
       }
     };
 
@@ -92,32 +99,40 @@ export function useMediaSession(player: HTMLAudioElement, dependencies: MediaSes
     const updateMediaSessionMetaData = () => {
       const currentSong = store.state.currentSongData;
 
-      // Handle artwork
-      let artworkPath: string | undefined;
-      if (currentSong.artwork !== undefined) {
-        if (typeof currentSong.artwork === 'object') {
-          // Handle Uint8Array artwork
-          const artwork = currentSong.artwork as Uint8Array<ArrayBuffer>;
-          const blob = new Blob([artwork]);
-          artworkPath = URL.createObjectURL(blob);
+      // Handle artwork - only regenerate if song or artwork changed
+      const hasSongChanged = currentSong.songId !== currentSongIdRef.current;
+      const hasArtworkChanged = currentSong.artwork !== lastArtworkDataRef.current;
+
+      if (hasSongChanged || hasArtworkChanged) {
+        currentSongIdRef.current = currentSong.songId;
+        lastArtworkDataRef.current = currentSong.artwork;
+
+        let artworkPath: string | undefined;
+        if (currentSong.artwork !== undefined) {
+          if (typeof currentSong.artwork === 'object') {
+            // Handle Uint8Array artwork
+            const artwork = currentSong.artwork as Uint8Array<ArrayBuffer>;
+            const blob = new Blob([artwork]);
+            artworkPath = URL.createObjectURL(blob);
+          } else {
+            // Handle base64 artwork
+            artworkPath = `data:;base64,${currentSong.artwork}`;
+          }
         } else {
-          // Handle base64 artwork
-          artworkPath = `data:;base64,${currentSong.artwork}`;
+          artworkPath = '';
         }
-      } else {
-        artworkPath = '';
+
+        // Clean up previous blob URL if replacing
+        if (artworkPathRef.current && artworkPathRef.current !== artworkPath) {
+          URL.revokeObjectURL(artworkPathRef.current);
+        }
+        artworkPathRef.current = artworkPath;
       }
 
-      // Clean up previous artwork URL
-      if (artworkPathRef.current && artworkPathRef.current !== artworkPath) {
-        URL.revokeObjectURL(artworkPathRef.current);
-      }
-      artworkPathRef.current = artworkPath;
-
-      const artwork = artworkPath
+      const artwork = artworkPathRef.current
         ? [
             {
-              src: artworkPath,
+              src: artworkPathRef.current,
               sizes: '1000x1000',
               type: 'image/webp'
             }
@@ -125,7 +140,7 @@ export function useMediaSession(player: HTMLAudioElement, dependencies: MediaSes
         : [];
 
       // Update metadata
-      if (typeof MediaMetadata !== 'undefined') {
+      if (typeof MediaMetadata !== 'undefined' && currentSong.title) {
         mediaSession.metadata = new MediaMetadata({
           title: currentSong.title,
           artist: Array.isArray(currentSong.artists)
@@ -141,39 +156,39 @@ export function useMediaSession(player: HTMLAudioElement, dependencies: MediaSes
       // Update position state
       safeSetPositionState();
 
-      // Set up action handlers
-      safeSetActionHandler('pause', () => toggleSongPlayback(false));
-      safeSetActionHandler('play', () => toggleSongPlayback(true));
-      safeSetActionHandler('previoustrack', handleSkipBackwardClick);
-      safeSetActionHandler('nexttrack', () => handleSkipForwardClick('PLAYER_SKIP'));
-
-      // Seek handlers
-      safeSetActionHandler('seekbackward', () => {
-        const newPosition = Math.max(0, player.currentTime - 10);
-        updateSongPosition(newPosition);
-      });
-
-      safeSetActionHandler('seekforward', () => {
-        const newPosition = Math.min(player.duration, player.currentTime + 10);
-        updateSongPosition(newPosition);
-      });
-
-      safeSetActionHandler('seekto', (details) => {
-        if (details.seekTime !== undefined) {
-          updateSongPosition(details.seekTime);
-        }
-      });
-
       // Update playback state
       mediaSession.playbackState = store.state.player.isCurrentSongPlaying ? 'playing' : 'paused';
     };
+
+    // Set up action handlers using stable refs
+    safeSetActionHandler('pause', () => depsRef.current.toggleSongPlayback(false));
+    safeSetActionHandler('play', () => depsRef.current.toggleSongPlayback(true));
+    safeSetActionHandler('stop', () => depsRef.current.toggleSongPlayback(false));
+    safeSetActionHandler('previoustrack', () => depsRef.current.handleSkipBackwardClick());
+    safeSetActionHandler('nexttrack', () => depsRef.current.handleSkipForwardClick('PLAYER_SKIP'));
+
+    // Seek handlers
+    safeSetActionHandler('seekbackward', () => {
+      const newPosition = Math.max(0, player.currentTime - 10);
+      depsRef.current.updateSongPosition(newPosition);
+    });
+
+    safeSetActionHandler('seekforward', () => {
+      const newPosition = Math.min(player.duration, player.currentTime + 10);
+      depsRef.current.updateSongPosition(newPosition);
+    });
+
+    safeSetActionHandler('seekto', (details) => {
+      if (details.seekTime !== undefined) {
+        depsRef.current.updateSongPosition(details.seekTime);
+      }
+    });
 
     const storeSubscription = store.subscribe(() => {
       updateMediaSessionMetaData();
     });
 
-    // Register metadata + handlers immediately so media keys are available without requiring
-    // a play/pause round-trip first.
+    // Register metadata + handlers immediately
     updateMediaSessionMetaData();
 
     // Listen to player events
@@ -189,6 +204,8 @@ export function useMediaSession(player: HTMLAudioElement, dependencies: MediaSes
         URL.revokeObjectURL(artworkPathRef.current);
         artworkPathRef.current = undefined;
       }
+      currentSongIdRef.current = undefined;
+      lastArtworkDataRef.current = undefined;
 
       // Clear media session
       mediaSession.metadata = null;
@@ -198,6 +215,7 @@ export function useMediaSession(player: HTMLAudioElement, dependencies: MediaSes
       // Remove action handlers
       safeSetActionHandler('play', null);
       safeSetActionHandler('pause', null);
+      safeSetActionHandler('stop', null);
       safeSetActionHandler('seekbackward', null);
       safeSetActionHandler('seekforward', null);
       safeSetActionHandler('previoustrack', null);
@@ -212,12 +230,5 @@ export function useMediaSession(player: HTMLAudioElement, dependencies: MediaSes
 
       storeSubscription.unsubscribe();
     };
-  }, [
-    handleSkipBackwardClick,
-    handleSkipForwardClick,
-    t,
-    toggleSongPlayback,
-    updateSongPosition,
-    player
-  ]);
+  }, [player, t]);
 }

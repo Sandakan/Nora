@@ -71,15 +71,17 @@ export function usePlayerControl(
     playerInstance instanceof HTMLAudioElement ? null : (playerInstance as AudioPlayer);
 
   const toggleSongPlayback = useCallback(
-    (startPlay?: boolean) => {
+    (startPlay?: boolean | unknown) => {
       if (store.state.currentSongData?.songId) {
+        const forcePlay = typeof startPlay === 'boolean' ? startPlay : undefined;
+
         // Use AudioPlayer's togglePlayback if available
         if (audioPlayer) {
-          return audioPlayer.togglePlayback(startPlay).catch((err) => managePlaybackErrors(err));
+          return audioPlayer.togglePlayback(forcePlay).catch((err) => managePlaybackErrors(err));
         }
 
         // Fallback to direct audio element control
-        if (typeof startPlay !== 'boolean' || startPlay === player.paused) {
+        if (typeof forcePlay !== 'boolean' || forcePlay === player.paused) {
           if (player.readyState > 0) {
             if (player.paused) {
               return player
@@ -126,6 +128,7 @@ export function usePlayerControl(
       if (typeof songId === 'number') {
         // Use AudioPlayer's playSongById if available (preferred path)
         if (audioPlayer) {
+          refStartPlay.current = isStartPlay;
           return audioPlayer.playSongById(songId, {
             autoPlay: isStartPlay,
             recordListening: true,

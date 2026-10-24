@@ -91,5 +91,46 @@ describe('AudioPlayer', () => {
 
       player.destroy();
     });
+
+    test('togglePlayback handles boolean and non-boolean parameters correctly', async () => {
+      const queue = new PlayerQueue([101, 102], 0);
+      const player = new AudioPlayer(queue);
+      const playerInternal = player as unknown as {
+        isUsingNativeEngine: boolean;
+        nativeIsPaused: boolean;
+      };
+      playerInternal.isUsingNativeEngine = true;
+      playerInternal.nativeIsPaused = true;
+
+      const playSpy = vi.spyOn(player, 'play').mockResolvedValue(undefined);
+      const pauseSpy = vi.spyOn(player, 'pause').mockResolvedValue(undefined);
+
+      // Initially paused: togglePlayback() should call play
+      await player.togglePlayback();
+      expect(playSpy).toHaveBeenCalledTimes(1);
+
+      // Force play: togglePlayback(true) calls play
+      await player.togglePlayback(true);
+      expect(playSpy).toHaveBeenCalledTimes(2);
+
+      // Force pause: togglePlayback(false) calls pause
+      await player.togglePlayback(false);
+      expect(pauseSpy).toHaveBeenCalledTimes(1);
+
+      // Mock paused to false (simulating active playback)
+      vi.spyOn(player, 'paused', 'get').mockReturnValue(false);
+
+      // When playing: togglePlayback() should call pause
+      await player.togglePlayback();
+      expect(pauseSpy).toHaveBeenCalledTimes(2);
+
+      // When playing: passing an event object (e.g. from Button clickHandler) should NOT force-play, it must toggle (pause)
+      const mockMouseEvent = { type: 'click', target: {} } as unknown as boolean;
+      await player.togglePlayback(mockMouseEvent);
+      expect(pauseSpy).toHaveBeenCalledTimes(3);
+      expect(playSpy).toHaveBeenCalledTimes(2);
+
+      player.destroy();
+    });
   });
 });

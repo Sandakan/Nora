@@ -1,3 +1,5 @@
+import { pathToFileURL } from 'url';
+
 import { contextBridge, ipcRenderer, webUtils } from 'electron';
 
 import type { LastFMAlbumInfo } from '../types/last_fm_album_info_api';
@@ -58,6 +60,72 @@ const playerControls = {
     ipcRenderer.removeListener('app/player/skipBackward', callback),
   removeSkipForwardToNextSongEvent: (callback: (e: unknown) => void) =>
     ipcRenderer.removeListener('app/player/skipForward', callback)
+};
+
+const audioEngine = {
+  ping: (): Promise<string> => ipcRenderer.invoke('app/audioEngine/ping'),
+  load: (
+    filePath: string,
+    options?: {
+      autoPlay?: boolean;
+      volume?: number;
+      playbackRate?: number;
+      metadata?: {
+        title?: string;
+        artist?: string;
+        album?: string;
+        durationSecs?: number;
+        coverUrl?: string;
+      };
+    }
+  ): Promise<{ durationSecs: number; sampleRate: number; channels: number }> =>
+    ipcRenderer.invoke('app/audioEngine/load', filePath, options),
+  updateMetadata: (metadata: {
+    title?: string;
+    artist?: string;
+    album?: string;
+    durationSecs?: number;
+    coverUrl?: string;
+  }): Promise<void> => ipcRenderer.invoke('app/audioEngine/updateMetadata', metadata),
+  play: (filePath: string): Promise<void> => ipcRenderer.invoke('app/audioEngine/play', filePath),
+  pause: (): Promise<void> => ipcRenderer.invoke('app/audioEngine/pause'),
+  resume: (): Promise<void> => ipcRenderer.invoke('app/audioEngine/resume'),
+  stop: (): Promise<void> => ipcRenderer.invoke('app/audioEngine/stop'),
+  seek: (positionSecs: number): Promise<void> =>
+    ipcRenderer.invoke('app/audioEngine/seek', positionSecs),
+  setVolume: (volume: number): Promise<void> =>
+    ipcRenderer.invoke('app/audioEngine/setVolume', volume),
+  setVolumeWithRamp: (target: number, durationMs: number): Promise<void> =>
+    ipcRenderer.invoke('app/audioEngine/setVolumeWithRamp', target, durationMs),
+  getPosition: (): Promise<number> => ipcRenderer.invoke('app/audioEngine/getPosition'),
+  getDuration: (): Promise<number> => ipcRenderer.invoke('app/audioEngine/getDuration'),
+  isEnded: (): Promise<boolean> => ipcRenderer.invoke('app/audioEngine/isEnded'),
+  listDevices: (): Promise<string[]> => ipcRenderer.invoke('app/audioEngine/listDevices'),
+  setDevice: (deviceName: string): Promise<void> =>
+    ipcRenderer.invoke('app/audioEngine/setDevice', deviceName),
+  setPlaybackRate: (rate: number): Promise<void> =>
+    ipcRenderer.invoke('app/audioEngine/setPlaybackRate', rate),
+  setEqBand: (frequencyHz: number, gainDb: number): Promise<void> =>
+    ipcRenderer.invoke('app/audioEngine/setEqBand', frequencyHz, gainDb),
+  setEqGains: (gains: number[]): Promise<void> =>
+    ipcRenderer.invoke('app/audioEngine/setEqGains', gains),
+  resetEq: (): Promise<void> => ipcRenderer.invoke('app/audioEngine/resetEq'),
+  onTrackEnded: (callback: () => void): (() => void) => {
+    const handler = () => callback();
+    ipcRenderer.on('app/audioEngine/trackEnded', handler);
+    return () => {
+      ipcRenderer.removeListener('app/audioEngine/trackEnded', handler);
+    };
+  },
+  onPlaybackError: (
+    callback: (error: { message: string; target: string }) => void
+  ): (() => void) => {
+    const handler = (_event: unknown, data: { message: string; target: string }) => callback(data);
+    ipcRenderer.on('app/audioEngine/playbackError', handler);
+    return () => {
+      ipcRenderer.removeListener('app/audioEngine/playbackError', handler);
+    };
+  }
 };
 
 const audioLibraryControls = {
@@ -594,6 +662,9 @@ const utils = {
   },
   removeDefaultAppProtocolFromFilePath: (filePath: string) => {
     return filePath.replace(/nora:[/\\]{1,2}localfiles[/\\]{1,2}|\?.*$/g, '');
+  },
+  pathToFileURL: (filePath: string) => {
+    return pathToFileURL(filePath).href;
   }
 };
 
@@ -602,6 +673,7 @@ export const api = {
   windowControls,
   theme,
   playerControls,
+  audioEngine,
   audioLibraryControls,
   suggestions,
   unknownSource,
