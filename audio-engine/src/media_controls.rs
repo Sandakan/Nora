@@ -75,19 +75,64 @@ pub fn update_metadata(metadata: CachedMetadata) -> Result<(), String> {
 
     if let Some(ref mut controls) = manager.controls {
         let duration = metadata.duration_secs.filter(|&d| d > 0.0).map(Duration::from_secs_f64);
+
+        let normalized_cover_url: Option<String> = metadata.cover_url.as_ref().and_then(|raw_url| {
+            #[cfg(target_os = "windows")]
+            {
+                // souvlaki on Windows trims "file://" and passes the rest to StorageFile::GetFileFromPathAsync.
+                // It fails if there is a leading slash before the drive letter (e.g. "/C:/...").
+                let trimmed = raw_url.trim_start_matches("file://");
+                let clean_path = trimmed.trim_start_matches('/');
+                let clean_path = clean_path.split('?').next().unwrap_or(clean_path);
+                let path_obj = std::path::Path::new(clean_path);
+                if path_obj.exists() {
+                    Some(format!("file://{}", clean_path.replace('/', "\\")))
+                } else {
+                    log::warn!("Cover artwork does not exist at path: '{}'. Skipping cover.", clean_path);
+                    None
+                }
+            }
+            #[cfg(not(target_os = "windows"))]
+            {
+                Some(raw_url.clone())
+            }
+        });
+
         let meta = MediaMetadata {
             title: metadata.title.as_deref(),
             artist: metadata.artist.as_deref(),
             album: metadata.album.as_deref(),
             duration,
-            cover_url: metadata.cover_url.as_deref(),
+            cover_url: normalized_cover_url.as_deref(),
         };
 
-        controls
-            .set_metadata(meta)
-            .map_err(|e| format!("Failed to set metadata: {:?}", e))?;
+        if let Err(err) = controls.set_metadata(meta) {
+            log::warn!(
+                "Failed to set media metadata with cover ({:?}). Retrying without cover...",
+                err
+            );
+            let fallback_meta = MediaMetadata {
+                title: metadata.title.as_deref(),
+                artist: metadata.artist.as_deref(),
+                album: metadata.album.as_deref(),
+                duration,
+                cover_url: None,
+            };
+            controls
+                .set_metadata(fallback_meta)
+                .map_err(|e| format!("Failed to set metadata: {:?}", e))?;
+        }
     }
     Ok(())
+}
+
+pub fn set_playback_status(status: &str, progress_secs: Option<f64>) -> Result<(), String> {
+    match status {
+        "playing" => set_playback_playing(progress_secs),
+        "paused" => set_playback_paused(progress_secs),
+        "stopped" => set_playback_stopped(),
+        _ => Err(format!("Unknown playback status: {}", status)),
+    }
 }
 
 pub fn set_playback_playing(progress_secs: Option<f64>) -> Result<(), String> {

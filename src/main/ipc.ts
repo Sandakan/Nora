@@ -670,6 +670,11 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     ipcMain.handle('app/audioEngine/pause', () => audioEngine.pause());
     ipcMain.handle('app/audioEngine/resume', () => audioEngine.resume());
     ipcMain.handle('app/audioEngine/stop', () => audioEngine.stop());
+    ipcMain.handle(
+      'app/audioEngine/setPlaybackStatus',
+      (_, status: string, progressSecs?: number) =>
+        audioEngine.setPlaybackStatus(status, progressSecs)
+    );
     ipcMain.handle('app/audioEngine/seek', (_, positionSecs: number) =>
       audioEngine.seek(positionSecs)
     );

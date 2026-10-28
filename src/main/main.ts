@@ -266,14 +266,18 @@ const createWindow = async () => {
     logger.debug(`OS Media Control Event received: ${event}`);
     if (!mainWindow || mainWindow.isDestroyed()) return;
 
-    if (event === 'toggle' || event === 'play' || event === 'pause') {
+    if (event === 'toggle') {
       mainWindow.webContents.send('app/player/toggleSongPlaybackState');
+    } else if (event === 'play') {
+      mainWindow.webContents.send('app/player/toggleSongPlaybackState', true);
+    } else if (event === 'pause') {
+      mainWindow.webContents.send('app/player/toggleSongPlaybackState', false);
     } else if (event === 'next') {
       mainWindow.webContents.send('app/player/skipForward');
     } else if (event === 'previous') {
       mainWindow.webContents.send('app/player/skipBackward');
     } else if (event === 'stop') {
-      mainWindow.webContents.send('app/player/toggleSongPlaybackState');
+      mainWindow.webContents.send('app/player/toggleSongPlaybackState', false);
     }
   });
 

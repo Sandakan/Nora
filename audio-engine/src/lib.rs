@@ -243,14 +243,20 @@ pub fn engine_load(path: String, options: Option<LoadOptions>) -> napi::Result<J
 
     if let Some(opts) = options.as_ref() {
         if let Some(ref m) = opts.metadata {
-            let _ = media_controls::update_metadata(m.clone().into());
+            if let Err(e) = media_controls::update_metadata(m.clone().into()) {
+                log::warn!("Failed to update media controls metadata on load: {}", e);
+            }
         }
     }
 
     if auto_play {
-        let _ = media_controls::set_playback_playing(Some(0.0));
+        if let Err(e) = media_controls::set_playback_playing(Some(0.0)) {
+            log::warn!("Failed to set playback playing on load: {}", e);
+        }
     } else {
-        let _ = media_controls::set_playback_paused(Some(0.0));
+        if let Err(e) = media_controls::set_playback_paused(Some(0.0)) {
+            log::warn!("Failed to set playback paused on load: {}", e);
+        }
     }
 
     Ok(JsAudioMetadata {
@@ -298,7 +304,9 @@ pub fn engine_play(path: String) -> napi::Result<()> {
         )
         .map_err(|e| napi::Error::from_reason(e))?;
 
-    let _ = media_controls::set_playback_playing(Some(0.0));
+    if let Err(e) = media_controls::set_playback_playing(Some(0.0)) {
+        log::warn!("Failed to set playback playing on enginePlay: {}", e);
+    }
     Ok(())
 }
 
@@ -309,7 +317,9 @@ pub fn engine_pause() -> napi::Result<()> {
         .map_err(|_| napi::Error::from_reason("Failed to lock engine mutex"))?;
     let pos = engine.get_position();
     engine.pause();
-    let _ = media_controls::set_playback_paused(Some(pos));
+    if let Err(e) = media_controls::set_playback_paused(Some(pos)) {
+        log::warn!("Failed to set playback paused on enginePause: {}", e);
+    }
     Ok(())
 }
 
@@ -320,7 +330,9 @@ pub fn engine_resume() -> napi::Result<()> {
         .map_err(|_| napi::Error::from_reason("Failed to lock engine mutex"))?;
     let pos = engine.get_position();
     engine.resume();
-    let _ = media_controls::set_playback_playing(Some(pos));
+    if let Err(e) = media_controls::set_playback_playing(Some(pos)) {
+        log::warn!("Failed to set playback playing on engineResume: {}", e);
+    }
     Ok(())
 }
 
@@ -330,7 +342,16 @@ pub fn engine_stop() -> napi::Result<()> {
         .lock()
         .map_err(|_| napi::Error::from_reason("Failed to lock engine mutex"))?;
     engine.stop();
-    let _ = media_controls::set_playback_stopped();
+    if let Err(e) = media_controls::set_playback_stopped() {
+        log::warn!("Failed to set playback stopped on engineStop: {}", e);
+    }
+    Ok(())
+}
+
+#[napi(js_name = "engineSetPlaybackStatus")]
+pub fn engine_set_playback_status(status: String, progress_secs: Option<f64>) -> napi::Result<()> {
+    media_controls::set_playback_status(&status, progress_secs)
+        .map_err(|e| napi::Error::from_reason(e))?;
     Ok(())
 }
 

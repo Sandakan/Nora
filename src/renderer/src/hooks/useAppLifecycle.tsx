@@ -293,7 +293,8 @@ export function useAppLifecycle(dependencies: AppLifecycleDependencies): void {
 
   // Setup IPC control listeners from main process
   useEffect(() => {
-    const handleToggleSongPlayback = () => toggleSongPlayback();
+    const handleToggleSongPlayback = (_e: unknown, forcePlay?: boolean) =>
+      toggleSongPlayback(forcePlay);
     const handleSkipForwardClickListener = () => handleSkipForwardClick('PLAYER_SKIP');
     const handlePlaySongFromUnknownSource = (_: unknown, data: AudioPlayerData) =>
       playSongFromUnknownSource(data, true);

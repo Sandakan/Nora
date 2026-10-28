@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath, pathToFileURL } from 'url';
 
 import { app } from 'electron';
 
@@ -55,6 +56,7 @@ export interface AudioEngineNative {
     callback: (err: Error | null, event: string) => void
   ): void;
   engineUpdateMetadata?(metadata: JsMediaMetadata): void;
+  engineSetPlaybackStatus?(status: string, progressSecs?: number): void;
   engineListDevices(): string[];
   engineSetDevice(deviceName: string): void;
   engineSetPlaybackRate(rate: number): void;
@@ -130,13 +132,61 @@ export function getAudioEngine(): AudioEngineNative {
   throw new Error('Native audio-engine binary (.node) could not be located.');
 }
 
+function normalizeCoverUrl(coverUrl?: string): string | undefined {
+  if (!coverUrl) return undefined;
+  const cleaned = removeDefaultAppProtocolFromFilePath(coverUrl).trim();
+  if (!cleaned) return undefined;
+
+  let filePath = cleaned;
+  if (filePath.startsWith('file://')) {
+    try {
+      filePath = fileURLToPath(filePath);
+    } catch {
+      filePath = filePath.replace(/^file:\/\/\/?/i, '');
+    }
+  }
+
+  // Remove any remaining URL query parameters
+  filePath = filePath.replace(/\?.*$/, '');
+
+  // Verify the file actually exists
+  if (!fs.existsSync(filePath)) {
+    logger.warn(`Cover artwork file does not exist at path: "${filePath}". Skipping.`);
+    return undefined;
+  }
+
+  // On Windows, souvlaki's GetFileFromPathAsync requires `file://C:\path\to\image.jpg`
+  // so that url.trim_start_matches("file://") results in `C:\path\to\image.jpg`
+  if (process.platform === 'win32') {
+    const winPath = path.resolve(filePath);
+    return `file://${winPath}`;
+  }
+
+  try {
+    return pathToFileURL(path.resolve(filePath)).href;
+  } catch {
+    return `file://${filePath}`;
+  }
+}
+
 export const audioEngine = {
   ping: (): string => {
     return getAudioEngine().ping();
   },
   load: (filePath: string, options?: LoadOptions): AudioMetadata => {
     const rawPath = removeDefaultAppProtocolFromFilePath(filePath);
-    return getAudioEngine().engineLoad(rawPath, options);
+    const normalizedOptions: LoadOptions | undefined = options
+      ? {
+          ...options,
+          metadata: options.metadata
+            ? {
+                ...options.metadata,
+                coverUrl: normalizeCoverUrl(options.metadata.coverUrl)
+              }
+            : undefined
+        }
+      : undefined;
+    return getAudioEngine().engineLoad(rawPath, normalizedOptions);
   },
   play: (filePath: string): void => {
     const rawPath = removeDefaultAppProtocolFromFilePath(filePath);
@@ -257,10 +307,23 @@ export const audioEngine = {
     try {
       const eng = getAudioEngine();
       if (typeof eng.engineUpdateMetadata === 'function') {
-        eng.engineUpdateMetadata(metadata);
+        eng.engineUpdateMetadata({
+          ...metadata,
+          coverUrl: normalizeCoverUrl(metadata.coverUrl)
+        });
       }
     } catch (err) {
       logger.error('Failed to update media controls metadata', { error: String(err) });
+    }
+  },
+  setPlaybackStatus: (status: string, progressSecs?: number): void => {
+    try {
+      const eng = getAudioEngine();
+      if (typeof eng.engineSetPlaybackStatus === 'function') {
+        eng.engineSetPlaybackStatus(status, progressSecs);
+      }
+    } catch (err) {
+      logger.warn('Failed to set native playback status', { error: String(err) });
     }
   },
   listDevices: (): string[] => {

@@ -1,5 +1,3 @@
-import { pathToFileURL } from 'url';
-
 import { contextBridge, ipcRenderer, webUtils } from 'electron';
 
 import type { LastFMAlbumInfo } from '../types/last_fm_album_info_api';
@@ -38,7 +36,7 @@ const theme = {
 const playerControls = {
   songPlaybackStateChange: (isPlaying: boolean): void =>
     ipcRenderer.send('app/player/songPlaybackStateChange', isPlaying),
-  toggleSongPlayback: (callback: (e: unknown) => void) =>
+  toggleSongPlayback: (callback: (e: unknown, forcePlay?: boolean) => void) =>
     ipcRenderer.on('app/player/toggleSongPlaybackState', callback),
   skipForwardToNextSong: (callback: (e: unknown) => void) =>
     ipcRenderer.on('app/player/skipForward', callback),
@@ -91,6 +89,11 @@ const audioEngine = {
   pause: (): Promise<void> => ipcRenderer.invoke('app/audioEngine/pause'),
   resume: (): Promise<void> => ipcRenderer.invoke('app/audioEngine/resume'),
   stop: (): Promise<void> => ipcRenderer.invoke('app/audioEngine/stop'),
+  setPlaybackStatus: (
+    status: 'playing' | 'paused' | 'stopped',
+    progressSecs?: number
+  ): Promise<void> =>
+    ipcRenderer.invoke('app/audioEngine/setPlaybackStatus', status, progressSecs),
   seek: (positionSecs: number): Promise<void> =>
     ipcRenderer.invoke('app/audioEngine/seek', positionSecs),
   setVolume: (volume: number): Promise<void> =>
@@ -664,7 +667,12 @@ const utils = {
     return filePath.replace(/nora:[/\\]{1,2}localfiles[/\\]{1,2}|\?.*$/g, '');
   },
   pathToFileURL: (filePath: string) => {
-    return pathToFileURL(filePath).href;
+    if (!filePath) return '';
+    let pathName = filePath.replace(/\\/g, '/');
+    if (!pathName.startsWith('/')) {
+      pathName = `/${pathName}`;
+    }
+    return encodeURI(`file://${pathName}`);
   }
 };
 

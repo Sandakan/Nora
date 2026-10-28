@@ -56,6 +56,7 @@ class AudioPlayer extends EventTarget {
   private currentSongData: AudioPlayerData | null = null;
   private currentEqualizerSettings: Equalizer | null = null;
   private isTransitioningTracks: boolean = false;
+  private isPlaybackTransitioning: boolean = false;
   private consecutiveLoadFailures: number = 0;
   private trackEndedUnsubscribe: (() => void) | null = null;
   private playbackErrorUnsubscribe: (() => void) | null = null;
@@ -281,10 +282,18 @@ class AudioPlayer extends EventTarget {
     }
 
     const effectiveVolume = this.muted ? 0 : this.volume;
-    const coverUrl = this.currentSongData.artworkPath
+    const rawArtworkPath = this.currentSongData.artworkPath
+      ? window.api.utils?.removeDefaultAppProtocolFromFilePath
+        ? window.api.utils.removeDefaultAppProtocolFromFilePath(this.currentSongData.artworkPath)
+        : this.currentSongData.artworkPath
+            .replace(/^nora:[/\\]{1,2}localfiles[/\\]{1,2}/i, '')
+            .replace(/\?.*$/, '')
+      : undefined;
+
+    const coverUrl = rawArtworkPath
       ? window.api.utils?.pathToFileURL
-        ? window.api.utils.pathToFileURL(this.currentSongData.artworkPath)
-        : `file:///${this.currentSongData.artworkPath.replace(/\\/g, '/')}`
+        ? window.api.utils.pathToFileURL(rawArtworkPath)
+        : `file:///${rawArtworkPath.replace(/\\/g, '/')}`
       : undefined;
 
     try {
@@ -772,9 +781,13 @@ class AudioPlayer extends EventTarget {
         return Promise.resolve();
       }
       this.nativeIsPaused = false;
+      this.isPlaybackTransitioning = true;
       this.startNativeTicker();
       this.emit('play');
-      return this.fadeInAudioNative();
+      window.api?.audioEngine?.setPlaybackStatus?.('playing', this.currentTime).catch(() => {});
+      return this.fadeInAudioNative().finally(() => {
+        this.isPlaybackTransitioning = false;
+      });
     }
     if (!this.audio.paused) {
       return Promise.resolve();
@@ -790,9 +803,13 @@ class AudioPlayer extends EventTarget {
         return Promise.resolve();
       }
       this.nativeIsPaused = true;
+      this.isPlaybackTransitioning = true;
       this.stopNativeTicker();
       this.emit('pause');
-      return this.fadeOutAudioNative();
+      window.api?.audioEngine?.setPlaybackStatus?.('paused', this.currentTime).catch(() => {});
+      return this.fadeOutAudioNative().finally(() => {
+        this.isPlaybackTransitioning = false;
+      });
     }
     if (this.audio.paused) {
       return Promise.resolve();
@@ -807,6 +824,12 @@ class AudioPlayer extends EventTarget {
    * @returns Promise that resolves when fade completes
    */
   async togglePlayback(forcePlay?: boolean): Promise<void> {
+    if (this.isPlaybackTransitioning) {
+      if (typeof forcePlay === 'boolean' && forcePlay !== this.nativeIsPaused) {
+        return;
+      }
+    }
+
     const shouldPlay = typeof forcePlay === 'boolean' ? forcePlay : this.paused;
 
     if (shouldPlay) {
