@@ -3,6 +3,7 @@ import path from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
 
 import { app } from 'electron';
+import sharp from 'sharp';
 
 import { removeDefaultAppProtocolFromFilePath } from '../fs/resolveFilePaths';
 import logger from '../logger';
@@ -132,9 +133,26 @@ export function getAudioEngine(): AudioEngineNative {
   throw new Error('Native audio-engine binary (.node) could not be located.');
 }
 
-function normalizeCoverUrl(coverUrl?: string): string | undefined {
-  if (!coverUrl) return undefined;
-  const cleaned = removeDefaultAppProtocolFromFilePath(coverUrl).trim();
+export const getSmtcCoversDir = (): string =>
+  path.join(app.getPath('userData'), 'temp_artworks', 'smtc');
+
+export const clearSmtcCoversFolder = async (): Promise<void> => {
+  const dir = getSmtcCoversDir();
+  try {
+    if (fs.existsSync(dir)) {
+      const entries = await fs.promises.readdir(dir);
+      for (const entry of entries) {
+        await fs.promises.rm(path.join(dir, entry), { recursive: true, force: true });
+      }
+      logger.debug('Successfully cleared smtc covers in temp_artworks.');
+    }
+  } catch (error) {
+    logger.error('Failed to clear smtc covers in temp_artworks.', { error });
+  }
+};
+
+async function getOrCreateSmtcCoverJpeg(sourcePath: string): Promise<string | undefined> {
+  const cleaned = removeDefaultAppProtocolFromFilePath(sourcePath).replace(/\?.*$/, '').trim();
   if (!cleaned) return undefined;
 
   let filePath = cleaned;
@@ -146,26 +164,74 @@ function normalizeCoverUrl(coverUrl?: string): string | undefined {
     }
   }
 
-  // Remove any remaining URL query parameters
-  filePath = filePath.replace(/\?.*$/, '');
+  const smtcCoversDir = getSmtcCoversDir();
+  if (!fs.existsSync(smtcCoversDir)) {
+    await fs.promises.mkdir(smtcCoversDir, { recursive: true });
+  }
 
-  // Verify the file actually exists
-  if (!fs.existsSync(filePath)) {
-    logger.warn(`Cover artwork file does not exist at path: "${filePath}". Skipping.`);
+  // Use base name of file for cached JPEG
+  const baseName = path.basename(filePath, path.extname(filePath));
+  const destJpgPath = path.join(smtcCoversDir, `${baseName}.jpg`);
+
+  // If destination already exists and is non-empty, reuse it
+  if (fs.existsSync(destJpgPath)) {
+    try {
+      const stat = await fs.promises.stat(destJpgPath);
+      if (stat.size > 0) {
+        return destJpgPath;
+      }
+    } catch {
+      // Re-convert on error
+    }
+  }
+
+  // Read source image (supports asar archives via Electron fs patch)
+  let imageBuffer: Buffer;
+  try {
+    imageBuffer = await fs.promises.readFile(filePath);
+  } catch {
+    try {
+      imageBuffer = await sharp(filePath).toBuffer();
+    } catch (err) {
+      logger.warn(`Source artwork could not be read for SMTC conversion: "${filePath}"`, {
+        error: String(err)
+      });
+      return undefined;
+    }
+  }
+
+  try {
+    // Windows SMTC requires standard formats like JPEG or PNG (WebP is unsupported)
+    await sharp(imageBuffer).jpeg({ quality: 90 }).toFile(destJpgPath);
+    logger.debug(`Generated SMTC JPEG thumbnail: ${destJpgPath}`);
+    return destJpgPath;
+  } catch (err) {
+    logger.warn(`Failed to convert artwork to JPEG for SMTC: "${filePath}"`, {
+      error: String(err)
+    });
+    return undefined;
+  }
+}
+
+async function normalizeCoverUrl(coverUrl?: string): Promise<string | undefined> {
+  if (!coverUrl) return undefined;
+
+  const destPath = await getOrCreateSmtcCoverJpeg(coverUrl);
+  if (!destPath || !fs.existsSync(destPath)) {
     return undefined;
   }
 
   // On Windows, souvlaki's GetFileFromPathAsync requires `file://C:\path\to\image.jpg`
   // so that url.trim_start_matches("file://") results in `C:\path\to\image.jpg`
   if (process.platform === 'win32') {
-    const winPath = path.resolve(filePath);
+    const winPath = path.resolve(destPath);
     return `file://${winPath}`;
   }
 
   try {
-    return pathToFileURL(path.resolve(filePath)).href;
+    return pathToFileURL(path.resolve(destPath)).href;
   } catch {
-    return `file://${filePath}`;
+    return `file://${destPath}`;
   }
 }
 
@@ -173,15 +239,18 @@ export const audioEngine = {
   ping: (): string => {
     return getAudioEngine().ping();
   },
-  load: (filePath: string, options?: LoadOptions): AudioMetadata => {
+  load: async (filePath: string, options?: LoadOptions): Promise<AudioMetadata> => {
     const rawPath = removeDefaultAppProtocolFromFilePath(filePath);
+    const coverUrl = options?.metadata?.coverUrl
+      ? await normalizeCoverUrl(options.metadata.coverUrl)
+      : undefined;
     const normalizedOptions: LoadOptions | undefined = options
       ? {
           ...options,
           metadata: options.metadata
             ? {
                 ...options.metadata,
-                coverUrl: normalizeCoverUrl(options.metadata.coverUrl)
+                coverUrl
               }
             : undefined
         }
@@ -303,13 +372,16 @@ export const audioEngine = {
       logger.error('Failed to initialize native media controls', { error: String(err) });
     }
   },
-  updateMetadata: (metadata: JsMediaMetadata): void => {
+  updateMetadata: async (metadata: JsMediaMetadata): Promise<void> => {
     try {
       const eng = getAudioEngine();
       if (typeof eng.engineUpdateMetadata === 'function') {
+        const coverUrl = metadata.coverUrl
+          ? await normalizeCoverUrl(metadata.coverUrl)
+          : undefined;
         eng.engineUpdateMetadata({
           ...metadata,
-          coverUrl: normalizeCoverUrl(metadata.coverUrl)
+          coverUrl
         });
       }
     } catch (err) {

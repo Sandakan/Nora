@@ -112,11 +112,11 @@ export function useMediaSession(
           if (typeof currentSong.artwork === 'object') {
             // Handle Uint8Array artwork
             const artwork = currentSong.artwork as Uint8Array<ArrayBuffer>;
-            const blob = new Blob([artwork]);
+            const blob = new Blob([artwork], { type: 'image/jpeg' });
             artworkPath = URL.createObjectURL(blob);
           } else {
             // Handle base64 artwork
-            artworkPath = `data:;base64,${currentSong.artwork}`;
+            artworkPath = `data:image/jpeg;base64,${currentSong.artwork}`;
           }
         } else {
           artworkPath = '';
@@ -134,7 +134,7 @@ export function useMediaSession(
             {
               src: artworkPathRef.current,
               sizes: '1000x1000',
-              type: 'image/webp'
+              type: 'image/jpeg'
             }
           ]
         : [];

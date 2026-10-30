@@ -27,7 +27,7 @@ import { version, appPreferences } from '../../package.json';
 import noraAppIcon from '../../resources/logo_light_mode.png?asset';
 import roundTo from '../common/roundTo';
 import manageLastFmAuth from './auth/manageLastFmAuth';
-import audioEngine from './core/audioEngine';
+import audioEngine, { clearSmtcCoversFolder } from './core/audioEngine';
 import changeAppTheme from './core/changeAppTheme';
 import checkForNewSongs from './core/checkForNewSongs';
 import checkForStartUpSongs from './core/checkForStartUpSongs';
@@ -251,6 +251,7 @@ const createWindow = async () => {
   mainWindow.once('ready-to-show', () => {
     if (app.hasSingleInstanceLock()) {
       logger.info('Started checking for new songs during the application start.');
+      clearSmtcCoversFolder();
       checkForNewSongs();
       addWatchersToFolders();
       addWatchersToParentFolders();
@@ -507,8 +508,9 @@ async function handleBeforeQuit() {
       const promise2 = savePendingMetadataUpdates(currentSongPath, true);
       const promise3 = closeAllAbortControllers();
       const promise4 = clearTempArtworkFolder();
+      const promise5 = clearSmtcCoversFolder();
 
-      await Promise.all([promise1, promise2, promise3, promise4]);
+      await Promise.all([promise1, promise2, promise3, promise4, promise5]);
 
       try {
         audioEngine.destroy();

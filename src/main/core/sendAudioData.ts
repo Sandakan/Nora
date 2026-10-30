@@ -1,4 +1,4 @@
-import { existsSync } from 'node:fs';
+import { existsSync, promises as fsPromises } from 'node:fs';
 
 import { addSongToPlayHistory } from '@main/db/queries/history';
 import { getPlayableSongById } from '@main/db/queries/songs';
@@ -24,8 +24,14 @@ export const parseArtworkDataForAudioPlayerData = (artworkData?: Buffer | Uint8A
 
 const getArtworkBuffer = async (artworkPath: string) => {
   try {
-    const realPath = removeDefaultAppProtocolFromFilePath(artworkPath);
-    const buffer = await sharp(realPath).toBuffer();
+    const realPath = removeDefaultAppProtocolFromFilePath(artworkPath).replace(/\?.*$/, '');
+    let input: Buffer;
+    try {
+      input = await fsPromises.readFile(realPath);
+    } catch {
+      input = await sharp(realPath).toBuffer();
+    }
+    const buffer = await sharp(input).jpeg({ quality: 90 }).toBuffer();
 
     return buffer;
   } catch (error) {
