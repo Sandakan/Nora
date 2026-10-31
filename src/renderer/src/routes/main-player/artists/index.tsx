@@ -87,7 +87,7 @@ function ArtistPage() {
 
   const selectAllHandler = useSelectAllHandler(artistsData, 'artist', 'artistId');
 
-  console.log('offset', currentlyActivePage?.data);
+
   return (
     <MainContainer
       className="appear-from-bottom artists-list-container h-full! overflow-hidden pb-0!"

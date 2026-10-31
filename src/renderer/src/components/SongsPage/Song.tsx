@@ -207,7 +207,12 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
             />
           ];
 
-          if ((artists?.length ?? 1) - 1 !== i) arr.push(<span className="mr-1">,</span>);
+          if ((artists?.length ?? 1) - 1 !== i)
+            arr.push(
+              <span key={`separator-${artist.artistId || i}`} className="mr-1">
+                ,
+              </span>
+            );
 
           return arr;
         })

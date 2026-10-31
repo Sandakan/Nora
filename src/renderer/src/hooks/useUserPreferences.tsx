@@ -60,7 +60,12 @@ export function useUserPreferences() {
           presetData.eightThousandHertzFilter,
           presetData.sixteenThousandHertzFilter
         ];
-        return window.api.settingsHelpers.saveUserEqualizerPreset({ frequencyBands });
+        return window.api.settingsHelpers.saveUserEqualizerPreset({
+          frequencyBands,
+          ...(presetData as { presetName?: string }).presetName
+            ? { presetName: (presetData as { presetName?: string }).presetName }
+            : {}
+        });
       }
       return window.api.settingsHelpers.saveUserEqualizerPreset(
         presetData as { frequencyBands?: number[]; isEnabled?: boolean }

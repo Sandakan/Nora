@@ -9,7 +9,7 @@ import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Button from '../Button';
 import Img from '../Img';
 import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
-import NavLink from '../NavLink';
+
 import SongArtist from '../SongsPage/SongArtist';
 
 interface AlbumProp extends Album {
@@ -317,12 +317,14 @@ export const Album = (props: AlbumProp) => {
   );
 
   return (
-    <NavLink
-      to="/main-player/albums/$albumId"
-      params={{ albumId: String(props.albumId) }}
-      preload={isMultipleSelectionEnabled ? false : undefined}
+    <div
+      tabIndex={0}
+      role="button"
+
+
+
       // style={{ animationDelay: `${50 * (props.index + 1)}ms` }}
-      className={`album group mr-6 mb-2 flex h-68 w-48 flex-col justify-between overflow-hidden rounded-md p-4 ${
+      className={`album group mr-6 mb-2 flex h-68 w-48 cursor-pointer flex-col justify-between overflow-hidden rounded-md p-4 outline-offset-1 focus-visible:outline! ${
         props.className ?? ''
       } ${
         isAMultipleSelection
@@ -341,6 +343,9 @@ export const Album = (props: AlbumProp) => {
         else if (isMultipleSelectionEnabled && multipleSelectionsData.selectionType === 'album')
           updateMultipleSelections(props.albumId, 'album', isAMultipleSelection ? 'remove' : 'add');
         else showAlbumInfoPage();
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') showAlbumInfoPage();
       }}
     >
       <div className="album-cover-and-play-btn-container relative h-[70%] cursor-pointer overflow-hidden">
@@ -396,6 +401,6 @@ export const Album = (props: AlbumProp) => {
           {t('common.songWithCount', { count: props.songs.length })}
         </div>
       </div>
-    </NavLink>
+    </div>
   );
 };
