@@ -33,6 +33,8 @@ lazy_static! {
     };
     static ref ON_ENDED_CALLBACK: Arc<Mutex<Option<ThreadsafeFunction<()>>>> = Arc::new(Mutex::new(None));
     static ref ON_ERROR_CALLBACK: Arc<Mutex<Option<ThreadsafeFunction<String>>>> = Arc::new(Mutex::new(None));
+    static ref ON_TICK_CALLBACK: Arc<Mutex<Option<ThreadsafeFunction<JsEngineTickPayload>>>> = Arc::new(Mutex::new(None));
+    static ref ON_TRANSITIONED_CALLBACK: Arc<Mutex<Option<ThreadsafeFunction<String>>>> = Arc::new(Mutex::new(None));
 }
 
 fn run_recovery(weak_engine: Weak<Mutex<PlayerEngine>>, target_generation: u64) {
@@ -113,6 +115,65 @@ pub struct JsEngineTickPayload {
     pub is_playing: bool,
 }
 
+#[napi(js_name = "engineOnTick")]
+pub fn engine_on_tick(callback: ThreadsafeFunction<JsEngineTickPayload>) -> napi::Result<()> {
+    let mut cb = ON_TICK_CALLBACK
+        .lock()
+        .map_err(|_| napi::Error::from_reason("Failed to lock tick callback mutex"))?;
+    *cb = Some(callback);
+
+    let cb_clone = ON_TICK_CALLBACK.clone();
+    let mut engine = GLOBAL_ENGINE
+        .lock()
+        .map_err(|_| napi::Error::from_reason("Failed to lock engine mutex"))?;
+    engine.set_tick_callback(move |payload: ticker::EngineTickPayload| {
+        if let Ok(guard) = cb_clone.lock() {
+            if let Some(ref tsfn) = *guard {
+                let js_payload = JsEngineTickPayload {
+                    position: payload.position,
+                    timestamp_ms: payload.timestamp_ms,
+                    is_playing: payload.is_playing,
+                };
+                let _ = tsfn.call(Ok(js_payload), ThreadsafeFunctionCallMode::NonBlocking);
+            }
+        }
+    });
+
+    Ok(())
+}
+
+#[napi(js_name = "engineOnTransitioned")]
+pub fn engine_on_transitioned(callback: ThreadsafeFunction<String>) -> napi::Result<()> {
+    let mut cb = ON_TRANSITIONED_CALLBACK
+        .lock()
+        .map_err(|_| napi::Error::from_reason("Failed to lock transitioned callback mutex"))?;
+    *cb = Some(callback);
+
+    let cb_clone = ON_TRANSITIONED_CALLBACK.clone();
+    let mut engine = GLOBAL_ENGINE
+        .lock()
+        .map_err(|_| napi::Error::from_reason("Failed to lock engine mutex"))?;
+    engine.set_transitioned_callback(move |path: String| {
+        if let Ok(guard) = cb_clone.lock() {
+            if let Some(ref tsfn) = *guard {
+                let _ = tsfn.call(Ok(path), ThreadsafeFunctionCallMode::NonBlocking);
+            }
+        }
+    });
+
+    Ok(())
+}
+
+#[napi(js_name = "enginePreload")]
+pub fn engine_preload(path: String, fallback_duration: Option<f64>) -> napi::Result<()> {
+    let mut engine = GLOBAL_ENGINE
+        .lock()
+        .map_err(|_| napi::Error::from_reason("Failed to lock engine mutex"))?;
+    engine.preload_file(&path, fallback_duration)
+        .map_err(|e| napi::Error::from_reason(e))?;
+    Ok(())
+}
+
 #[napi(js_name = "ping")]
 pub fn ping() -> String {
     "pong from audio-engine".to_string()
@@ -187,6 +248,7 @@ pub struct LoadOptions {
     pub auto_play: Option<bool>,
     pub volume: Option<f64>,
     pub playback_rate: Option<f64>,
+    pub fallback_duration: Option<f64>,
     pub metadata: Option<JsMediaMetadata>,
 }
 
@@ -206,11 +268,14 @@ pub fn engine_load(path: String, options: Option<LoadOptions>) -> napi::Result<J
     let auto_play = options.as_ref().and_then(|o| o.auto_play).unwrap_or(true);
     let volume = options.as_ref().and_then(|o| o.volume).unwrap_or(1.0) as f32;
     let playback_rate = options.as_ref().and_then(|o| o.playback_rate).unwrap_or(1.0) as f32;
+    let fallback_duration = options.as_ref().and_then(|o| o.fallback_duration);
 
     let on_end = {
         let cb_clone = ON_ENDED_CALLBACK.clone();
         Some(move || {
-            let _ = media_controls::set_playback_stopped();
+            let _ = std::thread::spawn(|| {
+                let _ = media_controls::set_playback_stopped();
+            });
             if let Ok(guard) = cb_clone.lock() {
                 if let Some(ref tsfn) = *guard {
                     let _ = tsfn.call(Ok(()), ThreadsafeFunctionCallMode::NonBlocking);
@@ -236,6 +301,7 @@ pub fn engine_load(path: String, options: Option<LoadOptions>) -> napi::Result<J
             auto_play,
             volume,
             playback_rate,
+            fallback_duration,
             on_end,
             on_err,
         )
@@ -275,7 +341,9 @@ pub fn engine_play(path: String) -> napi::Result<()> {
     let on_end = {
         let cb_clone = ON_ENDED_CALLBACK.clone();
         Some(move || {
-            let _ = media_controls::set_playback_stopped();
+            let _ = std::thread::spawn(|| {
+                let _ = media_controls::set_playback_stopped();
+            });
             if let Ok(guard) = cb_clone.lock() {
                 if let Some(ref tsfn) = *guard {
                     let _ = tsfn.call(Ok(()), ThreadsafeFunctionCallMode::NonBlocking);
@@ -428,7 +496,7 @@ pub fn engine_list_devices() -> napi::Result<Vec<String>> {
 }
 
 #[napi(js_name = "engineSetDevice")]
-pub fn engine_set_device(device_name: String) -> napi::Result<()> {
+pub fn engine_set_device(device_name: Option<String>) -> napi::Result<()> {
     let mut engine = GLOBAL_ENGINE
         .lock()
         .map_err(|_| napi::Error::from_reason("Failed to lock engine mutex"))?;

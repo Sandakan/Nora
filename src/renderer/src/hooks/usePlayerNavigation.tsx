@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 
-import type AudioPlayer from '../other/player';
+import AudioPlayer from '../other/player';
 import type PlayerQueue from '../other/playerQueue';
 import { store } from '../store/store';
 
@@ -45,12 +45,9 @@ export function usePlayerNavigation(
   ) => void
 ) {
   // Support both AudioPlayer instance and HTMLAudioElement for backward compatibility
-  const player =
-    playerInstance instanceof HTMLAudioElement
-      ? playerInstance
-      : (playerInstance as AudioPlayer).audio;
   const audioPlayer =
-    playerInstance instanceof HTMLAudioElement ? null : (playerInstance as AudioPlayer);
+    playerInstance instanceof AudioPlayer ? playerInstance : null;
+  const player = playerInstance;
   const changeQueueCurrentSongIndex = useCallback(
     (currentSongIndex: number, _isPlaySong = true) => {
       // Use PlayerQueue's moveToPosition method

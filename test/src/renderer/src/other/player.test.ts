@@ -3,26 +3,57 @@ import { describe, test, expect, vi, beforeEach } from 'vitest';
 import AudioPlayer from '../../../../../src/renderer/src/other/player';
 import PlayerQueue from '../../../../../src/renderer/src/other/playerQueue';
 
-type MockWindowApi = {
-  api: {
-    audioLibraryControls: {
-      getSong: ReturnType<typeof vi.fn>;
-    };
-  };
+type MockAudioEngine = {
+  load: ReturnType<typeof vi.fn>;
+  preload: ReturnType<typeof vi.fn>;
+  stop: ReturnType<typeof vi.fn>;
+  play: ReturnType<typeof vi.fn>;
+  pause: ReturnType<typeof vi.fn>;
+  resume: ReturnType<typeof vi.fn>;
+  setVolume: ReturnType<typeof vi.fn>;
+  setPlaybackRate: ReturnType<typeof vi.fn>;
+  setEqGains: ReturnType<typeof vi.fn>;
+  onTrackEnded: ReturnType<typeof vi.fn>;
+  onPlaybackError: ReturnType<typeof vi.fn>;
+  onPositionTick: ReturnType<typeof vi.fn>;
+  onTrackTransitioned: ReturnType<typeof vi.fn>;
 };
+
+let mockAudioEngine: MockAudioEngine;
 
 beforeEach(() => {
   vi.clearAllMocks();
-  (window as unknown as MockWindowApi).api.audioLibraryControls.getSong = vi
-    .fn()
-    .mockImplementation((songId: number) =>
+
+  mockAudioEngine = {
+    load: vi.fn().mockResolvedValue({ durationSecs: 180, sampleRate: 44100, channels: 2 }),
+    preload: vi.fn().mockResolvedValue(undefined),
+    stop: vi.fn().mockResolvedValue(undefined),
+    play: vi.fn().mockResolvedValue(undefined),
+    pause: vi.fn().mockResolvedValue(undefined),
+    resume: vi.fn().mockResolvedValue(undefined),
+    setVolume: vi.fn().mockResolvedValue(undefined),
+    setPlaybackRate: vi.fn().mockResolvedValue(undefined),
+    setEqGains: vi.fn().mockResolvedValue(undefined),
+    onTrackEnded: vi.fn().mockReturnValue(() => {}),
+    onPlaybackError: vi.fn().mockReturnValue(() => {}),
+    onPositionTick: vi.fn().mockReturnValue(() => {}),
+    onTrackTransitioned: vi.fn().mockReturnValue(() => {})
+  };
+
+  const winApi = (window as unknown as { api?: Record<string, unknown> }).api || {};
+  winApi.audioEngine = mockAudioEngine;
+  winApi.properties = winApi.properties || { isInDevelopment: false };
+  winApi.audioLibraryControls = {
+    getSong: vi.fn().mockImplementation((songId: number) =>
       Promise.resolve({
         songId,
         title: `Song ${songId}`,
         path: `http://localhost:5000/song/${songId}`,
         duration: 180
       })
-    );
+    )
+  };
+  (window as unknown as { api: Record<string, unknown> }).api = winApi;
 });
 
 describe('AudioPlayer', () => {
@@ -36,10 +67,11 @@ describe('AudioPlayer', () => {
         loadSong: (id: number) => Promise<void>;
       };
       await playerInternal.loadSong(101);
-      expect(player.audio.src).toContain('101');
-      expect(
-        (player.audio as unknown as { load: ReturnType<typeof vi.fn> }).load
-      ).toHaveBeenCalledTimes(1);
+      expect(mockAudioEngine.load).toHaveBeenCalledTimes(1);
+      expect(mockAudioEngine.load).toHaveBeenCalledWith(
+        'http://localhost:5000/song/101',
+        expect.anything()
+      );
 
       // Reset mock counts
       vi.clearAllMocks();
@@ -56,12 +88,7 @@ describe('AudioPlayer', () => {
       });
 
       // Since songId 101 is already loaded, load() should NOT be called again
-      expect(
-        (player.audio as unknown as { load: ReturnType<typeof vi.fn> }).load
-      ).not.toHaveBeenCalled();
-      expect(
-        (window as unknown as MockWindowApi).api.audioLibraryControls.getSong
-      ).not.toHaveBeenCalled();
+      expect(mockAudioEngine.load).not.toHaveBeenCalled();
 
       player.destroy();
     });
@@ -74,7 +101,10 @@ describe('AudioPlayer', () => {
         loadSong: (id: number) => Promise<void>;
       };
       await playerInternal.loadSong(101);
-      expect(player.audio.src).toContain('101');
+      expect(mockAudioEngine.load).toHaveBeenCalledWith(
+        'http://localhost:5000/song/101',
+        expect.anything()
+      );
 
       vi.clearAllMocks();
 
@@ -83,10 +113,10 @@ describe('AudioPlayer', () => {
 
       // Wait a tick for async loadSong in positionChange handler
       await vi.waitFor(() => {
-        expect(
-          (window as unknown as MockWindowApi).api.audioLibraryControls.getSong
-        ).toHaveBeenCalledWith(102);
-        expect(player.audio.src).toContain('102');
+        expect(mockAudioEngine.load).toHaveBeenCalledWith(
+          'http://localhost:5000/song/102',
+          expect.anything()
+        );
       });
 
       player.destroy();
@@ -96,10 +126,8 @@ describe('AudioPlayer', () => {
       const queue = new PlayerQueue([101, 102], 0);
       const player = new AudioPlayer(queue);
       const playerInternal = player as unknown as {
-        isUsingNativeEngine: boolean;
         nativeIsPaused: boolean;
       };
-      playerInternal.isUsingNativeEngine = true;
       playerInternal.nativeIsPaused = true;
 
       const playSpy = vi.spyOn(player, 'play').mockResolvedValue(undefined);

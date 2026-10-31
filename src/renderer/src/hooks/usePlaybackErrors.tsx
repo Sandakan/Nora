@@ -53,7 +53,11 @@ export function usePlaybackErrors(
                   <details className="mt-4">
                     {playerErrorData
                       ? `CODE ${playerErrorData.code} : ${playerErrorData.message}`
-                      : t('player.noErrorMessage')}
+                      : appError instanceof Error
+                        ? appError.message
+                        : typeof appError === 'string'
+                          ? appError
+                          : t('player.noErrorMessage')}
                   </details>
                 )
               }}

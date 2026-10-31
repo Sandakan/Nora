@@ -106,6 +106,25 @@ impl DecoderState {
     }
 }
 
+pub struct ActiveTrackInfo {
+    pub file_path: String,
+    pub ring_buffer: Arc<SpscRingBuffer>,
+    pub stop_signal: Arc<AtomicBool>,
+    pub worker_handle: Option<JoinHandle<()>>,
+}
+
+pub struct StandbyTrack {
+    pub file_path: String,
+    pub duration_secs: f64,
+    pub source_sample_rate: u32,
+    pub source_channels: u16,
+    pub ring_buffer: Arc<SpscRingBuffer>,
+    pub stop_signal: Arc<AtomicBool>,
+    pub seek_request: Arc<Mutex<Option<f64>>>,
+    pub playback_rate: Arc<Mutex<f32>>,
+    pub worker_handle: Option<JoinHandle<()>>,
+}
+
 pub struct PlayerEngine {
     state: Arc<Mutex<DecoderState>>,
     eq_chain: Arc<Mutex<EqChain>>,
@@ -120,7 +139,12 @@ pub struct PlayerEngine {
     is_recovering: Arc<AtomicBool>,
     on_end_cb: Option<Arc<dyn Fn() + Send + Sync + 'static>>,
     on_err_cb: Option<Arc<dyn Fn(String) + Send + Sync + 'static>>,
+    on_tick_cb: Option<Arc<dyn Fn(EngineTickPayload) + Send + Sync + 'static>>,
+    on_transitioned_cb: Option<Arc<dyn Fn(String) + Send + Sync + 'static>>,
     recovery_trigger: Option<Arc<dyn Fn(u64) + Send + Sync + 'static>>,
+    active_track_slot: Arc<Mutex<Option<ActiveTrackInfo>>>,
+    standby_slot: Arc<Mutex<Option<StandbyTrack>>>,
+    has_standby: Arc<AtomicBool>,
 }
 
 impl PlayerEngine {
@@ -130,6 +154,9 @@ impl PlayerEngine {
         let device_manager = Arc::new(Mutex::new(DeviceManager::new()));
         let ticker = PositionTicker::new();
         let stop_signal = Arc::new(AtomicBool::new(false));
+        let active_track_slot = Arc::new(Mutex::new(None));
+        let standby_slot = Arc::new(Mutex::new(None));
+        let has_standby = Arc::new(AtomicBool::new(false));
 
         Self {
             state,
@@ -145,8 +172,27 @@ impl PlayerEngine {
             is_recovering: Arc::new(AtomicBool::new(false)),
             on_end_cb: None,
             on_err_cb: None,
+            on_tick_cb: None,
+            on_transitioned_cb: None,
             recovery_trigger: None,
+            active_track_slot,
+            standby_slot,
+            has_standby,
         }
+    }
+
+    pub fn set_tick_callback<F>(&mut self, callback: F)
+    where
+        F: Fn(EngineTickPayload) + Send + Sync + 'static,
+    {
+        self.on_tick_cb = Some(Arc::new(callback));
+    }
+
+    pub fn set_transitioned_callback<F>(&mut self, callback: F)
+    where
+        F: Fn(String) + Send + Sync + 'static,
+    {
+        self.on_transitioned_cb = Some(Arc::new(callback));
     }
 
     pub fn set_recovery_trigger<F>(&mut self, trigger: F)
@@ -181,6 +227,7 @@ impl PlayerEngine {
         auto_play: bool,
         volume: f32,
         playback_rate: f32,
+        fallback_duration: Option<f64>,
         on_end: Option<FEnd>,
         on_err: Option<FErr>,
     ) -> Result<AudioMetadata, String>
@@ -201,10 +248,154 @@ impl PlayerEngine {
             auto_play,
             volume,
             playback_rate,
+            fallback_duration,
             on_end_arc,
             on_err_arc,
             true,
         )
+    }
+
+    /// Preload the next upcoming track for seamless zero-gap transition.
+    pub fn preload_file(&mut self, file_path: &str, fallback_duration: Option<f64>) -> Result<(), String> {
+        if self.stop_signal.load(Ordering::Acquire) {
+            return Err("Player is stopped".to_string());
+        }
+
+        // If standby already preloaded with same file, do nothing
+        if let Ok(guard) = self.standby_slot.lock() {
+            if let Some(ref standby) = *guard {
+                if standby.file_path == file_path {
+                    return Ok(());
+                }
+            }
+        }
+
+        // Discard any previous standby track
+        if let Ok(mut guard) = self.standby_slot.lock() {
+            self.has_standby.store(false, Ordering::Release);
+            if let Some(mut old) = guard.take() {
+                old.stop_signal.store(true, Ordering::Release);
+                if let Some(h) = old.worker_handle.take() {
+                    let _ = h.join();
+                }
+            }
+        }
+
+        let p = Path::new(file_path);
+        let file = File::open(p).map_err(|e| format!("Failed to open preload file '{}': {}", file_path, e))?;
+        let mss = MediaSourceStream::new(Box::new(file), Default::default());
+
+        let mut hint = Hint::new();
+        if let Some(ext) = p.extension().and_then(|e| e.to_str()) {
+            hint.with_extension(ext);
+        }
+
+        let format_reader = get_probe()
+            .probe(&hint, mss, Default::default(), Default::default())
+            .map_err(|e| format!("Failed to probe preload audio format: {}", e))?;
+
+        let track = format_reader
+            .default_track(TrackType::Audio)
+            .ok_or_else(|| "No default audio track in preload file".to_string())?;
+
+        let codec_params = track
+            .codec_params
+            .as_ref()
+            .and_then(|cp| cp.audio())
+            .ok_or_else(|| "No audio codec parameters in preload track".to_string())?;
+
+        let track_id = track.id;
+        let track_time_base = track.time_base;
+        let decoder_opts: AudioDecoderOptions = Default::default();
+        let decoder = symphonia::default::get_codecs()
+            .make_audio_decoder(codec_params, &decoder_opts)
+            .map_err(|e| format!("Failed to create codec decoder for preload: {}", e))?;
+
+        let source_sample_rate = codec_params.sample_rate.unwrap_or(44100);
+        let source_channels = codec_params.channels.as_ref().map(|c| c.count() as u16).unwrap_or(2);
+
+        let mut duration_secs = if let Some(n_frames) = track.num_frames {
+            n_frames as f64 / source_sample_rate as f64
+        } else if let (Some(tb), Some(dur)) = (track.time_base, track.duration) {
+            tb.calc_duration(dur).map(|t| t.as_secs_f64()).unwrap_or(0.0)
+        } else {
+            0.0
+        };
+
+        if duration_secs <= 0.0 {
+            if let Some(fb) = fallback_duration {
+                if fb > 0.0 {
+                    duration_secs = fb;
+                }
+            }
+        }
+
+        let (output_sample_rate, current_rate) = {
+            let st = self.state.lock().unwrap();
+            let rate = *st.playback_rate.lock().unwrap();
+            (st.output_sample_rate, rate)
+        };
+
+        let target_sample_rate = if output_sample_rate > 0 { output_sample_rate } else { 48000 };
+
+        let standby_ring_buffer = SpscRingBuffer::new(65536);
+        let standby_stop_signal = Arc::new(AtomicBool::new(false));
+        let standby_seek_request = Arc::new(Mutex::new(None));
+        let standby_playback_rate = Arc::new(Mutex::new(current_rate));
+
+        let resampler = SpeedResampler::new(
+            source_sample_rate,
+            target_sample_rate,
+            2,
+            1024,
+        );
+
+        let worker_stop = standby_stop_signal.clone();
+        let worker_seek = standby_seek_request.clone();
+        let worker_rate = standby_playback_rate.clone();
+        let worker_ring = standby_ring_buffer.clone();
+        let worker_presented = Arc::new(AtomicU64::new(0));
+
+        let worker_handle = thread::Builder::new()
+            .name("nora-preload-decoder".into())
+            .spawn(move || {
+                Self::decoder_worker_loop(
+                    format_reader,
+                    decoder,
+                    track_id,
+                    track_time_base,
+                    source_sample_rate,
+                    source_channels as usize,
+                    target_sample_rate,
+                    resampler,
+                    worker_ring,
+                    worker_stop,
+                    worker_seek,
+                    worker_rate,
+                    worker_presented,
+                );
+            })
+            .map_err(|e| format!("Failed to spawn preload decoder thread: {}", e))?;
+
+        let standby = StandbyTrack {
+            file_path: file_path.to_string(),
+            duration_secs,
+            source_sample_rate,
+            source_channels,
+            ring_buffer: standby_ring_buffer,
+            stop_signal: standby_stop_signal,
+            seek_request: standby_seek_request,
+            playback_rate: standby_playback_rate,
+            worker_handle: Some(worker_handle),
+        };
+
+        if let Ok(mut guard) = self.standby_slot.lock() {
+            *guard = Some(standby);
+            self.has_standby.store(true, Ordering::Release);
+        }
+
+        log::info!("Preloaded next track successfully: {}", file_path);
+        Ok(())
     }
 
     fn load_file_internal(
@@ -213,6 +404,7 @@ impl PlayerEngine {
         auto_play: bool,
         volume: f32,
         playback_rate: f32,
+        fallback_duration: Option<f64>,
         on_end: Option<Arc<dyn Fn() + Send + Sync + 'static>>,
         on_err: Option<Arc<dyn Fn(String) + Send + Sync + 'static>>,
         increment_generation: bool,
@@ -253,13 +445,21 @@ impl PlayerEngine {
         let source_sample_rate = codec_params.sample_rate.unwrap_or(44100);
         let source_channels = codec_params.channels.as_ref().map(|c| c.count() as u16).unwrap_or(2);
 
-        let duration_secs = if let Some(n_frames) = track.num_frames {
+        let mut duration_secs = if let Some(n_frames) = track.num_frames {
             n_frames as f64 / source_sample_rate as f64
         } else if let (Some(tb), Some(dur)) = (track.time_base, track.duration) {
             tb.calc_duration(dur).map(|t| t.as_secs_f64()).unwrap_or(0.0)
         } else {
             0.0
         };
+
+        if duration_secs <= 0.0 {
+            if let Some(fb) = fallback_duration {
+                if fb > 0.0 {
+                    duration_secs = fb;
+                }
+            }
+        }
 
         let device = self
             .device_manager
@@ -350,7 +550,34 @@ impl PlayerEngine {
             })
             .map_err(|e| format!("Failed to spawn audio decoder thread: {}", e))?;
 
+        // Store active track info for seamless queries and lifetime tracking
+        if let Ok(mut guard) = self.active_track_slot.lock() {
+            *guard = Some(ActiveTrackInfo {
+                file_path: file_path.to_string(),
+                ring_buffer: ring_buffer.clone(),
+                stop_signal: stop_signal.clone(),
+                worker_handle: None,
+            });
+        }
+
         self.worker_handle = Some(worker_handle);
+
+        // Start smooth 100ms position ticker if callback is configured
+        if let Some(ref on_tick) = self.on_tick_cb {
+            let state_clone = self.state.clone();
+            let on_tick_arc = on_tick.clone();
+            self.ticker.start(
+                move || {
+                    let st = state_clone.lock().unwrap();
+                    let pos = st.presented_frames.load(Ordering::Relaxed) as f64 / st.output_sample_rate as f64;
+                    let playing = st.is_playing.load(Ordering::Relaxed);
+                    (pos, playing)
+                },
+                Box::new(move |payload| {
+                    on_tick_arc(payload);
+                }),
+            );
+        }
 
         let err_fn = Self::create_error_handler(
             self.generation,
@@ -367,6 +594,10 @@ impl PlayerEngine {
             device_channels,
             ring_buffer,
             stop_signal,
+            self.state.clone(),
+            self.active_track_slot.clone(),
+            self.standby_slot.clone(),
+            self.has_standby.clone(),
             is_playing,
             is_ended,
             presented_frames,
@@ -374,6 +605,7 @@ impl PlayerEngine {
             volume_cache,
             self.eq_chain.clone(),
             on_end,
+            self.on_transitioned_cb.clone(),
             err_fn,
         )?;
 
@@ -489,7 +721,8 @@ impl PlayerEngine {
 
                             // Normalize source channels to stereo
                             stereo_buf.clear();
-                            match source_channels {
+                            let norm_channels = source_channels.max(1);
+                            match norm_channels {
                                 1 => {
                                     for &s in slice.iter() {
                                         stereo_buf.push(s);
@@ -560,8 +793,12 @@ impl PlayerEngine {
     fn audio_callback_f32(
         data: &mut [f32],
         device_channels: usize,
-        ring_buffer: &Arc<SpscRingBuffer>,
-        stop_signal: &Arc<AtomicBool>,
+        current_ring_buffer: &mut Arc<SpscRingBuffer>,
+        current_active_stop: &mut Arc<AtomicBool>,
+        state: &Arc<Mutex<DecoderState>>,
+        active_track_slot: &Arc<Mutex<Option<ActiveTrackInfo>>>,
+        standby_slot: &Arc<Mutex<Option<StandbyTrack>>>,
+        has_standby: &Arc<AtomicBool>,
         is_playing: &Arc<AtomicBool>,
         is_ended: &Arc<AtomicBool>,
         presented_frames: &Arc<AtomicU64>,
@@ -569,8 +806,9 @@ impl PlayerEngine {
         volume_cache: &Arc<AtomicU32>,
         eq_chain: &Arc<Mutex<EqChain>>,
         on_end: &Option<Arc<dyn Fn() + Send + Sync + 'static>>,
+        on_transitioned: &Option<Arc<dyn Fn(String) + Send + Sync + 'static>>,
     ) {
-        if stop_signal.load(Ordering::Relaxed) || !is_playing.load(Ordering::Relaxed) {
+        if current_active_stop.load(Ordering::Relaxed) || !is_playing.load(Ordering::Relaxed) {
             data.fill(0.0);
             return;
         }
@@ -580,17 +818,70 @@ impl PlayerEngine {
 
         let mut frames_processed = 0;
         let mut vol_lock = volume_lock.try_lock();
+        let mut transitioned = false;
 
         while frames_processed < frames_needed {
             let chunk_frames = (frames_needed - frames_processed).min(512);
             let samples_to_read = chunk_frames * 2;
 
-            let popped = ring_buffer.pop_slice(&mut stereo_scratch[..samples_to_read]);
+            let popped = current_ring_buffer.pop_slice(&mut stereo_scratch[..samples_to_read]);
             if popped < samples_to_read {
                 stereo_scratch[popped..samples_to_read].fill(0.0);
 
-                if ring_buffer.is_eof_and_empty() {
-                    if !is_ended.swap(true, Ordering::Release) {
+                if current_ring_buffer.is_eof_and_empty() {
+                    if has_standby.load(Ordering::Acquire) {
+                        if let Ok(mut standby_guard) = standby_slot.try_lock() {
+                            if let Some(standby) = standby_guard.take() {
+                                has_standby.store(false, Ordering::Release);
+                                // Stop previous track worker
+                                current_active_stop.store(true, Ordering::Release);
+
+                                // Swap active buffer and stop signal
+                                *current_ring_buffer = standby.ring_buffer.clone();
+                                *current_active_stop = standby.stop_signal.clone();
+
+                                // Drain remainder of this chunk from standby buffer
+                                let needed_more = samples_to_read - popped;
+                                let popped_next = current_ring_buffer.pop_slice(&mut stereo_scratch[popped..samples_to_read]);
+                                if popped_next < needed_more {
+                                    stereo_scratch[popped + popped_next..samples_to_read].fill(0.0);
+                                }
+
+                                // Reset presented frames to frames read from the next track
+                                let next_frames = (popped_next / 2) as u64;
+                                presented_frames.store(next_frames, Ordering::Release);
+
+                                // Update decoder state with standby track info
+                                if let Ok(mut st) = state.try_lock() {
+                                    st.duration_secs = standby.duration_secs;
+                                    st.source_sample_rate = standby.source_sample_rate;
+                                    st.source_channels = standby.source_channels;
+                                    st.is_ended.store(false, Ordering::Release);
+                                    st.seek_request = standby.seek_request;
+                                    st.playback_rate = standby.playback_rate;
+                                }
+
+                                let next_path = standby.file_path.clone();
+
+                                // Update active track slot
+                                if let Ok(mut active_guard) = active_track_slot.try_lock() {
+                                    *active_guard = Some(ActiveTrackInfo {
+                                        file_path: standby.file_path,
+                                        ring_buffer: standby.ring_buffer,
+                                        stop_signal: standby.stop_signal,
+                                        worker_handle: standby.worker_handle,
+                                    });
+                                }
+
+                                // Notify transition
+                                if let Some(ref cb) = on_transitioned {
+                                    cb(next_path);
+                                }
+
+                                transitioned = true;
+                            }
+                        }
+                    } else if !is_ended.swap(true, Ordering::Release) {
                         is_playing.store(false, Ordering::Release);
                         if let Some(ref cb) = on_end {
                             cb();
@@ -675,7 +966,9 @@ impl PlayerEngine {
             frames_processed += chunk_frames;
         }
 
-        presented_frames.fetch_add(frames_needed as u64, Ordering::Relaxed);
+        if !transitioned {
+            presented_frames.fetch_add(frames_needed as u64, Ordering::Relaxed);
+        }
     }
 
     /// Legacy compatibility play_file wrapper.
@@ -691,21 +984,10 @@ impl PlayerEngine {
         FEnd: Fn() + Send + Sync + 'static,
         FErr: Fn(String) + Send + Sync + 'static,
     {
-        self.load_file(file_path, true, 1.0, 1.0, on_end, on_err)?;
-
         if let Some(on_tick) = on_tick {
-            let state_clone = self.state.clone();
-            self.ticker.start(
-                move || {
-                    let st = state_clone.lock().unwrap();
-                    let pos = st.presented_frames.load(Ordering::Relaxed) as f64 / st.output_sample_rate as f64;
-                    let playing = st.is_playing.load(Ordering::Relaxed);
-                    (pos, playing)
-                },
-                Box::new(on_tick),
-            );
+            self.set_tick_callback(on_tick);
         }
-
+        self.load_file(file_path, true, 1.0, 1.0, None, on_end, on_err)?;
         Ok(())
     }
 
@@ -726,6 +1008,10 @@ impl PlayerEngine {
         device_channels: usize,
         ring_buffer: Arc<SpscRingBuffer>,
         stop_signal: Arc<AtomicBool>,
+        state: Arc<Mutex<DecoderState>>,
+        active_track_slot: Arc<Mutex<Option<ActiveTrackInfo>>>,
+        standby_slot: Arc<Mutex<Option<StandbyTrack>>>,
+        has_standby: Arc<AtomicBool>,
         is_playing: Arc<AtomicBool>,
         is_ended: Arc<AtomicBool>,
         presented_frames: Arc<AtomicU64>,
@@ -733,8 +1019,12 @@ impl PlayerEngine {
         volume_cache: Arc<AtomicU32>,
         eq_chain: Arc<Mutex<EqChain>>,
         on_end: Option<Arc<dyn Fn() + Send + Sync + 'static>>,
+        on_transitioned: Option<Arc<dyn Fn(String) + Send + Sync + 'static>>,
         err_fn: impl FnMut(cpal::Error) + Send + 'static,
     ) -> Result<SendStream, String> {
+        let mut current_ring_buffer = ring_buffer;
+        let mut current_active_stop = stop_signal;
+
         let stream = match sample_format {
             SampleFormat::F32 => device
                 .build_output_stream(
@@ -743,8 +1033,12 @@ impl PlayerEngine {
                         Self::audio_callback_f32(
                             data,
                             device_channels,
-                            &ring_buffer,
-                            &stop_signal,
+                            &mut current_ring_buffer,
+                            &mut current_active_stop,
+                            &state,
+                            &active_track_slot,
+                            &standby_slot,
+                            &has_standby,
                             &is_playing,
                             &is_ended,
                             &presented_frames,
@@ -752,6 +1046,7 @@ impl PlayerEngine {
                             &volume_cache,
                             &eq_chain,
                             &on_end,
+                            &on_transitioned,
                         );
                     },
                     err_fn,
@@ -821,6 +1116,27 @@ impl PlayerEngine {
             let _ = send_stream.0.pause();
         }
 
+        if let Ok(mut guard) = self.active_track_slot.lock() {
+            if let Some(mut info) = guard.take() {
+                info.stop_signal.store(true, Ordering::Release);
+                if let Some(handle) = info.worker_handle.take() {
+                    let _ = handle.join();
+                }
+                info.ring_buffer.clear();
+            }
+        }
+
+        if let Ok(mut guard) = self.standby_slot.lock() {
+            self.has_standby.store(false, Ordering::Release);
+            if let Some(mut standby) = guard.take() {
+                standby.stop_signal.store(true, Ordering::Release);
+                if let Some(handle) = standby.worker_handle.take() {
+                    let _ = handle.join();
+                }
+                standby.ring_buffer.clear();
+            }
+        }
+
         if let Some(handle) = self.worker_handle.take() {
             let _ = handle.join();
         }
@@ -845,8 +1161,8 @@ impl PlayerEngine {
             return Ok(());
         }
 
-        let file_path = match self.current_file_path.as_ref() {
-            Some(p) => p.clone(),
+        let file_path = match self.get_current_file_path() {
+            Some(p) => p,
             None => return Err("No file loaded".to_string()),
         };
 
@@ -874,7 +1190,22 @@ impl PlayerEngine {
         // Release previous stream handle before building new one
         self.stream = None;
 
-        if new_output_sample_rate == current_output_sample_rate && self.ring_buffer.is_some() {
+        let (active_rb_opt, active_stop_opt) = if let Ok(guard) = self.active_track_slot.lock() {
+            if let Some(ref info) = *guard {
+                (Some(info.ring_buffer.clone()), Some(info.stop_signal.clone()))
+            } else {
+                (self.ring_buffer.clone(), Some(self.stop_signal.clone()))
+            }
+        } else {
+            (self.ring_buffer.clone(), Some(self.stop_signal.clone()))
+        };
+
+        if new_output_sample_rate == current_output_sample_rate && active_rb_opt.is_some() {
+            let active_rb = active_rb_opt.unwrap();
+            let active_stop = active_stop_opt.unwrap();
+            self.ring_buffer = Some(active_rb.clone());
+            self.stop_signal = active_stop.clone();
+
             log::info!(
                 "Rebuilding stream with identical sample rate ({} Hz)",
                 new_output_sample_rate
@@ -899,8 +1230,12 @@ impl PlayerEngine {
                 config,
                 sample_format,
                 device_channels,
-                self.ring_buffer.as_ref().unwrap().clone(),
-                self.stop_signal.clone(),
+                active_rb,
+                active_stop,
+                self.state.clone(),
+                self.active_track_slot.clone(),
+                self.standby_slot.clone(),
+                self.has_standby.clone(),
                 st.is_playing.clone(),
                 st.is_ended.clone(),
                 st.presented_frames.clone(),
@@ -908,6 +1243,7 @@ impl PlayerEngine {
                 st.volume_cache.clone(),
                 self.eq_chain.clone(),
                 self.on_end_cb.clone(),
+                self.on_transitioned_cb.clone(),
                 err_fn,
             )?;
 
@@ -930,12 +1266,14 @@ impl PlayerEngine {
             let rate = *self.state.lock().unwrap().playback_rate.lock().unwrap();
             let on_end = self.on_end_cb.clone();
             let on_err = self.on_err_cb.clone();
+            let duration = self.get_duration();
 
             self.load_file_internal(
                 &file_path,
                 was_playing,
                 volume,
                 rate,
+                Some(duration),
                 on_end,
                 on_err,
                 false,
@@ -954,6 +1292,11 @@ impl PlayerEngine {
         st.presented_frames.store(target_frame, Ordering::Release);
         if let Some(ref rb) = self.ring_buffer {
             rb.clear();
+        }
+        if let Ok(guard) = self.active_track_slot.lock() {
+            if let Some(ref info) = *guard {
+                info.ring_buffer.clear();
+            }
         }
         let mut req = st.seek_request.lock().unwrap();
         *req = Some(target);
@@ -987,10 +1330,18 @@ impl PlayerEngine {
     }
 
     pub fn set_playback_rate(&self, rate: f32) {
-        let st = self.state.lock().unwrap();
-        if let Ok(mut r) = st.playback_rate.lock() {
-            *r = rate.clamp(0.25, 4.0);
+        let clamped = rate.clamp(0.25, 4.0);
+        let rate_lock = self.state.lock().unwrap().playback_rate.clone();
+        if let Ok(mut r) = rate_lock.lock() {
+            *r = clamped;
         };
+        if let Ok(guard) = self.standby_slot.lock() {
+            if let Some(ref standby) = *guard {
+                if let Ok(mut r) = standby.playback_rate.lock() {
+                    *r = clamped;
+                }
+            }
+        }
     }
 
     pub fn set_eq_band(&self, frequency_hz: f32, gain_db: f32) {
@@ -1021,6 +1372,15 @@ impl PlayerEngine {
         self.state.lock().unwrap().duration_secs
     }
 
+    pub fn get_current_file_path(&self) -> Option<String> {
+        if let Ok(guard) = self.active_track_slot.lock() {
+            if let Some(ref info) = *guard {
+                return Some(info.file_path.clone());
+            }
+        }
+        self.current_file_path.clone()
+    }
+
     pub fn is_playing(&self) -> bool {
         self.state.lock().unwrap().is_playing.load(Ordering::Acquire)
     }
@@ -1033,8 +1393,9 @@ impl PlayerEngine {
         self.device_manager.lock().unwrap().list_output_devices()
     }
 
-    pub fn set_device(&mut self, device_name: String) {
-        self.device_manager.lock().unwrap().set_device_name(Some(device_name));
+    pub fn set_device(&mut self, device_name: Option<String>) {
+        let name = device_name.filter(|s| !s.trim().is_empty());
+        self.device_manager.lock().unwrap().set_device_name(name);
         if self.stream.is_some() && !self.stop_signal.load(Ordering::Relaxed) {
             let _ = self.rebuild_stream();
         }

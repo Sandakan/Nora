@@ -279,6 +279,10 @@ const createWindow = async () => {
       mainWindow.webContents.send('app/player/skipBackward');
     } else if (event === 'stop') {
       mainWindow.webContents.send('app/player/toggleSongPlaybackState', false);
+    } else if (event === 'raise') {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.show();
+      mainWindow.focus();
     }
   });
 

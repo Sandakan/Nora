@@ -568,6 +568,7 @@ declare global {
     currentSong: CurrentSong;
     volume: Volume;
     playbackRate: number;
+    selectedAudioDevice?: string;
   }
 
   type EqualizerBandFilters =

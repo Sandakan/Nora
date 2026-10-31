@@ -26,7 +26,7 @@ impl DeviceManager {
     }
 
     pub fn set_device_name(&mut self, name: Option<String>) {
-        self.selected_device_name = name;
+        self.selected_device_name = name.filter(|s| !s.trim().is_empty());
     }
 
     pub fn get_selected_device(&self) -> Option<cpal::Device> {

@@ -59,6 +59,7 @@ export function useListeningData(player: AudioPlayer | HTMLAudioElement) {
 
         // Create new listening session
         const listeningDataSession = new ListeningDataSession(songId, duration, isKnownSource);
+        listeningDataSession.isPaused = player.paused;
         listeningDataSession.recordListeningData();
 
         // Set up event listeners for the session

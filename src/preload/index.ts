@@ -68,6 +68,7 @@ const audioEngine = {
       autoPlay?: boolean;
       volume?: number;
       playbackRate?: number;
+      fallbackDuration?: number;
       metadata?: {
         title?: string;
         artist?: string;
@@ -78,6 +79,8 @@ const audioEngine = {
     }
   ): Promise<{ durationSecs: number; sampleRate: number; channels: number }> =>
     ipcRenderer.invoke('app/audioEngine/load', filePath, options),
+  preload: (filePath: string, fallbackDuration?: number): Promise<void> =>
+    ipcRenderer.invoke('app/audioEngine/preload', filePath, fallbackDuration),
   updateMetadata: (metadata: {
     title?: string;
     artist?: string;
@@ -113,6 +116,25 @@ const audioEngine = {
   setEqGains: (gains: number[]): Promise<void> =>
     ipcRenderer.invoke('app/audioEngine/setEqGains', gains),
   resetEq: (): Promise<void> => ipcRenderer.invoke('app/audioEngine/resetEq'),
+  onPositionTick: (
+    callback: (payload: { position: number; timestampMs: number; isPlaying: boolean }) => void
+  ): (() => void) => {
+    const handler = (
+      _event: unknown,
+      data: { position: number; timestampMs: number; isPlaying: boolean }
+    ) => callback(data);
+    ipcRenderer.on('app/audioEngine/positionTick', handler);
+    return () => {
+      ipcRenderer.removeListener('app/audioEngine/positionTick', handler);
+    };
+  },
+  onTrackTransitioned: (callback: (path: string) => void): (() => void) => {
+    const handler = (_event: unknown, path: string) => callback(path);
+    ipcRenderer.on('app/audioEngine/trackTransitioned', handler);
+    return () => {
+      ipcRenderer.removeListener('app/audioEngine/trackTransitioned', handler);
+    };
+  },
   onTrackEnded: (callback: () => void): (() => void) => {
     const handler = () => callback();
     ipcRenderer.on('app/audioEngine/trackEnded', handler);
@@ -599,7 +621,11 @@ const settingsHelpers = {
     ipcRenderer.invoke('app/saveUserKeyboardShortcuts', shortcuts),
 
   // User Equalizer Preset
-  getUserEqualizerPreset: (): Promise<{ frequencyBands: number[] }> =>
+  getUserEqualizerPreset: (): Promise<{
+    frequencyBands: number[];
+    presetName?: string;
+    isEnabled?: boolean;
+  }> =>
     ipcRenderer.invoke('app/getUserEqualizerPreset'),
   saveUserEqualizerPreset: (presetData: {
     presetName?: string;

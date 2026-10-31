@@ -1,7 +1,7 @@
 import { lazy, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import type AudioPlayer from '../other/player';
+import AudioPlayer from '../other/player';
 import type PlayerQueue from '../other/playerQueue';
 import { dispatch, store } from '../store/store';
 import storage from '../utils/localStorage';
@@ -63,12 +63,9 @@ export function usePlayerControl(
   const refStartPlay = useRef(false);
 
   // Support both AudioPlayer instance and HTMLAudioElement for backward compatibility
-  const player =
-    playerInstance instanceof HTMLAudioElement
-      ? playerInstance
-      : (playerInstance as AudioPlayer).audio;
   const audioPlayer =
-    playerInstance instanceof HTMLAudioElement ? null : (playerInstance as AudioPlayer);
+    playerInstance instanceof AudioPlayer ? playerInstance : null;
+  const player = playerInstance;
 
   const toggleSongPlayback = useCallback(
     (startPlay?: boolean | unknown) => {
@@ -81,7 +78,7 @@ export function usePlayerControl(
         }
 
         // Fallback to direct audio element control
-        if (typeof forcePlay !== 'boolean' || forcePlay === player.paused) {
+        if (player instanceof HTMLAudioElement && (typeof forcePlay !== 'boolean' || forcePlay === player.paused)) {
           if (player.readyState > 0) {
             if (player.paused) {
               return player
@@ -210,20 +207,45 @@ export function usePlayerControl(
         const { isKnownSource } = audioPlayerData;
         if (isKnownSource) playSong(audioPlayerData.songId);
         else {
-          console.log('playSong', audioPlayerData.path);
-          dispatch({
-            type: 'CURRENT_SONG_DATA_CHANGE',
-            data: audioPlayerData
-          });
-          player.src = `${audioPlayerData.path}?ts=${Date.now()}`;
-          refStartPlay.current = isStartPlay;
-          if (isStartPlay) toggleSongPlayback();
+          console.log('[playSongFromUnknownSource]', audioPlayerData.path);
+          if (audioPlayer) {
+            refStartPlay.current = isStartPlay;
+            audioPlayer
+              .loadSong(audioPlayerData, { autoPlay: isStartPlay, updateStore: true })
+              .then(() => {
+                recordListeningData(
+                  audioPlayerData.songId,
+                  audioPlayerData.duration,
+                  undefined,
+                  false
+                );
+              })
+              .catch((err) => {
+                console.error('[usePlayerControl] Failed to play unknown source song:', err);
+                changePromptMenuData(true, <SongUnplayableErrorPrompt err={err as Error} />);
+              });
+          } else {
+            dispatch({
+              type: 'CURRENT_SONG_DATA_CHANGE',
+              data: audioPlayerData
+            });
+            player.src = `${audioPlayerData.path}?ts=${Date.now()}`;
+            refStartPlay.current = isStartPlay;
+            if (isStartPlay) toggleSongPlayback();
 
-          recordListeningData(audioPlayerData.songId, audioPlayerData.duration, undefined, false);
+            recordListeningData(audioPlayerData.songId, audioPlayerData.duration, undefined, false);
+          }
         }
       }
     },
-    [playSong, recordListeningData, toggleSongPlayback, player]
+    [
+      audioPlayer,
+      changePromptMenuData,
+      playSong,
+      recordListeningData,
+      toggleSongPlayback,
+      player
+    ]
   );
 
   const updateCurrentSongData = useCallback(

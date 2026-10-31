@@ -43,7 +43,7 @@ impl PositionTicker {
             let start_instant = Instant::now();
 
             while running.load(Ordering::Relaxed) {
-                thread::sleep(Duration::from_millis(250));
+                thread::sleep(Duration::from_millis(100));
 
                 if !running.load(Ordering::Relaxed) {
                     break;

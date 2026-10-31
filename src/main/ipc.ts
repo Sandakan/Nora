@@ -643,6 +643,7 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
           autoPlay?: boolean;
           volume?: number;
           playbackRate?: number;
+          fallbackDuration?: number;
           metadata?: {
             title?: string;
             artist?: string;
@@ -652,6 +653,11 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
           };
         }
       ) => audioEngine.load(filePath, options)
+    );
+    ipcMain.handle(
+      'app/audioEngine/preload',
+      (_, filePath: string, fallbackDuration?: number) =>
+        audioEngine.preload(filePath, fallbackDuration)
     );
     ipcMain.handle(
       'app/audioEngine/updateMetadata',
@@ -714,6 +720,18 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
           message,
           target: 'AUDIO_ENGINE'
         });
+      }
+    });
+
+    audioEngine.onTick((payload) => {
+      if (!mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('app/audioEngine/positionTick', payload);
+      }
+    });
+
+    audioEngine.onTransitioned((path) => {
+      if (!mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('app/audioEngine/trackTransitioned', path);
       }
     });
 

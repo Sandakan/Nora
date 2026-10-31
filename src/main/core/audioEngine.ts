@@ -22,10 +22,17 @@ export interface JsMediaMetadata {
   coverUrl?: string;
 }
 
+export interface EngineTickPayload {
+  position: number;
+  timestampMs: number;
+  isPlaying: boolean;
+}
+
 export interface LoadOptions {
   autoPlay?: boolean;
   volume?: number;
   playbackRate?: number;
+  fallbackDuration?: number;
   metadata?: JsMediaMetadata;
 }
 
@@ -38,6 +45,7 @@ export interface JsLogRecord {
 export interface AudioEngineNative {
   ping(): string;
   engineLoad(path: string, options?: LoadOptions): AudioMetadata;
+  enginePreload?(path: string, fallbackDuration?: number): void;
   enginePlay(path: string): void;
   enginePause(): void;
   engineResume(): void;
@@ -51,6 +59,8 @@ export interface AudioEngineNative {
   engineIsEnded?(): boolean;
   engineOnEnded?(callback: (err: Error | null) => void): void;
   engineOnError?(callback: (err: Error | null, message: string) => void): void;
+  engineOnTick?(callback: (err: Error | null, payload: EngineTickPayload) => void): void;
+  engineOnTransitioned?(callback: (err: Error | null, path: string) => void): void;
   engineInitLogger?(callback: (err: Error | null, record: JsLogRecord) => void): void;
   engineInitMediaControls?(
     hwndBuf: Buffer | null,
@@ -79,10 +89,17 @@ function resolveNativeBinaryPath(): string | null {
     path.join(__dirname, '../audio-engine/dist')
   ];
 
+  const archPrefix = `audio-engine.${process.platform}-${process.arch}`;
+
   for (const dir of candidateDirs) {
     if (fs.existsSync(dir)) {
       try {
         const files = fs.readdirSync(dir);
+        // Prefer exact arch match (e.g. audio-engine.win32-x64-msvc.node or audio-engine.win32-x64.node)
+        const archFile = files.find((f) => f.startsWith(archPrefix) && f.endsWith('.node'));
+        if (archFile) {
+          return path.join(dir, archFile);
+        }
         const nodeFile = files.find((f) => f.startsWith('audio-engine') && f.endsWith('.node'));
         if (nodeFile) {
           return path.join(dir, nodeFile);
@@ -257,6 +274,13 @@ export const audioEngine = {
       : undefined;
     return getAudioEngine().engineLoad(rawPath, normalizedOptions);
   },
+  preload: (filePath: string, fallbackDuration?: number): void => {
+    const rawPath = removeDefaultAppProtocolFromFilePath(filePath);
+    const eng = getAudioEngine();
+    if (typeof eng.enginePreload === 'function') {
+      eng.enginePreload(rawPath, fallbackDuration);
+    }
+  },
   play: (filePath: string): void => {
     const rawPath = removeDefaultAppProtocolFromFilePath(filePath);
     getAudioEngine().enginePlay(rawPath);
@@ -341,6 +365,34 @@ export const audioEngine = {
       }
     } catch (err) {
       logger.error('Failed to register engineOnError callback', { error: String(err) });
+    }
+  },
+  onTick: (callback: (payload: EngineTickPayload) => void): void => {
+    try {
+      const eng = getAudioEngine();
+      if (typeof eng.engineOnTick === 'function') {
+        eng.engineOnTick((err, payload) => {
+          if (!err && payload) {
+            callback(payload);
+          }
+        });
+      }
+    } catch (err) {
+      logger.error('Failed to register engineOnTick callback', { error: String(err) });
+    }
+  },
+  onTransitioned: (callback: (path: string) => void): void => {
+    try {
+      const eng = getAudioEngine();
+      if (typeof eng.engineOnTransitioned === 'function') {
+        eng.engineOnTransitioned((err, path) => {
+          if (!err && path) {
+            callback(path);
+          }
+        });
+      }
+    } catch (err) {
+      logger.error('Failed to register engineOnTransitioned callback', { error: String(err) });
     }
   },
   initLogger: (callback: (record: JsLogRecord) => void): void => {

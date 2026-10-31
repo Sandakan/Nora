@@ -146,6 +146,21 @@ export function useAppLifecycle(dependencies: AppLifecycleDependencies): void {
     toggleShuffling(playback?.isShuffling);
     toggleRepeat(playback?.isRepeating);
 
+    // Restore audio output device preference
+    if (playback?.selectedAudioDevice && window.api?.audioEngine?.listDevices) {
+      window.api.audioEngine
+        .listDevices()
+        .then((devices) => {
+          if (devices.includes(playback.selectedAudioDevice!)) {
+            return window.api.audioEngine.setDevice(playback.selectedAudioDevice!);
+          }
+          return undefined;
+        })
+        .catch((err) => {
+          console.error('[useAppLifecycle] Failed to restore saved audio device:', err);
+        });
+    }
+
     // Check for startup songs (e.g., songs opened via file association)
     window.api.audioLibraryControls
       .checkForStartUpSongs()

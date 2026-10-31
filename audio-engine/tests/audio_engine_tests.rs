@@ -3,6 +3,7 @@ use audio_engine::dsp::{EqChain, BiquadFilter, EQ_FREQUENCIES};
 use audio_engine::engine::PlayerEngine;
 use audio_engine::resampler::SpeedResampler;
 use audio_engine::ticker::{EngineTickPayload, PositionTicker};
+use cpal::traits::HostTrait;
 use std::sync::{atomic::Ordering, Arc};
 use std::thread;
 use std::time::Duration;
@@ -10,9 +11,42 @@ use std::time::Duration;
 #[test]
 fn test_eq_chain_frequencies_count() {
     assert_eq!(EQ_FREQUENCIES.len(), 10);
-    assert_eq!(EQ_FREQUENCIES[0], 60.0);
-    assert_eq!(EQ_FREQUENCIES[4], 1000.0);
+    assert_eq!(EQ_FREQUENCIES[0], 32.0);
+    assert_eq!(EQ_FREQUENCIES[4], 500.0);
+    assert_eq!(EQ_FREQUENCIES[5], 1000.0);
     assert_eq!(EQ_FREQUENCIES[9], 16000.0);
+}
+
+#[test]
+fn test_player_engine_preload_and_callbacks() {
+    let mut engine = PlayerEngine::new();
+    engine.set_tick_callback(|_payload| {});
+    engine.set_transitioned_callback(|_path| {});
+    // Preloading nonexistent file should fail cleanly without crash
+    let res = engine.preload_file("nonexistent.mp3", Some(120.0));
+    assert!(res.is_err());
+}
+
+#[test]
+fn test_device_manager_device_selection_empty_or_none() {
+    let mut dm = DeviceManager::new();
+    dm.set_device_name(Some("   ".to_string()));
+    // Empty / whitespace should be treated as None, selecting default output device
+    let dev = dm.get_selected_device();
+    let default_dev = cpal::default_host().default_output_device();
+    assert_eq!(dev.is_some(), default_dev.is_some());
+
+    dm.set_device_name(None);
+    let dev_none = dm.get_selected_device();
+    assert_eq!(dev_none.is_some(), default_dev.is_some());
+}
+
+#[test]
+fn test_player_engine_device_switching() {
+    let mut engine = PlayerEngine::new();
+    engine.set_device(None);
+    engine.set_device(Some("".to_string()));
+    engine.set_device(Some("NonExistentDevice12345".to_string()));
 }
 
 #[test]

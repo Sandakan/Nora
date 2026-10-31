@@ -378,6 +378,9 @@
     "languageDescription": "Select the language you want Nora to be displayed in.",
 
     "audioPlayback": "Audio playback",
+    "audioOutputDevice": "Audio output device",
+    "audioOutputDeviceDescription": "Select the audio output device for playback.",
+    "defaultAudioDevice": "Default System Output",
     "showRemainingSongDuration": "Show remaining song duration",
     "showRemainingSongDurationDescription": "Shows the remaining duration of the song instead of the default song duration.",
     "playbackRate": "Playback speed",
