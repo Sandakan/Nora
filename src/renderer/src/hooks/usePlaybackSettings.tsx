@@ -1,5 +1,6 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
+import type AudioPlayer from '../other/player';
 import toggleSongIsFavorite from '../other/toggleSongIsFavorite';
 import { dispatch, store } from '../store/store';
 import storage from '../utils/localStorage';
@@ -29,11 +30,58 @@ import { useUserPreferences } from './useUserPreferences';
  *   updateEqualizerOptions({ preset: 'rock', bands: [...] });
  *   ```;
  *
- * @param player - The HTMLAudioElement instance
+ * @param player - The AudioPlayer or HTMLAudioElement instance
  * @returns Object containing playback setting functions
  */
-export function usePlaybackSettings(player: HTMLAudioElement) {
-  const { saveEqualizerPreset } = useUserPreferences();
+export function usePlaybackSettings(player: AudioPlayer | HTMLAudioElement) {
+  const { equalizerPreset, saveEqualizerPreset } = useUserPreferences();
+  const pendingPresetNameRef = useRef<string | undefined>(undefined);
+
+  // Synchronize database equalizer preset with player and native audio engine on startup/change
+  useEffect(() => {
+    const bands = equalizerPreset?.frequencyBands;
+    if (!bands || bands.length !== 10) return;
+
+    // Do not overwrite local edits in progress
+    if (pendingPresetRef.current) return;
+
+    const eq: Equalizer = {
+      thirtyTwoHertzFilter: bands[0] ?? 0,
+      sixtyFourHertzFilter: bands[1] ?? 0,
+      hundredTwentyFiveHertzFilter: bands[2] ?? 0,
+      twoHundredFiftyHertzFilter: bands[3] ?? 0,
+      fiveHundredHertzFilter: bands[4] ?? 0,
+      thousandHertzFilter: bands[5] ?? 0,
+      twoThousandHertzFilter: bands[6] ?? 0,
+      fourThousandHertzFilter: bands[7] ?? 0,
+      eightThousandHertzFilter: bands[8] ?? 0,
+      sixteenThousandHertzFilter: bands[9] ?? 0
+    };
+
+    storage.equalizerPreset.setEqualizerPreset(eq);
+    if (
+      'applyEqualizerSettings' in player &&
+      typeof player.applyEqualizerSettings === 'function'
+    ) {
+      player.applyEqualizerSettings(eq);
+    }
+  }, [equalizerPreset, player]);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingPresetRef = useRef<Equalizer | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+        if (pendingPresetRef.current) {
+          saveEqualizerPreset({
+            ...pendingPresetRef.current,
+            ...(pendingPresetNameRef.current ? { presetName: pendingPresetNameRef.current } : {})
+          });
+        }
+      }
+    };
+  }, [saveEqualizerPreset]);
 
   const toggleRepeat = useCallback((newState?: RepeatTypes) => {
     const repeatState =
@@ -71,7 +119,10 @@ export function usePlaybackSettings(player: HTMLAudioElement) {
 
   const updateSongPosition = useCallback(
     (position: number) => {
-      if (position >= 0 && position <= player.duration) player.currentTime = position;
+      const dur = player.duration;
+      if (position >= 0 && (Number.isNaN(dur) || dur === 0 || position <= dur)) {
+        player.currentTime = position;
+      }
     },
     [player]
   );
@@ -100,10 +151,33 @@ export function usePlaybackSettings(player: HTMLAudioElement) {
   );
 
   const updateEqualizerOptions = useCallback(
-    (options: Equalizer) => {
-      saveEqualizerPreset(options);
+    (options: Equalizer, presetName?: string) => {
+      // 1. Immediately apply to local storage cache and live audio player (0ms latency)
+      storage.equalizerPreset.setEqualizerPreset(options);
+      if (
+        'applyEqualizerSettings' in player &&
+        typeof player.applyEqualizerSettings === 'function'
+      ) {
+        player.applyEqualizerSettings(options);
+      }
+
+      // 2. Debounce database persistence by 350ms to avoid flooding PostgreSQL transactions
+      pendingPresetRef.current = options;
+      pendingPresetNameRef.current = presetName;
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+      debounceTimerRef.current = setTimeout(() => {
+        saveEqualizerPreset({
+          ...options,
+          ...(presetName ? { presetName } : {})
+        });
+        pendingPresetNameRef.current = undefined;
+        pendingPresetRef.current = null;
+        debounceTimerRef.current = null;
+      }, 350);
     },
-    [saveEqualizerPreset]
+    [saveEqualizerPreset, player]
   );
 
   return {

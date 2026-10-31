@@ -20,12 +20,23 @@ files:
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
   - '!**/resources/other/*'
   - '!**/resources/installer_assets/*'
-  - '!**/resources/other/*'
+  - '!audio-engine/target/**/*'
+  - '!audio-engine/scratch/**/*'
+  - '!audio-engine/src/**/*'
+  - '!audio-engine/examples/**/*'
+  - '!audio-engine/tests/**/*'
+  - '!**/node_modules/audio-engine/target/**/*'
+  - '!**/node_modules/audio-engine/scratch/**/*'
+  - '!**/node_modules/audio-engine/src/**/*'
+  - '!**/node_modules/audio-engine/examples/**/*'
+  - '!**/node_modules/audio-engine/tests/**/*'
 
 asarUnpack:
   - resources/**
   - node_modules/sharp/**/*
   - node_modules/@img/**/*
+  - node_modules/audio-engine/dist/**/*
+  - audio-engine/dist/**/*
 
 fileAssociations:
   - ext: mp3

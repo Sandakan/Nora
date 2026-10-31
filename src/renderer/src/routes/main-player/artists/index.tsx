@@ -50,7 +50,6 @@ function ArtistPage() {
     (state) => state.multipleSelectionsData.isEnabled
   );
   const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
-  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
   const sortingStates = useStore(store, (state) => state.localStorage.sortingStates);
 
   const { toggleMultipleSelections } = useContext(AppUpdateContext);
@@ -87,7 +86,7 @@ function ArtistPage() {
 
   const selectAllHandler = useSelectAllHandler(artistsData, 'artist', 'artistId');
 
-  console.log('offset', currentlyActivePage?.data);
+
   return (
     <MainContainer
       className="appear-from-bottom artists-list-container h-full! overflow-hidden pb-0!"

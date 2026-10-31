@@ -27,16 +27,45 @@ const AudioPlaybackSettings = () => {
   const { t } = useTranslation();
 
   const [seekbarScrollInterval, setSeekbarScrollInterval] = useState('5');
-
   const [playbackRateInterval, setPlaybackRateInterval] = useState(1);
+  const [selectedDevice, setSelectedDevice] = useState('');
+  const [availableDevices, setAvailableDevices] = useState<string[]>([]);
 
   useEffect(() => {
     const interval = storage.preferences.getPreferences('seekbarScrollInterval');
     const playbackRate = storage.playback.getPlaybackOptions('playbackRate');
+    const savedDevice = storage.playback.getPlaybackOptions('selectedAudioDevice') || '';
 
     setPlaybackRateInterval(playbackRate);
     setSeekbarScrollInterval(interval.toString());
+    setSelectedDevice(savedDevice);
+
+    if (window.api?.audioEngine?.listDevices) {
+      window.api.audioEngine
+        .listDevices()
+        .then((devices) => {
+          setAvailableDevices(devices);
+        })
+        .catch((err) => {
+          console.error('[AudioPlaybackSettings] Failed to list audio devices:', err);
+        });
+    }
   }, []);
+
+  const handleDeviceChange = (deviceName: string) => {
+    setSelectedDevice(deviceName);
+    storage.playback.setPlaybackOptions('selectedAudioDevice', deviceName);
+    if (window.api?.audioEngine?.setDevice) {
+      window.api.audioEngine.setDevice(deviceName).catch((err) => {
+        console.error('[AudioPlaybackSettings] Failed to switch audio device:', err);
+      });
+    }
+  };
+
+  const deviceOptions: DropdownOption<string>[] = [
+    { label: t('settingsPage.defaultAudioDevice'), value: '' },
+    ...availableDevices.map((device) => ({ label: device, value: device }))
+  ];
 
   const playbackRateSeekBarCssProperties: CSSProperties = {};
 
@@ -54,6 +83,20 @@ const AudioPlaybackSettings = () => {
         {t('settingsPage.audioPlayback')}
       </div>
       <ul className="marker:bg-font-color-highlight dark:marker:bg-dark-font-color-highlight list-disc pl-6">
+        <li className="audio-output-device mb-6" id="audioOutputDevice">
+          <div className="description">{t('settingsPage.audioOutputDeviceDescription')}</div>
+          <Dropdown
+            className="mt-4"
+            name="audioOutputDevice"
+            value={selectedDevice}
+            options={deviceOptions}
+            onChange={(e) => {
+              const val = e.currentTarget.value;
+              handleDeviceChange(val);
+            }}
+          />
+        </li>
+
         <li className="secondary-container show-remaining-song-duration mb-4">
           <div className="description">
             {t('settingsPage.showRemainingSongDurationDescription')}

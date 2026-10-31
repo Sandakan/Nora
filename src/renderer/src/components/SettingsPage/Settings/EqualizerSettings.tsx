@@ -83,7 +83,7 @@ const EqualizerSettings = () => {
 
   const [selectedPreset, setSelectedPreset] = useState<string>('flat');
   const hasHydratedFromDatabaseRef = useRef(false);
-  const shouldSkipNextSaveRef = useRef(true);
+  const isHydratingRef = useRef(false);
 
   const isTheDefaultPreset = useMemo(() => selectedPreset === 'flat', [selectedPreset]);
 
@@ -101,15 +101,18 @@ const EqualizerSettings = () => {
     });
 
     hasHydratedFromDatabaseRef.current = true;
-    shouldSkipNextSaveRef.current = true;
+    isHydratingRef.current = true;
+    if (equalizerPreset?.presetName) {
+      setSelectedPreset(equalizerPreset.presetName);
+    }
     dispatch({ type: undefined, data: hydratedEqualizer });
   }, [equalizerPreset]);
 
   useEffect(() => {
     setSelectedPreset(getPresetName(content));
 
-    if (shouldSkipNextSaveRef.current) {
-      shouldSkipNextSaveRef.current = false;
+    if (isHydratingRef.current) {
+      isHydratingRef.current = false;
       return;
     }
 
@@ -118,7 +121,7 @@ const EqualizerSettings = () => {
       return;
     }
 
-    updateEqualizerOptions(content);
+    updateEqualizerOptions(content, getPresetName(content));
   }, [content, updateEqualizerOptions]);
 
   const equalizerBands = useMemo(() => {

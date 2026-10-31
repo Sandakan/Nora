@@ -258,6 +258,12 @@
         "prefer-rest-params": "error",
         "prefer-spread": "error"
       }
+    },
+    {
+      "files": ["**/*.js", "**/*.cjs"],
+      "rules": {
+        "typescript/no-require-imports": "off"
+      }
     }
   ]
 }

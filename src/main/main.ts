@@ -27,6 +27,7 @@ import { version, appPreferences } from '../../package.json';
 import noraAppIcon from '../../resources/logo_light_mode.png?asset';
 import roundTo from '../common/roundTo';
 import manageLastFmAuth from './auth/manageLastFmAuth';
+import audioEngine, { clearSmtcCoversFolder } from './core/audioEngine';
 import changeAppTheme from './core/changeAppTheme';
 import checkForNewSongs from './core/checkForNewSongs';
 import checkForStartUpSongs from './core/checkForStartUpSongs';
@@ -250,6 +251,7 @@ const createWindow = async () => {
   mainWindow.once('ready-to-show', () => {
     if (app.hasSingleInstanceLock()) {
       logger.info('Started checking for new songs during the application start.');
+      clearSmtcCoversFolder();
       checkForNewSongs();
       addWatchersToFolders();
       addWatchersToParentFolders();
@@ -258,6 +260,30 @@ const createWindow = async () => {
   mainWindow.webContents.setWindowOpenHandler((data: { url: string }) => {
     shell.openExternal(data.url);
     return { action: 'deny' };
+  });
+
+  const hwnd = process.platform === 'win32' ? mainWindow.getNativeWindowHandle() : undefined;
+  audioEngine.initMediaControls(hwnd, (event) => {
+    logger.debug(`OS Media Control Event received: ${event}`);
+    if (!mainWindow || mainWindow.isDestroyed()) return;
+
+    if (event === 'toggle') {
+      mainWindow.webContents.send('app/player/toggleSongPlaybackState');
+    } else if (event === 'play') {
+      mainWindow.webContents.send('app/player/toggleSongPlaybackState', true);
+    } else if (event === 'pause') {
+      mainWindow.webContents.send('app/player/toggleSongPlaybackState', false);
+    } else if (event === 'next') {
+      mainWindow.webContents.send('app/player/skipForward');
+    } else if (event === 'previous') {
+      mainWindow.webContents.send('app/player/skipBackward');
+    } else if (event === 'stop') {
+      mainWindow.webContents.send('app/player/toggleSongPlaybackState', false);
+    } else if (event === 'raise') {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.show();
+      mainWindow.focus();
+    }
   });
 
   // mainWindow.on('closed', () => {
@@ -282,6 +308,9 @@ protocol.registerSchemesAsPrivileged([
 if (process.platform === 'win32') {
   app.setAppUserModelId('com.sandakannipunajith.nora');
 }
+
+app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
+app.commandLine.appendSwitch('disable-features', 'HardwareMediaKeyHandling');
 
 let hideWindowOnClose = false;
 let isAppQuitting = false;
@@ -483,8 +512,15 @@ async function handleBeforeQuit() {
       const promise2 = savePendingMetadataUpdates(currentSongPath, true);
       const promise3 = closeAllAbortControllers();
       const promise4 = clearTempArtworkFolder();
+      const promise5 = clearSmtcCoversFolder();
 
-      await Promise.all([promise1, promise2, promise3, promise4]);
+      await Promise.all([promise1, promise2, promise3, promise4, promise5]);
+
+      try {
+        audioEngine.destroy();
+      } catch (err) {
+        logger.error('Failed to destroy audio-engine during quit', { err });
+      }
 
       mainWindow.webContents.send('app/beforeQuitEvent');
       await closeDatabaseInstance();

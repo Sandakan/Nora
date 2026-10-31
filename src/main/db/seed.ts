@@ -47,7 +47,7 @@ export const seedDatabase = async () => {
     const isEqualizerSeeded = await isEqualizerPresetSeeded();
     if (!isEqualizerSeeded) {
       await db.insert(userEqualizerPreset).values({
-        presetName: 'Default',
+        presetName: 'flat',
         frequencyBands: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         isEnabled: false
       });
