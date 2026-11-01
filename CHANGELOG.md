@@ -8,6 +8,137 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > [!TIP]
 > The latest version, **( v3.1.0-stable )** contains a lot of new features and improvements. As always expect some bugs in the app
 
+## [Unreleased]
+
+### Added
+
+- Added native Rust-based audio engine (`audio-engine`) powered by Symphonia and cpal to circumvent Chromium audio playback issues, integrated via N-API and IPC.
+- Added batch equalizer gain adjustments via `set_eq_gains` method on `PlayerEngine` and IPC handlers.
+- Added equalizer preset management and user preferences synchronization.
+- Added volume state management with smooth ramping and clamping in the native audio engine.
+- Added error handling, logging, and playback recovery mechanisms in the audio engine.
+- Added track ended callback and enhanced audio player transition handling.
+- Added engine load functionality with configurable auto play, volume, and playback rate options.
+- Added playback status handling and metadata support to the native audio engine.
+- Added window hide-on-close functionality.
+
+### Changed
+
+- Removed deprecated `electron-store` dependency and silent audio anchor.
+- Updated project dependencies including Electron, `@tanstack/react-pacer`, `oxfmt`, and `material-symbols`.
+- Added documentation and troubleshooting guides for the native audio engine crate build process.
+
+### Fixed
+
+- Fixed an issue where the song paused or skipped unexpectedly on play next.
+- Fixed favorite button hover background in `Song.tsx` ([#536](https://github.com/Sandakan/Nora/issues/536)).
+- Prevented potential ReDoS vulnerability in protocol and query string removal in filesystem path utils.
+
+## [4.0.0-alpha.5] - 2026-08-05
+
+### Added
+
+- Added offline Last.fm scrobble queue with auto-flush on reconnect ([#462](https://github.com/Sandakan/Nora/issues/462), [#471](https://github.com/Sandakan/Nora/issues/471)).
+- Added dynamic changelog parsing and markdown-based release notes UI component.
+- Added concurrency control for song parsing, user preferences hook, and localStorage management utilities.
+- Added sorting options for "Most Skipped" songs ([#438](https://github.com/Sandakan/Nora/issues/438), [#489](https://github.com/Sandakan/Nora/issues/489)) and "Date Modified" ([#461](https://github.com/Sandakan/Nora/issues/461)).
+- Added tray single-click toggle window setting with runtime IPC hot-swapping ([#418](https://github.com/Sandakan/Nora/issues/418)).
+- Added song tags editing page and navigation.
+- Added Brazilian Portuguese (`pt-BR`) ([#364](https://github.com/Sandakan/Nora/issues/364)) and French (`fr`) ([#410](https://github.com/Sandakan/Nora/issues/410)) translations.
+- Added macOS titlebar layout improvements and native entitlements configuration ([#456](https://github.com/Sandakan/Nora/issues/456)).
+- Added precommit hook for automated test, lint, and format verification.
+
+### Changed
+
+- Replaced `fs-extra` with native `fs` methods for clearing temporary artwork storage.
+- Consolidated Drizzle migrations and wrapped duplicate artist resolution in database transactions.
+- Updated project dependencies including Electron 41.4.0, Sharp, and Oxfmt.
+
+### Fixed
+
+- Fixed scrobble queue batch claiming and capacity checks to execute atomically within database transactions.
+- Fixed like-toggle catch handler state mutations and re-syncing like state on props invalidation ([#470](https://github.com/Sandakan/Nora/issues/470), [#465](https://github.com/Sandakan/Nora/issues/465)).
+- Fixed Windows SMTC integration by configuring AppUserModelId ([#520](https://github.com/Sandakan/Nora/issues/520)).
+- Fixed Discord RPC inconsistencies regarding pause, seek, album art, and crash safety ([#376](https://github.com/Sandakan/Nora/issues/376), [#436](https://github.com/Sandakan/Nora/issues/436)).
+- Fixed off-screen window repositioning and fullscreen bounds clamping on macOS ([#372](https://github.com/Sandakan/Nora/issues/372), [#475](https://github.com/Sandakan/Nora/issues/475)).
+- Fixed shuffle history bounds and cleared `queueBeforeShuffle` on queue mutations ([#356](https://github.com/Sandakan/Nora/issues/356)).
+- Fixed blacklist filtering to enforce boundary checks and propagate blacklist status to child folders.
+- Fixed song path reset on route song ID change in song tag editing.
+- Fixed instant playback rate updates when changed from settings ([#419](https://github.com/Sandakan/Nora/issues/419)).
+- Fixed dark square background behind play icon in search results ([#474](https://github.com/Sandakan/Nora/issues/474)).
+- Fixed overflow CSS clipping bug in song components ([#480](https://github.com/Sandakan/Nora/issues/480)).
+
+## [4.0.0-alpha.4] - 2026-04-30
+
+### Fixed
+
+- Fixed version script in `package.json` to ensure dependencies are installed prior to building.
+
+## [4.0.0-alpha.3] - 2026-04-30
+
+### Added
+
+- Added UI zoom factor setting and configurable zoom controls.
+- Replaced `music-metadata` with `node-taglib-sharp` for faster and more reliable audio metadata parsing.
+- Added Home query module for fetching recently played songs, recent artists, and favorite songs.
+- Added initial Flatpak packaging support.
+- Added colorized log viewer script and CLI command powered by `yoctocolors`.
+- Added Polish (`pl.json`) and Assamese (`as.json`) translations.
+- Added Nora privacy policy and Microsoft Store publication metadata.
+
+### Changed
+
+- Migrated localStorage user data directly into PGlite database.
+- Migrated `songId` identifier from string to numeric type across database schema, queries, and components.
+- Replaced Biome with `oxlint` and standardized code formatting with `oxfmt`.
+- Updated Drizzle ORM and electron-vite dependencies.
+
+### Fixed
+
+- Fixed arguments passed to Nora when opening audio files through the OS file explorer.
+- Fixed oversized `app.asar` package size and resolved file path resolution issues.
+- Fixed `exportDatabase` function to properly handle search paths and instance cloning.
+- Enhanced concurrency control in `parseSong` to prevent duplicate song parsing.
+
+## [4.0.0-alpha.2] - 2025-11-23
+
+### Added
+
+- Added unlinking functionality for songs in albums, artists, and genres during song deletion.
+- Wired song listening data recording to player events.
+
+### Changed
+
+- Refactored `reParseSong` to remove redundant queries.
+- Updated dependencies including Electron to version 39.2.1.
+
+## [4.0.0-alpha.1] - 2025-11-15
+
+### Added
+
+- Migrated routing to [TanStack Router](https://tanstack.com/router) with file-based routing and loaders.
+- Migrated styling framework to [Tailwind CSS v4](https://tailwindcss.com/).
+- Migrated local database to [@electric-sql/pglite](https://pglite.electric-sql.com/) with SQL migrations and schema indexing.
+- Revamped audio queue and playback architecture with an event-driven `PlayerQueue` and dedicated React hooks (`usePlayerControl`, `useQueue`, `usePlaybackSettings`, `useNavigation`).
+- Integrated [@tanstack/react-query](https://tanstack.com/query) for asynchronous data fetching, cache management, and theme mutations.
+- Added customizable keyboard shortcuts persisted to local storage.
+- Added database reset / nuke functionality with storage and database metrics retrieval.
+- Added case-insensitive and similarity search options.
+- Added auto-play support and enhanced playback error recovery in `AudioPlayer`.
+
+### Changed
+
+- Moved `sharp` image processing to WebAssembly (WASM) build.
+- Converted test suite to Vitest and expanded test coverage for queue and lyrics parsing.
+- Reorganized route structure and moved page components into dedicated `/routes` directories.
+- Updated project dependencies including Electron 39.0.0 and ESLint configuration with `simple-import-sort`.
+
+### Fixed
+
+- Fixed audio streaming issues in Electron by ordering song fetching to descending order.
+- Fixed image loading issues on macOS.
+- Fixed CSS transition regressions and outline styles resulting from the Tailwind CSS v4 migration.
+
 ## [3.1.0-stable] - 2025-03-29
 
 ![Nora v3.1.0-stable version artwork](resources/other/release%20artworks/whats-new-v3.1.0-stable.webp)
@@ -951,6 +1082,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added a lyrics pane which shows lyrics according to the current song.
 - Instant identification of newly added songs.
 
+[Unreleased]: https://github.com/Sandakan/Nora/compare/v4.0.0-alpha.5...HEAD
+[4.0.0-alpha.5]: https://github.com/Sandakan/Nora/compare/v4.0.0-alpha.4...v4.0.0-alpha.5
+[4.0.0-alpha.4]: https://github.com/Sandakan/Nora/compare/v4.0.0-alpha.3...v4.0.0-alpha.4
+[4.0.0-alpha.3]: https://github.com/Sandakan/Nora/compare/v4.0.0-alpha.2...v4.0.0-alpha.3
+[4.0.0-alpha.2]: https://github.com/Sandakan/Nora/compare/v4.0.0-alpha.1...v4.0.0-alpha.2
+[4.0.0-alpha.1]: https://github.com/Sandakan/Nora/compare/v3.1.0-stable...v4.0.0-alpha.1
 [3.1.0-stable]: https://github.com/Sandakan/Nora/compare/v3.0.0-stable...v3.1.0-stable
 [3.0.0-stable]: https://github.com/Sandakan/Nora/compare/v2.4.3-stable...v3.0.0-stable
 [2.4.3-stable]: https://github.com/Sandakan/Nora/compare/v2.4.2-stable...v2.4.3-stable
