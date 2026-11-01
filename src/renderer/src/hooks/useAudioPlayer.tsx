@@ -6,7 +6,8 @@ let playerInstance: AudioPlayer | null = null;
 
 /**
  * Custom hook to get the singleton AudioPlayer instance. The player instance integrates with
- * PlayerQueue for automatic song loading and native push ticker position updates. Persists across component re-renders.
+ * PlayerQueue for automatic song loading and native push ticker position updates. Persists across
+ * component re-renders.
  *
  * @returns The AudioPlayer instance with integrated queue
  */

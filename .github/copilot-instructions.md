@@ -352,8 +352,8 @@ export async function getAllSongs(sortType?: SongSortTypes, filterType?: SongFil
 // src/main/core/toggleLikeSongs.ts
 import { db } from '@main/db/db';
 import { songs } from '@main/db/schema';
-import { dataUpdateEvent } from '@main/main';
 import logger from '@main/logger';
+import { dataUpdateEvent } from '@main/main';
 
 export default async function toggleLikeSongs(songIds: string[], isLikeSong?: boolean) {
   try {
@@ -549,6 +549,7 @@ capture stale/null references due to closure timing.
 
 ```typescript
 import { Store } from '@tanstack/store';
+
 import { reducer as appReducer, DEFAULT_REDUCER_DATA } from '../other/appReducer';
 import storage from '../utils/localStorage';
 
@@ -812,9 +813,9 @@ npm run prettier-check      # Prettier formatting check
 ### Test Patterns
 
 ```typescript
+import { parseLyrics } from '@common/parseLyrics';
 // Example test structure
 import { describe, test, expect } from 'vitest';
-import { parseLyrics } from '@common/parseLyrics';
 
 describe('parseLyrics', () => {
   test('should parse synced lyrics', () => {
@@ -1010,13 +1011,12 @@ function playSong(songId: string) {
 Use `eslint-plugin-simple-import-sort` for automatic sorting:
 
 ```typescript
-// 1. External dependencies
-import { useEffect, useCallback } from 'react';
-import { useSuspenseQuery } from '@tanstack/react-query';
-
 // 2. Internal path aliases
 import { settingsQuery } from '@renderer/queries';
 import storage from '@renderer/utils/localStorage';
+import { useSuspenseQuery } from '@tanstack/react-query';
+// 1. External dependencies
+import { useEffect, useCallback } from 'react';
 
 // 3. Relative imports
 import AudioPlayer from '../other/player';

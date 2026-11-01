@@ -9,7 +9,6 @@ import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Button from '../Button';
 import Img from '../Img';
 import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
-
 import SongArtist from '../SongsPage/SongArtist';
 
 interface AlbumProp extends Album {
@@ -320,8 +319,6 @@ export const Album = (props: AlbumProp) => {
     <div
       tabIndex={0}
       role="button"
-
-
 
       // style={{ animationDelay: `${50 * (props.index + 1)}ms` }}
       className={`album group mr-6 mb-2 flex h-68 w-48 cursor-pointer flex-col justify-between overflow-hidden rounded-md p-4 outline-offset-1 focus-visible:outline! ${

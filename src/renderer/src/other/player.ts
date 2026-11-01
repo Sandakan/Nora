@@ -102,7 +102,8 @@ class AudioPlayer extends EventTarget {
   }
 
   /**
-   * Sets up native engine callbacks: track end, playback error, 100ms position tick, and track transitioned.
+   * Sets up native engine callbacks: track end, playback error, 100ms position tick, and track
+   * transitioned.
    */
   private setupNativeListeners() {
     if (window.api?.audioEngine?.onTrackEnded) {
@@ -140,11 +141,9 @@ class AudioPlayer extends EventTarget {
     }
 
     if (window.api?.audioEngine?.onTrackTransitioned) {
-      this.trackTransitionedUnsubscribe = window.api.audioEngine.onTrackTransitioned(
-        (newPath) => {
-          this.handleTrackTransitioned(newPath);
-        }
-      );
+      this.trackTransitionedUnsubscribe = window.api.audioEngine.onTrackTransitioned((newPath) => {
+        this.handleTrackTransitioned(newPath);
+      });
     }
   }
 
@@ -203,9 +202,7 @@ class AudioPlayer extends EventTarget {
     });
   }
 
-  /**
-   * Preloads the next upcoming track into the native Rust audio engine for zero-gap transitions.
-   */
+  /** Preloads the next upcoming track into the native Rust audio engine for zero-gap transitions. */
   private async preloadNextTrack(): Promise<void> {
     if (!window.api?.audioEngine?.preload) return;
 
@@ -249,9 +246,7 @@ class AudioPlayer extends EventTarget {
     }
   }
 
-  /**
-   * Handles gapless transition notification emitted by the native Rust engine.
-   */
+  /** Handles gapless transition notification emitted by the native Rust engine. */
   private async handleTrackTransitioned(newPath: string) {
     console.log('[AudioPlayer.handleTrackTransitioned]', { newPath });
 
@@ -264,9 +259,7 @@ class AudioPlayer extends EventTarget {
       });
       this.nativeCurrentTime = 0;
       this.emit('timeUpdate', 0);
-      document.dispatchEvent(
-        new CustomEvent('player/positionChange', { detail: 0 })
-      );
+      document.dispatchEvent(new CustomEvent('player/positionChange', { detail: 0 }));
       this.preloadNextTrack();
       return;
     }
@@ -302,9 +295,7 @@ class AudioPlayer extends EventTarget {
       this.emit('songLoaded', transitionedSong);
       this.emit('durationChange', this.nativeDuration);
       this.emit('timeUpdate', 0);
-      document.dispatchEvent(
-        new CustomEvent('player/positionChange', { detail: 0 })
-      );
+      document.dispatchEvent(new CustomEvent('player/positionChange', { detail: 0 }));
       this.dispatchEvent(
         new CustomEvent('player/trackchange', { detail: transitionedSong.songId })
       );
@@ -313,9 +304,7 @@ class AudioPlayer extends EventTarget {
     }
   }
 
-  /**
-   * Handles song end when no gapless transition occurred. Advances queue or repeats as configured.
-   */
+  /** Handles song end when no gapless transition occurred. Advances queue or repeats as configured. */
   private async handleSongEnd() {
     if (this.isTransitioningTracks) {
       return;
@@ -399,9 +388,7 @@ class AudioPlayer extends EventTarget {
 
       const rawPath = window.api.utils?.removeDefaultAppProtocolFromFilePath
         ? window.api.utils.removeDefaultAppProtocolFromFilePath(songData.path)
-        : songData.path
-            .replace(/^nora:[/\\]{1,2}localfiles[/\\]{1,2}/i, '')
-            .replace(/\?.*$/, '');
+        : songData.path.replace(/^nora:[/\\]{1,2}localfiles[/\\]{1,2}/i, '').replace(/\?.*$/, '');
 
       const storeVolume = store?.state?.player?.volume;
       if (storeVolume) {

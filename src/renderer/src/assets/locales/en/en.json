@@ -98,6 +98,9 @@
     "checkingForUpdates": "Checking for app updates...",
     "updateCheckError": "Error occurred when checking for app updates.",
     "updateCheckErrorNoInternet": "$t(common.updateCheckError) $t(common.noInternet)",
+    "updateNow": "Update now",
+    "viewChangelog": "View changelog",
+    "restartAndInstall": "Restart & Install",
     "optionDisabled": "This option is disabled.",
     "somethingWentWrong": "Something went wrong.",
     "details": "Details",
@@ -1124,7 +1127,11 @@
     "PLAYLIST_RENAME_SUCCESS": "Playlist renamed successfully.",
     "PLAYLIST_NOT_FOUND": "Playlist not found.",
     "SONG_REPARSE_SUCCESS": "Successfully reparsed `{{title}}`.",
-    "SONG_REPARSE_FAILED": "Error occurred when re-parsing the song."
+    "SONG_REPARSE_FAILED": "Error occurred when re-parsing the song.",
+    "APP_UPDATE_NOT_AVAILABLE": "Nora is up-to-date.",
+    "APP_UPDATE_AVAILABLE": "A new update (v{{version}}) is available.",
+    "APP_UPDATE_PROGRESS": "Downloading update...",
+    "APP_UPDATE_DOWNLOADED": "Update v{{version}} downloaded and ready to install."
   },
 
   "discordrpc": {

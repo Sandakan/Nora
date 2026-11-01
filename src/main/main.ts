@@ -22,6 +22,7 @@ import {
   type OpenDialogOptions,
   type SaveDialogOptions
 } from 'electron';
+import sharp from 'sharp';
 
 import { version, appPreferences } from '../../package.json';
 import noraAppIcon from '../../resources/logo_light_mode.png?asset';
@@ -48,6 +49,11 @@ import resetAppData from './resetAppData';
 import { savePendingSongLyrics } from './saveLyricsToSong';
 import checkForUpdates from './update';
 import { savePendingMetadataUpdates } from './updateSong/updateSongId3Tags';
+import logMemoryCheckpoint from './utils/memoryProfiler';
+
+sharp.cache({ memory: 25, files: 10, items: 50 });
+sharp.concurrency(1);
+logMemoryCheckpoint('main-module-init');
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -249,6 +255,7 @@ const createWindow = async () => {
     mainWindow.loadFile(join(import.meta.dirname, '../renderer/index.html'));
   }
   mainWindow.once('ready-to-show', () => {
+    logMemoryCheckpoint('ready-to-show');
     if (app.hasSingleInstanceLock()) {
       logger.info('Started checking for new songs during the application start.');
       clearSmtcCoversFolder();
@@ -489,6 +496,7 @@ async function manageWindowFinishLoad() {
   if (IS_DEVELOPMENT) mainWindow.webContents.openDevTools({ mode: 'detach', activate: true });
 
   logger.debug(`Starting up the renderer.`);
+  logMemoryCheckpoint('window-finish-load');
 
   manageTaskbarPlaybackButtonControls(mainWindow, true, false);
 

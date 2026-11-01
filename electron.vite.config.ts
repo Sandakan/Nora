@@ -103,7 +103,7 @@ export default defineConfig({
         autoCodeSplitting: true
       }),
       react({
-        compiler: true,
+        compiler: true
       }),
       tailwindcss()
     ]

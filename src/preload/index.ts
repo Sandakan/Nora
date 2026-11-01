@@ -95,8 +95,7 @@ const audioEngine = {
   setPlaybackStatus: (
     status: 'playing' | 'paused' | 'stopped',
     progressSecs?: number
-  ): Promise<void> =>
-    ipcRenderer.invoke('app/audioEngine/setPlaybackStatus', status, progressSecs),
+  ): Promise<void> => ipcRenderer.invoke('app/audioEngine/setPlaybackStatus', status, progressSecs),
   seek: (positionSecs: number): Promise<void> =>
     ipcRenderer.invoke('app/audioEngine/seek', positionSecs),
   setVolume: (volume: number): Promise<void> =>
@@ -625,8 +624,7 @@ const settingsHelpers = {
     frequencyBands: number[];
     presetName?: string;
     isEnabled?: boolean;
-  }> =>
-    ipcRenderer.invoke('app/getUserEqualizerPreset'),
+  }> => ipcRenderer.invoke('app/getUserEqualizerPreset'),
   saveUserEqualizerPreset: (presetData: {
     presetName?: string;
     frequencyBands?: number[];
@@ -702,7 +700,13 @@ const utils = {
   }
 };
 
+const appUpdates = {
+  downloadUpdate: (): Promise<any> => ipcRenderer.invoke('app/downloadUpdate'),
+  quitAndInstallUpdate: (): Promise<void> => ipcRenderer.invoke('app/quitAndInstallUpdate')
+};
+
 export const api = {
+  appUpdates,
   properties,
   windowControls,
   theme,

@@ -19,6 +19,8 @@ declare global {
   type LogMessageTypes = 'INFO' | 'WARN' | 'ERROR';
 
   type IpcChannels =
+    | 'app/downloadUpdate'
+    | 'app/quitAndInstallUpdate'
     | 'app/beforeQuitEvent'
     | 'app/Close'
     | 'app/minimize'
@@ -961,6 +963,10 @@ declare global {
     | 'SONG_WHITELISTED'
     | 'FOLDER_BLACKLISTED'
     | 'FOLDER_WHITELISTED'
+    | 'APP_UPDATE_AVAILABLE'
+    | 'APP_UPDATE_NOT_AVAILABLE'
+    | 'APP_UPDATE_PROGRESS'
+    | 'APP_UPDATE_DOWNLOADED'
     | 'PENDING_METADATA_UPDATES_SAVED'
     | 'FOLDER_PARSED_FOR_DIRECTORIES'
     | 'RESET_SUCCESSFUL'

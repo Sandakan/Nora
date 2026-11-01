@@ -428,9 +428,7 @@ export const audioEngine = {
     try {
       const eng = getAudioEngine();
       if (typeof eng.engineUpdateMetadata === 'function') {
-        const coverUrl = metadata.coverUrl
-          ? await normalizeCoverUrl(metadata.coverUrl)
-          : undefined;
+        const coverUrl = metadata.coverUrl ? await normalizeCoverUrl(metadata.coverUrl) : undefined;
         eng.engineUpdateMetadata({
           ...metadata,
           coverUrl

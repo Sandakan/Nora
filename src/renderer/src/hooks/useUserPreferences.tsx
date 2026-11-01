@@ -62,9 +62,9 @@ export function useUserPreferences() {
         ];
         return window.api.settingsHelpers.saveUserEqualizerPreset({
           frequencyBands,
-          ...(presetData as { presetName?: string }).presetName
+          ...((presetData as { presetName?: string }).presetName
             ? { presetName: (presetData as { presetName?: string }).presetName }
-            : {}
+            : {})
         });
       }
       return window.api.settingsHelpers.saveUserEqualizerPreset(

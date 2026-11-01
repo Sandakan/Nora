@@ -59,10 +59,7 @@ export function usePlaybackSettings(player: AudioPlayer | HTMLAudioElement) {
     };
 
     storage.equalizerPreset.setEqualizerPreset(eq);
-    if (
-      'applyEqualizerSettings' in player &&
-      typeof player.applyEqualizerSettings === 'function'
-    ) {
+    if ('applyEqualizerSettings' in player && typeof player.applyEqualizerSettings === 'function') {
       player.applyEqualizerSettings(eq);
     }
   }, [equalizerPreset, player]);

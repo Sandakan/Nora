@@ -45,8 +45,7 @@ export function usePlayerNavigation(
   ) => void
 ) {
   // Support both AudioPlayer instance and HTMLAudioElement for backward compatibility
-  const audioPlayer =
-    playerInstance instanceof AudioPlayer ? playerInstance : null;
+  const audioPlayer = playerInstance instanceof AudioPlayer ? playerInstance : null;
   const player = playerInstance;
   const changeQueueCurrentSongIndex = useCallback(
     (currentSongIndex: number, _isPlaySong = true) => {

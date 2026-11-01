@@ -63,8 +63,7 @@ export function usePlayerControl(
   const refStartPlay = useRef(false);
 
   // Support both AudioPlayer instance and HTMLAudioElement for backward compatibility
-  const audioPlayer =
-    playerInstance instanceof AudioPlayer ? playerInstance : null;
+  const audioPlayer = playerInstance instanceof AudioPlayer ? playerInstance : null;
   const player = playerInstance;
 
   const toggleSongPlayback = useCallback(
@@ -78,7 +77,10 @@ export function usePlayerControl(
         }
 
         // Fallback to direct audio element control
-        if (player instanceof HTMLAudioElement && (typeof forcePlay !== 'boolean' || forcePlay === player.paused)) {
+        if (
+          player instanceof HTMLAudioElement &&
+          (typeof forcePlay !== 'boolean' || forcePlay === player.paused)
+        ) {
           if (player.readyState > 0) {
             if (player.paused) {
               return player
@@ -238,14 +240,7 @@ export function usePlayerControl(
         }
       }
     },
-    [
-      audioPlayer,
-      changePromptMenuData,
-      playSong,
-      recordListeningData,
-      toggleSongPlayback,
-      player
-    ]
+    [audioPlayer, changePromptMenuData, playSong, recordListeningData, toggleSongPlayback, player]
   );
 
   const updateCurrentSongData = useCallback(

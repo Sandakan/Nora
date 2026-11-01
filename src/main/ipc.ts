@@ -102,6 +102,7 @@ import sendNowPlayingSongDataToLastFM from './other/lastFm/sendNowPlayingSongDat
 import reParseSong from './parseSong/reParseSong';
 import saveLyricsToSong from './saveLyricsToSong';
 import search from './search';
+import { downloadAppUpdate, quitAndInstallAppUpdate } from './update';
 import updateSongId3Tags, { isMetadataUpdatesPending } from './updateSong/updateSongId3Tags';
 import convertLyricsToPinyin from './utils/convertToPinyin';
 import convertLyricsToRomaja from './utils/convertToRomaja';
@@ -654,10 +655,8 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
         }
       ) => audioEngine.load(filePath, options)
     );
-    ipcMain.handle(
-      'app/audioEngine/preload',
-      (_, filePath: string, fallbackDuration?: number) =>
-        audioEngine.preload(filePath, fallbackDuration)
+    ipcMain.handle('app/audioEngine/preload', (_, filePath: string, fallbackDuration?: number) =>
+      audioEngine.preload(filePath, fallbackDuration)
     );
     ipcMain.handle(
       'app/audioEngine/updateMetadata',
@@ -707,6 +706,8 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       audioEngine.setEqGains(gains)
     );
     ipcMain.handle('app/audioEngine/resetEq', () => audioEngine.resetEq());
+    ipcMain.handle('app/downloadUpdate', async () => downloadAppUpdate());
+    ipcMain.handle('app/quitAndInstallUpdate', () => quitAndInstallAppUpdate());
 
     audioEngine.onEnded(() => {
       if (!mainWindow.isDestroyed()) {

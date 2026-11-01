@@ -21,18 +21,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added engine load functionality with configurable auto play, volume, and playback rate options.
 - Added playback status handling and metadata support to the native audio engine.
 - Added window hide-on-close functionality.
+- Added in-app React toast notifications for auto-updater statuses (`APP_UPDATE_AVAILABLE`, `APP_UPDATE_NOT_AVAILABLE`, `APP_UPDATE_PROGRESS`, and `APP_UPDATE_DOWNLOADED`) with interactive "Update now", "View changelog", and "Restart & Install" actions.
+- Added Main process startup memory profiling telemetry (`memoryProfiler.ts`).
 
 ### Changed
 
 - Removed deprecated `electron-store` dependency and silent audio anchor.
 - Updated project dependencies including Electron, `@tanstack/react-pacer`, `oxfmt`, and `material-symbols`.
 - Added documentation and troubleshooting guides for the native audio engine crate build process.
+- Optimized Main process startup memory footprint by lazy-loading Kuroshiro / Kuromoji on demand (~132MB heap savings), tuning PGlite PostgreSQL memory parameters (`shared_buffers`, `work_mem`), and bounding Sharp libvips cache limits.
+- Replaced blocking native OS update dialogs with silent background checks and in-app React notifications.
 
 ### Fixed
 
 - Fixed an issue where the song paused or skipped unexpectedly on play next.
 - Fixed favorite button hover background in `Song.tsx` ([#536](https://github.com/Sandakan/Nora/issues/536)).
 - Prevented potential ReDoS vulnerability in protocol and query string removal in filesystem path utils.
+- Fixed an issue where a modal "No Updates: Current version is up-to-date." dialog popped up on every app startup.
+- Fixed native error dialogs appearing when auto-updater checks fail while offline.
 
 ## [4.0.0-alpha.5] - 2026-08-05
 
