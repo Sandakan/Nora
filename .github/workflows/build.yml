@@ -13,7 +13,7 @@ env:
   MAIN_VITE_LAST_FM_API_KEY: ${{ secrets.LAST_FM_API_KEY }}
   MAIN_VITE_GENIUS_API_KEY: ${{ secrets.GENIUS_API_KEY }}
   MAIN_VITE_LAST_FM_SHARED_SECRET: ${{ secrets.LAST_FM_SHARED_SECRET }}
-  MAIN_VITE_ENCRYPTION_SECRET: ${{ secrets.ENCRYPTION_SECRET }}
+
   MAIN_VITE_DISCORD_CLIENT_ID: ${{ secrets.DISCORD_CLIENT_ID }}
 
 jobs:
@@ -173,7 +173,8 @@ jobs:
           path: audio-engine/dist
 
       - name: Ensure workspace audio-engine dist synchronization
-        run: node -e "const fs = require('fs'); const src = 'audio-engine/dist'; const dest = 'node_modules/audio-engine/dist'; if (fs.existsSync(src) && !fs.existsSync(dest)) { fs.cpSync(src, dest, { recursive: true }); }"
+        run: |
+          node -e "const fs = require('fs'); const src = 'audio-engine/dist'; const dest = 'node_modules/audio-engine/dist'; if (fs.existsSync(src) && !fs.existsSync(dest)) { fs.cpSync(src, dest, { recursive: true }); }"
 
       - name: Package Linux
         if: matrix.os == 'ubuntu-latest'

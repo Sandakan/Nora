@@ -4,7 +4,7 @@ import type { LastFMSessionGetResponse } from '../../types/last_fm_api';
 import logger from '../logger';
 import { dataUpdateEvent, sendMessageToRenderer } from '../main';
 import hashText from '../utils/hashText';
-import { encrypt } from '../utils/safeStorage';
+import { encrypt, isEncryptionAvailable } from '../utils/safeStorage';
 
 const createLastFmAuthSignature = (token: string, apiKey: string) => {
   const LAST_FM_SHARED_SECRET = import.meta.env.MAIN_VITE_LAST_FM_SHARED_SECRET;
@@ -18,6 +18,12 @@ const createLastFmAuthSignature = (token: string, apiKey: string) => {
 
 const manageLastFmAuth = async (token: string) => {
   try {
+    const encryptionAvailable = await isEncryptionAvailable();
+    if (!encryptionAvailable) {
+      logger.error('OS credential encryption is unavailable on this system.');
+      return sendMessageToRenderer({ messageCode: 'ENCRYPTION_UNAVAILABLE' });
+    }
+
     const LAST_FM_API_KEY = import.meta.env.MAIN_VITE_LAST_FM_API_KEY;
     if (!LAST_FM_API_KEY) throw new Error('LastFM api key not found.');
 
@@ -38,7 +44,7 @@ const manageLastFmAuth = async (token: string) => {
     logger.verbose('LastFM JSON result', { json });
     if ('session' in json) {
       const { key, name } = json.session;
-      const encryptedKey = encrypt(key);
+      const encryptedKey = await encrypt(key);
       logger.info('Successfully retrieved user authentication for LastFM', { name });
 
       await saveUserSettings({ lastFmSessionName: name, lastFmSessionKey: encryptedKey });

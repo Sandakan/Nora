@@ -466,7 +466,7 @@ export const userSettings = pgTable(
 
     // LastFM session data
     lastFmSessionName: varchar('lastfm_session_name', { length: 255 }),
-    lastFmSessionKey: varchar('lastfm_session_key', { length: 255 }),
+    lastFmSessionKey: text('lastfm_session_key'),
 
     createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()

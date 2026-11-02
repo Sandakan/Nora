@@ -96,6 +96,7 @@ import { setDiscordRpcActivity } from './other/discordRPC';
 import { generatePalettes } from './other/generatePalette';
 import { flushScrobbleQueue } from './other/lastFm/flushScrobbleQueue';
 import getAlbumInfoFromLastFM from './other/lastFm/getAlbumInfoFromLastFM';
+import { getLastFmSessionStatus } from './other/lastFm/getLastFMAuthData';
 import getSimilarTracks from './other/lastFm/getSimilarTracks';
 import scrobbleSong from './other/lastFm/scrobbleSong';
 import sendNowPlayingSongDataToLastFM from './other/lastFm/sendNowPlayingSongDataToLastFM';
@@ -114,7 +115,6 @@ import { getQueueInfo } from './utils/getQueueInfo';
 import getTranslatedLyrics from './utils/getTranslatedLyrics';
 import resetLyrics from './utils/resetLyrics';
 import romanizeLyrics from './utils/romanizeLyrics';
-import { compare } from './utils/safeStorage';
 
 /**
  * Registers Electron IPC listeners and main-window event handlers for the provided window.
@@ -583,9 +583,7 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       getMusicFolderData(folderPaths, sortType)
     );
 
-    ipcMain.handle('app/compareEncryptedData', (_, data: string, encryptedData: string) =>
-      compare(data, encryptedData)
-    );
+    ipcMain.handle('app/getLastFmSessionStatus', () => getLastFmSessionStatus());
 
     ipcMain.handle('app/isMetadataUpdatesPending', (_, songPath: string) =>
       isMetadataUpdatesPending(removeDefaultAppProtocolFromFilePath(songPath))

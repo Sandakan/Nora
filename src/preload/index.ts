@@ -609,7 +609,8 @@ const settingsHelpers = {
   exportAppData: (localStorageData: string): Promise<void> =>
     ipcRenderer.invoke('app/exportAppData', localStorageData),
   importAppData: (): Promise<void | LocalStorage> => ipcRenderer.invoke('app/importAppData'),
-  compareEncryptedData: (): Promise<boolean> => ipcRenderer.invoke('app/compareEncryptedData'),
+  getLastFmSessionStatus: (): Promise<LastFmSessionStatus> =>
+    ipcRenderer.invoke('app/getLastFmSessionStatus'),
   loginToLastFmInBrowser: () => ipcRenderer.send('app/loginToLastFmInBrowser'),
   getFolderLocation: (): Promise<string> => ipcRenderer.invoke('app/getFolderLocation'),
 

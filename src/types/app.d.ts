@@ -326,31 +326,31 @@ declare global {
   // Lyrics frame types used by in-song metadata.
   type UnsynchronisedLyrics =
     | {
-        language: string;
-        text: string;
-      }
+      language: string;
+      text: string;
+    }
     | undefined;
 
   type SynchronisedLyrics =
     | Array<{
-        /**
-         * 3 letter ISO 639-2 language code, for example: eng
-         *
-         * @see {@link https://id3.org/ISO%20639-2 ISO 639-2}
-         */
-        language: string;
-        /** Absolute time unit used by the stored synced lyrics format. */
-        timeStampFormat: number;
-        /** Content type for the stored synced lyrics format. */
-        contentType: number;
-        /** Content descriptor */
-        shortText?: string;
-        synchronisedText: Array<{
-          text: string;
-          /** Absolute time in unit according to `timeStampFormat`. */
-          timeStamp: number;
-        }>;
-      }>
+      /**
+       * 3 letter ISO 639-2 language code, for example: eng
+       *
+       * @see {@link https://id3.org/ISO%20639-2 ISO 639-2}
+       */
+      language: string;
+      /** Absolute time unit used by the stored synced lyrics format. */
+      timeStampFormat: number;
+      /** Content type for the stored synced lyrics format. */
+      contentType: number;
+      /** Content descriptor */
+      shortText?: string;
+      synchronisedText: Array<{
+        text: string;
+        /** Absolute time in unit according to `timeStampFormat`. */
+        timeStamp: number;
+      }>;
+    }>
     | undefined;
 
   interface LyricsMetadataFromShortText {
@@ -481,7 +481,9 @@ declare global {
     lastFmSessionKey: string | null;
   }
 
-  interface UserData extends UserSettings {}
+  type LastFmSessionStatus = 'CONNECTED' | 'EXPIRED_OR_INVALID' | 'NOT_CONNECTED';
+
+  interface UserData extends UserSettings { }
 
   type LanguageCodes = NoInfer<keyof typeof resources>;
 
@@ -978,6 +980,8 @@ declare global {
     | 'LYRICS_CONVERT_SUCCESS'
     | 'RESET_CONVERTED_LYRICS_SUCCESS'
     | 'LASTFM_LOGIN_SUCCESS'
+    | 'LASTFM_SESSION_EXPIRED'
+    | 'ENCRYPTION_UNAVAILABLE'
     | 'APPDATA_EXPORT_STARTED'
     | 'APPDATA_IMPORT_STARTED'
     | 'APPDATA_EXPORT_SUCCESS'
