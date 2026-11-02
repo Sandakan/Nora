@@ -161,4 +161,93 @@ describe('AudioPlayer', () => {
       player.destroy();
     });
   });
+
+  describe('getExactCurrentTime & monotonic clock interpolation', () => {
+    test('returns nativeCurrentTime when player is paused', () => {
+      const queue = new PlayerQueue([101], 0);
+      const player = new AudioPlayer(queue);
+      const playerInternal = player as unknown as {
+        nativeCurrentTime: number;
+        nativeIsPaused: boolean;
+        isTickPlaying: boolean;
+      };
+
+      playerInternal.nativeCurrentTime = 12.34;
+      playerInternal.nativeIsPaused = true;
+      playerInternal.isTickPlaying = false;
+
+      expect(player.getExactCurrentTime()).toBe(12.34);
+      expect(player.currentTime).toBe(12.34);
+
+      player.destroy();
+    });
+
+    test('interpolates sub-millisecond precision based on performance.now() when playing', () => {
+      let tickCallback: ((tick: { position: number; isPlaying: boolean }) => void) | undefined;
+      mockAudioEngine.onPositionTick = vi.fn().mockImplementation((cb) => {
+        tickCallback = cb;
+        return () => {};
+      });
+
+      const queue = new PlayerQueue([101], 0);
+      const player = new AudioPlayer(queue);
+      const playerInternal = player as unknown as {
+        nativeIsPaused: boolean;
+        nativeDuration: number;
+      };
+
+      playerInternal.nativeIsPaused = false;
+      playerInternal.nativeDuration = 200;
+
+      const nowSpy = vi.spyOn(performance, 'now');
+      nowSpy.mockReturnValue(1000);
+
+      // Ticker reports 15.0s at t = 1000ms
+      tickCallback?.({ position: 15.0, isPlaying: true });
+
+      // Advance clock by 45ms (t = 1045ms)
+      nowSpy.mockReturnValue(1045);
+
+      const exact = player.getExactCurrentTime();
+      expect(exact).toBeCloseTo(15.045, 4);
+
+      // Test with 1.5x playback rate
+      player.playbackRate = 1.5;
+      // Clock advances another 40ms to 1085ms (85ms since anchor reset on rate change)
+      nowSpy.mockReturnValue(1085);
+      expect(player.getExactCurrentTime()).toBeCloseTo(15.045 + 0.04 * 1.5, 4);
+
+      nowSpy.mockRestore();
+      player.destroy();
+    });
+
+    test('clamps interpolated time to duration and 0', () => {
+      let tickCallback: ((tick: { position: number; isPlaying: boolean }) => void) | undefined;
+      mockAudioEngine.onPositionTick = vi.fn().mockImplementation((cb) => {
+        tickCallback = cb;
+        return () => {};
+      });
+
+      const queue = new PlayerQueue([101], 0);
+      const player = new AudioPlayer(queue);
+      const playerInternal = player as unknown as {
+        nativeIsPaused: boolean;
+        nativeDuration: number;
+      };
+
+      playerInternal.nativeIsPaused = false;
+      playerInternal.nativeDuration = 100;
+
+      const nowSpy = vi.spyOn(performance, 'now');
+      nowSpy.mockReturnValue(1000);
+      tickCallback?.({ position: 99.5, isPlaying: true });
+
+      // Advance clock past song duration (e.g. by 2 seconds)
+      nowSpy.mockReturnValue(3000);
+      expect(player.getExactCurrentTime()).toBe(100);
+
+      nowSpy.mockRestore();
+      player.destroy();
+    });
+  });
 });

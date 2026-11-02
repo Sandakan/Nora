@@ -1,32 +1,71 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import roundTo from '../../../../common/roundTo';
+import { getPlayer } from '../../hooks/useAudioPlayer';
 
 type Props = { offset: number };
 
 const LyricsEditingPageDurationCounter = (props: Props) => {
   const { t } = useTranslation();
+  const { offset = 0 } = props;
   const [roundedSongPosition, setRoundedSongPosition] = useState(0);
 
-  const { offset = 0 } = props;
-
-  const handleSongPositionChange = useCallback(
-    (e: Event) => {
-      if ('detail' in e && !Number.isNaN(e.detail)) {
-        const songPosition = e.detail as number;
-
-        setRoundedSongPosition(roundTo(songPosition + offset, 2));
-      }
-    },
-    [offset]
-  );
-
   useEffect(() => {
-    document.addEventListener('player/positionChange', handleSongPositionChange);
+    const player = getPlayer();
+    let animationFrameId: number | null = null;
 
-    return () => document.removeEventListener('player/positionChange', handleSongPositionChange);
-  }, [handleSongPositionChange]);
+    const updatePosition = () => {
+      const exactTime = player.getExactCurrentTime();
+      setRoundedSongPosition(roundTo(exactTime + offset, 2));
+    };
+
+    const loop = () => {
+      updatePosition();
+      animationFrameId = requestAnimationFrame(loop);
+    };
+
+    const handlePlay = () => {
+      if (animationFrameId === null) {
+        animationFrameId = requestAnimationFrame(loop);
+      }
+    };
+
+    const handlePause = () => {
+      if (animationFrameId !== null) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+      }
+      updatePosition();
+    };
+
+    const handleSeekOrTimeUpdate = () => {
+      updatePosition();
+    };
+
+    // Initial position sync
+    updatePosition();
+
+    if (!player.paused) {
+      animationFrameId = requestAnimationFrame(loop);
+    }
+
+    player.on('play', handlePlay);
+    player.on('pause', handlePause);
+    player.on('seeked', handleSeekOrTimeUpdate);
+    player.on('timeUpdate', handleSeekOrTimeUpdate);
+
+    return () => {
+      if (animationFrameId !== null) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+      }
+      player.off('play', handlePlay);
+      player.off('pause', handlePause);
+      player.off('seeked', handleSeekOrTimeUpdate);
+      player.off('timeUpdate', handleSeekOrTimeUpdate);
+    };
+  }, [offset]);
 
   return (
     <span className="">

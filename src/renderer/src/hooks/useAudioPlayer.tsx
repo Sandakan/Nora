@@ -5,14 +5,11 @@ import { getQueue } from '../other/queueSingleton';
 let playerInstance: AudioPlayer | null = null;
 
 /**
- * Custom hook to get the singleton AudioPlayer instance. The player instance integrates with
- * PlayerQueue for automatic song loading and native push ticker position updates. Persists across
- * component re-renders.
+ * Retrieves the singleton AudioPlayer instance directly without a hook.
  *
- * @returns The AudioPlayer instance with integrated queue
+ * @returns The AudioPlayer instance
  */
-export function useAudioPlayer() {
-  // Get the singleton queue directly (not via hook)
+export function getPlayer(): AudioPlayer {
   const queue = getQueue();
 
   // Initialize player with queue on first call
@@ -21,4 +18,15 @@ export function useAudioPlayer() {
   }
 
   return playerInstance;
+}
+
+/**
+ * Custom hook to get the singleton AudioPlayer instance. The player instance integrates with
+ * PlayerQueue for automatic song loading and native push ticker position updates. Persists across
+ * component re-renders.
+ *
+ * @returns The AudioPlayer instance with integrated queue
+ */
+export function useAudioPlayer() {
+  return getPlayer();
 }

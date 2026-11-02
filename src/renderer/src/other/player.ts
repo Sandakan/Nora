@@ -47,6 +47,9 @@ class AudioPlayer extends EventTarget {
   private nativeCurrentTime = 0;
   private nativeDuration = 0;
   private nativeIsPaused = true;
+  private lastTickPosition = 0;
+  private lastTickTimestamp = 0;
+  private isTickPlaying = false;
   private currentSongData: AudioPlayerData | null = null;
   private currentEqualizerSettings: Equalizer | null = null;
   private isTransitioningTracks: boolean = false;
@@ -131,6 +134,9 @@ class AudioPlayer extends EventTarget {
     if (window.api?.audioEngine?.onPositionTick) {
       this.positionTickUnsubscribe = window.api.audioEngine.onPositionTick((tick) => {
         this.nativeCurrentTime = tick.position;
+        this.lastTickPosition = tick.position;
+        this.lastTickTimestamp = performance.now();
+        this.isTickPlaying = tick.isPlaying;
         this.emit('timeUpdate', tick.position);
 
         const playerPositionChange = new CustomEvent('player/positionChange', {
@@ -258,6 +264,8 @@ class AudioPlayer extends EventTarget {
         duration: this.currentSongData.duration
       });
       this.nativeCurrentTime = 0;
+      this.lastTickPosition = 0;
+      this.lastTickTimestamp = performance.now();
       this.emit('timeUpdate', 0);
       document.dispatchEvent(new CustomEvent('player/positionChange', { detail: 0 }));
       this.preloadNextTrack();
@@ -282,6 +290,9 @@ class AudioPlayer extends EventTarget {
       this.currentLoadedSongId = transitionedSong.songId;
       this.nativeDuration = transitionedSong.duration;
       this.nativeCurrentTime = 0;
+      this.lastTickPosition = 0;
+      this.lastTickTimestamp = performance.now();
+      this.isTickPlaying = true;
 
       dispatch({ type: 'CURRENT_SONG_DATA_CHANGE', data: transitionedSong });
       storage.playback.setCurrentSongOptions('songId', transitionedSong.songId);
@@ -313,6 +324,10 @@ class AudioPlayer extends EventTarget {
     console.log('[AudioPlayer.handleSongEnd]', { repeatMode: this.repeatMode });
 
     this.nativeIsPaused = true;
+    this.isTickPlaying = false;
+    this.nativeCurrentTime = 0;
+    this.lastTickPosition = 0;
+    this.lastTickTimestamp = performance.now();
 
     if (this.repeatMode === 'one') {
       this.currentTime = 0;
@@ -442,6 +457,9 @@ class AudioPlayer extends EventTarget {
       this.nativeDuration =
         meta?.durationSecs && meta.durationSecs > 0 ? meta.durationSecs : songData.duration;
       this.nativeCurrentTime = 0;
+      this.lastTickPosition = 0;
+      this.lastTickTimestamp = performance.now();
+      this.isTickPlaying = autoPlay;
       this.emit('durationChange', this.nativeDuration);
 
       this.applyEqualizerSettings();
@@ -723,6 +741,8 @@ class AudioPlayer extends EventTarget {
       return Promise.resolve();
     }
     this.nativeIsPaused = false;
+    this.isTickPlaying = true;
+    this.lastTickTimestamp = performance.now();
     this.isPlaybackTransitioning = true;
     this.emit('play');
     window.api?.audioEngine?.setPlaybackStatus?.('playing', this.currentTime).catch(() => {});
@@ -736,7 +756,11 @@ class AudioPlayer extends EventTarget {
     if (this.nativeIsPaused) {
       return Promise.resolve();
     }
+    this.nativeCurrentTime = this.getExactCurrentTime();
+    this.lastTickPosition = this.nativeCurrentTime;
+    this.lastTickTimestamp = performance.now();
     this.nativeIsPaused = true;
+    this.isTickPlaying = false;
     this.isPlaybackTransitioning = true;
     this.emit('pause');
     window.api?.audioEngine?.setPlaybackStatus?.('paused', this.currentTime).catch(() => {});
@@ -955,14 +979,34 @@ class AudioPlayer extends EventTarget {
     return this.queue.currentSongId;
   }
 
+  /**
+   * Calculates the exact current playback time with sub-millisecond precision using monotonic clock
+   * interpolation (performance.now()) between native 100ms ticker updates.
+   *
+   * @returns Current playback position in seconds
+   */
+  getExactCurrentTime(): number {
+    if (this.nativeIsPaused || !this.isTickPlaying) {
+      return this.nativeCurrentTime;
+    }
+    const elapsedSeconds = (performance.now() - this.lastTickTimestamp) / 1000;
+    const interpolated = this.lastTickPosition + elapsedSeconds * this.currentPlaybackRate;
+    if (this.duration > 0 && interpolated > this.duration) {
+      return this.duration;
+    }
+    return Math.max(0, interpolated);
+  }
+
   /** Gets the current playback time in seconds. */
   get currentTime(): number {
-    return this.nativeCurrentTime;
+    return this.getExactCurrentTime();
   }
 
   /** Sets the current playback time in seconds. */
   set currentTime(time: number) {
     this.nativeCurrentTime = time;
+    this.lastTickPosition = time;
+    this.lastTickTimestamp = performance.now();
     this.emit('timeUpdate', time);
     this.emit('seeking');
 
@@ -1037,6 +1081,10 @@ class AudioPlayer extends EventTarget {
   /** Sets the playback rate. */
   set playbackRate(value: number) {
     if (this.currentPlaybackRate === value) return;
+    if (this.isTickPlaying && !this.nativeIsPaused) {
+      this.lastTickPosition = this.getExactCurrentTime();
+      this.lastTickTimestamp = performance.now();
+    }
     this.currentPlaybackRate = value;
 
     if (this.lastSetPlaybackRate !== value && window.api?.audioEngine) {

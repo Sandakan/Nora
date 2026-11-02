@@ -5,6 +5,7 @@ import EditingLyricsLine from '@renderer/components/LyricsEditingPage/EditingLyr
 import LyricsEditingPageDurationCounter from '@renderer/components/LyricsEditingPage/LyricsEditingPageDurationCounter';
 import MainContainer from '@renderer/components/MainContainer';
 import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
+import { getPlayer } from '@renderer/hooks/useAudioPlayer';
 import { routeStateStore } from '@renderer/store/routeStateStore';
 import { store } from '@renderer/store/store';
 import { lyricsEditorSchema } from '@renderer/utils/zod/lyricsEditorSchema';
@@ -193,7 +194,10 @@ function LyricsEditingPage() {
       if (e.key === 'Enter') {
         e.stopPropagation();
 
-        const roundedSongPosition = songPositionRef.current;
+        const player = getPlayer();
+        const exactPosition = player.getExactCurrentTime();
+        const roundedSongPosition = roundTo(exactPosition + offset, 2);
+        songPositionRef.current = roundedSongPosition;
 
         setLyricsLines((prevLines) => {
           // updateTextActiveStatus(prevLines, e.shiftKey);
@@ -282,7 +286,7 @@ function LyricsEditingPage() {
 
       return undefined;
     },
-    [updateTextActiveStatus]
+    [offset, updateTextActiveStatus]
   );
 
   const moreOptionsContextMenuItems = useMemo((): ContextMenuItem[] => {
