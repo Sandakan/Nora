@@ -52,4 +52,4 @@ jobs:
 
       - name: Run Cargo tests
         working-directory: audio-engine
-        run: cargo test --features noop
+        run: cargo test --lib --features noop

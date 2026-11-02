@@ -7,6 +7,9 @@ pub mod ring_buffer;
 pub mod media_controls;
 pub mod ticker;
 
+#[cfg(test)]
+mod tests;
+
 use napi::threadsafe_function::{ThreadsafeFunction, ThreadsafeFunctionCallMode};
 use napi_derive::napi;
 use std::sync::{Arc, Mutex, Weak};

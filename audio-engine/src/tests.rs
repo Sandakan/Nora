@@ -1,8 +1,8 @@
-use audio_engine::devices::DeviceManager;
-use audio_engine::dsp::{EqChain, BiquadFilter, EQ_FREQUENCIES};
-use audio_engine::engine::PlayerEngine;
-use audio_engine::resampler::SpeedResampler;
-use audio_engine::ticker::{EngineTickPayload, PositionTicker};
+use crate::devices::DeviceManager;
+use crate::dsp::{BiquadFilter, EqChain, EQ_FREQUENCIES};
+use crate::engine::PlayerEngine;
+use crate::resampler::SpeedResampler;
+use crate::ticker::{EngineTickPayload, PositionTicker};
 use cpal::traits::HostTrait;
 use std::sync::{atomic::Ordering, Arc};
 use std::thread;
@@ -124,7 +124,7 @@ fn test_player_engine_initial_state() {
 
 #[test]
 fn test_volume_state_immediate_and_clamping() {
-    use audio_engine::engine::VolumeState;
+    use crate::engine::VolumeState;
 
     let mut vs = VolumeState::new(0.5);
     assert_eq!(vs.current, 0.5);
@@ -142,7 +142,7 @@ fn test_volume_state_immediate_and_clamping() {
 
 #[test]
 fn test_volume_state_ramping_interpolation() {
-    use audio_engine::engine::VolumeState;
+    use crate::engine::VolumeState;
 
     let mut vs = VolumeState::new(0.0);
     // Ramp to 1.0 over 10ms at 1000Hz (10 frames)
