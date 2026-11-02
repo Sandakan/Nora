@@ -51,4 +51,5 @@ jobs:
           cache-workspaces: audio-engine
 
       - name: Run Cargo tests
-        run: cargo test --manifest-path audio-engine/Cargo.toml
+        working-directory: audio-engine
+        run: cargo test --features noop

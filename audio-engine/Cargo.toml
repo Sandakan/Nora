@@ -8,6 +8,10 @@ description = "Native Rust Audio Engine for Nora Music Player (cpal + symphonia 
 [lib]
 crate-type = ["cdylib", "rlib"]
 
+[features]
+default = []
+noop = ["napi/noop"]
+
 [dependencies]
 napi = { version = "3.14", default-features = false, features = ["async", "napi4", "tokio_rt"] }
 napi-derive = "3.6"
