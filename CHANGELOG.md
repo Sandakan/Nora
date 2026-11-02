@@ -23,6 +23,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added window hide-on-close functionality.
 - Added in-app React toast notifications for auto-updater statuses (`APP_UPDATE_AVAILABLE`, `APP_UPDATE_NOT_AVAILABLE`, `APP_UPDATE_PROGRESS`, and `APP_UPDATE_DOWNLOADED`) with interactive "Update now", "View changelog", and "Restart & Install" actions.
 - Added Main process startup memory profiling telemetry (`memoryProfiler.ts`).
+- Added sub-millisecond high-resolution monotonic clock interpolation (`performance.now()`) to `AudioPlayer` via `getExactCurrentTime()` for continuous audio position precision.
+- Exported `getPlayer()` singleton accessor from `useAudioPlayer.tsx`.
+- Added smooth 60 FPS `requestAnimationFrame` duration counter animation to `LyricsEditingPageDurationCounter` during playback.
+- Added centralized `useActiveLyricLine` coordinator hook to track active lyric lines at 60 FPS using monotonic clock interpolation while keeping inactive lines idle.
 
 ### Changed
 
@@ -31,6 +35,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added documentation and troubleshooting guides for the native audio engine crate build process.
 - Optimized Main process startup memory footprint by lazy-loading Kuroshiro / Kuromoji on demand (~132MB heap savings), tuning PGlite PostgreSQL memory parameters (`shared_buffers`, `work_mem`), and bounding Sharp libvips cache limits.
 - Replaced blocking native OS update dialogs with silent background checks and in-app React notifications.
+- Updated LyricsEditingPage shortcut handler (Enter / Shift+Enter) to sample player.getExactCurrentTime() synchronously at keypress time for sub-millisecond accurate timestamping.
+- Upgraded `LyricLine` and `EnhancedSyncedLyricWord` to support sub-millisecond precision word-by-word karaoke highlighting.
+- Upgraded `LyricsProgressBar` to 60 FPS real-time rendering via `requestAnimationFrame` and removed the 300ms CSS transition delay.
+- Upgraded `useSkipLyricsLines` to sample exact playback position synchronously on keypress for instantaneous line skipping.
 
 ### Fixed
 
@@ -39,6 +47,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Prevented potential ReDoS vulnerability in protocol and query string removal in filesystem path utils.
 - Fixed an issue where a modal "No Updates: Current version is up-to-date." dialog popped up on every app startup.
 - Fixed native error dialogs appearing when auto-updater checks fail while offline.
+- Fixed up to 100ms lyric timestamp quantization jitter when syncing lyrics in the lyrics editor.
+- Fixed up to 100ms line transition delay and word-level karaoke timing jitter across Lyrics Page, Full Screen Player, and Mini Player.
 
 ## [4.0.0-alpha.5] - 2026-08-05
 
