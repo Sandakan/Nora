@@ -126,7 +126,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
             className="play-pause-btn text-font-color-white dark:text-font-color-white mx-2! h-fit scale-90 cursor-pointer rounded-none! border-0! bg-transparent! p-0! text-6xl outline-offset-1 transition-transform focus-visible:outline! dark:bg-transparent!"
             tooltipLabel={t('player.playPause')}
             iconClassName="text-5xl!"
-            clickHandler={toggleSongPlayback}
+            clickHandler={() => toggleSongPlayback()}
             iconName={isCurrentSongPlaying ? 'pause_circle' : 'play_circle'}
             removeFocusOnClick
           />

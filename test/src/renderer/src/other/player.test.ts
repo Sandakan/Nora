@@ -92,4 +92,82 @@ describe('AudioPlayer', () => {
       player.destroy();
     });
   });
+
+  describe('togglePlayback', () => {
+    test('pauses audio when playing and forcePlay is undefined', async () => {
+      const queue = new PlayerQueue([101], 0);
+      const player = new AudioPlayer(queue);
+      player.audio.paused = false;
+
+      const pauseSpy = vi.spyOn(player, 'pause').mockResolvedValue(undefined);
+      const playSpy = vi.spyOn(player, 'play').mockResolvedValue(undefined);
+
+      await player.togglePlayback();
+
+      expect(pauseSpy).toHaveBeenCalledTimes(1);
+      expect(playSpy).not.toHaveBeenCalled();
+
+      player.destroy();
+    });
+
+    test('resumes audio when paused and forcePlay is undefined', async () => {
+      const queue = new PlayerQueue([101], 0);
+      const player = new AudioPlayer(queue);
+      player.audio.paused = true;
+
+      const pauseSpy = vi.spyOn(player, 'pause').mockResolvedValue(undefined);
+      const playSpy = vi.spyOn(player, 'play').mockResolvedValue(undefined);
+
+      await player.togglePlayback();
+
+      expect(playSpy).toHaveBeenCalledTimes(1);
+      expect(pauseSpy).not.toHaveBeenCalled();
+
+      player.destroy();
+    });
+
+    test('pauses audio when playing even if an event object is passed', async () => {
+      const queue = new PlayerQueue([101], 0);
+      const player = new AudioPlayer(queue);
+      player.audio.paused = false;
+
+      const pauseSpy = vi.spyOn(player, 'pause').mockResolvedValue(undefined);
+      const playSpy = vi.spyOn(player, 'play').mockResolvedValue(undefined);
+
+      // Simulating a click event passed to togglePlayback
+      const clickEvent = { isTrusted: true, type: 'click' } as unknown as boolean;
+      await player.togglePlayback(clickEvent);
+
+      expect(pauseSpy).toHaveBeenCalledTimes(1);
+      expect(playSpy).not.toHaveBeenCalled();
+
+      player.destroy();
+    });
+
+    test('forces play when forcePlay is true', async () => {
+      const queue = new PlayerQueue([101], 0);
+      const player = new AudioPlayer(queue);
+      player.audio.paused = false;
+
+      const playSpy = vi.spyOn(player, 'play').mockResolvedValue(undefined);
+      await player.togglePlayback(true);
+
+      expect(playSpy).toHaveBeenCalledTimes(1);
+
+      player.destroy();
+    });
+
+    test('forces pause when forcePlay is false', async () => {
+      const queue = new PlayerQueue([101], 0);
+      const player = new AudioPlayer(queue);
+      player.audio.paused = true;
+
+      const pauseSpy = vi.spyOn(player, 'pause').mockResolvedValue(undefined);
+      await player.togglePlayback(false);
+
+      expect(pauseSpy).toHaveBeenCalledTimes(1);
+
+      player.destroy();
+    });
+  });
 });

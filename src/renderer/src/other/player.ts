@@ -448,7 +448,7 @@ class AudioPlayer {
    * @returns Promise that resolves when fade completes
    */
   async togglePlayback(forcePlay?: boolean): Promise<void> {
-    const shouldPlay = forcePlay !== undefined ? forcePlay : this.audio.paused;
+    const shouldPlay = typeof forcePlay === 'boolean' ? forcePlay : this.audio.paused;
 
     if (shouldPlay) {
       if (this.audio.readyState > 0) {
