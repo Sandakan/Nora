@@ -169,7 +169,7 @@ export const clearSmtcCoversFolder = async (): Promise<void> => {
 };
 
 async function getOrCreateSmtcCoverJpeg(sourcePath: string): Promise<string | undefined> {
-  const cleaned = removeDefaultAppProtocolFromFilePath(sourcePath).replace(/\?.*$/, '').trim();
+  const cleaned = removeDefaultAppProtocolFromFilePath(sourcePath).split('?')[0].trim();
   if (!cleaned) return undefined;
 
   let filePath = cleaned;

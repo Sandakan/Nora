@@ -24,7 +24,7 @@ export const parseArtworkDataForAudioPlayerData = (artworkData?: Buffer | Uint8A
 
 const getArtworkBuffer = async (artworkPath: string) => {
   try {
-    const realPath = removeDefaultAppProtocolFromFilePath(artworkPath).replace(/\?.*$/, '');
+    const realPath = removeDefaultAppProtocolFromFilePath(artworkPath).split('?')[0];
     let input: Buffer;
     try {
       input = await fsPromises.readFile(realPath);

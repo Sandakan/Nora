@@ -26,6 +26,9 @@ type PlayerEventType =
 
 type PlayerEventCallback<T = unknown> = (data: T) => void;
 
+const cleanLocalFilePath = (filePath: string): string =>
+  filePath.replace(/^nora:[/\\]+localfiles[/\\]+/i, '').split('?')[0];
+
 /**
  * AudioPlayer class that manages pure Rust audio playback with integrated queue management.
  * Provides event-based architecture for player state changes. Owns a PlayerQueue instance and
@@ -111,7 +114,7 @@ class AudioPlayer extends EventTarget {
   private setupNativeListeners() {
     if (window.api?.audioEngine?.onTrackEnded) {
       this.trackEndedUnsubscribe = window.api.audioEngine.onTrackEnded(() => {
-        this.handleSongEnd();
+        void this.handleSongEnd();
       });
     }
 
@@ -126,7 +129,7 @@ class AudioPlayer extends EventTarget {
           MEDIA_ERR_DECODE: 3,
           MEDIA_ERR_SRC_NOT_SUPPORTED: 4
         };
-        this.pause();
+        void this.pause();
         this.emit('error', new Error(`[NativeAudioEngine] ${err.message}`));
       });
     }
@@ -148,7 +151,7 @@ class AudioPlayer extends EventTarget {
 
     if (window.api?.audioEngine?.onTrackTransitioned) {
       this.trackTransitionedUnsubscribe = window.api.audioEngine.onTrackTransitioned((newPath) => {
-        this.handleTrackTransitioned(newPath);
+        void this.handleTrackTransitioned(newPath);
       });
     }
   }
@@ -188,7 +191,7 @@ class AudioPlayer extends EventTarget {
             this.consecutiveLoadFailures = 0;
             this.isTransitioningTracks = false;
             this.pendingAutoPlay = false;
-            this.pause();
+            void this.pause();
             this.emit('loadError', { songId, error: err });
           }
         });
@@ -200,7 +203,7 @@ class AudioPlayer extends EventTarget {
 
     this.queue.on('queueChange', (data) => {
       this.emit('queueChange', data);
-      this.preloadNextTrack();
+      void this.preloadNextTrack();
     });
 
     this.queue.on('metadataChange', (data) => {
@@ -217,9 +220,9 @@ class AudioPlayer extends EventTarget {
         if (this.currentSongData) {
           const rawPath = window.api.utils?.removeDefaultAppProtocolFromFilePath
             ? window.api.utils.removeDefaultAppProtocolFromFilePath(this.currentSongData.path)
-            : this.currentSongData.path
-                .replace(/^nora:[/\\]{1,2}localfiles[/\\]{1,2}/i, '')
-                .replace(/\?.*$/, '');
+            : cleanLocalFilePath(this.currentSongData.path);
+
+
           this.preloadedSongData = this.currentSongData;
           await window.api.audioEngine.preload(rawPath, this.currentSongData.duration);
         }
@@ -239,9 +242,9 @@ class AudioPlayer extends EventTarget {
           this.preloadedSongData = nextSong;
           const rawPath = window.api.utils?.removeDefaultAppProtocolFromFilePath
             ? window.api.utils.removeDefaultAppProtocolFromFilePath(nextSong.path)
-            : nextSong.path
-                .replace(/^nora:[/\\]{1,2}localfiles[/\\]{1,2}/i, '')
-                .replace(/\?.*$/, '');
+            : cleanLocalFilePath(nextSong.path);
+
+
           await window.api.audioEngine.preload(rawPath, nextSong.duration);
         }
       } else {
@@ -268,7 +271,7 @@ class AudioPlayer extends EventTarget {
       this.lastTickTimestamp = performance.now();
       this.emit('timeUpdate', 0);
       document.dispatchEvent(new CustomEvent('player/positionChange', { detail: 0 }));
-      this.preloadNextTrack();
+      void this.preloadNextTrack();
       return;
     }
 
@@ -311,7 +314,7 @@ class AudioPlayer extends EventTarget {
         new CustomEvent('player/trackchange', { detail: transitionedSong.songId })
       );
 
-      this.preloadNextTrack();
+      void this.preloadNextTrack();
     }
   }
 
@@ -349,7 +352,7 @@ class AudioPlayer extends EventTarget {
       this.nativeIsPaused = true;
       this.emit('pause');
       this.emit('playbackComplete');
-      window.api?.audioEngine?.setPlaybackStatus?.('paused', this.currentTime).catch(() => {});
+      window.api?.audioEngine?.setPlaybackStatus?.('paused', this.currentTime).catch(() => { });
       dispatch({ type: 'CURRENT_SONG_PLAYBACK_STATE', data: false });
     }
   }
@@ -403,7 +406,7 @@ class AudioPlayer extends EventTarget {
 
       const rawPath = window.api.utils?.removeDefaultAppProtocolFromFilePath
         ? window.api.utils.removeDefaultAppProtocolFromFilePath(songData.path)
-        : songData.path.replace(/^nora:[/\\]{1,2}localfiles[/\\]{1,2}/i, '').replace(/\?.*$/, '');
+        : cleanLocalFilePath(songData.path);
 
       const storeVolume = store?.state?.player?.volume;
       if (storeVolume) {
@@ -415,9 +418,9 @@ class AudioPlayer extends EventTarget {
       const rawArtworkPath = songData.artworkPath
         ? window.api.utils?.removeDefaultAppProtocolFromFilePath
           ? window.api.utils.removeDefaultAppProtocolFromFilePath(songData.artworkPath)
-          : songData.artworkPath
-              .replace(/^nora:[/\\]{1,2}localfiles[/\\]{1,2}/i, '')
-              .replace(/\?.*$/, '')
+          : cleanLocalFilePath(songData.artworkPath)
+
+
         : undefined;
 
       const coverUrl = rawArtworkPath
@@ -475,14 +478,14 @@ class AudioPlayer extends EventTarget {
       if (autoPlay) {
         this.nativeIsPaused = false;
         this.emit('play');
-        window.api?.audioEngine?.setPlaybackStatus?.('playing', 0).catch(() => {});
+        window.api?.audioEngine?.setPlaybackStatus?.('playing', 0).catch(() => { });
       } else {
         this.nativeIsPaused = true;
         this.emit('pause');
-        window.api?.audioEngine?.setPlaybackStatus?.('paused', 0).catch(() => {});
+        window.api?.audioEngine?.setPlaybackStatus?.('paused', 0).catch(() => { });
       }
 
-      this.preloadNextTrack();
+      void this.preloadNextTrack();
 
       return songData;
     } catch (error) {
@@ -531,7 +534,7 @@ class AudioPlayer extends EventTarget {
       this.trackTransitionedUnsubscribe = null;
     }
     if (window.api?.audioEngine) {
-      window.api.audioEngine.stop().catch(() => {});
+      window.api.audioEngine.stop().catch(() => { });
     }
     if (this.unsubscribeFunc) this.unsubscribeFunc.unsubscribe();
     this.queue.removeAllListeners();
@@ -729,7 +732,7 @@ class AudioPlayer extends EventTarget {
     const newMode = isRepeating === 'repeat-1' ? 'one' : isRepeating === 'repeat' ? 'all' : 'off';
     if (this.repeatMode !== newMode) {
       this.repeatMode = newMode;
-      this.preloadNextTrack();
+      void this.preloadNextTrack();
     }
   }
 
@@ -745,7 +748,7 @@ class AudioPlayer extends EventTarget {
     this.lastTickTimestamp = performance.now();
     this.isPlaybackTransitioning = true;
     this.emit('play');
-    window.api?.audioEngine?.setPlaybackStatus?.('playing', this.currentTime).catch(() => {});
+    window.api?.audioEngine?.setPlaybackStatus?.('playing', this.currentTime).catch(() => { });
     return this.fadeInAudioNative().finally(() => {
       this.isPlaybackTransitioning = false;
     });
@@ -763,7 +766,7 @@ class AudioPlayer extends EventTarget {
     this.isTickPlaying = false;
     this.isPlaybackTransitioning = true;
     this.emit('pause');
-    window.api?.audioEngine?.setPlaybackStatus?.('paused', this.currentTime).catch(() => {});
+    window.api?.audioEngine?.setPlaybackStatus?.('paused', this.currentTime).catch(() => { });
     return this.fadeOutAudioNative().finally(() => {
       this.isPlaybackTransitioning = false;
     });
@@ -964,7 +967,7 @@ class AudioPlayer extends EventTarget {
   setRepeatMode(mode: 'off' | 'one' | 'all') {
     this.repeatMode = mode;
     this.emit('repeatModeChange', mode);
-    this.preloadNextTrack();
+    void this.preloadNextTrack();
   }
 
   /** Gets the current repeat mode. */

@@ -258,7 +258,7 @@ const createWindow = async () => {
     logMemoryCheckpoint('ready-to-show');
     if (app.hasSingleInstanceLock()) {
       logger.info('Started checking for new songs during the application start.');
-      clearSmtcCoversFolder();
+      void clearSmtcCoversFolder();
       checkForNewSongs();
       addWatchersToFolders();
       addWatchersToParentFolders();
