@@ -1,4 +1,5 @@
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
+import { createRequire } from 'module';
 import { readdirSync, statSync } from 'fs';
 import { join, resolve } from 'path';
 
@@ -46,7 +47,18 @@ function watchAudioEnginePlugin(): Plugin {
       if (id.includes('audio-engine') && (id.endsWith('.rs') || id.endsWith('Cargo.toml'))) {
         console.log(`\n[audio-engine] Change detected in ${id}. Rebuilding native audio engine...`);
         try {
-          execSync('npx --package=@napi-rs/cli napi build --platform -o dist', {
+          let napiCli: string;
+          try {
+            const req = createRequire(import.meta.url);
+            const napiCliPkg = req.resolve('@napi-rs/cli/package.json', {
+              paths: [engineDir]
+            });
+            napiCli = resolve(napiCliPkg, '..', 'dist', 'cli.js');
+          } catch {
+            napiCli = resolve(engineDir, 'node_modules', '@napi-rs/cli', 'dist', 'cli.js');
+          }
+
+          execFileSync(process.execPath, [napiCli, 'build', '--platform', '-o', 'dist'], {
             cwd: engineDir,
             stdio: 'inherit'
           });
