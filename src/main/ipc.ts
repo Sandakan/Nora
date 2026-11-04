@@ -700,6 +700,7 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     ipcMain.handle('app/audioEngine/getPosition', () => audioEngine.getPosition());
     ipcMain.handle('app/audioEngine/getDuration', () => audioEngine.getDuration());
     ipcMain.handle('app/audioEngine/isEnded', () => audioEngine.isEnded());
+    ipcMain.handle('app/audioEngine/getDefaultDevice', () => audioEngine.getDefaultDevice());
     ipcMain.handle('app/audioEngine/listDevices', () => audioEngine.listDevices());
     ipcMain.handle('app/audioEngine/setDevice', (_, deviceName: string) =>
       audioEngine.setDevice(deviceName)
@@ -741,6 +742,12 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     audioEngine.onTransitioned((path) => {
       if (!mainWindow.isDestroyed()) {
         mainWindow.webContents.send('app/audioEngine/trackTransitioned', path);
+      }
+    });
+
+    audioEngine.onDevicesChanged((payload) => {
+      if (!mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('app/audioEngine/devicesChanged', payload);
       }
     });
 

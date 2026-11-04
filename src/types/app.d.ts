@@ -83,6 +83,7 @@ declare global {
     | 'app/audioEngine/setVolumeWithRamp'
     | 'app/audioEngine/getPosition'
     | 'app/audioEngine/getDuration'
+    | 'app/audioEngine/getDefaultDevice'
     | 'app/audioEngine/listDevices'
     | 'app/audioEngine/setDevice'
     | 'app/audioEngine/setPlaybackRate'
@@ -326,31 +327,31 @@ declare global {
   // Lyrics frame types used by in-song metadata.
   type UnsynchronisedLyrics =
     | {
-      language: string;
-      text: string;
-    }
+        language: string;
+        text: string;
+      }
     | undefined;
 
   type SynchronisedLyrics =
     | Array<{
-      /**
-       * 3 letter ISO 639-2 language code, for example: eng
-       *
-       * @see {@link https://id3.org/ISO%20639-2 ISO 639-2}
-       */
-      language: string;
-      /** Absolute time unit used by the stored synced lyrics format. */
-      timeStampFormat: number;
-      /** Content type for the stored synced lyrics format. */
-      contentType: number;
-      /** Content descriptor */
-      shortText?: string;
-      synchronisedText: Array<{
-        text: string;
-        /** Absolute time in unit according to `timeStampFormat`. */
-        timeStamp: number;
-      }>;
-    }>
+        /**
+         * 3 letter ISO 639-2 language code, for example: eng
+         *
+         * @see {@link https://id3.org/ISO%20639-2 ISO 639-2}
+         */
+        language: string;
+        /** Absolute time unit used by the stored synced lyrics format. */
+        timeStampFormat: number;
+        /** Content type for the stored synced lyrics format. */
+        contentType: number;
+        /** Content descriptor */
+        shortText?: string;
+        synchronisedText: Array<{
+          text: string;
+          /** Absolute time in unit according to `timeStampFormat`. */
+          timeStamp: number;
+        }>;
+      }>
     | undefined;
 
   interface LyricsMetadataFromShortText {
@@ -483,7 +484,7 @@ declare global {
 
   type LastFmSessionStatus = 'CONNECTED' | 'EXPIRED_OR_INVALID' | 'NOT_CONNECTED';
 
-  interface UserData extends UserSettings { }
+  interface UserData extends UserSettings {}
 
   type LanguageCodes = NoInfer<keyof typeof resources>;
 

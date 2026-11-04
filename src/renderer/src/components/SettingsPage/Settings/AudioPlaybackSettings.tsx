@@ -30,6 +30,7 @@ const AudioPlaybackSettings = () => {
   const [playbackRateInterval, setPlaybackRateInterval] = useState(1);
   const [selectedDevice, setSelectedDevice] = useState('');
   const [availableDevices, setAvailableDevices] = useState<string[]>([]);
+  const [defaultDeviceName, setDefaultDeviceName] = useState('');
 
   useEffect(() => {
     const interval = storage.preferences.getPreferences('seekbarScrollInterval');
@@ -50,6 +51,30 @@ const AudioPlaybackSettings = () => {
           console.error('[AudioPlaybackSettings] Failed to list audio devices:', err);
         });
     }
+    if (window.api?.audioEngine?.getDefaultDevice) {
+      window.api.audioEngine
+        .getDefaultDevice()
+        .then((dev) => {
+          if (dev) setDefaultDeviceName(dev);
+        })
+        .catch((err) => {
+          console.error('[AudioPlaybackSettings] Failed to get default audio device:', err);
+        });
+    }
+
+    let cleanupDevicesListener: (() => void) | undefined;
+    if (window.api?.audioEngine?.onDevicesChanged) {
+      cleanupDevicesListener = window.api.audioEngine.onDevicesChanged(
+        ({ defaultDevice, devices }) => {
+          setAvailableDevices(devices);
+          if (defaultDevice) setDefaultDeviceName(defaultDevice);
+        }
+      );
+    }
+
+    return () => {
+      cleanupDevicesListener?.();
+    };
   }, []);
 
   const handleDeviceChange = (deviceName: string) => {
@@ -63,7 +88,12 @@ const AudioPlaybackSettings = () => {
   };
 
   const deviceOptions: DropdownOption<string>[] = [
-    { label: t('settingsPage.defaultAudioDevice'), value: '' },
+    {
+      label: defaultDeviceName
+        ? `${t('settingsPage.defaultAudioDevice')} (${defaultDeviceName})`
+        : t('settingsPage.defaultAudioDevice'),
+      value: ''
+    },
     ...availableDevices.map((device) => ({ label: device, value: device }))
   ];
 

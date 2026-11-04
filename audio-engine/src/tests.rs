@@ -32,21 +32,49 @@ fn test_device_manager_device_selection_empty_or_none() {
     let mut dm = DeviceManager::new();
     dm.set_device_name(Some("   ".to_string()));
     // Empty / whitespace should be treated as None, selecting default output device
+    assert!(dm.is_default_selected());
     let dev = dm.get_selected_device();
     let default_dev = cpal::default_host().default_output_device();
     assert_eq!(dev.is_some(), default_dev.is_some());
 
     dm.set_device_name(None);
+    assert!(dm.is_default_selected());
     let dev_none = dm.get_selected_device();
     assert_eq!(dev_none.is_some(), default_dev.is_some());
+
+    dm.set_device_name(Some("CustomDevice".to_string()));
+    assert!(!dm.is_default_selected());
+}
+
+#[test]
+fn test_device_manager_default_device_name_query() {
+    let mut dm = DeviceManager::new();
+    let default_name = dm.get_default_device_name();
+    let _ = dm.get_selected_device();
+    if default_name.is_some() {
+        assert_eq!(dm.current_active_device_name(), default_name);
+    }
+}
+
+#[test]
+fn test_device_watcher_start_stop() {
+    let mut watcher = crate::device_watcher::DeviceWatcher::new();
+    watcher.start(|_| {}, None);
+    std::thread::sleep(std::time::Duration::from_millis(50));
+    watcher.stop();
 }
 
 #[test]
 fn test_player_engine_device_switching() {
     let mut engine = PlayerEngine::new();
+    assert!(engine.is_default_device_selected());
     engine.set_device(None);
+    assert!(engine.is_default_device_selected());
     engine.set_device(Some("".to_string()));
+    assert!(engine.is_default_device_selected());
     engine.set_device(Some("NonExistentDevice12345".to_string()));
+    assert!(!engine.is_default_device_selected());
+    let _ = engine.hot_switch_device();
 }
 
 #[test]

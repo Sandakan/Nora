@@ -3,6 +3,7 @@ use cpal::traits::{DeviceTrait, HostTrait};
 pub struct DeviceManager {
     host: cpal::Host,
     selected_device_name: Option<String>,
+    current_active_device_name: Option<String>,
 }
 
 impl DeviceManager {
@@ -10,6 +11,7 @@ impl DeviceManager {
         Self {
             host: cpal::default_host(),
             selected_device_name: None,
+            current_active_device_name: None,
         }
     }
 
@@ -25,16 +27,32 @@ impl DeviceManager {
         device_names
     }
 
+    pub fn is_default_selected(&self) -> bool {
+        self.selected_device_name.is_none()
+    }
+
+    pub fn current_active_device_name(&self) -> Option<String> {
+        self.current_active_device_name.clone()
+    }
+
+    pub fn get_default_device_name(&self) -> Option<String> {
+        self.host
+            .default_output_device()
+            .and_then(|d| d.description().ok())
+            .map(|desc| desc.name().to_string())
+    }
+
     pub fn set_device_name(&mut self, name: Option<String>) {
         self.selected_device_name = name.filter(|s| !s.trim().is_empty());
     }
 
-    pub fn get_selected_device(&self) -> Option<cpal::Device> {
+    pub fn get_selected_device(&mut self) -> Option<cpal::Device> {
         if let Some(ref target_name) = self.selected_device_name {
             if let Ok(devices) = self.host.output_devices() {
                 for device in devices {
                     if let Ok(desc) = device.description() {
                         if desc.name() == target_name {
+                            self.current_active_device_name = Some(target_name.clone());
                             return Some(device);
                         }
                     }
@@ -56,6 +74,9 @@ impl DeviceManager {
                     for device in devices {
                         if let Ok(id) = device.id() {
                             if id == default_id {
+                                if let Ok(desc) = device.description() {
+                                    self.current_active_device_name = Some(desc.name().to_string());
+                                }
                                 return Some(device);
                             }
                         }
@@ -70,6 +91,7 @@ impl DeviceManager {
                     for device in devices {
                         if let Ok(desc) = device.description() {
                             if desc.name() == default_name {
+                                self.current_active_device_name = Some(default_name.to_string());
                                 return Some(device);
                             }
                         }
@@ -81,10 +103,19 @@ impl DeviceManager {
         // Fallback: pick the first available enumerated output device
         if let Ok(mut devices) = self.host.output_devices() {
             if let Some(device) = devices.next() {
+                if let Ok(desc) = device.description() {
+                    self.current_active_device_name = Some(desc.name().to_string());
+                }
                 return Some(device);
             }
         }
 
-        self.host.default_output_device()
+        let fallback_default = self.host.default_output_device();
+        if let Some(ref d) = fallback_default {
+            if let Ok(desc) = d.description() {
+                self.current_active_device_name = Some(desc.name().to_string());
+            }
+        }
+        fallback_default
     }
 }

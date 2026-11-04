@@ -61,6 +61,9 @@ export interface AudioEngineNative {
   engineOnError?(callback: (err: Error | null, message: string) => void): void;
   engineOnTick?(callback: (err: Error | null, payload: EngineTickPayload) => void): void;
   engineOnTransitioned?(callback: (err: Error | null, path: string) => void): void;
+  engineOnDevicesChanged?(
+    callback: (err: Error | null, payload: { defaultDevice: string; devices: string[] }) => void
+  ): void;
   engineInitLogger?(callback: (err: Error | null, record: JsLogRecord) => void): void;
   engineInitMediaControls?(
     hwndBuf: Buffer | null,
@@ -68,6 +71,7 @@ export interface AudioEngineNative {
   ): void;
   engineUpdateMetadata?(metadata: JsMediaMetadata): void;
   engineSetPlaybackStatus?(status: string, progressSecs?: number): void;
+  engineGetDefaultDevice?(): string | null;
   engineListDevices(): string[];
   engineSetDevice(deviceName: string): void;
   engineSetPlaybackRate(rate: number): void;
@@ -395,6 +399,22 @@ export const audioEngine = {
       logger.error('Failed to register engineOnTransitioned callback', { error: String(err) });
     }
   },
+  onDevicesChanged: (
+    callback: (payload: { defaultDevice: string; devices: string[] }) => void
+  ): void => {
+    try {
+      const eng = getAudioEngine();
+      if (typeof eng.engineOnDevicesChanged === 'function') {
+        eng.engineOnDevicesChanged((err, payload) => {
+          if (!err && payload) {
+            callback(payload);
+          }
+        });
+      }
+    } catch (err) {
+      logger.error('Failed to register engineOnDevicesChanged callback', { error: String(err) });
+    }
+  },
   initLogger: (callback: (record: JsLogRecord) => void): void => {
     try {
       const eng = getAudioEngine();
@@ -446,6 +466,16 @@ export const audioEngine = {
       }
     } catch (err) {
       logger.warn('Failed to set native playback status', { error: String(err) });
+    }
+  },
+  getDefaultDevice: (): string => {
+    try {
+      const eng = getAudioEngine();
+      return (
+        (typeof eng.engineGetDefaultDevice === 'function' && eng.engineGetDefaultDevice()) || ''
+      );
+    } catch {
+      return '';
     }
   },
   listDevices: (): string[] => {

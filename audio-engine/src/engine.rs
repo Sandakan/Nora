@@ -997,11 +997,20 @@ impl PlayerEngine {
     }
 
     pub fn resume(&mut self) -> Result<(), String> {
-        let needs_rebuild = self.stream.is_none()
+        let is_default = self.device_manager.lock().unwrap().is_default_selected();
+        let default_changed = if is_default {
+            let active = self.device_manager.lock().unwrap().current_active_device_name();
+            let current_default = self.device_manager.lock().unwrap().get_default_device_name();
+            active.is_some() && current_default.is_some() && active != current_default
+        } else {
+            false
+        };
+
+        let needs_rebuild = (self.stream.is_none() || default_changed)
             && !self.stop_signal.load(Ordering::Acquire)
             && self.get_current_file_path().is_some();
         if needs_rebuild {
-            log::info!("Audio stream was dropped or uninitialized; rebuilding before resume...");
+            log::info!("Audio stream was dropped, uninitialized, or default output changed; rebuilding before resume...");
             self.rebuild_stream()?;
         }
         let st = self.state.lock().unwrap();
@@ -1399,6 +1408,43 @@ impl PlayerEngine {
 
     pub fn list_devices(&self) -> Vec<String> {
         self.device_manager.lock().unwrap().list_output_devices()
+    }
+
+    pub fn is_default_device_selected(&self) -> bool {
+        self.device_manager.lock().unwrap().is_default_selected()
+    }
+
+    pub fn get_default_device_name(&self) -> Option<String> {
+        self.device_manager.lock().unwrap().get_default_device_name()
+    }
+
+    pub fn hot_switch_device(&mut self) -> Result<(), String> {
+        if self.stream.is_none() || self.stop_signal.load(Ordering::Relaxed) {
+            return Ok(());
+        }
+
+        let is_playing = self.is_playing();
+        let target_vol = {
+            let vol_lock = self.state.lock().unwrap().volume.clone();
+            let target = vol_lock.lock().unwrap().target;
+            target
+        };
+
+        if is_playing {
+            // Smoothly ramp volume down to 0 over 15ms to prevent pops/clicks
+            self.set_volume_with_ramp(0.0, 15);
+            std::thread::sleep(std::time::Duration::from_millis(15));
+        }
+
+        log::info!("Hot-switching audio stream to new system default output device...");
+        let res = self.rebuild_stream();
+
+        if is_playing {
+            // Restore volume with a smooth 15ms ramp-up
+            self.set_volume_with_ramp(target_vol, 15);
+        }
+
+        res
     }
 
     pub fn set_device(&mut self, device_name: Option<String>) {

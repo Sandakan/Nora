@@ -1,3 +1,4 @@
+pub mod device_watcher;
 pub mod devices;
 pub mod dsp;
 pub mod engine;
@@ -15,9 +16,11 @@ use napi_derive::napi;
 use std::sync::{Arc, Mutex, Weak};
 use lazy_static::lazy_static;
 
+use device_watcher::DeviceWatcher;
 use engine::PlayerEngine;
 
 lazy_static! {
+    static ref DEVICE_WATCHER: Arc<Mutex<DeviceWatcher>> = Arc::new(Mutex::new(DeviceWatcher::new()));
     static ref GLOBAL_ENGINE: Arc<Mutex<PlayerEngine>> = {
         let engine = Arc::new(Mutex::new(PlayerEngine::new()));
         let weak_engine = Arc::downgrade(&engine);
@@ -32,12 +35,43 @@ lazy_static! {
                     });
             });
         }
+
+        // Start device watcher for dynamic default output hot-switching & device updates
+        let weak_watcher_engine = Arc::downgrade(&engine);
+        {
+            let mut watcher = DEVICE_WATCHER.lock().unwrap();
+            watcher.start(
+                move |_new_default| {
+                    if let Some(engine_arc) = weak_watcher_engine.upgrade() {
+                        if let Ok(mut eng) = engine_arc.lock() {
+                            if eng.is_default_device_selected() {
+                                log::info!("Device watcher detected default output switch; initiating hot-switch...");
+                                let _ = eng.hot_switch_device();
+                            }
+                        }
+                    }
+                },
+                Some(Box::new(|default_dev, devices| {
+                    if let Ok(guard) = ON_DEVICES_CHANGED_CALLBACK.lock() {
+                        if let Some(ref tsfn) = *guard {
+                            let payload = JsDevicesChangedPayload {
+                                default_device: default_dev,
+                                devices,
+                            };
+                            let _ = tsfn.call(Ok(payload), ThreadsafeFunctionCallMode::NonBlocking);
+                        }
+                    }
+                })),
+            );
+        }
+
         engine
     };
     static ref ON_ENDED_CALLBACK: Arc<Mutex<Option<ThreadsafeFunction<()>>>> = Arc::new(Mutex::new(None));
     static ref ON_ERROR_CALLBACK: Arc<Mutex<Option<ThreadsafeFunction<String>>>> = Arc::new(Mutex::new(None));
     static ref ON_TICK_CALLBACK: Arc<Mutex<Option<ThreadsafeFunction<JsEngineTickPayload>>>> = Arc::new(Mutex::new(None));
     static ref ON_TRANSITIONED_CALLBACK: Arc<Mutex<Option<ThreadsafeFunction<String>>>> = Arc::new(Mutex::new(None));
+    static ref ON_DEVICES_CHANGED_CALLBACK: Arc<Mutex<Option<ThreadsafeFunction<JsDevicesChangedPayload>>>> = Arc::new(Mutex::new(None));
 }
 
 fn run_recovery(weak_engine: Weak<Mutex<PlayerEngine>>, target_generation: u64) {
@@ -118,6 +152,23 @@ pub struct JsEngineTickPayload {
     pub position: f64,
     pub timestamp_ms: f64,
     pub is_playing: bool,
+}
+
+#[napi(object)]
+pub struct JsDevicesChangedPayload {
+    pub default_device: String,
+    pub devices: Vec<String>,
+}
+
+#[napi(js_name = "engineOnDevicesChanged")]
+pub fn engine_on_devices_changed(
+    callback: ThreadsafeFunction<JsDevicesChangedPayload>,
+) -> napi::Result<()> {
+    let mut cb = ON_DEVICES_CHANGED_CALLBACK
+        .lock()
+        .map_err(|_| napi::Error::from_reason("Failed to lock devices changed callback mutex"))?;
+    *cb = Some(callback);
+    Ok(())
 }
 
 #[napi(js_name = "engineOnTick")]
@@ -492,6 +543,14 @@ pub fn engine_is_ended() -> napi::Result<bool> {
     Ok(engine.is_ended())
 }
 
+#[napi(js_name = "engineGetDefaultDevice")]
+pub fn engine_get_default_device() -> napi::Result<Option<String>> {
+    let engine = GLOBAL_ENGINE
+        .lock()
+        .map_err(|_| napi::Error::from_reason("Failed to lock engine mutex"))?;
+    Ok(engine.get_default_device_name())
+}
+
 #[napi(js_name = "engineListDevices")]
 pub fn engine_list_devices() -> napi::Result<Vec<String>> {
     let engine = GLOBAL_ENGINE
@@ -553,5 +612,8 @@ pub fn engine_destroy() -> napi::Result<()> {
         .map_err(|_| napi::Error::from_reason("Failed to lock engine mutex"))?;
     engine.stop();
     let _ = media_controls::set_playback_stopped();
+    if let Ok(mut watcher) = DEVICE_WATCHER.lock() {
+        watcher.stop();
+    }
     Ok(())
 }

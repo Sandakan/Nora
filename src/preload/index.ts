@@ -105,6 +105,7 @@ const audioEngine = {
   getPosition: (): Promise<number> => ipcRenderer.invoke('app/audioEngine/getPosition'),
   getDuration: (): Promise<number> => ipcRenderer.invoke('app/audioEngine/getDuration'),
   isEnded: (): Promise<boolean> => ipcRenderer.invoke('app/audioEngine/isEnded'),
+  getDefaultDevice: (): Promise<string> => ipcRenderer.invoke('app/audioEngine/getDefaultDevice'),
   listDevices: (): Promise<string[]> => ipcRenderer.invoke('app/audioEngine/listDevices'),
   setDevice: (deviceName: string): Promise<void> =>
     ipcRenderer.invoke('app/audioEngine/setDevice', deviceName),
@@ -139,6 +140,16 @@ const audioEngine = {
     ipcRenderer.on('app/audioEngine/trackEnded', handler);
     return () => {
       ipcRenderer.removeListener('app/audioEngine/trackEnded', handler);
+    };
+  },
+  onDevicesChanged: (
+    callback: (payload: { defaultDevice: string; devices: string[] }) => void
+  ): (() => void) => {
+    const handler = (_event: unknown, data: { defaultDevice: string; devices: string[] }) =>
+      callback(data);
+    ipcRenderer.on('app/audioEngine/devicesChanged', handler);
+    return () => {
+      ipcRenderer.removeListener('app/audioEngine/devicesChanged', handler);
     };
   },
   onPlaybackError: (
