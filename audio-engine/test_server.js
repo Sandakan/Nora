@@ -460,10 +460,11 @@ const server = http.createServer((req, res) => {
     const rawFileName = req.headers['x-file-name']
       ? decodeURIComponent(req.headers['x-file-name'])
       : 'temp_song.mp3';
-    const ext = path.extname(rawFileName) || '.mp3';
+    const safeFileName = path.basename(rawFileName).replace(/[\r\n]+/g, '');
+    const ext = path.extname(safeFileName) || '.mp3';
     const tempFilePath = path.join(SCRATCH_DIR, `temp_uploaded_play${ext}`);
 
-    console.log(`[SERVER] Receiving uploaded file: ${rawFileName} -> saving to ${tempFilePath}`);
+    console.log(`[SERVER] Receiving uploaded file: ${safeFileName} -> saving to ${tempFilePath}`);
     const fileStream = fs.createWriteStream(tempFilePath);
 
     req.pipe(fileStream);
