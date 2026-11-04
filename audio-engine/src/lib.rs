@@ -42,9 +42,11 @@ lazy_static! {
 
 fn run_recovery(weak_engine: Weak<Mutex<PlayerEngine>>, target_generation: u64) {
     let delays = [
-        std::time::Duration::from_millis(0),
         std::time::Duration::from_millis(100),
         std::time::Duration::from_millis(300),
+        std::time::Duration::from_millis(600),
+        std::time::Duration::from_millis(1000),
+        std::time::Duration::from_millis(1500),
     ];
 
     let mut last_error = String::new();
@@ -70,7 +72,7 @@ fn run_recovery(weak_engine: Weak<Mutex<PlayerEngine>>, target_generation: u64) 
             return;
         }
 
-        log::info!("Attempting audio stream recovery (attempt {}/3)...", attempt + 1);
+        log::info!("Attempting audio stream recovery (attempt {}/{})...", attempt + 1, delays.len());
         match engine.rebuild_stream() {
             Ok(()) => {
                 log::info!("Audio stream successfully recovered and rebuilt.");
@@ -396,11 +398,11 @@ pub fn engine_pause() -> napi::Result<()> {
 
 #[napi(js_name = "engineResume")]
 pub fn engine_resume() -> napi::Result<()> {
-    let engine = GLOBAL_ENGINE
+    let mut engine = GLOBAL_ENGINE
         .lock()
         .map_err(|_| napi::Error::from_reason("Failed to lock engine mutex"))?;
     let pos = engine.get_position();
-    engine.resume();
+    engine.resume().map_err(|e| napi::Error::from_reason(e))?;
     if let Err(e) = media_controls::set_playback_playing(Some(pos)) {
         log::warn!("Failed to set playback playing on engineResume: {}", e);
     }

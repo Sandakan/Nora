@@ -996,9 +996,17 @@ impl PlayerEngine {
         st.is_playing.store(false, Ordering::Release);
     }
 
-    pub fn resume(&self) {
+    pub fn resume(&mut self) -> Result<(), String> {
+        let needs_rebuild = self.stream.is_none()
+            && !self.stop_signal.load(Ordering::Acquire)
+            && self.get_current_file_path().is_some();
+        if needs_rebuild {
+            log::info!("Audio stream was dropped or uninitialized; rebuilding before resume...");
+            self.rebuild_stream()?;
+        }
         let st = self.state.lock().unwrap();
         st.is_playing.store(true, Ordering::Release);
+        Ok(())
     }
 
     fn build_cpal_stream(

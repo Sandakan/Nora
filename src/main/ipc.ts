@@ -173,6 +173,16 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     });
     powerMonitor.addListener('on-ac', toggleOnBatteryPower);
     powerMonitor.addListener('on-battery', toggleOnBatteryPower);
+    powerMonitor.addListener('suspend', () => {
+      logger.info('System is suspending. Pausing audio playback...');
+      if (!mainWindow || mainWindow.isDestroyed()) return;
+      mainWindow.webContents.send('app/player/toggleSongPlaybackState', false);
+      try {
+        audioEngine.pause();
+      } catch (err) {
+        logger.warn('Failed to pause audio engine on system suspend', { error: String(err) });
+      }
+    });
 
     // ipcMain.on('app/getSongPosition', (_, position: number) =>
     //   saveUserData('currentSong.stoppedPosition', position)
