@@ -60,6 +60,17 @@ impl DeviceManager {
             }
         }
 
+        #[cfg(not(target_os = "windows"))]
+        {
+            let default_dev = self.host.default_output_device();
+            if let Some(ref d) = default_dev {
+                if let Ok(desc) = d.description() {
+                    self.current_active_device_name = Some(desc.name().to_string());
+                }
+            }
+            return default_dev;
+        }
+
         // On Windows WASAPI, cpal::Host::default_output_device() returns a virtual
         // DefaultOutput device handle that utilizes ActivateAudioInterfaceAsync.
         // Under Windows sleep/wake or audio endpoint change notifications, thread-pool threads
@@ -67,6 +78,7 @@ impl DeviceManager {
         // to fail with RPC_E_CHANGED_MODE ("Cannot change thread mode after it is set", os error -2147417850).
         // Resolving the concrete default device via enumeration (which yields DeviceHandle::Specific)
         // bypasses ActivateAudioInterfaceAsync completely and invokes IMMDevice::Activate directly.
+        #[cfg(target_os = "windows")]
         if let Some(default_dev) = self.host.default_output_device() {
             // First attempt to match by device ID
             if let Ok(default_id) = default_dev.id() {

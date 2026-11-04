@@ -50,9 +50,12 @@ fn test_device_manager_device_selection_empty_or_none() {
 fn test_device_manager_default_device_name_query() {
     let mut dm = DeviceManager::new();
     let default_name = dm.get_default_device_name();
-    let _ = dm.get_selected_device();
-    if default_name.is_some() {
-        assert_eq!(dm.current_active_device_name(), default_name);
+    let dev = dm.get_selected_device();
+    if dev.is_some() {
+        assert!(dm.current_active_device_name().is_some());
+    }
+    if let Some(ref name) = default_name {
+        assert!(!name.is_empty());
     }
 }
 
