@@ -27,7 +27,7 @@ export type LogMessageTypes = 'INFO' | 'WARN' | 'ERROR';
 //         obj[x] = `${property.message}\r${property.stack}`;
 //       }
 //     }
-
+// 
 //     const str = JSON.stringify(obj);
 //     return str;
 //   }
@@ -87,18 +87,18 @@ const log = winston.createLogger({
 //   logType: LogType = 'MAIN'
 // ) => {
 //   let mes: string;
-
+// 
 //   if (message instanceof Error) mes = message.message;
 //   else mes = message.replaceAll('\n', '\n\t');
-
+// 
 //   const options: LogOptions = { ...defaultLogOptions, ...logOptions };
-
+// 
 //   if (options.sendToRenderer) sendMessageToRenderer(options.sendToRenderer);
-
+// 
 //   if (messageType !== 'INFO') mes = mes.toUpperCase();
 //   const str = `\n[${new Date().toUTCString()}] [${logType}] = ${mes}\n\t${objectToString(data)}`;
 //   // appendFileSync(logFilePath, str, { encoding: 'utf-8' });
-
+// 
 //   if (!options?.preventLoggingToConsole) {
 //     if (messageType === 'ERROR') pinoLogger.error(str);
 //     else if (messageType === 'WARN') pinoLogger.warn(str);
@@ -132,26 +132,41 @@ export const toggleVerboseLogs = (isEnabled: boolean) => {
 //   debug: 5,
 //   silly: 6
 
+const getProcessTag = (data: unknown): string => {
+  if (
+    data &&
+    typeof data === 'object' &&
+    'process' in data &&
+    typeof (data as { process?: unknown }).process === 'string'
+  ) {
+    return (data as { process: string }).process;
+  }
+  return 'MAIN';
+};
+
+const sanitizeLogMessage = (message: string): string =>
+  typeof message === 'string' ? message.replace(/[\r\n]+/g, ' ') : String(message ?? '');
+
 const logger = {
   info: (message: string, data = {} as object) => {
-    log.info(message, { process: 'MAIN', data });
+    log.info(sanitizeLogMessage(message), { process: getProcessTag(data), data });
   },
   error: (message: string, data = {} as object, error?: unknown) => {
-    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorMessage = error instanceof Error ? error.message : error ? String(error) : undefined;
 
-    log.error(message, { process: 'MAIN', error: errorMessage, data });
+    log.error(sanitizeLogMessage(message), { process: getProcessTag(data), error: errorMessage, data });
   },
   warn: (message: string, data = {} as object) => {
-    log.warn(message, { process: 'MAIN', data });
+    log.warn(sanitizeLogMessage(message), { process: getProcessTag(data), data });
   },
   debug: (message: string, data = {} as object) => {
-    log.debug(message, { process: 'MAIN', data });
+    log.debug(sanitizeLogMessage(message), { process: getProcessTag(data), data });
   },
   silly: (message: string, data = {} as object) => {
-    log.silly(message, { process: 'MAIN', data });
+    log.silly(sanitizeLogMessage(message), { process: getProcessTag(data), data });
   },
   verbose: (message: string, data = {} as object) => {
-    log.verbose(message, { process: 'MAIN', data });
+    log.verbose(sanitizeLogMessage(message), { process: getProcessTag(data), data });
   }
 };
 

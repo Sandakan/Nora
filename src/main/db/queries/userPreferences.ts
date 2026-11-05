@@ -40,7 +40,17 @@ export const saveUserKeyboardShortcuts = async (shortcuts: Record<string, string
 export const getUserEqualizerPreset = async () => {
   const preset = await db.query.userEqualizerPreset.findFirst();
 
-  if (!preset) throw new Error('User equalizer preset not found');
+  if (!preset) {
+    const [inserted] = await db
+      .insert(userEqualizerPreset)
+      .values({
+        presetName: 'flat',
+        frequencyBands: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        isEnabled: false
+      })
+      .returning();
+    return inserted;
+  }
 
   return preset;
 };

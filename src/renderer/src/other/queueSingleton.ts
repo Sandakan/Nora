@@ -112,6 +112,7 @@ function setupQueueStoreSync(queue: PlayerQueue) {
         ...state.localStorage,
         queue: {
           ...state.localStorage.queue,
+          songIds: queue.getAllSongIds(),
           position: queue.position
         }
       }
