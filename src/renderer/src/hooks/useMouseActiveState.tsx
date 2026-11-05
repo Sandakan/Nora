@@ -55,7 +55,9 @@ const useMouseActiveState = (
           manageMouseMovement();
       } else manageMouseMovement();
 
-      return debounce(() => {
+      // Update the previous position after the move settles so the next movement
+      // is measured from the actual cursor location, not the origin.
+      debounce(() => {
         prevPositionRef.current = { x: e.clientX, y: e.clientY };
       }, 100);
     },

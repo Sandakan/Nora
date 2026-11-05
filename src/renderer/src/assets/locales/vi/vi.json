@@ -140,6 +140,9 @@
     "closeUpNext": "Đóng 'TIẾP THEO'",
     "by": "bởi",
 
+    "backToPlayer": "Quay lại Trình phát",
+    "openInDisplayMode": "Mở ở Chế độ Hiển thị",
+
     "errorTitle": "Đã xảy ra lỗi trong trình phát.",
     "errorMessage": "$t(player.errorTitle)<br /> Điều này có thể là kết quả của việc phát một tệp bài hát bị lỗi. <details/>",
     "noErrorMessage": "Không có thông báo lỗi được tạo ra"
