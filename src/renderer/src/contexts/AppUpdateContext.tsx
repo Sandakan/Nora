@@ -33,7 +33,7 @@ export interface AppUpdateContextType {
   toggleMutedState: (isMuted?: boolean) => void;
   updateVolume: (volume: number) => void;
   updateSongPosition: (position: number) => void;
-  updateEqualizerOptions: (options: Equalizer) => void;
+  updateEqualizerOptions: (options: Equalizer, presetName?: string) => void;
   createQueue: (
     songIds: number[],
     queueType: QueueTypes,

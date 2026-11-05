@@ -207,7 +207,12 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
             />
           ];
 
-          if ((artists?.length ?? 1) - 1 !== i) arr.push(<span className="mr-1">,</span>);
+          if ((artists?.length ?? 1) - 1 !== i)
+            arr.push(
+              <span key={`separator-${artist.artistId || i}`} className="mr-1">
+                ,
+              </span>
+            );
 
           return arr;
         })
@@ -687,7 +692,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
         </div>
         <div className="song-duration flex w-full! items-center justify-between pr-4 pl-2 text-center transition-none sm:pr-1">
           <Button
-            className="mt-1 mr-0! rounded-none! border-0! bg-transparent p-0! text-inherit! outline-offset-1 focus-visible:outline! hover:bg-transparent dark:bg-transparent dark:hover:bg-transparent"
+            className="mt-1 mr-0! rounded-none! border-0! bg-transparent p-0! text-inherit! outline-offset-1 hover:bg-transparent focus-visible:outline! dark:bg-transparent dark:hover:bg-transparent"
             iconName="favorite"
             iconClassName={`${
               isAFavorite ? 'material-icons-round' : 'material-icons-round-outlined'

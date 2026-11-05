@@ -1,4 +1,5 @@
 import i18n from '../i18n';
+import openReleaseNotesPrompt from './openReleaseNotesPrompt';
 
 interface AppNotificationConfig extends Partial<AppNotification> {
   // to prevent having an empty array of triggers
@@ -68,7 +69,9 @@ const notificationsFromMainConfig: AppNotificationConfig[] = [
       'PLAYLIST_IMPORT_FAILED_DUE_TO_SONGS_OUTSIDE_LIBRARY',
       'PLAYLIST_IMPORT_TO_EXISTING_PLAYLIST_FAILED',
       'PLAYLIST_CREATION_FAILED',
-      'SONG_REPARSE_FAILED'
+      'SONG_REPARSE_FAILED',
+      'LASTFM_SESSION_EXPIRED',
+      'ENCRYPTION_UNAVAILABLE'
     ],
     iconName: 'error',
     iconClassName: 'material-icons-round-outlined'
@@ -241,6 +244,64 @@ const notificationsFromMainConfig: AppNotificationConfig[] = [
         this.duration = 5000;
       return this;
     }
+  },
+  {
+    trigger: ['APP_UPDATE_NOT_AVAILABLE'],
+    duration: 5000,
+    iconName: 'check_circle',
+    iconClassName: 'material-icons-round-outlined'
+  },
+  {
+    trigger: ['APP_UPDATE_AVAILABLE'],
+    duration: 25000,
+    iconName: 'system_update',
+    iconClassName: 'material-icons-round-outlined',
+    buttons: [
+      {
+        label: i18n.t('common.updateNow', 'Update now'),
+        iconClassName: 'download',
+        className: defaultButtonStyles,
+        clickHandler: () => window.api.appUpdates.downloadUpdate()
+      },
+      {
+        label: i18n.t('common.viewChangelog', 'View changelog'),
+        iconClassName: 'notes',
+        className: defaultButtonStyles,
+        clickHandler: () => openReleaseNotesPrompt()
+      }
+    ]
+  },
+  {
+    trigger: ['APP_UPDATE_PROGRESS'],
+    duration: 10000,
+    iconName: 'downloading',
+    iconClassName: 'material-icons-round-outlined',
+    type: 'WITH_PROGRESS_BAR',
+    validate({ data }) {
+      if (data) return 'total' in data && 'value' in data;
+      return false;
+    },
+    update({ data }) {
+      this.progressBarData = {
+        total: (data?.total as number) || 100,
+        value: (data?.value as number) || 0
+      };
+      return this;
+    }
+  },
+  {
+    trigger: ['APP_UPDATE_DOWNLOADED'],
+    duration: 30000,
+    iconName: 'system_update',
+    iconClassName: 'material-icons-round-outlined',
+    buttons: [
+      {
+        label: i18n.t('common.restartAndInstall', 'Restart & Install'),
+        iconClassName: 'restart_alt',
+        className: defaultButtonStyles,
+        clickHandler: () => window.api.appUpdates.quitAndInstallUpdate()
+      }
+    ]
   }
 ];
 

@@ -98,6 +98,9 @@
     "checkingForUpdates": "Checking for app updates...",
     "updateCheckError": "Error occurred when checking for app updates.",
     "updateCheckErrorNoInternet": "$t(common.updateCheckError) $t(common.noInternet)",
+    "updateNow": "Update now",
+    "viewChangelog": "View changelog",
+    "restartAndInstall": "Restart & Install",
     "optionDisabled": "This option is disabled.",
     "somethingWentWrong": "Something went wrong.",
     "details": "Details",
@@ -378,6 +381,9 @@
     "languageDescription": "Select the language you want Nora to be displayed in.",
 
     "audioPlayback": "Audio playback",
+    "audioOutputDevice": "Audio output device",
+    "audioOutputDeviceDescription": "Select the audio output device for playback.",
+    "defaultAudioDevice": "Default System Output",
     "showRemainingSongDuration": "Show remaining song duration",
     "showRemainingSongDurationDescription": "Shows the remaining duration of the song instead of the default song duration.",
     "playbackRate": "Playback speed",
@@ -392,6 +398,7 @@
     "lastFmLogo": "LastFM logo",
     "lastFmConnected": "LastFM connected",
     "lastFmNotConnected": "LastFM not connected",
+    "lastFmSessionExpired": "LastFM session expired or invalid",
     "loggedInAs": "Logged in as",
     "lastFmDescription1": "Connect with Last.fm to enable Scrobbling.",
     "lastFmDescription2": "Scrobbling is a way to send information about the music a user is listening to.",
@@ -1066,6 +1073,8 @@
     "METADATA_UPDATE_FAILED": "Metadata update failed. {{message}}",
     "SONG_EXT_NOT_SUPPORTED_FOR_LYRICS_SAVES": "Lyrics cannot be saved because current song extension ({{ext}}) is not supported for modifying metadata.",
     "LASTFM_LOGIN_SUCCESS": "You successfully logged in to LastFM.",
+    "LASTFM_SESSION_EXPIRED": "Your Last.fm session has expired or is invalid. Please re-authenticate.",
+    "ENCRYPTION_UNAVAILABLE": "OS credential encryption is unavailable on this system.",
     "AUDIO_PARSING_PROCESS_UPDATE": "{{value}} completed out of {{total}} songs.",
     "SONG_PALETTE_GENERATING_PROCESS_UPDATE": "Generating palettes for {{value}} out of {{total}} songs.",
     "GENRE_PALETTE_GENERATING_PROCESS_UPDATE": "Generating palettes for {{value}} out of {{total}} genres.",
@@ -1121,7 +1130,11 @@
     "PLAYLIST_RENAME_SUCCESS": "Playlist renamed successfully.",
     "PLAYLIST_NOT_FOUND": "Playlist not found.",
     "SONG_REPARSE_SUCCESS": "Successfully reparsed `{{title}}`.",
-    "SONG_REPARSE_FAILED": "Error occurred when re-parsing the song."
+    "SONG_REPARSE_FAILED": "Error occurred when re-parsing the song.",
+    "APP_UPDATE_NOT_AVAILABLE": "Nora is up-to-date.",
+    "APP_UPDATE_AVAILABLE": "A new update (v{{version}}) is available.",
+    "APP_UPDATE_PROGRESS": "Downloading update...",
+    "APP_UPDATE_DOWNLOADED": "Update v{{version}} downloaded and ready to install."
   },
 
   "discordrpc": {

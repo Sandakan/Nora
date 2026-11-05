@@ -5,6 +5,7 @@ import addArtworkToAPlaylist from './core/addArtworkToAPlaylist';
 import addSongsFromFolderStructures from './core/addMusicFolder';
 import addNewPlaylist from './core/addNewPlaylist';
 import addSongsToPlaylist from './core/addSongsToPlaylist';
+import audioEngine from './core/audioEngine';
 import blacklistFolders from './core/blacklistFolders';
 import blacklistSongs from './core/blacklistSongs';
 import changeAppTheme from './core/changeAppTheme';
@@ -95,12 +96,14 @@ import { setDiscordRpcActivity } from './other/discordRPC';
 import { generatePalettes } from './other/generatePalette';
 import { flushScrobbleQueue } from './other/lastFm/flushScrobbleQueue';
 import getAlbumInfoFromLastFM from './other/lastFm/getAlbumInfoFromLastFM';
+import { getLastFmSessionStatus } from './other/lastFm/getLastFMAuthData';
 import getSimilarTracks from './other/lastFm/getSimilarTracks';
 import scrobbleSong from './other/lastFm/scrobbleSong';
 import sendNowPlayingSongDataToLastFM from './other/lastFm/sendNowPlayingSongDataToLastFM';
 import reParseSong from './parseSong/reParseSong';
 import saveLyricsToSong from './saveLyricsToSong';
 import search from './search';
+import { downloadAppUpdate, quitAndInstallAppUpdate } from './update';
 import updateSongId3Tags, { isMetadataUpdatesPending } from './updateSong/updateSongId3Tags';
 import convertLyricsToPinyin from './utils/convertToPinyin';
 import convertLyricsToRomaja from './utils/convertToRomaja';
@@ -112,7 +115,6 @@ import { getQueueInfo } from './utils/getQueueInfo';
 import getTranslatedLyrics from './utils/getTranslatedLyrics';
 import resetLyrics from './utils/resetLyrics';
 import romanizeLyrics from './utils/romanizeLyrics';
-import { compare } from './utils/safeStorage';
 
 /**
  * Registers Electron IPC listeners and main-window event handlers for the provided window.
@@ -171,6 +173,16 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     });
     powerMonitor.addListener('on-ac', toggleOnBatteryPower);
     powerMonitor.addListener('on-battery', toggleOnBatteryPower);
+    powerMonitor.addListener('suspend', () => {
+      logger.info('System is suspending. Pausing audio playback...');
+      if (!mainWindow || mainWindow.isDestroyed()) return;
+      mainWindow.webContents.send('app/player/toggleSongPlaybackState', false);
+      try {
+        audioEngine.pause();
+      } catch (err) {
+        logger.warn('Failed to pause audio engine on system suspend', { error: String(err) });
+      }
+    });
 
     // ipcMain.on('app/getSongPosition', (_, position: number) =>
     //   saveUserData('currentSong.stoppedPosition', position)
@@ -581,9 +593,7 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       getMusicFolderData(folderPaths, sortType)
     );
 
-    ipcMain.handle('app/compareEncryptedData', (_, data: string, encryptedData: string) =>
-      compare(data, encryptedData)
-    );
+    ipcMain.handle('app/getLastFmSessionStatus', () => getLastFmSessionStatus());
 
     ipcMain.handle('app/isMetadataUpdatesPending', (_, songPath: string) =>
       isMetadataUpdatesPending(removeDefaultAppProtocolFromFilePath(songPath))
@@ -630,5 +640,136 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     });
 
     ipcMain.on('app/restartApp', (_: unknown, reason: string) => restartApp(reason));
+
+    // Native Audio Engine IPC Handlers
+    ipcMain.handle('app/audioEngine/ping', () => audioEngine.ping());
+    ipcMain.handle(
+      'app/audioEngine/load',
+      (
+        _,
+        filePath: string,
+        options?: {
+          autoPlay?: boolean;
+          volume?: number;
+          playbackRate?: number;
+          fallbackDuration?: number;
+          metadata?: {
+            title?: string;
+            artist?: string;
+            album?: string;
+            durationSecs?: number;
+            coverUrl?: string;
+          };
+        }
+      ) => audioEngine.load(filePath, options)
+    );
+    ipcMain.handle('app/audioEngine/preload', (_, filePath: string, fallbackDuration?: number) =>
+      audioEngine.preload(filePath, fallbackDuration)
+    );
+    ipcMain.handle(
+      'app/audioEngine/updateMetadata',
+      (
+        _,
+        metadata: {
+          title?: string;
+          artist?: string;
+          album?: string;
+          durationSecs?: number;
+          coverUrl?: string;
+        }
+      ) => audioEngine.updateMetadata(metadata)
+    );
+    ipcMain.handle('app/audioEngine/play', (_, filePath: string) => audioEngine.play(filePath));
+    ipcMain.handle('app/audioEngine/pause', () => audioEngine.pause());
+    ipcMain.handle('app/audioEngine/resume', () => audioEngine.resume());
+    ipcMain.handle('app/audioEngine/stop', () => audioEngine.stop());
+    ipcMain.handle(
+      'app/audioEngine/setPlaybackStatus',
+      (_, status: string, progressSecs?: number) =>
+        audioEngine.setPlaybackStatus(status, progressSecs)
+    );
+    ipcMain.handle('app/audioEngine/seek', (_, positionSecs: number) =>
+      audioEngine.seek(positionSecs)
+    );
+    ipcMain.handle('app/audioEngine/setVolume', (_, volume: number) =>
+      audioEngine.setVolume(volume)
+    );
+    ipcMain.handle('app/audioEngine/setVolumeWithRamp', (_, target: number, durationMs: number) =>
+      audioEngine.setVolumeWithRamp(target, durationMs)
+    );
+    ipcMain.handle('app/audioEngine/getPosition', () => audioEngine.getPosition());
+    ipcMain.handle('app/audioEngine/getDuration', () => audioEngine.getDuration());
+    ipcMain.handle('app/audioEngine/isEnded', () => audioEngine.isEnded());
+    ipcMain.handle('app/audioEngine/getDefaultDevice', () => audioEngine.getDefaultDevice());
+    ipcMain.handle('app/audioEngine/listDevices', () => audioEngine.listDevices());
+    ipcMain.handle('app/audioEngine/setDevice', (_, deviceName: string) =>
+      audioEngine.setDevice(deviceName)
+    );
+    ipcMain.handle('app/audioEngine/setPlaybackRate', (_, rate: number) =>
+      audioEngine.setPlaybackRate(rate)
+    );
+    ipcMain.handle('app/audioEngine/setEqBand', (_, frequencyHz: number, gainDb: number) =>
+      audioEngine.setEqBand(frequencyHz, gainDb)
+    );
+    ipcMain.handle('app/audioEngine/setEqGains', (_, gains: number[]) =>
+      audioEngine.setEqGains(gains)
+    );
+    ipcMain.handle('app/audioEngine/resetEq', () => audioEngine.resetEq());
+    ipcMain.handle('app/downloadUpdate', async () => downloadAppUpdate());
+    ipcMain.handle('app/quitAndInstallUpdate', () => quitAndInstallAppUpdate());
+
+    audioEngine.onEnded(() => {
+      if (!mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('app/audioEngine/trackEnded');
+      }
+    });
+
+    audioEngine.onError((message) => {
+      if (!mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('app/audioEngine/playbackError', {
+          message,
+          target: 'AUDIO_ENGINE'
+        });
+      }
+    });
+
+    audioEngine.onTick((payload) => {
+      if (!mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('app/audioEngine/positionTick', payload);
+      }
+    });
+
+    audioEngine.onTransitioned((path) => {
+      if (!mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('app/audioEngine/trackTransitioned', path);
+      }
+    });
+
+    audioEngine.onDevicesChanged((payload) => {
+      if (!mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('app/audioEngine/devicesChanged', payload);
+      }
+    });
+
+    audioEngine.initLogger((record) => {
+      if (!record || typeof record !== 'object' || !record.level) return;
+      const { level, message, target } = record;
+      const meta = { process: 'AUDIO_ENGINE', target };
+      switch (level) {
+        case 'error':
+          logger.error(message, meta);
+          break;
+        case 'warn':
+          logger.warn(message, meta);
+          break;
+        case 'debug':
+        case 'trace':
+          logger.debug(message, meta);
+          break;
+        default:
+          logger.info(message, meta);
+          break;
+      }
+    });
   }
 }

@@ -36,7 +36,7 @@ const theme = {
 const playerControls = {
   songPlaybackStateChange: (isPlaying: boolean): void =>
     ipcRenderer.send('app/player/songPlaybackStateChange', isPlaying),
-  toggleSongPlayback: (callback: (e: unknown) => void) =>
+  toggleSongPlayback: (callback: (e: unknown, forcePlay?: boolean) => void) =>
     ipcRenderer.on('app/player/toggleSongPlaybackState', callback),
   skipForwardToNextSong: (callback: (e: unknown) => void) =>
     ipcRenderer.on('app/player/skipForward', callback),
@@ -58,6 +58,109 @@ const playerControls = {
     ipcRenderer.removeListener('app/player/skipBackward', callback),
   removeSkipForwardToNextSongEvent: (callback: (e: unknown) => void) =>
     ipcRenderer.removeListener('app/player/skipForward', callback)
+};
+
+const audioEngine = {
+  ping: (): Promise<string> => ipcRenderer.invoke('app/audioEngine/ping'),
+  load: (
+    filePath: string,
+    options?: {
+      autoPlay?: boolean;
+      volume?: number;
+      playbackRate?: number;
+      fallbackDuration?: number;
+      metadata?: {
+        title?: string;
+        artist?: string;
+        album?: string;
+        durationSecs?: number;
+        coverUrl?: string;
+      };
+    }
+  ): Promise<{ durationSecs: number; sampleRate: number; channels: number }> =>
+    ipcRenderer.invoke('app/audioEngine/load', filePath, options),
+  preload: (filePath: string, fallbackDuration?: number): Promise<void> =>
+    ipcRenderer.invoke('app/audioEngine/preload', filePath, fallbackDuration),
+  updateMetadata: (metadata: {
+    title?: string;
+    artist?: string;
+    album?: string;
+    durationSecs?: number;
+    coverUrl?: string;
+  }): Promise<void> => ipcRenderer.invoke('app/audioEngine/updateMetadata', metadata),
+  play: (filePath: string): Promise<void> => ipcRenderer.invoke('app/audioEngine/play', filePath),
+  pause: (): Promise<void> => ipcRenderer.invoke('app/audioEngine/pause'),
+  resume: (): Promise<void> => ipcRenderer.invoke('app/audioEngine/resume'),
+  stop: (): Promise<void> => ipcRenderer.invoke('app/audioEngine/stop'),
+  setPlaybackStatus: (
+    status: 'playing' | 'paused' | 'stopped',
+    progressSecs?: number
+  ): Promise<void> => ipcRenderer.invoke('app/audioEngine/setPlaybackStatus', status, progressSecs),
+  seek: (positionSecs: number): Promise<void> =>
+    ipcRenderer.invoke('app/audioEngine/seek', positionSecs),
+  setVolume: (volume: number): Promise<void> =>
+    ipcRenderer.invoke('app/audioEngine/setVolume', volume),
+  setVolumeWithRamp: (target: number, durationMs: number): Promise<void> =>
+    ipcRenderer.invoke('app/audioEngine/setVolumeWithRamp', target, durationMs),
+  getPosition: (): Promise<number> => ipcRenderer.invoke('app/audioEngine/getPosition'),
+  getDuration: (): Promise<number> => ipcRenderer.invoke('app/audioEngine/getDuration'),
+  isEnded: (): Promise<boolean> => ipcRenderer.invoke('app/audioEngine/isEnded'),
+  getDefaultDevice: (): Promise<string> => ipcRenderer.invoke('app/audioEngine/getDefaultDevice'),
+  listDevices: (): Promise<string[]> => ipcRenderer.invoke('app/audioEngine/listDevices'),
+  setDevice: (deviceName: string): Promise<void> =>
+    ipcRenderer.invoke('app/audioEngine/setDevice', deviceName),
+  setPlaybackRate: (rate: number): Promise<void> =>
+    ipcRenderer.invoke('app/audioEngine/setPlaybackRate', rate),
+  setEqBand: (frequencyHz: number, gainDb: number): Promise<void> =>
+    ipcRenderer.invoke('app/audioEngine/setEqBand', frequencyHz, gainDb),
+  setEqGains: (gains: number[]): Promise<void> =>
+    ipcRenderer.invoke('app/audioEngine/setEqGains', gains),
+  resetEq: (): Promise<void> => ipcRenderer.invoke('app/audioEngine/resetEq'),
+  onPositionTick: (
+    callback: (payload: { position: number; timestampMs: number; isPlaying: boolean }) => void
+  ): (() => void) => {
+    const handler = (
+      _event: unknown,
+      data: { position: number; timestampMs: number; isPlaying: boolean }
+    ) => callback(data);
+    ipcRenderer.on('app/audioEngine/positionTick', handler);
+    return () => {
+      ipcRenderer.removeListener('app/audioEngine/positionTick', handler);
+    };
+  },
+  onTrackTransitioned: (callback: (path: string) => void): (() => void) => {
+    const handler = (_event: unknown, path: string) => callback(path);
+    ipcRenderer.on('app/audioEngine/trackTransitioned', handler);
+    return () => {
+      ipcRenderer.removeListener('app/audioEngine/trackTransitioned', handler);
+    };
+  },
+  onTrackEnded: (callback: () => void): (() => void) => {
+    const handler = () => callback();
+    ipcRenderer.on('app/audioEngine/trackEnded', handler);
+    return () => {
+      ipcRenderer.removeListener('app/audioEngine/trackEnded', handler);
+    };
+  },
+  onDevicesChanged: (
+    callback: (payload: { defaultDevice: string; devices: string[] }) => void
+  ): (() => void) => {
+    const handler = (_event: unknown, data: { defaultDevice: string; devices: string[] }) =>
+      callback(data);
+    ipcRenderer.on('app/audioEngine/devicesChanged', handler);
+    return () => {
+      ipcRenderer.removeListener('app/audioEngine/devicesChanged', handler);
+    };
+  },
+  onPlaybackError: (
+    callback: (error: { message: string; target: string }) => void
+  ): (() => void) => {
+    const handler = (_event: unknown, data: { message: string; target: string }) => callback(data);
+    ipcRenderer.on('app/audioEngine/playbackError', handler);
+    return () => {
+      ipcRenderer.removeListener('app/audioEngine/playbackError', handler);
+    };
+  }
 };
 
 const audioLibraryControls = {
@@ -517,7 +620,8 @@ const settingsHelpers = {
   exportAppData: (localStorageData: string): Promise<void> =>
     ipcRenderer.invoke('app/exportAppData', localStorageData),
   importAppData: (): Promise<void | LocalStorage> => ipcRenderer.invoke('app/importAppData'),
-  compareEncryptedData: (): Promise<boolean> => ipcRenderer.invoke('app/compareEncryptedData'),
+  getLastFmSessionStatus: (): Promise<LastFmSessionStatus> =>
+    ipcRenderer.invoke('app/getLastFmSessionStatus'),
   loginToLastFmInBrowser: () => ipcRenderer.send('app/loginToLastFmInBrowser'),
   getFolderLocation: (): Promise<string> => ipcRenderer.invoke('app/getFolderLocation'),
 
@@ -528,8 +632,11 @@ const settingsHelpers = {
     ipcRenderer.invoke('app/saveUserKeyboardShortcuts', shortcuts),
 
   // User Equalizer Preset
-  getUserEqualizerPreset: (): Promise<{ frequencyBands: number[] }> =>
-    ipcRenderer.invoke('app/getUserEqualizerPreset'),
+  getUserEqualizerPreset: (): Promise<{
+    frequencyBands: number[];
+    presetName?: string;
+    isEnabled?: boolean;
+  }> => ipcRenderer.invoke('app/getUserEqualizerPreset'),
   saveUserEqualizerPreset: (presetData: {
     presetName?: string;
     frequencyBands?: number[];
@@ -594,14 +701,29 @@ const utils = {
   },
   removeDefaultAppProtocolFromFilePath: (filePath: string) => {
     return filePath.replace(/nora:[/\\]{1,2}localfiles[/\\]{1,2}|\?.*$/g, '');
+  },
+  pathToFileURL: (filePath: string) => {
+    if (!filePath) return '';
+    let pathName = filePath.replace(/\\/g, '/');
+    if (!pathName.startsWith('/')) {
+      pathName = `/${pathName}`;
+    }
+    return encodeURI(`file://${pathName}`);
   }
 };
 
+const appUpdates = {
+  downloadUpdate: (): Promise<any> => ipcRenderer.invoke('app/downloadUpdate'),
+  quitAndInstallUpdate: (): Promise<void> => ipcRenderer.invoke('app/quitAndInstallUpdate')
+};
+
 export const api = {
+  appUpdates,
   properties,
   windowControls,
   theme,
   playerControls,
+  audioEngine,
   audioLibraryControls,
   suggestions,
   unknownSource,

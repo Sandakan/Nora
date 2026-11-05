@@ -71,8 +71,8 @@ test/
 // ✅ CORRECT: test/src/main/fs/getParentFolderPaths.test.ts
 // Tests ONLY: src/main/fs/getParentFolderPaths.ts
 
-import { describe, it, expect } from 'vitest';
 import { getParentFolderPaths } from '@main/fs/getParentFolderPaths';
+import { describe, it, expect } from 'vitest';
 
 describe('getParentFolderPaths', () => {
   it('should handle single absolute path', () => {
@@ -91,9 +91,9 @@ describe('getParentFolderPaths', () => {
 // ✅ CORRECT: test/integration/pathHandling.test.ts
 // Tests: Interactions between getParentFolderPaths, filesystem, fs.watch(), etc.
 
-import { describe, it, expect } from 'vitest';
-import { getParentFolderPaths } from '@main/fs/getParentFolderPaths';
 import { ensureWatched } from '@main/fs/addWatchersToParentFolders';
+import { getParentFolderPaths } from '@main/fs/getParentFolderPaths';
+import { describe, it, expect } from 'vitest';
 
 describe('Filesystem Path Handling Integration', () => {
   it('should watch parent folders of added music paths', () => {
@@ -203,9 +203,9 @@ npm run coverage
 ### Main Process Tests (`test/src/main/`)
 
 ```typescript
+import { getParentFolderPaths } from '@main/fs/getParentFolderPaths';
 // test/src/main/fs/getParentFolderPaths.test.ts
 import { describe, it, expect } from 'vitest';
-import { getParentFolderPaths } from '@main/fs/getParentFolderPaths';
 
 describe('getParentFolderPaths', () => {
   describe('absolute paths', () => {
@@ -220,10 +220,10 @@ describe('getParentFolderPaths', () => {
 ### Renderer Tests (`test/src/renderer/`)
 
 ```typescript
+import { useAudioPlayer } from '@renderer/hooks/useAudioPlayer';
+import { renderHook, act } from '@testing-library/react';
 // test/src/renderer/src/hooks/useAudioPlayer.test.ts
 import { describe, it, expect } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
-import { useAudioPlayer } from '@renderer/hooks/useAudioPlayer';
 
 describe('useAudioPlayer', () => {
   it('should initialize player', () => {
@@ -236,9 +236,9 @@ describe('useAudioPlayer', () => {
 ### Common Module Tests (`test/src/common/`)
 
 ```typescript
+import { parseLyrics } from '@common/parseLyrics';
 // test/src/common/parseLyrics.test.ts
 import { describe, it, expect } from 'vitest';
-import { parseLyrics } from '@common/parseLyrics';
 
 describe('parseLyrics', () => {
   it('should detect synced lyrics', () => {

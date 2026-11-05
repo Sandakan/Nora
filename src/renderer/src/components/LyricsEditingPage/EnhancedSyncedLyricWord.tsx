@@ -10,11 +10,12 @@ type Props = {
   end: number;
   delay: number;
   text: string;
+  isWordActive?: boolean;
 };
 
 const EnhancedSyncedLyricWord = (props: Props) => {
   const { updateSongPosition } = useContext(AppUpdateContext);
-  const { isActive, start, end, delay, text } = props;
+  const { isActive, start, end, delay, text, isWordActive } = props;
   const [isInRange, setIsInRange] = useState(false);
 
   const handleSongPositionChange = useCallback(
@@ -29,6 +30,10 @@ const EnhancedSyncedLyricWord = (props: Props) => {
   );
 
   useEffect(() => {
+    if (typeof isWordActive === 'boolean') {
+      return undefined;
+    }
+
     if (isActive) {
       document.addEventListener('player/positionChange', handleSongPositionChange);
     } else {
@@ -36,13 +41,15 @@ const EnhancedSyncedLyricWord = (props: Props) => {
     }
 
     return () => document.removeEventListener('player/positionChange', handleSongPositionChange);
-  }, [handleSongPositionChange, isActive]);
+  }, [handleSongPositionChange, isActive, isWordActive]);
+
+  const wordHighlightActive = typeof isWordActive === 'boolean' ? isWordActive : isInRange;
 
   return (
     <span
       onClick={() => updateSongPosition(start)}
       className={`text-font-color-black dark:text-font-color-white mr-2 transition-colors last:mr-0 ${
-        isInRange
+        wordHighlightActive
           ? 'text-font-color-highlight/90 dark:text-font-color-highlight/90'
           : isActive
             ? 'text-font-color-black/50 dark:text-font-color-white/50'

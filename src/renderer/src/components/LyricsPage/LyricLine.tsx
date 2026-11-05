@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import roundTo from '../../../../common/roundTo';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import { getPlayer } from '../../hooks/useAudioPlayer';
 import EnhancedSyncedLyricWord from '../LyricsEditingPage/EnhancedSyncedLyricWord';
 import LyricsProgressBar from './LyricsProgressBar';
 
@@ -17,9 +18,8 @@ interface LyricProp {
   syncedLyrics?: { start: number; end: number };
   isAutoScrolling?: boolean;
   playerType?: PlayerTypes;
+  isActive?: boolean;
 }
-
-// const syncedLyricsRegex = /^\[\d+:\d{1,2}\.\d{1,3}]/gm;
 
 const lyricsScrollIntoViewEvent = new CustomEvent('lyrics/scrollIntoView', {
   detail: 'scrollingUsingScrollIntoView'
@@ -34,14 +34,8 @@ const getLyricText = (lyrics: string) => {
 };
 
 const LyricLine = (props: LyricProp) => {
-  // const preferences = useStore(store, (state) => state.localStorage.preferences);
-
   const { updateSongPosition, updateContextMenuData } = useContext(AppUpdateContext);
-  const [isInRange, setIsInRange] = useState(false);
   const { t } = useTranslation();
-
-  const lyricsRef = useRef(null as HTMLDivElement | null);
-  const isTheCurrnetLineRef = useRef(false);
 
   const {
     index,
@@ -50,9 +44,35 @@ const LyricLine = (props: LyricProp) => {
     convertedLyric,
     syncedLyrics,
     isAutoScrolling = true,
-    playerType = 'normal'
+    playerType = 'normal',
+    isActive: isActiveProp
   } = props;
 
+  const [isInRangeLocal, setIsInRangeLocal] = useState(false);
+  const lyricsRef = useRef(null as HTMLDivElement | null);
+  const isTheCurrentLineRef = useRef(false);
+
+  // If isActiveProp is provided (boolean), use it; otherwise fall back to local event-driven state
+  const isLineActive = typeof isActiveProp === 'boolean' ? isActiveProp : isInRangeLocal;
+
+  // Active word tracking for enhanced synced lyrics (karaoke)
+  const [activeWordIndex, setActiveWordIndex] = useState<number>(-1);
+  const activeWordIndexRef = useRef<number>(-1);
+
+  // When using centralized isActiveProp: auto-scroll when line becomes active
+  useEffect(() => {
+    if (typeof isActiveProp === 'boolean' && isActiveProp) {
+      if (isAutoScrolling) {
+        lyricsRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        });
+      }
+      document.dispatchEvent(lyricsScrollIntoViewEvent);
+    }
+  }, [isActiveProp, isAutoScrolling]);
+
+  // Fallback listener for when isActiveProp is not provided
   const handleLyricsActivity = useCallback(
     (e: Event) => {
       if ('detail' in e && !Number.isNaN(e.detail)) {
@@ -61,9 +81,9 @@ const LyricLine = (props: LyricProp) => {
         if (lyricsRef.current && syncedLyrics) {
           const { start, end } = syncedLyrics;
           if (songPosition > start && songPosition < end) {
-            if (!isTheCurrnetLineRef.current) {
-              isTheCurrnetLineRef.current = true;
-              setIsInRange(true);
+            if (!isTheCurrentLineRef.current) {
+              isTheCurrentLineRef.current = true;
+              setIsInRangeLocal(true);
               if (isAutoScrolling)
                 lyricsRef.current?.scrollIntoView({
                   behavior: 'smooth',
@@ -73,8 +93,8 @@ const LyricLine = (props: LyricProp) => {
               document.dispatchEvent(lyricsScrollIntoViewEvent);
             }
           } else {
-            isTheCurrnetLineRef.current = false;
-            setIsInRange(false);
+            isTheCurrentLineRef.current = false;
+            setIsInRangeLocal(false);
           }
         }
       }
@@ -83,10 +103,92 @@ const LyricLine = (props: LyricProp) => {
   );
 
   useEffect(() => {
+    if (typeof isActiveProp === 'boolean') {
+      return undefined;
+    }
     document.addEventListener('player/positionChange', handleLyricsActivity);
-
     return () => document.removeEventListener('player/positionChange', handleLyricsActivity);
-  }, [handleLyricsActivity]);
+  }, [handleLyricsActivity, isActiveProp]);
+
+  // Word-level 60 FPS karaoke tracking when line is active and contains words
+  useEffect(() => {
+    const hasWords =
+      Array.isArray(lyric) ||
+      (translatedLyricLines.length > 0 && Array.isArray(translatedLyricLines[0].text)) ||
+      (convertedLyric && Array.isArray(convertedLyric));
+
+    if (!isLineActive || !hasWords) {
+      setActiveWordIndex(-1);
+      activeWordIndexRef.current = -1;
+      return undefined;
+    }
+
+    const player = getPlayer();
+    let animId: number | null = null;
+
+    // Get the word list to track timing
+    const words: SyncedLyricsLineWord[] = Array.isArray(lyric)
+      ? lyric
+      : translatedLyricLines.length > 0 && Array.isArray(translatedLyricLines[0].text)
+        ? (translatedLyricLines[0].text as SyncedLyricsLineWord[])
+        : Array.isArray(convertedLyric)
+          ? convertedLyric
+          : [];
+
+    const updateActiveWord = () => {
+      const currentTime = player.getExactCurrentTime();
+      let foundWord = -1;
+      for (let i = 0; i < words.length; i += 1) {
+        const w = words[i];
+        if (currentTime >= w.start && currentTime < w.end) {
+          foundWord = i;
+          break;
+        }
+      }
+      if (foundWord !== activeWordIndexRef.current) {
+        activeWordIndexRef.current = foundWord;
+        setActiveWordIndex(foundWord);
+      }
+    };
+
+    const loop = () => {
+      updateActiveWord();
+      animId = requestAnimationFrame(loop);
+    };
+
+    if (!player.paused) {
+      animId = requestAnimationFrame(loop);
+    }
+
+    const onPlay = () => {
+      if (animId === null) animId = requestAnimationFrame(loop);
+    };
+    const onPause = () => {
+      if (animId !== null) {
+        cancelAnimationFrame(animId);
+        animId = null;
+      }
+      updateActiveWord();
+    };
+
+    player.on('play', onPlay);
+    player.on('pause', onPause);
+    player.on('seeked', updateActiveWord);
+    player.on('timeUpdate', updateActiveWord);
+
+    updateActiveWord();
+
+    return () => {
+      if (animId !== null) {
+        cancelAnimationFrame(animId);
+        animId = null;
+      }
+      player.off('play', onPlay);
+      player.off('pause', onPause);
+      player.off('seeked', updateActiveWord);
+      player.off('timeUpdate', updateActiveWord);
+    };
+  }, [convertedLyric, isLineActive, lyric, translatedLyricLines]);
 
   const lyricString = useMemo(() => {
     if (typeof lyric === 'string') return getLyricText(lyric);
@@ -95,7 +197,8 @@ const LyricLine = (props: LyricProp) => {
       return (
         <EnhancedSyncedLyricWord
           key={i}
-          isActive={isInRange}
+          isActive={isLineActive}
+          isWordActive={isLineActive ? i === activeWordIndex : false}
           start={extendedText.start}
           end={extendedText.end}
           text={extendedText.text}
@@ -105,7 +208,7 @@ const LyricLine = (props: LyricProp) => {
     });
 
     return extendedLyricLines;
-  }, [isInRange, lyric]);
+  }, [activeWordIndex, isLineActive, lyric]);
 
   const translatedLyricString = useMemo(() => {
     if (translatedLyricLines.length === 0) return undefined;
@@ -117,7 +220,8 @@ const LyricLine = (props: LyricProp) => {
       return (
         <EnhancedSyncedLyricWord
           key={i}
-          isActive={isInRange}
+          isActive={isLineActive}
+          isWordActive={isLineActive ? i === activeWordIndex : false}
           start={extendedText.start}
           end={extendedText.end}
           text={extendedText.text}
@@ -127,7 +231,7 @@ const LyricLine = (props: LyricProp) => {
     });
 
     return extendedLyricLines;
-  }, [isInRange, translatedLyricLines]);
+  }, [activeWordIndex, isLineActive, translatedLyricLines]);
 
   const convertedLyricString = useMemo(() => {
     if (!convertedLyric || convertedLyric.length === 0) return undefined;
@@ -137,7 +241,8 @@ const LyricLine = (props: LyricProp) => {
       return (
         <EnhancedSyncedLyricWord
           key={i}
-          isActive={isInRange}
+          isActive={isLineActive}
+          isWordActive={isLineActive ? i === activeWordIndex : false}
           start={extendedText.start}
           end={extendedText.end}
           text={extendedText.text}
@@ -147,11 +252,10 @@ const LyricLine = (props: LyricProp) => {
     });
 
     return extendedLyricLines;
-  }, [isInRange, convertedLyric]);
+  }, [activeWordIndex, convertedLyric, isLineActive]);
 
   const lyricStringLinePrimary = translatedLyricString ?? convertedLyricString ?? lyricString;
   let lyricStringLineSecondaryUpper;
-  // if (!preferences.compactLyrics && translatedLyricString)
   if (translatedLyricString) lyricStringLineSecondaryUpper = convertedLyricString ?? lyricString;
 
   return (
@@ -170,7 +274,7 @@ const LyricLine = (props: LyricProp) => {
       className={`highlight text-font-color-black/20 dark:text-font-color-white/20 z-0 mb-5 flex w-fit flex-col items-center justify-center text-center text-5xl font-medium text-balance transition-[transform,translate,scale,color,filter] duration-250 select-none first:mt-8 last:mb-4 empty:mb-16 ${
         syncedLyrics
           ? `cursor-pointer blur-[1px] ${
-              isInRange
+              isLineActive
                 ? 'text-font-color-highlight! dark:text-dark-font-color-highlight! scale-100! font-medium blur-none! [&>div>span]:mr-3!'
                 : 'scale-75!'
             }`
@@ -208,7 +312,7 @@ const LyricLine = (props: LyricProp) => {
     >
       {lyricStringLineSecondaryUpper && (
         <div
-          className={`flex flex-row flex-wrap ${playerType !== 'full' ? 'items-center justify-center' : ''} ${syncedLyrics && isInRange ? 'text-font-color-black/50! dark:text-font-color-white/50! text-xl!' : 'text-xl!'}`}
+          className={`flex flex-row flex-wrap ${playerType !== 'full' ? 'items-center justify-center' : ''} ${syncedLyrics && isLineActive ? 'text-font-color-black/50! dark:text-font-color-white/50! text-xl!' : 'text-xl!'}`}
         >
           {lyricStringLineSecondaryUpper}
         </div>
@@ -218,7 +322,7 @@ const LyricLine = (props: LyricProp) => {
       >
         {lyricStringLinePrimary}
       </div>
-      {syncedLyrics && isInRange && <LyricsProgressBar delay={0} syncedLyrics={syncedLyrics} />}
+      {syncedLyrics && isLineActive && <LyricsProgressBar delay={0} syncedLyrics={syncedLyrics} />}
     </div>
   );
 };

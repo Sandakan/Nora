@@ -4,6 +4,7 @@ import LyricLine from '@renderer/components/LyricsPage/LyricLine';
 import LyricsMetadata from '@renderer/components/LyricsPage/LyricsMetadata';
 import NoLyrics from '@renderer/components/LyricsPage/NoLyrics';
 import MainContainer from '@renderer/components/MainContainer';
+import useActiveLyricLine from '@renderer/hooks/useActiveLyricLine';
 import useNetworkConnectivity from '@renderer/hooks/useNetworkConnectivity';
 import useSkipLyricsLines from '@renderer/hooks/useSkipLyricsLines';
 import { queryClient } from '@renderer/index';
@@ -76,6 +77,7 @@ function LyricsPage() {
 
   const lyricsLinesContainerRef = useRef<HTMLDivElement>(null);
   useSkipLyricsLines(lyrics);
+  const activeLineIndex = useActiveLyricLine(lyrics?.lyrics?.parsedLyrics, lyrics?.lyrics?.offset);
   // const [isOfflineLyricAvailable, setIsOfflineLyricsAvailable] = useState(false);
 
   const copyright = useMemo(() => lyrics?.lyrics?.copyright, [lyrics]);
@@ -157,6 +159,7 @@ function LyricsPage() {
               playerType="normal"
               key={index}
               index={index}
+              isActive={activeLineIndex === index}
               lyric={originalText}
               translatedLyricLines={lyric.translatedTexts}
               syncedLyrics={{ start, end }}
@@ -170,7 +173,8 @@ function LyricsPage() {
           <LyricLine
             playerType="normal"
             key="..."
-            index={0}
+            index={-1}
+            isActive={activeLineIndex === -1}
             lyric="•••"
             syncedLyrics={{
               start: 0,
@@ -200,7 +204,7 @@ function LyricsPage() {
       }
     }
     return [];
-  }, [currentSongData.duration, isAutoScrolling, lyrics]);
+  }, [activeLineIndex, currentSongData.duration, isAutoScrolling, lyrics]);
 
   // const showOnlineLyrics = useCallback(
   //   (

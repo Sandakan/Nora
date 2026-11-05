@@ -1,6 +1,7 @@
 import { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import type AudioPlayer from '../other/player';
 import { store } from '../store/store';
 
 /**
@@ -9,9 +10,10 @@ import { store } from '../store/store';
  * Registers listeners on the audio player to update Discord activity (song title, artists, artwork,
  * action button) and to set playback timestamps while the player is actively playing.
  *
- * @param player - The HTMLAudioElement whose playback state and metadata drive the presence updates
+ * @param player - The AudioPlayer or HTMLAudioElement whose playback state and metadata drive the
+ *   presence updates
  */
-export function useDiscordRpc(player: HTMLAudioElement) {
+export function useDiscordRpc(player: AudioPlayer | HTMLAudioElement) {
   const { t } = useTranslation();
 
   const setDiscordRpcActivity = useCallback(() => {

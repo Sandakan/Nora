@@ -12,6 +12,7 @@ import { drizzle } from 'drizzle-orm/pglite';
 import { migrate } from 'drizzle-orm/pglite/migrator';
 import { app } from 'electron';
 
+import logMemoryCheckpoint from '../utils/memoryProfiler';
 import { seedDatabase } from './seed';
 
 const DB_NAME = 'nora.pglite.db';
@@ -21,7 +22,21 @@ logger.debug(`Migrations folder: ${migrationsFolder}`);
 
 mkdirSync(DB_PATH, { recursive: true });
 
-const pgliteInstance = await PGlite.create(DB_PATH, { debug: 1, extensions: { pg_trgm, citext } });
+const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
+
+const postgresqlconf = [
+  'shared_buffers = 16MB',
+  'work_mem = 2MB',
+  'temp_buffers = 2MB',
+  'maintenance_work_mem = 8MB'
+];
+
+const pgliteInstance = await PGlite.create(DB_PATH, {
+  debug: isDev ? 1 : 0,
+  extensions: { pg_trgm, citext },
+  postgresqlconf
+});
+
 pgliteInstance.onNotification((notification) => {
   logger.info('Database notification:', { notification });
 });
@@ -44,6 +59,7 @@ export const closeDatabaseInstance = async () => {
 
 await migrate(db, { migrationsFolder });
 await seedDatabase();
+logMemoryCheckpoint('database-ready');
 
 export const nukeDatabase = async () => {
   try {

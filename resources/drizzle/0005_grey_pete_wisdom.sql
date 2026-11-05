@@ -1,0 +1,1 @@
+ALTER TABLE "user_settings" ALTER COLUMN "lastfm_session_key" SET DATA TYPE text;

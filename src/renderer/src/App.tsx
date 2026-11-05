@@ -17,7 +17,6 @@ import { useDiscordRpc } from './hooks/useDiscordRpc';
 import { useDynamicTheme } from './hooks/useDynamicTheme';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useListeningData } from './hooks/useListeningData';
-import { useMediaSession } from './hooks/useMediaSession';
 import { useMultiSelection } from './hooks/useMultiSelection';
 // ? HOOKS
 import useNetworkConnectivity from './hooks/useNetworkConnectivity';
@@ -79,7 +78,6 @@ export default function App() {
 
   // ? INITIALIZE PLAYER AND QUEUE (singleton instances via custom hooks)
   const player = useAudioPlayer();
-  const audio = player.audio;
   const playerQueue = player.queue; // Access properties directly from AudioPlayer instance
 
   // const [content, dispatch] = useReducer(reducer, DEFAULT_REDUCER_DATA);
@@ -130,7 +128,7 @@ export default function App() {
   // Playback errors hook handles error management and retry logic
   const skipForwardRef = useRef<(() => void) | undefined>(undefined);
   const { managePlaybackErrors, resetErrorCount } = usePlaybackErrors(
-    audio,
+    player,
     changePromptMenuData,
     skipForwardRef
   );
@@ -144,11 +142,11 @@ export default function App() {
     updateSongPosition,
     toggleIsFavorite,
     updateEqualizerOptions
-  } = usePlaybackSettings(audio);
+  } = usePlaybackSettings(player);
 
   // ? INITIALIZE LISTENING DATA
   // Listening data hook handles recording song playback sessions for analytics
-  const { recordListeningData } = useListeningData(audio);
+  const { recordListeningData } = useListeningData(player);
 
   // ? WIRE UP LISTENING DATA RECORDING TO PLAYER EVENTS
   // Listen for songLoaded events from AudioPlayer to record listening data
@@ -239,18 +237,9 @@ export default function App() {
     }
   }, []);
 
-  // ? INITIALIZE MEDIA SESSION
-  // Media session hook handles OS-level media controls and browser media notifications
-  useMediaSession(audio, {
-    toggleSongPlayback,
-    handleSkipBackwardClick,
-    handleSkipForwardClick,
-    updateSongPosition
-  });
-
   // ? INITIALIZE DISCORD RPC
   // Discord RPC hook handles Discord Rich Presence integration
-  useDiscordRpc(audio);
+  useDiscordRpc(player);
 
   // Set up keyboard shortcuts with all required dependencies
   useKeyboardShortcuts({

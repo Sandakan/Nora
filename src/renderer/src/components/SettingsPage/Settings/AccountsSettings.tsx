@@ -12,9 +12,19 @@ const AccountsSettings = () => {
   const { data: userSettings } = useQuery(settingsQuery.all);
   const { t } = useTranslation();
 
+  const { data: lastFmSessionStatus } = useQuery({
+    queryKey: ['lastFmSessionStatus', userSettings?.lastFmSessionKey],
+    queryFn: () => window.api.settingsHelpers.getLastFmSessionStatus()
+  });
+
   const isLastFmConnected = useMemo(
-    () => !!userSettings?.lastFmSessionKey,
-    [userSettings?.lastFmSessionKey]
+    () => lastFmSessionStatus === 'CONNECTED',
+    [lastFmSessionStatus]
+  );
+
+  const isLastFmExpired = useMemo(
+    () => lastFmSessionStatus === 'EXPIRED_OR_INVALID',
+    [lastFmSessionStatus]
   );
 
   const { mutate: updateDiscordRpcState } = useMutation({
@@ -75,21 +85,27 @@ const AccountsSettings = () => {
               src={LastFMIcon}
               alt={t('settingsPage.lastFmLogo')}
               className={`mr-4 h-16 w-16 rounded-md ${
-                !isLastFmConnected && 'brightness-90 grayscale'
+                !isLastFmConnected && !isLastFmExpired && 'brightness-90 grayscale'
               }`}
             />
             <div className="grow-0">
               <p
                 className={`flex items-center font-semibold uppercase ${
-                  isLastFmConnected ? 'text-green-500' : 'text-red-500'
+                  isLastFmConnected
+                    ? 'text-green-500'
+                    : isLastFmExpired
+                      ? 'text-amber-500'
+                      : 'text-red-500'
                 } `}
               >
                 {t(
                   isLastFmConnected
                     ? 'settingsPage.lastFmConnected'
-                    : 'settingsPage.lastFmNotConnected'
+                    : isLastFmExpired
+                      ? 'settingsPage.lastFmSessionExpired'
+                      : 'settingsPage.lastFmNotConnected'
                 )}{' '}
-                {isLastFmConnected &&
+                {(isLastFmConnected || isLastFmExpired) &&
                   userSettings?.lastFmSessionName &&
                   `(${t('settingsPage.loggedInAs')} ${userSettings.lastFmSessionName})`}
               </p>
@@ -101,7 +117,7 @@ const AccountsSettings = () => {
               </ul>
               <Button
                 label={
-                  isLastFmConnected
+                  isLastFmConnected || isLastFmExpired
                     ? t('settingsPage.authenticateAgain')
                     : t('settingsPage.loginInBrowser')
                 }

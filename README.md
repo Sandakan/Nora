@@ -123,6 +123,12 @@ Install dependencies
 npm install
 ```
 
+Build native audio engine
+
+```bash
+npm run build:engine
+```
+
 Launch in development mode
 
 ```bash
@@ -130,7 +136,7 @@ npm start
 ```
 
 > [!TIP]
-> If you encounter issues (such as `Error: Electron uninstall`), check out the [Troubleshooting Guide](docs/TROUBLESHOOTING.md).
+> If you encounter issues (such as `Error: Electron uninstall` or audio engine build errors), check out the [Troubleshooting Guide](docs/TROUBLESHOOTING.md).
 
 ## 📊 Star History
 
