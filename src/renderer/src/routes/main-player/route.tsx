@@ -52,6 +52,7 @@ function RouteComponent() {
             }`}
             loading="eager"
             src={bodyBackgroundImage}
+            noFallbacks
             alt=""
           />
         </div>
