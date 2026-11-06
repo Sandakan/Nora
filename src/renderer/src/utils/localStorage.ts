@@ -277,6 +277,19 @@ const setSortingStates = <Type extends keyof SortingStates, Data extends Sorting
 const getSortingStates = <Type extends keyof SortingStates>(type: Type) =>
   getItem('sortingStates', type);
 
+// FILTERING STATES
+
+const setFilteringStates = <
+  Type extends keyof FilteringStates,
+  Data extends FilteringStates[Type]
+>(
+  type: Type,
+  data: Data
+) => setItem('filteringStates', type, data);
+
+const getFilteringStates = <Type extends keyof FilteringStates>(type: Type) =>
+  getItem('filteringStates', type);
+
 // KEYBOARD SHORTCUTS (Legacy - stored in localStorage for backward compat)
 // Note: These read/write from the store's initial keyboardShortcuts, not database
 
@@ -362,6 +375,7 @@ export default {
   },
   queue: { setQueue, getQueue, setCurrentSongIndex },
   sortingStates: { setSortingStates, getSortingStates },
+  filteringStates: { setFilteringStates, getFilteringStates },
   lyricsEditorSettings: { setLyricsEditorSettings, getLyricsEditorSettings },
   keyboardShortcuts: {
     resetShortcutsToDefaults,
