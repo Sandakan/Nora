@@ -1,64 +1,59 @@
-// import logger from './logger';
-import { dialog } from 'electron';
-/* eslint-disable promise/catch-or-return */
 import electronUpdater from 'electron-updater';
-// import { IS_DEVELOPMENT } from './main';
 
-// export default async function checkForUpdates() {
-//   electronUpdater.autoUpdater.logger = {
-//     info: (mes) => logger.info(mes),
-//     warn: (mes) => logger.warn(mes),
-//     error: (mes) => logger.error(mes),
-//     debug: (mes) => logger.debug(mes)
-//   };
-//   electronUpdater.autoUpdater.autoDownload = false;
-//   // electronUpdater.autoUpdater.forceDevUpdateConfig = IS_DEVELOPMENT;
-
-//   const result = await electronUpdater.autoUpdater.checkForUpdatesAndNotify();
-
-//   return result;
-// }
+import logger from './logger';
+import { sendMessageToRenderer } from './main';
 
 electronUpdater.autoUpdater.autoDownload = false;
 
 electronUpdater.autoUpdater.on('error', (error) => {
-  dialog.showErrorBox('Error: ', error == null ? 'unknown' : (error.stack || error).toString());
+  logger.error('AutoUpdater encountered an error during update check/download.', { error });
 });
 
-electronUpdater.autoUpdater.on('update-available', () => {
-  dialog
-    .showMessageBox({
-      type: 'info',
-      title: 'Found Updates',
-      message: 'Found updates, do you want update now?',
-      buttons: ['Sure', 'No']
-    })
-    .then((buttonIndex) => {
-      if (buttonIndex.response === 0) {
-        electronUpdater.autoUpdater.downloadUpdate();
-      }
-    });
-});
-
-electronUpdater.autoUpdater.on('update-not-available', () => {
-  dialog.showMessageBox({
-    title: 'No Updates',
-    message: 'Current version is up-to-date.'
+electronUpdater.autoUpdater.on('update-available', (info) => {
+  logger.info('AutoUpdater found a new update.', { version: info.version });
+  sendMessageToRenderer({
+    messageCode: 'APP_UPDATE_AVAILABLE',
+    data: { version: info.version }
   });
 });
 
-electronUpdater.autoUpdater.on('update-downloaded', () => {
-  dialog
-    .showMessageBox({
-      title: 'Install Updates',
-      message: 'Updates downloaded, application will be quit for update...'
-    })
-    .then(() => {
-      setImmediate(() => electronUpdater.autoUpdater.quitAndInstall());
-    });
+electronUpdater.autoUpdater.on('update-not-available', (info) => {
+  logger.info('AutoUpdater: Current version is up-to-date.', { version: info?.version });
+  sendMessageToRenderer({
+    messageCode: 'APP_UPDATE_NOT_AVAILABLE',
+    data: { version: info?.version }
+  });
 });
 
-// export this to MenuItem click callback
+electronUpdater.autoUpdater.on('download-progress', (progressObj) => {
+  sendMessageToRenderer({
+    messageCode: 'APP_UPDATE_PROGRESS',
+    data: {
+      total: 100,
+      value: Math.round(progressObj.percent)
+    }
+  });
+});
+
+electronUpdater.autoUpdater.on('update-downloaded', (info) => {
+  logger.info('AutoUpdater update downloaded successfully.', { version: info.version });
+  sendMessageToRenderer({
+    messageCode: 'APP_UPDATE_DOWNLOADED',
+    data: { version: info.version }
+  });
+});
+
+export async function downloadAppUpdate() {
+  logger.info('User requested to download app update.');
+  return electronUpdater.autoUpdater.downloadUpdate();
+}
+
+export function quitAndInstallAppUpdate() {
+  logger.info('User requested to quit and install app update.');
+  setImmediate(() => electronUpdater.autoUpdater.quitAndInstall());
+}
+
 export default function checkForUpdates() {
+  logger.info('Starting background check for app updates.');
   electronUpdater.autoUpdater.checkForUpdates();
 }

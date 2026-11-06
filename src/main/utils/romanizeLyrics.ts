@@ -9,8 +9,23 @@ import { getLrcLyricsMetadata } from '../core/saveLyricsToLrcFile';
 import logger from '../logger';
 import { sendMessageToRenderer } from '../main';
 
-const kuroshiro = new Kuroshiro();
-await kuroshiro.init(new KuromojiAnalyzer());
+let kuroshiroInstance: Kuroshiro | null = null;
+let kuroshiroInitPromise: Promise<Kuroshiro> | null = null;
+
+const getKuroshiro = async (): Promise<Kuroshiro> => {
+  if (kuroshiroInstance) return kuroshiroInstance;
+  if (!kuroshiroInitPromise) {
+    kuroshiroInitPromise = (async () => {
+      logger.info('Initializing Kuroshiro and Kuromoji analyzer on-demand...');
+      const k = new Kuroshiro();
+      await k.init(new KuromojiAnalyzer());
+      kuroshiroInstance = k;
+      logger.info('Kuroshiro initialized successfully on-demand.');
+      return kuroshiroInstance;
+    })();
+  }
+  return kuroshiroInitPromise;
+};
 
 const hasConvertibleCharacter = (str: string) => {
   if (!str) return false;
@@ -21,6 +36,7 @@ const hasConvertibleCharacter = (str: string) => {
 };
 
 const convertText = async (str: string) => {
+  const kuroshiro = await getKuroshiro();
   const strsToReplace = ['  ', ' ,', ' .', ' ?', ' !', ' ;', ' )', '( '];
   const strsReplace = [' ', ',', '.', '?', '!', ';', ')', '('];
   const kana = await kuroshiro.convert(str, { to: 'katakana', mode: 'spaced' });

@@ -3,6 +3,7 @@ import { useStore } from '@tanstack/react-store';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import useActiveLyricLine from '../../../hooks/useActiveLyricLine';
 import useSkipLyricsLines from '../../../hooks/useSkipLyricsLines';
 import i18n from '../../../i18n';
 import LyricLine from '../../LyricsPage/LyricLine';
@@ -23,6 +24,7 @@ const LyricsContainer = (props: Props) => {
 
   const [lyrics, setLyrics] = useState<SongLyrics | null | undefined>(null);
   useSkipLyricsLines(lyrics);
+  const activeLineIndex = useActiveLyricLine(lyrics?.lyrics?.parsedLyrics, lyrics?.lyrics?.offset);
 
   useEffect(() => {
     if (isLyricsVisible) {
@@ -86,6 +88,7 @@ const LyricsContainer = (props: Props) => {
               playerType="full"
               key={index}
               index={index}
+              isActive={activeLineIndex === index}
               lyric={text}
               syncedLyrics={{ start, end }}
               translatedLyricLines={lyric.translatedTexts}
@@ -98,7 +101,8 @@ const LyricsContainer = (props: Props) => {
           <LyricLine
             playerType="full"
             key="..."
-            index={0}
+            index={-1}
+            isActive={activeLineIndex === -1}
             lyric="•••"
             syncedLyrics={{
               start: 0,
@@ -127,7 +131,7 @@ const LyricsContainer = (props: Props) => {
       }
     }
     return [];
-  }, [lyrics]);
+  }, [activeLineIndex, lyrics]);
 
   const lyricsSource = useMemo(() => {
     if (lyrics && lyrics?.lyrics) {

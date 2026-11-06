@@ -19,6 +19,8 @@ declare global {
   type LogMessageTypes = 'INFO' | 'WARN' | 'ERROR';
 
   type IpcChannels =
+    | 'app/downloadUpdate'
+    | 'app/quitAndInstallUpdate'
     | 'app/beforeQuitEvent'
     | 'app/Close'
     | 'app/minimize'
@@ -70,7 +72,23 @@ declare global {
     | 'app/player/skipForward'
     | 'app/player/skipBackward'
     | 'app/player/toggleSongPlaybackState'
-    | 'app/player/skipBackward';
+    | 'app/player/skipBackward'
+    | 'app/audioEngine/ping'
+    | 'app/audioEngine/play'
+    | 'app/audioEngine/pause'
+    | 'app/audioEngine/resume'
+    | 'app/audioEngine/stop'
+    | 'app/audioEngine/seek'
+    | 'app/audioEngine/setVolume'
+    | 'app/audioEngine/setVolumeWithRamp'
+    | 'app/audioEngine/getPosition'
+    | 'app/audioEngine/getDuration'
+    | 'app/audioEngine/getDefaultDevice'
+    | 'app/audioEngine/listDevices'
+    | 'app/audioEngine/setDevice'
+    | 'app/audioEngine/setPlaybackRate'
+    | 'app/audioEngine/setEqBand'
+    | 'app/audioEngine/resetEq';
 
   interface ImageCoverData {
     format: string;
@@ -464,6 +482,8 @@ declare global {
     lastFmSessionKey: string | null;
   }
 
+  type LastFmSessionStatus = 'CONNECTED' | 'EXPIRED_OR_INVALID' | 'NOT_CONNECTED';
+
   interface UserData extends UserSettings {}
 
   type LanguageCodes = NoInfer<keyof typeof resources>;
@@ -553,6 +573,7 @@ declare global {
     currentSong: CurrentSong;
     volume: Volume;
     playbackRate: number;
+    selectedAudioDevice?: string;
   }
 
   type EqualizerBandFilters =
@@ -950,6 +971,10 @@ declare global {
     | 'SONG_WHITELISTED'
     | 'FOLDER_BLACKLISTED'
     | 'FOLDER_WHITELISTED'
+    | 'APP_UPDATE_AVAILABLE'
+    | 'APP_UPDATE_NOT_AVAILABLE'
+    | 'APP_UPDATE_PROGRESS'
+    | 'APP_UPDATE_DOWNLOADED'
     | 'PENDING_METADATA_UPDATES_SAVED'
     | 'FOLDER_PARSED_FOR_DIRECTORIES'
     | 'RESET_SUCCESSFUL'
@@ -961,6 +986,8 @@ declare global {
     | 'LYRICS_CONVERT_SUCCESS'
     | 'RESET_CONVERTED_LYRICS_SUCCESS'
     | 'LASTFM_LOGIN_SUCCESS'
+    | 'LASTFM_SESSION_EXPIRED'
+    | 'ENCRYPTION_UNAVAILABLE'
     | 'APPDATA_EXPORT_STARTED'
     | 'APPDATA_IMPORT_STARTED'
     | 'APPDATA_EXPORT_SUCCESS'

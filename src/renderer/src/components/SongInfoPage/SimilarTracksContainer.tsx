@@ -1,3 +1,4 @@
+import { useQueueOperations } from '@renderer/hooks/useQueueOperations';
 import { songQuery } from '@renderer/queries/songs';
 import { store } from '@renderer/store/store';
 import { useSuspenseQuery } from '@tanstack/react-query';
@@ -15,12 +16,10 @@ type Props = { songId: number };
 
 const SimilarTracksContainer = (props: Props) => {
   const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
-  const queue = useStore(store, (state) => state.localStorage.queue);
-  const currentSongData = useStore(store, (state) => state.currentSongData);
   const preferences = useStore(store, (state) => state.localStorage.preferences);
 
-  const { createQueue, playSong, updateQueueData, addNewNotifications } =
-    useContext(AppUpdateContext);
+  const { addToNext } = useQueueOperations();
+  const { createQueue, playSong, addNewNotifications } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { songId } = props;
@@ -47,28 +46,7 @@ const SimilarTracksContainer = (props: Props) => {
     const songs = similarTracks.sortedAvailTracks.map((song) => song.songData!);
     const queueSongIds = songs.filter((song) => !song.isBlacklisted).map((song) => song.songId);
 
-    let currentSongIndex = queue.position ?? queue.songIds.indexOf(currentSongData.songId);
-    const duplicateIds: number[] = [];
-
-    const newQueue = queue.songIds.filter((id) => {
-      const isADuplicate = queueSongIds.includes(id);
-      if (isADuplicate) duplicateIds.push(id);
-
-      return !isADuplicate;
-    });
-
-    for (const duplicateId of duplicateIds) {
-      const duplicateIdPosition = queue.songIds.indexOf(duplicateId);
-
-      if (
-        duplicateIdPosition !== -1 &&
-        duplicateIdPosition < currentSongIndex &&
-        currentSongIndex - 1 >= 0
-      )
-        currentSongIndex -= 1;
-    }
-    newQueue.splice(currentSongIndex + 1, 0, ...queueSongIds);
-    updateQueueData(currentSongIndex, newQueue, undefined, false);
+    addToNext(queueSongIds, { removeDuplicates: false });
     addNewNotifications([
       {
         id: `${queueSongIds.length}PlayNext`,
@@ -79,15 +57,7 @@ const SimilarTracksContainer = (props: Props) => {
         iconName: 'shortcut'
       }
     ]);
-  }, [
-    similarTracks.sortedAvailTracks,
-    queue.position,
-    queue.songIds,
-    currentSongData.songId,
-    updateQueueData,
-    addNewNotifications,
-    t
-  ]);
+  }, [similarTracks.sortedAvailTracks, addToNext, addNewNotifications, t]);
 
   const availableSimilarTrackComponents = useMemo(
     () =>

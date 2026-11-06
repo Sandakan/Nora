@@ -1,4 +1,6 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
+
+import { getPlayer } from '../../hooks/useAudioPlayer';
 
 type Props = {
   syncedLyrics: { start: number; end: number };
@@ -9,41 +11,80 @@ const LyricsProgressBar = (props: Props) => {
   const { syncedLyrics, delay } = props;
   const myElementRef = useRef<HTMLSpanElement>(null);
 
-  const handleLyricsActivity = useCallback(
-    (e: Event) => {
-      if ('detail' in e && typeof e.detail === 'number') {
-        const songPosition = e.detail as number;
-        const progress =
-          songPosition < syncedLyrics.start - delay
-            ? '0%'
-            : songPosition > syncedLyrics.end - delay
-              ? '100%'
-              : `${
-                  ((songPosition - (syncedLyrics.start - delay)) /
-                    (syncedLyrics.end - delay - (syncedLyrics.start - delay))) *
-                  100
-                }%`;
+  useEffect(() => {
+    const player = getPlayer();
+    let animId: number | null = null;
 
-        if (myElementRef.current) {
-          myElementRef.current.style.setProperty('--duration', progress);
+    const start = syncedLyrics.start - delay;
+    const end = syncedLyrics.end - delay;
+    const duration = end - start;
+
+    const updateProgress = () => {
+      const songPosition = player.getExactCurrentTime();
+      let percentage = 0;
+      if (duration > 0) {
+        if (songPosition <= start) {
+          percentage = 0;
+        } else if (songPosition >= end) {
+          percentage = 100;
+        } else {
+          percentage = ((songPosition - start) / duration) * 100;
         }
       }
-    },
-    [delay, syncedLyrics.end, syncedLyrics.start]
-  );
 
-  useEffect(() => {
-    document.addEventListener('player/positionChange', handleLyricsActivity);
+      if (myElementRef.current) {
+        myElementRef.current.style.setProperty('--duration', `${percentage}%`);
+      }
+    };
 
-    return () => document.removeEventListener('player/positionChange', handleLyricsActivity);
-  }, [handleLyricsActivity]);
+    const loop = () => {
+      updateProgress();
+      animId = requestAnimationFrame(loop);
+    };
+
+    if (!player.paused) {
+      animId = requestAnimationFrame(loop);
+    }
+
+    const onPlay = () => {
+      if (animId === null) {
+        animId = requestAnimationFrame(loop);
+      }
+    };
+
+    const onPause = () => {
+      if (animId !== null) {
+        cancelAnimationFrame(animId);
+        animId = null;
+      }
+      updateProgress();
+    };
+
+    player.on('play', onPlay);
+    player.on('pause', onPause);
+    player.on('seeked', updateProgress);
+    player.on('timeUpdate', updateProgress);
+
+    updateProgress();
+
+    return () => {
+      if (animId !== null) {
+        cancelAnimationFrame(animId);
+        animId = null;
+      }
+      player.off('play', onPlay);
+      player.off('pause', onPause);
+      player.off('seeked', updateProgress);
+      player.off('timeUpdate', updateProgress);
+    };
+  }, [delay, syncedLyrics.end, syncedLyrics.start]);
 
   return (
     <span
       ref={myElementRef}
       className="bg-font-color-highlight/25 dark:bg-dark-font-color-highlight/25 visible! mt-1 block h-1 w-1/2 max-w-[4rem] min-w-[2rem] rounded-md opacity-100! transition-[visibility,opacity]"
     >
-      <span className="bg-font-color-highlight/40 dark:bg-dark-font-color-highlight/50 block h-full w-[var(--duration)] rounded-md transition-[width] duration-300!" />
+      <span className="bg-font-color-highlight/40 dark:bg-dark-font-color-highlight/50 block h-full w-[var(--duration)] rounded-md" />
     </span>
   );
 };
