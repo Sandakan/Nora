@@ -51,7 +51,7 @@ const SongAdditionalInfoContainer = (props: Props) => {
           {songInfo.album && (
             <SongAdditionalInfoItem label={t('common.album_one')} value={songInfo.album?.name} />
           )}
-          {songInfo?.albumArtists && (
+          {Array.isArray(songInfo.albumArtists) && songInfo.albumArtists.length > 0 && (
             <SongAdditionalInfoItem
               label={t('common.albumArtists')}
               value={songInfo.albumArtists.map((artist) => artist.name).join(', ')}
@@ -69,10 +69,28 @@ const SongAdditionalInfoContainer = (props: Props) => {
               value={songInfo.trackNo.toString()}
             />
           )}
+          {songInfo.discNo && (
+            <SongAdditionalInfoItem
+              label={t('common.discNo', 'Disc number')}
+              value={songInfo.discNo.toString()}
+            />
+          )}
           {songInfo.year && (
             <SongAdditionalInfoItem
               label={t('common.releasedYear')}
               value={songInfo.year.toString()}
+            />
+          )}
+          {songInfo.bpm && (
+            <SongAdditionalInfoItem
+              label={t('common.bpm', 'BPM (Tempo)')}
+              value={`${songInfo.bpm} BPM`}
+            />
+          )}
+          {songInfo.initialKey && (
+            <SongAdditionalInfoItem
+              label={t('common.initialKey', 'Musical Key')}
+              value={songInfo.initialKey}
             />
           )}
           <SongAdditionalInfoItem
@@ -83,6 +101,12 @@ const SongAdditionalInfoContainer = (props: Props) => {
             <SongAdditionalInfoItem
               label={t('common.lastModifiedOn')}
               value={new Date(songInfo.modifiedDate).toUTCString()}
+            />
+          )}
+          {songInfo.bitsPerSample && (
+            <SongAdditionalInfoItem
+              label={t('common.bitsPerSample', 'Bit depth')}
+              value={`${songInfo.bitsPerSample}-bit`}
             />
           )}
           {songInfo.sampleRate && (
@@ -103,6 +127,36 @@ const SongAdditionalInfoContainer = (props: Props) => {
               value={t('common.channelWithCount', {
                 count: songInfo.noOfChannels
               })}
+            />
+          )}
+          {songInfo.replayGainTrackGain !== undefined && songInfo.replayGainTrackGain !== null && (
+            <SongAdditionalInfoItem
+              label={t('common.replayGainTrackGain', 'Track ReplayGain')}
+              value={`${songInfo.replayGainTrackGain > 0 ? '+' : ''}${songInfo.replayGainTrackGain.toFixed(2)} dB`}
+            />
+          )}
+          {songInfo.replayGainTrackPeak !== undefined && songInfo.replayGainTrackPeak !== null && (
+            <SongAdditionalInfoItem
+              label={t('common.replayGainTrackPeak', 'Track peak level')}
+              value={songInfo.replayGainTrackPeak.toFixed(4)}
+            />
+          )}
+          {songInfo.publisher && (
+            <SongAdditionalInfoItem
+              label={t('common.publisher', 'Publisher / Label')}
+              value={songInfo.publisher}
+            />
+          )}
+          {songInfo.isrc && (
+            <SongAdditionalInfoItem
+              label={t('common.isrc', 'ISRC')}
+              value={songInfo.isrc}
+            />
+          )}
+          {songInfo.mbid && (
+            <SongAdditionalInfoItem
+              label={t('common.mbid', 'MusicBrainz ID')}
+              value={songInfo.mbid}
             />
           )}
           <SongAdditionalInfoItem label={t('common.songLocation')} value={songInfo.path} />

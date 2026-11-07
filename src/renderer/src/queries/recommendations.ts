@@ -69,5 +69,18 @@ export const recommendationQuery = createQueryKeys('recommendations', {
         };
       }
     }
+  },
+  songFeatures: (data: { songId: number }) => {
+    return {
+      queryKey: [data.songId],
+      queryFn: async (): Promise<SongAudioFeaturesData | null> => {
+        try {
+          return await window.api.recommendations.getSongFeatures(data.songId);
+        } catch (error) {
+          console.error('[recommendationQuery.songFeatures] Failed:', error);
+          return null;
+        }
+      }
+    };
   }
 });

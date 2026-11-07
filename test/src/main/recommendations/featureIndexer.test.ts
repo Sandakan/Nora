@@ -40,9 +40,11 @@ vi.mock('@main/core/audioEngine', () => ({
 }));
 
 import {
+  analyzeAndIndexSingleSong,
   build14DVector,
   CURRENT_FEATURE_VERSION,
   getFeatureIndexingStatus,
+  getSongAudioFeatures,
   indexSongAudioFeatures,
   indexSongOnPlayback,
   pauseBackgroundFeatureIndexer,
@@ -211,5 +213,40 @@ describe('featureIndexer', () => {
 
     await indexSongOnPlayback(101, 'test.mp3');
     expect(analyzeSpy).not.toHaveBeenCalled();
+  });
+
+  it('should fetch song audio features for a specific song', async () => {
+    const { db } = await import('@main/db/db');
+    vi.mocked(db.query.songAudioFeatures.findFirst).mockResolvedValueOnce({
+      songId: 202,
+      rmsEnergy: 0.22,
+      crestFactor: 5.5,
+      zeroCrossingRate: 0.05,
+      spectralCentroid: 2200,
+      lowEnergyRatio: 0.4,
+      midEnergyRatio: 0.4,
+      highEnergyRatio: 0.2,
+      estimatedBpm: 128,
+      pulseClarity: 0.8,
+      globalListeners: 1000,
+      globalPlaycount: 5000,
+      featureVersion: 1,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    } as unknown as Awaited<ReturnType<typeof db.query.songAudioFeatures.findFirst>>);
+
+    const result = await getSongAudioFeatures(202);
+    expect(result).not.toBeNull();
+    expect(result?.songId).toBe(202);
+    expect(result?.estimatedBpm).toBe(128);
+    expect(result?.pulseClarity).toBe(0.8);
+  });
+
+  it('should return null when song features do not exist', async () => {
+    const { db } = await import('@main/db/db');
+    vi.mocked(db.query.songAudioFeatures.findFirst).mockResolvedValueOnce(undefined);
+
+    const result = await getSongAudioFeatures(9999);
+    expect(result).toBeNull();
   });
 });

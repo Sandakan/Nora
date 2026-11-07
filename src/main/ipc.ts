@@ -76,7 +76,9 @@ import {
   getSongRadioQueue
 } from './recommendations/recommendationEngine';
 import {
+  analyzeAndIndexSingleSong,
   getFeatureIndexingStatus,
+  getSongAudioFeatures,
   pauseBackgroundFeatureIndexer,
   resumeBackgroundFeatureIndexer,
   reindexAudioFeatures
@@ -289,6 +291,14 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
 
     ipcMain.handle('app/recommendations/reindex', (_, mode: 'missing' | 'all') =>
       reindexAudioFeatures(mode)
+    );
+
+    ipcMain.handle('app/recommendations/getSongFeatures', (_, songId: number) =>
+      getSongAudioFeatures(songId)
+    );
+
+    ipcMain.handle('app/recommendations/analyzeSong', (_, songId: number) =>
+      analyzeAndIndexSingleSong(songId)
     );
 
     ipcMain.handle('app/toggleSmartAutoPlay', async (_, enable?: boolean) => {

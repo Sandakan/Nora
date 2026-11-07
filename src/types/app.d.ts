@@ -150,6 +150,23 @@ declare global {
     paletteData?: PaletteData;
   }
 
+  interface SongAudioFeaturesData {
+    songId: number;
+    rmsEnergy: number | null;
+    crestFactor: number | null;
+    zeroCrossingRate: number | null;
+    spectralCentroid: number | null;
+    lowEnergyRatio: number | null;
+    midEnergyRatio: number | null;
+    highEnergyRatio: number | null;
+    estimatedBpm: number | null;
+    pulseClarity: number | null;
+    globalListeners: number | null;
+    globalPlaycount: number | null;
+    featureVersion: number;
+    updatedAt: string | null;
+  }
+
   interface FeatureIndexingStatus {
     status: 'idle' | 'indexing' | 'paused' | 'complete';
     totalSongs: number;

@@ -200,4 +200,47 @@ describe('recommendationQuery', () => {
       expect(reindexMock).toHaveBeenCalledWith('all');
     });
   });
+
+  describe('songFeatures', () => {
+    it('returns features from window.api.recommendations.getSongFeatures', async () => {
+      const mockFeatures: SongAudioFeaturesData = {
+        songId: 101,
+        rmsEnergy: 0.2,
+        crestFactor: 5.0,
+        zeroCrossingRate: 0.04,
+        spectralCentroid: 2400,
+        lowEnergyRatio: 0.35,
+        midEnergyRatio: 0.45,
+        highEnergyRatio: 0.2,
+        estimatedBpm: 120,
+        pulseClarity: 0.75,
+        globalListeners: 500,
+        globalPlaycount: 2500,
+        featureVersion: 1,
+        updatedAt: '2026-11-07T00:00:00.000Z'
+      };
+
+      (window as unknown as { api: { recommendations: { getSongFeatures: (id: number) => Promise<SongAudioFeaturesData | null> } } }).api = {
+        recommendations: {
+          getSongFeatures: vi.fn().mockResolvedValue(mockFeatures)
+        }
+      };
+
+      const query = recommendationQuery.songFeatures({ songId: 101 });
+      const result = await query.queryFn();
+      expect(result).toEqual(mockFeatures);
+    });
+
+    it('returns null on failure', async () => {
+      (window as unknown as { api: { recommendations: { getSongFeatures: (id: number) => Promise<SongAudioFeaturesData | null> } } }).api = {
+        recommendations: {
+          getSongFeatures: vi.fn().mockRejectedValue(new Error('IPC failed'))
+        }
+      };
+
+      const query = recommendationQuery.songFeatures({ songId: 999 });
+      const result = await query.queryFn();
+      expect(result).toBeNull();
+    });
+  });
 });

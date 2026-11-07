@@ -754,6 +754,12 @@ const recommendations = {
   reindex: (mode: 'missing' | 'all'): Promise<void> =>
     ipcRenderer.invoke('app/recommendations/reindex', mode),
 
+  getSongFeatures: (songId: number): Promise<SongAudioFeaturesData | null> =>
+    ipcRenderer.invoke('app/recommendations/getSongFeatures', songId),
+
+  analyzeSong: (songId: number): Promise<SongAudioFeaturesData | null> =>
+    ipcRenderer.invoke('app/recommendations/analyzeSong', songId),
+
   onIndexingProgress: (
     callback: (status: FeatureIndexingStatus) => void
   ): (() => void) => {

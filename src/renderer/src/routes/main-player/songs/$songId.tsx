@@ -6,6 +6,7 @@ import NavLink from '@renderer/components/NavLink';
 import SecondaryContainer from '@renderer/components/SecondaryContainer';
 import ListeningActivityBarGraph from '@renderer/components/SongInfoPage/ListeningActivityBarGraph';
 import SimilarTracksContainer from '@renderer/components/SongInfoPage/SimilarTracksContainer';
+import SongAcousticInfoContainer from '@renderer/components/SongInfoPage/SongAcousticInfoContainer';
 import SongAdditionalInfoContainer from '@renderer/components/SongInfoPage/SongAdditionalInfoContainer';
 import SongStat from '@renderer/components/SongInfoPage/SongStat';
 import SongsWithFeaturingArtistsSuggestion from '@renderer/components/SongInfoPage/SongsWithFeaturingArtistSuggestion';
@@ -402,6 +403,7 @@ function SongInfoPage() {
             </div>
           )}
           <SongAdditionalInfoContainer songInfo={songInfo} songDurationStr={songDuration} />
+          {songId && <SongAcousticInfoContainer songId={songId} />}
           {songId && <SimilarTracksContainer songId={songId} />}
         </SecondaryContainer>
       </>

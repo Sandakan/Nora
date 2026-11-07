@@ -1,6 +1,10 @@
 import audioEngine, { type JsAudioFeatures } from '@main/core/audioEngine';
 import { db } from '@main/db/db';
 import { artists, artistsSongs, songAudioFeatures, songs } from '@main/db/schema';
+import {
+  removeDefaultAppProtocolFromFilePath,
+  resolveSongFilePath
+} from '@main/fs/resolveFilePaths';
 import logger from '@main/logger';
 import { and, eq, sql } from 'drizzle-orm';
 
@@ -455,6 +459,77 @@ export const startBackgroundFeatureIndexer = async () => {
 
 export const stopBackgroundFeatureIndexer = () => {
   stopRequested = true;
+};
+
+/**
+ * Retrieves the stored DSP audio features for a specific song, if indexed.
+ */
+export const getSongAudioFeatures = async (
+  songId: number
+): Promise<SongAudioFeaturesData | null> => {
+  try {
+    const row = await db.query.songAudioFeatures.findFirst({
+      where: eq(songAudioFeatures.songId, songId)
+    });
+
+    if (!row) {
+      return null;
+    }
+
+    return {
+      songId: row.songId,
+      rmsEnergy: row.rmsEnergy,
+      crestFactor: row.crestFactor,
+      zeroCrossingRate: row.zeroCrossingRate,
+      spectralCentroid: row.spectralCentroid,
+      lowEnergyRatio: row.lowEnergyRatio,
+      midEnergyRatio: row.midEnergyRatio,
+      highEnergyRatio: row.highEnergyRatio,
+      estimatedBpm: row.estimatedBpm,
+      pulseClarity: row.pulseClarity,
+      globalListeners: row.globalListeners,
+      globalPlaycount: row.globalPlaycount,
+      featureVersion: row.featureVersion,
+      updatedAt: row.updatedAt ? row.updatedAt.toISOString() : null
+    };
+  } catch (error) {
+    logger.warn('Failed to retrieve song audio features', { songId, error: String(error) });
+    return null;
+  }
+};
+
+/**
+ * On-demand action to analyze and index acoustic DSP features for a specific song.
+ * Finds the song path, computes the features, persists them to the DB, and broadcasts updated status.
+ */
+export const analyzeAndIndexSingleSong = async (
+  songId: number
+): Promise<SongAudioFeaturesData | null> => {
+  try {
+    const song = await db.query.songs.findFirst({
+      where: eq(songs.id, songId),
+      columns: {
+        id: true,
+        path: true
+      }
+    });
+
+    if (!song) {
+      logger.warn('Cannot analyze song features: song not found', { songId });
+      return null;
+    }
+
+    const resolved = resolveSongFilePath(song.path);
+    const realFilePath = removeDefaultAppProtocolFromFilePath(resolved);
+
+    await indexSongAudioFeatures(songId, realFilePath);
+    await broadcastIndexingStatus();
+
+    return await getSongAudioFeatures(songId);
+  } catch (error) {
+    logger.error('Failed on-demand song feature analysis', { songId, error: String(error) });
+    return null;
+  }
 };
 
 // End of feature indexer logic
