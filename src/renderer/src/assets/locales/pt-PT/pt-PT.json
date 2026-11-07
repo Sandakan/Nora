@@ -46,7 +46,7 @@
     "bitRate": "Taxa de bits",
     "noOfAudioChannels": "Número de canais de áudio",
     "channelWithCount_one": "{{count}} canal (Mono)",
-    "channelWithCount_other": "{{count}} canais (Estéreo)",
+    "channelWithCount_other": "{{count}} canais (Multicanal)",
     "songLocation": "Localização da música",
     "lyrics": "Letra da música",
     "syncedLyrics": "Letra sincronizada",
@@ -98,7 +98,8 @@
     "restartApp": "Reiniciar aplicação",
     "skipSong": "Saltar para a próxima música",
     "ok": "OK",
-    "loading": "A carregar"
+    "loading": "A carregar",
+    "channelWithCount_stereo": "{{count}} canais (Estéreo)"
   },
   "titleBar": {
     "changeTheme": "Alterar tema",
@@ -577,7 +578,8 @@
     "mostSoughtFrequency": "Frequência mais procurada",
     "lovedSong": "Gostou desta música",
     "unlovedSong": "Não gostou desta música",
-    "byArtists": " <By>de</By> <span>{{val, list}}</span>"
+    "byArtists": " <By>de</By> <span>{{val, list}}</span>",
+    "listensCount_one": "{{count}} reprodução"
   },
   "songTagsEditingPage": {
     "editArtwork": "Editar capa",
