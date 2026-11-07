@@ -227,7 +227,7 @@ export function useAppLifecycle(dependencies: AppLifecycleDependencies): void {
       const nextSongId = playerQueue.nextSongId;
       if (nextSongId) {
         try {
-          const songData = await window.api.audioLibraryControls.getSong(nextSongId);
+          const songData = await window.api.audioLibraryControls.getSong(nextSongId, false);
           if (songData) changeUpNextSongData(songData);
         } catch (err) {
           console.error('Failed to fetch up next song:', err);

@@ -37,6 +37,25 @@ export const citext = customType<{
   }
 });
 
+// PostgreSQL cube type for multi-dimensional acoustic vector similarity
+export const cube = customType<{
+  data: string | number[];
+  driverData: string;
+}>({
+  dataType() {
+    return 'cube';
+  },
+  toDriver(value: string | number[]): string {
+    if (Array.isArray(value)) {
+      return `(${value.join(',')})`;
+    }
+    return value;
+  },
+  fromDriver(value: string): string {
+    return value;
+  }
+});
+
 // ============================================================================
 // Enums
 // ============================================================================
@@ -60,6 +79,7 @@ export const artists = pgTable(
     name: varchar('name', { length: 1024 }).notNull(),
     // Generated column: case-insensitive text for searches (using citext type)
     nameCI: citext('name_ci').generatedAlwaysAs((): SQL => sql`${artists.name}::citext`),
+    mbid: varchar('mbid', { length: 64 }),
     isFavorite: boolean('is_favorite').notNull().default(false),
     createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
@@ -71,7 +91,8 @@ export const artists = pgTable(
     index('idx_artists_name_ci').on(t.nameCI.asc()),
     // GIN index for fuzzy matching with pg_trgm trigram operator
     index('idx_artists_name_ci_trgm').using('gin', t.nameCI.op('gin_trgm_ops')),
-    index('idx_artists_is_favorite').on(t.isFavorite)
+    index('idx_artists_is_favorite').on(t.isFavorite),
+    index('idx_artists_mbid').on(t.mbid)
   ]
 );
 
@@ -130,6 +151,16 @@ export const songs = pgTable(
     year: integer('year'),
     diskNumber: integer('disk_number'),
     trackNumber: integer('track_number'),
+    mbid: varchar('mbid', { length: 64 }),
+    bpm: integer('bpm'),
+    initialKey: varchar('initial_key', { length: 32 }),
+    replayGainTrackGain: doublePrecision('replay_gain_track_gain'),
+    replayGainTrackPeak: doublePrecision('replay_gain_track_peak'),
+    grouping: varchar('grouping', { length: 512 }),
+    publisher: varchar('publisher', { length: 512 }),
+    isCompilation: boolean('is_compilation').notNull().default(false),
+    bitsPerSample: integer('bits_per_sample'),
+    isrc: varchar('isrc', { length: 64 }),
     folderId: integer('folder_id').references(() => musicFolders.id, {
       onDelete: 'set null',
       onUpdate: 'cascade'
@@ -165,6 +196,7 @@ export const songs = pgTable(
     index('idx_songs_path').on(t.path),
     index('idx_songs_is_favorite').on(t.isFavorite),
     index('idx_songs_is_blacklisted').on(t.isBlacklisted),
+    index('idx_songs_mbid').on(t.mbid),
 
     // Composite indexes for common sorting patterns
     index('idx_songs_skip_count_title').on(t.skipCount.desc(), t.title.asc()),
@@ -257,6 +289,7 @@ export const albums = pgTable(
     title: varchar('title', { length: 255 }).notNull(),
     // Generated column: case-insensitive text for searches (using citext type)
     titleCI: citext('title_ci').generatedAlwaysAs((): SQL => sql`${albums.title}::citext`),
+    mbid: varchar('mbid', { length: 64 }),
     year: integer('year'),
     createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
@@ -271,7 +304,8 @@ export const albums = pgTable(
     // Index for year-based filtering and sorting
     index('idx_albums_year').on(t.year.desc()),
     // Composite index for year + title sorting
-    index('idx_albums_year_title').on(t.year.desc(), t.title.asc())
+    index('idx_albums_year_title').on(t.year.desc(), t.title.asc()),
+    index('idx_albums_mbid').on(t.mbid)
   ]
 );
 
@@ -323,8 +357,9 @@ export const playEvents = pgTable(
     id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
     playbackPercentage: decimal('playback_percentage', {
       precision: 5,
-      scale: 1
+      scale: 3
     }).notNull(),
+    chosenByUser: boolean('chosen_by_user').notNull().default(false),
     songId: integer('song_id')
       .notNull()
       .references(() => songs.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
@@ -441,6 +476,7 @@ export const userSettings = pgTable(
       .default(true),
     enableDiscordRPC: boolean('enable_discord_rpc').notNull().default(true),
     saveVerboseLogs: boolean('save_verbose_logs').notNull().default(false),
+    enableSmartAutoPlay: boolean('enable_smart_auto_play').notNull().default(false),
 
     // Window positions (stored as JSON objects)
     mainWindowX: integer('main_window_x'),
@@ -802,6 +838,171 @@ export const albumsArtists = pgTable(
 );
 
 // ============================================================================
+// AI Recommendation & Last.fm Cache Tables
+// ============================================================================
+
+export const songAudioFeatures = pgTable(
+  'song_audio_features',
+  {
+    songId: integer('song_id')
+      .primaryKey()
+      .references(() => songs.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    rmsEnergy: doublePrecision('rms_energy'),
+    crestFactor: doublePrecision('crest_factor'),
+    zeroCrossingRate: doublePrecision('zero_crossing_rate'),
+    spectralCentroid: doublePrecision('spectral_centroid'),
+    lowEnergyRatio: doublePrecision('low_energy_ratio'),
+    midEnergyRatio: doublePrecision('mid_energy_ratio'),
+    highEnergyRatio: doublePrecision('high_energy_ratio'),
+    estimatedBpm: doublePrecision('estimated_bpm'),
+    pulseClarity: doublePrecision('pulse_clarity'),
+    featureVector: cube('feature_vector'),
+    globalListeners: integer('global_listeners'),
+    globalPlaycount: integer('global_playcount'),
+    lastfmSyncedAt: timestamp('lastfm_synced_at', { withTimezone: false }),
+    featureVersion: integer('feature_version').notNull().default(1),
+    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
+  },
+  (t) => [
+    index('idx_song_audio_features_lastfm_synced').on(t.lastfmSyncedAt),
+    index('idx_song_audio_features_vector').using('gist', t.featureVector)
+  ]
+);
+
+export const songSimilarities = pgTable(
+  'song_similarities',
+  {
+    id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+    sourceSongId: integer('source_song_id')
+      .notNull()
+      .references(() => songs.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    targetSongId: integer('target_song_id').references(() => songs.id, {
+      onDelete: 'cascade',
+      onUpdate: 'cascade'
+    }),
+    targetTitle: varchar('target_title', { length: 4096 }).notNull(),
+    targetTitleCI: citext('target_title_ci').generatedAlwaysAs(
+      (): SQL => sql`${songSimilarities.targetTitle}::citext`
+    ),
+    targetArtist: varchar('target_artist', { length: 1024 }).notNull(),
+    targetArtistCI: citext('target_artist_ci').generatedAlwaysAs(
+      (): SQL => sql`${songSimilarities.targetArtist}::citext`
+    ),
+    targetMbid: varchar('target_mbid', { length: 64 }),
+    targetUrl: text('target_url'),
+    matchScore: doublePrecision('match_score').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
+  },
+  (t) => [
+    index('idx_song_similarities_source').on(t.sourceSongId),
+    index('idx_song_similarities_target').on(t.targetSongId),
+    index('idx_song_similarities_target_mbid').on(t.targetMbid),
+    index('idx_song_similarities_target_title_ci').on(t.targetTitleCI),
+    index('idx_song_similarities_match_score').on(t.matchScore.desc())
+  ]
+);
+
+export const artistSimilarities = pgTable(
+  'artist_similarities',
+  {
+    id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+    sourceArtistId: integer('source_artist_id')
+      .notNull()
+      .references(() => artists.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    targetArtistId: integer('target_artist_id').references(() => artists.id, {
+      onDelete: 'cascade',
+      onUpdate: 'cascade'
+    }),
+    targetArtistName: varchar('target_artist_name', { length: 1024 }).notNull(),
+    targetArtistNameCI: citext('target_artist_name_ci').generatedAlwaysAs(
+      (): SQL => sql`${artistSimilarities.targetArtistName}::citext`
+    ),
+    targetMbid: varchar('target_mbid', { length: 64 }),
+    targetUrl: text('target_url'),
+    matchScore: doublePrecision('match_score').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
+  },
+  (t) => [
+    index('idx_artist_similarities_source').on(t.sourceArtistId),
+    index('idx_artist_similarities_target').on(t.targetArtistId),
+    index('idx_artist_similarities_target_mbid').on(t.targetMbid),
+    index('idx_artist_similarities_target_name_ci').on(t.targetArtistNameCI),
+    index('idx_artist_similarities_match_score').on(t.matchScore.desc())
+  ]
+);
+
+export const lastfmTags = pgTable(
+  'lastfm_tags',
+  {
+    id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+    name: varchar('name', { length: 255 }).notNull().unique(),
+    nameCI: citext('name_ci').generatedAlwaysAs((): SQL => sql`${lastfmTags.name}::citext`),
+    url: text('url'),
+    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull()
+  },
+  (t) => [
+    index('idx_lastfm_tags_name_ci').on(t.nameCI)
+  ]
+);
+
+export const songsLastfmTags = pgTable(
+  'songs_lastfm_tags',
+  {
+    songId: integer('song_id')
+      .notNull()
+      .references(() => songs.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    tagId: integer('tag_id')
+      .notNull()
+      .references(() => lastfmTags.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    weight: integer('weight').notNull().default(0)
+  },
+  (t) => [
+    primaryKey({ columns: [t.songId, t.tagId] }),
+    index('idx_songs_lastfm_tags_song_id').on(t.songId),
+    index('idx_songs_lastfm_tags_tag_id').on(t.tagId)
+  ]
+);
+
+export const artistsLastfmTags = pgTable(
+  'artists_lastfm_tags',
+  {
+    artistId: integer('artist_id')
+      .notNull()
+      .references(() => artists.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    tagId: integer('tag_id')
+      .notNull()
+      .references(() => lastfmTags.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    weight: integer('weight').notNull().default(0)
+  },
+  (t) => [
+    primaryKey({ columns: [t.artistId, t.tagId] }),
+    index('idx_artists_lastfm_tags_artist_id').on(t.artistId),
+    index('idx_artists_lastfm_tags_tag_id').on(t.tagId)
+  ]
+);
+
+export const albumsLastfmTags = pgTable(
+  'albums_lastfm_tags',
+  {
+    albumId: integer('album_id')
+      .notNull()
+      .references(() => albums.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    tagId: integer('tag_id')
+      .notNull()
+      .references(() => lastfmTags.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    weight: integer('weight').notNull().default(0)
+  },
+  (t) => [
+    primaryKey({ columns: [t.albumId, t.tagId] }),
+    index('idx_albums_lastfm_tags_album_id').on(t.albumId),
+    index('idx_albums_lastfm_tags_tag_id').on(t.tagId)
+  ]
+);
+
+// ============================================================================
 // Relations
 // ============================================================================
 
@@ -835,13 +1036,16 @@ export const ignoredDuplicateMetadataRelations = relations(ignoredDuplicateMetad
 export const albumsRelations = relations(albums, ({ many }) => ({
   songs: many(albumsSongs),
   artists: many(albumsArtists),
-  artworks: many(albumsArtworks)
+  artworks: many(albumsArtworks),
+  lastfmTags: many(albumsLastfmTags)
 }));
 
 export const artistsRelations = relations(artists, ({ many }) => ({
   songs: many(artistsSongs),
   albums: many(albumsArtists),
-  artworks: many(artistsArtworks)
+  artworks: many(artistsArtworks),
+  similarities: many(artistSimilarities, { relationName: 'artist_similarities_source' }),
+  lastfmTags: many(artistsLastfmTags)
 }));
 
 export const musicFoldersRelations = relations(musicFolders, ({ one, many }) => ({
@@ -861,6 +1065,7 @@ export const songsRelations = relations(songs, ({ one, many }) => ({
     fields: [songs.folderId],
     references: [musicFolders.id]
   }),
+  audioFeatures: one(songAudioFeatures),
   artists: many(artistsSongs),
   albums: many(albumsSongs),
   genres: many(genresSongs),
@@ -869,7 +1074,9 @@ export const songsRelations = relations(songs, ({ one, many }) => ({
   playHistory: many(playHistory),
   playEvents: many(playEvents),
   seekEvents: many(seekEvents),
-  skipEvents: many(skipEvents)
+  skipEvents: many(skipEvents),
+  similarities: many(songSimilarities, { relationName: 'song_similarities_source' }),
+  lastfmTags: many(songsLastfmTags)
 }));
 
 export const artworksRelations = relations(artworks, ({ many, one }) => ({
@@ -1076,3 +1283,74 @@ export const artworksPlaylistsRelations = relations(artworksPlaylists, ({ one })
     references: [playlists.id]
   })
 }));
+
+export const songAudioFeaturesRelations = relations(songAudioFeatures, ({ one }) => ({
+  song: one(songs, {
+    fields: [songAudioFeatures.songId],
+    references: [songs.id]
+  })
+}));
+
+export const songSimilaritiesRelations = relations(songSimilarities, ({ one }) => ({
+  sourceSong: one(songs, {
+    fields: [songSimilarities.sourceSongId],
+    references: [songs.id],
+    relationName: 'song_similarities_source'
+  }),
+  targetSong: one(songs, {
+    fields: [songSimilarities.targetSongId],
+    references: [songs.id]
+  })
+}));
+
+export const artistSimilaritiesRelations = relations(artistSimilarities, ({ one }) => ({
+  sourceArtist: one(artists, {
+    fields: [artistSimilarities.sourceArtistId],
+    references: [artists.id],
+    relationName: 'artist_similarities_source'
+  }),
+  targetArtist: one(artists, {
+    fields: [artistSimilarities.targetArtistId],
+    references: [artists.id]
+  })
+}));
+
+export const lastfmTagsRelations = relations(lastfmTags, ({ many }) => ({
+  songs: many(songsLastfmTags),
+  artists: many(artistsLastfmTags),
+  albums: many(albumsLastfmTags)
+}));
+
+export const songsLastfmTagsRelations = relations(songsLastfmTags, ({ one }) => ({
+  song: one(songs, {
+    fields: [songsLastfmTags.songId],
+    references: [songs.id]
+  }),
+  tag: one(lastfmTags, {
+    fields: [songsLastfmTags.tagId],
+    references: [lastfmTags.id]
+  })
+}));
+
+export const artistsLastfmTagsRelations = relations(artistsLastfmTags, ({ one }) => ({
+  artist: one(artists, {
+    fields: [artistsLastfmTags.artistId],
+    references: [artists.id]
+  }),
+  tag: one(lastfmTags, {
+    fields: [artistsLastfmTags.tagId],
+    references: [lastfmTags.id]
+  })
+}));
+
+export const albumsLastfmTagsRelations = relations(albumsLastfmTags, ({ one }) => ({
+  album: one(albums, {
+    fields: [albumsLastfmTags.albumId],
+    references: [albums.id]
+  }),
+  tag: one(lastfmTags, {
+    fields: [albumsLastfmTags.tagId],
+    references: [lastfmTags.id]
+  })
+}));
+

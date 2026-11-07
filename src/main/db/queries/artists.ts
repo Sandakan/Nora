@@ -87,6 +87,14 @@ export const createArtist = async (
   return data[0];
 };
 
+export const updateArtistMbid = async (
+  artistId: number,
+  mbid: string,
+  trx: DB | DBTransaction = db
+) => {
+  return trx.update(artists).set({ mbid }).where(eq(artists.id, artistId));
+};
+
 export const getLinkedAlbumArtist = async (
   albumId: number,
   artistId: number,

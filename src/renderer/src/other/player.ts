@@ -237,7 +237,7 @@ class AudioPlayer extends EventTarget {
       }
 
       if (nextSongId !== null && typeof nextSongId === 'number') {
-        const nextSong = await window.api.audioLibraryControls.getSong(nextSongId);
+        const nextSong = await window.api.audioLibraryControls.getSong(nextSongId, false);
         if (nextSong) {
           this.preloadedSongData = nextSong;
           const rawPath = window.api.utils?.removeDefaultAppProtocolFromFilePath
@@ -280,7 +280,7 @@ class AudioPlayer extends EventTarget {
       const nextId = this.queue.nextSongId;
       if (nextId) {
         try {
-          transitionedSong = await window.api.audioLibraryControls.getSong(nextId);
+          transitionedSong = await window.api.audioLibraryControls.getSong(nextId, false);
         } catch (e) {
           console.error('[AudioPlayer.handleTrackTransitioned] Failed to resolve next song:', e);
         }
@@ -288,6 +288,7 @@ class AudioPlayer extends EventTarget {
     }
 
     if (transitionedSong) {
+      window.api?.audioLibraryControls?.recordSongPlayback?.(transitionedSong.songId)?.catch(() => { });
       this.preloadedSongData = null;
       this.currentSongData = transitionedSong;
       this.currentLoadedSongId = transitionedSong.songId;
@@ -348,6 +349,27 @@ class AudioPlayer extends EventTarget {
       this.queue.moveToPosition(0);
       this.emit('repeatAll');
     } else {
+      // Check Smart Auto-Play if enabled
+      try {
+        const userSettings = await window.api?.settings?.getUserSettings?.();
+        if (userSettings?.enableSmartAutoPlay && this.currentSongData?.songId) {
+          const radioIds = await window.api?.recommendations?.getSongRadioQueue?.(
+            this.currentSongData.songId,
+            10
+          );
+          if (Array.isArray(radioIds) && radioIds.length > 0) {
+            this.queue.addSongIdsToEnd(radioIds);
+            if (this.queue.hasNext) {
+              this.pendingAutoPlay = true;
+              this.queue.moveToNext();
+              return;
+            }
+          }
+        }
+      } catch (err) {
+        console.error('[AudioPlayer] Smart Auto-Play error:', err);
+      }
+
       this.isTransitioningTracks = false;
       this.nativeIsPaused = true;
       this.emit('pause');
@@ -379,9 +401,10 @@ class AudioPlayer extends EventTarget {
 
     try {
       if (typeof songIdOrData === 'number') {
-        songData = await window.api.audioLibraryControls.getSong(songIdOrData);
+        songData = await window.api.audioLibraryControls.getSong(songIdOrData, true);
       } else {
         songData = songIdOrData;
+        window.api?.audioLibraryControls?.recordSongPlayback?.(songData.songId)?.catch(() => { });
       }
 
       if (!songData) {
@@ -824,7 +847,7 @@ class AudioPlayer extends EventTarget {
     try {
       console.log('[AudioPlayer.playSongById]', { songId, autoPlay });
 
-      const songData = await window.api.audioLibraryControls.getSong(songId);
+      const songData = await window.api.audioLibraryControls.getSong(songId, false);
       if (!songData) {
         throw new Error(`Song not found for ID: ${songId}`);
       }

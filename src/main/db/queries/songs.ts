@@ -32,6 +32,14 @@ export const updateSongBasicFields = async (
   return res[0];
 };
 
+export const updateSongMbid = async (
+  songId: number,
+  mbid: string,
+  trx: DB | DBTransaction = db
+) => {
+  return trx.update(songs).set({ mbid }).where(eq(songs.id, songId));
+};
+
 export const getSongsRelativeToFolder = async (
   folderPathOrId: string | number,
   options = {

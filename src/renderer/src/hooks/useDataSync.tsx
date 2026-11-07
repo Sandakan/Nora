@@ -9,31 +9,39 @@ import { homeQuery } from '../queries/home';
 import { playlistQuery } from '../queries/playlists';
 import { searchQuery } from '../queries/search';
 import { songQuery } from '../queries/songs';
+import { getPlayer } from './useAudioPlayer';
 
 /**
- * Hook for synchronizing data updates from the main process
+ * Hook for synchronizing data updates from the main process and audio playback events.
  *
- * Listens to IPC data update events from the main process and invalidates relevant React Query
- * caches to keep the UI in sync with backend changes.
+ * Listens to IPC data update events from the main process and audio player playback transitions,
+ * invalidating relevant React Query caches to keep the UI in sync.
  *
- * Handles the following data types: - Songs (new, updated, deleted, artworks, palette, likes) -
- * Artists (new, updated, deleted, artworks, likes) - Albums (new, updated, deleted) - Playlists
- * (new, updated, deleted, songs added/removed) - Genres (new, updated, deleted) - Settings
- * (preferences, theme, window state, etc.)
+ * Handles the following data types:
+ * - Songs (new, updated, deleted, artworks, palette, likes)
+ * - Artists (new, updated, deleted, artworks, likes)
+ * - Albums (new, updated, deleted)
+ * - Playlists (new, updated, deleted, songs added/removed)
+ * - Genres (new, updated, deleted)
+ * - Settings (preferences, theme, window state, etc.)
+ * - History & Recently played songs (play events, skips, playback transitions)
  *
- * This hook automatically sets up IPC listeners and cleanup.
- *
- * @example
- *   ```tsx
- *   function App() {
- *     // Set up data synchronization
- *     useDataSync();
- *
- *     return <div>...</div>;
- *   }
- *   ```;
+ * This hook automatically sets up listeners and cleanup.
  */
 export function useDataSync(): void {
+  useEffect(() => {
+    const player = getPlayer();
+    const handleSongChange = () => {
+      queryClient.invalidateQueries({ queryKey: homeQuery.recentlyPlayedSongs.queryKey });
+      queryClient.invalidateQueries({ queryKey: songQuery.history._def });
+    };
+
+    player.on('songLoaded', handleSongChange);
+    return () => {
+      player.off('songLoaded', handleSongChange);
+    };
+  }, []);
+
   useEffect(() => {
     const noticeDataUpdateEvents = (_: unknown, dataEvents: DataUpdateEvent[]) => {
       for (const dataEvent of dataEvents) {
@@ -41,15 +49,6 @@ export function useDataSync(): void {
         // The home page is co-invalidated with the song list because every
         // song-level change (artwork, palette, like, etc.) is also reflected
         // in home-page views.
-        //
-        // Artist/album/playlist/genre events are intentionally NOT in this
-        // list: each of those event types invalidates its own typed cache
-        // (artistQuery, albumQuery, playlistQuery, genreQuery) below, and
-        // song records reference those entities by id, not by embedded
-        // name — so a rename of an artist does not require re-fetching the
-        // songs list to keep `Song.tsx` rows correct. If song records ever
-        // start embedding resolved artist/album names, re-add the four
-        // `artists` / `albums` / `playlists` / `genres` entries here.
         const songAndHomeEvents: DataUpdateEventTypes[] = [
           'songs',
           'songs/newSong',
@@ -63,6 +62,18 @@ export function useDataSync(): void {
           queryClient.invalidateQueries({ queryKey: songQuery._def });
           queryClient.invalidateQueries({ queryKey: searchQuery.query._def });
           queryClient.invalidateQueries({ queryKey: homeQuery._def });
+        }
+
+        // History / Recently played events
+        const historyEvents: DataUpdateEventTypes[] = [
+          'userData/recentlyPlayedSongs',
+          'playlists/history',
+          'songs/listeningData/listens',
+          'songs/listeningData/skips'
+        ];
+        if (historyEvents.includes(dataEvent.dataType)) {
+          queryClient.invalidateQueries({ queryKey: homeQuery.recentlyPlayedSongs.queryKey });
+          queryClient.invalidateQueries({ queryKey: songQuery.history._def });
         }
 
         // Artist events

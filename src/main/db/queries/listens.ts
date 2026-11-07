@@ -41,9 +41,10 @@ export const getAllSongListeningData = async (songIds?: number[], trx: DB | DBTr
 export const addSongPlayEvent = (
   songId: number,
   playbackPercentage: string,
+  chosenByUser = false,
   trx: DB | DBTransaction = db
 ) => {
-  return trx.insert(playEvents).values({ playbackPercentage, songId });
+  return trx.insert(playEvents).values({ playbackPercentage, songId, chosenByUser });
 };
 
 export const addSongSeekEvent = (

@@ -51,6 +51,7 @@ interface ArtistElement {
   name: string;
   url: string;
   image: Image[];
+  mbid?: string;
 }
 
 interface Stats {

@@ -44,7 +44,7 @@ import { resolveSeparateArtists } from './core/resolveSeparateArtists';
 import restoreBlacklistedFolders from './core/restoreBlacklistedFolder';
 import restoreBlacklistedSongs from './core/restoreBlacklistedSongs';
 import saveArtworkToSystem from './core/saveArtworkToSystem';
-import sendAudioData from './core/sendAudioData';
+import sendAudioData, { recordSongPlayback } from './core/sendAudioData';
 import sendAudioDataFromPath from './core/sendAudioDataFromPath';
 import sendPlaylistData from './core/sendPlaylistData';
 import sendSongID3Tags from './core/sendSongMetadata';
@@ -70,6 +70,17 @@ import {
   getUserEqualizerPreset,
   saveUserEqualizerPreset
 } from './db/queries/userPreferences';
+import {
+  getPersonalizedRecommendations,
+  getSimilarSongsForTrack,
+  getSongRadioQueue
+} from './recommendations/recommendationEngine';
+import {
+  getFeatureIndexingStatus,
+  pauseBackgroundFeatureIndexer,
+  resumeBackgroundFeatureIndexer,
+  reindexAudioFeatures
+} from './recommendations/featureIndexer';
 import { removeDefaultAppProtocolFromFilePath } from './fs/resolveFilePaths';
 import logger, { logFilePath } from './logger';
 import {
@@ -192,7 +203,11 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       addSongsFromFolderStructures(structures)
     );
 
-    ipcMain.handle('app/getSong', (_, id: number) => sendAudioData(id));
+    ipcMain.handle('app/getSong', (_, id: number, recordHistory = true) =>
+      sendAudioData(id, recordHistory)
+    );
+
+    ipcMain.handle('app/recordSongPlayback', (_, id: number) => recordSongPlayback(id));
 
     ipcMain.handle('app/getSongFromUnknownSource', (_, songPath: string) =>
       sendAudioDataFromPath(songPath)
@@ -241,6 +256,47 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     ipcMain.handle('app/updateTraySingleClickBehavior', (_, enable: boolean) =>
       updateTraySingleClickBehavior(enable)
     );
+
+    // AI & Multi-Horizon Recommendation Handlers
+    ipcMain.handle(
+      'app/recommendations/getPersonalized',
+      (_, options?: { limit?: number; sessionSeedSongIds?: number[] }) =>
+        getPersonalizedRecommendations(options)
+    );
+
+    ipcMain.handle(
+      'app/recommendations/getSimilarSongsForTrack',
+      (_, songId: number, limit?: number) => getSimilarSongsForTrack(songId, limit)
+    );
+
+    ipcMain.handle(
+      'app/recommendations/getSongRadioQueue',
+      (_, seedSongId: number, queueLength?: number) =>
+        getSongRadioQueue(seedSongId, queueLength)
+    );
+
+    ipcMain.handle('app/recommendations/getIndexingStatus', () =>
+      getFeatureIndexingStatus()
+    );
+
+    ipcMain.handle('app/recommendations/pauseIndexing', () =>
+      pauseBackgroundFeatureIndexer()
+    );
+
+    ipcMain.handle('app/recommendations/resumeIndexing', () =>
+      resumeBackgroundFeatureIndexer()
+    );
+
+    ipcMain.handle('app/recommendations/reindex', (_, mode: 'missing' | 'all') =>
+      reindexAudioFeatures(mode)
+    );
+
+    ipcMain.handle('app/toggleSmartAutoPlay', async (_, enable?: boolean) => {
+      const current = await getUserSettings();
+      const updated = enable !== undefined ? enable : !current.enableSmartAutoPlay;
+      await saveUserSettings({ enableSmartAutoPlay: updated });
+      return updated;
+    });
 
     // User Keyboard Shortcuts Handlers
     ipcMain.handle('app/getUserKeyboardShortcuts', async () => {
@@ -367,8 +423,13 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
 
     ipcMain.handle(
       'app/updateSongListeningData',
-      (_: unknown, songId: number, dataType: ListeningDataEvents, value: number) =>
-        updateSongListeningData(songId, dataType, value)
+      (
+        _: unknown,
+        songId: number,
+        dataType: ListeningDataEvents,
+        value: number,
+        chosenByUser?: boolean
+      ) => updateSongListeningData(songId, dataType, value, chosenByUser)
     );
 
     ipcMain.handle('app/generatePalettes', generatePalettes);

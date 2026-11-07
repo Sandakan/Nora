@@ -155,6 +155,14 @@ export const createAlbum = async (
   return data[0];
 };
 
+export const updateAlbumMbid = async (
+  albumId: number,
+  mbid: string,
+  trx: DB | DBTransaction = db
+) => {
+  return trx.update(albums).set({ mbid }).where(eq(albums.id, albumId));
+};
+
 export const getLinkedAlbumSong = async (
   albumId: number,
   songId: number,

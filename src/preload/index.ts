@@ -174,6 +174,8 @@ const audioLibraryControls = {
 
   getSong: (songId: number, updateListeningRate = true): Promise<AudioPlayerData> =>
     ipcRenderer.invoke('app/getSong', songId, updateListeningRate),
+  recordSongPlayback: (songId: number): Promise<void> =>
+    ipcRenderer.invoke('app/recordSongPlayback', songId),
   getAllSongs: (
     sortType?: SongSortTypes,
     filterType?: SongFilterTypes,
@@ -203,9 +205,16 @@ const audioLibraryControls = {
   updateSongListeningData: (
     songId: number,
     dataType: ListeningDataEvents,
-    dataUpdateType: number
+    dataUpdateType: number,
+    chosenByUser?: boolean
   ): Promise<void> =>
-    ipcRenderer.invoke('app/updateSongListeningData', songId, dataType, dataUpdateType),
+    ipcRenderer.invoke(
+      'app/updateSongListeningData',
+      songId,
+      dataType,
+      dataUpdateType,
+      chosenByUser
+    ),
   resyncSongsLibrary: (): Promise<true> => ipcRenderer.invoke('app/resyncSongsLibrary'),
 
   getBlacklistData: (): Promise<Blacklist> => ipcRenderer.invoke('app/getBlacklistData'),
@@ -660,7 +669,10 @@ const settingsHelpers = {
   getIgnoredDuplicateMetadata: (): Promise<Array<{ duplicateGroupId: string; songId: number }>> =>
     ipcRenderer.invoke('app/getIgnoredDuplicateMetadata'),
   addIgnoredDuplicate: (duplicateGroupId: string, songId: number): Promise<void> =>
-    ipcRenderer.invoke('app/addIgnoredDuplicate', duplicateGroupId, songId)
+    ipcRenderer.invoke('app/addIgnoredDuplicate', duplicateGroupId, songId),
+
+  toggleSmartAutoPlay: (enable?: boolean): Promise<boolean> =>
+    ipcRenderer.invoke('app/toggleSmartAutoPlay', enable)
 };
 
 // $ APP RESTART OR RESET
@@ -712,6 +724,47 @@ const utils = {
   }
 };
 
+const recommendations = {
+  getPersonalizedRecommendations: (options?: {
+    limit?: number;
+    sessionSeedSongIds?: number[];
+  }): Promise<RecommendedSongResult[]> =>
+    ipcRenderer.invoke('app/recommendations/getPersonalized', options),
+
+  getSimilarSongsForTrack: (
+    songId: number,
+    limit?: number
+  ): Promise<RecommendedSongResult[]> =>
+    ipcRenderer.invoke('app/recommendations/getSimilarSongsForTrack', songId, limit),
+
+  getSongRadioQueue: (
+    seedSongId: number,
+    queueLength?: number
+  ): Promise<number[]> =>
+    ipcRenderer.invoke('app/recommendations/getSongRadioQueue', seedSongId, queueLength),
+  getIndexingStatus: (): Promise<FeatureIndexingStatus> =>
+    ipcRenderer.invoke('app/recommendations/getIndexingStatus'),
+
+  pauseIndexing: (): Promise<void> =>
+    ipcRenderer.invoke('app/recommendations/pauseIndexing'),
+
+  resumeIndexing: (): Promise<void> =>
+    ipcRenderer.invoke('app/recommendations/resumeIndexing'),
+
+  reindex: (mode: 'missing' | 'all'): Promise<void> =>
+    ipcRenderer.invoke('app/recommendations/reindex', mode),
+
+  onIndexingProgress: (
+    callback: (status: FeatureIndexingStatus) => void
+  ): (() => void) => {
+    const handler = (_event: unknown, status: FeatureIndexingStatus) => callback(status);
+    ipcRenderer.on('app/recommendations/indexingProgress', handler);
+    return () => {
+      ipcRenderer.removeListener('app/recommendations/indexingProgress', handler);
+    };
+  }
+};
+
 const appUpdates = {
   downloadUpdate: (): Promise<any> => ipcRenderer.invoke('app/downloadUpdate'),
   quitAndInstallUpdate: (): Promise<void> => ipcRenderer.invoke('app/quitAndInstallUpdate')
@@ -725,6 +778,7 @@ export const api = {
   playerControls,
   audioEngine,
   audioLibraryControls,
+  recommendations,
   suggestions,
   unknownSource,
   quitEvent,

@@ -88,7 +88,15 @@ declare global {
     | 'app/audioEngine/setDevice'
     | 'app/audioEngine/setPlaybackRate'
     | 'app/audioEngine/setEqBand'
-    | 'app/audioEngine/resetEq';
+    | 'app/audioEngine/resetEq'
+    | 'app/recommendations/getPersonalized'
+    | 'app/recommendations/getSimilarSongsForTrack'
+    | 'app/recommendations/getSongRadioQueue'
+    | 'app/recommendations/getIndexingStatus'
+    | 'app/recommendations/pauseIndexing'
+    | 'app/recommendations/resumeIndexing'
+    | 'app/recommendations/reindex'
+    | 'app/recommendations/indexingProgress';
 
   interface ImageCoverData {
     format: string;
@@ -111,6 +119,16 @@ declare global {
     noOfChannels?: number;
     year?: number;
     sampleRate?: number;
+    mbid?: string;
+    bpm?: number;
+    initialKey?: string;
+    replayGainTrackGain?: number;
+    replayGainTrackPeak?: number;
+    grouping?: string;
+    publisher?: string;
+    isCompilation?: boolean;
+    bitsPerSample?: number;
+    isrc?: string;
     paletteId?: string;
     isAFavorite: boolean;
     isArtworkAvailable: boolean;
@@ -130,6 +148,26 @@ declare global {
     artworkPaths: ArtworkPaths;
     isBlacklisted: boolean;
     paletteData?: PaletteData;
+  }
+
+  interface FeatureIndexingStatus {
+    status: 'idle' | 'indexing' | 'paused' | 'complete';
+    totalSongs: number;
+    indexedSongs: number;
+    remainingSongs: number;
+    percentage: number;
+    currentSong?: {
+      songId: number;
+      title: string;
+      artists?: string;
+    } | null;
+  }
+
+  interface RecommendedSongResult {
+    song: SongData;
+    score: number;
+    reason: string;
+    matchType: 'acoustic' | 'graph' | 'circadian' | 'rediscovery' | 'tag';
   }
 
   interface PaletteData extends NodeVibrantPalette {
@@ -327,31 +365,31 @@ declare global {
   // Lyrics frame types used by in-song metadata.
   type UnsynchronisedLyrics =
     | {
-        language: string;
-        text: string;
-      }
+      language: string;
+      text: string;
+    }
     | undefined;
 
   type SynchronisedLyrics =
     | Array<{
-        /**
-         * 3 letter ISO 639-2 language code, for example: eng
-         *
-         * @see {@link https://id3.org/ISO%20639-2 ISO 639-2}
-         */
-        language: string;
-        /** Absolute time unit used by the stored synced lyrics format. */
-        timeStampFormat: number;
-        /** Content type for the stored synced lyrics format. */
-        contentType: number;
-        /** Content descriptor */
-        shortText?: string;
-        synchronisedText: Array<{
-          text: string;
-          /** Absolute time in unit according to `timeStampFormat`. */
-          timeStamp: number;
-        }>;
-      }>
+      /**
+       * 3 letter ISO 639-2 language code, for example: eng
+       *
+       * @see {@link https://id3.org/ISO%20639-2 ISO 639-2}
+       */
+      language: string;
+      /** Absolute time unit used by the stored synced lyrics format. */
+      timeStampFormat: number;
+      /** Content type for the stored synced lyrics format. */
+      contentType: number;
+      /** Content descriptor */
+      shortText?: string;
+      synchronisedText: Array<{
+        text: string;
+        /** Absolute time in unit according to `timeStampFormat`. */
+        timeStamp: number;
+      }>;
+    }>
     | undefined;
 
   interface LyricsMetadataFromShortText {
@@ -466,6 +504,7 @@ declare global {
     saveLyricsInLrcFilesForSupportedSongs: boolean;
     enableDiscordRPC: boolean;
     saveVerboseLogs: boolean;
+    enableSmartAutoPlay: boolean;
     mainWindowX: number | null;
     mainWindowY: number | null;
     miniPlayerX: number | null;
@@ -484,7 +523,7 @@ declare global {
 
   type LastFmSessionStatus = 'CONNECTED' | 'EXPIRED_OR_INVALID' | 'NOT_CONNECTED';
 
-  interface UserData extends UserSettings {}
+  interface UserData extends UserSettings { }
 
   type LanguageCodes = NoInfer<keyof typeof resources>;
 
@@ -776,6 +815,7 @@ declare global {
   interface SavableAlbum {
     albumId: number;
     title: string;
+    mbid?: string;
     artists?: {
       name: string;
       artistId: number;
@@ -796,6 +836,7 @@ declare global {
 
   interface SavableArtist {
     artistId: number;
+    mbid?: string;
     songs: {
       title: string;
       songId: number;

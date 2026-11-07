@@ -62,6 +62,46 @@ impl BiquadFilter {
         self.a2 = a2 / a0;
     }
 
+    /// Configures a 2nd order low-pass Butterworth filter.
+    pub fn set_low_pass(&mut self, sample_rate: f32, cutoff_hz: f32, q: f32) {
+        let w0 = 2.0 * PI * (cutoff_hz / sample_rate);
+        let alpha = w0.sin() / (2.0 * q);
+        let cos_w0 = w0.cos();
+
+        let b0 = (1.0 - cos_w0) / 2.0;
+        let b1 = 1.0 - cos_w0;
+        let b2 = (1.0 - cos_w0) / 2.0;
+        let a0 = 1.0 + alpha;
+        let a1 = -2.0 * cos_w0;
+        let a2 = 1.0 - alpha;
+
+        self.b0 = b0 / a0;
+        self.b1 = b1 / a0;
+        self.b2 = b2 / a0;
+        self.a1 = a1 / a0;
+        self.a2 = a2 / a0;
+    }
+
+    /// Configures a 2nd order high-pass Butterworth filter.
+    pub fn set_high_pass(&mut self, sample_rate: f32, cutoff_hz: f32, q: f32) {
+        let w0 = 2.0 * PI * (cutoff_hz / sample_rate);
+        let alpha = w0.sin() / (2.0 * q);
+        let cos_w0 = w0.cos();
+
+        let b0 = (1.0 + cos_w0) / 2.0;
+        let b1 = -(1.0 + cos_w0);
+        let b2 = (1.0 + cos_w0) / 2.0;
+        let a0 = 1.0 + alpha;
+        let a1 = -2.0 * cos_w0;
+        let a2 = 1.0 - alpha;
+
+        self.b0 = b0 / a0;
+        self.b1 = b1 / a0;
+        self.b2 = b2 / a0;
+        self.a1 = a1 / a0;
+        self.a2 = a2 / a0;
+    }
+
     #[inline]
     pub fn process_sample(&mut self, input: f32) -> f32 {
         let output = self.b0 * input + self.b1 * self.x1 + self.b2 * self.x2

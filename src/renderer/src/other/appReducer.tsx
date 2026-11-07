@@ -615,6 +615,7 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
 
 export const USER_DATA_TEMPLATE: UserData = {
   language: 'en',
+  enableSmartAutoPlay: false,
   autoLaunchApp: false,
   isMiniPlayerAlwaysOnTop: false,
   isMusixmatchLyricsEnabled: false,

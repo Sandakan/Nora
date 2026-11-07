@@ -54,6 +54,7 @@ export const resolveSeparateArtists = async (
           artistId: Math.floor(Math.random() * 1000000),
           isAFavorite: false,
           name: artistName,
+          mbid: undefined,
           songs: selectedArtist?.songs ?? [],
           artworkName: (selectedArtist as unknown as SavableArtist).artworkName,
           albums: (selectedArtist as unknown as (typeof artistsData)[number]).albums ?? [],

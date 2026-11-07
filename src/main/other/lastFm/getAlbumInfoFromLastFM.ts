@@ -125,24 +125,58 @@ const getAlbumInfoFromLastFM = async (albumId: number): Promise<LastFMAlbumInfo 
 
     const selectedAlbum = convertToAlbum(data);
 
-    const { title, artists = [] } = selectedAlbum;
+    const { title, artists = [], mbid } = selectedAlbum;
     const artistsStr = artists?.map((artist) => artist.name).join(', ') || '';
 
-    const url = new URL('http://ws.audioscrobbler.com/2.0/');
-    url.searchParams.set('method', 'album.getInfo');
-    url.searchParams.set('api_key', LAST_FM_API_KEY);
-    url.searchParams.set('album', title);
-    url.searchParams.set('artist', artistsStr);
-    url.searchParams.set('limit', '10');
-    url.searchParams.set('autocorrect', '1');
-    url.searchParams.set('format', 'json');
+    const makeUrl = (useMbid: boolean) => {
+      const url = new URL('https://ws.audioscrobbler.com/2.0/');
+      url.searchParams.set('method', 'album.getInfo');
+      url.searchParams.set('api_key', LAST_FM_API_KEY);
+      url.searchParams.set('limit', '10');
+      url.searchParams.set('autocorrect', '1');
+      url.searchParams.set('format', 'json');
+      if (useMbid && mbid) {
+        url.searchParams.set('mbid', mbid.trim());
+      } else {
+        url.searchParams.set('album', title);
+        url.searchParams.set('artist', artistsStr);
+      }
+      return url;
+    };
 
-    const res = await fetch(url);
-    if (res.ok) {
-      const data: LastFMAlbumInfoAPI = await res.json();
-      if ('error' in data) throw new Error(`${data.error} - ${data.message}`);
+    let res = mbid ? await fetch(makeUrl(true)) : null;
+    let apiData: LastFMAlbumInfoAPI | null =
+      res && res.ok ? ((await res.json()) as LastFMAlbumInfoAPI) : null;
 
-      const downloadedAlbumData = data.album;
+    if (!apiData || ('error' in apiData && apiData.error === 6)) {
+      res = await fetch(makeUrl(false));
+      if (res.ok) {
+        apiData = (await res.json()) as LastFMAlbumInfoAPI;
+      }
+    }
+
+    if (apiData && !('error' in apiData)) {
+      const downloadedAlbumData = apiData.album;
+
+      // Opportunistically harvest album MBID and tags
+      import('@main/db/db').then(async ({ db }) => {
+        const { albums } = await import('@main/db/schema');
+        const { saveAlbumLastFmTags } = await import('../../recommendations/lastFmEnricher');
+        if (!selectedAlbum.mbid && downloadedAlbumData.mbid) {
+          const { eq } = await import('drizzle-orm');
+          await db
+            .update(albums)
+            .set({ mbid: downloadedAlbumData.mbid.trim() })
+            .where(eq(albums.id, albumId));
+        }
+
+        const rawTags = downloadedAlbumData.tags?.tag;
+        const tagsList = Array.isArray(rawTags) ? rawTags : rawTags ? [rawTags] : [];
+        if (tagsList.length > 0) {
+          await saveAlbumLastFmTags(albumId, tagsList, db);
+        }
+      }).catch(() => {});
+
       const parsedAlbumData = parseAlbumInfoFromLastFM(downloadedAlbumData, selectedAlbum);
       return parsedAlbumData;
     }

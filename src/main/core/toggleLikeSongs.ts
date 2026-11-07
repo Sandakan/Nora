@@ -41,6 +41,17 @@ const toggleLikeSongs = async (songIds: number[], isLikeSong?: boolean) => {
   });
 
   dataUpdateEvent('songs/likes', [...result.likes, ...result.dislikes]);
+
+  if (result.likes.length > 0) {
+    import('../recommendations/lastFmEnricher')
+      .then(async ({ enrichSongOnPlayOrFavorite }) => {
+        await Promise.allSettled(
+          result.likes.map((songId) => enrichSongOnPlayOrFavorite(songId))
+        );
+      })
+      .catch(() => {});
+  }
+
   return result;
 };
 

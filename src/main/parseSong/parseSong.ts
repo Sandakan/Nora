@@ -15,6 +15,11 @@ import manageAlbumArtistOfParsedSong from './manageAlbumArtistOfParsedSong';
 import manageAlbumsOfParsedSong from './manageAlbumsOfParsedSong';
 import manageArtistsOfParsedSong from './manageArtistsOfParsedSong';
 import manageGenresOfParsedSong from './manageGenresOfParsedSong';
+import {
+  resolveDeferredArtistSimilarities,
+  resolveDeferredSongSimilarities
+} from '../recommendations/deferredMatch';
+import { indexSongAudioFeatures } from '../recommendations/featureIndexer';
 // import { timeEnd, timeStart } from './utils/measureTimeUsage';
 
 const pathsQueue = new Set<string>();
@@ -169,6 +174,23 @@ export const parseSong = async (
         noOfChannels: file.properties.audioChannels,
         diskNumber: metadata.disc ?? undefined,
         trackNumber: metadata.track ?? undefined,
+        mbid: metadata.musicBrainzTrackId || undefined,
+        bpm:
+          metadata.beatsPerMinute && metadata.beatsPerMinute > 0
+            ? Math.round(metadata.beatsPerMinute)
+            : undefined,
+        initialKey: metadata.initialKey || undefined,
+        replayGainTrackGain: !isNaN(metadata.replayGainTrackGain)
+          ? metadata.replayGainTrackGain
+          : undefined,
+        replayGainTrackPeak: !isNaN(metadata.replayGainTrackPeak)
+          ? metadata.replayGainTrackPeak
+          : undefined,
+        grouping: metadata.grouping || undefined,
+        publisher: metadata.publisher || undefined,
+        isCompilation: Boolean(metadata.isCompilation),
+        bitsPerSample: file.properties.bitsPerSample || undefined,
+        isrc: metadata.isrc || undefined,
         fileCreatedAt: stats ? stats.birthtime : new Date(),
         fileModifiedAt: stats ? stats.mtime : new Date(),
         folderId
@@ -200,7 +222,8 @@ export const parseSong = async (
             songYear: songData.year,
             artists: artistsData,
             albumArtists: albumArtistsData,
-            albumName: albumData
+            albumName: albumData,
+            mbid: metadata.musicBrainzReleaseId || undefined
           },
           trx
         );
@@ -220,7 +243,8 @@ export const parseSong = async (
           {
             artworkId: artworkData[0].id,
             songId: songData.id,
-            songArtists: artistsData
+            songArtists: artistsData,
+            mbid: metadata.musicBrainzArtistId || undefined
           },
           trx
         );
@@ -245,6 +269,32 @@ export const parseSong = async (
           trx
         );
 
+        // Resolve deferred similarities matching newly inserted song and artists
+        await resolveDeferredSongSimilarities(
+          {
+            id: songData.id,
+            title: songData.title,
+            mbid: songData.mbid,
+            artistNames: artistsData
+          },
+          trx
+        );
+
+        const allSongArtists = [...newArtists, ...relevantArtists];
+        const processedArtistIds = new Set<number>();
+        for (const artist of allSongArtists) {
+          if (processedArtistIds.has(artist.id)) continue;
+          processedArtistIds.add(artist.id);
+          await resolveDeferredArtistSimilarities(
+            {
+              id: artist.id,
+              name: artist.name,
+              mbid: artist.mbid
+            },
+            trx
+          );
+        }
+
         return {
           songData,
           linkedArtworks,
@@ -257,6 +307,11 @@ export const parseSong = async (
           relevantAlbumArtists,
           newAlbumArtists
         };
+      });
+
+      // Asynchronously trigger acoustic feature extraction
+      indexSongAudioFeatures(res.songData.id, absoluteFilePath).catch((err) => {
+        logger.debug('Background feature extraction deferred/failed', { err });
       });
 
       logger.debug(`Song parsing completed successfully.`, {

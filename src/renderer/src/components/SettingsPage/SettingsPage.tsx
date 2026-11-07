@@ -8,12 +8,12 @@ import AdvancedSettings from './Settings/AdvancedSettings';
 import AppearanceSettings from './Settings/AppearanceSettings';
 import AudioPlaybackSettings from './Settings/AudioPlaybackSettings';
 import DefaultPageSettings from './Settings/DefaultPageSettings';
-// import StorageSettings from './Settings/StorageSettings';
 import EqualizerSettings from './Settings/EqualizerSettings';
 import LanguageSettings from './Settings/LanguageSettings';
 import LyricsSettings from './Settings/LyricsSettings';
 import PerformanceSettings from './Settings/PerformanceSettings';
 import PreferencesSettings from './Settings/PreferencesSettings';
+import RecommendationSettings from './Settings/RecommendationSettings';
 import StartupSettings from './Settings/StartupSettings';
 import StorageSettings from './Settings/StorageSettings';
 
@@ -35,6 +35,9 @@ const SettingsPage = () => {
 
           {/* ? AUDIO PLAYBACK SETTINGS */}
           <AudioPlaybackSettings />
+
+          {/* ? RECOMMENDATION SETTINGS */}
+          <RecommendationSettings />
 
           {/* ? ACCOUNTS SETTINGS */}
           <AccountsSettings />

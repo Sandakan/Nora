@@ -329,6 +329,34 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
         }
       },
       {
+        label: t('song.startSongRadio', 'Start Song Radio'),
+        iconName: 'radio',
+        handlerFunction: async () => {
+          try {
+            const radioSongIds = await window.api.recommendations.getSongRadioQueue(songId);
+            createQueue([songId, ...radioSongIds], 'songs', false, undefined, false);
+            playSong(songId, true);
+            addNewNotifications([
+              {
+                id: `${title}SongRadioStarted`,
+                content: t('notifications.songRadioStarted', `Started Song Radio for '${title}'`),
+                icon: (
+                  <Img
+                    src={artworkPaths?.optimizedArtworkPath || DefaultSongCover}
+                    loading="lazy"
+                    alt="Song Artwork"
+                  />
+                )
+              }
+            ]);
+          } catch (err) {
+            console.error('Failed to start song radio:', err);
+          }
+          toggleMultipleSelections(false);
+        },
+        isDisabled: isMultipleSelectionsEnabled
+      },
+      {
         label: isMultipleSelectionsEnabled
           ? t('song.toggleLikeSongs')
           : t(`song.${isAFavorite ? 'unlikeSong' : 'likeSong'}`),
@@ -501,6 +529,9 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
     handlePlayBtnClick,
     toggleMultipleSelections,
     createQueue,
+    playSong,
+    addToNext,
+    addToEnd,
     queue.position,
     queue.songIds,
     currentSongData.songId,

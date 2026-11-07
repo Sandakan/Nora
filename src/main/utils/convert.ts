@@ -57,7 +57,17 @@ export const convertToSongData = (song: GetAllSongsReturnType[number]): SongData
     createdDate: song.createdAt ? new Date(song.createdAt).getTime() : 0,
     modifiedDate: song.updatedAt ? new Date(song.updatedAt).getTime() : undefined,
     discNo: song.diskNumber ?? undefined,
-    noOfChannels: song.noOfChannels ?? undefined
+    noOfChannels: song.noOfChannels ?? undefined,
+    mbid: song.mbid ?? undefined,
+    bpm: song.bpm ?? undefined,
+    initialKey: song.initialKey ?? undefined,
+    replayGainTrackGain: song.replayGainTrackGain ?? undefined,
+    replayGainTrackPeak: song.replayGainTrackPeak ?? undefined,
+    grouping: song.grouping ?? undefined,
+    publisher: song.publisher ?? undefined,
+    isCompilation: song.isCompilation ?? false,
+    bitsPerSample: song.bitsPerSample ?? undefined,
+    isrc: song.isrc ?? undefined
   } satisfies SongData;
 };
 
@@ -67,6 +77,7 @@ export const convertToArtist = (artist: GetAllArtistsReturnType[number]) => {
   return {
     artistId: artist.id,
     name: artist.name,
+    mbid: artist.mbid ?? undefined,
     artworkPaths: parseArtistArtworks(artworks),
     songs: artist.songs.map((s) => ({
       title: s.song.title,
@@ -85,6 +96,7 @@ export const convertToAlbum = (album: GetAllAlbumsReturnType[number]) => {
   return {
     albumId: album.id,
     title: album.title,
+    mbid: album.mbid ?? undefined,
     artworkPaths: parseAlbumArtworks(artworks),
     artists,
     songs: album.songs.map((s) => ({

@@ -265,6 +265,28 @@ const SongCard = (props: SongCardProp) => {
         }
       },
       {
+        label: t('song.startSongRadio', 'Start Song Radio'),
+        iconName: 'radio',
+        handlerFunction: async () => {
+          try {
+            const radioSongIds = await window.api.recommendations.getSongRadioQueue(songId);
+            createQueue([songId, ...radioSongIds], 'songs', false, undefined, false);
+            playSong(songId, true);
+            addNewNotifications([
+              {
+                id: `${title}SongRadioStarted`,
+                content: t('notifications.songRadioStarted', `Started Song Radio for '${title}'`),
+                icon: <Img src={artworkPath} loading="lazy" alt="Song Artwork" />
+              }
+            ]);
+          } catch (err) {
+            console.error('Failed to start song radio:', err);
+          }
+          toggleMultipleSelections(false);
+        },
+        isDisabled: isMultipleSelectionsEnabled
+      },
+      {
         label: isMultipleSelectionsEnabled
           ? t('song.toggleLikeSongs')
           : t(`song.${isSongAFavorite ? 'unlikeSong' : 'likeSong'}`),
@@ -446,6 +468,7 @@ const SongCard = (props: SongCardProp) => {
     handlePlayBtnClick,
     toggleMultipleSelections,
     createQueue,
+    playSong,
     addToNext,
     addToEnd,
     currentSongData.songId,

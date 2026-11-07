@@ -1,3 +1,4 @@
+pub mod analysis;
 pub mod device_watcher;
 pub mod devices;
 pub mod dsp;
@@ -616,4 +617,13 @@ pub fn engine_destroy() -> napi::Result<()> {
         watcher.stop();
     }
     Ok(())
+}
+
+#[napi(js_name = "engineAnalyzeAudioFeatures")]
+pub async fn engine_analyze_audio_features(path: String) -> napi::Result<analysis::JsAudioFeatures> {
+    napi::tokio::task::spawn_blocking(move || {
+        analysis::analyze_audio_file(&path).map_err(napi::Error::from_reason)
+    })
+    .await
+    .map_err(|e| napi::Error::from_reason(format!("Analysis task failed: {}", e)))?
 }

@@ -20,7 +20,7 @@ class ListeningDataSession {
   seeks: { position: number; seeks: number }[];
   startTime: Date;
 
-  constructor(songId: number, duration: number, chosenByUser = false, isKnownSource = true) {
+  constructor(songId: number, duration: number, isKnownSource = true, chosenByUser = false) {
     this.songId = songId;
     this.duration = duration;
     this.isKnownSource = isKnownSource;
@@ -100,7 +100,8 @@ class ListeningDataSession {
         window.api.audioLibraryControls.updateSongListeningData(
           this.songId,
           'LISTEN',
-          this.passedFullListenRange && playbackPercentage > 0.99 ? 1 : playbackPercentage
+          this.passedFullListenRange && playbackPercentage > 0.99 ? 1 : playbackPercentage,
+          this.chosenByUser
         );
       }
 

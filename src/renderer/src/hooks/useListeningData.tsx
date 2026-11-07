@@ -45,7 +45,13 @@ export function useListeningData(player: AudioPlayer | HTMLAudioElement) {
    * @param isKnownSource - Whether the song is from the app's library or an external source
    */
   const recordListeningData = useCallback(
-    (songId: number, duration: number, isRepeating = false, isKnownSource = true) => {
+    (
+      songId: number,
+      duration: number,
+      isRepeating = false,
+      isKnownSource = true,
+      chosenByUser = false
+    ) => {
       // Check if we need to create a new session
       if (recordRef?.current?.songId !== songId || isRepeating) {
         if (isRepeating) {
@@ -58,7 +64,12 @@ export function useListeningData(player: AudioPlayer | HTMLAudioElement) {
         }
 
         // Create new listening session
-        const listeningDataSession = new ListeningDataSession(songId, duration, isKnownSource);
+        const listeningDataSession = new ListeningDataSession(
+          songId,
+          duration,
+          isKnownSource,
+          chosenByUser
+        );
         listeningDataSession.isPaused = player.paused;
         listeningDataSession.recordListeningData();
 

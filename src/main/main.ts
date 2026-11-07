@@ -45,6 +45,10 @@ import logger from './logger';
 import { clearTempArtworkFolder } from './other/artworks';
 import { clearDiscordRpcActivity } from './other/discordRPC';
 import { flushScrobbleQueue } from './other/lastFm/flushScrobbleQueue';
+import {
+  startBackgroundFeatureIndexer,
+  stopBackgroundFeatureIndexer
+} from './recommendations/featureIndexer';
 import resetAppData from './resetAppData';
 import { savePendingSongLyrics } from './saveLyricsToSong';
 import checkForUpdates from './update';
@@ -262,6 +266,7 @@ const createWindow = async () => {
       checkForNewSongs();
       addWatchersToFolders();
       addWatchersToParentFolders();
+      startBackgroundFeatureIndexer();
     }
   });
   mainWindow.webContents.setWindowOpenHandler((data: { url: string }) => {
@@ -523,6 +528,8 @@ async function handleBeforeQuit() {
       const promise5 = clearSmtcCoversFolder();
 
       await Promise.all([promise1, promise2, promise3, promise4, promise5]);
+
+      stopBackgroundFeatureIndexer();
 
       try {
         audioEngine.destroy();

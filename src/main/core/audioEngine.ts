@@ -28,6 +28,12 @@ export interface EngineTickPayload {
   isPlaying: boolean;
 }
 
+export interface JsLogRecord {
+  level: string;
+  target: string;
+  message: string;
+}
+
 export interface LoadOptions {
   autoPlay?: boolean;
   volume?: number;
@@ -36,14 +42,21 @@ export interface LoadOptions {
   metadata?: JsMediaMetadata;
 }
 
-export interface JsLogRecord {
-  level: string;
-  message: string;
-  target: string;
+export interface JsAudioFeatures {
+  rmsEnergy: number;
+  crestFactor: number;
+  zeroCrossingRate: number;
+  spectralCentroid: number;
+  lowEnergyRatio: number;
+  midEnergyRatio: number;
+  highEnergyRatio: number;
+  estimatedBpm: number;
+  pulseClarity: number;
 }
 
 export interface AudioEngineNative {
   ping(): string;
+  engineAnalyzeAudioFeatures?(path: string): Promise<JsAudioFeatures>;
   engineLoad(path: string, options?: LoadOptions): AudioMetadata;
   enginePreload?(path: string, fallbackDuration?: number): void;
   enginePlay(path: string): void;
@@ -499,6 +512,14 @@ export const audioEngine = {
   },
   resetEq: (): void => {
     getAudioEngine().engineResetEq();
+  },
+  analyzeAudioFeatures: async (filePath: string): Promise<JsAudioFeatures> => {
+    const rawPath = removeDefaultAppProtocolFromFilePath(filePath);
+    const engine = getAudioEngine();
+    if (typeof engine.engineAnalyzeAudioFeatures === 'function') {
+      return engine.engineAnalyzeAudioFeatures(rawPath);
+    }
+    throw new Error('engineAnalyzeAudioFeatures is not implemented or available in this native build');
   },
   destroy: (): void => {
     if (nativeModule) {

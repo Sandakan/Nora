@@ -6,6 +6,7 @@ import MostLovedSongs from '@renderer/components/HomePage/MostLovedSongs';
 import RecentlyAddedSongs from '@renderer/components/HomePage/RecentlyAddedSongs';
 import RecentlyPlayedArtists from '@renderer/components/HomePage/RecentlyPlayedArtists';
 import RecentlyPlayedSongs from '@renderer/components/HomePage/RecentlyPlayedSongs';
+import RecommendedSongs from '@renderer/components/HomePage/RecommendedSongs';
 import SpecialPlaylistCard from '@renderer/components/HomePage/SpecialPlaylistCard';
 import MainContainer from '@renderer/components/MainContainer';
 import SecondaryContainer from '@renderer/components/SecondaryContainer';
@@ -14,6 +15,7 @@ import useResizeObserver from '@renderer/hooks/useResizeObserver';
 import { queryClient } from '@renderer/index';
 import { artistQuery } from '@renderer/queries/aritsts';
 import { homeQuery } from '@renderer/queries/home';
+import { recommendationQuery } from '@renderer/queries/recommendations';
 import { songQuery } from '@renderer/queries/songs';
 import storage from '@renderer/utils/localStorage';
 // import DataFetchingImage from '../../../assets/images/svg/Umbrella_Monochromatic.svg';
@@ -42,6 +44,7 @@ export const Route = createFileRoute('/main-player/home/')({
         end: 30
       })
     );
+    await queryClient.ensureQueryData(recommendationQuery.personalized({ limit: 15 }));
   }
 });
 
@@ -59,6 +62,10 @@ function HomePage() {
     data: { data: latestSongs }
   } = useSuspenseQuery(songQuery.all({ sortType: 'dateAddedDescending', start: 0, end: 30 }));
   const { data: recentlyPlayedSongs } = useSuspenseQuery(homeQuery.recentlyPlayedSongs);
+
+  const { data: recommendedSongs } = useSuspenseQuery(
+    recommendationQuery.personalized({ limit: 15 })
+  );
 
   const { data: recentSongArtists } = useSuspenseQuery(homeQuery.recentSongArtists);
 
@@ -328,6 +335,12 @@ function HomePage() {
               recentlyPlayedSongs={recentlyPlayedSongs.slice(0, noOfRecentandLovedSongCards)}
               noOfVisibleSongs={noOfRecentandLovedSongCards}
             />
+            {recommendedSongs.length > 0 && (
+              <RecommendedSongs
+                recommendedSongs={recommendedSongs}
+                noOfVisibleSongs={noOfRecentandLovedSongCards}
+              />
+            )}
             <RecentlyPlayedArtists
               recentlyPlayedSongArtists={recentSongArtists}
               noOfVisibleArtists={noOfRecentandLovedArtists}

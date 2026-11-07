@@ -12,13 +12,26 @@ import { dataUpdateEvent } from '../main';
 const updateSongListeningData = async (
   songId: number,
   dataType: ListeningDataEvents,
-  value: number
+  value: number,
+  chosenByUser = false
 ) => {
   try {
-    logger.debug(`Requested to update listening data.`, { songId, dataType, value });
+    logger.debug(`Requested to update listening data.`, {
+      songId,
+      dataType,
+      value,
+      chosenByUser
+    });
 
-    if (dataType === 'LISTEN' && typeof value === 'number')
-      await addSongPlayEvent(songId, value.toString());
+    if (dataType === 'LISTEN' && typeof value === 'number') {
+      const percentageStr = Number(value.toFixed(3)).toString();
+      await addSongPlayEvent(songId, percentageStr, chosenByUser);
+
+      // Trigger Last.fm enrichment asynchronously on play
+      import('../recommendations/lastFmEnricher')
+        .then(({ enrichSongOnPlayOrFavorite }) => enrichSongOnPlayOrFavorite(songId))
+        .catch(() => {});
+    }
     else if (dataType === 'SKIP' && typeof value === 'number') {
       await db.transaction(async (trx) => {
         await addSongSkipEvent(songId, value.toString(), trx);

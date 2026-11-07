@@ -43,7 +43,8 @@ const sendNowPlayingSongDataToLastFM = async (songId: number) => {
         album: song.album?.name,
         albumArtist: song?.albumArtists?.map((artist) => artist.name).join(', '),
         trackNumber: song?.trackNo,
-        duration: Math.ceil(song.duration)
+        duration: Math.ceil(song.duration),
+        mbid: song.mbid
       };
 
       const body = generateApiRequestBodyForLastFMPostRequests({
