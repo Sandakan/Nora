@@ -13,15 +13,15 @@ default = []
 noop = ["napi/noop"]
 
 [dependencies]
-napi = { version = "3.14", default-features = false, features = ["async", "napi4", "tokio_rt"] }
-napi-derive = "3.6"
+napi = { version = "3.16", default-features = false, features = ["async", "napi4", "tokio_rt"] }
+napi-derive = "3.7"
 cpal = "0.18"
 symphonia = { version = "0.6", features = ["all"] }
-rubato = "5.0"
+rubato = "5.1"
 log = "0.4"
 env_logger = "0.11"
 lazy_static = "1.5"
-souvlaki = { version = "0.8", default-features = false, features = ["use_zbus"] }
+souvlaki = { version = "0.9", default-features = false, features = ["use_zbus"] }
 
 [build-dependencies]
 napi-build = "2.6"
