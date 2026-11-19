@@ -405,6 +405,12 @@ app
       }
     });
 
+    mainWindow.on('hide', () => {
+      mainWindow.webContents.session.clearCache().catch((err) => {
+        logger.debug('Failed to clear session cache on window hide:', { err });
+      });
+    });
+
     mainWindow.on('moved', manageAppMoveEvent);
 
     mainWindow.on('resized', () => {

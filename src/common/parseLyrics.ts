@@ -1,6 +1,4 @@
 import detectChinese from '@neos21/detect-chinese';
-import Kuroshiro from '@sglkc/kuroshiro';
-import { pinyin } from 'pinyin-pro';
 
 import isHangul from './isHangul';
 // import logger from '../main/logger';
@@ -252,11 +250,17 @@ const parseTranslatedLyricsText = (lines: string[]): TranslatedLyricLine[] => {
   });
 };
 
+// Matches Hiragana, Katakana, and CJK Unified Ideographs (equivalent to Kuroshiro.Util.isJapanese)
+const JAPANESE_CHAR_REGEX =
+  /[\u3040-\u309F\u30A0-\u30FF\u31F0-\u31FF\uFF65-\uFF9F\u4E00-\u9FAF\u3400-\u4DBF]/;
+// Matches CJK Unified Ideographs used for Chinese text detection without loading pinyin-pro dictionaries
+const CHINESE_CHAR_REGEX = /[\u4E00-\u9FFF\u3400-\u4DBF]/;
+
 const getPrecentageJP = (str: string) => {
   if (!str) return 0;
   let count = 0;
   for (const c of str) {
-    if (Kuroshiro.Util.isJapanese(c)) count++;
+    if (JAPANESE_CHAR_REGEX.test(c)) count++;
   }
   return count / str.length;
 };
@@ -267,7 +271,7 @@ const getPrecentageCN = (str: string) => {
   if (detection.language === 'cn') return 1;
   let count = 0;
   for (let i = 0; i < str.length; i++) {
-    if (pinyin(str[i]) != str[i]) count++;
+    if (CHINESE_CHAR_REGEX.test(str[i])) count++;
   }
   return count / str.length;
 };

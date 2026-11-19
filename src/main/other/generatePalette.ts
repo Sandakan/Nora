@@ -2,7 +2,6 @@ import { swatchTypeEnum } from '@db/schema';
 import { db } from '@main/db/db';
 import { createArtworkPalette, getLowResArtworksWithoutPalettes } from '@main/db/queries/palettes';
 import generateCoverBuffer from '@main/parseSong/generateCoverBuffer';
-import { Vibrant } from 'node-vibrant/node';
 
 import roundTo from '../../common/roundTo';
 import logger from '../logger';
@@ -46,6 +45,7 @@ export const DEFAULT_SONG_PALETTE: PaletteData = {
 
 const generatePalette = async (artwork?: Buffer | string): Promise<PaletteData | undefined> => {
   if (artwork) {
+    const { Vibrant } = await import('node-vibrant/node');
     const palette = await Vibrant.from(artwork)
       .getPalette()
       .catch((error) => {

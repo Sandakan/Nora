@@ -1,5 +1,3 @@
-import { romanize } from 'romaja';
-
 import { version } from '../../../package.json';
 import isHangul from '../../common/isHangul';
 import { INSTRUMENTAL_LYRIC_IDENTIFIER } from '../../common/parseLyrics';
@@ -14,14 +12,12 @@ const hasConvertibleCharacter = (str: string) => {
   return false;
 };
 
-const convertText = (str: string) => {
-  return romanize(str).trim();
-};
-
 const convertLyricsToRomaja = async () => {
   const cachedLyrics = getCachedLyrics();
   try {
     if (!cachedLyrics) return undefined;
+    const { romanize } = await import('romaja');
+
     const { parsedLyrics } = cachedLyrics.lyrics;
     const lines: (string | SyncedLyricsLineWord[])[] = parsedLyrics.map(
       (line) => line.originalText
@@ -32,7 +28,7 @@ const convertLyricsToRomaja = async () => {
       const line = lines[i];
       if (typeof line === 'string') {
         if (!hasConvertibleCharacter(line)) convertedLyrics.push([]);
-        else convertedLyrics.push([convertText(line)]);
+        else convertedLyrics.push([romanize(line).trim()]);
       } else {
         const convertedSyncedWords: string[] = [];
         let convertedWordsCount = 0;
@@ -40,7 +36,7 @@ const convertLyricsToRomaja = async () => {
           const word = line[j];
           if (!hasConvertibleCharacter(word.text)) convertedSyncedWords.push(word.text.trim());
           else {
-            convertedSyncedWords.push(convertText(word.text));
+            convertedSyncedWords.push(romanize(word.text).trim());
             convertedWordsCount++;
           }
         }

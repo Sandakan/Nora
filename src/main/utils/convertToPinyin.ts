@@ -1,6 +1,3 @@
-import detectChinese from '@neos21/detect-chinese';
-import { pinyin } from 'pinyin-pro';
-
 import { version } from '../../../package.json';
 import { INSTRUMENTAL_LYRIC_IDENTIFIER } from '../../common/parseLyrics';
 import { getCachedLyrics, updateCachedLyrics } from '../core/getSongLyrics';
@@ -8,20 +5,27 @@ import { getLrcLyricsMetadata } from '../core/saveLyricsToLrcFile';
 import logger from '../logger';
 import { sendMessageToRenderer } from '../main';
 
-const hasConvertibleCharacter = async (str: string) => {
+type PinyinFn = typeof import('pinyin-pro').pinyin;
+type DetectChineseMod = typeof import('@neos21/detect-chinese').default;
+
+const hasConvertibleCharacter = (
+  str: string,
+  pinyinFn: PinyinFn,
+  detectChineseMod: DetectChineseMod
+) => {
   if (!str) return false;
-  const detection = detectChinese.detect(str);
+  const detection = detectChineseMod.detect(str);
   if (detection.language === 'cn') return true;
   for (let i = 0; i < str.length; i++) {
-    if (pinyin(str[i]) != str[i]) return true;
+    if (pinyinFn(str[i]) != str[i]) return true;
   }
   return false;
 };
 
-const convertText = (str: string) => {
+const convertText = (str: string, pinyinFn: PinyinFn) => {
   const strsToReplace = ['  ', ' ,', ' .', ' ?', ' !', ' ;', ' )', '( '];
   const strsReplace = [' ', ',', '.', '?', '!', ';', ')', '('];
-  let convertedText = pinyin(str, { nonZh: 'consecutive' });
+  let convertedText = pinyinFn(str, { nonZh: 'consecutive' });
   for (let j = 0; j < strsToReplace.length; j++)
     convertedText = convertedText.replaceAll(strsToReplace[j], strsReplace[j]);
   return convertedText.trim();
@@ -31,6 +35,12 @@ const convertLyricsToPinyin = async () => {
   const cachedLyrics = getCachedLyrics();
   try {
     if (!cachedLyrics) return undefined;
+
+    const [{ pinyin }, { default: detectChinese }] = await Promise.all([
+      import('pinyin-pro'),
+      import('@neos21/detect-chinese')
+    ]);
+
     const { parsedLyrics } = cachedLyrics.lyrics;
     const lines: (string | SyncedLyricsLineWord[])[] = parsedLyrics.map(
       (line) => line.originalText
@@ -40,16 +50,17 @@ const convertLyricsToPinyin = async () => {
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       if (typeof line === 'string') {
-        if (!hasConvertibleCharacter(line)) convertedLyrics.push([]);
-        else convertedLyrics.push([convertText(line)]);
+        if (!hasConvertibleCharacter(line, pinyin, detectChinese)) convertedLyrics.push([]);
+        else convertedLyrics.push([convertText(line, pinyin)]);
       } else {
         const convertedSyncedWords: string[] = [];
         let convertedWordsCount = 0;
         for (let j = 0; j < line.length; j++) {
           const word = line[j];
-          if (!hasConvertibleCharacter(word.text)) convertedSyncedWords.push(word.text.trim());
+          if (!hasConvertibleCharacter(word.text, pinyin, detectChinese))
+            convertedSyncedWords.push(word.text.trim());
           else {
-            convertedSyncedWords.push(convertText(word.text));
+            convertedSyncedWords.push(convertText(word.text, pinyin));
             convertedWordsCount++;
           }
         }

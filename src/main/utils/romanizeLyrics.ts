@@ -1,6 +1,4 @@
-import Kuroshiro from '@sglkc/kuroshiro';
-import KuromojiAnalyzer from '@sglkc/kuroshiro-analyzer-kuromoji';
-import { toRomaji } from 'wanakana';
+import type KuroshiroType from '@sglkc/kuroshiro';
 
 import { version } from '../../../package.json';
 import { INSTRUMENTAL_LYRIC_IDENTIFIER } from '../../common/parseLyrics';
@@ -9,14 +7,21 @@ import { getLrcLyricsMetadata } from '../core/saveLyricsToLrcFile';
 import logger from '../logger';
 import { sendMessageToRenderer } from '../main';
 
-let kuroshiroInstance: Kuroshiro | null = null;
-let kuroshiroInitPromise: Promise<Kuroshiro> | null = null;
+const JAPANESE_CHAR_REGEX =
+  /[\u3040-\u309F\u30A0-\u30FF\u31F0-\u31FF\uFF65-\uFF9F\u4E00-\u9FAF\u3400-\u4DBF]/;
 
-const getKuroshiro = async (): Promise<Kuroshiro> => {
+let kuroshiroInstance: KuroshiroType | null = null;
+let kuroshiroInitPromise: Promise<KuroshiroType> | null = null;
+
+const getKuroshiro = async (): Promise<KuroshiroType> => {
   if (kuroshiroInstance) return kuroshiroInstance;
   if (!kuroshiroInitPromise) {
     kuroshiroInitPromise = (async () => {
       logger.info('Initializing Kuroshiro and Kuromoji analyzer on-demand...');
+      const [{ default: Kuroshiro }, { default: KuromojiAnalyzer }] = await Promise.all([
+        import('@sglkc/kuroshiro'),
+        import('@sglkc/kuroshiro-analyzer-kuromoji')
+      ]);
       const k = new Kuroshiro();
       await k.init(new KuromojiAnalyzer());
       kuroshiroInstance = k;
@@ -30,12 +35,12 @@ const getKuroshiro = async (): Promise<Kuroshiro> => {
 const hasConvertibleCharacter = (str: string) => {
   if (!str) return false;
   for (const c of str) {
-    if (Kuroshiro.Util.isJapanese(c)) return true;
+    if (JAPANESE_CHAR_REGEX.test(c)) return true;
   }
   return false;
 };
 
-const convertText = async (str: string) => {
+const convertText = async (str: string, toRomaji: typeof import('wanakana').toRomaji) => {
   const kuroshiro = await getKuroshiro();
   const strsToReplace = ['  ', ' ,', ' .', ' ?', ' !', ' ;', ' )', '( '];
   const strsReplace = [' ', ',', '.', '?', '!', ';', ')', '('];
@@ -51,6 +56,7 @@ const romanizeLyrics = async () => {
   const cachedLyrics = getCachedLyrics();
   try {
     if (!cachedLyrics) return undefined;
+    const { toRomaji } = await import('wanakana');
     const { parsedLyrics } = cachedLyrics.lyrics;
     const lines: (string | SyncedLyricsLineWord[])[] = parsedLyrics.map(
       (line) => line.originalText
@@ -61,7 +67,7 @@ const romanizeLyrics = async () => {
       const line = lines[i];
       if (typeof line === 'string') {
         if (!hasConvertibleCharacter(line)) convertedLyrics.push([]);
-        else convertedLyrics.push([await convertText(line)]);
+        else convertedLyrics.push([await convertText(line, toRomaji)]);
       } else {
         const convertedSyncedWords: string[] = [];
         let convertedWordsCount = 0;
@@ -69,7 +75,7 @@ const romanizeLyrics = async () => {
           const word = line[j];
           if (!hasConvertibleCharacter(word.text)) convertedSyncedWords.push(word.text.trim());
           else {
-            convertedSyncedWords.push(await convertText(word.text));
+            convertedSyncedWords.push(await convertText(word.text, toRomaji));
             convertedWordsCount++;
           }
         }

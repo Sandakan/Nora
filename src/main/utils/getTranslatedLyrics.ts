@@ -1,4 +1,3 @@
-import { translate } from '@vitalets/google-translate-api';
 import type { RawResponse } from '@vitalets/google-translate-api/dist/cjs/types';
 
 import { version } from '../../../package.json';
@@ -46,6 +45,7 @@ const getTranslatedLyrics = async (languageCode: string) => {
           .join(' ')
           .trim();
       });
+      const { translate } = await import('@vitalets/google-translate-api');
       const { raw } = await translate(lines.join('\n'), { to: languageCode || 'auto' });
       const translatedLang = languageCode || 'en';
 

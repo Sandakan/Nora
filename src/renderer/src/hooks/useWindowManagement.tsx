@@ -150,15 +150,20 @@ export function useWindowManagement(
   );
 
   /**
-   * Updates the browser/window title bar with current song information. Displays song title and
-   * artist names if available.
+   * Updates the browser/window title bar with current song information prefixed with "Nora".
+   * Displays song title and artist names if available.
    */
   const addSongTitleToTitleBar = useCallback(() => {
-    if (store.state.currentSongData.title && store.state.currentSongData.artists)
-      document.title = `${store.state.currentSongData.title} - ${
-        Array.isArray(store.state.currentSongData.artists) &&
-        store.state.currentSongData.artists.map((artist) => artist.name).join(', ')
-      }`;
+    const { title, artists } = store.state.currentSongData;
+    if (title) {
+      const artistNames = Array.isArray(artists)
+        ? artists
+            .map((artist) => artist.name)
+            .filter(Boolean)
+            .join(', ')
+        : '';
+      document.title = artistNames ? `Nora — ${title} - ${artistNames}` : `Nora — ${title}`;
+    }
   }, []);
 
   /** Resets the browser/window title bar to the default "Nora" title. */

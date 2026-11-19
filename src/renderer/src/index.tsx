@@ -1,19 +1,27 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Link, RouterProvider, createHashHistory, createRouter } from '@tanstack/react-router';
-import { StrictMode } from 'react';
+import { StrictMode, Suspense, lazy } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import './i18n';
 // Import the generated route tree
 import { routeTree } from './routeTree.gen';
 
+const ReactQueryDevtools = import.meta.env.DEV
+  ? lazy(() =>
+      import('@tanstack/react-query-devtools').then((mod) => ({
+        default: mod.ReactQueryDevtools
+      }))
+    )
+  : null;
+
 // Create a new router instance
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false, // default: true
-      staleTime: 1000 * 60 * 1 // 1 minutes
+      staleTime: 1000 * 60 * 1, // 1 minute
+      gcTime: 1000 * 60 * 2 // 2 minutes (down from 5 minutes default) to trim unused route caches
     }
   }
 });
@@ -85,7 +93,11 @@ root.render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
-      <ReactQueryDevtools />
+      {ReactQueryDevtools && (
+        <Suspense fallback={null}>
+          <ReactQueryDevtools />
+        </Suspense>
+      )}
     </QueryClientProvider>
   </StrictMode>
 );

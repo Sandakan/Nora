@@ -39,6 +39,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Upgraded `LyricLine` and `EnhancedSyncedLyricWord` to support sub-millisecond precision word-by-word karaoke highlighting.
 - Upgraded `LyricsProgressBar` to 60 FPS real-time rendering via `requestAnimationFrame` and removed the 300ms CSS transition delay.
 - Upgraded `useSkipLyricsLines` to sample exact playback position synchronously on keypress for instantaneous line skipping.
+- Further reduced Main and Renderer memory usage (~71 MiB combined savings) by lazy-loading language/conversion, translation, palette, and database-dump modules (`pinyin-pro`, `romaja`, `wanakana`, `@vitalets/google-translate-api`, `node-vibrant`, `pg_dump`) on demand, stripping `ReactQueryDevtools` from production builds, tightening TanStack Query `gcTime` to 2 minutes, and clearing Chromium session cache when hiding to tray.
+- Prefixed the playing window title with `Nora — ` in `useWindowManagement.tsx` so Windows Task Manager and Alt+Tab clearly identify the app alongside the active track.
 
 ### Fixed
 
@@ -49,6 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed native error dialogs appearing when auto-updater checks fail while offline.
 - Fixed up to 100ms lyric timestamp quantization jitter when syncing lyrics in the lyrics editor.
 - Fixed up to 100ms line transition delay and word-level karaoke timing jitter across Lyrics Page, Full Screen Player, and Mini Player.
+- Fixed `[INEFFECTIVE_DYNAMIC_IMPORT]` build warning and circular dependency between `featureIndexer.ts` and `main.ts` by resolving the window via `BrowserWindow.getAllWindows()`.
 
 ## [4.0.0-alpha.5] - 2026-08-05
 

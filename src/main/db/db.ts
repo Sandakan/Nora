@@ -3,7 +3,6 @@ import path from 'path';
 
 import * as schema from '@db/schema';
 import { PGlite } from '@electric-sql/pglite';
-import { pgDump } from '@electric-sql/pglite-tools/pg_dump';
 import { citext } from '@electric-sql/pglite/contrib/citext';
 import { cube } from '@electric-sql/pglite/contrib/cube';
 // PostgreSQL Database extensions
@@ -139,6 +138,7 @@ export const exportDatabase = async () => {
 
   const clonedPg = await pgliteInstance.clone();
 
+  const { pgDump } = await import('@electric-sql/pglite-tools/pg_dump');
   const dump = await pgDump({ pg: clonedPg as PGlite });
 
   const [, dumpTextPromise] = await Promise.allSettled([clonedPg.close(), dump.text()]);
