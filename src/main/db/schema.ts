@@ -943,9 +943,7 @@ export const lastfmTags = pgTable(
     url: text('url'),
     createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull()
   },
-  (t) => [
-    index('idx_lastfm_tags_name_ci').on(t.nameCI)
-  ]
+  (t) => [index('idx_lastfm_tags_name_ci').on(t.nameCI)]
 );
 
 export const songsLastfmTags = pgTable(
@@ -1353,4 +1351,3 @@ export const albumsLastfmTagsRelations = relations(albumsLastfmTags, ({ one }) =
     references: [lastfmTags.id]
   })
 }));
-

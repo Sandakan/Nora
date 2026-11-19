@@ -11,15 +11,15 @@ import logger from '../logger';
 import { dataUpdateEvent, sendMessageToRenderer } from '../main';
 import { storeArtworks } from '../other/artworks';
 import { generatePalettes } from '../other/generatePalette';
-import manageAlbumArtistOfParsedSong from './manageAlbumArtistOfParsedSong';
-import manageAlbumsOfParsedSong from './manageAlbumsOfParsedSong';
-import manageArtistsOfParsedSong from './manageArtistsOfParsedSong';
-import manageGenresOfParsedSong from './manageGenresOfParsedSong';
 import {
   resolveDeferredArtistSimilarities,
   resolveDeferredSongSimilarities
 } from '../recommendations/deferredMatch';
 import { indexSongAudioFeatures } from '../recommendations/featureIndexer';
+import manageAlbumArtistOfParsedSong from './manageAlbumArtistOfParsedSong';
+import manageAlbumsOfParsedSong from './manageAlbumsOfParsedSong';
+import manageArtistsOfParsedSong from './manageArtistsOfParsedSong';
+import manageGenresOfParsedSong from './manageGenresOfParsedSong';
 // import { timeEnd, timeStart } from './utils/measureTimeUsage';
 
 const pathsQueue = new Set<string>();

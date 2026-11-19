@@ -9,6 +9,7 @@ import {
 } from '@main/db/schema';
 import logger from '@main/logger';
 import { desc, eq, inArray, sql } from 'drizzle-orm';
+
 import getSongInfo from '../core/getSongInfo';
 
 export interface RecommendedSongResult {
@@ -23,9 +24,7 @@ export interface PersonalizedRecommendationOptions {
   sessionSeedSongIds?: number[];
 }
 
-/**
- * Parses a raw database cube or array into a standard 14D number array.
- */
+/** Parses a raw database cube or array into a standard 14D number array. */
 export const parseVector = (v: unknown): number[] | null => {
   if (Array.isArray(v)) {
     return v.map(Number);
@@ -40,9 +39,7 @@ export const parseVector = (v: unknown): number[] | null => {
   return null;
 };
 
-/**
- * Computes standard Euclidean distance between two vectors of arbitrary length.
- */
+/** Computes standard Euclidean distance between two vectors of arbitrary length. */
 export const euclideanDistance = (a: number[], b: number[]): number => {
   const len = Math.min(a.length, b.length);
   let sum = 0;
@@ -53,9 +50,7 @@ export const euclideanDistance = (a: number[], b: number[]): number => {
   return Math.sqrt(sum);
 };
 
-/**
- * Computes the element-wise centroid (mean) of a set of equal-length vectors.
- */
+/** Computes the element-wise centroid (mean) of a set of equal-length vectors. */
 export const averageVectors = (vectors: number[][]): number[] | null => {
   if (!vectors.length) return null;
   const dim = vectors[0].length;
@@ -71,9 +66,7 @@ export const averageVectors = (vectors: number[][]): number[] | null => {
   return avg;
 };
 
-/**
- * Returns a human-friendly circadian time block name and range based on the given hour.
- */
+/** Returns a human-friendly circadian time block name and range based on the given hour. */
 export const getCircadianTimeBlock = (hour: number) => {
   if (hour >= 5 && hour < 10) {
     return { label: 'Morning Flow', blockStart: 5, blockEnd: 10 };
@@ -91,11 +84,10 @@ export const getCircadianTimeBlock = (hour: number) => {
 };
 
 /**
- * Multi-Horizon Personalized Recommendation Scorer.
- * Combines Session Seeds (0.40), Circadian Time-of-Day (0.25), Long-Term Favorites &
- * High-Completion History (0.35), minus Skip Penalties (-0.35).
- * Scores candidate library songs across acoustic Euclidean distance, Last.fm graph connections,
- * genre/tag overlap, and library novelty. Applies MMR artist diversity.
+ * Multi-Horizon Personalized Recommendation Scorer. Combines Session Seeds (0.40), Circadian
+ * Time-of-Day (0.25), Long-Term Favorites & High-Completion History (0.35), minus Skip Penalties
+ * (-0.35). Scores candidate library songs across acoustic Euclidean distance, Last.fm graph
+ * connections, genre/tag overlap, and library novelty. Applies MMR artist diversity.
  */
 export const getPersonalizedRecommendations = async (
   options?: PersonalizedRecommendationOptions
@@ -169,12 +161,7 @@ export const getPersonalizedRecommendations = async (
 
     // 5. Query Feature Vectors for Taste Horizons
     const allQuerySongIds = [
-      ...new Set([
-        ...sessionSongIds,
-        ...circadianSongIds,
-        ...longTermSongIds,
-        ...skipSongIds
-      ])
+      ...new Set([...sessionSongIds, ...circadianSongIds, ...longTermSongIds, ...skipSongIds])
     ];
 
     const featureRows =
@@ -255,9 +242,7 @@ export const getPersonalizedRecommendations = async (
 
     const candidateIdsToFilter = new Set(sessionSongIds);
 
-    const candidates = allFeatureCandidates.filter(
-      (c) => !candidateIdsToFilter.has(c.songId)
-    );
+    const candidates = allFeatureCandidates.filter((c) => !candidateIdsToFilter.has(c.songId));
 
     if (candidates.length === 0) {
       // If no candidates in songAudioFeatures, fallback to songs directly
@@ -316,10 +301,7 @@ export const getPersonalizedRecommendations = async (
         : [];
     const userTagWeightMap = new Map<number, number>();
     for (const t of userTagRows) {
-      userTagWeightMap.set(
-        t.tagId,
-        (userTagWeightMap.get(t.tagId) ?? 0) + (t.weight || 1)
-      );
+      userTagWeightMap.set(t.tagId, (userTagWeightMap.get(t.tagId) ?? 0) + (t.weight || 1));
     }
 
     // Candidate tags
@@ -407,24 +389,16 @@ export const getPersonalizedRecommendations = async (
       // Final Composite Score:
       // Acoustic (0.35) + Graph (0.30) + Tag Overlap (0.20) + Novelty (0.15)
       const totalScore =
-        0.35 * acousticScore +
-        0.3 * graphScore +
-        0.2 * tagScore +
-        0.15 * noveltyScore;
+        0.35 * acousticScore + 0.3 * graphScore + 0.2 * tagScore + 0.15 * noveltyScore;
 
       // Determine human-readable reason & matchType
       let reason = 'Matches your acoustic taste';
-      let matchType: 'acoustic' | 'graph' | 'circadian' | 'rediscovery' | 'tag' =
-        'acoustic';
+      let matchType: 'acoustic' | 'graph' | 'circadian' | 'rediscovery' | 'tag' = 'acoustic';
 
       if (graphScore >= 0.5 && graphMatch?.sourceTitle) {
         reason = `Because you listened to ${graphMatch.sourceTitle}`;
         matchType = 'graph';
-      } else if (
-        circadianCentroid &&
-        vec &&
-        euclideanDistance(vec, circadianCentroid) < 1.0
-      ) {
+      } else if (circadianCentroid && vec && euclideanDistance(vec, circadianCentroid) < 1.0) {
         reason = `${circadianInfo.label}`;
         matchType = 'circadian';
       } else if (noveltyScore >= 0.8 && acousticScore >= 0.6) {
@@ -515,9 +489,8 @@ export const getPersonalizedRecommendations = async (
 };
 
 /**
- * Hybrid Similarity for a Specific Song.
- * Blends local acoustic Euclidean distance (0.45) with Last.fm track similarity (0.35)
- * and artist/genre overlap (0.20). Fully functional offline.
+ * Hybrid Similarity for a Specific Song. Blends local acoustic Euclidean distance (0.45) with
+ * Last.fm track similarity (0.35) and artist/genre overlap (0.20). Fully functional offline.
  */
 export const getSimilarSongsForTrack = async (
   songId: number,
@@ -589,14 +562,7 @@ export const getSimilarSongsForTrack = async (
     scored.sort((a, b) => b.score - a.score);
 
     const topIds = scored.slice(0, limit).map((s) => s.songId);
-    const songDataList = await getSongInfo(
-      topIds,
-      undefined,
-      undefined,
-      topIds.length,
-      true,
-      true
-    );
+    const songDataList = await getSongInfo(topIds, undefined, undefined, topIds.length, true, true);
 
     const dataMap = new Map<number, SongData>();
     for (const s of songDataList) {
@@ -625,9 +591,8 @@ export const getSimilarSongsForTrack = async (
 };
 
 /**
- * Generates an auto-sequenced radio queue starting from a seed track.
- * Uses acoustic trajectory chaining with artist alternation so the radio flows
- * naturally without repetitive artist blocks.
+ * Generates an auto-sequenced radio queue starting from a seed track. Uses acoustic trajectory
+ * chaining with artist alternation so the radio flows naturally without repetitive artist blocks.
  */
 export const getSongRadioQueue = async (
   seedSongId: number,

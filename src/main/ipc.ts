@@ -70,19 +70,6 @@ import {
   getUserEqualizerPreset,
   saveUserEqualizerPreset
 } from './db/queries/userPreferences';
-import {
-  getPersonalizedRecommendations,
-  getSimilarSongsForTrack,
-  getSongRadioQueue
-} from './recommendations/recommendationEngine';
-import {
-  analyzeAndIndexSingleSong,
-  getFeatureIndexingStatus,
-  getSongAudioFeatures,
-  pauseBackgroundFeatureIndexer,
-  resumeBackgroundFeatureIndexer,
-  reindexAudioFeatures
-} from './recommendations/featureIndexer';
 import { removeDefaultAppProtocolFromFilePath } from './fs/resolveFilePaths';
 import logger, { logFilePath } from './logger';
 import {
@@ -114,6 +101,19 @@ import getSimilarTracks from './other/lastFm/getSimilarTracks';
 import scrobbleSong from './other/lastFm/scrobbleSong';
 import sendNowPlayingSongDataToLastFM from './other/lastFm/sendNowPlayingSongDataToLastFM';
 import reParseSong from './parseSong/reParseSong';
+import {
+  analyzeAndIndexSingleSong,
+  getFeatureIndexingStatus,
+  getSongAudioFeatures,
+  pauseBackgroundFeatureIndexer,
+  resumeBackgroundFeatureIndexer,
+  reindexAudioFeatures
+} from './recommendations/featureIndexer';
+import {
+  getPersonalizedRecommendations,
+  getSimilarSongsForTrack,
+  getSongRadioQueue
+} from './recommendations/recommendationEngine';
 import saveLyricsToSong from './saveLyricsToSong';
 import search from './search';
 import { downloadAppUpdate, quitAndInstallAppUpdate } from './update';
@@ -273,21 +273,14 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
 
     ipcMain.handle(
       'app/recommendations/getSongRadioQueue',
-      (_, seedSongId: number, queueLength?: number) =>
-        getSongRadioQueue(seedSongId, queueLength)
+      (_, seedSongId: number, queueLength?: number) => getSongRadioQueue(seedSongId, queueLength)
     );
 
-    ipcMain.handle('app/recommendations/getIndexingStatus', () =>
-      getFeatureIndexingStatus()
-    );
+    ipcMain.handle('app/recommendations/getIndexingStatus', () => getFeatureIndexingStatus());
 
-    ipcMain.handle('app/recommendations/pauseIndexing', () =>
-      pauseBackgroundFeatureIndexer()
-    );
+    ipcMain.handle('app/recommendations/pauseIndexing', () => pauseBackgroundFeatureIndexer());
 
-    ipcMain.handle('app/recommendations/resumeIndexing', () =>
-      resumeBackgroundFeatureIndexer()
-    );
+    ipcMain.handle('app/recommendations/resumeIndexing', () => resumeBackgroundFeatureIndexer());
 
     ipcMain.handle('app/recommendations/reindex', (_, mode: 'missing' | 'all') =>
       reindexAudioFeatures(mode)

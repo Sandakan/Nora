@@ -1,8 +1,8 @@
 import detectChinese from '@neos21/detect-chinese';
 import Kuroshiro from '@sglkc/kuroshiro';
 import { pinyin } from 'pinyin-pro';
-import isHangul from 'romaja/src/hangul/isHangul.js';
 
+import isHangul from './isHangul';
 // import logger from '../main/logger';
 import isLyricsSynced, {
   EXTENDED_SYNCED_LYRICS_LINE_REGEX,

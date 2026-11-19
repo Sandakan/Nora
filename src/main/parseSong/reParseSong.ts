@@ -14,6 +14,11 @@ import { dataUpdateEvent, sendMessageToRenderer } from '../main';
 import { removeArtwork, storeArtworks } from '../other/artworks';
 import { generatePalettes } from '../other/generatePalette';
 import {
+  resolveDeferredArtistSimilarities,
+  resolveDeferredSongSimilarities
+} from '../recommendations/deferredMatch';
+import { indexSongAudioFeatures } from '../recommendations/featureIndexer';
+import {
   removeDeletedAlbumDataOfSong,
   removeDeletedArtistDataOfSong,
   removeDeletedArtworkDataOfSong,
@@ -23,11 +28,6 @@ import manageAlbumArtistOfParsedSong from './manageAlbumArtistOfParsedSong';
 import manageAlbumsOfParsedSong from './manageAlbumsOfParsedSong';
 import manageArtistsOfParsedSong from './manageArtistsOfParsedSong';
 import manageGenresOfParsedSong from './manageGenresOfParsedSong';
-import {
-  resolveDeferredArtistSimilarities,
-  resolveDeferredSongSimilarities
-} from '../recommendations/deferredMatch';
-import { indexSongAudioFeatures } from '../recommendations/featureIndexer';
 import {
   getAlbumInfoFromSong,
   getArtistNamesFromSong,

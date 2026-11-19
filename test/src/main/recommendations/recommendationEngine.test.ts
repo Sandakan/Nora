@@ -15,7 +15,10 @@ vi.mock('@main/db/db', () => ({
       playEvents: { findMany: vi.fn().mockResolvedValue([]) },
       songs: { findMany: vi.fn().mockResolvedValue([]) },
       skipEvents: { findMany: vi.fn().mockResolvedValue([]) },
-      songAudioFeatures: { findFirst: vi.fn().mockResolvedValue(null), findMany: vi.fn().mockResolvedValue([]) },
+      songAudioFeatures: {
+        findFirst: vi.fn().mockResolvedValue(null),
+        findMany: vi.fn().mockResolvedValue([])
+      },
       songSimilarities: { findMany: vi.fn().mockResolvedValue([]) },
       songsLastfmTags: { findMany: vi.fn().mockResolvedValue([]) }
     }

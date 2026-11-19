@@ -19,8 +19,8 @@ export interface VectorMetaInputs {
 }
 
 /**
- * Normalizes acoustic DSP features and library metadata into a 14-dimensional cube vector.
- * Each dimension is mapped and clamped to [0.0, 1.0].
+ * Normalizes acoustic DSP features and library metadata into a 14-dimensional cube vector. Each
+ * dimension is mapped and clamped to [0.0, 1.0].
  */
 export const build14DVector = (dsp: JsAudioFeatures, meta: VectorMetaInputs): string => {
   const clamp = (val: number, min = 0.0, max = 1.0) => Math.min(max, Math.max(min, val));
@@ -44,13 +44,10 @@ export const build14DVector = (dsp: JsAudioFeatures, meta: VectorMetaInputs): st
       : 0.5;
 
   const dim12_duration = clamp(meta.durationSecs / 600.0);
-  const dim13_year =
-    meta.year && meta.year > 0 ? clamp((meta.year - 1950.0) / 75.0) : 0.5;
+  const dim13_year = meta.year && meta.year > 0 ? clamp((meta.year - 1950.0) / 75.0) : 0.5;
 
   const listeners = meta.globalListeners ?? 0;
-  const dim14_popularity = clamp(
-    Math.log10(listeners + 1) / Math.log10(5000000 + 1)
-  );
+  const dim14_popularity = clamp(Math.log10(listeners + 1) / Math.log10(5000000 + 1));
 
   const dims = [
     dim1_rms,
@@ -72,9 +69,7 @@ export const build14DVector = (dsp: JsAudioFeatures, meta: VectorMetaInputs): st
   return `(${dims.map((d) => Number(d.toFixed(4))).join(',')})`;
 };
 
-/**
- * Extracts DSP features for a single song and persists the features + 14D vector.
- */
+/** Extracts DSP features for a single song and persists the features + 14D vector. */
 export const indexSongAudioFeatures = async (
   songId: number,
   filePath: string,
@@ -134,13 +129,10 @@ export const indexSongAudioFeatures = async (
       updatedAt: new Date()
     };
 
-    await trx
-      .insert(songAudioFeatures)
-      .values(record)
-      .onConflictDoUpdate({
-        target: songAudioFeatures.songId,
-        set: record
-      });
+    await trx.insert(songAudioFeatures).values(record).onConflictDoUpdate({
+      target: songAudioFeatures.songId,
+      set: record
+    });
 
     logger.debug('Indexed audio features for song', {
       songId,
@@ -196,13 +188,10 @@ export const indexSongAudioFeatures = async (
           featureVersion: CURRENT_FEATURE_VERSION,
           updatedAt: new Date()
         };
-        await trx
-          .insert(songAudioFeatures)
-          .values(fallbackRecord)
-          .onConflictDoUpdate({
-            target: songAudioFeatures.songId,
-            set: fallbackRecord
-          });
+        await trx.insert(songAudioFeatures).values(fallbackRecord).onConflictDoUpdate({
+          target: songAudioFeatures.songId,
+          set: fallbackRecord
+        });
       } catch (fallbackErr) {
         logger.error('Failed to write fallback features record for song', {
           songId,
@@ -220,9 +209,9 @@ const failedSongAttempts = new Map<number, number>();
 const inFlightPlaybackIndexing = new Set<number>();
 
 /**
- * Opportunistically fingerprints a single song upon playback.
- * Runs independently of the bulk background indexer pause state after a 2-second grace period.
- * Skips immediately if the song already has up-to-date audio features or is already being analyzed.
+ * Opportunistically fingerprints a single song upon playback. Runs independently of the bulk
+ * background indexer pause state after a 2-second grace period. Skips immediately if the song
+ * already has up-to-date audio features or is already being analyzed.
  */
 export const indexSongOnPlayback = async (songId: number, filePath: string): Promise<void> => {
   if (inFlightPlaybackIndexing.has(songId)) {
@@ -373,8 +362,8 @@ export const reindexAudioFeatures = async (mode: 'missing' | 'all' = 'missing') 
 };
 
 /**
- * Starts the background audio feature indexer. Processes unindexed songs in small batches
- * with non-blocking yields to avoid degrading UI performance or audio playback.
+ * Starts the background audio feature indexer. Processes unindexed songs in small batches with
+ * non-blocking yields to avoid degrading UI performance or audio playback.
  */
 export const startBackgroundFeatureIndexer = async () => {
   if (isIndexerRunning) return;
@@ -461,9 +450,7 @@ export const stopBackgroundFeatureIndexer = () => {
   stopRequested = true;
 };
 
-/**
- * Retrieves the stored DSP audio features for a specific song, if indexed.
- */
+/** Retrieves the stored DSP audio features for a specific song, if indexed. */
 export const getSongAudioFeatures = async (
   songId: number
 ): Promise<SongAudioFeaturesData | null> => {
@@ -499,8 +486,8 @@ export const getSongAudioFeatures = async (
 };
 
 /**
- * On-demand action to analyze and index acoustic DSP features for a specific song.
- * Finds the song path, computes the features, persists them to the DB, and broadcasts updated status.
+ * On-demand action to analyze and index acoustic DSP features for a specific song. Finds the song
+ * path, computes the features, persists them to the DB, and broadcasts updated status.
  */
 export const analyzeAndIndexSingleSong = async (
   songId: number

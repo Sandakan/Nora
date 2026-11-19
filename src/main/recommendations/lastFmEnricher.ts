@@ -13,9 +13,7 @@ import {
 import logger from '@main/logger';
 import { and, eq, isNull } from 'drizzle-orm';
 
-/**
- * Upserts a Last.fm tag into the lastfm_tags table by case-insensitive name.
- */
+/** Upserts a Last.fm tag into the lastfm_tags table by case-insensitive name. */
 export const upsertLastFmTag = async (
   tagName: string,
   url?: string,
@@ -57,9 +55,7 @@ export const upsertLastFmTag = async (
   }
 };
 
-/**
- * Links Last.fm tags to a song with weights.
- */
+/** Links Last.fm tags to a song with weights. */
 export const saveSongLastFmTags = async (
   songId: number,
   tags: Array<{ name: string; url?: string; count?: number }>,
@@ -81,9 +77,7 @@ export const saveSongLastFmTags = async (
   }
 };
 
-/**
- * Links Last.fm tags to an artist with weights.
- */
+/** Links Last.fm tags to an artist with weights. */
 export const saveArtistLastFmTags = async (
   artistId: number,
   tags: Array<{ name: string; url?: string; count?: number }>,
@@ -105,9 +99,7 @@ export const saveArtistLastFmTags = async (
   }
 };
 
-/**
- * Links Last.fm tags to an album with weights.
- */
+/** Links Last.fm tags to an album with weights. */
 export const saveAlbumLastFmTags = async (
   albumId: number,
   tags: Array<{ name: string; url?: string; count?: number }>,
@@ -129,9 +121,7 @@ export const saveAlbumLastFmTags = async (
   }
 };
 
-/**
- * Harvests track.getInfo payload to backfill MBIDs, global popularity, and tags.
- */
+/** Harvests track.getInfo payload to backfill MBIDs, global popularity, and tags. */
 export const harvestTrackInfo = async (
   songId: number,
   trackData: {
@@ -224,9 +214,7 @@ export const harvestTrackInfo = async (
   }
 };
 
-/**
- * Harvests track.getSimilar results into song_similarities with deferred FK matching.
- */
+/** Harvests track.getSimilar results into song_similarities with deferred FK matching. */
 export const harvestSimilarTracks = async (
   sourceSongId: number,
   similarTracks: Array<{
@@ -265,9 +253,7 @@ export const harvestSimilarTracks = async (
         }
       });
       const matchingSong = candidates.find((c) =>
-        c.artists?.some(
-          (a) => a.artist?.name.toLowerCase() === targetArtist.toLowerCase()
-        )
+        c.artists?.some((a) => a.artist?.name.toLowerCase() === targetArtist.toLowerCase())
       );
       if (matchingSong) {
         matchedSongId = matchingSong.id;
@@ -294,8 +280,8 @@ export const harvestSimilarTracks = async (
 };
 
 /**
- * Opportunistically triggers Last.fm enrichment when a song is played or favorited.
- * Rate-limited to at most once per 14 days per song.
+ * Opportunistically triggers Last.fm enrichment when a song is played or favorited. Rate-limited to
+ * at most once per 14 days per song.
  */
 export const enrichSongOnPlayOrFavorite = async (songId: number) => {
   try {

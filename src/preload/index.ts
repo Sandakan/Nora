@@ -731,25 +731,17 @@ const recommendations = {
   }): Promise<RecommendedSongResult[]> =>
     ipcRenderer.invoke('app/recommendations/getPersonalized', options),
 
-  getSimilarSongsForTrack: (
-    songId: number,
-    limit?: number
-  ): Promise<RecommendedSongResult[]> =>
+  getSimilarSongsForTrack: (songId: number, limit?: number): Promise<RecommendedSongResult[]> =>
     ipcRenderer.invoke('app/recommendations/getSimilarSongsForTrack', songId, limit),
 
-  getSongRadioQueue: (
-    seedSongId: number,
-    queueLength?: number
-  ): Promise<number[]> =>
+  getSongRadioQueue: (seedSongId: number, queueLength?: number): Promise<number[]> =>
     ipcRenderer.invoke('app/recommendations/getSongRadioQueue', seedSongId, queueLength),
   getIndexingStatus: (): Promise<FeatureIndexingStatus> =>
     ipcRenderer.invoke('app/recommendations/getIndexingStatus'),
 
-  pauseIndexing: (): Promise<void> =>
-    ipcRenderer.invoke('app/recommendations/pauseIndexing'),
+  pauseIndexing: (): Promise<void> => ipcRenderer.invoke('app/recommendations/pauseIndexing'),
 
-  resumeIndexing: (): Promise<void> =>
-    ipcRenderer.invoke('app/recommendations/resumeIndexing'),
+  resumeIndexing: (): Promise<void> => ipcRenderer.invoke('app/recommendations/resumeIndexing'),
 
   reindex: (mode: 'missing' | 'all'): Promise<void> =>
     ipcRenderer.invoke('app/recommendations/reindex', mode),
@@ -760,9 +752,7 @@ const recommendations = {
   analyzeSong: (songId: number): Promise<SongAudioFeaturesData | null> =>
     ipcRenderer.invoke('app/recommendations/analyzeSong', songId),
 
-  onIndexingProgress: (
-    callback: (status: FeatureIndexingStatus) => void
-  ): (() => void) => {
+  onIndexingProgress: (callback: (status: FeatureIndexingStatus) => void): (() => void) => {
     const handler = (_event: unknown, status: FeatureIndexingStatus) => callback(status);
     ipcRenderer.on('app/recommendations/indexingProgress', handler);
     return () => {

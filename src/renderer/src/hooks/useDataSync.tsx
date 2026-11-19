@@ -18,6 +18,7 @@ import { getPlayer } from './useAudioPlayer';
  * invalidating relevant React Query caches to keep the UI in sync.
  *
  * Handles the following data types:
+ *
  * - Songs (new, updated, deleted, artworks, palette, likes)
  * - Artists (new, updated, deleted, artworks, likes)
  * - Albums (new, updated, deleted)

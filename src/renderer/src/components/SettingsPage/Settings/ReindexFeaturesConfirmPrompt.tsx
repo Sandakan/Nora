@@ -1,8 +1,8 @@
+import { queryClient } from '@renderer/index';
+import { recommendationQuery } from '@renderer/queries/recommendations';
 import { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { queryClient } from '@renderer/index';
-import { recommendationQuery } from '@renderer/queries/recommendations';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import Button from '../../Button';
 
@@ -88,20 +88,22 @@ const ReindexFeaturesConfirmPrompt = () => {
 
         <div className="mt-4">
           <ul className="marker:text-font-color-highlight dark:marker:text-dark-font-color-highlight list-inside list-disc pl-4">
-            <li className="text-sm font-light mb-3">
-              <span className="font-semibold text-font-color-highlight dark:text-dark-font-color-highlight">
+            <li className="mb-3 text-sm font-light">
+              <span className="text-font-color-highlight dark:text-dark-font-color-highlight font-semibold">
                 {t('settingsPage.smartReindex', 'Smart Re-index (Recommended)')}
               </span>
-              : {t(
+              :{' '}
+              {t(
                 'settingsPage.smartReindexDescription',
                 'Analyzes songs that have not yet been indexed or were processed with an outdated algorithm version. Existing indexed songs are preserved.'
               )}
             </li>
             <li className="text-sm font-light">
-              <span className="font-semibold text-font-color-crimson">
+              <span className="text-font-color-crimson font-semibold">
                 {t('settingsPage.fullReindex', 'Force Full Re-index')}
               </span>
-              : {t(
+              :{' '}
+              {t(
                 'settingsPage.fullReindexDescription',
                 'Clears all existing audio feature vectors and re-analyzes every song in your library from scratch in the background.'
               )}
@@ -113,18 +115,18 @@ const ReindexFeaturesConfirmPrompt = () => {
       <div className="buttons-container mt-8 flex flex-wrap items-center justify-end gap-3">
         <Button
           label={t('common.cancel', 'Cancel')}
-          className="mr-0! h-10 px-5 cursor-pointer rounded-lg font-medium text-sm"
+          className="mr-0! h-10 cursor-pointer rounded-lg px-5 text-sm font-medium"
           clickHandler={() => changePromptMenuData(false)}
         />
         <Button
           label={t('settingsPage.forceFullReindex', 'Force Full Re-index')}
-          className="danger-btn bg-font-color-crimson! text-font-color-white hover:border-font-color-crimson dark:bg-font-color-crimson! dark:text-font-color-white dark:hover:border-font-color-crimson mr-0! h-10 px-5 cursor-pointer rounded-lg outline-hidden ease-in-out font-medium text-sm"
+          className="danger-btn bg-font-color-crimson! text-font-color-white hover:border-font-color-crimson dark:bg-font-color-crimson! dark:text-font-color-white dark:hover:border-font-color-crimson mr-0! h-10 cursor-pointer rounded-lg px-5 text-sm font-medium outline-hidden ease-in-out"
           pendingAnimationOnDisabled
           clickHandler={handleFullReindex}
         />
         <Button
           label={t('settingsPage.startSmartReindex', 'Smart Re-index')}
-          className="confirm-reindex-btn bg-background-color-3! text-font-color-black hover:border-background-color-3 dark:bg-dark-background-color-3! dark:text-font-color-black! dark:hover:border-background-color-3 mr-0! h-10 px-6 cursor-pointer rounded-lg outline-hidden ease-in-out font-medium text-sm"
+          className="confirm-reindex-btn bg-background-color-3! text-font-color-black hover:border-background-color-3 dark:bg-dark-background-color-3! dark:text-font-color-black! dark:hover:border-background-color-3 mr-0! h-10 cursor-pointer rounded-lg px-6 text-sm font-medium outline-hidden ease-in-out"
           pendingAnimationOnDisabled
           clickHandler={handleSmartReindex}
         />

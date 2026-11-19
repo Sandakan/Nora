@@ -39,6 +39,7 @@ vi.mock('@main/core/audioEngine', () => ({
   }
 }));
 
+import type { JsAudioFeatures } from '../../../../src/main/core/audioEngine';
 import {
   analyzeAndIndexSingleSong,
   build14DVector,
@@ -52,7 +53,6 @@ import {
   resumeBackgroundFeatureIndexer,
   type VectorMetaInputs
 } from '../../../../src/main/recommendations/featureIndexer';
-import type { JsAudioFeatures } from '../../../../src/main/core/audioEngine';
 
 describe('featureIndexer', () => {
   const dummyDsp: JsAudioFeatures = {
@@ -83,10 +83,7 @@ describe('featureIndexer', () => {
     const vectorStr = build14DVector(dummyDsp, dummyMeta);
     expect(vectorStr).toMatch(/^\([-0-9., ]+\)$/);
 
-    const dims = vectorStr
-      .replace(/[()]/g, '')
-      .split(',')
-      .map(Number);
+    const dims = vectorStr.replace(/[()]/g, '').split(',').map(Number);
     expect(dims).toHaveLength(14);
 
     for (const d of dims) {
@@ -102,10 +99,7 @@ describe('featureIndexer', () => {
     };
 
     const vectorStr = build14DVector(dummyDsp, metaWithoutBpm);
-    const dims = vectorStr
-      .replace(/[()]/g, '')
-      .split(',')
-      .map(Number);
+    const dims = vectorStr.replace(/[()]/g, '').split(',').map(Number);
 
     // dim 8 is estimated BPM normalized, dim 10 is effective BPM
     expect(dims[7]).toBe(dims[9]);
@@ -133,10 +127,7 @@ describe('featureIndexer', () => {
     };
 
     const vectorStr = build14DVector(extremeDsp, extremeMeta);
-    const dims = vectorStr
-      .replace(/[()]/g, '')
-      .split(',')
-      .map(Number);
+    const dims = vectorStr.replace(/[()]/g, '').split(',').map(Number);
 
     for (const d of dims) {
       expect(d).toBeGreaterThanOrEqual(0.0);
@@ -150,10 +141,7 @@ describe('featureIndexer', () => {
     };
 
     const vectorStr = build14DVector(dummyDsp, minimalMeta);
-    const dims = vectorStr
-      .replace(/[()]/g, '')
-      .split(',')
-      .map(Number);
+    const dims = vectorStr.replace(/[()]/g, '').split(',').map(Number);
 
     // ReplayGain default is 0.5
     expect(dims[10]).toBe(0.5);

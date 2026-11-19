@@ -159,23 +159,25 @@ const getAlbumInfoFromLastFM = async (albumId: number): Promise<LastFMAlbumInfo 
       const downloadedAlbumData = apiData.album;
 
       // Opportunistically harvest album MBID and tags
-      import('@main/db/db').then(async ({ db }) => {
-        const { albums } = await import('@main/db/schema');
-        const { saveAlbumLastFmTags } = await import('../../recommendations/lastFmEnricher');
-        if (!selectedAlbum.mbid && downloadedAlbumData.mbid) {
-          const { eq } = await import('drizzle-orm');
-          await db
-            .update(albums)
-            .set({ mbid: downloadedAlbumData.mbid.trim() })
-            .where(eq(albums.id, albumId));
-        }
+      import('@main/db/db')
+        .then(async ({ db }) => {
+          const { albums } = await import('@main/db/schema');
+          const { saveAlbumLastFmTags } = await import('../../recommendations/lastFmEnricher');
+          if (!selectedAlbum.mbid && downloadedAlbumData.mbid) {
+            const { eq } = await import('drizzle-orm');
+            await db
+              .update(albums)
+              .set({ mbid: downloadedAlbumData.mbid.trim() })
+              .where(eq(albums.id, albumId));
+          }
 
-        const rawTags = downloadedAlbumData.tags?.tag;
-        const tagsList = Array.isArray(rawTags) ? rawTags : rawTags ? [rawTags] : [];
-        if (tagsList.length > 0) {
-          await saveAlbumLastFmTags(albumId, tagsList, db);
-        }
-      }).catch(() => {});
+          const rawTags = downloadedAlbumData.tags?.tag;
+          const tagsList = Array.isArray(rawTags) ? rawTags : rawTags ? [rawTags] : [];
+          if (tagsList.length > 0) {
+            await saveAlbumLastFmTags(albumId, tagsList, db);
+          }
+        })
+        .catch(() => {});
 
       const parsedAlbumData = parseAlbumInfoFromLastFM(downloadedAlbumData, selectedAlbum);
       return parsedAlbumData;

@@ -519,7 +519,9 @@ export const audioEngine = {
     if (typeof engine.engineAnalyzeAudioFeatures === 'function') {
       return engine.engineAnalyzeAudioFeatures(rawPath);
     }
-    throw new Error('engineAnalyzeAudioFeatures is not implemented or available in this native build');
+    throw new Error(
+      'engineAnalyzeAudioFeatures is not implemented or available in this native build'
+    );
   },
   destroy: (): void => {
     if (nativeModule) {

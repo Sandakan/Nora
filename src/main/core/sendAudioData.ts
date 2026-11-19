@@ -13,8 +13,8 @@ import {
 } from '../fs/resolveFilePaths';
 import logger from '../logger';
 import { IS_DEVELOPMENT, dataUpdateEvent, setCurrentSongPath } from '../main';
-import { parsePaletteFromArtworks } from './getAllSongs';
 import { indexSongOnPlayback } from '../recommendations/featureIndexer';
+import { parsePaletteFromArtworks } from './getAllSongs';
 
 export const parseArtworkDataForAudioPlayerData = (artworkData?: Buffer | Uint8Array) => {
   if (artworkData === undefined) return undefined;
@@ -116,10 +116,7 @@ export const recordSongPlayback = async (songId: number, data?: AudioPlayerData)
   }
 };
 
-const sendAudioData = async (
-  songId: number,
-  recordHistory = true
-): Promise<AudioPlayerData> => {
+const sendAudioData = async (songId: number, recordHistory = true): Promise<AudioPlayerData> => {
   logger.debug(`Fetching song data for song id -${songId}- (recordHistory: ${recordHistory})`);
   try {
     const song = await getPlayableSongById(songId);

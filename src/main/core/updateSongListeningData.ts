@@ -31,8 +31,7 @@ const updateSongListeningData = async (
       import('../recommendations/lastFmEnricher')
         .then(({ enrichSongOnPlayOrFavorite }) => enrichSongOnPlayOrFavorite(songId))
         .catch(() => {});
-    }
-    else if (dataType === 'SKIP' && typeof value === 'number') {
+    } else if (dataType === 'SKIP' && typeof value === 'number') {
       await db.transaction(async (trx) => {
         await addSongSkipEvent(songId, value.toString(), trx);
         await incrementSongSkipCount(songId, trx);

@@ -178,13 +178,14 @@ const SongAcousticInfoContainer = ({ songId }: Props) => {
                 />
               )}
 
-              <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-background-color-1/30 dark:border-dark-background-color-1/30 pt-3">
+              <div className="border-background-color-1/30 dark:border-dark-background-color-1/30 mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-3">
                 <div className="text-font-color-dimmed dark:text-dark-font-color-dimmed flex items-center text-xs">
                   <span className="material-icons-round-outlined mr-1.5 text-base leading-none">
                     fingerprint
                   </span>
                   <span>
-                    {t('songInfoPage.fingerprintDetails', 'Fingerprint')}: v{features.featureVersion}
+                    {t('songInfoPage.fingerprintDetails', 'Fingerprint')}: v
+                    {features.featureVersion}
                     {features.updatedAt && (
                       <>
                         {' • '}

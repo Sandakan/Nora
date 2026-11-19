@@ -24,9 +24,15 @@ const getMigrationsFolder = () => {
   const resourcesPath = process.resourcesPath;
 
   const rawCandidates: (string | undefined)[] = [
-    resourcesPath ? path.resolve(resourcesPath, 'app.asar.unpacked', 'resources', 'drizzle') : undefined,
+    resourcesPath
+      ? path.resolve(resourcesPath, 'app.asar.unpacked', 'resources', 'drizzle')
+      : undefined,
     appPath
-      ? path.resolve(appPath.replace(/app\.asar[/\\]?$/, 'app.asar.unpacked'), 'resources', 'drizzle')
+      ? path.resolve(
+          appPath.replace(/app\.asar[/\\]?$/, 'app.asar.unpacked'),
+          'resources',
+          'drizzle'
+        )
       : undefined,
     resourcesPath ? path.resolve(resourcesPath, 'resources', 'drizzle') : undefined,
     resourcesPath ? path.resolve(resourcesPath, 'drizzle') : undefined,

@@ -1,9 +1,9 @@
-import { useContext } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useMutation, useQuery } from '@tanstack/react-query';
-
 import { queryClient } from '@renderer/index';
 import { settingsQuery } from '@renderer/queries/settings';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { useContext } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import Checkbox from '../../Checkbox';
 import AudioFeatureExplainerPrompt from './AudioFeatureExplainerPrompt';

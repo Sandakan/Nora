@@ -1,4 +1,5 @@
 import { eq } from 'drizzle-orm';
+
 import type { LastFmArtistInfoAPI } from '../../../types/last_fm_artist_info_api';
 import logger from '../../logger';
 import { checkIfConnectedToInternet } from '../../main';
@@ -53,62 +54,64 @@ const getArtistInfoFromLastFM = async (artistName: string, mbid?: string) => {
         // Opportunistic harvesting of artist MBID, similarities and tags
         const artistObj = data.artist;
         if (artistObj) {
-          import('@main/db/db').then(async ({ db }) => {
-            const { artists, artistSimilarities } = await import('@main/db/schema');
-            const { saveArtistLastFmTags } = await import('../../recommendations/lastFmEnricher');
-            const localArtist = await db.query.artists.findFirst({
-              where: (a, { eq }) => eq(a.nameCI, artistName.trim())
-            });
+          import('@main/db/db')
+            .then(async ({ db }) => {
+              const { artists, artistSimilarities } = await import('@main/db/schema');
+              const { saveArtistLastFmTags } = await import('../../recommendations/lastFmEnricher');
+              const localArtist = await db.query.artists.findFirst({
+                where: (a, { eq }) => eq(a.nameCI, artistName.trim())
+              });
 
-            if (localArtist) {
-              if (!localArtist.mbid && artistObj.mbid) {
-                await db
-                  .update(artists)
-                  .set({ mbid: artistObj.mbid.trim() })
-                  .where(eq(artists.id, localArtist.id));
-              }
-
-              const rawTags = artistObj.tags?.tag;
-              const tagsList = Array.isArray(rawTags) ? rawTags : rawTags ? [rawTags] : [];
-              if (tagsList.length > 0) {
-                await saveArtistLastFmTags(localArtist.id, tagsList, db);
-              }
-
-              const rawSim = artistObj.similar?.artist;
-              const simList = Array.isArray(rawSim) ? rawSim : rawSim ? [rawSim] : [];
-              for (const sim of simList) {
-                const targetMbid = sim.mbid?.trim() || null;
-                const targetName = sim.name.trim();
-                let matchedId: number | null = null;
-                if (targetMbid) {
-                  const s = await db.query.artists.findFirst({
-                    where: eq(artists.mbid, targetMbid),
-                    columns: { id: true }
-                  });
-                  if (s) matchedId = s.id;
-                }
-                if (!matchedId) {
-                  const s = await db.query.artists.findFirst({
-                    where: eq(artists.nameCI, targetName),
-                    columns: { id: true }
-                  });
-                  if (s) matchedId = s.id;
+              if (localArtist) {
+                if (!localArtist.mbid && artistObj.mbid) {
+                  await db
+                    .update(artists)
+                    .set({ mbid: artistObj.mbid.trim() })
+                    .where(eq(artists.id, localArtist.id));
                 }
 
-                await db
-                  .insert(artistSimilarities)
-                  .values({
-                    sourceArtistId: localArtist.id,
-                    targetArtistId: matchedId,
-                    targetArtistName: targetName,
-                    targetMbid,
-                    targetUrl: sim.url || null,
-                    matchScore: 0.8
-                  })
-                  .onConflictDoNothing();
+                const rawTags = artistObj.tags?.tag;
+                const tagsList = Array.isArray(rawTags) ? rawTags : rawTags ? [rawTags] : [];
+                if (tagsList.length > 0) {
+                  await saveArtistLastFmTags(localArtist.id, tagsList, db);
+                }
+
+                const rawSim = artistObj.similar?.artist;
+                const simList = Array.isArray(rawSim) ? rawSim : rawSim ? [rawSim] : [];
+                for (const sim of simList) {
+                  const targetMbid = sim.mbid?.trim() || null;
+                  const targetName = sim.name.trim();
+                  let matchedId: number | null = null;
+                  if (targetMbid) {
+                    const s = await db.query.artists.findFirst({
+                      where: eq(artists.mbid, targetMbid),
+                      columns: { id: true }
+                    });
+                    if (s) matchedId = s.id;
+                  }
+                  if (!matchedId) {
+                    const s = await db.query.artists.findFirst({
+                      where: eq(artists.nameCI, targetName),
+                      columns: { id: true }
+                    });
+                    if (s) matchedId = s.id;
+                  }
+
+                  await db
+                    .insert(artistSimilarities)
+                    .values({
+                      sourceArtistId: localArtist.id,
+                      targetArtistId: matchedId,
+                      targetArtistName: targetName,
+                      targetMbid,
+                      targetUrl: sim.url || null,
+                      matchScore: 0.8
+                    })
+                    .onConflictDoNothing();
+                }
               }
-            }
-          }).catch(() => {});
+            })
+            .catch(() => {});
         }
 
         return data;

@@ -222,7 +222,6 @@ class AudioPlayer extends EventTarget {
             ? window.api.utils.removeDefaultAppProtocolFromFilePath(this.currentSongData.path)
             : cleanLocalFilePath(this.currentSongData.path);
 
-
           this.preloadedSongData = this.currentSongData;
           await window.api.audioEngine.preload(rawPath, this.currentSongData.duration);
         }
@@ -243,7 +242,6 @@ class AudioPlayer extends EventTarget {
           const rawPath = window.api.utils?.removeDefaultAppProtocolFromFilePath
             ? window.api.utils.removeDefaultAppProtocolFromFilePath(nextSong.path)
             : cleanLocalFilePath(nextSong.path);
-
 
           await window.api.audioEngine.preload(rawPath, nextSong.duration);
         }
@@ -288,7 +286,9 @@ class AudioPlayer extends EventTarget {
     }
 
     if (transitionedSong) {
-      window.api?.audioLibraryControls?.recordSongPlayback?.(transitionedSong.songId)?.catch(() => { });
+      window.api?.audioLibraryControls
+        ?.recordSongPlayback?.(transitionedSong.songId)
+        ?.catch(() => {});
       this.preloadedSongData = null;
       this.currentSongData = transitionedSong;
       this.currentLoadedSongId = transitionedSong.songId;
@@ -374,7 +374,7 @@ class AudioPlayer extends EventTarget {
       this.nativeIsPaused = true;
       this.emit('pause');
       this.emit('playbackComplete');
-      window.api?.audioEngine?.setPlaybackStatus?.('paused', this.currentTime).catch(() => { });
+      window.api?.audioEngine?.setPlaybackStatus?.('paused', this.currentTime).catch(() => {});
       dispatch({ type: 'CURRENT_SONG_PLAYBACK_STATE', data: false });
     }
   }
@@ -404,7 +404,7 @@ class AudioPlayer extends EventTarget {
         songData = await window.api.audioLibraryControls.getSong(songIdOrData, true);
       } else {
         songData = songIdOrData;
-        window.api?.audioLibraryControls?.recordSongPlayback?.(songData.songId)?.catch(() => { });
+        window.api?.audioLibraryControls?.recordSongPlayback?.(songData.songId)?.catch(() => {});
       }
 
       if (!songData) {
@@ -442,8 +442,6 @@ class AudioPlayer extends EventTarget {
         ? window.api.utils?.removeDefaultAppProtocolFromFilePath
           ? window.api.utils.removeDefaultAppProtocolFromFilePath(songData.artworkPath)
           : cleanLocalFilePath(songData.artworkPath)
-
-
         : undefined;
 
       const coverUrl = rawArtworkPath
@@ -501,11 +499,11 @@ class AudioPlayer extends EventTarget {
       if (autoPlay) {
         this.nativeIsPaused = false;
         this.emit('play');
-        window.api?.audioEngine?.setPlaybackStatus?.('playing', 0).catch(() => { });
+        window.api?.audioEngine?.setPlaybackStatus?.('playing', 0).catch(() => {});
       } else {
         this.nativeIsPaused = true;
         this.emit('pause');
-        window.api?.audioEngine?.setPlaybackStatus?.('paused', 0).catch(() => { });
+        window.api?.audioEngine?.setPlaybackStatus?.('paused', 0).catch(() => {});
       }
 
       void this.preloadNextTrack();
@@ -557,7 +555,7 @@ class AudioPlayer extends EventTarget {
       this.trackTransitionedUnsubscribe = null;
     }
     if (window.api?.audioEngine) {
-      window.api.audioEngine.stop().catch(() => { });
+      window.api.audioEngine.stop().catch(() => {});
     }
     if (this.unsubscribeFunc) this.unsubscribeFunc.unsubscribe();
     this.queue.removeAllListeners();
@@ -771,7 +769,7 @@ class AudioPlayer extends EventTarget {
     this.lastTickTimestamp = performance.now();
     this.isPlaybackTransitioning = true;
     this.emit('play');
-    window.api?.audioEngine?.setPlaybackStatus?.('playing', this.currentTime).catch(() => { });
+    window.api?.audioEngine?.setPlaybackStatus?.('playing', this.currentTime).catch(() => {});
     return this.fadeInAudioNative().finally(() => {
       this.isPlaybackTransitioning = false;
     });
@@ -789,7 +787,7 @@ class AudioPlayer extends EventTarget {
     this.isTickPlaying = false;
     this.isPlaybackTransitioning = true;
     this.emit('pause');
-    window.api?.audioEngine?.setPlaybackStatus?.('paused', this.currentTime).catch(() => { });
+    window.api?.audioEngine?.setPlaybackStatus?.('paused', this.currentTime).catch(() => {});
     return this.fadeOutAudioNative().finally(() => {
       this.isPlaybackTransitioning = false;
     });

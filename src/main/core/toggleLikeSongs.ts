@@ -45,9 +45,7 @@ const toggleLikeSongs = async (songIds: number[], isLikeSong?: boolean) => {
   if (result.likes.length > 0) {
     import('../recommendations/lastFmEnricher')
       .then(async ({ enrichSongOnPlayOrFavorite }) => {
-        await Promise.allSettled(
-          result.likes.map((songId) => enrichSongOnPlayOrFavorite(songId))
-        );
+        await Promise.allSettled(result.likes.map((songId) => enrichSongOnPlayOrFavorite(songId)));
       })
       .catch(() => {});
   }

@@ -27,7 +27,7 @@ export type LogMessageTypes = 'INFO' | 'WARN' | 'ERROR';
 //         obj[x] = `${property.message}\r${property.stack}`;
 //       }
 //     }
-// 
+//
 //     const str = JSON.stringify(obj);
 //     return str;
 //   }
@@ -87,18 +87,18 @@ const log = winston.createLogger({
 //   logType: LogType = 'MAIN'
 // ) => {
 //   let mes: string;
-// 
+//
 //   if (message instanceof Error) mes = message.message;
 //   else mes = message.replaceAll('\n', '\n\t');
-// 
+//
 //   const options: LogOptions = { ...defaultLogOptions, ...logOptions };
-// 
+//
 //   if (options.sendToRenderer) sendMessageToRenderer(options.sendToRenderer);
-// 
+//
 //   if (messageType !== 'INFO') mes = mes.toUpperCase();
 //   const str = `\n[${new Date().toUTCString()}] [${logType}] = ${mes}\n\t${objectToString(data)}`;
 //   // appendFileSync(logFilePath, str, { encoding: 'utf-8' });
-// 
+//
 //   if (!options?.preventLoggingToConsole) {
 //     if (messageType === 'ERROR') pinoLogger.error(str);
 //     else if (messageType === 'WARN') pinoLogger.warn(str);
@@ -154,7 +154,11 @@ const logger = {
   error: (message: string, data = {} as object, error?: unknown) => {
     const errorMessage = error instanceof Error ? error.message : error ? String(error) : undefined;
 
-    log.error(sanitizeLogMessage(message), { process: getProcessTag(data), error: errorMessage, data });
+    log.error(sanitizeLogMessage(message), {
+      process: getProcessTag(data),
+      error: errorMessage,
+      data
+    });
   },
   warn: (message: string, data = {} as object) => {
     log.warn(sanitizeLogMessage(message), { process: getProcessTag(data), data });

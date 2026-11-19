@@ -4,8 +4,8 @@ import logger from '@main/logger';
 import { and, eq, isNull, or } from 'drizzle-orm';
 
 /**
- * Resolves any pending deferred song similarity edges matching a newly added or updated song
- * by MBID or (targetTitleCI + targetArtistCI).
+ * Resolves any pending deferred song similarity edges matching a newly added or updated song by
+ * MBID or (targetTitleCI + targetArtistCI).
  */
 export const resolveDeferredSongSimilarities = async (
   song: {
@@ -53,8 +53,8 @@ export const resolveDeferredSongSimilarities = async (
 };
 
 /**
- * Resolves any pending deferred artist similarity edges matching a newly added or updated artist
- * by MBID or targetArtistNameCI.
+ * Resolves any pending deferred artist similarity edges matching a newly added or updated artist by
+ * MBID or targetArtistNameCI.
  */
 export const resolveDeferredArtistSimilarities = async (
   artist: {

@@ -9,9 +9,7 @@ const SongAdditionalInfoItem = (props: Props) => {
   const { label, value, tooltip, technicalLabel } = props;
 
   const titleText =
-    tooltip && technicalLabel
-      ? `${technicalLabel} — ${tooltip}`
-      : (tooltip ?? technicalLabel);
+    tooltip && technicalLabel ? `${technicalLabel} — ${tooltip}` : (tooltip ?? technicalLabel);
 
   return (
     <div className="odd:bg-background-color-1/25 hover:odd:bg-background-color-1/50 even:hover:bg-background-color-1/50 dark:odd:bg-dark-background-color-1/25 dark:hover:odd:bg-dark-background-color-1/50 dark:even:hover:bg-dark-background-color-1/50 mb-2 rounded-md p-2 first:mt-2 last:mb-0">

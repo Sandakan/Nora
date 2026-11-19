@@ -312,7 +312,10 @@ const parseNotificationFromMain = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const messageKey: any = `backend.${messageCode}`;
 
-  const translateMessage = i18n.t as (key: string, options?: Record<string, unknown>) => string;
+  const translateMessage = i18n.t as unknown as (
+    key: string,
+    options?: Record<string, unknown>
+  ) => string;
 
   const message = i18n.exists(messageKey)
     ? translateMessage(messageKey, data) || messageCode

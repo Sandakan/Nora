@@ -1,4 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
+
 import { recommendationQuery } from '../../../../../src/renderer/src/queries/recommendations';
 
 describe('recommendationQuery', () => {
@@ -20,7 +21,11 @@ describe('recommendationQuery', () => {
         }
       };
 
-      (window as unknown as { api: { recommendations: { getIndexingStatus: () => Promise<FeatureIndexingStatus> } } }).api = {
+      (
+        window as unknown as {
+          api: { recommendations: { getIndexingStatus: () => Promise<FeatureIndexingStatus> } };
+        }
+      ).api = {
         recommendations: {
           getIndexingStatus: vi.fn().mockResolvedValue(mockStatus),
           getPersonalizedRecommendations: vi.fn(),
@@ -38,7 +43,11 @@ describe('recommendationQuery', () => {
     });
 
     it('returns fallback idle status on error', async () => {
-      (window as unknown as { api: { recommendations: { getIndexingStatus: () => Promise<FeatureIndexingStatus> } } }).api = {
+      (
+        window as unknown as {
+          api: { recommendations: { getIndexingStatus: () => Promise<FeatureIndexingStatus> } };
+        }
+      ).api = {
         recommendations: {
           getIndexingStatus: vi.fn().mockRejectedValue(new Error('IPC failed')),
           getPersonalizedRecommendations: vi.fn(),
@@ -76,7 +85,11 @@ describe('recommendationQuery', () => {
       ];
 
       const getRecsMock = vi.fn().mockResolvedValue(mockResult);
-      (window as unknown as { api: { recommendations: { getPersonalizedRecommendations: typeof getRecsMock } } }).api = {
+      (
+        window as unknown as {
+          api: { recommendations: { getPersonalizedRecommendations: typeof getRecsMock } };
+        }
+      ).api = {
         recommendations: {
           getPersonalizedRecommendations: getRecsMock,
           getIndexingStatus: vi.fn(),
@@ -90,7 +103,12 @@ describe('recommendationQuery', () => {
       };
 
       const queryDef = recommendationQuery.personalized({ limit: 10, sessionSeedSongIds: [42] });
-      expect(queryDef.queryKey).toEqual(['recommendations', 'personalized', 'limit=10', 'seeds=42']);
+      expect(queryDef.queryKey).toEqual([
+        'recommendations',
+        'personalized',
+        'limit=10',
+        'seeds=42'
+      ]);
 
       const data = await queryDef.queryFn();
       expect(data).toEqual(mockResult);
@@ -111,7 +129,11 @@ describe('recommendationQuery', () => {
       ];
 
       const getSimilarMock = vi.fn().mockResolvedValue(mockSimilar);
-      (window as unknown as { api: { recommendations: { getSimilarSongsForTrack: typeof getSimilarMock } } }).api = {
+      (
+        window as unknown as {
+          api: { recommendations: { getSimilarSongsForTrack: typeof getSimilarMock } };
+        }
+      ).api = {
         recommendations: {
           getSimilarSongsForTrack: getSimilarMock,
           getIndexingStatus: vi.fn(),
@@ -134,7 +156,11 @@ describe('recommendationQuery', () => {
   describe('songRadio', () => {
     it('queries song radio queue', async () => {
       const getRadioMock = vi.fn().mockResolvedValue([10, 20, 30]);
-      (window as unknown as { api: { recommendations: { getSongRadioQueue: typeof getRadioMock } } }).api = {
+      (
+        window as unknown as {
+          api: { recommendations: { getSongRadioQueue: typeof getRadioMock } };
+        }
+      ).api = {
         recommendations: {
           getSongRadioQueue: getRadioMock,
           getIndexingStatus: vi.fn(),
@@ -154,7 +180,11 @@ describe('recommendationQuery', () => {
     });
 
     it('returns empty array when songRadio fails', async () => {
-      (window as unknown as { api: { recommendations: { getSongRadioQueue: () => Promise<number[]> } } }).api = {
+      (
+        window as unknown as {
+          api: { recommendations: { getSongRadioQueue: () => Promise<number[]> } };
+        }
+      ).api = {
         recommendations: {
           getSongRadioQueue: vi.fn().mockRejectedValue(new Error('IPC error')),
           getIndexingStatus: vi.fn(),
@@ -179,7 +209,17 @@ describe('recommendationQuery', () => {
       const resumeMock = vi.fn().mockResolvedValue(undefined);
       const reindexMock = vi.fn().mockResolvedValue(undefined);
 
-      (window as unknown as { api: { recommendations: { pauseIndexing: typeof pauseMock; resumeIndexing: typeof resumeMock; reindex: typeof reindexMock } } }).api = {
+      (
+        window as unknown as {
+          api: {
+            recommendations: {
+              pauseIndexing: typeof pauseMock;
+              resumeIndexing: typeof resumeMock;
+              reindex: typeof reindexMock;
+            };
+          };
+        }
+      ).api = {
         recommendations: {
           pauseIndexing: pauseMock,
           resumeIndexing: resumeMock,
@@ -220,7 +260,15 @@ describe('recommendationQuery', () => {
         updatedAt: '2026-11-07T00:00:00.000Z'
       };
 
-      (window as unknown as { api: { recommendations: { getSongFeatures: (id: number) => Promise<SongAudioFeaturesData | null> } } }).api = {
+      (
+        window as unknown as {
+          api: {
+            recommendations: {
+              getSongFeatures: (id: number) => Promise<SongAudioFeaturesData | null>;
+            };
+          };
+        }
+      ).api = {
         recommendations: {
           getSongFeatures: vi.fn().mockResolvedValue(mockFeatures)
         }
@@ -232,7 +280,15 @@ describe('recommendationQuery', () => {
     });
 
     it('returns null on failure', async () => {
-      (window as unknown as { api: { recommendations: { getSongFeatures: (id: number) => Promise<SongAudioFeaturesData | null> } } }).api = {
+      (
+        window as unknown as {
+          api: {
+            recommendations: {
+              getSongFeatures: (id: number) => Promise<SongAudioFeaturesData | null>;
+            };
+          };
+        }
+      ).api = {
         recommendations: {
           getSongFeatures: vi.fn().mockRejectedValue(new Error('IPC failed'))
         }

@@ -23,11 +23,11 @@ const AudioFeatureExplainerPrompt = () => {
           )}
         </p>
 
-        <h4 className="font-semibold text-font-color-highlight dark:text-dark-font-color-highlight text-lg mt-4 mb-2 flex items-center">
+        <h4 className="text-font-color-highlight dark:text-dark-font-color-highlight mt-4 mb-2 flex items-center text-lg font-semibold">
           <span className="material-icons-round mr-2 text-2xl">graphic_eq</span>
           {t('audioFeatureExplainerPrompt.whatWeMeasureTitle', 'What Nora Measures')}
         </h4>
-        <ul className="marker:text-font-color-highlight dark:marker:text-dark-font-color-highlight list-inside list-disc pl-4 space-y-2 mb-4">
+        <ul className="marker:text-font-color-highlight dark:marker:text-dark-font-color-highlight mb-4 list-inside list-disc space-y-2 pl-4">
           <li>
             <strong className="text-font-color-highlight dark:text-dark-font-color-highlight">
               {t('audioFeatureExplainerPrompt.tempo', 'Tempo & Speed')}:
@@ -57,7 +57,7 @@ const AudioFeatureExplainerPrompt = () => {
           </li>
         </ul>
 
-        <h4 className="font-semibold text-font-color-highlight dark:text-dark-font-color-highlight text-lg mt-6 mb-2 flex items-center">
+        <h4 className="text-font-color-highlight dark:text-dark-font-color-highlight mt-6 mb-2 flex items-center text-lg font-semibold">
           <span className="material-icons-round mr-2 text-2xl">lock</span>
           {t('audioFeatureExplainerPrompt.privacyTitle', '100% Local & Private')}
         </h4>
@@ -68,7 +68,7 @@ const AudioFeatureExplainerPrompt = () => {
           )}
         </p>
 
-        <h4 className="font-semibold text-font-color-highlight dark:text-dark-font-color-highlight text-lg mt-6 mb-2 flex items-center">
+        <h4 className="text-font-color-highlight dark:text-dark-font-color-highlight mt-6 mb-2 flex items-center text-lg font-semibold">
           <span className="material-icons-round mr-2 text-2xl">verified_user</span>
           {t('audioFeatureExplainerPrompt.safetyTitle', 'Safe & Gentle on Your Library')}
         </h4>

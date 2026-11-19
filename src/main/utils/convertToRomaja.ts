@@ -1,7 +1,7 @@
-import isHangul from 'romaja/src/hangul/isHangul.js';
-import { romanize } from 'romaja/src/romanize.js';
+import { romanize } from 'romaja';
 
 import { version } from '../../../package.json';
+import isHangul from '../../common/isHangul';
 import { INSTRUMENTAL_LYRIC_IDENTIFIER } from '../../common/parseLyrics';
 import { getCachedLyrics, updateCachedLyrics } from '../core/getSongLyrics';
 import { getLrcLyricsMetadata } from '../core/saveLyricsToLrcFile';

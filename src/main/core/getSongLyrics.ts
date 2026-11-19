@@ -74,9 +74,9 @@ const fetchLyricsFromLRCFile = async (songPath: string) => {
     : undefined;
   const customLrcFilePathWithoutExtension = userData.customLrcFilesSaveLocation
     ? path.join(
-      userData.customLrcFilesSaveLocation,
-      `${path.basename(songPath.replaceAll(path.extname(songPath), ''))}.lrc`
-    )
+        userData.customLrcFilesSaveLocation,
+        `${path.basename(songPath.replaceAll(path.extname(songPath), ''))}.lrc`
+      )
     : undefined;
 
   try {

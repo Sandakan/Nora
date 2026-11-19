@@ -148,10 +148,7 @@ const SongAdditionalInfoContainer = (props: Props) => {
             />
           )}
           {songInfo.isrc && (
-            <SongAdditionalInfoItem
-              label={t('common.isrc', 'ISRC')}
-              value={songInfo.isrc}
-            />
+            <SongAdditionalInfoItem label={t('common.isrc', 'ISRC')} value={songInfo.isrc} />
           )}
           {songInfo.mbid && (
             <SongAdditionalInfoItem

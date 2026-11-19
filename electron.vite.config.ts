@@ -1,6 +1,6 @@
 import { execFileSync } from 'child_process';
-import { createRequire } from 'module';
 import { readdirSync, statSync } from 'fs';
+import { createRequire } from 'module';
 import { join, resolve } from 'path';
 
 import tailwindcss from '@tailwindcss/vite';

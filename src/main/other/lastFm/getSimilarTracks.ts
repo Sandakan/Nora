@@ -70,7 +70,8 @@ const getSimilarTracks = async (songId: number): Promise<SimilarTracksOutput> =>
 
     const isOnline = checkIfConnectedToInternet();
     if (!isOnline) {
-      const { getSimilarSongsForTrack } = await import('../../recommendations/recommendationEngine');
+      const { getSimilarSongsForTrack } =
+        await import('../../recommendations/recommendationEngine');
       const hybridFallback = await getSimilarSongsForTrack(songId, 10);
       return {
         sortedAvailTracks: hybridFallback.map((item) => ({
@@ -134,9 +135,8 @@ const getSimilarTracks = async (songId: number): Promise<SimilarTracksOutput> =>
       const parsedAndSortedSimilarTracks = await parseSimilarTracks(similarTracksList);
 
       if (parsedAndSortedSimilarTracks.sortedAvailTracks.length < 5) {
-        const { getSimilarSongsForTrack } = await import(
-          '../../recommendations/recommendationEngine'
-        );
+        const { getSimilarSongsForTrack } =
+          await import('../../recommendations/recommendationEngine');
         const hybridFallback = await getSimilarSongsForTrack(songId, 10);
         const existingIds = new Set(
           parsedAndSortedSimilarTracks.sortedAvailTracks
@@ -176,9 +176,8 @@ const getSimilarTracks = async (songId: number): Promise<SimilarTracksOutput> =>
   } catch (error) {
     logger.error('Failed to get similar tracks of a song.', { error, songId });
     try {
-      const { getSimilarSongsForTrack } = await import(
-        '../../recommendations/recommendationEngine'
-      );
+      const { getSimilarSongsForTrack } =
+        await import('../../recommendations/recommendationEngine');
       const hybridFallback = await getSimilarSongsForTrack(songId, 10);
       return {
         sortedAvailTracks: hybridFallback.map((item) => ({

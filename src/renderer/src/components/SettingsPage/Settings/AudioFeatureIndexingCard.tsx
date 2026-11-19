@@ -1,9 +1,9 @@
-import { useContext, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
-
 import { queryClient } from '@renderer/index';
 import { recommendationQuery } from '@renderer/queries/recommendations';
+import { useQuery } from '@tanstack/react-query';
+import { useContext, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import Button from '../../Button';
 import ReindexFeaturesConfirmPrompt from './ReindexFeaturesConfirmPrompt';
@@ -39,11 +39,15 @@ const AudioFeatureIndexingCard = () => {
       <div className="flex items-center justify-between text-sm uppercase opacity-50">
         <span>{t('settingsPage.audioFeatureIndexing', 'Audio Feature Indexing')}</span>
         <span>
-          {t('settingsPage.audioFeatureIndexingProgress', '{{indexed}} / {{total}} SONGS ({{percentage}}%)', {
-            indexed: indexedSongs.toLocaleString(),
-            total: totalSongs.toLocaleString(),
-            percentage
-          })}
+          {t(
+            'settingsPage.audioFeatureIndexingProgress',
+            '{{indexed}} / {{total}} SONGS ({{percentage}}%)',
+            {
+              indexed: indexedSongs.toLocaleString(),
+              total: totalSongs.toLocaleString(),
+              percentage
+            }
+          )}
         </span>
       </div>
 
@@ -52,31 +56,35 @@ const AudioFeatureIndexingCard = () => {
         title={`${percentage}%`}
       >
         <div
-          className="h-full bg-font-color-highlight dark:bg-dark-font-color-highlight transition-all duration-300 ease-out"
+          className="bg-font-color-highlight dark:bg-dark-font-color-highlight h-full transition-all duration-300 ease-out"
           style={{ width: `${Math.min(100, Math.max(0, percentage))}%` }}
         />
       </div>
 
       <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-        <div className="min-w-0 max-w-[65%] text-xs">
+        <div className="max-w-[65%] min-w-0 text-xs">
           {status === 'indexing' ? (
             currentSong ? (
               <div
-                className="flex items-center gap-1.5 text-font-color-highlight dark:text-dark-font-color-highlight truncate"
+                className="text-font-color-highlight dark:text-dark-font-color-highlight flex items-center gap-1.5 truncate"
                 title={`${t('settingsPage.analyzingPrefix', 'Analyzing')}: "${currentSong.title}"${
                   currentSong.artists ? ` • ${currentSong.artists}` : ''
                 }`}
               >
-                <span className="material-icons-round text-sm animate-pulse">graphic_eq</span>
+                <span className="material-icons-round animate-pulse text-sm">graphic_eq</span>
                 <span className="truncate">
-                  <span className="opacity-75">{t('settingsPage.analyzingPrefix', 'Analyzing')}: </span>
+                  <span className="opacity-75">
+                    {t('settingsPage.analyzingPrefix', 'Analyzing')}:{' '}
+                  </span>
                   <span className="font-medium">&quot;{currentSong.title}&quot;</span>
-                  {currentSong.artists && <span className="opacity-75"> • {currentSong.artists}</span>}
+                  {currentSong.artists && (
+                    <span className="opacity-75"> • {currentSong.artists}</span>
+                  )}
                 </span>
               </div>
             ) : (
-              <div className="flex items-center gap-1.5 text-font-color-highlight dark:text-dark-font-color-highlight">
-                <span className="material-icons-round text-sm animate-pulse">graphic_eq</span>
+              <div className="text-font-color-highlight dark:text-dark-font-color-highlight flex items-center gap-1.5">
+                <span className="material-icons-round animate-pulse text-sm">graphic_eq</span>
                 <span>{t('settingsPage.indexingInProgress', 'Analyzing audio features...')}</span>
               </div>
             )
@@ -85,9 +93,13 @@ const AudioFeatureIndexingCard = () => {
               <span className="h-2 w-2 rounded-full bg-amber-500" />
               <span>
                 {remainingSongs > 0
-                  ? t('settingsPage.indexingPausedRemaining', 'Paused • {{count}} songs remaining', {
-                      count: remainingSongs
-                    })
+                  ? t(
+                      'settingsPage.indexingPausedRemaining',
+                      'Paused • {{count}} songs remaining',
+                      {
+                        count: remainingSongs
+                      }
+                    )
                   : t('settingsPage.indexingPaused', 'Indexing paused')}
               </span>
             </div>
@@ -113,7 +125,7 @@ const AudioFeatureIndexingCard = () => {
               <Button
                 label={t('settingsPage.pause', 'Pause')}
                 iconName="pause"
-                className="mr-3! py-1! px-3!"
+                className="mr-3! px-3! py-1!"
                 clickHandler={async (_, setIsDisabled, setIsPending) => {
                   setIsDisabled(true);
                   setIsPending(true);
@@ -132,7 +144,7 @@ const AudioFeatureIndexingCard = () => {
               <Button
                 label={t('settingsPage.resume', 'Resume')}
                 iconName="play_arrow"
-                className="mr-3! py-1! px-3!"
+                className="mr-3! px-3! py-1!"
                 clickHandler={async (_, setIsDisabled, setIsPending) => {
                   setIsDisabled(true);
                   setIsPending(true);
@@ -152,7 +164,7 @@ const AudioFeatureIndexingCard = () => {
           <Button
             label={t('settingsPage.reindex', 'Re-index')}
             iconName="refresh"
-            className="mr-0! py-1! px-3!"
+            className="mr-0! px-3! py-1!"
             clickHandler={() => {
               changePromptMenuData(true, <ReindexFeaturesConfirmPrompt />);
             }}

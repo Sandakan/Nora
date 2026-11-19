@@ -242,12 +242,8 @@
           "name": "albums_artists_album_id_albums_id_fk",
           "tableFrom": "albums_artists",
           "tableTo": "albums",
-          "columnsFrom": [
-            "album_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["album_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -255,12 +251,8 @@
           "name": "albums_artists_artist_id_artists_id_fk",
           "tableFrom": "albums_artists",
           "tableTo": "artists",
-          "columnsFrom": [
-            "artist_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["artist_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -268,10 +260,7 @@
       "compositePrimaryKeys": {
         "albums_artists_album_id_artist_id_pk": {
           "name": "albums_artists_album_id_artist_id_pk",
-          "columns": [
-            "album_id",
-            "artist_id"
-          ]
+          "columns": ["album_id", "artist_id"]
         }
       },
       "uniqueConstraints": {},
@@ -347,12 +336,8 @@
           "name": "albums_artworks_album_id_albums_id_fk",
           "tableFrom": "albums_artworks",
           "tableTo": "albums",
-          "columnsFrom": [
-            "album_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["album_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -360,12 +345,8 @@
           "name": "albums_artworks_artwork_id_artworks_id_fk",
           "tableFrom": "albums_artworks",
           "tableTo": "artworks",
-          "columnsFrom": [
-            "artwork_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["artwork_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -373,10 +354,7 @@
       "compositePrimaryKeys": {
         "albums_artworks_album_id_artwork_id_pk": {
           "name": "albums_artworks_album_id_artwork_id_pk",
-          "columns": [
-            "album_id",
-            "artwork_id"
-          ]
+          "columns": ["album_id", "artwork_id"]
         }
       },
       "uniqueConstraints": {},
@@ -445,12 +423,8 @@
           "name": "albums_lastfm_tags_album_id_albums_id_fk",
           "tableFrom": "albums_lastfm_tags",
           "tableTo": "albums",
-          "columnsFrom": [
-            "album_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["album_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -458,12 +432,8 @@
           "name": "albums_lastfm_tags_tag_id_lastfm_tags_id_fk",
           "tableFrom": "albums_lastfm_tags",
           "tableTo": "lastfm_tags",
-          "columnsFrom": [
-            "tag_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tag_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -471,10 +441,7 @@
       "compositePrimaryKeys": {
         "albums_lastfm_tags_album_id_tag_id_pk": {
           "name": "albums_lastfm_tags_album_id_tag_id_pk",
-          "columns": [
-            "album_id",
-            "tag_id"
-          ]
+          "columns": ["album_id", "tag_id"]
         }
       },
       "uniqueConstraints": {},
@@ -550,12 +517,8 @@
           "name": "album_songs_album_id_albums_id_fk",
           "tableFrom": "album_songs",
           "tableTo": "albums",
-          "columnsFrom": [
-            "album_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["album_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -563,12 +526,8 @@
           "name": "album_songs_song_id_songs_id_fk",
           "tableFrom": "album_songs",
           "tableTo": "songs",
-          "columnsFrom": [
-            "song_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["song_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -576,10 +535,7 @@
       "compositePrimaryKeys": {
         "album_songs_album_id_song_id_pk": {
           "name": "album_songs_album_id_song_id_pk",
-          "columns": [
-            "album_id",
-            "song_id"
-          ]
+          "columns": ["album_id", "song_id"]
         }
       },
       "uniqueConstraints": {},
@@ -751,12 +707,8 @@
           "name": "artist_similarities_source_artist_id_artists_id_fk",
           "tableFrom": "artist_similarities",
           "tableTo": "artists",
-          "columnsFrom": [
-            "source_artist_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["source_artist_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -764,12 +716,8 @@
           "name": "artist_similarities_target_artist_id_artists_id_fk",
           "tableFrom": "artist_similarities",
           "tableTo": "artists",
-          "columnsFrom": [
-            "target_artist_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["target_artist_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -998,12 +946,8 @@
           "name": "artists_artworks_artist_id_artists_id_fk",
           "tableFrom": "artists_artworks",
           "tableTo": "artists",
-          "columnsFrom": [
-            "artist_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["artist_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -1011,12 +955,8 @@
           "name": "artists_artworks_artwork_id_artworks_id_fk",
           "tableFrom": "artists_artworks",
           "tableTo": "artworks",
-          "columnsFrom": [
-            "artwork_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["artwork_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -1024,10 +964,7 @@
       "compositePrimaryKeys": {
         "artists_artworks_artist_id_artwork_id_pk": {
           "name": "artists_artworks_artist_id_artwork_id_pk",
-          "columns": [
-            "artist_id",
-            "artwork_id"
-          ]
+          "columns": ["artist_id", "artwork_id"]
         }
       },
       "uniqueConstraints": {},
@@ -1096,12 +1033,8 @@
           "name": "artists_lastfm_tags_artist_id_artists_id_fk",
           "tableFrom": "artists_lastfm_tags",
           "tableTo": "artists",
-          "columnsFrom": [
-            "artist_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["artist_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -1109,12 +1042,8 @@
           "name": "artists_lastfm_tags_tag_id_lastfm_tags_id_fk",
           "tableFrom": "artists_lastfm_tags",
           "tableTo": "lastfm_tags",
-          "columnsFrom": [
-            "tag_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tag_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -1122,10 +1051,7 @@
       "compositePrimaryKeys": {
         "artists_lastfm_tags_artist_id_tag_id_pk": {
           "name": "artists_lastfm_tags_artist_id_tag_id_pk",
-          "columns": [
-            "artist_id",
-            "tag_id"
-          ]
+          "columns": ["artist_id", "tag_id"]
         }
       },
       "uniqueConstraints": {},
@@ -1201,12 +1127,8 @@
           "name": "artists_songs_song_id_songs_id_fk",
           "tableFrom": "artists_songs",
           "tableTo": "songs",
-          "columnsFrom": [
-            "song_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["song_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -1214,12 +1136,8 @@
           "name": "artists_songs_artist_id_artists_id_fk",
           "tableFrom": "artists_songs",
           "tableTo": "artists",
-          "columnsFrom": [
-            "artist_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["artist_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -1227,10 +1145,7 @@
       "compositePrimaryKeys": {
         "artists_songs_song_id_artist_id_pk": {
           "name": "artists_songs_song_id_artist_id_pk",
-          "columns": [
-            "song_id",
-            "artist_id"
-          ]
+          "columns": ["song_id", "artist_id"]
         }
       },
       "uniqueConstraints": {},
@@ -1455,12 +1370,8 @@
           "name": "artworks_genres_genre_id_genres_id_fk",
           "tableFrom": "artworks_genres",
           "tableTo": "genres",
-          "columnsFrom": [
-            "genre_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["genre_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -1468,12 +1379,8 @@
           "name": "artworks_genres_artwork_id_artworks_id_fk",
           "tableFrom": "artworks_genres",
           "tableTo": "artworks",
-          "columnsFrom": [
-            "artwork_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["artwork_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -1481,10 +1388,7 @@
       "compositePrimaryKeys": {
         "artworks_genres_genre_id_artwork_id_pk": {
           "name": "artworks_genres_genre_id_artwork_id_pk",
-          "columns": [
-            "genre_id",
-            "artwork_id"
-          ]
+          "columns": ["genre_id", "artwork_id"]
         }
       },
       "uniqueConstraints": {},
@@ -1560,12 +1464,8 @@
           "name": "artworks_playlists_playlist_id_playlists_id_fk",
           "tableFrom": "artworks_playlists",
           "tableTo": "playlists",
-          "columnsFrom": [
-            "playlist_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["playlist_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -1573,12 +1473,8 @@
           "name": "artworks_playlists_artwork_id_artworks_id_fk",
           "tableFrom": "artworks_playlists",
           "tableTo": "artworks",
-          "columnsFrom": [
-            "artwork_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["artwork_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -1586,10 +1482,7 @@
       "compositePrimaryKeys": {
         "artworks_playlists_playlist_id_artwork_id_pk": {
           "name": "artworks_playlists_playlist_id_artwork_id_pk",
-          "columns": [
-            "playlist_id",
-            "artwork_id"
-          ]
+          "columns": ["playlist_id", "artwork_id"]
         }
       },
       "uniqueConstraints": {},
@@ -1665,12 +1558,8 @@
           "name": "artworks_songs_song_id_songs_id_fk",
           "tableFrom": "artworks_songs",
           "tableTo": "songs",
-          "columnsFrom": [
-            "song_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["song_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -1678,12 +1567,8 @@
           "name": "artworks_songs_artwork_id_artworks_id_fk",
           "tableFrom": "artworks_songs",
           "tableTo": "artworks",
-          "columnsFrom": [
-            "artwork_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["artwork_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -1691,10 +1576,7 @@
       "compositePrimaryKeys": {
         "artworks_songs_song_id_artwork_id_pk": {
           "name": "artworks_songs_song_id_artwork_id_pk",
-          "columns": [
-            "song_id",
-            "artwork_id"
-          ]
+          "columns": ["song_id", "artwork_id"]
         }
       },
       "uniqueConstraints": {},
@@ -1877,12 +1759,8 @@
           "name": "genres_songs_genre_id_genres_id_fk",
           "tableFrom": "genres_songs",
           "tableTo": "genres",
-          "columnsFrom": [
-            "genre_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["genre_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -1890,12 +1768,8 @@
           "name": "genres_songs_song_id_songs_id_fk",
           "tableFrom": "genres_songs",
           "tableTo": "songs",
-          "columnsFrom": [
-            "song_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["song_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -1903,10 +1777,7 @@
       "compositePrimaryKeys": {
         "genres_songs_genre_id_song_id_pk": {
           "name": "genres_songs_genre_id_song_id_pk",
-          "columns": [
-            "genre_id",
-            "song_id"
-          ]
+          "columns": ["genre_id", "song_id"]
         }
       },
       "uniqueConstraints": {},
@@ -1978,12 +1849,8 @@
           "name": "ignored_artists_artist_id_artists_id_fk",
           "tableFrom": "ignored_artists",
           "tableTo": "artists",
-          "columnsFrom": [
-            "artist_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["artist_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -1993,9 +1860,7 @@
         "ignored_artists_artist_id_unique": {
           "name": "ignored_artists_artist_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "artist_id"
-          ]
+          "columns": ["artist_id"]
         }
       },
       "policies": {},
@@ -2087,12 +1952,8 @@
           "name": "ignored_duplicate_metadata_song_id_songs_id_fk",
           "tableFrom": "ignored_duplicate_metadata",
           "tableTo": "songs",
-          "columnsFrom": [
-            "song_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["song_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -2167,12 +2028,8 @@
           "name": "ignored_featuring_artists_artist_id_artists_id_fk",
           "tableFrom": "ignored_featuring_artists",
           "tableTo": "artists",
-          "columnsFrom": [
-            "artist_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["artist_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -2182,9 +2039,7 @@
         "ignored_featuring_artists_artist_id_unique": {
           "name": "ignored_featuring_artists_artist_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "artist_id"
-          ]
+          "columns": ["artist_id"]
         }
       },
       "policies": {},
@@ -2265,9 +2120,7 @@
         "lastfm_tags_name_unique": {
           "name": "lastfm_tags_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         }
       },
       "policies": {},
@@ -2439,12 +2292,8 @@
           "name": "music_folders_parent_id_music_folders_id_fk",
           "tableFrom": "music_folders",
           "tableTo": "music_folders",
-          "columnsFrom": [
-            "parent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["parent_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "cascade"
         }
@@ -2454,9 +2303,7 @@
         "music_folders_path_unique": {
           "name": "music_folders_path_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "path"
-          ]
+          "columns": ["path"]
         }
       },
       "policies": {},
@@ -2604,12 +2451,8 @@
           "name": "palette_swatches_palette_id_palettes_id_fk",
           "tableFrom": "palette_swatches",
           "tableTo": "palettes",
-          "columnsFrom": [
-            "palette_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["palette_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -2684,12 +2527,8 @@
           "name": "palettes_artwork_id_artworks_id_fk",
           "tableFrom": "palettes",
           "tableTo": "artworks",
-          "columnsFrom": [
-            "artwork_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["artwork_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -2828,12 +2667,8 @@
           "name": "play_events_song_id_songs_id_fk",
           "tableFrom": "play_events",
           "tableTo": "songs",
-          "columnsFrom": [
-            "song_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["song_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -2923,12 +2758,8 @@
           "name": "play_history_song_id_songs_id_fk",
           "tableFrom": "play_history",
           "tableTo": "songs",
-          "columnsFrom": [
-            "song_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["song_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -3129,12 +2960,8 @@
           "name": "playlists_songs_playlist_id_playlists_id_fk",
           "tableFrom": "playlists_songs",
           "tableTo": "playlists",
-          "columnsFrom": [
-            "playlist_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["playlist_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -3142,12 +2969,8 @@
           "name": "playlists_songs_song_id_songs_id_fk",
           "tableFrom": "playlists_songs",
           "tableTo": "songs",
-          "columnsFrom": [
-            "song_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["song_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -3155,10 +2978,7 @@
       "compositePrimaryKeys": {
         "playlists_songs_playlist_id_song_id_pk": {
           "name": "playlists_songs_playlist_id_song_id_pk",
-          "columns": [
-            "playlist_id",
-            "song_id"
-          ]
+          "columns": ["playlist_id", "song_id"]
         }
       },
       "uniqueConstraints": {},
@@ -3283,12 +3103,8 @@
           "name": "scrobble_queue_song_id_songs_id_fk",
           "tableFrom": "scrobble_queue",
           "tableTo": "songs",
-          "columnsFrom": [
-            "song_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["song_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "cascade"
         }
@@ -3405,12 +3221,8 @@
           "name": "seek_events_song_id_songs_id_fk",
           "tableFrom": "seek_events",
           "tableTo": "songs",
-          "columnsFrom": [
-            "song_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["song_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -3527,12 +3339,8 @@
           "name": "skip_events_song_id_songs_id_fk",
           "tableFrom": "skip_events",
           "tableTo": "songs",
-          "columnsFrom": [
-            "song_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["song_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -3690,12 +3498,8 @@
           "name": "song_audio_features_song_id_songs_id_fk",
           "tableFrom": "song_audio_features",
           "tableTo": "songs",
-          "columnsFrom": [
-            "song_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["song_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -3886,12 +3690,8 @@
           "name": "song_similarities_source_song_id_songs_id_fk",
           "tableFrom": "song_similarities",
           "tableTo": "songs",
-          "columnsFrom": [
-            "source_song_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["source_song_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -3899,12 +3699,8 @@
           "name": "song_similarities_target_song_id_songs_id_fk",
           "tableFrom": "song_similarities",
           "tableTo": "songs",
-          "columnsFrom": [
-            "target_song_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["target_song_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -4464,12 +4260,8 @@
           "name": "songs_folder_id_music_folders_id_fk",
           "tableFrom": "songs",
           "tableTo": "music_folders",
-          "columnsFrom": [
-            "folder_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["folder_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "cascade"
         }
@@ -4479,9 +4271,7 @@
         "songs_path_unique": {
           "name": "songs_path_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "path"
-          ]
+          "columns": ["path"]
         }
       },
       "policies": {},
@@ -4549,12 +4339,8 @@
           "name": "songs_lastfm_tags_song_id_songs_id_fk",
           "tableFrom": "songs_lastfm_tags",
           "tableTo": "songs",
-          "columnsFrom": [
-            "song_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["song_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -4562,12 +4348,8 @@
           "name": "songs_lastfm_tags_tag_id_lastfm_tags_id_fk",
           "tableFrom": "songs_lastfm_tags",
           "tableTo": "lastfm_tags",
-          "columnsFrom": [
-            "tag_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tag_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         }
@@ -4575,10 +4357,7 @@
       "compositePrimaryKeys": {
         "songs_lastfm_tags_song_id_tag_id_pk": {
           "name": "songs_lastfm_tags_song_id_tag_id_pk",
-          "columns": [
-            "song_id",
-            "tag_id"
-          ]
+          "columns": ["song_id", "tag_id"]
         }
       },
       "uniqueConstraints": {},
@@ -5004,22 +4783,12 @@
     "public.artwork_source": {
       "name": "artwork_source",
       "schema": "public",
-      "values": [
-        "LOCAL",
-        "REMOTE"
-      ]
+      "values": ["LOCAL", "REMOTE"]
     },
     "public.swatch_type": {
       "name": "swatch_type",
       "schema": "public",
-      "values": [
-        "VIBRANT",
-        "LIGHT_VIBRANT",
-        "DARK_VIBRANT",
-        "MUTED",
-        "LIGHT_MUTED",
-        "DARK_MUTED"
-      ]
+      "values": ["VIBRANT", "LIGHT_VIBRANT", "DARK_VIBRANT", "MUTED", "LIGHT_MUTED", "DARK_MUTED"]
     }
   },
   "schemas": {},
