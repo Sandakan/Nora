@@ -31,7 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Removed deprecated `electron-store` dependency and silent audio anchor.
-- Updated project dependencies including Electron, `@tanstack/react-pacer`, `oxfmt`, and `material-symbols`.
+- Updated project dependencies including Electron, `i18next` v27, `react-i18next` v18, `romaja` 0.9, `@electric-sql/pglite`, `@tanstack/react-query`, `@tanstack/react-pacer`, `oxfmt`, `material-symbols`, and `audio-engine` Cargo crates (`napi`, `rubato`, `souvlaki`).
 - Added documentation and troubleshooting guides for the native audio engine crate build process.
 - Optimized Main process startup memory footprint by lazy-loading Kuroshiro / Kuromoji on demand (~132MB heap savings), tuning PGlite PostgreSQL memory parameters (`shared_buffers`, `work_mem`), and bounding Sharp libvips cache limits.
 - Replaced blocking native OS update dialogs with silent background checks and in-app React notifications.

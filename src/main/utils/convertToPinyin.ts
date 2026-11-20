@@ -6,7 +6,7 @@ import logger from '../logger';
 import { sendMessageToRenderer } from '../main';
 
 type PinyinFn = typeof import('pinyin-pro').pinyin;
-type DetectChineseMod = typeof import('@neos21/detect-chinese').default;
+type DetectChineseMod = typeof import('@neos21/detect-chinese');
 
 const hasConvertibleCharacter = (
   str: string,
@@ -36,10 +36,14 @@ const convertLyricsToPinyin = async () => {
   try {
     if (!cachedLyrics) return undefined;
 
-    const [{ pinyin }, { default: detectChinese }] = await Promise.all([
+    const [{ pinyin }, detectChineseModule] = await Promise.all([
       import('pinyin-pro'),
       import('@neos21/detect-chinese')
     ]);
+    const detectChinese: DetectChineseMod =
+      'default' in detectChineseModule
+        ? (detectChineseModule as { default: DetectChineseMod }).default
+        : detectChineseModule;
 
     const { parsedLyrics } = cachedLyrics.lyrics;
     const lines: (string | SyncedLyricsLineWord[])[] = parsedLyrics.map(
